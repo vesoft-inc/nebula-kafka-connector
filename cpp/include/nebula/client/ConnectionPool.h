@@ -1,0 +1,52 @@
+// Copyright (c) 2022 vesoft inc. All rights reserved.
+
+#pragma once
+
+#include <list>
+#include <memory>
+#include <mutex>
+#include <thread>
+
+#include "nebula/client/Config.h"
+#include "nebula/client/Connection.h"
+#include "nebula/client/Session.h"
+
+namespace nebula::client {
+
+class ConnectionPool {
+public:
+    ~ConnectionPool();
+
+    void init(const std::vector<std::string> &addresses, const Config &config);
+
+    void close();
+
+    Session getSession(const AuthReq &req, bool retryConnect = true);
+
+    Connection getConnection();
+
+    void giveBack(Connection &&conn);
+
+    std::size_t size() const {
+        std::lock_guard<std::mutex> l(lock_);
+        return conns_.size();
+    }
+
+private:
+    // The count may can't perform if can't create enough valid connection
+    void newConnection(std::size_t cursor, std::size_t count);
+
+    std::size_t nextCursor() {
+        return cursor_ >= address_.size() ? cursor_ = 0 : cursor_++;
+    }
+
+    std::size_t cursor_{0};
+    // host, port
+    std::vector<std::pair<std::string, int32_t>> address_;
+    Config config_;
+
+    mutable std::mutex lock_;
+    std::list<Connection> conns_;
+};
+
+}  // namespace nebula::client
