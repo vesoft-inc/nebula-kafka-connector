@@ -77,8 +77,6 @@ set(NEBULA_THIRD_PARTY_LIBRARIES
     bz2
     fmt
     unwind
-    -static-libgcc
-    -static-libstdc++
     -Wl,--no-undefined
     ${GETTIME_LIB}
     ${libatomic_link_flags}
