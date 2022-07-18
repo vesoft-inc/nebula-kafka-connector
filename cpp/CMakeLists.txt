@@ -24,7 +24,7 @@ set(CMAKE_CXX_STANDARD 11)  # specify the C++ standard
 
 option(ENABLE_MODULE_UPDATE "Automatically update module" OFF)
 option(DISABLE_CLONE_COMMON "Automatically disable clone common module" OFF)
-option(ENABLE_STATIC_LIBGXX "Statically link against with libstdc++ and libgcc" ON)
+option(ENABLE_VERSION_SCRIPT "Use version script to maintain symbol's visibility" ON)
 
 add_definitions(-DNEBULA_HOME=${CMAKE_SOURCE_DIR})
 
@@ -71,14 +71,14 @@ macro(nebula_add_library name type)
     )
 endmacro()
 
-if (ENABLE_STATIC_LIBGXX)
-    nebula_add_shared_linker_flag(-static-libstdc++)
-    nebula_add_shared_linker_flag(-static-libgcc)
-endif()
-
+nebula_add_shared_linker_flag(-static-libstdc++)
+nebula_add_shared_linker_flag(-static-libgcc)
 nebula_add_shared_linker_flag(-rdynamic)
 nebula_add_shared_linker_flag(-Wl,--no-undefined)
-nebula_add_shared_linker_flag("-Wl,--version-script=${CMAKE_SOURCE_DIR}/exported-symbols.map")
+
+if (ENABLE_VERSION_SCRIPT)
+    nebula_add_shared_linker_flag("-Wl,--version-script=${CMAKE_SOURCE_DIR}/exported-symbols.map")
+endif()
 
 
 nebula_add_subdirectory(src)
