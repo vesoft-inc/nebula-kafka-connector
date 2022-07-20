@@ -95,6 +95,12 @@ install(
     PATTERN ".gitkeep" EXCLUDE
 )
 
+install(
+    DIRECTORY include/graph
+    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+    PATTERN ".gitkeep" EXCLUDE
+)
+
 add_custom_target(
   format
   COMMAND "find" "include" "src/client" "src/mclient" "src/sclient" "src/thrift" "src/datatypes" "src/time" "src/geo" "src/graph" "-type" "f" "\\(" "-iname" "\\*.h" "-o" "-iname" "\\*.cpp" "\\)" "|" "xargs" "clang-format" "-i"

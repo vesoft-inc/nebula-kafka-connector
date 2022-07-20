@@ -85,6 +85,20 @@
         # ${NEBULA_THIRD_PARTY_LIBRARIES}
 # )
 
+nebula_add_test(
+    NAME
+        basic_test
+    SOURCES
+        BasicTest.cpp
+    OBJECTS
+        ${NEBULA_CLIENT_OBJS}
+        $<TARGET_OBJECTS:nebula_common_obj>
+        $<TARGET_OBJECTS:nebula_graph_client_obj>
+    LIBRARIES
+        gtest
+        ${NEBULA_THIRD_PARTY_LIBRARIES}
+)
+
 # nebula_add_test(
     # NAME
         # config_test

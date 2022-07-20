@@ -4,7 +4,7 @@
 project("Nebula C++ Client simple example" C CXX)
 cmake_minimum_required(VERSION 2.8.0)
 
-set(CMAKE_CXX_STANDARD 11)  # specify the C++ standard
+set(CMAKE_CXX_STANDARD 17)  # specify the C++ standard
 
 if (NOT NEBULA_HOME)
     set(NEBULA_HOME /usr/local/nebula)
@@ -28,20 +28,29 @@ include_directories(${NEBULA_HOME}/include)
 link_directories(${NEBULA_HOME}/lib64)
 link_directories(${NEBULA_HOME}/lib)
 
-add_executable(session_example
-    SessionExample.cpp
+#add_executable(session_example
+    #SessionExample.cpp
+#)
+
+add_executable(session_basic_example
+    SessionBasicExample.cpp
 )
 
-add_executable(storage_client_example
-    StorageClientExample.cpp
-)
+#add_executable(storage_client_example
+    #StorageClientExample.cpp
+#)
 
-target_link_libraries(session_example
+#target_link_libraries(session_example
+    #PRIVATE
+        #nebula_graph_client
+#)
+
+target_link_libraries(session_basic_example
     PRIVATE
         nebula_graph_client
 )
 
-target_link_libraries(storage_client_example
-    PRIVATE
-        nebula_storage_client
-)
+#target_link_libraries(storage_client_example
+    #PRIVATE
+        #nebula_storage_client
+#)
