@@ -98,7 +98,7 @@ func (cn *connection) Authenticate(username, password string) (*graph.AuthRespon
 		}
 		return nil, err
 	}
-	if string(resp.GetGqlStatus().Status) != "Success" {
+	if string(resp.GetGqlStatus().Status) != "SUCCESS" {
 		return nil, fmt.Errorf("authentication failed, error: %s", string(resp.GetGqlStatus().Status))
 	}
 	return resp, err

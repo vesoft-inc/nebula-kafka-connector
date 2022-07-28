@@ -9,13 +9,26 @@ import (
 
 const (
 	address  = "127.0.0.1"
-	port     = 9669
+	port     = 29562
 	username = "root"
 	password = "nebula"
 )
 
 // Initialize logger
 var log = nebula.DefaultLogger{}
+
+func runQuery(session *nebula.Session, query string) {
+	resp, err := session.Execute(query)
+	if err != nil {
+		log.Fatal(fmt.Sprintf("failed to execute, error: %s", err.Error()))
+	}
+	log.Info("Execution response received")
+
+	if string(resp.GetExecutionOutcome().GetGqlStatus().Status) != "SUCCESS" {
+		log.Fatal(fmt.Sprintf("execute failed, error: %s", string(resp.GetExecutionOutcome().GetGqlStatus().Status)))
+	}
+	log.Info("query: " + query + " was executed successfully")
+}
 
 func main() {
 	fmt.Println("Basic example starts ...")
@@ -33,7 +46,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	if string(authResp.GetGqlStatus().Status) != "Success" {
+	if string(authResp.GetGqlStatus().Status) != "SUCCESS" {
 		log.Fatal(fmt.Sprintf("authentication failed, error: %s", string(authResp.GetGqlStatus().Status)))
 	}
 	log.Info(fmt.Sprintf("Authentication with Identifier: %d succeed", authResp.GetIdentifier()))
@@ -43,15 +56,21 @@ func main() {
 	defer session.Release()
 
 	// Execute a query
-	resp, err := session.Execute("INSERT NODE node_type ({id:1, age:1})")
-	if err != nil {
-		log.Fatal(fmt.Sprintf("failed to execute, error: %s", err.Error()))
-	}
-	log.Info("Execution response received")
+	log.Info("Create graph type...")
+	runQuery(session, `CREATE GRAPH TYPE graph_type IF NOT EXISTS AS GRAPH TYPE {(node_type(id) LABEL player {id INT, name STRING}),(node_type)-[edge_type LABEL follow {followness INT}]->(node_type)}`)
+	time.Sleep(3 * time.Second)
 
-	if string(resp.GetExecutionOutcome().GetGqlStatus().Status) != "Success" {
-		log.Fatal(fmt.Sprintf("execute failed, error: %s", string(resp.GetExecutionOutcome().GetGqlStatus().Status)))
-	}
+	log.Info("Create graph nba...")
+	runQuery(session, `CREATE GRAPH nba IF NOT EXISTS OF graph_type`)
+	time.Sleep(5 * time.Second)
+
+	log.Info("Insert a node...")
+	runQuery(session, `USE nba INSERT NODE node_type ({id:1, name:"Tim"}),({id:2, name:"Jerry"}),({id:3, name:"Kyle"})`)
+
+	log.Info("Insert an edge...")
+	runQuery(session, `USE nba INSERT EDGE edge_type ({id:1})-[{followness:90}]->({id:2}),({id:2})-[{followness:100}]->({id:3})`)
+
+	log.Info("Execution response received")
 
 	fmt.Println("Basic example finished")
 }
