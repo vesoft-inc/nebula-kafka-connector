@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/client"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 
 const (
