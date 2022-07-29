@@ -1,4 +1,4 @@
-module github.com/vesoft-inc/nebula-ng/go
+module github.com/vesoft-inc/nebula-ng-tools/golang
 
 go 1.17
 

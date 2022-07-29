@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	"github.com/vesoft-inc/nebula-ng/go/pkg/generated_code/v5.0.0/nebula/graph"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 )
 
 // TODO(Aiee) add scheduler to release idle connection periodically

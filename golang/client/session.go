@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/vesoft-inc/nebula-ng/go/pkg/generated_code/v5.0.0/nebula/graph"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 )
 
 type timezoneInfo struct {
