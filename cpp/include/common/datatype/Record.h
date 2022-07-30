@@ -200,6 +200,8 @@ private:
 
 bool operator==(const RawRecord& lhs, const RawRecord& rhs);
 bool operator!=(const RawRecord& lhs, const RawRecord& rhs);
+bool operator<(const RawRecord& lhs, const RawRecord& rhs);
+std::ostream &operator<<(std::ostream &os, const RawRecord &record);
 
 // Record is not used currently.
 class Record {};

@@ -30,4 +30,17 @@ bool operator!=(const RawRecord& lhs, const RawRecord& rhs) {
     return !(lhs == rhs);
 }
 
+bool operator<(const RawRecord& lhs, const RawRecord& rhs) {
+    return lhs.getValues() < rhs.getValues();
+}
+
+std::ostream &operator<<(std::ostream &os, const RawRecord &record) {
+    os << "[";
+    for (auto &value : record.getValues()) {
+        os << value << ", ";
+    }
+    os << "]";
+    return os;
+}
+
 }  // namespace nebula::client

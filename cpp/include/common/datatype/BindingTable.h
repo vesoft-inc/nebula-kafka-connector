@@ -170,6 +170,10 @@ public:
         records_.insert(records_.end(), other.records_.begin(), other.records_.end());
     }
 
+    auto& records() {
+        return records_;
+    }
+
     // Reuse the binding table memory in place
     void reset() {
         // FIXME(yee)
