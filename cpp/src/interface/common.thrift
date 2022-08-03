@@ -104,7 +104,8 @@ struct RawRecord {
 # struct Record {}
 
 struct BindingTable {
-    1: list<RawRecord> (cpp.template = "std::pmr::deque") records;
+    1: list<binary> (cpp.template = "std::pmr::vector") columnNames;
+    2: list<RawRecord> (cpp.template = "std::pmr::deque") records;
 } (cpp.type = "nebula::client::BindingTable")
 
 

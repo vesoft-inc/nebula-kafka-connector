@@ -6,9 +6,8 @@
  */
 #pragma once
 
-#include <thrift/lib/cpp2/visitation/for_each.h>
-
 #include "common_metadata.h"
+#include <thrift/lib/cpp2/visitation/for_each.h>
 
 namespace apache {
 namespace thrift {
@@ -16,92 +15,94 @@ namespace detail {
 
 template <>
 struct ForEachField<::nebula::cpp2::NList> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).values_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).values_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::NMap> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {}
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::Node> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).nodeID_ref()...);
-        f(1, static_cast<T&&>(t).nodeTypeID_ref()...);
-        f(2, static_cast<T&&>(t).properties_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).nodeID_ref()...);
+    f(1, static_cast<T&&>(t).nodeTypeID_ref()...);
+    f(2, static_cast<T&&>(t).properties_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::Edge> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).srcID_ref()...);
-        f(1, static_cast<T&&>(t).dstID_ref()...);
-        f(2, static_cast<T&&>(t).edgeTypeID_ref()...);
-        f(3, static_cast<T&&>(t).rank_ref()...);
-        f(4, static_cast<T&&>(t).properties_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).srcID_ref()...);
+    f(1, static_cast<T&&>(t).dstID_ref()...);
+    f(2, static_cast<T&&>(t).edgeTypeID_ref()...);
+    f(3, static_cast<T&&>(t).rank_ref()...);
+    f(4, static_cast<T&&>(t).properties_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::Value> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).boolVal_ref()...);
-        f(1, static_cast<T&&>(t).int8Val_ref()...);
-        f(2, static_cast<T&&>(t).int16Val_ref()...);
-        f(3, static_cast<T&&>(t).int32Val_ref()...);
-        f(4, static_cast<T&&>(t).int64Val_ref()...);
-        f(5, static_cast<T&&>(t).floatVal_ref()...);
-        f(6, static_cast<T&&>(t).doubleVal_ref()...);
-        f(7, static_cast<T&&>(t).stringVal_ref()...);
-        f(8, static_cast<T&&>(t).listVal_ref()...);
-        f(9, static_cast<T&&>(t).mapVal_ref()...);
-        f(10, static_cast<T&&>(t).nodeVal_ref()...);
-        f(11, static_cast<T&&>(t).edgeVal_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).boolVal_ref()...);
+    f(1, static_cast<T&&>(t).int8Val_ref()...);
+    f(2, static_cast<T&&>(t).int16Val_ref()...);
+    f(3, static_cast<T&&>(t).int32Val_ref()...);
+    f(4, static_cast<T&&>(t).int64Val_ref()...);
+    f(5, static_cast<T&&>(t).floatVal_ref()...);
+    f(6, static_cast<T&&>(t).doubleVal_ref()...);
+    f(7, static_cast<T&&>(t).stringVal_ref()...);
+    f(8, static_cast<T&&>(t).listVal_ref()...);
+    f(9, static_cast<T&&>(t).mapVal_ref()...);
+    f(10, static_cast<T&&>(t).nodeVal_ref()...);
+    f(11, static_cast<T&&>(t).edgeVal_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::FieldType> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).filedName_ref()...);
-        f(1, static_cast<T&&>(t).valueType_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).filedName_ref()...);
+    f(1, static_cast<T&&>(t).valueType_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::RecordType> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).fieldType_ref()...);
-        f(1, static_cast<T&&>(t).fieldNameIndexMap_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).fieldType_ref()...);
+    f(1, static_cast<T&&>(t).fieldNameIndexMap_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::RawRecord> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).values_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).values_ref()...);
+  }
 };
 
 template <>
 struct ForEachField<::nebula::cpp2::BindingTable> {
-    template <typename F, typename... T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
-        f(0, static_cast<T&&>(t).records_ref()...);
-    }
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).columnNames_ref()...);
+    f(1, static_cast<T&&>(t).records_ref()...);
+  }
 };
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache

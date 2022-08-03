@@ -10,12 +10,10 @@
 
 #include "graph_types.h"
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
-struct graph_constants {};
+struct graph_constants {
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+};
+
+}}} // nebula::graph::cpp2

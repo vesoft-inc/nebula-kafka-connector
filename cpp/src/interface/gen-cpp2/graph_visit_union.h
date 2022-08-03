@@ -6,12 +6,13 @@
  */
 #pragma once
 
-#include <thrift/lib/cpp2/visitation/visit_union.h>
-
 #include "graph_metadata.h"
+#include <thrift/lib/cpp2/visitation/visit_union.h>
 
 namespace apache {
 namespace thrift {
-namespace detail {}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+namespace detail {
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache

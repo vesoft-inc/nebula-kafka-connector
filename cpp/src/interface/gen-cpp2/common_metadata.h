@@ -6,10 +6,9 @@
  */
 #pragma once
 
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
-
 #include <vector>
 
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "common_types.h"
 
 
@@ -20,60 +19,60 @@ namespace md {
 
 template <>
 class EnumMetadata<::nebula::cpp2::ValueType> {
-public:
-    static void gen(ThriftMetadata& metadata);
+ public:
+  static void gen(ThriftMetadata& metadata);
 };
 template <>
 class EnumMetadata<::nebula::cpp2::ErrorCode> {
-public:
-    static void gen(ThriftMetadata& metadata);
+ public:
+  static void gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::NList> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::NMap> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::Node> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::Edge> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::Value> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::FieldType> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::RecordType> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::RawRecord> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::cpp2::BindingTable> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
-}  // namespace md
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace md
+} // namespace detail
+} // namespace thrift
+} // namespace apache

@@ -6,5 +6,5 @@
  */
 #pragma once
 #include "common_for_each_field.h"
-#include "common_visit_by_thrift_field_metadata.h"
 #include "common_visit_union.h"
+#include "common_visit_by_thrift_field_metadata.h"

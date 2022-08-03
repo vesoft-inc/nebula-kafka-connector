@@ -7,7 +7,6 @@
 #pragma once
 
 #include <thrift/lib/cpp2/visitation/visit_by_thrift_field_metadata.h>
-
 #include "common_metadata.h"
 
 namespace apache {
@@ -16,156 +15,158 @@ namespace detail {
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::NList> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).values_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::NList");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).values_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::NList");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::NMap> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::NMap");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::NMap");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::Node> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).nodeID_ref());
-            case 2:
-                return f(1, static_cast<T&&>(t).nodeTypeID_ref());
-            case 3:
-                return f(2, static_cast<T&&>(t).properties_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::Node");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).nodeID_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).nodeTypeID_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).properties_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::Node");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::Edge> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).srcID_ref());
-            case 2:
-                return f(1, static_cast<T&&>(t).dstID_ref());
-            case 3:
-                return f(2, static_cast<T&&>(t).edgeTypeID_ref());
-            case 4:
-                return f(3, static_cast<T&&>(t).rank_ref());
-            case 5:
-                return f(4, static_cast<T&&>(t).properties_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::Edge");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).srcID_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).dstID_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).edgeTypeID_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).rank_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).properties_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::Edge");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::Value> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).boolVal_ref());
-            case 2:
-                return f(1, static_cast<T&&>(t).int8Val_ref());
-            case 3:
-                return f(2, static_cast<T&&>(t).int16Val_ref());
-            case 4:
-                return f(3, static_cast<T&&>(t).int32Val_ref());
-            case 5:
-                return f(4, static_cast<T&&>(t).int64Val_ref());
-            case 6:
-                return f(5, static_cast<T&&>(t).floatVal_ref());
-            case 7:
-                return f(6, static_cast<T&&>(t).doubleVal_ref());
-            case 8:
-                return f(7, static_cast<T&&>(t).stringVal_ref());
-            case 9:
-                return f(8, static_cast<T&&>(t).listVal_ref());
-            case 10:
-                return f(9, static_cast<T&&>(t).mapVal_ref());
-            case 11:
-                return f(10, static_cast<T&&>(t).nodeVal_ref());
-            case 12:
-                return f(11, static_cast<T&&>(t).edgeVal_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::Value");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).boolVal_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).int8Val_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).int16Val_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).int32Val_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).int64Val_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).floatVal_ref());
+    case 7:
+      return f(6, static_cast<T&&>(t).doubleVal_ref());
+    case 8:
+      return f(7, static_cast<T&&>(t).stringVal_ref());
+    case 9:
+      return f(8, static_cast<T&&>(t).listVal_ref());
+    case 10:
+      return f(9, static_cast<T&&>(t).mapVal_ref());
+    case 11:
+      return f(10, static_cast<T&&>(t).nodeVal_ref());
+    case 12:
+      return f(11, static_cast<T&&>(t).edgeVal_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::Value");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::FieldType> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).filedName_ref());
-            case 2:
-                return f(1, static_cast<T&&>(t).valueType_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::FieldType");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).filedName_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).valueType_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::FieldType");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::RecordType> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).fieldType_ref());
-            case 2:
-                return f(1, static_cast<T&&>(t).fieldNameIndexMap_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::RecordType");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).fieldType_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).fieldNameIndexMap_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::RecordType");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::RawRecord> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).values_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::RawRecord");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).values_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::RawRecord");
     }
+  }
 };
 
 template <>
 struct VisitByFieldId<::nebula::cpp2::BindingTable> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
-        switch (fieldId) {
-            case 1:
-                return f(0, static_cast<T&&>(t).records_ref());
-            default:
-                throwInvalidThriftId(fieldId, "::nebula::cpp2::BindingTable");
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).columnNames_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).records_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::BindingTable");
     }
+  }
 };
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache

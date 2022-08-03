@@ -10,10 +10,8 @@
 #include <thrift/lib/cpp2/gen/module_constants_cpp.h>
 
 
-namespace nebula {
-namespace cpp2 {
+namespace nebula { namespace cpp2 {
 
-constexpr char const* const common_constants::version_;
+constexpr char const * const common_constants::version_;
 
-}
-}  // namespace nebula
+}} // nebula::cpp2

@@ -14,5 +14,6 @@
  * VirtualProtocol) to read/write thrift structs.
  */
 
-#include "common_types_custom_protocol.h"
 #include "graph_types.tcc"
+
+#include "common_types_custom_protocol.h"

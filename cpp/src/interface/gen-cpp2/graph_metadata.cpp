@@ -4,9 +4,8 @@
  * DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
  *  @generated @nocommit
  */
-#include "graph_metadata.h"
-
 #include <thrift/lib/cpp2/gen/module_metadata_cpp.h>
+#include "graph_metadata.h"
 
 namespace apache {
 namespace thrift {
@@ -22,474 +21,329 @@ using ThriftFunctionGenerator = void (*)(ThriftMetadata&, ThriftService&);
 
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::ProfilingStats>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.ProfilingStats",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_ProfilingStats = res.first->second;
-    graph_ProfilingStats.name_ref() = "graph.ProfilingStats";
-    graph_ProfilingStats.is_union_ref() = false;
-    static const EncodedThriftField graph_ProfilingStats_fields[] = {
-            {1,
-             "rows",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "exec_duration_in_us",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {3,
-             "total_duration_in_us",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {4,
-             "other_stats",
-             true,
-             std::make_unique<Map>(
-                     std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-                     std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_ProfilingStats_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_ProfilingStats.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.ProfilingStats", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_ProfilingStats = res.first->second;
+  graph_ProfilingStats.name_ref() = "graph.ProfilingStats";
+  graph_ProfilingStats.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_ProfilingStats_fields[] = {
+    {1, "rows", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "exec_duration_in_us", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "total_duration_in_us", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "other_stats", true, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE)), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_ProfilingStats_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_ProfilingStats.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::Pair>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.Pair",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_Pair = res.first->second;
-    graph_Pair.name_ref() = "graph.Pair";
-    graph_Pair.is_union_ref() = false;
-    static const EncodedThriftField graph_Pair_fields[] = {
-            {1,
-             "key",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "value",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_Pair_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_Pair.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.Pair", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_Pair = res.first->second;
+  graph_Pair.name_ref() = "graph.Pair";
+  graph_Pair.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_Pair_fields[] = {
+    {1, "key", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "value", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_Pair_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_Pair.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::PlanNodeDescription>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.PlanNodeDescription",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_PlanNodeDescription = res.first->second;
-    graph_PlanNodeDescription.name_ref() = "graph.PlanNodeDescription";
-    graph_PlanNodeDescription.is_union_ref() = false;
-    static const EncodedThriftField graph_PlanNodeDescription_fields[] = {
-            {1,
-             "name",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "id",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {3,
-             "output_var",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {4,
-             "description",
-             true,
-             std::make_unique<List>(
-                     std::make_unique<Struct<::nebula::graph::cpp2::Pair>>("graph.Pair")),
-             std::vector<ThriftConstStruct>{}},
-            {5,
-             "profiles",
-             true,
-             std::make_unique<List>(
-                     std::make_unique<Struct<::nebula::graph::cpp2::ProfilingStats>>(
-                             "graph.ProfilingStats")),
-             std::vector<ThriftConstStruct>{}},
-            {6,
-             "dependencies",
-             true,
-             std::make_unique<List>(
-                     std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_PlanNodeDescription_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_PlanNodeDescription.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.PlanNodeDescription", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_PlanNodeDescription = res.first->second;
+  graph_PlanNodeDescription.name_ref() = "graph.PlanNodeDescription";
+  graph_PlanNodeDescription.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_PlanNodeDescription_fields[] = {
+    {1, "name", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "id", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "output_var", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "description", true, std::make_unique<List>(std::make_unique<Struct< ::nebula::graph::cpp2::Pair>>("graph.Pair")), std::vector<ThriftConstStruct>{}},
+    {5, "profiles", true, std::make_unique<List>(std::make_unique<Struct< ::nebula::graph::cpp2::ProfilingStats>>("graph.ProfilingStats")), std::vector<ThriftConstStruct>{}},
+    {6, "dependencies", true, std::make_unique<List>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_PlanNodeDescription_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_PlanNodeDescription.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::PlanDescription>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.PlanDescription",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_PlanDescription = res.first->second;
-    graph_PlanDescription.name_ref() = "graph.PlanDescription";
-    graph_PlanDescription.is_union_ref() = false;
-    static const EncodedThriftField graph_PlanDescription_fields[] = {
-            {1,
-             "plan_node_descs",
-             false,
-             std::make_unique<List>(
-                     std::make_unique<Struct<::nebula::graph::cpp2::PlanNodeDescription>>(
-                             "graph.PlanNodeDescription")),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "node_index_map",
-             false,
-             std::make_unique<Map>(
-                     std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-                     std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)),
-             std::vector<ThriftConstStruct>{}},
-            {3,
-             "format",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {4,
-             "optimize_time_in_us",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_PlanDescription_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_PlanDescription.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.PlanDescription", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_PlanDescription = res.first->second;
+  graph_PlanDescription.name_ref() = "graph.PlanDescription";
+  graph_PlanDescription.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_PlanDescription_fields[] = {
+    {1, "plan_node_descs", false, std::make_unique<List>(std::make_unique<Struct< ::nebula::graph::cpp2::PlanNodeDescription>>("graph.PlanNodeDescription")), std::vector<ThriftConstStruct>{}},
+    {2, "node_index_map", false, std::make_unique<Map>(std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE)), std::vector<ThriftConstStruct>{}},
+    {3, "format", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "optimize_time_in_us", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_PlanDescription_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_PlanDescription.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::GQLStatus>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.GQLStatus",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_GQLStatus = res.first->second;
-    graph_GQLStatus.name_ref() = "graph.GQLStatus";
-    graph_GQLStatus.is_union_ref() = false;
-    static const EncodedThriftField graph_GQLStatus_fields[] = {
-            {1,
-             "status",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_GQLStatus_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_GQLStatus.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.GQLStatus", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_GQLStatus = res.first->second;
+  graph_GQLStatus.name_ref() = "graph.GQLStatus";
+  graph_GQLStatus.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_GQLStatus_fields[] = {
+    {1, "status", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_GQLStatus_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_GQLStatus.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::ExecutionOutcome>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.ExecutionOutcome",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_ExecutionOutcome = res.first->second;
-    graph_ExecutionOutcome.name_ref() = "graph.ExecutionOutcome";
-    graph_ExecutionOutcome.is_union_ref() = false;
-    static const EncodedThriftField graph_ExecutionOutcome_fields[] = {
-            {1,
-             "gqlStatus",
-             false,
-             std::make_unique<Typedef>(
-                     "graph.GQLStatus",
-                     std::make_unique<Struct<::nebula::graph::cpp2::GQLStatus>>(
-                             "graph.GQLStatus"),
-                     std::vector<ThriftConstStruct>{}),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "result",
-             true,
-             std::make_unique<Typedef>("common.BindingTable",
-                                       std::make_unique<Struct<::nebula::cpp2::BindingTable>>(
-                                               "common.BindingTable"),
-                                       std::vector<ThriftConstStruct>{}),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_ExecutionOutcome_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_ExecutionOutcome.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.ExecutionOutcome", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_ExecutionOutcome = res.first->second;
+  graph_ExecutionOutcome.name_ref() = "graph.ExecutionOutcome";
+  graph_ExecutionOutcome.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_ExecutionOutcome_fields[] = {
+    {1, "gqlStatus", false, std::make_unique<Typedef>("graph.GQLStatus", std::make_unique<Struct< ::nebula::graph::cpp2::GQLStatus>>("graph.GQLStatus"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {2, "result", true, std::make_unique<Typedef>("common.BindingTable", std::make_unique<Struct< ::nebula::cpp2::BindingTable>>("common.BindingTable"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_ExecutionOutcome_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_ExecutionOutcome.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::ExecutionResponse>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.ExecutionResponse",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_ExecutionResponse = res.first->second;
-    graph_ExecutionResponse.name_ref() = "graph.ExecutionResponse";
-    graph_ExecutionResponse.is_union_ref() = false;
-    static const EncodedThriftField graph_ExecutionResponse_fields[] = {
-            {1,
-             "executionOutcome",
-             false,
-             std::make_unique<Struct<::nebula::graph::cpp2::ExecutionOutcome>>(
-                     "graph.ExecutionOutcome"),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "latencyInUs",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_ExecutionResponse_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_ExecutionResponse.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.ExecutionResponse", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_ExecutionResponse = res.first->second;
+  graph_ExecutionResponse.name_ref() = "graph.ExecutionResponse";
+  graph_ExecutionResponse.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_ExecutionResponse_fields[] = {
+    {1, "executionOutcome", false, std::make_unique<Struct< ::nebula::graph::cpp2::ExecutionOutcome>>("graph.ExecutionOutcome"), std::vector<ThriftConstStruct>{}},
+    {2, "latencyInUs", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_ExecutionResponse_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_ExecutionResponse.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::AuthReq>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.AuthReq",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_AuthReq = res.first->second;
-    graph_AuthReq.name_ref() = "graph.AuthReq";
-    graph_AuthReq.is_union_ref() = false;
-    static const EncodedThriftField graph_AuthReq_fields[] = {
-            {1,
-             "username",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "password",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {3,
-             "client_type",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-            {4,
-             "client_version",
-             false,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_AuthReq_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_AuthReq.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.AuthReq", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_AuthReq = res.first->second;
+  graph_AuthReq.name_ref() = "graph.AuthReq";
+  graph_AuthReq.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_AuthReq_fields[] = {
+    {1, "username", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "password", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "client_type", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "client_version", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_AuthReq_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_AuthReq.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::graph::cpp2::AuthResponse>::gen(ThriftMetadata& metadata) {
-    auto res = metadata.structs_ref()->emplace("graph.AuthResponse",
-                                               ::apache::thrift::metadata::ThriftStruct{});
-    if (!res.second) {
-        return res.first->second;
-    }
-    ::apache::thrift::metadata::ThriftStruct& graph_AuthResponse = res.first->second;
-    graph_AuthResponse.name_ref() = "graph.AuthResponse";
-    graph_AuthResponse.is_union_ref() = false;
-    static const EncodedThriftField graph_AuthResponse_fields[] = {
-            {1,
-             "gqlStatus",
-             false,
-             std::make_unique<Struct<::nebula::graph::cpp2::GQLStatus>>("graph.GQLStatus"),
-             std::vector<ThriftConstStruct>{}},
-            {2,
-             "identifier",
-             true,
-             std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE),
-             std::vector<ThriftConstStruct>{}},
-    };
-    for (const auto& f : graph_AuthResponse_fields) {
-        ::apache::thrift::metadata::ThriftField field;
-        field.id_ref() = f.id;
-        field.name_ref() = f.name;
-        field.is_optional_ref() = f.is_optional;
-        f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
-        field.structured_annotations_ref() = f.structured_annotations;
-        graph_AuthResponse.fields_ref()->push_back(std::move(field));
-    }
+  auto res = metadata.structs_ref()->emplace("graph.AuthResponse", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
     return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& graph_AuthResponse = res.first->second;
+  graph_AuthResponse.name_ref() = "graph.AuthResponse";
+  graph_AuthResponse.is_union_ref() = false;
+  static const EncodedThriftField
+  graph_AuthResponse_fields[] = {
+    {1, "gqlStatus", false, std::make_unique<Struct< ::nebula::graph::cpp2::GQLStatus>>("graph.GQLStatus"), std::vector<ThriftConstStruct>{}},
+    {2, "identifier", true, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : graph_AuthResponse_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    graph_AuthResponse.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
 }
 
-void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_authenticate(
-        ThriftMetadata& metadata, ThriftService& service) {
-    ::apache::thrift::metadata::ThriftFunction func;
-    (void)metadata;
-    func.name_ref() = "authenticate";
-    auto func_ret_type =
-            std::make_unique<Struct<::nebula::graph::cpp2::AuthResponse>>("graph.AuthResponse");
-    func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
-    ::apache::thrift::metadata::ThriftField graph_GraphService_authenticate_authReq_1;
-    graph_GraphService_authenticate_authReq_1.id_ref() = 1;
-    graph_GraphService_authenticate_authReq_1.name_ref() = "authReq";
-    graph_GraphService_authenticate_authReq_1.is_optional_ref() = false;
-    auto graph_GraphService_authenticate_authReq_1_type =
-            std::make_unique<Struct<::nebula::graph::cpp2::AuthReq>>("graph.AuthReq");
-    graph_GraphService_authenticate_authReq_1_type->writeAndGenType(
-            *graph_GraphService_authenticate_authReq_1.type_ref(), metadata);
-    func.arguments_ref()->push_back(std::move(graph_GraphService_authenticate_authReq_1));
-    func.is_oneway_ref() = false;
-    service.functions_ref()->push_back(std::move(func));
+void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_authenticate(ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  (void)metadata;
+  func.name_ref() = "authenticate";
+  auto func_ret_type = std::make_unique<Struct< ::nebula::graph::cpp2::AuthResponse>>("graph.AuthResponse");
+  func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
+  ::apache::thrift::metadata::ThriftField graph_GraphService_authenticate_authReq_1;
+  graph_GraphService_authenticate_authReq_1.id_ref() = 1;
+  graph_GraphService_authenticate_authReq_1.name_ref() = "authReq";
+  graph_GraphService_authenticate_authReq_1.is_optional_ref() = false;
+  auto graph_GraphService_authenticate_authReq_1_type = std::make_unique<Struct< ::nebula::graph::cpp2::AuthReq>>("graph.AuthReq");
+  graph_GraphService_authenticate_authReq_1_type->writeAndGenType(*graph_GraphService_authenticate_authReq_1.type_ref(), metadata);
+  func.arguments_ref()->push_back(std::move(graph_GraphService_authenticate_authReq_1));
+  func.is_oneway_ref() = false;
+  service.functions_ref()->push_back(std::move(func));
 }
-void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_signout(
-        ThriftMetadata& metadata, ThriftService& service) {
-    ::apache::thrift::metadata::ThriftFunction func;
-    (void)metadata;
-    func.name_ref() = "signout";
-    auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
-    func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
-    ::apache::thrift::metadata::ThriftField graph_GraphService_signout_sessionId_1;
-    graph_GraphService_signout_sessionId_1.id_ref() = 1;
-    graph_GraphService_signout_sessionId_1.name_ref() = "sessionId";
-    graph_GraphService_signout_sessionId_1.is_optional_ref() = false;
-    auto graph_GraphService_signout_sessionId_1_type =
-            std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
-    graph_GraphService_signout_sessionId_1_type->writeAndGenType(
-            *graph_GraphService_signout_sessionId_1.type_ref(), metadata);
-    func.arguments_ref()->push_back(std::move(graph_GraphService_signout_sessionId_1));
-    func.is_oneway_ref() = true;
-    service.functions_ref()->push_back(std::move(func));
+void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_signout(ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  (void)metadata;
+  func.name_ref() = "signout";
+  auto func_ret_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_VOID_TYPE);
+  func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
+  ::apache::thrift::metadata::ThriftField graph_GraphService_signout_sessionId_1;
+  graph_GraphService_signout_sessionId_1.id_ref() = 1;
+  graph_GraphService_signout_sessionId_1.name_ref() = "sessionId";
+  graph_GraphService_signout_sessionId_1.is_optional_ref() = false;
+  auto graph_GraphService_signout_sessionId_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
+  graph_GraphService_signout_sessionId_1_type->writeAndGenType(*graph_GraphService_signout_sessionId_1.type_ref(), metadata);
+  func.arguments_ref()->push_back(std::move(graph_GraphService_signout_sessionId_1));
+  func.is_oneway_ref() = true;
+  service.functions_ref()->push_back(std::move(func));
 }
-void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_execute(
-        ThriftMetadata& metadata, ThriftService& service) {
-    ::apache::thrift::metadata::ThriftFunction func;
-    (void)metadata;
-    func.name_ref() = "execute";
-    auto func_ret_type = std::make_unique<Struct<::nebula::graph::cpp2::ExecutionResponse>>(
-            "graph.ExecutionResponse");
-    func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
-    ::apache::thrift::metadata::ThriftField graph_GraphService_execute_sessionId_1;
-    graph_GraphService_execute_sessionId_1.id_ref() = 1;
-    graph_GraphService_execute_sessionId_1.name_ref() = "sessionId";
-    graph_GraphService_execute_sessionId_1.is_optional_ref() = false;
-    auto graph_GraphService_execute_sessionId_1_type =
-            std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
-    graph_GraphService_execute_sessionId_1_type->writeAndGenType(
-            *graph_GraphService_execute_sessionId_1.type_ref(), metadata);
-    func.arguments_ref()->push_back(std::move(graph_GraphService_execute_sessionId_1));
-    ::apache::thrift::metadata::ThriftField graph_GraphService_execute_stmt_2;
-    graph_GraphService_execute_stmt_2.id_ref() = 2;
-    graph_GraphService_execute_stmt_2.name_ref() = "stmt";
-    graph_GraphService_execute_stmt_2.is_optional_ref() = false;
-    auto graph_GraphService_execute_stmt_2_type =
-            std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE);
-    graph_GraphService_execute_stmt_2_type->writeAndGenType(
-            *graph_GraphService_execute_stmt_2.type_ref(), metadata);
-    func.arguments_ref()->push_back(std::move(graph_GraphService_execute_stmt_2));
-    func.is_oneway_ref() = false;
-    service.functions_ref()->push_back(std::move(func));
+void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_execute(ThriftMetadata& metadata, ThriftService& service) {
+  ::apache::thrift::metadata::ThriftFunction func;
+  (void)metadata;
+  func.name_ref() = "execute";
+  auto func_ret_type = std::make_unique<Struct< ::nebula::graph::cpp2::ExecutionResponse>>("graph.ExecutionResponse");
+  func_ret_type->writeAndGenType(*func.return_type_ref(), metadata);
+  ::apache::thrift::metadata::ThriftField graph_GraphService_execute_sessionId_1;
+  graph_GraphService_execute_sessionId_1.id_ref() = 1;
+  graph_GraphService_execute_sessionId_1.name_ref() = "sessionId";
+  graph_GraphService_execute_sessionId_1.is_optional_ref() = false;
+  auto graph_GraphService_execute_sessionId_1_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE);
+  graph_GraphService_execute_sessionId_1_type->writeAndGenType(*graph_GraphService_execute_sessionId_1.type_ref(), metadata);
+  func.arguments_ref()->push_back(std::move(graph_GraphService_execute_sessionId_1));
+  ::apache::thrift::metadata::ThriftField graph_GraphService_execute_stmt_2;
+  graph_GraphService_execute_stmt_2.id_ref() = 2;
+  graph_GraphService_execute_stmt_2.name_ref() = "stmt";
+  graph_GraphService_execute_stmt_2.is_optional_ref() = false;
+  auto graph_GraphService_execute_stmt_2_type = std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BINARY_TYPE);
+  graph_GraphService_execute_stmt_2_type->writeAndGenType(*graph_GraphService_execute_stmt_2.type_ref(), metadata);
+  func.arguments_ref()->push_back(std::move(graph_GraphService_execute_stmt_2));
+  func.is_oneway_ref() = false;
+  service.functions_ref()->push_back(std::move(func));
 }
 
-void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen(
-        ::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-    const ::apache::thrift::metadata::ThriftServiceContextRef* self =
-            genRecurse(*response.metadata_ref(), *response.services_ref());
-    DCHECK(self != nullptr);
-    // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to
-    // fill the field with the result of looking up in ThriftMetadata.
-    ::apache::thrift::metadata::ThriftServiceContext context;
-    context.module_ref() = *self->module_ref();
-    context.service_info_ref() =
-            response.metadata_ref()->services_ref()->at(*self->service_name_ref());
-    response.context_ref() = std::move(context);
+void ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen(::apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  const ::apache::thrift::metadata::ThriftServiceContextRef* self = genRecurse(*response.metadata_ref(), *response.services_ref());
+  DCHECK(self != nullptr);
+  // TODO(praihan): Remove ThriftServiceContext from response. But in the meantime, we need to fill the field with the result of looking up in ThriftMetadata.
+  ::apache::thrift::metadata::ThriftServiceContext context;
+  context.module_ref() = *self->module_ref();
+  context.service_info_ref() = response.metadata_ref()->services_ref()->at(*self->service_name_ref());
+  response.context_ref() = std::move(context);
 }
 
-const ThriftServiceContextRef*
-ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::genRecurse(
-        ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
-    (void)metadata;
-    ::apache::thrift::metadata::ThriftService graph_GraphService;
-    graph_GraphService.name_ref() = "graph.GraphService";
-    static const ThriftFunctionGenerator functions[] = {
-            ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_authenticate,
-            ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_signout,
-            ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_execute,
-    };
-    for (auto& function_gen : functions) {
-        function_gen(metadata, graph_GraphService);
-    }
-    // We need to keep the index around because a reference or iterator could be invalidated.
-    auto selfIndex = services.size();
-    services.emplace_back();
-    ThriftServiceContextRef& context = services[selfIndex];
-    metadata.services_ref()->emplace("graph.GraphService", std::move(graph_GraphService));
-    context.service_name_ref() = "graph.GraphService";
-    ::apache::thrift::metadata::ThriftModuleContext module;
-    module.name_ref() = "graph";
-    context.module_ref() = std::move(module);
-    return &context;
+const ThriftServiceContextRef* ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services) {
+  (void) metadata;
+  ::apache::thrift::metadata::ThriftService graph_GraphService;
+  graph_GraphService.name_ref() = "graph.GraphService";
+  static const ThriftFunctionGenerator functions[] = {
+    ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_authenticate,
+    ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_signout,
+    ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf>::gen_execute,
+  };
+  for (auto& function_gen : functions) {
+    function_gen(metadata, graph_GraphService);
+  }
+  // We need to keep the index around because a reference or iterator could be invalidated.
+  auto selfIndex = services.size();
+  services.emplace_back();
+  ThriftServiceContextRef& context = services[selfIndex];
+  metadata.services_ref()->emplace("graph.GraphService", std::move(graph_GraphService));
+  context.service_name_ref() = "graph.GraphService";
+  ::apache::thrift::metadata::ThriftModuleContext module;
+  module.name_ref() = "graph";
+  context.module_ref() = std::move(module);
+  return &context;
 }
-}  // namespace md
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace md
+} // namespace detail
+} // namespace thrift
+} // namespace apache

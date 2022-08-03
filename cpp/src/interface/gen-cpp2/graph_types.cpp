@@ -5,11 +5,11 @@
  *  @generated @nocommit
  */
 #include "graph_types.h"
+#include "graph_types.tcc"
 
 #include <thrift/lib/cpp2/gen/module_types_cpp.h>
 
 #include "graph_data.h"
-#include "graph_types.tcc"
 
 
 namespace apache {
@@ -17,33 +17,33 @@ namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::ProfilingStats>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::ProfilingStats>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::ProfilingStats>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 ProfilingStats::ProfilingStats(const ProfilingStats&) = default;
 ProfilingStats& ProfilingStats::operator=(const ProfilingStats&) = default;
-ProfilingStats::ProfilingStats(ProfilingStats&& other) noexcept
-        : rows(std::move(other.rows)),
-          exec_duration_in_us(std::move(other.exec_duration_in_us)),
-          total_duration_in_us(std::move(other.total_duration_in_us)),
-          __fbthrift_field_other_stats(std::move(other.__fbthrift_field_other_stats)),
-          __isset(other.__isset) {}
+ProfilingStats::ProfilingStats(ProfilingStats&& other) noexcept  :
+    rows(std::move(other.rows)),
+    exec_duration_in_us(std::move(other.exec_duration_in_us)),
+    total_duration_in_us(std::move(other.total_duration_in_us)),
+    __fbthrift_field_other_stats(std::move(other.__fbthrift_field_other_stats)),
+    __isset(other.__isset) {
+}
 
 ProfilingStats& ProfilingStats::operator=(FOLLY_MAYBE_UNUSED ProfilingStats&& other) noexcept {
     this->rows = std::move(other.rows);
@@ -55,114 +55,103 @@ ProfilingStats& ProfilingStats::operator=(FOLLY_MAYBE_UNUSED ProfilingStats&& ot
 }
 
 
-ProfilingStats::ProfilingStats(
-        apache::thrift::FragileConstructor,
-        ::std::int64_t rows__arg,
-        ::std::int64_t exec_duration_in_us__arg,
-        ::std::int64_t total_duration_in_us__arg,
-        std::unordered_map<::std::string, ::std::string> other_stats__arg)
-        : rows(std::move(rows__arg)),
-          exec_duration_in_us(std::move(exec_duration_in_us__arg)),
-          total_duration_in_us(std::move(total_duration_in_us__arg)),
-          __fbthrift_field_other_stats(std::move(other_stats__arg)) {
-    __isset.set(folly::index_constant<0>(), true);
+ProfilingStats::ProfilingStats(apache::thrift::FragileConstructor, ::std::int64_t rows__arg, ::std::int64_t exec_duration_in_us__arg, ::std::int64_t total_duration_in_us__arg, std::unordered_map<::std::string, ::std::string> other_stats__arg) :
+    rows(std::move(rows__arg)),
+    exec_duration_in_us(std::move(exec_duration_in_us__arg)),
+    total_duration_in_us(std::move(total_duration_in_us__arg)),
+    __fbthrift_field_other_stats(std::move(other_stats__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void ProfilingStats::__clear() {
-    // clear all fields
-    this->rows = ::std::int64_t();
-    this->exec_duration_in_us = ::std::int64_t();
-    this->total_duration_in_us = ::std::int64_t();
-    this->__fbthrift_field_other_stats.clear();
-    __isset = {};
+  // clear all fields
+  this->rows = ::std::int64_t();
+  this->exec_duration_in_us = ::std::int64_t();
+  this->total_duration_in_us = ::std::int64_t();
+  this->__fbthrift_field_other_stats.clear();
+  __isset = {};
 }
 
 bool ProfilingStats::operator==(const ProfilingStats& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!(lhs.rows_ref() == rhs.rows_ref())) {
-        return false;
-    }
-    if (!(lhs.exec_duration_in_us_ref() == rhs.exec_duration_in_us_ref())) {
-        return false;
-    }
-    if (!(lhs.total_duration_in_us_ref() == rhs.total_duration_in_us_ref())) {
-        return false;
-    }
-    if (!(lhs.other_stats_ref() == rhs.other_stats_ref())) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.rows_ref() == rhs.rows_ref())) {
+    return false;
+  }
+  if (!(lhs.exec_duration_in_us_ref() == rhs.exec_duration_in_us_ref())) {
+    return false;
+  }
+  if (!(lhs.total_duration_in_us_ref() == rhs.total_duration_in_us_ref())) {
+    return false;
+  }
+  if (!(lhs.other_stats_ref() == rhs.other_stats_ref())) {
+    return false;
+  }
+  return true;
 }
 
-const std::unordered_map<::std::string, ::std::string>* ProfilingStats::get_other_stats()
-        const& {
-    return other_stats_ref().has_value() ? std::addressof(__fbthrift_field_other_stats)
-                                         : nullptr;
+const std::unordered_map<::std::string, ::std::string>* ProfilingStats::get_other_stats() const& {
+  return other_stats_ref().has_value() ? std::addressof(__fbthrift_field_other_stats) : nullptr;
 }
 
 std::unordered_map<::std::string, ::std::string>* ProfilingStats::get_other_stats() & {
-    return other_stats_ref().has_value() ? std::addressof(__fbthrift_field_other_stats)
-                                         : nullptr;
+  return other_stats_ref().has_value() ? std::addressof(__fbthrift_field_other_stats) : nullptr;
 }
 
 
 void swap(ProfilingStats& a, ProfilingStats& b) {
-    using ::std::swap;
-    swap(a.rows_ref().value(), b.rows_ref().value());
-    swap(a.exec_duration_in_us_ref().value(), b.exec_duration_in_us_ref().value());
-    swap(a.total_duration_in_us_ref().value(), b.total_duration_in_us_ref().value());
-    swap(a.other_stats_ref().value_unchecked(), b.other_stats_ref().value_unchecked());
-    swap(a.__isset, b.__isset);
+  using ::std::swap;
+  swap(a.rows_ref().value(), b.rows_ref().value());
+  swap(a.exec_duration_in_us_ref().value(), b.exec_duration_in_us_ref().value());
+  swap(a.total_duration_in_us_ref().value(), b.total_duration_in_us_ref().value());
+  swap(a.other_stats_ref().value_unchecked(), b.other_stats_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
 }
 
 template void ProfilingStats::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ProfilingStats::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ProfilingStats::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ProfilingStats::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ProfilingStats::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ProfilingStats::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void ProfilingStats::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t ProfilingStats::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ProfilingStats::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ProfilingStats::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ProfilingStats::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ProfilingStats::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::Pair>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::Pair>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::Pair>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 Pair::Pair(const Pair&) = default;
 Pair& Pair::operator=(const Pair&) = default;
-Pair::Pair(Pair&& other) noexcept : key(std::move(other.key)), value(std::move(other.value)) {}
+Pair::Pair(Pair&& other) noexcept  :
+    key(std::move(other.key)),
+    value(std::move(other.value)) {
+}
 
 Pair& Pair::operator=(FOLLY_MAYBE_UNUSED Pair&& other) noexcept {
     this->key = std::move(other.key);
@@ -171,47 +160,49 @@ Pair& Pair::operator=(FOLLY_MAYBE_UNUSED Pair&& other) noexcept {
 }
 
 
-Pair::Pair(apache::thrift::FragileConstructor, ::std::string key__arg, ::std::string value__arg)
-        : key(std::move(key__arg)), value(std::move(value__arg)) {}
+Pair::Pair(apache::thrift::FragileConstructor, ::std::string key__arg, ::std::string value__arg) :
+    key(std::move(key__arg)),
+    value(std::move(value__arg)) {
+}
 
 
 void Pair::__clear() {
-    // clear all fields
-    this->key = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->value = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  // clear all fields
+  this->key = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->value = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
 }
 
 bool Pair::operator==(const Pair& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.key, rhs.key)) {
-        return false;
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.value, rhs.value)) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.key, rhs.key)) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.value, rhs.value)) {
+    return false;
+  }
+  return true;
 }
 
 bool Pair::operator<(const Pair& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.key, rhs.key)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.key, rhs.key);
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.value, rhs.value)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.value, rhs.value);
-    }
-    return false;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.key, rhs.key)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.key, rhs.key);
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.value, rhs.value)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.value, rhs.value);
+  }
+  return false;
 }
 
 
 void swap(Pair& a, Pair& b) {
-    using ::std::swap;
-    swap(a.key_ref().value(), b.key_ref().value());
-    swap(a.value_ref().value(), b.value_ref().value());
+  using ::std::swap;
+  swap(a.key_ref().value(), b.key_ref().value());
+  swap(a.value_ref().value(), b.value_ref().value());
 }
 
 template void Pair::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
@@ -224,52 +215,52 @@ template uint32_t Pair::serializedSize<>(apache::thrift::CompactProtocolWriter c
 template uint32_t Pair::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::PlanNodeDescription>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::PlanNodeDescription>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::PlanNodeDescription>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 PlanNodeDescription::PlanNodeDescription(const PlanNodeDescription&) = default;
 PlanNodeDescription& PlanNodeDescription::operator=(const PlanNodeDescription&) = default;
-PlanNodeDescription::PlanNodeDescription() : id() {}
+PlanNodeDescription::PlanNodeDescription() :
+      id() {
+}
 
 
 PlanNodeDescription::~PlanNodeDescription() {}
 
-PlanNodeDescription::PlanNodeDescription(PlanNodeDescription&& other) noexcept
-        : name(std::move(other.name)),
-          id(std::move(other.id)),
-          output_var(std::move(other.output_var)),
-          __fbthrift_field_description(std::move(other.__fbthrift_field_description)),
-          __fbthrift_field_profiles(std::move(other.__fbthrift_field_profiles)),
-          __fbthrift_field_dependencies(std::move(other.__fbthrift_field_dependencies)),
-          __isset(other.__isset) {}
+PlanNodeDescription::PlanNodeDescription(PlanNodeDescription&& other) noexcept  :
+    name(std::move(other.name)),
+    id(std::move(other.id)),
+    output_var(std::move(other.output_var)),
+    __fbthrift_field_description(std::move(other.__fbthrift_field_description)),
+    __fbthrift_field_profiles(std::move(other.__fbthrift_field_profiles)),
+    __fbthrift_field_dependencies(std::move(other.__fbthrift_field_dependencies)),
+    __isset(other.__isset) {
+}
 
-PlanNodeDescription& PlanNodeDescription::operator=(
-        FOLLY_MAYBE_UNUSED PlanNodeDescription&& other) noexcept {
+PlanNodeDescription& PlanNodeDescription::operator=(FOLLY_MAYBE_UNUSED PlanNodeDescription&& other) noexcept {
     this->name = std::move(other.name);
     this->id = std::move(other.id);
     this->output_var = std::move(other.output_var);
@@ -281,181 +272,161 @@ PlanNodeDescription& PlanNodeDescription::operator=(
 }
 
 
-PlanNodeDescription::PlanNodeDescription(
-        apache::thrift::FragileConstructor,
-        ::std::string name__arg,
-        ::std::int64_t id__arg,
-        ::std::string output_var__arg,
-        ::std::vector<::nebula::graph::cpp2::Pair> description__arg,
-        ::std::vector<::nebula::graph::cpp2::ProfilingStats> profiles__arg,
-        ::std::vector<::std::int64_t> dependencies__arg)
-        : name(std::move(name__arg)),
-          id(std::move(id__arg)),
-          output_var(std::move(output_var__arg)),
-          __fbthrift_field_description(std::move(description__arg)),
-          __fbthrift_field_profiles(std::move(profiles__arg)),
-          __fbthrift_field_dependencies(std::move(dependencies__arg)) {
-    __isset.set(folly::index_constant<0>(), true);
-    __isset.set(folly::index_constant<1>(), true);
-    __isset.set(folly::index_constant<2>(), true);
+PlanNodeDescription::PlanNodeDescription(apache::thrift::FragileConstructor, ::std::string name__arg, ::std::int64_t id__arg, ::std::string output_var__arg, ::std::vector<::nebula::graph::cpp2::Pair> description__arg, ::std::vector<::nebula::graph::cpp2::ProfilingStats> profiles__arg, ::std::vector<::std::int64_t> dependencies__arg) :
+    name(std::move(name__arg)),
+    id(std::move(id__arg)),
+    output_var(std::move(output_var__arg)),
+    __fbthrift_field_description(std::move(description__arg)),
+    __fbthrift_field_profiles(std::move(profiles__arg)),
+    __fbthrift_field_dependencies(std::move(dependencies__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
 }
 
 
 void PlanNodeDescription::__clear() {
-    // clear all fields
-    this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->id = ::std::int64_t();
-    this->output_var = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->__fbthrift_field_description.clear();
-    this->__fbthrift_field_profiles.clear();
-    this->__fbthrift_field_dependencies.clear();
-    __isset = {};
+  // clear all fields
+  this->name = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->id = ::std::int64_t();
+  this->output_var = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->__fbthrift_field_description.clear();
+  this->__fbthrift_field_profiles.clear();
+  this->__fbthrift_field_dependencies.clear();
+  __isset = {};
 }
 
 bool PlanNodeDescription::operator==(const PlanNodeDescription& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.name, rhs.name)) {
-        return false;
-    }
-    if (!(lhs.id_ref() == rhs.id_ref())) {
-        return false;
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.output_var, rhs.output_var)) {
-        return false;
-    }
-    if (!(lhs.description_ref() == rhs.description_ref())) {
-        return false;
-    }
-    if (!(lhs.profiles_ref() == rhs.profiles_ref())) {
-        return false;
-    }
-    if (!(lhs.dependencies_ref() == rhs.dependencies_ref())) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.name, rhs.name)) {
+    return false;
+  }
+  if (!(lhs.id_ref() == rhs.id_ref())) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.output_var, rhs.output_var)) {
+    return false;
+  }
+  if (!(lhs.description_ref() == rhs.description_ref())) {
+    return false;
+  }
+  if (!(lhs.profiles_ref() == rhs.profiles_ref())) {
+    return false;
+  }
+  if (!(lhs.dependencies_ref() == rhs.dependencies_ref())) {
+    return false;
+  }
+  return true;
 }
 
-const ::std::vector<::nebula::graph::cpp2::Pair>* PlanNodeDescription::get_description()
-        const& {
-    return description_ref().has_value() ? std::addressof(__fbthrift_field_description)
-                                         : nullptr;
+const ::std::vector<::nebula::graph::cpp2::Pair>* PlanNodeDescription::get_description() const& {
+  return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
 }
 
 ::std::vector<::nebula::graph::cpp2::Pair>* PlanNodeDescription::get_description() & {
-    return description_ref().has_value() ? std::addressof(__fbthrift_field_description)
-                                         : nullptr;
+  return description_ref().has_value() ? std::addressof(__fbthrift_field_description) : nullptr;
 }
 
-const ::std::vector<::nebula::graph::cpp2::ProfilingStats>* PlanNodeDescription::get_profiles()
-        const& {
-    return profiles_ref().has_value() ? std::addressof(__fbthrift_field_profiles) : nullptr;
+const ::std::vector<::nebula::graph::cpp2::ProfilingStats>* PlanNodeDescription::get_profiles() const& {
+  return profiles_ref().has_value() ? std::addressof(__fbthrift_field_profiles) : nullptr;
 }
 
 ::std::vector<::nebula::graph::cpp2::ProfilingStats>* PlanNodeDescription::get_profiles() & {
-    return profiles_ref().has_value() ? std::addressof(__fbthrift_field_profiles) : nullptr;
+  return profiles_ref().has_value() ? std::addressof(__fbthrift_field_profiles) : nullptr;
 }
 
 const ::std::vector<::std::int64_t>* PlanNodeDescription::get_dependencies() const& {
-    return dependencies_ref().has_value() ? std::addressof(__fbthrift_field_dependencies)
-                                          : nullptr;
+  return dependencies_ref().has_value() ? std::addressof(__fbthrift_field_dependencies) : nullptr;
 }
 
 ::std::vector<::std::int64_t>* PlanNodeDescription::get_dependencies() & {
-    return dependencies_ref().has_value() ? std::addressof(__fbthrift_field_dependencies)
-                                          : nullptr;
+  return dependencies_ref().has_value() ? std::addressof(__fbthrift_field_dependencies) : nullptr;
 }
 
 
 void swap(PlanNodeDescription& a, PlanNodeDescription& b) {
-    using ::std::swap;
-    swap(a.name_ref().value(), b.name_ref().value());
-    swap(a.id_ref().value(), b.id_ref().value());
-    swap(a.output_var_ref().value(), b.output_var_ref().value());
-    swap(a.description_ref().value_unchecked(), b.description_ref().value_unchecked());
-    swap(a.profiles_ref().value_unchecked(), b.profiles_ref().value_unchecked());
-    swap(a.dependencies_ref().value_unchecked(), b.dependencies_ref().value_unchecked());
-    swap(a.__isset, b.__isset);
+  using ::std::swap;
+  swap(a.name_ref().value(), b.name_ref().value());
+  swap(a.id_ref().value(), b.id_ref().value());
+  swap(a.output_var_ref().value(), b.output_var_ref().value());
+  swap(a.description_ref().value_unchecked(), b.description_ref().value_unchecked());
+  swap(a.profiles_ref().value_unchecked(), b.profiles_ref().value_unchecked());
+  swap(a.dependencies_ref().value_unchecked(), b.dependencies_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
 }
 
 template void PlanNodeDescription::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t PlanNodeDescription::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t PlanNodeDescription::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t PlanNodeDescription::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PlanNodeDescription::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PlanNodeDescription::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void PlanNodeDescription::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t PlanNodeDescription::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t PlanNodeDescription::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t PlanNodeDescription::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PlanNodeDescription::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PlanNodeDescription::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<
-                PlanNodeDescription,
-                ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-                ::std::vector<::nebula::graph::cpp2::Pair>>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        PlanNodeDescription,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::nebula::graph::cpp2::Pair>>,
+    "inconsistent use of json option");
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<
-                PlanNodeDescription,
-                ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-                ::std::vector<::nebula::graph::cpp2::ProfilingStats>>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        PlanNodeDescription,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::nebula::graph::cpp2::ProfilingStats>>,
+    "inconsistent use of json option");
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<
-                PlanNodeDescription,
-                ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-                ::std::vector<::nebula::graph::cpp2::Pair>>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PlanNodeDescription,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::nebula::graph::cpp2::Pair>>,
+    "inconsistent use of nimble option");
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<
-                PlanNodeDescription,
-                ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-                ::std::vector<::nebula::graph::cpp2::ProfilingStats>>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PlanNodeDescription,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::nebula::graph::cpp2::ProfilingStats>>,
+    "inconsistent use of nimble option");
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::PlanDescription>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::PlanDescription>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::PlanDescription>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 PlanDescription::PlanDescription(const PlanDescription&) = default;
 PlanDescription& PlanDescription::operator=(const PlanDescription&) = default;
-PlanDescription::PlanDescription(PlanDescription&& other) noexcept
-        : plan_node_descs(std::move(other.plan_node_descs)),
-          node_index_map(std::move(other.node_index_map)),
-          format(std::move(other.format)),
-          optimize_time_in_us(std::move(other.optimize_time_in_us)) {}
+PlanDescription::PlanDescription(PlanDescription&& other) noexcept  :
+    plan_node_descs(std::move(other.plan_node_descs)),
+    node_index_map(std::move(other.node_index_map)),
+    format(std::move(other.format)),
+    optimize_time_in_us(std::move(other.optimize_time_in_us)) {
+}
 
-PlanDescription& PlanDescription::operator=(
-        FOLLY_MAYBE_UNUSED PlanDescription&& other) noexcept {
+PlanDescription& PlanDescription::operator=(FOLLY_MAYBE_UNUSED PlanDescription&& other) noexcept {
     this->plan_node_descs = std::move(other.plan_node_descs);
     this->node_index_map = std::move(other.node_index_map);
     this->format = std::move(other.format);
@@ -464,131 +435,119 @@ PlanDescription& PlanDescription::operator=(
 }
 
 
-PlanDescription::PlanDescription(
-        apache::thrift::FragileConstructor,
-        ::std::vector<::nebula::graph::cpp2::PlanNodeDescription> plan_node_descs__arg,
-        std::unordered_map<::std::int64_t, ::std::int64_t> node_index_map__arg,
-        ::std::string format__arg,
-        ::std::int32_t optimize_time_in_us__arg)
-        : plan_node_descs(std::move(plan_node_descs__arg)),
-          node_index_map(std::move(node_index_map__arg)),
-          format(std::move(format__arg)),
-          optimize_time_in_us(std::move(optimize_time_in_us__arg)) {}
+PlanDescription::PlanDescription(apache::thrift::FragileConstructor, ::std::vector<::nebula::graph::cpp2::PlanNodeDescription> plan_node_descs__arg, std::unordered_map<::std::int64_t, ::std::int64_t> node_index_map__arg, ::std::string format__arg, ::std::int32_t optimize_time_in_us__arg) :
+    plan_node_descs(std::move(plan_node_descs__arg)),
+    node_index_map(std::move(node_index_map__arg)),
+    format(std::move(format__arg)),
+    optimize_time_in_us(std::move(optimize_time_in_us__arg)) {
+}
 
 
 void PlanDescription::__clear() {
-    // clear all fields
-    this->plan_node_descs.clear();
-    this->node_index_map.clear();
-    this->format = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->optimize_time_in_us = ::std::int32_t();
+  // clear all fields
+  this->plan_node_descs.clear();
+  this->node_index_map.clear();
+  this->format = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->optimize_time_in_us = ::std::int32_t();
 }
 
 bool PlanDescription::operator==(const PlanDescription& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!(lhs.plan_node_descs_ref() == rhs.plan_node_descs_ref())) {
-        return false;
-    }
-    if (!(lhs.node_index_map_ref() == rhs.node_index_map_ref())) {
-        return false;
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.format, rhs.format)) {
-        return false;
-    }
-    if (!(lhs.optimize_time_in_us_ref() == rhs.optimize_time_in_us_ref())) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.plan_node_descs_ref() == rhs.plan_node_descs_ref())) {
+    return false;
+  }
+  if (!(lhs.node_index_map_ref() == rhs.node_index_map_ref())) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.format, rhs.format)) {
+    return false;
+  }
+  if (!(lhs.optimize_time_in_us_ref() == rhs.optimize_time_in_us_ref())) {
+    return false;
+  }
+  return true;
 }
 
-const ::std::vector<::nebula::graph::cpp2::PlanNodeDescription>&
-PlanDescription::get_plan_node_descs() const& {
-    return plan_node_descs;
+const ::std::vector<::nebula::graph::cpp2::PlanNodeDescription>& PlanDescription::get_plan_node_descs() const& {
+  return plan_node_descs;
 }
 
-::std::vector<::nebula::graph::cpp2::PlanNodeDescription>
-PlanDescription::get_plan_node_descs() && {
-    return std::move(plan_node_descs);
+::std::vector<::nebula::graph::cpp2::PlanNodeDescription> PlanDescription::get_plan_node_descs() && {
+  return std::move(plan_node_descs);
 }
 
-const std::unordered_map<::std::int64_t, ::std::int64_t>& PlanDescription::get_node_index_map()
-        const& {
-    return node_index_map;
+const std::unordered_map<::std::int64_t, ::std::int64_t>& PlanDescription::get_node_index_map() const& {
+  return node_index_map;
 }
 
 std::unordered_map<::std::int64_t, ::std::int64_t> PlanDescription::get_node_index_map() && {
-    return std::move(node_index_map);
+  return std::move(node_index_map);
 }
 
 
 void swap(PlanDescription& a, PlanDescription& b) {
-    using ::std::swap;
-    swap(a.plan_node_descs_ref().value(), b.plan_node_descs_ref().value());
-    swap(a.node_index_map_ref().value(), b.node_index_map_ref().value());
-    swap(a.format_ref().value(), b.format_ref().value());
-    swap(a.optimize_time_in_us_ref().value(), b.optimize_time_in_us_ref().value());
+  using ::std::swap;
+  swap(a.plan_node_descs_ref().value(), b.plan_node_descs_ref().value());
+  swap(a.node_index_map_ref().value(), b.node_index_map_ref().value());
+  swap(a.format_ref().value(), b.format_ref().value());
+  swap(a.optimize_time_in_us_ref().value(), b.optimize_time_in_us_ref().value());
 }
 
 template void PlanDescription::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t PlanDescription::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t PlanDescription::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t PlanDescription::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PlanDescription::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t PlanDescription::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void PlanDescription::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t PlanDescription::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t PlanDescription::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t PlanDescription::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PlanDescription::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t PlanDescription::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<
-                PlanDescription,
-                ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-                ::std::vector<::nebula::graph::cpp2::PlanNodeDescription>>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        PlanDescription,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::nebula::graph::cpp2::PlanNodeDescription>>,
+    "inconsistent use of json option");
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<
-                PlanDescription,
-                ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
-                ::std::vector<::nebula::graph::cpp2::PlanNodeDescription>>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        PlanDescription,
+        ::apache::thrift::type_class::list<::apache::thrift::type_class::structure>,
+        ::std::vector<::nebula::graph::cpp2::PlanNodeDescription>>,
+    "inconsistent use of nimble option");
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::GQLStatus>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::GQLStatus>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::GQLStatus>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 GQLStatus::GQLStatus(const GQLStatus&) = default;
 GQLStatus& GQLStatus::operator=(const GQLStatus&) = default;
-GQLStatus::GQLStatus(GQLStatus&& other) noexcept : status(std::move(other.status)) {}
+GQLStatus::GQLStatus(GQLStatus&& other) noexcept  :
+    status(std::move(other.status)) {
+}
 
 GQLStatus& GQLStatus::operator=(FOLLY_MAYBE_UNUSED GQLStatus&& other) noexcept {
     this->status = std::move(other.status);
@@ -596,92 +555,87 @@ GQLStatus& GQLStatus::operator=(FOLLY_MAYBE_UNUSED GQLStatus&& other) noexcept {
 }
 
 
-GQLStatus::GQLStatus(apache::thrift::FragileConstructor, ::std::string status__arg)
-        : status(std::move(status__arg)) {}
+GQLStatus::GQLStatus(apache::thrift::FragileConstructor, ::std::string status__arg) :
+    status(std::move(status__arg)) {
+}
 
 
 void GQLStatus::__clear() {
-    // clear all fields
-    this->status = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  // clear all fields
+  this->status = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
 }
 
 bool GQLStatus::operator==(const GQLStatus& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.status, rhs.status)) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.status, rhs.status)) {
+    return false;
+  }
+  return true;
 }
 
 bool GQLStatus::operator<(const GQLStatus& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.status, rhs.status)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.status, rhs.status);
-    }
-    return false;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.status, rhs.status)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.status, rhs.status);
+  }
+  return false;
 }
 
 
 void swap(GQLStatus& a, GQLStatus& b) {
-    using ::std::swap;
-    swap(a.status_ref().value(), b.status_ref().value());
+  using ::std::swap;
+  swap(a.status_ref().value(), b.status_ref().value());
 }
 
 template void GQLStatus::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t GQLStatus::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t GQLStatus::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t GQLStatus::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t GQLStatus::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t GQLStatus::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void GQLStatus::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t GQLStatus::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t GQLStatus::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t GQLStatus::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t GQLStatus::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t GQLStatus::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::ExecutionOutcome>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::ExecutionOutcome>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::ExecutionOutcome>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 ExecutionOutcome::ExecutionOutcome(const ExecutionOutcome&) = default;
 ExecutionOutcome& ExecutionOutcome::operator=(const ExecutionOutcome&) = default;
-ExecutionOutcome::ExecutionOutcome(ExecutionOutcome&& other) noexcept
-        : gqlStatus(std::move(other.gqlStatus)),
-          __fbthrift_field_result(std::move(other.__fbthrift_field_result)),
-          __isset(other.__isset) {}
+ExecutionOutcome::ExecutionOutcome(ExecutionOutcome&& other) noexcept  :
+    gqlStatus(std::move(other.gqlStatus)),
+    __fbthrift_field_result(std::move(other.__fbthrift_field_result)),
+    __isset(other.__isset) {
+}
 
-ExecutionOutcome& ExecutionOutcome::operator=(
-        FOLLY_MAYBE_UNUSED ExecutionOutcome&& other) noexcept {
+ExecutionOutcome& ExecutionOutcome::operator=(FOLLY_MAYBE_UNUSED ExecutionOutcome&& other) noexcept {
     this->gqlStatus = std::move(other.gqlStatus);
     this->__fbthrift_field_result = std::move(other.__fbthrift_field_result);
     __isset = other.__isset;
@@ -689,237 +643,227 @@ ExecutionOutcome& ExecutionOutcome::operator=(
 }
 
 
-ExecutionOutcome::ExecutionOutcome(apache::thrift::FragileConstructor,
-                                   nebula::client::GQLStatus gqlStatus__arg,
-                                   nebula::client::BindingTable result__arg)
-        : gqlStatus(std::move(gqlStatus__arg)),
-          __fbthrift_field_result(std::move(result__arg)) {
-    __isset.set(folly::index_constant<0>(), true);
+ExecutionOutcome::ExecutionOutcome(apache::thrift::FragileConstructor, nebula::client::GQLStatus gqlStatus__arg, nebula::client::BindingTable result__arg) :
+    gqlStatus(std::move(gqlStatus__arg)),
+    __fbthrift_field_result(std::move(result__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void ExecutionOutcome::__clear() {
-    // clear all fields
-    this->gqlStatus.__clear();
-    this->__fbthrift_field_result.__clear();
-    __isset = {};
+  // clear all fields
+  this->gqlStatus.__clear();
+  this->__fbthrift_field_result.__clear();
+  __isset = {};
 }
 
 bool ExecutionOutcome::operator==(const ExecutionOutcome& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!(lhs.gqlStatus_ref() == rhs.gqlStatus_ref())) {
-        return false;
-    }
-    if (!(lhs.result_ref() == rhs.result_ref())) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.gqlStatus_ref() == rhs.gqlStatus_ref())) {
+    return false;
+  }
+  if (!(lhs.result_ref() == rhs.result_ref())) {
+    return false;
+  }
+  return true;
 }
 
 const nebula::client::GQLStatus& ExecutionOutcome::get_gqlStatus() const& {
-    return gqlStatus;
+  return gqlStatus;
 }
 
 nebula::client::GQLStatus ExecutionOutcome::get_gqlStatus() && {
-    return std::move(gqlStatus);
+  return std::move(gqlStatus);
 }
 
 const nebula::client::BindingTable* ExecutionOutcome::get_result() const& {
-    return result_ref().has_value() ? std::addressof(__fbthrift_field_result) : nullptr;
+  return result_ref().has_value() ? std::addressof(__fbthrift_field_result) : nullptr;
 }
 
 nebula::client::BindingTable* ExecutionOutcome::get_result() & {
-    return result_ref().has_value() ? std::addressof(__fbthrift_field_result) : nullptr;
+  return result_ref().has_value() ? std::addressof(__fbthrift_field_result) : nullptr;
 }
 
 
 void swap(ExecutionOutcome& a, ExecutionOutcome& b) {
-    using ::std::swap;
-    swap(a.gqlStatus_ref().value(), b.gqlStatus_ref().value());
-    swap(a.result_ref().value_unchecked(), b.result_ref().value_unchecked());
-    swap(a.__isset, b.__isset);
+  using ::std::swap;
+  swap(a.gqlStatus_ref().value(), b.gqlStatus_ref().value());
+  swap(a.result_ref().value_unchecked(), b.result_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
 }
 
 template void ExecutionOutcome::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ExecutionOutcome::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ExecutionOutcome::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ExecutionOutcome::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ExecutionOutcome::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ExecutionOutcome::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void ExecutionOutcome::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t ExecutionOutcome::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ExecutionOutcome::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ExecutionOutcome::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ExecutionOutcome::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ExecutionOutcome::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<ExecutionOutcome,
-                                                     ::apache::thrift::type_class::structure,
-                                                     nebula::client::GQLStatus>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        ExecutionOutcome,
+        ::apache::thrift::type_class::structure,
+        nebula::client::GQLStatus>,
+    "inconsistent use of json option");
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<ExecutionOutcome,
-                                                     ::apache::thrift::type_class::structure,
-                                                     nebula::client::BindingTable>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        ExecutionOutcome,
+        ::apache::thrift::type_class::structure,
+        nebula::client::BindingTable>,
+    "inconsistent use of json option");
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<ExecutionOutcome,
-                                                       ::apache::thrift::type_class::structure,
-                                                       nebula::client::GQLStatus>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ExecutionOutcome,
+        ::apache::thrift::type_class::structure,
+        nebula::client::GQLStatus>,
+    "inconsistent use of nimble option");
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<ExecutionOutcome,
-                                                       ::apache::thrift::type_class::structure,
-                                                       nebula::client::BindingTable>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ExecutionOutcome,
+        ::apache::thrift::type_class::structure,
+        nebula::client::BindingTable>,
+    "inconsistent use of nimble option");
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::ExecutionResponse>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::ExecutionResponse>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::ExecutionResponse>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 ExecutionResponse::ExecutionResponse(const ExecutionResponse&) = default;
 ExecutionResponse& ExecutionResponse::operator=(const ExecutionResponse&) = default;
-ExecutionResponse::ExecutionResponse(ExecutionResponse&& other) noexcept
-        : executionOutcome(std::move(other.executionOutcome)),
-          latencyInUs(std::move(other.latencyInUs)) {}
+ExecutionResponse::ExecutionResponse(ExecutionResponse&& other) noexcept  :
+    executionOutcome(std::move(other.executionOutcome)),
+    latencyInUs(std::move(other.latencyInUs)) {
+}
 
-ExecutionResponse& ExecutionResponse::operator=(
-        FOLLY_MAYBE_UNUSED ExecutionResponse&& other) noexcept {
+ExecutionResponse& ExecutionResponse::operator=(FOLLY_MAYBE_UNUSED ExecutionResponse&& other) noexcept {
     this->executionOutcome = std::move(other.executionOutcome);
     this->latencyInUs = std::move(other.latencyInUs);
     return *this;
 }
 
 
-ExecutionResponse::ExecutionResponse(apache::thrift::FragileConstructor,
-                                     nebula::client::ExecutionOutcome executionOutcome__arg,
-                                     ::std::int64_t latencyInUs__arg)
-        : executionOutcome(std::move(executionOutcome__arg)),
-          latencyInUs(std::move(latencyInUs__arg)) {}
+ExecutionResponse::ExecutionResponse(apache::thrift::FragileConstructor, nebula::client::ExecutionOutcome executionOutcome__arg, ::std::int64_t latencyInUs__arg) :
+    executionOutcome(std::move(executionOutcome__arg)),
+    latencyInUs(std::move(latencyInUs__arg)) {
+}
 
 
 void ExecutionResponse::__clear() {
-    // clear all fields
-    this->executionOutcome.__clear();
-    this->latencyInUs = ::std::int64_t();
+  // clear all fields
+  this->executionOutcome.__clear();
+  this->latencyInUs = ::std::int64_t();
 }
 
 bool ExecutionResponse::operator==(const ExecutionResponse& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!(lhs.executionOutcome_ref() == rhs.executionOutcome_ref())) {
-        return false;
-    }
-    if (!(lhs.latencyInUs_ref() == rhs.latencyInUs_ref())) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.executionOutcome_ref() == rhs.executionOutcome_ref())) {
+    return false;
+  }
+  if (!(lhs.latencyInUs_ref() == rhs.latencyInUs_ref())) {
+    return false;
+  }
+  return true;
 }
 
 const nebula::client::ExecutionOutcome& ExecutionResponse::get_executionOutcome() const& {
-    return executionOutcome;
+  return executionOutcome;
 }
 
 nebula::client::ExecutionOutcome ExecutionResponse::get_executionOutcome() && {
-    return std::move(executionOutcome);
+  return std::move(executionOutcome);
 }
 
 
 void swap(ExecutionResponse& a, ExecutionResponse& b) {
-    using ::std::swap;
-    swap(a.executionOutcome_ref().value(), b.executionOutcome_ref().value());
-    swap(a.latencyInUs_ref().value(), b.latencyInUs_ref().value());
+  using ::std::swap;
+  swap(a.executionOutcome_ref().value(), b.executionOutcome_ref().value());
+  swap(a.latencyInUs_ref().value(), b.latencyInUs_ref().value());
 }
 
 template void ExecutionResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t ExecutionResponse::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t ExecutionResponse::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t ExecutionResponse::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ExecutionResponse::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t ExecutionResponse::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void ExecutionResponse::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t ExecutionResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t ExecutionResponse::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t ExecutionResponse::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ExecutionResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t ExecutionResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<ExecutionResponse,
-                                                     ::apache::thrift::type_class::structure,
-                                                     nebula::client::ExecutionOutcome>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        ExecutionResponse,
+        ::apache::thrift::type_class::structure,
+        nebula::client::ExecutionOutcome>,
+    "inconsistent use of json option");
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<ExecutionResponse,
-                                                       ::apache::thrift::type_class::structure,
-                                                       nebula::client::ExecutionOutcome>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        ExecutionResponse,
+        ::apache::thrift::type_class::structure,
+        nebula::client::ExecutionOutcome>,
+    "inconsistent use of nimble option");
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::AuthReq>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::AuthReq>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::AuthReq>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 AuthReq::AuthReq(const AuthReq&) = default;
 AuthReq& AuthReq::operator=(const AuthReq&) = default;
-AuthReq::AuthReq(AuthReq&& other) noexcept
-        : username(std::move(other.username)),
-          password(std::move(other.password)),
-          client_type(std::move(other.client_type)),
-          client_version(std::move(other.client_version)) {}
+AuthReq::AuthReq(AuthReq&& other) noexcept  :
+    username(std::move(other.username)),
+    password(std::move(other.password)),
+    client_type(std::move(other.client_type)),
+    client_version(std::move(other.client_version)) {
+}
 
 AuthReq& AuthReq::operator=(FOLLY_MAYBE_UNUSED AuthReq&& other) noexcept {
     this->username = std::move(other.username);
@@ -930,122 +874,112 @@ AuthReq& AuthReq::operator=(FOLLY_MAYBE_UNUSED AuthReq&& other) noexcept {
 }
 
 
-AuthReq::AuthReq(apache::thrift::FragileConstructor,
-                 ::std::string username__arg,
-                 ::std::string password__arg,
-                 ::std::string client_type__arg,
-                 ::std::string client_version__arg)
-        : username(std::move(username__arg)),
-          password(std::move(password__arg)),
-          client_type(std::move(client_type__arg)),
-          client_version(std::move(client_version__arg)) {}
+AuthReq::AuthReq(apache::thrift::FragileConstructor, ::std::string username__arg, ::std::string password__arg, ::std::string client_type__arg, ::std::string client_version__arg) :
+    username(std::move(username__arg)),
+    password(std::move(password__arg)),
+    client_type(std::move(client_type__arg)),
+    client_version(std::move(client_version__arg)) {
+}
 
 
 void AuthReq::__clear() {
-    // clear all fields
-    this->username = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->password = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->client_type = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
-    this->client_version = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  // clear all fields
+  this->username = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->password = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->client_type = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
+  this->client_version = apache::thrift::StringTraits<std::string>::fromStringLiteral("");
 }
 
 bool AuthReq::operator==(const AuthReq& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.username, rhs.username)) {
-        return false;
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.password, rhs.password)) {
-        return false;
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_type, rhs.client_type)) {
-        return false;
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_version,
-                                                            rhs.client_version)) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.username, rhs.username)) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.password, rhs.password)) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_type, rhs.client_type)) {
+    return false;
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_version, rhs.client_version)) {
+    return false;
+  }
+  return true;
 }
 
 bool AuthReq::operator<(const AuthReq& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.username, rhs.username)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.username, rhs.username);
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.password, rhs.password)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.password, rhs.password);
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_type, rhs.client_type)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.client_type,
-                                                                 rhs.client_type);
-    }
-    if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_version,
-                                                            rhs.client_version)) {
-        return apache::thrift::StringTraits<std::string>::isLess(lhs.client_version,
-                                                                 rhs.client_version);
-    }
-    return false;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.username, rhs.username)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.username, rhs.username);
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.password, rhs.password)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.password, rhs.password);
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_type, rhs.client_type)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.client_type, rhs.client_type);
+  }
+  if (!apache::thrift::StringTraits<std::string>::isEqual(lhs.client_version, rhs.client_version)) {
+    return apache::thrift::StringTraits<std::string>::isLess(lhs.client_version, rhs.client_version);
+  }
+  return false;
 }
 
 
 void swap(AuthReq& a, AuthReq& b) {
-    using ::std::swap;
-    swap(a.username_ref().value(), b.username_ref().value());
-    swap(a.password_ref().value(), b.password_ref().value());
-    swap(a.client_type_ref().value(), b.client_type_ref().value());
-    swap(a.client_version_ref().value(), b.client_version_ref().value());
+  using ::std::swap;
+  swap(a.username_ref().value(), b.username_ref().value());
+  swap(a.password_ref().value(), b.password_ref().value());
+  swap(a.client_type_ref().value(), b.client_type_ref().value());
+  swap(a.client_version_ref().value(), b.client_version_ref().value());
 }
 
 template void AuthReq::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t AuthReq::write<>(apache::thrift::BinaryProtocolWriter*) const;
 template uint32_t AuthReq::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t AuthReq::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AuthReq::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void AuthReq::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t AuthReq::write<>(apache::thrift::CompactProtocolWriter*) const;
 template uint32_t AuthReq::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AuthReq::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AuthReq::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+
+}}} // nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
 namespace detail {
 
 void TccStructTraits<::nebula::graph::cpp2::AuthResponse>::translateFieldName(
-        folly::StringPiece _fname,
-        int16_t& fid,
-        apache::thrift::protocol::TType& _ftype) noexcept {
-    using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::AuthResponse>;
-    static const st::translate_field_name_table table{data::fields_size,
-                                                      data::fields_names.data(),
-                                                      data::fields_ids.data(),
-                                                      data::fields_types.data()};
-    st::translate_field_name(_fname, fid, _ftype, table);
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::graph::cpp2::AuthResponse>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
 }
 
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 AuthResponse::AuthResponse(const AuthResponse&) = default;
 AuthResponse& AuthResponse::operator=(const AuthResponse&) = default;
-AuthResponse::AuthResponse(AuthResponse&& other) noexcept
-        : gqlStatus(std::move(other.gqlStatus)),
-          __fbthrift_field_identifier(std::move(other.__fbthrift_field_identifier)),
-          __isset(other.__isset) {}
+AuthResponse::AuthResponse(AuthResponse&& other) noexcept  :
+    gqlStatus(std::move(other.gqlStatus)),
+    __fbthrift_field_identifier(std::move(other.__fbthrift_field_identifier)),
+    __isset(other.__isset) {
+}
 
 AuthResponse& AuthResponse::operator=(FOLLY_MAYBE_UNUSED AuthResponse&& other) noexcept {
     this->gqlStatus = std::move(other.gqlStatus);
@@ -1055,99 +989,88 @@ AuthResponse& AuthResponse::operator=(FOLLY_MAYBE_UNUSED AuthResponse&& other) n
 }
 
 
-AuthResponse::AuthResponse(apache::thrift::FragileConstructor,
-                           nebula::client::GQLStatus gqlStatus__arg,
-                           ::std::int64_t identifier__arg)
-        : gqlStatus(std::move(gqlStatus__arg)),
-          __fbthrift_field_identifier(std::move(identifier__arg)) {
-    __isset.set(folly::index_constant<0>(), true);
+AuthResponse::AuthResponse(apache::thrift::FragileConstructor, nebula::client::GQLStatus gqlStatus__arg, ::std::int64_t identifier__arg) :
+    gqlStatus(std::move(gqlStatus__arg)),
+    __fbthrift_field_identifier(std::move(identifier__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
 }
 
 
 void AuthResponse::__clear() {
-    // clear all fields
-    this->gqlStatus.__clear();
-    this->__fbthrift_field_identifier = ::std::int64_t();
-    __isset = {};
+  // clear all fields
+  this->gqlStatus.__clear();
+  this->__fbthrift_field_identifier = ::std::int64_t();
+  __isset = {};
 }
 
 bool AuthResponse::operator==(const AuthResponse& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!(lhs.gqlStatus_ref() == rhs.gqlStatus_ref())) {
-        return false;
-    }
-    if (!(lhs.identifier_ref() == rhs.identifier_ref())) {
-        return false;
-    }
-    return true;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.gqlStatus_ref() == rhs.gqlStatus_ref())) {
+    return false;
+  }
+  if (!(lhs.identifier_ref() == rhs.identifier_ref())) {
+    return false;
+  }
+  return true;
 }
 
 bool AuthResponse::operator<(const AuthResponse& rhs) const {
-    (void)rhs;
-    auto& lhs = *this;
-    (void)lhs;
-    if (!(lhs.gqlStatus_ref() == rhs.gqlStatus_ref())) {
-        return lhs.gqlStatus_ref() < rhs.gqlStatus_ref();
-    }
-    if (!(lhs.identifier_ref() == rhs.identifier_ref())) {
-        return lhs.identifier_ref() < rhs.identifier_ref();
-    }
-    return false;
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.gqlStatus_ref() == rhs.gqlStatus_ref())) {
+    return lhs.gqlStatus_ref() < rhs.gqlStatus_ref();
+  }
+  if (!(lhs.identifier_ref() == rhs.identifier_ref())) {
+    return lhs.identifier_ref() < rhs.identifier_ref();
+  }
+  return false;
 }
 
 const nebula::client::GQLStatus& AuthResponse::get_gqlStatus() const& {
-    return gqlStatus;
+  return gqlStatus;
 }
 
 nebula::client::GQLStatus AuthResponse::get_gqlStatus() && {
-    return std::move(gqlStatus);
+  return std::move(gqlStatus);
 }
 
 
 void swap(AuthResponse& a, AuthResponse& b) {
-    using ::std::swap;
-    swap(a.gqlStatus_ref().value(), b.gqlStatus_ref().value());
-    swap(a.identifier_ref().value_unchecked(), b.identifier_ref().value_unchecked());
-    swap(a.__isset, b.__isset);
+  using ::std::swap;
+  swap(a.gqlStatus_ref().value(), b.gqlStatus_ref().value());
+  swap(a.identifier_ref().value_unchecked(), b.identifier_ref().value_unchecked());
+  swap(a.__isset, b.__isset);
 }
 
 template void AuthResponse::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
 template uint32_t AuthResponse::write<>(apache::thrift::BinaryProtocolWriter*) const;
-template uint32_t AuthResponse::serializedSize<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
-template uint32_t AuthResponse::serializedSizeZC<>(
-        apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AuthResponse::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t AuthResponse::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
 template void AuthResponse::readNoXfer<>(apache::thrift::CompactProtocolReader*);
 template uint32_t AuthResponse::write<>(apache::thrift::CompactProtocolWriter*) const;
-template uint32_t AuthResponse::serializedSize<>(
-        apache::thrift::CompactProtocolWriter const*) const;
-template uint32_t AuthResponse::serializedSizeZC<>(
-        apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AuthResponse::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t AuthResponse::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_json<AuthResponse,
-                                                     ::apache::thrift::type_class::structure,
-                                                     nebula::client::GQLStatus>,
-        "inconsistent use of json option");
+    ::apache::thrift::detail::st::gen_check_json<
+        AuthResponse,
+        ::apache::thrift::type_class::structure,
+        nebula::client::GQLStatus>,
+    "inconsistent use of json option");
 
 static_assert(
-        ::apache::thrift::detail::st::gen_check_nimble<AuthResponse,
-                                                       ::apache::thrift::type_class::structure,
-                                                       nebula::client::GQLStatus>,
-        "inconsistent use of nimble option");
+    ::apache::thrift::detail::st::gen_check_nimble<
+        AuthResponse,
+        ::apache::thrift::type_class::structure,
+        nebula::client::GQLStatus>,
+    "inconsistent use of nimble option");
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
-namespace {
-FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {}
-}  // namespace
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+namespace nebula { namespace graph { namespace cpp2 { namespace {
+FOLLY_MAYBE_UNUSED FOLLY_ERASE void validateAdapters() {
+}
+}}}} // nebula::graph::cpp2

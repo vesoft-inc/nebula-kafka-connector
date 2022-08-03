@@ -1672,11 +1672,11 @@ void BindingTable::readNoXfer(Protocol_* iprot) {
           apache::thrift::protocol::T_LIST))) {
     goto _loop;
   }
-_readField_records:
+_readField_columnNames:
   {
     _readState.beforeSubobject(iprot);
-    this->__fbthrift_field_records = std::pmr::deque<nebula::client::RawRecord>();
-    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, std::pmr::deque<nebula::client::RawRecord>>::readWithContext(*iprot, this->__fbthrift_field_records, _readState);
+    this->__fbthrift_field_columnNames = std::pmr::vector<::std::string>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::pmr::vector<::std::string>>::readWithContext(*iprot, this->__fbthrift_field_columnNames, _readState);
     _readState.afterSubobject(iprot);
     
   }
@@ -1685,6 +1685,23 @@ _readField_records:
   if (UNLIKELY(!_readState.advanceToNextField(
           iprot,
           1,
+          2,
+          apache::thrift::protocol::T_LIST))) {
+    goto _loop;
+  }
+_readField_records:
+  {
+    _readState.beforeSubobject(iprot);
+    this->__fbthrift_field_records = std::pmr::deque<nebula::client::RawRecord>();
+    ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, std::pmr::deque<nebula::client::RawRecord>>::readWithContext(*iprot, this->__fbthrift_field_records, _readState);
+    _readState.afterSubobject(iprot);
+    
+  }
+ this->__isset.set(1, true);
+
+  if (UNLIKELY(!_readState.advanceToNextField(
+          iprot,
+          2,
           0,
           apache::thrift::protocol::T_STOP))) {
     goto _loop;
@@ -1708,6 +1725,14 @@ _loop:
     case 1:
     {
       if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
+        goto _readField_columnNames;
+      } else {
+        goto _skip;
+      }
+    }
+    case 2:
+    {
+      if (LIKELY(_readState.isCompatibleWithType(iprot, apache::thrift::protocol::T_LIST))) {
         goto _readField_records;
       } else {
         goto _skip;
@@ -1729,7 +1754,11 @@ uint32_t BindingTable::serializedSize(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("BindingTable");
   {
-    xfer += prot_->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 1);
+    xfer += prot_->serializedFieldSize("columnNames", apache::thrift::protocol::T_LIST, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::pmr::vector<::std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_columnNames);
+  }
+  {
+    xfer += prot_->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, std::pmr::deque<nebula::client::RawRecord>>::serializedSize<false>(*prot_, this->__fbthrift_field_records);
   }
   xfer += prot_->serializedSizeStop();
@@ -1741,7 +1770,11 @@ uint32_t BindingTable::serializedSizeZC(Protocol_ const* prot_) const {
   uint32_t xfer = 0;
   xfer += prot_->serializedStructSize("BindingTable");
   {
-    xfer += prot_->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 1);
+    xfer += prot_->serializedFieldSize("columnNames", apache::thrift::protocol::T_LIST, 1);
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::pmr::vector<::std::string>>::serializedSize<false>(*prot_, this->__fbthrift_field_columnNames);
+  }
+  {
+    xfer += prot_->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 2);
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, std::pmr::deque<nebula::client::RawRecord>>::serializedSize<false>(*prot_, this->__fbthrift_field_records);
   }
   xfer += prot_->serializedSizeStop();
@@ -1755,7 +1788,14 @@ uint32_t BindingTable::write(Protocol_* prot_) const {
   bool previousFieldHasValue = true;
   {
     constexpr int16_t kPrevFieldId = 0;
-    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 1, kPrevFieldId>(*prot_, "records", previousFieldHasValue);
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 1, kPrevFieldId>(*prot_, "columnNames", previousFieldHasValue);
+    previousFieldHasValue = true;
+    xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::binary>, std::pmr::vector<::std::string>>::write(*prot_, this->__fbthrift_field_columnNames);
+    xfer += prot_->writeFieldEnd();
+  }
+  {
+    constexpr int16_t kPrevFieldId = 1;
+    xfer += ::apache::thrift::detail::writeFieldBegin<apache::thrift::protocol::T_LIST, 2, kPrevFieldId>(*prot_, "records", previousFieldHasValue);
     previousFieldHasValue = true;
     xfer += ::apache::thrift::detail::pm::protocol_methods<::apache::thrift::type_class::list<::apache::thrift::type_class::structure>, std::pmr::deque<nebula::client::RawRecord>>::write(*prot_, this->__fbthrift_field_records);
     xfer += prot_->writeFieldEnd();

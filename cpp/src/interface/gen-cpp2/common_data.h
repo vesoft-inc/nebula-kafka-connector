@@ -10,104 +10,90 @@
 
 #include "common_types.h"
 
-namespace apache {
-namespace thrift {
+namespace apache { namespace thrift {
 
-template <>
-struct TEnumDataStorage<::nebula::cpp2::ValueType> {
-    using type = ::nebula::cpp2::ValueType;
-    static constexpr const std::size_t size = 13;
-    static const std::array<type, size> values;
-    static const std::array<folly::StringPiece, size> names;
+template <> struct TEnumDataStorage<::nebula::cpp2::ValueType> {
+  using type = ::nebula::cpp2::ValueType;
+  static constexpr const std::size_t size = 13;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
-template <>
-struct TEnumDataStorage<::nebula::cpp2::ErrorCode> {
-    using type = ::nebula::cpp2::ErrorCode;
-    static constexpr const std::size_t size = 170;
-    static const std::array<type, size> values;
-    static const std::array<folly::StringPiece, size> names;
+template <> struct TEnumDataStorage<::nebula::cpp2::ErrorCode> {
+  using type = ::nebula::cpp2::ErrorCode;
+  static constexpr const std::size_t size = 170;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
-template <>
-struct TEnumDataStorage<::nebula::cpp2::Value::Type> {
-    using type = ::nebula::cpp2::Value::Type;
-    static constexpr const std::size_t size = 12;
-    static const std::array<type, size> values;
-    static const std::array<folly::StringPiece, size> names;
+template <> struct TEnumDataStorage<::nebula::cpp2::Value::Type> {
+  using type = ::nebula::cpp2::Value::Type;
+  static constexpr const std::size_t size = 12;
+  static const std::array<type, size> values;
+  static const std::array<folly::StringPiece, size> names;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::NList> {
-    static constexpr const std::size_t fields_size = 1;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::NList> {
+  static constexpr const std::size_t fields_size = 1;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::NMap> {
-    static constexpr const std::size_t fields_size = 0;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::NMap> {
+  static constexpr const std::size_t fields_size = 0;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::Node> {
-    static constexpr const std::size_t fields_size = 3;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::Node> {
+  static constexpr const std::size_t fields_size = 3;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::Edge> {
-    static constexpr const std::size_t fields_size = 5;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::Edge> {
+  static constexpr const std::size_t fields_size = 5;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::Value> {
-    static constexpr const std::size_t fields_size = 12;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::Value> {
+  static constexpr const std::size_t fields_size = 12;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::FieldType> {
-    static constexpr const std::size_t fields_size = 2;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::FieldType> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::RecordType> {
-    static constexpr const std::size_t fields_size = 2;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::RecordType> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::RawRecord> {
-    static constexpr const std::size_t fields_size = 1;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::RawRecord> {
+  static constexpr const std::size_t fields_size = 1;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-template <>
-struct TStructDataStorage<::nebula::cpp2::BindingTable> {
-    static constexpr const std::size_t fields_size = 1;
-    static const std::array<folly::StringPiece, fields_size> fields_names;
-    static const std::array<int16_t, fields_size> fields_ids;
-    static const std::array<protocol::TType, fields_size> fields_types;
+template <> struct TStructDataStorage<::nebula::cpp2::BindingTable> {
+  static constexpr const std::size_t fields_size = 2;
+  static const std::array<folly::StringPiece, fields_size> fields_names;
+  static const std::array<int16_t, fields_size> fields_ids;
+  static const std::array<protocol::TType, fields_size> fields_types;
 };
 
-}  // namespace thrift
-}  // namespace apache
+}} // apache::thrift

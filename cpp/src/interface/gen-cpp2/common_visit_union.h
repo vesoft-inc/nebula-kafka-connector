@@ -6,9 +6,8 @@
  */
 #pragma once
 
-#include <thrift/lib/cpp2/visitation/visit_union.h>
-
 #include "common_metadata.h"
+#include <thrift/lib/cpp2/visitation/visit_union.h>
 
 namespace apache {
 namespace thrift {
@@ -16,38 +15,38 @@ namespace detail {
 
 template <>
 struct VisitUnion<::nebula::cpp2::Value> {
-    template <typename F, typename T>
-    void operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
-        using Union = std::remove_reference_t<T>;
-        switch (t.getType()) {
-            case Union::Type::boolVal:
-                return f(0, *static_cast<T&&>(t).boolVal_ref());
-            case Union::Type::int8Val:
-                return f(1, *static_cast<T&&>(t).int8Val_ref());
-            case Union::Type::int16Val:
-                return f(2, *static_cast<T&&>(t).int16Val_ref());
-            case Union::Type::int32Val:
-                return f(3, *static_cast<T&&>(t).int32Val_ref());
-            case Union::Type::int64Val:
-                return f(4, *static_cast<T&&>(t).int64Val_ref());
-            case Union::Type::floatVal:
-                return f(5, *static_cast<T&&>(t).floatVal_ref());
-            case Union::Type::doubleVal:
-                return f(6, *static_cast<T&&>(t).doubleVal_ref());
-            case Union::Type::stringVal:
-                return f(7, *static_cast<T&&>(t).stringVal_ref());
-            case Union::Type::listVal:
-                return f(8, *static_cast<T&&>(t).listVal_ref());
-            case Union::Type::mapVal:
-                return f(9, *static_cast<T&&>(t).mapVal_ref());
-            case Union::Type::nodeVal:
-                return f(10, *static_cast<T&&>(t).nodeVal_ref());
-            case Union::Type::edgeVal:
-                return f(11, *static_cast<T&&>(t).edgeVal_ref());
-            case Union::Type::__EMPTY__:;
-        }
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, T&& t) const {
+    using Union = std::remove_reference_t<T>;
+    switch (t.getType()) {
+    case Union::Type::boolVal:
+      return f(0, *static_cast<T&&>(t).boolVal_ref());
+    case Union::Type::int8Val:
+      return f(1, *static_cast<T&&>(t).int8Val_ref());
+    case Union::Type::int16Val:
+      return f(2, *static_cast<T&&>(t).int16Val_ref());
+    case Union::Type::int32Val:
+      return f(3, *static_cast<T&&>(t).int32Val_ref());
+    case Union::Type::int64Val:
+      return f(4, *static_cast<T&&>(t).int64Val_ref());
+    case Union::Type::floatVal:
+      return f(5, *static_cast<T&&>(t).floatVal_ref());
+    case Union::Type::doubleVal:
+      return f(6, *static_cast<T&&>(t).doubleVal_ref());
+    case Union::Type::stringVal:
+      return f(7, *static_cast<T&&>(t).stringVal_ref());
+    case Union::Type::listVal:
+      return f(8, *static_cast<T&&>(t).listVal_ref());
+    case Union::Type::mapVal:
+      return f(9, *static_cast<T&&>(t).mapVal_ref());
+    case Union::Type::nodeVal:
+      return f(10, *static_cast<T&&>(t).nodeVal_ref());
+    case Union::Type::edgeVal:
+      return f(11, *static_cast<T&&>(t).edgeVal_ref());
+    case Union::Type::__EMPTY__: ;
     }
+  }
 };
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace detail
+} // namespace thrift
+} // namespace apache

@@ -6,319 +6,234 @@
  */
 
 #include "GraphService.h"
-
-#include <thrift/lib/cpp2/gen/service_cpp.h>
-
 #include "GraphService.tcc"
 #include "graph_metadata.h"
+#include <thrift/lib/cpp2/gen/service_cpp.h>
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 std::unique_ptr<apache::thrift::AsyncProcessor> GraphServiceSvIf::getProcessor() {
-    return std::make_unique<GraphServiceAsyncProcessor>(this);
+  return std::make_unique<GraphServiceAsyncProcessor>(this);
 }
 
 GraphServiceSvIf::CreateMethodMetadataResult GraphServiceSvIf::createMethodMetadata() {
-    return ::apache::thrift::detail::ap::createMethodMetadataMap<GraphServiceAsyncProcessor>();
+  return ::apache::thrift::detail::ap::createMethodMetadataMap<GraphServiceAsyncProcessor>();
 }
 
 
-void GraphServiceSvIf::authenticate(nebula::client::AuthResponse& /*_return*/,
-                                    const nebula::client::AuthReq& /*authReq*/) {
-    apache::thrift::detail::si::throw_app_exn_unimplemented("authenticate");
+void GraphServiceSvIf::authenticate(nebula::client::AuthResponse& /*_return*/, const nebula::client::AuthReq& /*authReq*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("authenticate");
 }
 
-folly::SemiFuture<nebula::client::AuthResponse> GraphServiceSvIf::semifuture_authenticate(
-        const nebula::client::AuthReq& p_authReq) {
-    auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-    __fbthrift_invocation_authenticate.compare_exchange_strong(
-            expected,
-            apache::thrift::detail::si::InvocationType::Sync,
-            std::memory_order_relaxed);
-    nebula::client::AuthResponse ret;
-    authenticate(ret, p_authReq);
-    return folly::makeSemiFuture(std::move(ret));
+folly::SemiFuture<nebula::client::AuthResponse> GraphServiceSvIf::semifuture_authenticate(const nebula::client::AuthReq& p_authReq) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_authenticate.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  nebula::client::AuthResponse ret;
+  authenticate(ret, p_authReq);
+  return folly::makeSemiFuture(std::move(ret));
 }
 
-folly::Future<nebula::client::AuthResponse> GraphServiceSvIf::future_authenticate(
-        const nebula::client::AuthReq& p_authReq) {
-    auto expected{apache::thrift::detail::si::InvocationType::Future};
-    __fbthrift_invocation_authenticate.compare_exchange_strong(
-            expected,
-            apache::thrift::detail::si::InvocationType::SemiFuture,
-            std::memory_order_relaxed);
-    return apache::thrift::detail::si::future(semifuture_authenticate(p_authReq),
-                                              getInternalKeepAlive());
+folly::Future<nebula::client::AuthResponse> GraphServiceSvIf::future_authenticate(const nebula::client::AuthReq& p_authReq) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_authenticate.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(semifuture_authenticate(p_authReq), getInternalKeepAlive());
 }
 
-void GraphServiceSvIf::async_tm_authenticate(
-        std::unique_ptr<apache::thrift::HandlerCallback<nebula::client::AuthResponse>> callback,
-        const nebula::client::AuthReq& p_authReq) {
-    // It's possible the coroutine versions will delegate to a future-based
-    // version. If that happens, we need the RequestParams arguments to be
-    // available to the future through the thread-local backchannel, so we create
-    // a RAII object that sets up RequestParams and clears them on destruction.
-    apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
-    auto invocationType = __fbthrift_invocation_authenticate.load(std::memory_order_relaxed);
-    try {
-        switch (invocationType) {
-            case apache::thrift::detail::si::InvocationType::AsyncTm: {
-                __fbthrift_invocation_authenticate.compare_exchange_strong(
-                        invocationType,
-                        apache::thrift::detail::si::InvocationType::Future,
-                        std::memory_order_relaxed);
-                FOLLY_FALLTHROUGH;
-            }
-            case apache::thrift::detail::si::InvocationType::Future: {
-                auto fut = future_authenticate(p_authReq);
-                apache::thrift::detail::si::async_tm_future(std::move(callback),
-                                                            std::move(fut));
-                return;
-            }
-            case apache::thrift::detail::si::InvocationType::SemiFuture: {
-                auto fut = semifuture_authenticate(p_authReq);
-                apache::thrift::detail::si::async_tm_semifuture(std::move(callback),
-                                                                std::move(fut));
-                return;
-            }
-            case apache::thrift::detail::si::InvocationType::Sync: {
-                nebula::client::AuthResponse _return;
-                authenticate(_return, p_authReq);
-                callback->result(_return);
-                return;
-            }
-            default: {
-                folly::assume_unreachable();
-            }
-        }
-    } catch (...) {
-        callback->exception(std::current_exception());
+void GraphServiceSvIf::async_tm_authenticate(std::unique_ptr<apache::thrift::HandlerCallback<nebula::client::AuthResponse>> callback, const nebula::client::AuthReq& p_authReq) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+  auto invocationType = __fbthrift_invocation_authenticate.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm:
+      {
+        __fbthrift_invocation_authenticate.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        FOLLY_FALLTHROUGH;
+      }
+      case apache::thrift::detail::si::InvocationType::Future:
+      {
+        auto fut = future_authenticate(p_authReq);
+        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture:
+      {
+        auto fut = semifuture_authenticate(p_authReq);
+        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Sync:
+      {
+        nebula::client::AuthResponse _return;
+        authenticate(_return, p_authReq);
+        callback->result(_return);
+        return;
+      }
+      default:
+      {
+        folly::assume_unreachable();
+      }
     }
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
 }
 
 void GraphServiceSvIf::signout(::std::int64_t /*sessionId*/) {
-    apache::thrift::detail::si::throw_app_exn_unimplemented("signout");
+  apache::thrift::detail::si::throw_app_exn_unimplemented("signout");
 }
 
-folly::SemiFuture<folly::Unit> GraphServiceSvIf::semifuture_signout(
-        ::std::int64_t p_sessionId) {
-    auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-    __fbthrift_invocation_signout.compare_exchange_strong(
-            expected,
-            apache::thrift::detail::si::InvocationType::Sync,
-            std::memory_order_relaxed);
-    signout(p_sessionId);
-    return folly::makeSemiFuture();
+folly::SemiFuture<folly::Unit> GraphServiceSvIf::semifuture_signout(::std::int64_t p_sessionId) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_signout.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  signout(p_sessionId);
+  return folly::makeSemiFuture();
 }
 
 folly::Future<folly::Unit> GraphServiceSvIf::future_signout(::std::int64_t p_sessionId) {
-    auto expected{apache::thrift::detail::si::InvocationType::Future};
-    __fbthrift_invocation_signout.compare_exchange_strong(
-            expected,
-            apache::thrift::detail::si::InvocationType::SemiFuture,
-            std::memory_order_relaxed);
-    return apache::thrift::detail::si::future(semifuture_signout(p_sessionId),
-                                              getInternalKeepAlive());
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_signout.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(semifuture_signout(p_sessionId), getInternalKeepAlive());
 }
 
-void GraphServiceSvIf::async_tm_signout(
-        std::unique_ptr<apache::thrift::HandlerCallbackBase> callback,
-        ::std::int64_t p_sessionId) {
-    // It's possible the coroutine versions will delegate to a future-based
-    // version. If that happens, we need the RequestParams arguments to be
-    // available to the future through the thread-local backchannel, so we create
-    // a RAII object that sets up RequestParams and clears them on destruction.
-    apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
-    auto invocationType = __fbthrift_invocation_signout.load(std::memory_order_relaxed);
-    try {
-        switch (invocationType) {
-            case apache::thrift::detail::si::InvocationType::AsyncTm: {
-                __fbthrift_invocation_signout.compare_exchange_strong(
-                        invocationType,
-                        apache::thrift::detail::si::InvocationType::Future,
-                        std::memory_order_relaxed);
-                FOLLY_FALLTHROUGH;
-            }
-            case apache::thrift::detail::si::InvocationType::Future: {
-                auto fut = future_signout(p_sessionId);
-                apache::thrift::detail::si::async_tm_future_oneway(std::move(callback),
-                                                                   std::move(fut));
-                return;
-            }
-            case apache::thrift::detail::si::InvocationType::SemiFuture: {
-                auto fut = semifuture_signout(p_sessionId);
-                apache::thrift::detail::si::async_tm_semifuture_oneway(std::move(callback),
-                                                                       std::move(fut));
-                return;
-            }
-            case apache::thrift::detail::si::InvocationType::Sync: {
-                signout(p_sessionId);
-                return;
-            }
-            default: {
-                folly::assume_unreachable();
-            }
-        }
-    } catch (...) {
-        callback->exception(std::current_exception());
+void GraphServiceSvIf::async_tm_signout(std::unique_ptr<apache::thrift::HandlerCallbackBase> callback, ::std::int64_t p_sessionId) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+  auto invocationType = __fbthrift_invocation_signout.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm:
+      {
+        __fbthrift_invocation_signout.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        FOLLY_FALLTHROUGH;
+      }
+      case apache::thrift::detail::si::InvocationType::Future:
+      {
+        auto fut = future_signout(p_sessionId);
+        apache::thrift::detail::si::async_tm_future_oneway(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture:
+      {
+        auto fut = semifuture_signout(p_sessionId);
+        apache::thrift::detail::si::async_tm_semifuture_oneway(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Sync:
+      {
+        signout(p_sessionId);
+        return;
+      }
+      default:
+      {
+        folly::assume_unreachable();
+      }
     }
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
 }
 
-void GraphServiceSvIf::execute(nebula::client::ExecutionResponse& /*_return*/,
-                               ::std::int64_t /*sessionId*/,
-                               const ::std::string& /*stmt*/) {
-    apache::thrift::detail::si::throw_app_exn_unimplemented("execute");
+void GraphServiceSvIf::execute(nebula::client::ExecutionResponse& /*_return*/, ::std::int64_t /*sessionId*/, const ::std::string& /*stmt*/) {
+  apache::thrift::detail::si::throw_app_exn_unimplemented("execute");
 }
 
-folly::SemiFuture<nebula::client::ExecutionResponse> GraphServiceSvIf::semifuture_execute(
-        ::std::int64_t p_sessionId, const ::std::string& p_stmt) {
-    auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
-    __fbthrift_invocation_execute.compare_exchange_strong(
-            expected,
-            apache::thrift::detail::si::InvocationType::Sync,
-            std::memory_order_relaxed);
-    nebula::client::ExecutionResponse ret;
-    execute(ret, p_sessionId, p_stmt);
-    return folly::makeSemiFuture(std::move(ret));
+folly::SemiFuture<nebula::client::ExecutionResponse> GraphServiceSvIf::semifuture_execute(::std::int64_t p_sessionId, const ::std::string& p_stmt) {
+  auto expected{apache::thrift::detail::si::InvocationType::SemiFuture};
+  __fbthrift_invocation_execute.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::Sync, std::memory_order_relaxed);
+  nebula::client::ExecutionResponse ret;
+  execute(ret, p_sessionId, p_stmt);
+  return folly::makeSemiFuture(std::move(ret));
 }
 
-folly::Future<nebula::client::ExecutionResponse> GraphServiceSvIf::future_execute(
-        ::std::int64_t p_sessionId, const ::std::string& p_stmt) {
-    auto expected{apache::thrift::detail::si::InvocationType::Future};
-    __fbthrift_invocation_execute.compare_exchange_strong(
-            expected,
-            apache::thrift::detail::si::InvocationType::SemiFuture,
-            std::memory_order_relaxed);
-    return apache::thrift::detail::si::future(semifuture_execute(p_sessionId, p_stmt),
-                                              getInternalKeepAlive());
+folly::Future<nebula::client::ExecutionResponse> GraphServiceSvIf::future_execute(::std::int64_t p_sessionId, const ::std::string& p_stmt) {
+  auto expected{apache::thrift::detail::si::InvocationType::Future};
+  __fbthrift_invocation_execute.compare_exchange_strong(expected, apache::thrift::detail::si::InvocationType::SemiFuture, std::memory_order_relaxed);
+  return apache::thrift::detail::si::future(semifuture_execute(p_sessionId, p_stmt), getInternalKeepAlive());
 }
 
-void GraphServiceSvIf::async_tm_execute(
-        std::unique_ptr<apache::thrift::HandlerCallback<nebula::client::ExecutionResponse>>
-                callback,
-        ::std::int64_t p_sessionId,
-        const ::std::string& p_stmt) {
-    // It's possible the coroutine versions will delegate to a future-based
-    // version. If that happens, we need the RequestParams arguments to be
-    // available to the future through the thread-local backchannel, so we create
-    // a RAII object that sets up RequestParams and clears them on destruction.
-    apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
-    auto invocationType = __fbthrift_invocation_execute.load(std::memory_order_relaxed);
-    try {
-        switch (invocationType) {
-            case apache::thrift::detail::si::InvocationType::AsyncTm: {
-                __fbthrift_invocation_execute.compare_exchange_strong(
-                        invocationType,
-                        apache::thrift::detail::si::InvocationType::Future,
-                        std::memory_order_relaxed);
-                FOLLY_FALLTHROUGH;
-            }
-            case apache::thrift::detail::si::InvocationType::Future: {
-                auto fut = future_execute(p_sessionId, p_stmt);
-                apache::thrift::detail::si::async_tm_future(std::move(callback),
-                                                            std::move(fut));
-                return;
-            }
-            case apache::thrift::detail::si::InvocationType::SemiFuture: {
-                auto fut = semifuture_execute(p_sessionId, p_stmt);
-                apache::thrift::detail::si::async_tm_semifuture(std::move(callback),
-                                                                std::move(fut));
-                return;
-            }
-            case apache::thrift::detail::si::InvocationType::Sync: {
-                nebula::client::ExecutionResponse _return;
-                execute(_return, p_sessionId, p_stmt);
-                callback->result(_return);
-                return;
-            }
-            default: {
-                folly::assume_unreachable();
-            }
-        }
-    } catch (...) {
-        callback->exception(std::current_exception());
+void GraphServiceSvIf::async_tm_execute(std::unique_ptr<apache::thrift::HandlerCallback<nebula::client::ExecutionResponse>> callback, ::std::int64_t p_sessionId, const ::std::string& p_stmt) {
+  // It's possible the coroutine versions will delegate to a future-based
+  // version. If that happens, we need the RequestParams arguments to be
+  // available to the future through the thread-local backchannel, so we create
+  // a RAII object that sets up RequestParams and clears them on destruction.
+  apache::thrift::detail::si::AsyncTmPrep asyncTmPrep(this, callback.get());
+  auto invocationType = __fbthrift_invocation_execute.load(std::memory_order_relaxed);
+  try {
+    switch (invocationType) {
+      case apache::thrift::detail::si::InvocationType::AsyncTm:
+      {
+        __fbthrift_invocation_execute.compare_exchange_strong(invocationType, apache::thrift::detail::si::InvocationType::Future, std::memory_order_relaxed);
+        FOLLY_FALLTHROUGH;
+      }
+      case apache::thrift::detail::si::InvocationType::Future:
+      {
+        auto fut = future_execute(p_sessionId, p_stmt);
+        apache::thrift::detail::si::async_tm_future(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::SemiFuture:
+      {
+        auto fut = semifuture_execute(p_sessionId, p_stmt);
+        apache::thrift::detail::si::async_tm_semifuture(std::move(callback), std::move(fut));
+        return;
+      }
+      case apache::thrift::detail::si::InvocationType::Sync:
+      {
+        nebula::client::ExecutionResponse _return;
+        execute(_return, p_sessionId, p_stmt);
+        callback->result(_return);
+        return;
+      }
+      default:
+      {
+        folly::assume_unreachable();
+      }
     }
+  } catch (...) {
+    callback->exception(std::current_exception());
+  }
 }
 
-void GraphServiceSvNull::authenticate(nebula::client::AuthResponse& /*_return*/,
-                                      const nebula::client::AuthReq& /*authReq*/) {}
+void GraphServiceSvNull::authenticate(nebula::client::AuthResponse& /*_return*/, const nebula::client::AuthReq& /*authReq*/) {}
 
 void GraphServiceSvNull::signout(::std::int64_t /*sessionId*/) {
-    return;
+  return;
 }
 
-void GraphServiceSvNull::execute(nebula::client::ExecutionResponse& /*_return*/,
-                                 ::std::int64_t /*sessionId*/,
-                                 const ::std::string& /*stmt*/) {}
+void GraphServiceSvNull::execute(nebula::client::ExecutionResponse& /*_return*/, ::std::int64_t /*sessionId*/, const ::std::string& /*stmt*/) {}
+
 
 
 const char* GraphServiceAsyncProcessor::getServiceName() {
-    return "GraphService";
+  return "GraphService";
 }
 
-void GraphServiceAsyncProcessor::getServiceMetadata(
-        apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
-    ::apache::thrift::detail::md::ServiceMetadata<GraphServiceSvIf>::gen(response);
+void GraphServiceAsyncProcessor::getServiceMetadata(apache::thrift::metadata::ThriftServiceMetadataResponse& response) {
+  ::apache::thrift::detail::md::ServiceMetadata<GraphServiceSvIf>::gen(response);
 }
 
-void GraphServiceAsyncProcessor::processSerializedCompressedRequest(
-        apache::thrift::ResponseChannelRequest::UniquePtr req,
-        apache::thrift::SerializedCompressedRequest&& serializedRequest,
-        apache::thrift::protocol::PROTOCOL_TYPES protType,
-        apache::thrift::Cpp2RequestContext* context,
-        folly::EventBase* eb,
-        apache::thrift::concurrency::ThreadManager* tm) {
-    apache::thrift::detail::ap::process(
-            this, std::move(req), std::move(serializedRequest), protType, context, eb, tm);
+void GraphServiceAsyncProcessor::processSerializedCompressedRequest(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), protType, context, eb, tm);
 }
 
-void GraphServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(
-        apache::thrift::ResponseChannelRequest::UniquePtr req,
-        apache::thrift::SerializedCompressedRequest&& serializedRequest,
-        const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata,
-        apache::thrift::protocol::PROTOCOL_TYPES protType,
-        apache::thrift::Cpp2RequestContext* context,
-        folly::EventBase* eb,
-        apache::thrift::concurrency::ThreadManager* tm) {
-    apache::thrift::detail::ap::process(this,
-                                        std::move(req),
-                                        std::move(serializedRequest),
-                                        methodMetadata,
-                                        protType,
-                                        context,
-                                        eb,
-                                        tm);
+void GraphServiceAsyncProcessor::processSerializedCompressedRequestWithMetadata(apache::thrift::ResponseChannelRequest::UniquePtr req, apache::thrift::SerializedCompressedRequest&& serializedRequest, const apache::thrift::AsyncProcessorFactory::MethodMetadata& methodMetadata, apache::thrift::protocol::PROTOCOL_TYPES protType, apache::thrift::Cpp2RequestContext* context, folly::EventBase* eb, apache::thrift::concurrency::ThreadManager* tm) {
+  apache::thrift::detail::ap::process(this, std::move(req), std::move(serializedRequest), methodMetadata, protType, context, eb, tm);
 }
 
 const GraphServiceAsyncProcessor::ProcessMap& GraphServiceAsyncProcessor::getOwnProcessMap() {
-    return kOwnProcessMap_;
+  return kOwnProcessMap_;
 }
 
-const GraphServiceAsyncProcessor::ProcessMap GraphServiceAsyncProcessor::kOwnProcessMap_{
-        {"authenticate",
-         {&GraphServiceAsyncProcessor::setUpAndProcess_authenticate<
-                  apache::thrift::CompactProtocolReader,
-                  apache::thrift::CompactProtocolWriter>,
-          &GraphServiceAsyncProcessor::setUpAndProcess_authenticate<
-                  apache::thrift::BinaryProtocolReader,
-                  apache::thrift::BinaryProtocolWriter>}},
-        {"signout",
-         {&GraphServiceAsyncProcessor::setUpAndProcess_signout<
-                  apache::thrift::CompactProtocolReader,
-                  apache::thrift::CompactProtocolWriter>,
-          &GraphServiceAsyncProcessor::setUpAndProcess_signout<
-                  apache::thrift::BinaryProtocolReader,
-                  apache::thrift::BinaryProtocolWriter>}},
-        {"execute",
-         {&GraphServiceAsyncProcessor::setUpAndProcess_execute<
-                  apache::thrift::CompactProtocolReader,
-                  apache::thrift::CompactProtocolWriter>,
-          &GraphServiceAsyncProcessor::setUpAndProcess_execute<
-                  apache::thrift::BinaryProtocolReader,
-                  apache::thrift::BinaryProtocolWriter>}},
+const GraphServiceAsyncProcessor::ProcessMap GraphServiceAsyncProcessor::kOwnProcessMap_ {
+  {"authenticate", {&GraphServiceAsyncProcessor::setUpAndProcess_authenticate<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &GraphServiceAsyncProcessor::setUpAndProcess_authenticate<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"signout", {&GraphServiceAsyncProcessor::setUpAndProcess_signout<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &GraphServiceAsyncProcessor::setUpAndProcess_signout<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
+  {"execute", {&GraphServiceAsyncProcessor::setUpAndProcess_execute<apache::thrift::CompactProtocolReader, apache::thrift::CompactProtocolWriter>, &GraphServiceAsyncProcessor::setUpAndProcess_execute<apache::thrift::BinaryProtocolReader, apache::thrift::BinaryProtocolWriter>}},
 };
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2

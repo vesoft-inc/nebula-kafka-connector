@@ -8,8 +8,5 @@
 #include "GraphService.h"
 #include "GraphService.tcc"
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {}
-}  // namespace graph
-}  // namespace nebula
+namespace nebula { namespace graph { namespace cpp2 {
+}}} // nebula::graph::cpp2

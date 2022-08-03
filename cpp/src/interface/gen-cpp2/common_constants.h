@@ -10,16 +10,16 @@
 
 #include "common_types.h"
 
-namespace nebula {
-namespace cpp2 {
+namespace nebula { namespace cpp2 {
 
 struct common_constants {
-    static constexpr char const* const version_ = "5.0.0";
 
-    static constexpr char const* version() {
-        return version_;
-    }
+  static constexpr char const * const version_ = "5.0.0";
+
+  static constexpr char const * version() {
+    return version_;
+  }
+
 };
 
-}  // namespace cpp2
-}  // namespace nebula
+}} // nebula::cpp2

@@ -8,448 +8,265 @@
 
 #include <thrift/lib/cpp2/gen/client_h.h>
 
+#include "graph_types.h"
 #include "common_types.h"
-#include "graph/response/thriftSerialization/AuthReqOps-inl.h"
 #include "graph/response/thriftSerialization/AuthResponseOps-inl.h"
+#include "graph/response/thriftSerialization/AuthReqOps-inl.h"
+#include "graph/response/thriftSerialization/GqlStatusOps-inl.h"
 #include "graph/response/thriftSerialization/ExecutionOutcomeOps-inl.h"
 #include "graph/response/thriftSerialization/ExecutionResponseOps-inl.h"
-#include "graph/response/thriftSerialization/GqlStatusOps-inl.h"
-#include "graph_types.h"
 
-namespace apache {
-namespace thrift {
-class Cpp2RequestContext;
-namespace detail {
-namespace ac {
-struct ClientRequestContext;
-}
-}  // namespace detail
-namespace transport {
-class THeader;
-}
-}  // namespace thrift
-}  // namespace apache
+namespace apache { namespace thrift {
+  class Cpp2RequestContext;
+  namespace detail { namespace ac { struct ClientRequestContext; }}
+  namespace transport { class THeader; }
+}}
 
-namespace nebula {
-namespace graph {
-namespace cpp2 {
+namespace nebula { namespace graph { namespace cpp2 {
 
 class GraphServiceAsyncClient : public apache::thrift::GeneratedAsyncClient {
-public:
-    using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
+ public:
+  using apache::thrift::GeneratedAsyncClient::GeneratedAsyncClient;
 
-    char const* getServiceName() const noexcept override {
-        return "GraphService";
-    }
+  char const* getServiceName() const noexcept override {
+    return "GraphService";
+  }
 
 
-    virtual void authenticate(std::unique_ptr<apache::thrift::RequestCallback> callback,
-                              const nebula::client::AuthReq& p_authReq);
-    virtual void authenticate(apache::thrift::RpcOptions& rpcOptions,
-                              std::unique_ptr<apache::thrift::RequestCallback> callback,
-                              const nebula::client::AuthReq& p_authReq);
+  virtual void authenticate(std::unique_ptr<apache::thrift::RequestCallback> callback, const nebula::client::AuthReq& p_authReq);
+  virtual void authenticate(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, const nebula::client::AuthReq& p_authReq);
+ protected:
+  void authenticateImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const nebula::client::AuthReq& p_authReq, bool stealRpcOptions = false);
+ public:
 
-protected:
-    void authenticateImpl(apache::thrift::RpcOptions& rpcOptions,
-                          std::shared_ptr<apache::thrift::transport::THeader> header,
-                          apache::thrift::ContextStack* contextStack,
-                          apache::thrift::RequestClientCallback::Ptr callback,
-                          const nebula::client::AuthReq& p_authReq,
-                          bool stealRpcOptions = false);
+  virtual void sync_authenticate(nebula::client::AuthResponse& _return, const nebula::client::AuthReq& p_authReq);
+  virtual void sync_authenticate(apache::thrift::RpcOptions& rpcOptions, nebula::client::AuthResponse& _return, const nebula::client::AuthReq& p_authReq);
 
-public:
-    virtual void sync_authenticate(nebula::client::AuthResponse& _return,
-                                   const nebula::client::AuthReq& p_authReq);
-    virtual void sync_authenticate(apache::thrift::RpcOptions& rpcOptions,
-                                   nebula::client::AuthResponse& _return,
-                                   const nebula::client::AuthReq& p_authReq);
-
-    virtual folly::Future<nebula::client::AuthResponse> future_authenticate(
-            const nebula::client::AuthReq& p_authReq);
-    virtual folly::SemiFuture<nebula::client::AuthResponse> semifuture_authenticate(
-            const nebula::client::AuthReq& p_authReq);
-    virtual folly::Future<nebula::client::AuthResponse> future_authenticate(
-            apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq);
-    virtual folly::SemiFuture<nebula::client::AuthResponse> semifuture_authenticate(
-            apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq);
-    virtual folly::Future<std::pair<nebula::client::AuthResponse,
-                                    std::unique_ptr<apache::thrift::transport::THeader>>>
-    header_future_authenticate(apache::thrift::RpcOptions& rpcOptions,
-                               const nebula::client::AuthReq& p_authReq);
-    virtual folly::SemiFuture<std::pair<nebula::client::AuthResponse,
-                                        std::unique_ptr<apache::thrift::transport::THeader>>>
-    header_semifuture_authenticate(apache::thrift::RpcOptions& rpcOptions,
-                                   const nebula::client::AuthReq& p_authReq);
+  virtual folly::Future<nebula::client::AuthResponse> future_authenticate(const nebula::client::AuthReq& p_authReq);
+  virtual folly::SemiFuture<nebula::client::AuthResponse> semifuture_authenticate(const nebula::client::AuthReq& p_authReq);
+  virtual folly::Future<nebula::client::AuthResponse> future_authenticate(apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq);
+  virtual folly::SemiFuture<nebula::client::AuthResponse> semifuture_authenticate(apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq);
+  virtual folly::Future<std::pair<nebula::client::AuthResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_authenticate(apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq);
+  virtual folly::SemiFuture<std::pair<nebula::client::AuthResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_authenticate(apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq);
 
 #if FOLLY_HAS_COROUTINES
-    template <int = 0>
-    folly::coro::Task<nebula::client::AuthResponse> co_authenticate(
-            const nebula::client::AuthReq& p_authReq) {
-        return co_authenticate<false>(nullptr, p_authReq);
+  template <int = 0>
+  folly::coro::Task<nebula::client::AuthResponse> co_authenticate(const nebula::client::AuthReq& p_authReq) {
+    return co_authenticate<false>(nullptr, p_authReq);
+  }
+  template <int = 0>
+  folly::coro::Task<nebula::client::AuthResponse> co_authenticate(apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq) {
+    return co_authenticate<true>(&rpcOptions, p_authReq);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<nebula::client::AuthResponse> co_authenticate(apache::thrift::RpcOptions* rpcOptions, const nebula::client::AuthReq& p_authReq) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientSyncCallback<false> callback(&returnState);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = authenticateCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions defaultRpcOptions;
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if constexpr (hasRpcOptions) {
+      authenticateImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_authReq);
+    } else {
+      authenticateImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_authReq);
     }
-    template <int = 0>
-    folly::coro::Task<nebula::client::AuthResponse> co_authenticate(
-            apache::thrift::RpcOptions& rpcOptions, const nebula::client::AuthReq& p_authReq) {
-        return co_authenticate<true>(&rpcOptions, p_authReq);
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
     }
-
-private:
-    template <bool hasRpcOptions>
-    folly::coro::Task<nebula::client::AuthResponse> co_authenticate(
-            apache::thrift::RpcOptions* rpcOptions, const nebula::client::AuthReq& p_authReq) {
-        const folly::CancellationToken& cancelToken =
-                co_await folly::coro::co_current_cancellation_token;
-        const bool cancellable = cancelToken.canBeCancelled();
-        apache::thrift::ClientReceiveState returnState;
-        apache::thrift::ClientSyncCallback<false> callback(&returnState);
-        auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-        auto [ctx, header] = authenticateCtx(rpcOptions);
-        using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
-        auto cancellableCallback =
-                cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-        static apache::thrift::RpcOptions defaultRpcOptions;
-        auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(
-                cancellableCallback
-                        ? (apache::thrift::RequestClientCallback*)cancellableCallback.get()
-                        : &callback);
-        if constexpr (hasRpcOptions) {
-            authenticateImpl(*rpcOptions,
-                             std::move(header),
-                             ctx.get(),
-                             std::move(wrappedCallback),
-                             p_authReq);
-        } else {
-            authenticateImpl(defaultRpcOptions,
-                             std::move(header),
-                             ctx.get(),
-                             std::move(wrappedCallback),
-                             p_authReq);
-        }
-        if (cancellable) {
-            folly::CancellationCallback cb(cancelToken, [&] {
-                CancellableCallback::cancel(std::move(cancellableCallback));
-            });
-            co_await callback.co_waitUntilDone();
-        } else {
-            co_await callback.co_waitUntilDone();
-        }
-        if (returnState.isException()) {
-            co_yield folly::coro::co_error(std::move(returnState.exception()));
-        }
-        returnState.resetProtocolId(protocolId);
-        returnState.resetCtx(std::move(ctx));
-        SCOPE_EXIT {
-            if (hasRpcOptions && returnState.header()) {
-                auto* rheader = returnState.header();
-                if (!rheader->getHeaders().empty()) {
-                    rpcOptions->setReadHeaders(rheader->releaseHeaders());
-                }
-                rpcOptions->setRoutingData(rheader->releaseRoutingData());
-            }
-        };
-        nebula::client::AuthResponse _return;
-        if (auto ew = recv_wrapped_authenticate(_return, returnState)) {
-            co_yield folly::coro::co_error(std::move(ew));
-        }
-        co_return _return;
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    nebula::client::AuthResponse _return;
+    if (auto ew = recv_wrapped_authenticate(_return, returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
 
-public:
-#endif  // FOLLY_HAS_COROUTINES
-
-    virtual void authenticate(
-            folly::Function<void(::apache::thrift::ClientReceiveState&&)> callback,
-            const nebula::client::AuthReq& p_authReq);
+  virtual void authenticate(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, const nebula::client::AuthReq& p_authReq);
 
 
-    static folly::exception_wrapper recv_wrapped_authenticate(
-            nebula::client::AuthResponse& _return, ::apache::thrift::ClientReceiveState& state);
-    static void recv_authenticate(nebula::client::AuthResponse& _return,
-                                  ::apache::thrift::ClientReceiveState& state);
-    // Mock friendly virtual instance method
-    virtual void recv_instance_authenticate(nebula::client::AuthResponse& _return,
-                                            ::apache::thrift::ClientReceiveState& state);
-    virtual folly::exception_wrapper recv_instance_wrapped_authenticate(
-            nebula::client::AuthResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  static folly::exception_wrapper recv_wrapped_authenticate(nebula::client::AuthResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  static void recv_authenticate(nebula::client::AuthResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual void recv_instance_authenticate(nebula::client::AuthResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_authenticate(nebula::client::AuthResponse& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  template <typename Protocol_, typename RpcOptions>
+  void authenticateT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, const nebula::client::AuthReq& p_authReq);
+  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> authenticateCtx(apache::thrift::RpcOptions* rpcOptions);
+ public:
+  virtual void signout(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_sessionId);
+  virtual void signout(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_sessionId);
+ protected:
+  void signoutImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_sessionId, bool stealRpcOptions = false);
+ public:
 
-private:
-    template <typename Protocol_, typename RpcOptions>
-    void authenticateT(Protocol_* prot,
-                       RpcOptions&& rpcOptions,
-                       std::shared_ptr<apache::thrift::transport::THeader> header,
-                       apache::thrift::ContextStack* contextStack,
-                       apache::thrift::RequestClientCallback::Ptr callback,
-                       const nebula::client::AuthReq& p_authReq);
-    std::pair<std::unique_ptr<::apache::thrift::ContextStack>,
-              std::shared_ptr<::apache::thrift::transport::THeader>>
-    authenticateCtx(apache::thrift::RpcOptions* rpcOptions);
+  virtual void sync_signout(::std::int64_t p_sessionId);
+  virtual void sync_signout(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId);
 
-public:
-    virtual void signout(std::unique_ptr<apache::thrift::RequestCallback> callback,
-                         ::std::int64_t p_sessionId);
-    virtual void signout(apache::thrift::RpcOptions& rpcOptions,
-                         std::unique_ptr<apache::thrift::RequestCallback> callback,
-                         ::std::int64_t p_sessionId);
-
-protected:
-    void signoutImpl(apache::thrift::RpcOptions& rpcOptions,
-                     std::shared_ptr<apache::thrift::transport::THeader> header,
-                     apache::thrift::ContextStack* contextStack,
-                     apache::thrift::RequestClientCallback::Ptr callback,
-                     ::std::int64_t p_sessionId,
-                     bool stealRpcOptions = false);
-
-public:
-    virtual void sync_signout(::std::int64_t p_sessionId);
-    virtual void sync_signout(apache::thrift::RpcOptions& rpcOptions,
-                              ::std::int64_t p_sessionId);
-
-    virtual folly::Future<folly::Unit> future_signout(::std::int64_t p_sessionId);
-    virtual folly::SemiFuture<folly::Unit> semifuture_signout(::std::int64_t p_sessionId);
-    virtual folly::Future<folly::Unit> future_signout(apache::thrift::RpcOptions& rpcOptions,
-                                                      ::std::int64_t p_sessionId);
-    virtual folly::SemiFuture<folly::Unit> semifuture_signout(
-            apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId);
+  virtual folly::Future<folly::Unit> future_signout(::std::int64_t p_sessionId);
+  virtual folly::SemiFuture<folly::Unit> semifuture_signout(::std::int64_t p_sessionId);
+  virtual folly::Future<folly::Unit> future_signout(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId);
+  virtual folly::SemiFuture<folly::Unit> semifuture_signout(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId);
 
 #if FOLLY_HAS_COROUTINES
-    template <int = 0>
-    folly::coro::Task<void> co_signout(::std::int64_t p_sessionId) {
-        return co_signout<false>(nullptr, p_sessionId);
+  template <int = 0>
+  folly::coro::Task<void> co_signout(::std::int64_t p_sessionId) {
+    return co_signout<false>(nullptr, p_sessionId);
+  }
+  template <int = 0>
+  folly::coro::Task<void> co_signout(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId) {
+    return co_signout<true>(&rpcOptions, p_sessionId);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<void> co_signout(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_sessionId) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientSyncCallback<true> callback(&returnState);
+    auto [ctx, header] = signoutCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<true>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions defaultRpcOptions;
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if constexpr (hasRpcOptions) {
+      signoutImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sessionId);
+    } else {
+      signoutImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sessionId);
     }
-    template <int = 0>
-    folly::coro::Task<void> co_signout(apache::thrift::RpcOptions& rpcOptions,
-                                       ::std::int64_t p_sessionId) {
-        return co_signout<true>(&rpcOptions, p_sessionId);
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
     }
-
-private:
-    template <bool hasRpcOptions>
-    folly::coro::Task<void> co_signout(apache::thrift::RpcOptions* rpcOptions,
-                                       ::std::int64_t p_sessionId) {
-        const folly::CancellationToken& cancelToken =
-                co_await folly::coro::co_current_cancellation_token;
-        const bool cancellable = cancelToken.canBeCancelled();
-        apache::thrift::ClientReceiveState returnState;
-        apache::thrift::ClientSyncCallback<true> callback(&returnState);
-        auto [ctx, header] = signoutCtx(rpcOptions);
-        using CancellableCallback = apache::thrift::CancellableRequestClientCallback<true>;
-        auto cancellableCallback =
-                cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-        static apache::thrift::RpcOptions defaultRpcOptions;
-        auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(
-                cancellableCallback
-                        ? (apache::thrift::RequestClientCallback*)cancellableCallback.get()
-                        : &callback);
-        if constexpr (hasRpcOptions) {
-            signoutImpl(*rpcOptions,
-                        std::move(header),
-                        ctx.get(),
-                        std::move(wrappedCallback),
-                        p_sessionId);
-        } else {
-            signoutImpl(defaultRpcOptions,
-                        std::move(header),
-                        ctx.get(),
-                        std::move(wrappedCallback),
-                        p_sessionId);
-        }
-        if (cancellable) {
-            folly::CancellationCallback cb(cancelToken, [&] {
-                CancellableCallback::cancel(std::move(cancellableCallback));
-            });
-            co_await callback.co_waitUntilDone();
-        } else {
-            co_await callback.co_waitUntilDone();
-        }
-        if (returnState.isException()) {
-            co_yield folly::coro::co_error(std::move(returnState.exception()));
-        }
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
 
-public:
-#endif  // FOLLY_HAS_COROUTINES
-
-    virtual void signout(folly::Function<void(::apache::thrift::ClientReceiveState&&)> callback,
-                         ::std::int64_t p_sessionId);
+  virtual void signout(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_sessionId);
 
 
-private:
-    template <typename Protocol_, typename RpcOptions>
-    void signoutT(Protocol_* prot,
-                  RpcOptions&& rpcOptions,
-                  std::shared_ptr<apache::thrift::transport::THeader> header,
-                  apache::thrift::ContextStack* contextStack,
-                  apache::thrift::RequestClientCallback::Ptr callback,
-                  ::std::int64_t p_sessionId);
-    std::pair<std::unique_ptr<::apache::thrift::ContextStack>,
-              std::shared_ptr<::apache::thrift::transport::THeader>>
-    signoutCtx(apache::thrift::RpcOptions* rpcOptions);
+ private:
+  template <typename Protocol_, typename RpcOptions>
+  void signoutT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_sessionId);
+  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> signoutCtx(apache::thrift::RpcOptions* rpcOptions);
+ public:
+  virtual void execute(std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual void execute(apache::thrift::RpcOptions& rpcOptions, std::unique_ptr<apache::thrift::RequestCallback> callback, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+ protected:
+  void executeImpl(apache::thrift::RpcOptions& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_sessionId, const ::std::string& p_stmt, bool stealRpcOptions = false);
+ public:
 
-public:
-    virtual void execute(std::unique_ptr<apache::thrift::RequestCallback> callback,
-                         ::std::int64_t p_sessionId,
-                         const ::std::string& p_stmt);
-    virtual void execute(apache::thrift::RpcOptions& rpcOptions,
-                         std::unique_ptr<apache::thrift::RequestCallback> callback,
-                         ::std::int64_t p_sessionId,
-                         const ::std::string& p_stmt);
+  virtual void sync_execute(nebula::client::ExecutionResponse& _return, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual void sync_execute(apache::thrift::RpcOptions& rpcOptions, nebula::client::ExecutionResponse& _return, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
 
-protected:
-    void executeImpl(apache::thrift::RpcOptions& rpcOptions,
-                     std::shared_ptr<apache::thrift::transport::THeader> header,
-                     apache::thrift::ContextStack* contextStack,
-                     apache::thrift::RequestClientCallback::Ptr callback,
-                     ::std::int64_t p_sessionId,
-                     const ::std::string& p_stmt,
-                     bool stealRpcOptions = false);
-
-public:
-    virtual void sync_execute(nebula::client::ExecutionResponse& _return,
-                              ::std::int64_t p_sessionId,
-                              const ::std::string& p_stmt);
-    virtual void sync_execute(apache::thrift::RpcOptions& rpcOptions,
-                              nebula::client::ExecutionResponse& _return,
-                              ::std::int64_t p_sessionId,
-                              const ::std::string& p_stmt);
-
-    virtual folly::Future<nebula::client::ExecutionResponse> future_execute(
-            ::std::int64_t p_sessionId, const ::std::string& p_stmt);
-    virtual folly::SemiFuture<nebula::client::ExecutionResponse> semifuture_execute(
-            ::std::int64_t p_sessionId, const ::std::string& p_stmt);
-    virtual folly::Future<nebula::client::ExecutionResponse> future_execute(
-            apache::thrift::RpcOptions& rpcOptions,
-            ::std::int64_t p_sessionId,
-            const ::std::string& p_stmt);
-    virtual folly::SemiFuture<nebula::client::ExecutionResponse> semifuture_execute(
-            apache::thrift::RpcOptions& rpcOptions,
-            ::std::int64_t p_sessionId,
-            const ::std::string& p_stmt);
-    virtual folly::Future<std::pair<nebula::client::ExecutionResponse,
-                                    std::unique_ptr<apache::thrift::transport::THeader>>>
-    header_future_execute(apache::thrift::RpcOptions& rpcOptions,
-                          ::std::int64_t p_sessionId,
-                          const ::std::string& p_stmt);
-    virtual folly::SemiFuture<std::pair<nebula::client::ExecutionResponse,
-                                        std::unique_ptr<apache::thrift::transport::THeader>>>
-    header_semifuture_execute(apache::thrift::RpcOptions& rpcOptions,
-                              ::std::int64_t p_sessionId,
-                              const ::std::string& p_stmt);
+  virtual folly::Future<nebula::client::ExecutionResponse> future_execute(::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual folly::SemiFuture<nebula::client::ExecutionResponse> semifuture_execute(::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual folly::Future<nebula::client::ExecutionResponse> future_execute(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual folly::SemiFuture<nebula::client::ExecutionResponse> semifuture_execute(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual folly::Future<std::pair<nebula::client::ExecutionResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_future_execute(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  virtual folly::SemiFuture<std::pair<nebula::client::ExecutionResponse, std::unique_ptr<apache::thrift::transport::THeader>>> header_semifuture_execute(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
 
 #if FOLLY_HAS_COROUTINES
-    template <int = 0>
-    folly::coro::Task<nebula::client::ExecutionResponse> co_execute(
-            ::std::int64_t p_sessionId, const ::std::string& p_stmt) {
-        return co_execute<false>(nullptr, p_sessionId, p_stmt);
+  template <int = 0>
+  folly::coro::Task<nebula::client::ExecutionResponse> co_execute(::std::int64_t p_sessionId, const ::std::string& p_stmt) {
+    return co_execute<false>(nullptr, p_sessionId, p_stmt);
+  }
+  template <int = 0>
+  folly::coro::Task<nebula::client::ExecutionResponse> co_execute(apache::thrift::RpcOptions& rpcOptions, ::std::int64_t p_sessionId, const ::std::string& p_stmt) {
+    return co_execute<true>(&rpcOptions, p_sessionId, p_stmt);
+  }
+ private:
+  template <bool hasRpcOptions>
+  folly::coro::Task<nebula::client::ExecutionResponse> co_execute(apache::thrift::RpcOptions* rpcOptions, ::std::int64_t p_sessionId, const ::std::string& p_stmt) {
+    const folly::CancellationToken& cancelToken =
+        co_await folly::coro::co_current_cancellation_token;
+    const bool cancellable = cancelToken.canBeCancelled();
+    apache::thrift::ClientReceiveState returnState;
+    apache::thrift::ClientSyncCallback<false> callback(&returnState);
+    auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
+    auto [ctx, header] = executeCtx(rpcOptions);
+    using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
+    auto cancellableCallback = cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
+    static apache::thrift::RpcOptions defaultRpcOptions;
+    auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(cancellableCallback ? (apache::thrift::RequestClientCallback*)cancellableCallback.get() : &callback);
+    if constexpr (hasRpcOptions) {
+      executeImpl(*rpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sessionId, p_stmt);
+    } else {
+      executeImpl(defaultRpcOptions, std::move(header), ctx.get(), std::move(wrappedCallback), p_sessionId, p_stmt);
     }
-    template <int = 0>
-    folly::coro::Task<nebula::client::ExecutionResponse> co_execute(
-            apache::thrift::RpcOptions& rpcOptions,
-            ::std::int64_t p_sessionId,
-            const ::std::string& p_stmt) {
-        return co_execute<true>(&rpcOptions, p_sessionId, p_stmt);
+    if (cancellable) {
+      folly::CancellationCallback cb(cancelToken, [&] { CancellableCallback::cancel(std::move(cancellableCallback)); });
+      co_await callback.co_waitUntilDone();
+    } else {
+      co_await callback.co_waitUntilDone();
     }
-
-private:
-    template <bool hasRpcOptions>
-    folly::coro::Task<nebula::client::ExecutionResponse> co_execute(
-            apache::thrift::RpcOptions* rpcOptions,
-            ::std::int64_t p_sessionId,
-            const ::std::string& p_stmt) {
-        const folly::CancellationToken& cancelToken =
-                co_await folly::coro::co_current_cancellation_token;
-        const bool cancellable = cancelToken.canBeCancelled();
-        apache::thrift::ClientReceiveState returnState;
-        apache::thrift::ClientSyncCallback<false> callback(&returnState);
-        auto protocolId = apache::thrift::GeneratedAsyncClient::getChannel()->getProtocolId();
-        auto [ctx, header] = executeCtx(rpcOptions);
-        using CancellableCallback = apache::thrift::CancellableRequestClientCallback<false>;
-        auto cancellableCallback =
-                cancellable ? CancellableCallback::create(&callback, channel_) : nullptr;
-        static apache::thrift::RpcOptions defaultRpcOptions;
-        auto wrappedCallback = apache::thrift::RequestClientCallback::Ptr(
-                cancellableCallback
-                        ? (apache::thrift::RequestClientCallback*)cancellableCallback.get()
-                        : &callback);
-        if constexpr (hasRpcOptions) {
-            executeImpl(*rpcOptions,
-                        std::move(header),
-                        ctx.get(),
-                        std::move(wrappedCallback),
-                        p_sessionId,
-                        p_stmt);
-        } else {
-            executeImpl(defaultRpcOptions,
-                        std::move(header),
-                        ctx.get(),
-                        std::move(wrappedCallback),
-                        p_sessionId,
-                        p_stmt);
-        }
-        if (cancellable) {
-            folly::CancellationCallback cb(cancelToken, [&] {
-                CancellableCallback::cancel(std::move(cancellableCallback));
-            });
-            co_await callback.co_waitUntilDone();
-        } else {
-            co_await callback.co_waitUntilDone();
-        }
-        if (returnState.isException()) {
-            co_yield folly::coro::co_error(std::move(returnState.exception()));
-        }
-        returnState.resetProtocolId(protocolId);
-        returnState.resetCtx(std::move(ctx));
-        SCOPE_EXIT {
-            if (hasRpcOptions && returnState.header()) {
-                auto* rheader = returnState.header();
-                if (!rheader->getHeaders().empty()) {
-                    rpcOptions->setReadHeaders(rheader->releaseHeaders());
-                }
-                rpcOptions->setRoutingData(rheader->releaseRoutingData());
-            }
-        };
-        nebula::client::ExecutionResponse _return;
-        if (auto ew = recv_wrapped_execute(_return, returnState)) {
-            co_yield folly::coro::co_error(std::move(ew));
-        }
-        co_return _return;
+    if (returnState.isException()) {
+      co_yield folly::coro::co_error(std::move(returnState.exception()));
     }
+    returnState.resetProtocolId(protocolId);
+    returnState.resetCtx(std::move(ctx));
+    SCOPE_EXIT {
+      if (hasRpcOptions && returnState.header()) {
+        auto* rheader = returnState.header();
+        if (!rheader->getHeaders().empty()) {
+          rpcOptions->setReadHeaders(rheader->releaseHeaders());
+        }
+        rpcOptions->setRoutingData(rheader->releaseRoutingData());
+      }
+    };
+    nebula::client::ExecutionResponse _return;
+    if (auto ew = recv_wrapped_execute(_return, returnState)) {
+      co_yield folly::coro::co_error(std::move(ew));
+    }
+    co_return _return;
+  }
+ public:
+#endif // FOLLY_HAS_COROUTINES
 
-public:
-#endif  // FOLLY_HAS_COROUTINES
-
-    virtual void execute(folly::Function<void(::apache::thrift::ClientReceiveState&&)> callback,
-                         ::std::int64_t p_sessionId,
-                         const ::std::string& p_stmt);
+  virtual void execute(folly::Function<void (::apache::thrift::ClientReceiveState&&)> callback, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
 
 
-    static folly::exception_wrapper recv_wrapped_execute(
-            nebula::client::ExecutionResponse& _return,
-            ::apache::thrift::ClientReceiveState& state);
-    static void recv_execute(nebula::client::ExecutionResponse& _return,
-                             ::apache::thrift::ClientReceiveState& state);
-    // Mock friendly virtual instance method
-    virtual void recv_instance_execute(nebula::client::ExecutionResponse& _return,
-                                       ::apache::thrift::ClientReceiveState& state);
-    virtual folly::exception_wrapper recv_instance_wrapped_execute(
-            nebula::client::ExecutionResponse& _return,
-            ::apache::thrift::ClientReceiveState& state);
-
-private:
-    template <typename Protocol_, typename RpcOptions>
-    void executeT(Protocol_* prot,
-                  RpcOptions&& rpcOptions,
-                  std::shared_ptr<apache::thrift::transport::THeader> header,
-                  apache::thrift::ContextStack* contextStack,
-                  apache::thrift::RequestClientCallback::Ptr callback,
-                  ::std::int64_t p_sessionId,
-                  const ::std::string& p_stmt);
-    std::pair<std::unique_ptr<::apache::thrift::ContextStack>,
-              std::shared_ptr<::apache::thrift::transport::THeader>>
-    executeCtx(apache::thrift::RpcOptions* rpcOptions);
-
-public:
+  static folly::exception_wrapper recv_wrapped_execute(nebula::client::ExecutionResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  static void recv_execute(nebula::client::ExecutionResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  // Mock friendly virtual instance method
+  virtual void recv_instance_execute(nebula::client::ExecutionResponse& _return, ::apache::thrift::ClientReceiveState& state);
+  virtual folly::exception_wrapper recv_instance_wrapped_execute(nebula::client::ExecutionResponse& _return, ::apache::thrift::ClientReceiveState& state);
+ private:
+  template <typename Protocol_, typename RpcOptions>
+  void executeT(Protocol_* prot, RpcOptions&& rpcOptions, std::shared_ptr<apache::thrift::transport::THeader> header, apache::thrift::ContextStack* contextStack, apache::thrift::RequestClientCallback::Ptr callback, ::std::int64_t p_sessionId, const ::std::string& p_stmt);
+  std::pair<std::unique_ptr<::apache::thrift::ContextStack>, std::shared_ptr<::apache::thrift::transport::THeader>> executeCtx(apache::thrift::RpcOptions* rpcOptions);
+ public:
 };
 
-}  // namespace cpp2
-}  // namespace graph
-}  // namespace nebula
+}}} // nebula::graph::cpp2

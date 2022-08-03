@@ -14,5 +14,5 @@
  */
 
 #include "GraphService.tcc"
-#include "common_types_custom_protocol.h"
 #include "graph_types_custom_protocol.h"
+#include "common_types_custom_protocol.h"

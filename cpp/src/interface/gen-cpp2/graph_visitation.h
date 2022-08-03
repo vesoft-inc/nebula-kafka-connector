@@ -7,5 +7,5 @@
 #pragma once
 #include "common_visitation.h"
 #include "graph_for_each_field.h"
-#include "graph_visit_by_thrift_field_metadata.h"
 #include "graph_visit_union.h"
+#include "graph_visit_by_thrift_field_metadata.h"

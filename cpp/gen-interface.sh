@@ -6,7 +6,7 @@
 
 set -e
 
-NEBULA_THIRDPARTY_HOME=/opt/vesoft/third-party/2.0
+NEBULA_THIRDPARTY_HOME=/opt/vesoft/third-party/3.0
 NEBULA_INTERFACE_HOME=src/interface
 SYNC_REMOTE_INTERFACE=0
 

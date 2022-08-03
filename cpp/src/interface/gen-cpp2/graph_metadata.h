@@ -6,20 +6,17 @@
  */
 #pragma once
 
-#include <thrift/lib/cpp2/gen/module_metadata_h.h>
-
 #include <vector>
 
-#include "common_metadata.h"
+#include <thrift/lib/cpp2/gen/module_metadata_h.h>
 #include "graph_types.h"
+#include "common_metadata.h"
 
 namespace nebula {
 namespace graph {
 namespace cpp2 {
 class GraphServiceSvIf;
-}
-}  // namespace graph
-}  // namespace nebula
+}}} // namespace nebula::graph::cpp2
 
 namespace apache {
 namespace thrift {
@@ -28,66 +25,64 @@ namespace md {
 
 template <>
 class StructMetadata<::nebula::graph::cpp2::ProfilingStats> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::Pair> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::PlanNodeDescription> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::PlanDescription> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::GQLStatus> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::ExecutionOutcome> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::ExecutionResponse> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::AuthReq> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class StructMetadata<::nebula::graph::cpp2::AuthResponse> {
-public:
-    static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
+ public:
+  static const ::apache::thrift::metadata::ThriftStruct& gen(ThriftMetadata& metadata);
 };
 template <>
 class ServiceMetadata<::nebula::graph::cpp2::GraphServiceSvIf> {
-public:
-    static void gen(ThriftServiceMetadataResponse& response);
+ public:
+  static void gen(ThriftServiceMetadataResponse& response);
+ private:
+  static const ThriftServiceContextRef* genRecurse(ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
 
-private:
-    static const ThriftServiceContextRef* genRecurse(
-            ThriftMetadata& metadata, std::vector<ThriftServiceContextRef>& services);
+  template <typename T>
+  friend class ServiceMetadata;
 
-    template <typename T>
-    friend class ServiceMetadata;
-
-    static void gen_authenticate(ThriftMetadata& metadata, ThriftService& context);
-    static void gen_signout(ThriftMetadata& metadata, ThriftService& context);
-    static void gen_execute(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_authenticate(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_signout(ThriftMetadata& metadata, ThriftService& context);
+  static void gen_execute(ThriftMetadata& metadata, ThriftService& context);
 };
-}  // namespace md
-}  // namespace detail
-}  // namespace thrift
-}  // namespace apache
+} // namespace md
+} // namespace detail
+} // namespace thrift
+} // namespace apache

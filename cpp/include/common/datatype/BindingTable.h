@@ -51,6 +51,16 @@ public:
         return recordType_;
     }
 
+    std::vector<std::string> getColumnNames() const {
+        auto& fts = recordType_.getFieldTypes();
+        std::vector<std::string> columnNames;
+        columnNames.reserve(fts.size());
+        for (auto& ft : fts) {
+            columnNames.emplace_back(std::string(ft.getFieldName()));
+        }
+        return columnNames;
+    }
+
     void setRecordType(const RecordType& recordType) {
         recordType_ = recordType;
     }

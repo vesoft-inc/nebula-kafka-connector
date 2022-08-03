@@ -20,8 +20,11 @@ struct TccStructTraits<nebula::client::BindingTable> {
     static void translateFieldName(MAYBE_UNUSED folly::StringPiece _fname,
                                    MAYBE_UNUSED int16_t& fid,
                                    MAYBE_UNUSED apache::thrift::protocol::TType& _ftype) {
-        if (_fname == "records") {
+        if (_fname == "columnNames") {
             fid = 1;
+            _ftype = apache::thrift::protocol::T_LIST;
+        } else if (_fname == "records") {
+            fid = 2;
             _ftype = apache::thrift::protocol::T_LIST;
         }
     }
@@ -39,7 +42,13 @@ uint32_t Cpp2Ops<nebula::client::BindingTable>::write(Protocol* proto,
     uint32_t xfer = 0;
     xfer += proto->writeStructBegin("BindingTable");
 
-    xfer += proto->writeFieldBegin("records", apache::thrift::protocol::T_LIST, 1);
+    xfer += proto->writeFieldBegin("columnNames", apache::thrift::protocol::T_LIST, 1);
+    xfer += detail::pm::protocol_methods<
+            type_class::list<type_class::structure>,
+            std::vector<std::string>>::write(*proto, obj->desc_.getColumnNames());
+    xfer += proto->writeFieldEnd();
+
+    xfer += proto->writeFieldBegin("records", apache::thrift::protocol::T_LIST, 2);
     xfer += detail::pm::protocol_methods<
             type_class::list<type_class::structure>,
             std::pmr::deque<nebula::client::RawRecord>>::write(*proto, obj->records_);
@@ -63,6 +72,17 @@ void Cpp2Ops<nebula::client::BindingTable>::read(Protocol* proto,
         goto _loop;
     }
 
+_readField_columnNames : {
+    obj->records_.clear();
+    detail::pm::protocol_methods<
+            type_class::list<type_class::structure>,
+            std::pmr::deque<nebula::client::RawRecord>>::read(*proto, obj->records_);
+}
+
+    if (UNLIKELY(!readState.advanceToNextField(proto, 1, 2, protocol::T_LIST))) {
+        goto _loop;
+    }
+
 _readField_values : {
     obj->records_.clear();
     detail::pm::protocol_methods<
@@ -70,7 +90,7 @@ _readField_values : {
             std::pmr::deque<nebula::client::RawRecord>>::read(*proto, obj->records_);
 }
 
-    if (UNLIKELY(!readState.advanceToNextField(proto, 1, 0, protocol::T_STOP))) {
+    if (UNLIKELY(!readState.advanceToNextField(proto, 2, 0, protocol::T_STOP))) {
         goto _loop;
     }
 
@@ -91,6 +111,13 @@ _loop:
 
     switch (readState.fieldId) {
         case 1: {
+            if (LIKELY(readState.fieldType == apache::thrift::protocol::T_LIST)) {
+                goto _readField_columnNames;
+            } else {
+                goto _skip;
+            }
+        }
+        case 2: {
             if (LIKELY(readState.fieldType == apache::thrift::protocol::T_LIST)) {
                 goto _readField_values;
             } else {
@@ -113,11 +140,18 @@ uint32_t Cpp2Ops<nebula::client::BindingTable>::serializedSize(
     uint32_t xfer = 0;
     xfer += proto->serializedStructSize("BindingTable");
 
-    xfer += proto->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 1);
+    xfer += proto->serializedFieldSize("columnNames", apache::thrift::protocol::T_LIST, 1);
+    xfer += detail::pm::protocol_methods<
+            type_class::list<type_class::structure>,
+            std::vector<std::string>>::serializedSize<false>(*proto,
+                                                             obj->desc_.getColumnNames());
+
+    xfer += proto->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 2);
     xfer += detail::pm::protocol_methods<
             type_class::list<type_class::structure>,
             std::pmr::deque<nebula::client::RawRecord>>::serializedSize<false>(*proto,
                                                                                obj->records_);
+
     xfer += proto->serializedSizeStop();
     return xfer;
 }
@@ -128,11 +162,18 @@ uint32_t Cpp2Ops<nebula::client::BindingTable>::serializedSizeZC(
     uint32_t xfer = 0;
     xfer += proto->serializedStructSize("BindingTable");
 
-    xfer += proto->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 1);
+    xfer += proto->serializedFieldSize("columnNames", apache::thrift::protocol::T_LIST, 1);
+    xfer += detail::pm::protocol_methods<
+            type_class::list<type_class::structure>,
+            std::vector<std::string>>::serializedSize<false>(*proto,
+                                                             obj->desc_.getColumnNames());
+
+    xfer += proto->serializedFieldSize("records", apache::thrift::protocol::T_LIST, 2);
     xfer += detail::pm::protocol_methods<
             type_class::list<type_class::structure>,
             std::pmr::deque<nebula::client::RawRecord>>::serializedSize<false>(*proto,
                                                                                obj->records_);
+
     xfer += proto->serializedSizeStop();
     return xfer;
 }
