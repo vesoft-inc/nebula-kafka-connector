@@ -17,6 +17,18 @@ const (
 // Initialize logger
 var log = nebula.DefaultLogger{}
 
+func printResult(res *nebula.ResultSet) {
+	tableStr := res.AsStringTable()
+
+	for _, row := range tableStr {
+		fmt.Printf("|")
+		for _, col := range row {
+			fmt.Printf("%s ", col)
+		}
+		fmt.Println("|")
+	}
+}
+
 func runQuery(session *nebula.Session, query string) {
 	resp, err := session.Execute(query)
 	if err != nil {
@@ -24,9 +36,14 @@ func runQuery(session *nebula.Session, query string) {
 	}
 	log.Info("Execution response received")
 
-	if string(resp.GetExecutionOutcome().GetGqlStatus().Status) != "SUCCESS" {
-		log.Fatal(fmt.Sprintf("execute failed, error: %s", string(resp.GetExecutionOutcome().GetGqlStatus().Status)))
+	if !resp.IsSuccess() {
+		log.Fatal(fmt.Sprintf("execute failed, error: %s", string(resp.GetStatus())))
 	}
+
+	if resp.GetRows() != nil {
+		printResult(resp)
+	}
+
 	log.Info("query: " + query + " was executed successfully")
 }
 
@@ -69,6 +86,12 @@ func main() {
 
 	log.Info("Insert an edge...")
 	runQuery(session, `USE nba INSERT EDGE edge_type ({id:1})-[{followness:90}]->({id:2}),({id:2})-[{followness:100}]->({id:3})`)
+
+	log.Info("Run a simple query...")
+	runQuery(session, `FROM nba FOR a in LIST [1,2,null,3] RETURN a`)
+
+	log.Info("Run a MATCH query...")
+	runQuery(session, `FROM nba MATCH (v) RETURN v`)
 
 	log.Info("Execution response received")
 

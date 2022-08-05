@@ -3016,15 +3016,21 @@ func (p *RawRecord) String() string {
 }
 
 // Attributes:
+//  - ColumnNames
 //  - Records
 type BindingTable struct {
-  Records []*RawRecord `thrift:"records,1" db:"records" json:"records"`
+  ColumnNames [][]byte `thrift:"columnNames,1" db:"columnNames" json:"columnNames"`
+  Records []*RawRecord `thrift:"records,2" db:"records" json:"records"`
 }
 
 func NewBindingTable() *BindingTable {
   return &BindingTable{}
 }
 
+
+func (p *BindingTable) GetColumnNames() [][]byte {
+  return p.ColumnNames
+}
 
 func (p *BindingTable) GetRecords() []*RawRecord {
   return p.Records
@@ -3041,12 +3047,23 @@ func NewBindingTableBuilder() *BindingTableBuilder{
 
 func (p BindingTableBuilder) Emit() *BindingTable{
   return &BindingTable{
+    ColumnNames: p.obj.ColumnNames,
     Records: p.obj.Records,
   }
 }
 
+func (b *BindingTableBuilder) ColumnNames(columnNames [][]byte) *BindingTableBuilder {
+  b.obj.ColumnNames = columnNames
+  return b
+}
+
 func (b *BindingTableBuilder) Records(records []*RawRecord) *BindingTableBuilder {
   b.obj.Records = records
+  return b
+}
+
+func (b *BindingTable) SetColumnNames(columnNames [][]byte) *BindingTable {
+  b.ColumnNames = columnNames
   return b
 }
 
@@ -3072,6 +3089,10 @@ func (p *BindingTable) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -3092,14 +3113,36 @@ func (p *BindingTable)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
+  tSlice := make([][]byte, 0, size)
+  p.ColumnNames =  tSlice
+  for i := 0; i < size; i ++ {
+    var _elem9 []byte
+    if v, err := iprot.ReadBinary(); err != nil {
+      return thrift.PrependError("error reading field 0: ", err)
+    } else {
+      _elem9 = v
+    }
+    p.ColumnNames = append(p.ColumnNames, _elem9)
+  }
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+  }
+  return nil
+}
+
+func (p *BindingTable)  ReadField2(iprot thrift.Protocol) error {
+  _, size, err := iprot.ReadListBegin()
+  if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+  }
   tSlice := make([]*RawRecord, 0, size)
   p.Records =  tSlice
   for i := 0; i < size; i ++ {
-    _elem9 := NewRawRecord()
-    if err := _elem9.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem9), err)
+    _elem10 := NewRawRecord()
+    if err := _elem10.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem10), err)
     }
-    p.Records = append(p.Records, _elem9)
+    p.Records = append(p.Records, _elem10)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -3111,6 +3154,7 @@ func (p *BindingTable) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("BindingTable"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -3119,8 +3163,26 @@ func (p *BindingTable) Write(oprot thrift.Protocol) error {
 }
 
 func (p *BindingTable) writeField1(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("records", thrift.LIST, 1); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:records: ", p), err) }
+  if err := oprot.WriteFieldBegin("columnNames", thrift.LIST, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:columnNames: ", p), err) }
+  if err := oprot.WriteListBegin(thrift.STRING, len(p.ColumnNames)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+  }
+  for _, v := range p.ColumnNames {
+    if err := oprot.WriteBinary(v); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T. (0) field write error: ", p), err) }
+  }
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:columnNames: ", p), err) }
+  return err
+}
+
+func (p *BindingTable) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("records", thrift.LIST, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:records: ", p), err) }
   if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Records)); err != nil {
     return thrift.PrependError("error writing list begin: ", err)
   }
@@ -3133,7 +3195,7 @@ func (p *BindingTable) writeField1(oprot thrift.Protocol) (err error) {
     return thrift.PrependError("error writing list end: ", err)
   }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:records: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:records: ", p), err) }
   return err
 }
 
@@ -3142,7 +3204,8 @@ func (p *BindingTable) String() string {
     return "<nil>"
   }
 
+  columnNamesVal := fmt.Sprintf("%v", p.ColumnNames)
   recordsVal := fmt.Sprintf("%v", p.Records)
-  return fmt.Sprintf("BindingTable({Records:%s})", recordsVal)
+  return fmt.Sprintf("BindingTable({ColumnNames:%s Records:%s})", columnNamesVal, recordsVal)
 }
 

@@ -5,8 +5,6 @@ package nebula_ng_go
 import (
 	"fmt"
 	"sync"
-
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 )
 
 type timezoneInfo struct {
@@ -19,7 +17,7 @@ type Session struct {
 	connection *connection
 	log        Logger
 	mu         sync.Mutex
-	// timezoneInfo
+	timezoneInfo
 }
 
 // TODO(Aiee) used for demo only
@@ -32,7 +30,7 @@ func NewSession(sessionID int64, connection *connection, log Logger) *Session {
 }
 
 // Execute returns the result of the given query as a ResultSet
-func (session *Session) Execute(stmt string) (*graph.ExecutionResponse, error) {
+func (session *Session) Execute(stmt string) (*ResultSet, error) {
 	session.mu.Lock()
 	defer session.mu.Unlock()
 	if session.connection == nil {
@@ -43,7 +41,12 @@ func (session *Session) Execute(stmt string) (*graph.ExecutionResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-	return resp, err
+
+	resSet, err := genResultSet(resp, session.timezoneInfo)
+	if err != nil {
+		return nil, err
+	}
+	return resSet, nil
 }
 
 // Release logs out and releases connection hold by session.

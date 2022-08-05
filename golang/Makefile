@@ -4,7 +4,7 @@ default: build
 
 build: fmt
 	go mod tidy
-	go build ./client
+	go build
 unit:
 	go mod tidy
 	go test -v -race --covermode=atomic --coverprofile coverage.out

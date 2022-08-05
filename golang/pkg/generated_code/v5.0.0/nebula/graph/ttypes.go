@@ -1318,9 +1318,11 @@ func (p *GQLStatus) String() string {
 // Attributes:
 //  - GqlStatus
 //  - Result_
+//  - PlanDesc
 type ExecutionOutcome struct {
   GqlStatus *GQLStatus `thrift:"gqlStatus,1,required" db:"gqlStatus" json:"gqlStatus"`
   Result_ *nebula0.BindingTable `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
+  PlanDesc *PlanDescription `thrift:"plan_desc,3,optional" db:"plan_desc" json:"plan_desc,omitempty"`
 }
 
 func NewExecutionOutcome() *ExecutionOutcome {
@@ -1343,12 +1345,23 @@ func (p *ExecutionOutcome) GetResult_() *nebula0.BindingTable {
   }
 return p.Result_
 }
+var ExecutionOutcome_PlanDesc_DEFAULT *PlanDescription
+func (p *ExecutionOutcome) GetPlanDesc() *PlanDescription {
+  if !p.IsSetPlanDesc() {
+    return ExecutionOutcome_PlanDesc_DEFAULT
+  }
+return p.PlanDesc
+}
 func (p *ExecutionOutcome) IsSetGqlStatus() bool {
   return p != nil && p.GqlStatus != nil
 }
 
 func (p *ExecutionOutcome) IsSetResult_() bool {
   return p != nil && p.Result_ != nil
+}
+
+func (p *ExecutionOutcome) IsSetPlanDesc() bool {
+  return p != nil && p.PlanDesc != nil
 }
 
 type ExecutionOutcomeBuilder struct {
@@ -1365,6 +1378,7 @@ func (p ExecutionOutcomeBuilder) Emit() *ExecutionOutcome{
   return &ExecutionOutcome{
     GqlStatus: p.obj.GqlStatus,
     Result_: p.obj.Result_,
+    PlanDesc: p.obj.PlanDesc,
   }
 }
 
@@ -1378,6 +1392,11 @@ func (e *ExecutionOutcomeBuilder) Result_(result *nebula0.BindingTable) *Executi
   return e
 }
 
+func (e *ExecutionOutcomeBuilder) PlanDesc(planDesc *PlanDescription) *ExecutionOutcomeBuilder {
+  e.obj.PlanDesc = planDesc
+  return e
+}
+
 func (e *ExecutionOutcome) SetGqlStatus(gqlStatus *GQLStatus) *ExecutionOutcome {
   e.GqlStatus = gqlStatus
   return e
@@ -1385,6 +1404,11 @@ func (e *ExecutionOutcome) SetGqlStatus(gqlStatus *GQLStatus) *ExecutionOutcome 
 
 func (e *ExecutionOutcome) SetResult_(result *nebula0.BindingTable) *ExecutionOutcome {
   e.Result_ = result
+  return e
+}
+
+func (e *ExecutionOutcome) SetPlanDesc(planDesc *PlanDescription) *ExecutionOutcome {
+  e.PlanDesc = planDesc
   return e
 }
 
@@ -1409,6 +1433,10 @@ func (p *ExecutionOutcome) Read(iprot thrift.Protocol) error {
       issetGqlStatus = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    case 3:
+      if err := p.ReadField3(iprot); err != nil {
         return err
       }
     default:
@@ -1445,11 +1473,20 @@ func (p *ExecutionOutcome)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
+func (p *ExecutionOutcome)  ReadField3(iprot thrift.Protocol) error {
+  p.PlanDesc = NewPlanDescription()
+  if err := p.PlanDesc.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.PlanDesc), err)
+  }
+  return nil
+}
+
 func (p *ExecutionOutcome) Write(oprot thrift.Protocol) error {
   if err := oprot.WriteStructBegin("ExecutionOutcome"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
+  if err := p.writeField3(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -1481,6 +1518,19 @@ func (p *ExecutionOutcome) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
+func (p *ExecutionOutcome) writeField3(oprot thrift.Protocol) (err error) {
+  if p.IsSetPlanDesc() {
+    if err := oprot.WriteFieldBegin("plan_desc", thrift.STRUCT, 3); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:plan_desc: ", p), err) }
+    if err := p.PlanDesc.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.PlanDesc), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 3:plan_desc: ", p), err) }
+  }
+  return err
+}
+
 func (p *ExecutionOutcome) String() string {
   if p == nil {
     return "<nil>"
@@ -1498,7 +1548,13 @@ func (p *ExecutionOutcome) String() string {
   } else {
     resultVal = fmt.Sprintf("%v", p.Result_)
   }
-  return fmt.Sprintf("ExecutionOutcome({GqlStatus:%s Result_:%s})", gqlStatusVal, resultVal)
+  var planDescVal string
+  if p.PlanDesc == nil {
+    planDescVal = "<nil>"
+  } else {
+    planDescVal = fmt.Sprintf("%v", p.PlanDesc)
+  }
+  return fmt.Sprintf("ExecutionOutcome({GqlStatus:%s Result_:%s PlanDesc:%s})", gqlStatusVal, resultVal, planDescVal)
 }
 
 // Attributes:
