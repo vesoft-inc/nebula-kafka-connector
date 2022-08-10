@@ -36,7 +36,7 @@ func runQuery(session *nebula.Session, query string) {
 	}
 	log.Info("Execution response received")
 
-	if !resp.IsSuccess() {
+	if !resp.IsSucceed() {
 		log.Fatal(fmt.Sprintf("execute failed, error: %s", string(resp.GetStatus())))
 	}
 

@@ -112,7 +112,7 @@ func TestResultSet(t *testing.T) {
 	}
 	assert.Equal(t, int64(1000), resultSetWithNil.GetLatency())
 	assert.Equal(t, "ERROR", resultSetWithNil.GetStatus())
-	assert.Equal(t, false, resultSetWithNil.IsSuccess())
+	assert.Equal(t, false, resultSetWithNil.IsSucceed())
 
 	// Fill a binding table
 	var int64 = int64(100)
@@ -135,7 +135,7 @@ func TestResultSet(t *testing.T) {
 	resultSet, _ := genResultSet(respWithData, testTimezone)
 
 	assert.Equal(t, "SUCCESS", resultSet.GetStatus())
-	assert.True(t, resultSet.IsSuccess())
+	assert.True(t, resultSet.IsSucceed())
 	assert.Equal(t, 2, len(resultSet.GetColNames()))
 
 	expectedTableStr := [][]string([][]string{[]string{"col1", "col2"}, []string{"100", "\"test_string\""}})
