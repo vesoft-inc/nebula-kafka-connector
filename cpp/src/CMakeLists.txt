@@ -156,5 +156,6 @@ nebula_add_library(
 #)
 
 nebula_add_subdirectory(client)
+nebula_add_subdirectory(datatypes/tests)
 #nebula_add_subdirectory(sclient)
 #nebula_add_subdirectory(mclient)

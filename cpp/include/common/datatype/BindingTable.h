@@ -5,6 +5,8 @@
 
 #include <cassert>
 #include <deque>
+#include <string>
+#include <vector>
 
 #include "common/datatype/Record.h"
 
@@ -60,6 +62,8 @@ public:
         }
         return columnNames;
     }
+
+    void setColumnNames(const std::vector<std::string>& colNames);
 
     void setRecordType(const RecordType& recordType) {
         recordType_ = recordType;
@@ -136,6 +140,10 @@ public:
     explicit BindingTable(const BindingTableDescriptor& desc,
                           const allocator_type& alloc = allocator_type())
             : desc_(desc, alloc), records_(alloc) {}
+
+    void setColumnNames(const std::vector<std::string>& colNames) {
+        desc_.setColumnNames(colNames);
+    }
 
     const BindingTableDescriptor& getDescriptor() const {
         return desc_;

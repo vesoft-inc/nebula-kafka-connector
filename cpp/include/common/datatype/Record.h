@@ -36,6 +36,10 @@ public:
         return fieldName_;
     }
 
+    void setFieldName(const std::string& name) {
+        fieldName_ = name;
+    }
+
     ValueType getType() const {
         return valueType_;
     }
@@ -95,6 +99,10 @@ public:
               fieldNameIndexMap_(std::move(other.fieldNameIndexMap_), alloc) {}
 
     const std::pmr::vector<FieldType>& getFieldTypes() const {
+        return fieldTypes_;
+    }
+
+    std::pmr::vector<FieldType>& getFieldTypes() {
         return fieldTypes_;
     }
 
@@ -201,7 +209,7 @@ private:
 bool operator==(const RawRecord& lhs, const RawRecord& rhs);
 bool operator!=(const RawRecord& lhs, const RawRecord& rhs);
 bool operator<(const RawRecord& lhs, const RawRecord& rhs);
-std::ostream &operator<<(std::ostream &os, const RawRecord &record);
+std::ostream& operator<<(std::ostream& os, const RawRecord& record);
 
 // Record is not used currently.
 class Record {};

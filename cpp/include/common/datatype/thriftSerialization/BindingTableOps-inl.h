@@ -73,10 +73,12 @@ void Cpp2Ops<nebula::client::BindingTable>::read(Protocol* proto,
     }
 
 _readField_columnNames : {
-    obj->records_.clear();
-    detail::pm::protocol_methods<
-            type_class::list<type_class::structure>,
-            std::pmr::deque<nebula::client::RawRecord>>::read(*proto, obj->records_);
+    obj->desc_.clear();
+    // TODO refactor table descriptor
+    std::vector<std::string> colNames;
+    detail::pm::protocol_methods<type_class::list<type_class::structure>,
+                                 std::vector<std::string>>::read(*proto, colNames);
+    obj->setColumnNames(colNames);
 }
 
     if (UNLIKELY(!readState.advanceToNextField(proto, 1, 2, protocol::T_LIST))) {
