@@ -23,7 +23,7 @@ std::string Edge::toString() const {
 }
 
 
-bool Edge::compareWithoutId(const Node& rhs) const {
+bool Edge::compareWithoutId(const Edge& rhs) const {
     return properties_ == rhs.properties_;
 }
 
