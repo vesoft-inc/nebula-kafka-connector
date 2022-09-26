@@ -141,3 +141,49 @@ func TestResultSet(t *testing.T) {
 	expectedTableStr := [][]string([][]string{[]string{"col1", "col2"}, []string{"100", "\"test_string\""}})
 	assert.Equal(t, expectedTableStr, resultSet.AsStringTable())
 }
+
+func TestString(t *testing.T) {
+	testTimezone := timezoneInfo{
+		0,
+		[]byte("UTC"),
+	}
+
+	// Node
+	{
+		rawNode := &nebula.Node{
+			1111,
+			2222,
+			map[string]*nebula.Value{
+				"key1": {StringVal: []byte("value1")},
+				"key2": {StringVal: []byte("value2")},
+			},
+		}
+
+		node, err := genNode(rawNode, testTimezone)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Equal(t, `({key1:"value1",key2:"value2"})`, node.String())
+	}
+
+	// Edge
+	{
+		rawEdge := &nebula.Edge{
+			1111,
+			2222,
+			3333,
+			4444,
+			map[string]*nebula.Value{
+				"key1": {StringVal: []byte("value1")},
+				"key2": {StringVal: []byte("value2")},
+				"key3": {StringVal: []byte("value3")},
+			},
+		}
+
+		edge, err := genEdge(rawEdge, testTimezone)
+		if err != nil {
+			t.Error(err)
+		}
+		assert.Equal(t, `[{key1:"value1",key2:"value2",key3:"value3"}]`, edge.String())
+	}
+}

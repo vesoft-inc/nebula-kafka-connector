@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"sort"
 	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
@@ -134,47 +135,45 @@ type Node struct {
 }
 
 // TODO(Aiee) For demo only
+// The properties of the node are sorted by key
 func (node *Node) String() string {
-	nodeID := node.rawNode.NodeID
-	nodeTypeID := node.rawNode.NodeTypeID
+	var keyList []string
 	var kvStr []string
-	for key, value := range node.rawNode.Properties {
-		kvTemp := fmt.Sprintf("%s: %s", key, ValueWrapper{value, node.timezoneInfo}.String())
+	for key, _ := range node.rawNode.Properties {
+		keyList = append(keyList, key)
+	}
+	sort.Strings(keyList)
+	for _, key := range keyList {
+		kvTemp := fmt.Sprintf(`%s:%s`,
+			key, ValueWrapper{node.rawNode.Properties[key], node.timezoneInfo}.String())
 		kvStr = append(kvStr, kvTemp)
 	}
 
-	// No properties
-	if len(kvStr) == 0 {
-		return fmt.Sprintf("(nodeID:%d, nodeTypeID: %d)", nodeID, nodeTypeID)
-	}
-	return fmt.Sprintf("(nodeID:%d, nodeTypeID:%d, props:{%s})", nodeID, nodeTypeID, kvStr)
+	// vid and tag are internal values now, so do not print
+	return fmt.Sprintf("({%s})", strings.Join(kvStr, ","))
 }
 
 type Edge struct {
-	edge         *nebula.Edge
+	rawEdge      *nebula.Edge
 	timezoneInfo timezoneInfo
 }
 
 // TODO(Aiee) For demo only
+// The properties of the edge are sorted by key
 func (edge *Edge) String() string {
-	srcID := edge.edge.SrcID
-	dstID := edge.edge.DstID
-	edgeTypeID := edge.edge.EdgeTypeID
-	edgeRank := edge.edge.Rank
-
+	var keyList []string
 	var kvStr []string
-	for key, value := range edge.edge.Properties {
-		kvTemp := fmt.Sprintf("%s: %s", key, ValueWrapper{value, edge.timezoneInfo}.String())
+	for key, _ := range edge.rawEdge.Properties {
+		keyList = append(keyList, key)
+	}
+	sort.Strings(keyList)
+	for _, key := range keyList {
+		kvTemp := fmt.Sprintf(`%s:%s`,
+			key, ValueWrapper{edge.rawEdge.Properties[key], edge.timezoneInfo}.String())
 		kvStr = append(kvStr, kvTemp)
 	}
 
-	// No properties
-	if len(kvStr) == 0 {
-		return fmt.Sprintf("(srcID: %d, dstID: %d, edgeTypeID: %d, edgeRank: %d)",
-			srcID, dstID, edgeTypeID, edgeRank)
-	}
-	return fmt.Sprintf("(srcID: %d, dstID: %d, edgeTypeID: %d, edgeRank: %d, props: %s)",
-		srcID, dstID, edgeTypeID, edgeRank, kvStr)
+	return fmt.Sprintf("[{%s}]", strings.Join(kvStr, ","))
 }
 
 type ErrorCode int64
@@ -249,11 +248,11 @@ func genNode(rawNode *nebula.Node, timezoneInfo timezoneInfo) (*Node, error) {
 
 func genEdge(edge *nebula.Edge, timezoneInfo timezoneInfo) (*Edge, error) {
 	if edge == nil {
-		return nil, fmt.Errorf("failed to generate Node: invalid rawNode")
+		return nil, fmt.Errorf("failed to generate Node: invalid rawEdge")
 	}
 
 	return &Edge{
-		edge:         edge,
+		rawEdge:      edge,
 		timezoneInfo: timezoneInfo,
 	}, nil
 }
