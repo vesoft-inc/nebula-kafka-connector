@@ -6,7 +6,7 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/jedib0t/go-pretty/v6 v6.0.5
 	github.com/jievince/liner v1.2.4-0.20211229025353-9af8863139ef
-	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220810062707-f21f2cd0fa55
+	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220926113505-7d21b3b92c7f
 )
 
 require (

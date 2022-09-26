@@ -38,6 +38,8 @@ github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PK
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220810062707-f21f2cd0fa55 h1:ulP/VfdFkC8UKdisiHCkiHycXLfGRO+d37/IOhiqHtI=
 github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220810062707-f21f2cd0fa55/go.mod h1:f1tsG7BLd/uz9MK37Z7rR9NjvAk3hGrLyO3xl+F0Eqg=
+github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220926113505-7d21b3b92c7f h1:oHwaa4a+jzSAusbtybpinP3ASRCww2C+kawzghZuW0I=
+github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220926113505-7d21b3b92c7f/go.mod h1:f1tsG7BLd/uz9MK37Z7rR9NjvAk3hGrLyO3xl+F0Eqg=
 golang.org/x/sync v0.0.0-20190911185100-cd5d95a43a6e/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sys v0.0.0-20180816055513-1c9583448a9c/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190222072716-a9d3bda3a223/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
