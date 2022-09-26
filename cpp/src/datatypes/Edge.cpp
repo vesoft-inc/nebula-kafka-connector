@@ -10,14 +10,21 @@ namespace nebula::client {
 
 std::string Edge::toString() const {
     std::stringstream os;
-    os << "[";
-    os << ":" << edgeTypeID_ << " ";
-    os << srcID_ << "->" << dstID_ << " ";
+    os << "[{";
+    auto n = properties_.size();
     for (const auto& item : properties_) {
-        os << item.first << ":" << item.second << ",";
+        os << item.first << ":" << item.second;
+        if (--n>0) {
+            os << ", ";
+        }
     }
-    os << "]";
+    os << "}]";
     return os.str();
+}
+
+
+bool Edge::compareWithoutId(const Node& rhs) const {
+    return properties_ == rhs.properties_;
 }
 
 bool operator==(const Edge& lhs, const Edge& rhs) {

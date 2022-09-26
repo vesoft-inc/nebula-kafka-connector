@@ -10,16 +10,20 @@ namespace nebula::client {
 
 std::string Node::toString() const {
     std::stringstream os;
-    os << "(";
-    os << nodeID_;
-    os << ":" << nodeTypeID_;
-    os << "{";
+    os << "({";
+    auto n = properties_.size();
     for (const auto& item : properties_) {
-        os << item.first << ":" << item.second << ",";
+        os << item.first << ":" << item.second;
+        if (--n > 0) {
+            os << ", ";
+        }
     }
-    os << "}";
-    os << ")";
+    os << "})";
     return os.str();
+}
+
+bool Node::compareWithoutId(const Node& rhs) const {
+    return properties_ == rhs.properties_;
 }
 
 bool operator==(const Node& lhs, const Node& rhs) {
