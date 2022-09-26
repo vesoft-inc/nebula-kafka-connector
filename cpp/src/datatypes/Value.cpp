@@ -444,6 +444,50 @@ bool operator==(const Value& lhs, const Value& rhs) {
     return false;
 }
 
+
+bool compareWithoutDynamicId(const Value& lhs, const Value& rhs) {
+    auto lType = lhs.getType();
+    auto rType = rhs.getType();
+    if (lType != rType) {
+        return false;
+    }
+    // TODO(jie): null is equal to null
+    if (lType == Value::Type::kNull) {
+        return true;
+    }
+    // TODO(jie): Consider the equality of compatible types
+    switch (lType) {
+        case Value::Type::kBool:
+            return lhs.getBool() == rhs.getBool();
+        case Value::Type::kInt8:
+            return lhs.getInt8() == rhs.getInt8();
+        case Value::Type::kInt16:
+            return lhs.getInt16() == rhs.getInt16();
+        case Value::Type::kInt32:
+            return lhs.getInt32() == rhs.getInt32();
+        case Value::Type::kInt64:
+            return lhs.getInt64() == rhs.getInt64();
+        case Value::Type::kFloat:
+            return lhs.getFloat() == rhs.getFloat();
+        case Value::Type::kDouble:
+            return lhs.getDouble() == rhs.getDouble();
+        case Value::Type::kString:
+            return lhs.getString() == rhs.getString();
+        case Value::Type::kList:
+            return compareWithoutDynamicId(lhs.getList(), rhs.getList());
+        case Value::Type::kMap:
+            return compareWithoutDynamicId(lhs.getMap(), rhs.getMap());
+        case Value::Type::kNode:
+            return compareWithoutDynamicId(lhs.getNode(), rhs.getNode());
+        case Value::Type::kEdge:
+            return compareWithoutDynamicId(lhs.getEdge(), rhs.getEdge());
+        default:
+            DLOG(FATAL) << "Unknown value type " << static_cast<int>(lType);
+    }
+
+    return false;
+}
+
 bool operator!=(const Value& lhs, const Value& rhs) {
     return !(lhs == rhs);
 }

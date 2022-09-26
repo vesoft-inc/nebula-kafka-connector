@@ -28,6 +28,22 @@ bool operator==(const Map& lhs, const Map& rhs) {
     return lhs.getValues() == rhs.getValues();
 }
 
+bool compareWithoutDynamicId(const Map& lhs, const Map& rhs) {
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    for (const auto& iter : lhs.getValues()) {
+        auto rhsIter = rhs.getValues().find(iter.first);
+        if (rhsIter == rhs.getValues().end()) {
+            return false;
+        }
+        if (!compareWithoutDynamicId(iter.second, rhsIter->second)) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool operator!=(const Map& lhs, const Map& rhs) {
     return !(lhs == rhs);
 }

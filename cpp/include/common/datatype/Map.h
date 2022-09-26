@@ -54,6 +54,7 @@ inline std::ostream& operator<<(std::ostream& os, const Map& map) {
 }
 
 bool operator==(const Map& lhs, const Map& rhs);
+bool compareWithoutDynamicId(const Map& lhs, const Map& rhs);
 bool operator!=(const Map& lhs, const Map& rhs);
 
 

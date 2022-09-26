@@ -22,13 +22,13 @@ std::string Node::toString() const {
     return os.str();
 }
 
-bool Node::compareWithoutId(const Node& rhs) const {
-    return properties_ == rhs.properties_;
-}
-
 bool operator==(const Node& lhs, const Node& rhs) {
     return lhs.getNodeID() == rhs.getNodeID() && lhs.getNodeTypeID() == rhs.getNodeTypeID() &&
            lhs.getProperties() == rhs.getProperties();
+}
+
+bool compareWithoutDynamicId(const Node& lhs, const Node& rhs) {
+    return lhs.getProperties() == rhs.getProperties();
 }
 
 bool operator!=(const Node& lhs, const Node& rhs) {

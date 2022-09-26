@@ -14,7 +14,7 @@ std::string Edge::toString() const {
     auto n = properties_.size();
     for (const auto& item : properties_) {
         os << item.first << ":" << item.second;
-        if (--n>0) {
+        if (--n > 0) {
             os << ", ";
         }
     }
@@ -23,7 +23,7 @@ std::string Edge::toString() const {
 }
 
 
-bool Edge::compareWithoutId(const Edge& rhs) const {
+bool Edge::compareWithoutDynamicId(const Edge& rhs) const {
     return properties_ == rhs.properties_;
 }
 

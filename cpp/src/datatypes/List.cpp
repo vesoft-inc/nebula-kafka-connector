@@ -26,6 +26,18 @@ bool operator==(const List& lhs, const List& rhs) {
     return lhs.getValues() == rhs.getValues();
 }
 
+bool compareWithoutDynamicId(const List& lhs, const List& rhs) {
+    if (lhs.size() != rhs.size()) {
+        return false;
+    }
+    for (size_t i = 0; i < lhs.size(); ++i) {
+        if (!compareWithoutDynamicId(lhs[i], rhs[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool operator!=(const List& lhs, const List& rhs) {
     return !(lhs == rhs);
 }

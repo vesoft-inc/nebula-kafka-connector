@@ -115,7 +115,7 @@ public:
 
     std::string toString() const;
     // Only for tck test verification
-    bool compareWithoutId(const Edge& rhs) const;
+    bool compareWithoutDynamicId(const Edge& rhs) const;
 
 private:
     // Serialization using fbthrift

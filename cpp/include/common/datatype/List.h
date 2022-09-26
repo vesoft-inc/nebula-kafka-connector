@@ -54,6 +54,7 @@ inline std::ostream& operator<<(std::ostream& os, const List& list) {
 }
 
 bool operator==(const List& lhs, const List& rhs);
+bool compareWithoutDynamicId(const List& lhs, const List& rhs);
 bool operator!=(const List& lhs, const List& rhs);
 
 

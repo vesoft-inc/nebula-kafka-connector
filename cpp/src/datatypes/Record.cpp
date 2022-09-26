@@ -26,6 +26,18 @@ bool operator==(const RawRecord& lhs, const RawRecord& rhs) {
     return lhs.getValues() == rhs.getValues();
 }
 
+bool compareWithoutDynamicId(const RawRecord& lhs, const RawRecord& rhs) {
+    if (lhs.getNumValues() != rhs.getNumValues()) {
+        return false;
+    }
+    for (size_t i = 0; i < lhs.getNumValues(); ++i) {
+        if (!compareWithoutDynamicId(lhs[i], rhs[i])) {
+            return false;
+        }
+    }
+    return true;
+}
+
 bool operator!=(const RawRecord& lhs, const RawRecord& rhs) {
     return !(lhs == rhs);
 }

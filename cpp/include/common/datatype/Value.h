@@ -356,6 +356,7 @@ inline std::ostream& operator<<(std::ostream& os, const Value& value) {
 
 // Comparison operations
 bool operator==(const Value& lhs, const Value& rhs);
+bool compareWithoutDynamicId(const Value& lhs, const Value& rhs);
 bool operator!=(const Value& lhs, const Value& rhs);
 bool operator<(const Value& lhs, const Value& rhs);
 bool operator>(const Value& lhs, const Value& rhs);

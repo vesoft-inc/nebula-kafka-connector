@@ -207,6 +207,7 @@ private:
 };
 
 bool operator==(const RawRecord& lhs, const RawRecord& rhs);
+bool compareWithoutDynamicId(const RawRecord& lhs, const RawRecord& rhs);
 bool operator!=(const RawRecord& lhs, const RawRecord& rhs);
 bool operator<(const RawRecord& lhs, const RawRecord& rhs);
 std::ostream& operator<<(std::ostream& os, const RawRecord& record);
