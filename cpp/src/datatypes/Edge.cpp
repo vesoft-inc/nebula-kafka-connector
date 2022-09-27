@@ -22,16 +22,15 @@ std::string Edge::toString() const {
     return os.str();
 }
 
-
-bool Edge::compareWithoutDynamicId(const Edge& rhs) const {
-    return properties_ == rhs.properties_;
-}
-
 bool operator==(const Edge& lhs, const Edge& rhs) {
     return lhs.getSrcID() == rhs.getSrcID() && lhs.getDstID() == rhs.getDstID() &&
            lhs.getEdgeRank() == rhs.getEdgeRank() &&
            lhs.getEdgeTypeID() == rhs.getEdgeTypeID() &&
            lhs.getProperties() == rhs.getProperties();
+}
+
+bool compareWithoutDynamicId(const Edge& lhs, const Edge& rhs) {
+    return lhs.getProperties() == rhs.getProperties();
 }
 
 bool operator!=(const Edge& lhs, const Edge& rhs) {

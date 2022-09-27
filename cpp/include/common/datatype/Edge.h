@@ -114,8 +114,6 @@ public:
     }
 
     std::string toString() const;
-    // Only for tck test verification
-    bool compareWithoutDynamicId(const Edge& rhs) const;
 
 private:
     // Serialization using fbthrift
@@ -133,6 +131,7 @@ inline std::ostream& operator<<(std::ostream& os, const Edge& edge) {
 }
 
 bool operator==(const Edge& lhs, const Edge& rhs);
+bool compareWithoutDynamicId(const Edge& lhs, const Edge& rhs);
 bool operator!=(const Edge& lhs, const Edge& rhs);
 
 }  // namespace nebula::client
