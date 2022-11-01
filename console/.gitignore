@@ -25,7 +25,7 @@ vendor/
 .vscode/
 
 # TODO(Aiee) Keep the binary in the git repository for simplicity
-# nebula-console
+nebula-console
 
 # Auto generated code by `go generate`
 box/blob.go

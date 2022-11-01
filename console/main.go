@@ -9,7 +9,6 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
@@ -48,8 +47,11 @@ var dataSetPrinter = printer.NewDataSetPrinter()
 
 var planDescPrinter = printer.NewPlanDescPrinter()
 
-/* Every statement will be repeatedly executed `g_repeats` times,
-in order to get the total and average execution time of the statement") */
+/*
+	Every statement will be repeatedly executed `g_repeats` times,
+
+in order to get the total and average execution time of the statement")
+*/
 var g_repeats = 1
 
 func welcome(interactive bool) {
@@ -358,9 +360,6 @@ func loop(c cli.Cli) error {
 			res, err := session.Execute(line)
 			if err != nil {
 				return err
-			}
-			if !res.IsSucceed() {
-				return errors.New("GQL execution failed")
 			}
 
 			if c.Output() {
