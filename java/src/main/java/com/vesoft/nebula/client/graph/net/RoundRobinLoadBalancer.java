@@ -53,7 +53,9 @@ public class RoundRobinLoadBalancer implements LoadBalancer {
 
     @Override
     public HostAddress getAddress() {
-        // TODO: update the server connection num into load balancer
+        if (pos.get() == Integer.MAX_VALUE) {
+            pos.set(0);
+        }
         int tryCount = 0;
         int newPos;
         while (++tryCount <= addresses.size()) {

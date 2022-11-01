@@ -53,7 +53,7 @@ public class Relationship extends BaseDataObject {
      *
      * @return String
      */
-    // todo 转换成edge name
+    // todo convert the edge type id to edge name
     public String edgeName() {
         return label;
     }

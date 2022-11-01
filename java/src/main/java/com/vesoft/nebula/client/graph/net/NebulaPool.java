@@ -29,16 +29,18 @@ public class NebulaPool implements Serializable {
 
     private static final long serialVersionUID = 6226487268001127885L;
 
+    private final Logger log = LoggerFactory.getLogger(NebulaPool.class);
+
     private GenericObjectPool<SyncConnection> objectPool = null;
     private LoadBalancer loadBalancer;
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     // the wait time to get idle connection, unit ms
     private int waitTime = 0;
     private AtomicBoolean hasInit = new AtomicBoolean(false);
     private AtomicBoolean isClosed = new AtomicBoolean(false);
 
     private List<HostAddress> hostToIp(List<HostAddress> addresses)
-        throws UnknownHostException {
+            throws UnknownHostException {
         List<HostAddress> newAddrs = new ArrayList<>();
         for (HostAddress addr : addresses) {
             String ip = InetAddress.getByName(addr.getHost()).getHostAddress();
@@ -50,27 +52,27 @@ public class NebulaPool implements Serializable {
     private void checkConfig(NebulaPoolConfig config) {
         if (config.getIdleTime() < 0) {
             throw new InvalidConfigException(
-                "Config idleTime:" + config.getIdleTime() + " is illegal");
+                    "Config idleTime:" + config.getIdleTime() + " is illegal");
         }
 
         if (config.getMaxConnSize() <= 0) {
             throw new InvalidConfigException(
-                "Config maxConnSize:" + config.getMaxConnSize() + " is illegal");
+                    "Config maxConnSize:" + config.getMaxConnSize() + " is illegal");
         }
 
         if (config.getMinConnSize() < 0 || config.getMinConnSize() > config.getMaxConnSize()) {
             throw new InvalidConfigException(
-                "Config minConnSize:" + config.getMinConnSize() + " is illegal");
+                    "Config minConnSize:" + config.getMinConnSize() + " is illegal");
         }
 
         if (config.getTimeout() < 0) {
             throw new InvalidConfigException(
-                "Config timeout:" + config.getTimeout() + " is illegal");
+                    "Config timeout:" + config.getTimeout() + " is illegal");
         }
 
         if (config.getWaitTime() < 0) {
             throw new InvalidConfigException(
-                "Config waitTime:" + config.getWaitTime() + " is illegal");
+                    "Config waitTime:" + config.getWaitTime() + " is illegal");
         }
 
         if (config.getMinClusterHealthRate() < 0) {
@@ -82,14 +84,13 @@ public class NebulaPool implements Serializable {
 
     /**
      * @param addresses the graphd services addresses
-     * @param config the config for the pool
-     * @return boolean if all graph services are ok, return true,
-     *         if some of them broken return false
-     * @throws UnknownHostException if host address is illegal
+     * @param config    the config for the pool
+     * @return boolean if all graph services are ok, return true, else return false
+     * @throws UnknownHostException   if host address is illegal
      * @throws InvalidConfigException if config is illegal
      */
     public boolean init(List<HostAddress> addresses, NebulaPoolConfig config)
-        throws UnknownHostException, InvalidConfigException {
+            throws UnknownHostException, InvalidConfigException {
         checkInit();
         hasInit.set(true);
         checkConfig(config);
@@ -107,11 +108,11 @@ public class NebulaPool implements Serializable {
         objConfig.setMaxIdle(config.getMaxConnSize());
         objConfig.setMaxTotal(config.getMaxConnSize());
         objConfig.setTimeBetweenEvictionRunsMillis(config.getIntervalIdle() <= 0
-            ? BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS
-            : config.getIntervalIdle());
+                ? BaseObjectPoolConfig.DEFAULT_TIME_BETWEEN_EVICTION_RUNS_MILLIS
+                : config.getIntervalIdle());
         objConfig.setSoftMinEvictableIdleTimeMillis(config.getIdleTime() <= 0
-            ? BaseObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS
-            : config.getIdleTime());
+                ? BaseObjectPoolConfig.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MILLIS
+                : config.getIdleTime());
         this.objectPool.setConfig(objConfig);
 
         AbandonedConfig abandonedConfig = new AbandonedConfig();
@@ -132,13 +133,14 @@ public class NebulaPool implements Serializable {
 
     /**
      * get a session from the NebulaPool
-     * @param userName the userName to authenticate with nebula-graph
-     * @param password the password to authenticate with nebula-graph
+     *
+     * @param userName  the userName to authenticate with nebula-graph
+     * @param password  the password to authenticate with nebula-graph
      * @param reconnect whether to retry after the connection is disconnected
      * @return Session
      * @throws NotValidConnectionException if get connection failed
-     * @throws IOErrorException if get unexpected exception
-     * @throws AuthFailedException if authenticate failed
+     * @throws IOErrorException            if get unexpected exception
+     * @throws AuthFailedException         if authenticate failed
      */
     public Session getSession(String userName, String password, boolean reconnect)
             throws NotValidConnectionException, IOErrorException, AuthFailedException,
@@ -161,6 +163,7 @@ public class NebulaPool implements Serializable {
 
     /**
      * Get the number of connections was used by users
+     *
      * @return the active connection number
      */
     public int getActiveConnNum() {
@@ -170,6 +173,7 @@ public class NebulaPool implements Serializable {
 
     /**
      * Get the number of free connections in the pool
+     *
      * @return the idle connection number
      */
     public int getIdleConnNum() {
@@ -179,6 +183,7 @@ public class NebulaPool implements Serializable {
 
     /**
      * Get the number of waits in a waiting get connection
+     *
      * @return the waiting connection number
      */
     public int getWaitersNum() {
@@ -193,12 +198,13 @@ public class NebulaPool implements Serializable {
     protected void updateServerStatus() {
         checkNoInitAndClosed();
         if (objectPool.getFactory() instanceof ConnObjectPool) {
-            ((ConnObjectPool)objectPool.getFactory()).updateServerStatus();
+            ((ConnObjectPool) objectPool.getFactory()).updateServerStatus();
         }
     }
 
     /**
      * Set the connection is invalidate, and the object pool will destroy it
+     *
      * @param connection the invalidate connection
      */
     protected void setInvalidateConnection(SyncConnection connection) {
@@ -212,6 +218,7 @@ public class NebulaPool implements Serializable {
 
     /**
      * Return the connection to object pool
+     *
      * @param connection the return connection
      */
     protected void returnConnection(SyncConnection connection) {
@@ -231,15 +238,15 @@ public class NebulaPool implements Serializable {
     private void checkNoInit() throws RuntimeException {
         if (!hasInit.get()) {
             throw new RuntimeException(
-                "The pool has not been initialized, please initialize it first.");
+                    "The pool has not been initialized, please initialize it first.");
         }
     }
 
     private void checkInit() throws RuntimeException {
         if (hasInit.get()) {
             throw new RuntimeException(
-                "The pool has already been initialized. "
-                    + "Please do not initialize the pool repeatedly.");
+                    "The pool has already been initialized. "
+                            + "Please do not initialize the pool repeatedly.");
         }
     }
 

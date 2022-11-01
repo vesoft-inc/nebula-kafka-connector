@@ -15,7 +15,6 @@ import com.vesoft.nebula.graph.ExecutionResponse;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,12 +34,13 @@ public class Session implements Serializable {
 
     private static final long serialVersionUID = -8855886967097862376L;
 
+    private static final Logger log = LoggerFactory.getLogger(Session.class);
+
     private final long sessionID;
     private SyncConnection connection;
     private final NebulaPool pool;
     private final Boolean retryConnect;
     private final AtomicBoolean connectionIsBroken = new AtomicBoolean(false);
-    private final Logger log = LoggerFactory.getLogger(getClass());
 
     /**
      * Constructor
@@ -124,16 +124,6 @@ public class Session implements Serializable {
     }
 
     /**
-     * check current session is ok
-     */
-    public synchronized boolean pingSession() {
-        if (connection == null) {
-            return false;
-        }
-        return connection.ping(sessionID);
-    }
-
-    /**
      * Notifies the server that the session is no longer needed
      * and returns the connection to the pool,
      * and the connection will be reuse.
@@ -206,7 +196,7 @@ public class Session implements Serializable {
      * @param value java obj
      * @return nebula value
      */
-    public static Value value2Nvalue(Object value) throws UnsupportedOperationException {
+    private static Value value2Nvalue(Object value) throws UnsupportedOperationException {
         Value nvalue = new Value();
         if (value == null) {
             // TODO nvalue.set(NullType.__NULL__);

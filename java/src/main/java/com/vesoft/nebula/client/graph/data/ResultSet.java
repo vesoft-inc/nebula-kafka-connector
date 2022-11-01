@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
+import com.vesoft.nebula.BindingTable;
 import com.vesoft.nebula.RawRecord;
 import com.vesoft.nebula.Value;
 import com.vesoft.nebula.graph.ExecutionResponse;
@@ -127,12 +128,12 @@ public class ResultSet {
     }
 
     public ResultSet(ExecutionResponse resp) {
-        if (resp == null) {
-            throw new RuntimeException("Input an null `ExecutionResponse' object");
+        if (resp == null || resp.executionOutcome == null) {
+            throw new RuntimeException("got null object for server's response");
         }
         this.response = resp;
-        if (resp.executionOutcome != null
-                && resp.executionOutcome.result != null
+
+        if (resp.executionOutcome.result != null
                 && resp.executionOutcome.result.columnNames != null) {
             // space name's charset is 'utf-8'
             for (byte[] column : resp.executionOutcome.result.columnNames) {
@@ -212,10 +213,11 @@ public class ResultSet {
      * @return int
      */
     public int rowsSize() {
-        if (response.executionOutcome.result.records == null) {
+        BindingTable result = response.executionOutcome.result;
+        if (result == null || result.records == null) {
             return 0;
         }
-        return response.executionOutcome.result.records.size();
+        return result.records.size();
     }
 
     /**
