@@ -20,5 +20,3 @@ require (
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/vesoft-inc/nebula-ng-tools/golang => /home/jie.wang/nebula-ng-tools/golang
