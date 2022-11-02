@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/console/box"
 	"github.com/vesoft-inc/nebula-ng-tools/console/cli"
 	"github.com/vesoft-inc/nebula-ng-tools/console/printer"
 	nebulago "github.com/vesoft-inc/nebula-ng-tools/golang"
@@ -77,34 +78,33 @@ func printConsoleResp(msg string) {
 	fmt.Println()
 }
 
-// TODO(Aiee) Add some data for quick demo
-// func playData(data string) (string, error) {
-// 	boxfilePath := "/" + data + ".ngql"
-// 	posixfilePath := "./data/" + data + ".ngql"
-// 	var c cli.Cli
-// 	// First find it in directory ./data/. If not found, then find it in the embedded box
-// 	if fd, err := os.Open(posixfilePath); err == nil {
-// 		c = cli.NewnCli(fd, false, "", func() { fd.Close() })
-// 	} else if box.Has(boxfilePath) {
-// 		fileStr := string(box.Get(boxfilePath))
-// 		c = cli.NewnCli(strings.NewReader(fileStr), false, "", nil)
-// 	} else {
-// 		return "", fmt.Errorf("file %s.ngql not existed in embed box and file directory ./data/ ", data)
-// 	}
+func playData(data string) error {
+	boxfilePath := "/" + data + ".ngql"
+	posixfilePath := "./data/" + data + ".ngql"
+	var c cli.Cli
+	// First find it in directory ./data/. If not found, then find it in the embedded box
+	if fd, err := os.Open(posixfilePath); err == nil {
+		c = cli.NewnCli(fd, false, "", func() { fd.Close() })
+	} else if box.Has(boxfilePath) {
+		fileStr := string(box.Get(boxfilePath))
+		c = cli.NewnCli(strings.NewReader(fileStr), false, "", nil)
+	} else {
+		return fmt.Errorf("file %s.ngql not existed in embed box and file directory ./data/ ", data)
+	}
 
-// 	c.PlayingData(true)
-// 	defer c.PlayingData(false)
-// 	fmt.Printf("Start loading dataset %s...\n", data)
-// 	err := loop(c)
-// 	if err != nil {
-// 		return "", err
-// 	}
-// 	respErr := c.GetRespError()
-// 	if respErr != "" {
-// 		return "", fmt.Errorf(respErr)
-// 	}
-// 	return c.GetSpace(), nil
-// }
+	c.PlayingData(true)
+	defer c.PlayingData(false)
+	fmt.Printf("Start loading dataset %s...\n", data)
+	err := loop(c)
+	if err != nil {
+		return err
+	}
+	respErr := c.GetRespError()
+	if respErr != "" {
+		return fmt.Errorf(respErr)
+	}
+	return nil
+}
 
 func defineParams(args string) {
 	argsRewritten := strings.Replace(args, "'", "\"", -1)
@@ -246,14 +246,14 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 		dataSetPrinter.ExportCsv(args[0])
 	case ExportDot:
 		planDescPrinter.ExportDot(args[0])
-	// case PlayData:
-	// 	newSpace, err := playData(args[0])
-	// 	if err != nil {
-	// 		printConsoleResp("Error: load dataset failed, " + err.Error())
-	// 	} else {
-	// 		printConsoleResp("Load dataset succeeded!")
-	// 		c.SetSpace(newSpace)
-	// 	}
+	case PlayData:
+		err := playData(args[0])
+		if err != nil {
+			printConsoleResp("Error: load dataset failed, " + err.Error())
+		} else {
+			printConsoleResp("Load dataset succeeded!")
+			// c.SetSpace(newSpace)
+		}
 	case Sleep:
 		i, err := strconv.Atoi(args[0])
 		if err != nil {
