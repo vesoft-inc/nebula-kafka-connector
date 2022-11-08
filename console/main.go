@@ -534,7 +534,7 @@ func main() {
 
 	// Build connection
 	connection := nebulago.NewConnection(hostAddr)
-	err = connection.Open(hostAddr, 1000*time.Millisecond, nil)
+	err = connection.Open(hostAddr, time.Duration(*timeout)*time.Millisecond, nil)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
