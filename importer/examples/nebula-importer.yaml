@@ -1,0 +1,117 @@
+client:
+  addresses:
+    - "192.168.8.6:39669"
+  user: root
+  password: nebula
+  concurrencyPerAddress: 1
+  reconnectInitialInterval: 1s
+  retry: 3
+  retryInitialInterval: 1s
+graph:
+  name: ldbc
+  nodes:
+    - name: Person
+      id:
+        name: "id"
+        type: "INT"
+        index: 0
+      props:
+        - name: "firstName"
+          type: "STRING"
+          index: 1
+        - name: "lastName"
+          type: "STRING"
+          index: 2
+        - name: "gender"
+          type: "STRING"
+          index: 3
+        - name: "birthday"
+          type: "STRING"
+          index: 4
+        - name: "creationDate"
+          type: "INT"
+          index: 5
+        - name: "locationIP"
+          type: "STRING"
+          index: 6
+        - name: "browserUsed"
+          type: "STRING"
+          index: 7
+        - name: "browserUsed"
+          type: "STRING"
+          index: 8
+          ignore: true
+      sources:
+        - path: ./examples/person.csv
+  edges:
+    - name: KNOWS
+      src:
+        name: Person
+        id:
+          name: "id"
+          type: "INT"
+          index: 0
+      dst:
+        name: Person
+        id:
+          name: "id"
+          type: "INT"
+          index: 1
+      props:
+        - name: "creationDate"
+          type: "INT"
+          index: 2
+      sources:
+        - path: ./examples/knows.csv
+  batch: 10
+  readerConcurrency: 10
+  importerConcurrency: 10
+  statsInterval: 1s
+  hooks:
+    before:
+      - statements:
+        - |
+          CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS GRAPH TYPE {
+          (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, kind STRING}),
+          (Forum(id) LABEL Forum {id INT, title STRING, creationDate INT}),
+          (Comment(id) LABELS Comment&Message {id INT, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT}),
+          (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate INT, locationIP STRING, browserUsed STRING}),
+          (Tag(id) LABEL Tag {id INT, name STRING, url STRING}),
+          (Post(id) LABELS Post&Message {id INT, imageFile STRING, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT, language STRING}),
+          (TagClass(id) LABEL TagClass {id INT, name STRING, url STRING}),
+          (Organisation(id) LABELS University&Company {id INT, kind STRING, name STRING, url STRING}),
+          (Person)-[HAS_INTEREST:HAS_INTEREST]->(Tag),
+          (Person)-[WORK_AT:WORK_AT{workFrom INT}]->(Organisation),
+          (Person)-[IS_LOCATED_IN_1:IS_LOCATED_IN]->(Place),
+          (Comment)-[IS_LOCATED_IN_2:IS_LOCATED_IN]->(Place),
+          (Post)-[IS_LOCATED_IN_3:IS_LOCATED_IN]->(Place),
+          (Organisation)-[IS_LOCATED_IN_4:IS_LOCATED_IN]->(Place),
+          (Place)-[IS_PART_OF:IS_PART_OF]->(Place),
+          (Tag)-[HAS_TYPE:HAS_TYPE]->(TagClass),
+          (Comment)-[REPLY_OF_1:REPLY_OF]->(Post),
+          (Comment)-[REPLY_OF_2:REPLY_OF]->(Comment),
+          (Person)-[KNOWS:KNOWS{creationDate INT}]->(Person),
+          (Forum)-[CONTAINER_OF:CONTAINER_OF]->(Post),
+          (Forum)-[HAS_MEMBER:HAS_MEMBER]->(Person),
+          (Forum)-[HAS_MODERATOR:HAS_MODERATOR]->(Person),
+          (Person)-[STUDY_AT:STUDY_AT{classYear INT}]->(Organisation),
+          (TagClass)-[IS_SUBCLASS_OF:IS_SUBCLASS_OF]->(TagClass),
+          (Forum)-[HAS_TAG_1:HAS_TAG]->(Tag),
+          (Post)-[HAS_TAG_2:HAS_TAG]->(Tag),
+          (Comment)-[HAS_TAG_3:HAS_TAG]->(Tag),
+          (Post)-[HAS_CREATOR_1:HAS_CREATOR]->(Person),
+          (Comment)-[HAS_CREATOR_2:HAS_CREATOR]->(Person),
+          (Person)-[LIKES_1:LIKES{creationDate INT}]->(Post),
+          (Person)-[LIKES_2:LIKES{creationDate INT}]->(Comment)}
+        wait: 1s
+      - statements:
+          - CREATE GRAPH ldbc IF NOT EXISTS OF ldbc_type
+        wait: 1s
+log:
+  level: INGO
+  console: true
+  files:
+   - logs/nebula-importer.log
+  fields:
+    - key: app
+      value: nebula-importer
