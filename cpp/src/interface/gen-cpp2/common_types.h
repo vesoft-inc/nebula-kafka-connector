@@ -16,6 +16,10 @@
 #include "common/datatype/thriftSerialization/NodeOps-inl.h"
 #include "common/datatype/thriftSerialization/EdgeOps-inl.h"
 #include "common/datatype/thriftSerialization/RecordOps-inl.h"
+#include "common/datatype/thriftSerialization/DateOps-inl.h"
+#include "common/datatype/thriftSerialization/DatetimeOps-inl.h"
+#include "common/datatype/thriftSerialization/TimeOps-inl.h"
+#include "common/datatype/thriftSerialization/DurationOps-inl.h"
 #include "common/datatype/thriftSerialization/BindingTableOps-inl.h"
 
 namespace apache {
@@ -30,6 +34,23 @@ struct dstID;
 struct edgeTypeID;
 struct rank;
 struct properties;
+struct seconds;
+struct microseconds;
+struct months;
+struct year;
+struct month;
+struct day;
+struct hour;
+struct minute;
+struct sec;
+struct microsec;
+struct year;
+struct month;
+struct day;
+struct hour;
+struct minute;
+struct sec;
+struct microsec;
 struct boolVal;
 struct int8Val;
 struct int16Val;
@@ -42,6 +63,10 @@ struct listVal;
 struct mapVal;
 struct nodeVal;
 struct edgeVal;
+struct durationVal;
+struct localTimeVal;
+struct dateVal;
+struct localDatetimeVal;
 struct filedName;
 struct valueType;
 struct fieldType;
@@ -86,6 +111,74 @@ APACHE_THRIFT_DEFINE_ACCESSOR(rank);
 #ifndef APACHE_THRIFT_ACCESSOR_properties
 #define APACHE_THRIFT_ACCESSOR_properties
 APACHE_THRIFT_DEFINE_ACCESSOR(properties);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_seconds
+#define APACHE_THRIFT_ACCESSOR_seconds
+APACHE_THRIFT_DEFINE_ACCESSOR(seconds);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_microseconds
+#define APACHE_THRIFT_ACCESSOR_microseconds
+APACHE_THRIFT_DEFINE_ACCESSOR(microseconds);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_months
+#define APACHE_THRIFT_ACCESSOR_months
+APACHE_THRIFT_DEFINE_ACCESSOR(months);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_year
+#define APACHE_THRIFT_ACCESSOR_year
+APACHE_THRIFT_DEFINE_ACCESSOR(year);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_month
+#define APACHE_THRIFT_ACCESSOR_month
+APACHE_THRIFT_DEFINE_ACCESSOR(month);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_day
+#define APACHE_THRIFT_ACCESSOR_day
+APACHE_THRIFT_DEFINE_ACCESSOR(day);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_hour
+#define APACHE_THRIFT_ACCESSOR_hour
+APACHE_THRIFT_DEFINE_ACCESSOR(hour);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_minute
+#define APACHE_THRIFT_ACCESSOR_minute
+APACHE_THRIFT_DEFINE_ACCESSOR(minute);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_sec
+#define APACHE_THRIFT_ACCESSOR_sec
+APACHE_THRIFT_DEFINE_ACCESSOR(sec);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_microsec
+#define APACHE_THRIFT_ACCESSOR_microsec
+APACHE_THRIFT_DEFINE_ACCESSOR(microsec);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_year
+#define APACHE_THRIFT_ACCESSOR_year
+APACHE_THRIFT_DEFINE_ACCESSOR(year);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_month
+#define APACHE_THRIFT_ACCESSOR_month
+APACHE_THRIFT_DEFINE_ACCESSOR(month);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_day
+#define APACHE_THRIFT_ACCESSOR_day
+APACHE_THRIFT_DEFINE_ACCESSOR(day);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_hour
+#define APACHE_THRIFT_ACCESSOR_hour
+APACHE_THRIFT_DEFINE_ACCESSOR(hour);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_minute
+#define APACHE_THRIFT_ACCESSOR_minute
+APACHE_THRIFT_DEFINE_ACCESSOR(minute);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_sec
+#define APACHE_THRIFT_ACCESSOR_sec
+APACHE_THRIFT_DEFINE_ACCESSOR(sec);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_microsec
+#define APACHE_THRIFT_ACCESSOR_microsec
+APACHE_THRIFT_DEFINE_ACCESSOR(microsec);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_boolVal
 #define APACHE_THRIFT_ACCESSOR_boolVal
@@ -134,6 +227,22 @@ APACHE_THRIFT_DEFINE_ACCESSOR(nodeVal);
 #ifndef APACHE_THRIFT_ACCESSOR_edgeVal
 #define APACHE_THRIFT_ACCESSOR_edgeVal
 APACHE_THRIFT_DEFINE_ACCESSOR(edgeVal);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_durationVal
+#define APACHE_THRIFT_ACCESSOR_durationVal
+APACHE_THRIFT_DEFINE_ACCESSOR(durationVal);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_localTimeVal
+#define APACHE_THRIFT_ACCESSOR_localTimeVal
+APACHE_THRIFT_DEFINE_ACCESSOR(localTimeVal);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_dateVal
+#define APACHE_THRIFT_ACCESSOR_dateVal
+APACHE_THRIFT_DEFINE_ACCESSOR(dateVal);
+#endif
+#ifndef APACHE_THRIFT_ACCESSOR_localDatetimeVal
+#define APACHE_THRIFT_ACCESSOR_localDatetimeVal
+APACHE_THRIFT_DEFINE_ACCESSOR(localDatetimeVal);
 #endif
 #ifndef APACHE_THRIFT_ACCESSOR_filedName
 #define APACHE_THRIFT_ACCESSOR_filedName
@@ -184,6 +293,10 @@ enum class ValueType {
   kMap = 10,
   kNode = 11,
   kEdge = 12,
+  kDuration = 13,
+  kLocalTime = 14,
+  kDate = 15,
+  kLocalDatetime = 16,
 };
 
 
@@ -382,7 +495,7 @@ template <> struct TEnumDataStorage<::nebula::cpp2::ValueType>;
 template <> struct TEnumTraits<::nebula::cpp2::ValueType> {
   using type = ::nebula::cpp2::ValueType;
 
-  static constexpr std::size_t const size = 13;
+  static constexpr std::size_t const size = 17;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 
@@ -390,7 +503,7 @@ template <> struct TEnumTraits<::nebula::cpp2::ValueType> {
   static bool findValue(char const* name, type* out);
 
   static constexpr type min() { return type::kNull; }
-  static constexpr type max() { return type::kEdge; }
+  static constexpr type max() { return type::kLocalDatetime; }
 };
 
 
@@ -436,6 +549,10 @@ class NList;
 class NMap;
 class Node;
 class Edge;
+class Duration;
+class Date;
+class LocalTime;
+class LocalDatetime;
 class Value;
 class FieldType;
 class RecordType;
@@ -1190,6 +1307,1168 @@ uint32_t Edge::read(Protocol_* iprot) {
 
 }} // nebula::cpp2
 namespace nebula { namespace cpp2 {
+class Duration final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
+
+ public:
+  using __fbthrift_cpp2_type = Duration;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  Duration() :
+      __fbthrift_field_seconds(),
+      __fbthrift_field_microseconds(),
+      __fbthrift_field_months() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  Duration(apache::thrift::FragileConstructor, ::std::int64_t seconds__arg, ::std::int32_t microseconds__arg, ::std::int32_t months__arg);
+
+  Duration(Duration&&) = default;
+
+  Duration(const Duration&) = default;
+
+
+  Duration& operator=(Duration&&) = default;
+
+  Duration& operator=(const Duration&) = default;
+  void __clear();
+ private:
+  ::std::int64_t __fbthrift_field_seconds;
+ private:
+  ::std::int32_t __fbthrift_field_microseconds;
+ private:
+  ::std::int32_t __fbthrift_field_months;
+ private:
+  apache::thrift::detail::isset_bitset<3, false> __isset;
+
+ public:
+
+  bool operator==(const Duration&) const;
+  bool operator<(const Duration&) const;
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> seconds_ref() const& {
+    return {this->__fbthrift_field_seconds, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> seconds_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_seconds), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> seconds_ref() & {
+    return {this->__fbthrift_field_seconds, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> seconds_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_seconds), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> seconds() const& {
+    return {this->__fbthrift_field_seconds, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> seconds() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_seconds), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> seconds() & {
+    return {this->__fbthrift_field_seconds, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int64_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> seconds() && {
+    return {static_cast<T&&>(this->__fbthrift_field_seconds), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> microseconds_ref() const& {
+    return {this->__fbthrift_field_microseconds, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> microseconds_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_microseconds), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> microseconds_ref() & {
+    return {this->__fbthrift_field_microseconds, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> microseconds_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_microseconds), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> microseconds() const& {
+    return {this->__fbthrift_field_microseconds, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> microseconds() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_microseconds), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> microseconds() & {
+    return {this->__fbthrift_field_microseconds, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> microseconds() && {
+    return {static_cast<T&&>(this->__fbthrift_field_microseconds), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> months_ref() const& {
+    return {this->__fbthrift_field_months, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> months_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_months), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> months_ref() & {
+    return {this->__fbthrift_field_months, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> months_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_months), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> months() const& {
+    return {this->__fbthrift_field_months, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> months() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_months), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> months() & {
+    return {this->__fbthrift_field_months, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> months() && {
+    return {static_cast<T&&>(this->__fbthrift_field_months), __isset.at(2), __isset.bit(2)};
+  }
+
+  ::std::int64_t get_seconds() const {
+    return __fbthrift_field_seconds;
+  }
+
+  [[deprecated("Use `FOO.seconds_ref() = BAR;` instead of `FOO.set_seconds(BAR);`")]]
+  ::std::int64_t& set_seconds(::std::int64_t seconds_) {
+    seconds_ref() = seconds_;
+    return __fbthrift_field_seconds;
+  }
+
+  ::std::int32_t get_microseconds() const {
+    return __fbthrift_field_microseconds;
+  }
+
+  [[deprecated("Use `FOO.microseconds_ref() = BAR;` instead of `FOO.set_microseconds(BAR);`")]]
+  ::std::int32_t& set_microseconds(::std::int32_t microseconds_) {
+    microseconds_ref() = microseconds_;
+    return __fbthrift_field_microseconds;
+  }
+
+  ::std::int32_t get_months() const {
+    return __fbthrift_field_months;
+  }
+
+  [[deprecated("Use `FOO.months_ref() = BAR;` instead of `FOO.set_months(BAR);`")]]
+  ::std::int32_t& set_months(::std::int32_t months_) {
+    months_ref() = months_;
+    return __fbthrift_field_months;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<Duration>;
+  friend void swap(Duration& a, Duration& b);
+};
+
+template <class Protocol_>
+uint32_t Duration::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // nebula::cpp2
+namespace nebula { namespace cpp2 {
+class Date final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
+
+ public:
+  using __fbthrift_cpp2_type = Date;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  Date() :
+      __fbthrift_field_year(),
+      __fbthrift_field_month(),
+      __fbthrift_field_day() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  Date(apache::thrift::FragileConstructor, ::std::int16_t year__arg, ::std::int8_t month__arg, ::std::int8_t day__arg);
+
+  Date(Date&&) noexcept;
+
+  Date(const Date& src);
+
+
+  Date& operator=(Date&&) noexcept;
+  Date& operator=(const Date& src);
+  void __clear();
+ private:
+  ::std::int16_t __fbthrift_field_year;
+ private:
+  ::std::int8_t __fbthrift_field_month;
+ private:
+  ::std::int8_t __fbthrift_field_day;
+ private:
+  apache::thrift::detail::isset_bitset<3, false> __isset;
+
+ public:
+
+  bool operator==(const Date&) const;
+  bool operator<(const Date&) const;
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> year_ref() const& {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> year_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> year_ref() & {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> year_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> year() const& {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> year() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> year() & {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> year() && {
+    return {static_cast<T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> month_ref() const& {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> month_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> month_ref() & {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> month_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> month() const& {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> month() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> month() & {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> month() && {
+    return {static_cast<T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> day_ref() const& {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> day_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> day_ref() & {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> day_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> day() const& {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> day() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> day() & {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> day() && {
+    return {static_cast<T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  ::std::int16_t get_year() const {
+    return __fbthrift_field_year;
+  }
+
+  [[deprecated("Use `FOO.year_ref() = BAR;` instead of `FOO.set_year(BAR);`")]]
+  ::std::int16_t& set_year(::std::int16_t year_) {
+    year_ref() = year_;
+    return __fbthrift_field_year;
+  }
+
+  ::std::int8_t get_month() const {
+    return __fbthrift_field_month;
+  }
+
+  [[deprecated("Use `FOO.month_ref() = BAR;` instead of `FOO.set_month(BAR);`")]]
+  ::std::int8_t& set_month(::std::int8_t month_) {
+    month_ref() = month_;
+    return __fbthrift_field_month;
+  }
+
+  ::std::int8_t get_day() const {
+    return __fbthrift_field_day;
+  }
+
+  [[deprecated("Use `FOO.day_ref() = BAR;` instead of `FOO.set_day(BAR);`")]]
+  ::std::int8_t& set_day(::std::int8_t day_) {
+    day_ref() = day_;
+    return __fbthrift_field_day;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<Date>;
+  friend void swap(Date& a, Date& b);
+};
+
+template <class Protocol_>
+uint32_t Date::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // nebula::cpp2
+namespace nebula { namespace cpp2 {
+class LocalTime final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
+
+ public:
+  using __fbthrift_cpp2_type = LocalTime;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  LocalTime() :
+      __fbthrift_field_hour(),
+      __fbthrift_field_minute(),
+      __fbthrift_field_sec(),
+      __fbthrift_field_microsec() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  LocalTime(apache::thrift::FragileConstructor, ::std::int8_t hour__arg, ::std::int8_t minute__arg, ::std::int8_t sec__arg, ::std::int32_t microsec__arg);
+
+  LocalTime(LocalTime&&) noexcept;
+
+  LocalTime(const LocalTime& src);
+
+
+  LocalTime& operator=(LocalTime&&) noexcept;
+  LocalTime& operator=(const LocalTime& src);
+  void __clear();
+ private:
+  ::std::int8_t __fbthrift_field_hour;
+ private:
+  ::std::int8_t __fbthrift_field_minute;
+ private:
+  ::std::int8_t __fbthrift_field_sec;
+ private:
+  ::std::int32_t __fbthrift_field_microsec;
+ private:
+  apache::thrift::detail::isset_bitset<4, false> __isset;
+
+ public:
+
+  bool operator==(const LocalTime&) const;
+  bool operator<(const LocalTime&) const;
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> hour_ref() const& {
+    return {this->__fbthrift_field_hour, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> hour_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_hour), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> hour_ref() & {
+    return {this->__fbthrift_field_hour, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> hour_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_hour), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> hour() const& {
+    return {this->__fbthrift_field_hour, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> hour() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_hour), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> hour() & {
+    return {this->__fbthrift_field_hour, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> hour() && {
+    return {static_cast<T&&>(this->__fbthrift_field_hour), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> minute_ref() const& {
+    return {this->__fbthrift_field_minute, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> minute_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_minute), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> minute_ref() & {
+    return {this->__fbthrift_field_minute, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> minute_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_minute), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> minute() const& {
+    return {this->__fbthrift_field_minute, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> minute() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_minute), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> minute() & {
+    return {this->__fbthrift_field_minute, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> minute() && {
+    return {static_cast<T&&>(this->__fbthrift_field_minute), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> sec_ref() const& {
+    return {this->__fbthrift_field_sec, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> sec_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_sec), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> sec_ref() & {
+    return {this->__fbthrift_field_sec, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> sec_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_sec), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> sec() const& {
+    return {this->__fbthrift_field_sec, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> sec() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_sec), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> sec() & {
+    return {this->__fbthrift_field_sec, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> sec() && {
+    return {static_cast<T&&>(this->__fbthrift_field_sec), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> microsec_ref() const& {
+    return {this->__fbthrift_field_microsec, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> microsec_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_microsec), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> microsec_ref() & {
+    return {this->__fbthrift_field_microsec, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> microsec_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_microsec), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> microsec() const& {
+    return {this->__fbthrift_field_microsec, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> microsec() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_microsec), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> microsec() & {
+    return {this->__fbthrift_field_microsec, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> microsec() && {
+    return {static_cast<T&&>(this->__fbthrift_field_microsec), __isset.at(3), __isset.bit(3)};
+  }
+
+  ::std::int8_t get_hour() const {
+    return __fbthrift_field_hour;
+  }
+
+  [[deprecated("Use `FOO.hour_ref() = BAR;` instead of `FOO.set_hour(BAR);`")]]
+  ::std::int8_t& set_hour(::std::int8_t hour_) {
+    hour_ref() = hour_;
+    return __fbthrift_field_hour;
+  }
+
+  ::std::int8_t get_minute() const {
+    return __fbthrift_field_minute;
+  }
+
+  [[deprecated("Use `FOO.minute_ref() = BAR;` instead of `FOO.set_minute(BAR);`")]]
+  ::std::int8_t& set_minute(::std::int8_t minute_) {
+    minute_ref() = minute_;
+    return __fbthrift_field_minute;
+  }
+
+  ::std::int8_t get_sec() const {
+    return __fbthrift_field_sec;
+  }
+
+  [[deprecated("Use `FOO.sec_ref() = BAR;` instead of `FOO.set_sec(BAR);`")]]
+  ::std::int8_t& set_sec(::std::int8_t sec_) {
+    sec_ref() = sec_;
+    return __fbthrift_field_sec;
+  }
+
+  ::std::int32_t get_microsec() const {
+    return __fbthrift_field_microsec;
+  }
+
+  [[deprecated("Use `FOO.microsec_ref() = BAR;` instead of `FOO.set_microsec(BAR);`")]]
+  ::std::int32_t& set_microsec(::std::int32_t microsec_) {
+    microsec_ref() = microsec_;
+    return __fbthrift_field_microsec;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<LocalTime>;
+  friend void swap(LocalTime& a, LocalTime& b);
+};
+
+template <class Protocol_>
+uint32_t LocalTime::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // nebula::cpp2
+namespace nebula { namespace cpp2 {
+class LocalDatetime final  {
+ private:
+  friend struct ::apache::thrift::detail::st::struct_private_access;
+
+  //  used by a static_assert in the corresponding source
+  static constexpr bool __fbthrift_cpp2_gen_json = false;
+  static constexpr bool __fbthrift_cpp2_gen_nimble = false;
+  static constexpr bool __fbthrift_cpp2_gen_has_thrift_uri = false;
+
+ public:
+  using __fbthrift_cpp2_type = LocalDatetime;
+  static constexpr bool __fbthrift_cpp2_is_union =
+    false;
+
+
+ public:
+
+  LocalDatetime() :
+      __fbthrift_field_year(),
+      __fbthrift_field_month(),
+      __fbthrift_field_day(),
+      __fbthrift_field_hour(),
+      __fbthrift_field_minute(),
+      __fbthrift_field_sec(),
+      __fbthrift_field_microsec() {
+  }
+  // FragileConstructor for use in initialization lists only.
+  [[deprecated("This constructor is deprecated")]]
+  LocalDatetime(apache::thrift::FragileConstructor, ::std::int16_t year__arg, ::std::int8_t month__arg, ::std::int8_t day__arg, ::std::int8_t hour__arg, ::std::int8_t minute__arg, ::std::int8_t sec__arg, ::std::int32_t microsec__arg);
+
+  LocalDatetime(LocalDatetime&&) noexcept;
+
+  LocalDatetime(const LocalDatetime& src);
+
+
+  LocalDatetime& operator=(LocalDatetime&&) noexcept;
+  LocalDatetime& operator=(const LocalDatetime& src);
+  void __clear();
+ private:
+  ::std::int16_t __fbthrift_field_year;
+ private:
+  ::std::int8_t __fbthrift_field_month;
+ private:
+  ::std::int8_t __fbthrift_field_day;
+ private:
+  ::std::int8_t __fbthrift_field_hour;
+ private:
+  ::std::int8_t __fbthrift_field_minute;
+ private:
+  ::std::int8_t __fbthrift_field_sec;
+ private:
+  ::std::int32_t __fbthrift_field_microsec;
+ private:
+  apache::thrift::detail::isset_bitset<7, false> __isset;
+
+ public:
+
+  bool operator==(const LocalDatetime&) const;
+  bool operator<(const LocalDatetime&) const;
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> year_ref() const& {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> year_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> year_ref() & {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> year_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> year() const& {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> year() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> year() & {
+    return {this->__fbthrift_field_year, __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int16_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> year() && {
+    return {static_cast<T&&>(this->__fbthrift_field_year), __isset.at(0), __isset.bit(0)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> month_ref() const& {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> month_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> month_ref() & {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> month_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> month() const& {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> month() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> month() & {
+    return {this->__fbthrift_field_month, __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> month() && {
+    return {static_cast<T&&>(this->__fbthrift_field_month), __isset.at(1), __isset.bit(1)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> day_ref() const& {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> day_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> day_ref() & {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> day_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> day() const& {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> day() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> day() & {
+    return {this->__fbthrift_field_day, __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> day() && {
+    return {static_cast<T&&>(this->__fbthrift_field_day), __isset.at(2), __isset.bit(2)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> hour_ref() const& {
+    return {this->__fbthrift_field_hour, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> hour_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_hour), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> hour_ref() & {
+    return {this->__fbthrift_field_hour, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> hour_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_hour), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> hour() const& {
+    return {this->__fbthrift_field_hour, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> hour() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_hour), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> hour() & {
+    return {this->__fbthrift_field_hour, __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> hour() && {
+    return {static_cast<T&&>(this->__fbthrift_field_hour), __isset.at(3), __isset.bit(3)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> minute_ref() const& {
+    return {this->__fbthrift_field_minute, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> minute_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_minute), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> minute_ref() & {
+    return {this->__fbthrift_field_minute, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> minute_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_minute), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> minute() const& {
+    return {this->__fbthrift_field_minute, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> minute() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_minute), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> minute() & {
+    return {this->__fbthrift_field_minute, __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> minute() && {
+    return {static_cast<T&&>(this->__fbthrift_field_minute), __isset.at(4), __isset.bit(4)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> sec_ref() const& {
+    return {this->__fbthrift_field_sec, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> sec_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_sec), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> sec_ref() & {
+    return {this->__fbthrift_field_sec, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> sec_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_sec), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> sec() const& {
+    return {this->__fbthrift_field_sec, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> sec() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_sec), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> sec() & {
+    return {this->__fbthrift_field_sec, __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int8_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> sec() && {
+    return {static_cast<T&&>(this->__fbthrift_field_sec), __isset.at(5), __isset.bit(5)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> microsec_ref() const& {
+    return {this->__fbthrift_field_microsec, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> microsec_ref() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_microsec), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> microsec_ref() & {
+    return {this->__fbthrift_field_microsec, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> microsec_ref() && {
+    return {static_cast<T&&>(this->__fbthrift_field_microsec), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&> microsec() const& {
+    return {this->__fbthrift_field_microsec, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<const T&&> microsec() const&& {
+    return {static_cast<const T&&>(this->__fbthrift_field_microsec), __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&> microsec() & {
+    return {this->__fbthrift_field_microsec, __isset.at(6), __isset.bit(6)};
+  }
+
+  template <typename..., typename T = ::std::int32_t>
+  FOLLY_ERASE ::apache::thrift::field_ref<T&&> microsec() && {
+    return {static_cast<T&&>(this->__fbthrift_field_microsec), __isset.at(6), __isset.bit(6)};
+  }
+
+  ::std::int16_t get_year() const {
+    return __fbthrift_field_year;
+  }
+
+  [[deprecated("Use `FOO.year_ref() = BAR;` instead of `FOO.set_year(BAR);`")]]
+  ::std::int16_t& set_year(::std::int16_t year_) {
+    year_ref() = year_;
+    return __fbthrift_field_year;
+  }
+
+  ::std::int8_t get_month() const {
+    return __fbthrift_field_month;
+  }
+
+  [[deprecated("Use `FOO.month_ref() = BAR;` instead of `FOO.set_month(BAR);`")]]
+  ::std::int8_t& set_month(::std::int8_t month_) {
+    month_ref() = month_;
+    return __fbthrift_field_month;
+  }
+
+  ::std::int8_t get_day() const {
+    return __fbthrift_field_day;
+  }
+
+  [[deprecated("Use `FOO.day_ref() = BAR;` instead of `FOO.set_day(BAR);`")]]
+  ::std::int8_t& set_day(::std::int8_t day_) {
+    day_ref() = day_;
+    return __fbthrift_field_day;
+  }
+
+  ::std::int8_t get_hour() const {
+    return __fbthrift_field_hour;
+  }
+
+  [[deprecated("Use `FOO.hour_ref() = BAR;` instead of `FOO.set_hour(BAR);`")]]
+  ::std::int8_t& set_hour(::std::int8_t hour_) {
+    hour_ref() = hour_;
+    return __fbthrift_field_hour;
+  }
+
+  ::std::int8_t get_minute() const {
+    return __fbthrift_field_minute;
+  }
+
+  [[deprecated("Use `FOO.minute_ref() = BAR;` instead of `FOO.set_minute(BAR);`")]]
+  ::std::int8_t& set_minute(::std::int8_t minute_) {
+    minute_ref() = minute_;
+    return __fbthrift_field_minute;
+  }
+
+  ::std::int8_t get_sec() const {
+    return __fbthrift_field_sec;
+  }
+
+  [[deprecated("Use `FOO.sec_ref() = BAR;` instead of `FOO.set_sec(BAR);`")]]
+  ::std::int8_t& set_sec(::std::int8_t sec_) {
+    sec_ref() = sec_;
+    return __fbthrift_field_sec;
+  }
+
+  ::std::int32_t get_microsec() const {
+    return __fbthrift_field_microsec;
+  }
+
+  [[deprecated("Use `FOO.microsec_ref() = BAR;` instead of `FOO.set_microsec(BAR);`")]]
+  ::std::int32_t& set_microsec(::std::int32_t microsec_) {
+    microsec_ref() = microsec_;
+    return __fbthrift_field_microsec;
+  }
+
+  template <class Protocol_>
+  uint32_t read(Protocol_* iprot);
+  template <class Protocol_>
+  uint32_t serializedSize(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t serializedSizeZC(Protocol_ const* prot_) const;
+  template <class Protocol_>
+  uint32_t write(Protocol_* prot_) const;
+
+ private:
+  template <class Protocol_>
+  void readNoXfer(Protocol_* iprot);
+
+  friend class ::apache::thrift::Cpp2Ops<LocalDatetime>;
+  friend void swap(LocalDatetime& a, LocalDatetime& b);
+};
+
+template <class Protocol_>
+uint32_t LocalDatetime::read(Protocol_* iprot) {
+  auto _xferStart = iprot->getCursorPosition();
+  readNoXfer(iprot);
+  return iprot->getCursorPosition() - _xferStart;
+}
+
+}} // nebula::cpp2
+namespace nebula { namespace cpp2 {
 class Value final  {
  private:
   friend struct ::apache::thrift::detail::st::struct_private_access;
@@ -1220,6 +2499,10 @@ class Value final  {
     mapVal = 10,
     nodeVal = 11,
     edgeVal = 12,
+    durationVal = 13,
+    localTimeVal = 14,
+    dateVal = 15,
+    localDatetimeVal = 16,
   } ;
 
   Value()
@@ -1288,6 +2571,26 @@ class Value final  {
       case Type::edgeVal:
       {
         set_edgeVal(std::move(rhs.value_.edgeVal));
+        break;
+      }
+      case Type::durationVal:
+      {
+        set_durationVal(std::move(rhs.value_.durationVal));
+        break;
+      }
+      case Type::localTimeVal:
+      {
+        set_localTimeVal(std::move(rhs.value_.localTimeVal));
+        break;
+      }
+      case Type::dateVal:
+      {
+        set_dateVal(std::move(rhs.value_.dateVal));
+        break;
+      }
+      case Type::localDatetimeVal:
+      {
+        set_localDatetimeVal(std::move(rhs.value_.localDatetimeVal));
         break;
       }
       default:
@@ -1364,6 +2667,26 @@ class Value final  {
         set_edgeVal(rhs.value_.edgeVal);
         break;
       }
+      case Type::durationVal:
+      {
+        set_durationVal(rhs.value_.durationVal);
+        break;
+      }
+      case Type::localTimeVal:
+      {
+        set_localTimeVal(rhs.value_.localTimeVal);
+        break;
+      }
+      case Type::dateVal:
+      {
+        set_dateVal(rhs.value_.dateVal);
+        break;
+      }
+      case Type::localDatetimeVal:
+      {
+        set_localDatetimeVal(rhs.value_.localDatetimeVal);
+        break;
+      }
       default:
       {
         assert(false);
@@ -1435,6 +2758,26 @@ class Value final  {
       case Type::edgeVal:
       {
         set_edgeVal(std::move(rhs.value_.edgeVal));
+        break;
+      }
+      case Type::durationVal:
+      {
+        set_durationVal(std::move(rhs.value_.durationVal));
+        break;
+      }
+      case Type::localTimeVal:
+      {
+        set_localTimeVal(std::move(rhs.value_.localTimeVal));
+        break;
+      }
+      case Type::dateVal:
+      {
+        set_dateVal(std::move(rhs.value_.dateVal));
+        break;
+      }
+      case Type::localDatetimeVal:
+      {
+        set_localDatetimeVal(std::move(rhs.value_.localDatetimeVal));
         break;
       }
       default:
@@ -1512,6 +2855,26 @@ class Value final  {
         set_edgeVal(rhs.value_.edgeVal);
         break;
       }
+      case Type::durationVal:
+      {
+        set_durationVal(rhs.value_.durationVal);
+        break;
+      }
+      case Type::localTimeVal:
+      {
+        set_localTimeVal(rhs.value_.localTimeVal);
+        break;
+      }
+      case Type::dateVal:
+      {
+        set_dateVal(rhs.value_.dateVal);
+        break;
+      }
+      case Type::localDatetimeVal:
+      {
+        set_localDatetimeVal(rhs.value_.localDatetimeVal);
+        break;
+      }
       default:
       {
         assert(false);
@@ -1538,6 +2901,10 @@ class Value final  {
     ::nebula::cpp2::NMap mapVal;
     ::nebula::cpp2::Node nodeVal;
     ::nebula::cpp2::Edge edgeVal;
+    ::nebula::cpp2::Duration durationVal;
+    ::nebula::cpp2::LocalTime localTimeVal;
+    ::nebula::cpp2::Date dateVal;
+    ::nebula::cpp2::LocalDatetime localDatetimeVal;
 
     storage_type() {}
     ~storage_type() {}
@@ -1700,6 +3067,90 @@ class Value final  {
     return value_.edgeVal;
   }
 
+  ::nebula::cpp2::Duration& set_durationVal(::nebula::cpp2::Duration const &t) {
+    __clear();
+    type_ = Type::durationVal;
+    ::new (std::addressof(value_.durationVal)) ::nebula::cpp2::Duration(t);
+    return value_.durationVal;
+  }
+
+  ::nebula::cpp2::Duration& set_durationVal(::nebula::cpp2::Duration&& t) {
+    __clear();
+    type_ = Type::durationVal;
+    ::new (std::addressof(value_.durationVal)) ::nebula::cpp2::Duration(std::move(t));
+    return value_.durationVal;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::nebula::cpp2::Duration, T...>> ::nebula::cpp2::Duration& set_durationVal(T&&... t) {
+    __clear();
+    type_ = Type::durationVal;
+    ::new (std::addressof(value_.durationVal)) ::nebula::cpp2::Duration(std::forward<T>(t)...);
+    return value_.durationVal;
+  }
+
+  ::nebula::cpp2::LocalTime& set_localTimeVal(::nebula::cpp2::LocalTime const &t) {
+    __clear();
+    type_ = Type::localTimeVal;
+    ::new (std::addressof(value_.localTimeVal)) ::nebula::cpp2::LocalTime(t);
+    return value_.localTimeVal;
+  }
+
+  ::nebula::cpp2::LocalTime& set_localTimeVal(::nebula::cpp2::LocalTime&& t) {
+    __clear();
+    type_ = Type::localTimeVal;
+    ::new (std::addressof(value_.localTimeVal)) ::nebula::cpp2::LocalTime(std::move(t));
+    return value_.localTimeVal;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::nebula::cpp2::LocalTime, T...>> ::nebula::cpp2::LocalTime& set_localTimeVal(T&&... t) {
+    __clear();
+    type_ = Type::localTimeVal;
+    ::new (std::addressof(value_.localTimeVal)) ::nebula::cpp2::LocalTime(std::forward<T>(t)...);
+    return value_.localTimeVal;
+  }
+
+  ::nebula::cpp2::Date& set_dateVal(::nebula::cpp2::Date const &t) {
+    __clear();
+    type_ = Type::dateVal;
+    ::new (std::addressof(value_.dateVal)) ::nebula::cpp2::Date(t);
+    return value_.dateVal;
+  }
+
+  ::nebula::cpp2::Date& set_dateVal(::nebula::cpp2::Date&& t) {
+    __clear();
+    type_ = Type::dateVal;
+    ::new (std::addressof(value_.dateVal)) ::nebula::cpp2::Date(std::move(t));
+    return value_.dateVal;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::nebula::cpp2::Date, T...>> ::nebula::cpp2::Date& set_dateVal(T&&... t) {
+    __clear();
+    type_ = Type::dateVal;
+    ::new (std::addressof(value_.dateVal)) ::nebula::cpp2::Date(std::forward<T>(t)...);
+    return value_.dateVal;
+  }
+
+  ::nebula::cpp2::LocalDatetime& set_localDatetimeVal(::nebula::cpp2::LocalDatetime const &t) {
+    __clear();
+    type_ = Type::localDatetimeVal;
+    ::new (std::addressof(value_.localDatetimeVal)) ::nebula::cpp2::LocalDatetime(t);
+    return value_.localDatetimeVal;
+  }
+
+  ::nebula::cpp2::LocalDatetime& set_localDatetimeVal(::nebula::cpp2::LocalDatetime&& t) {
+    __clear();
+    type_ = Type::localDatetimeVal;
+    ::new (std::addressof(value_.localDatetimeVal)) ::nebula::cpp2::LocalDatetime(std::move(t));
+    return value_.localDatetimeVal;
+  }
+
+  template<typename... T, typename = ::apache::thrift::safe_overload_t<::nebula::cpp2::LocalDatetime, T...>> ::nebula::cpp2::LocalDatetime& set_localDatetimeVal(T&&... t) {
+    __clear();
+    type_ = Type::localDatetimeVal;
+    ::new (std::addressof(value_.localDatetimeVal)) ::nebula::cpp2::LocalDatetime(std::forward<T>(t)...);
+    return value_.localDatetimeVal;
+  }
+
   bool const& get_boolVal() const {
     if (type_ != Type::boolVal) {
       ::apache::thrift::detail::throw_on_bad_field_access();
@@ -1784,6 +3235,34 @@ class Value final  {
     return value_.edgeVal;
   }
 
+  ::nebula::cpp2::Duration const& get_durationVal() const {
+    if (type_ != Type::durationVal) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.durationVal;
+  }
+
+  ::nebula::cpp2::LocalTime const& get_localTimeVal() const {
+    if (type_ != Type::localTimeVal) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.localTimeVal;
+  }
+
+  ::nebula::cpp2::Date const& get_dateVal() const {
+    if (type_ != Type::dateVal) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.dateVal;
+  }
+
+  ::nebula::cpp2::LocalDatetime const& get_localDatetimeVal() const {
+    if (type_ != Type::localDatetimeVal) {
+      ::apache::thrift::detail::throw_on_bad_field_access();
+    }
+    return value_.localDatetimeVal;
+  }
+
   bool& mutable_boolVal() {
     assert(type_ == Type::boolVal);
     return value_.boolVal;
@@ -1844,6 +3323,26 @@ class Value final  {
     return value_.edgeVal;
   }
 
+  ::nebula::cpp2::Duration& mutable_durationVal() {
+    assert(type_ == Type::durationVal);
+    return value_.durationVal;
+  }
+
+  ::nebula::cpp2::LocalTime& mutable_localTimeVal() {
+    assert(type_ == Type::localTimeVal);
+    return value_.localTimeVal;
+  }
+
+  ::nebula::cpp2::Date& mutable_dateVal() {
+    assert(type_ == Type::dateVal);
+    return value_.dateVal;
+  }
+
+  ::nebula::cpp2::LocalDatetime& mutable_localDatetimeVal() {
+    assert(type_ == Type::localDatetimeVal);
+    return value_.localDatetimeVal;
+  }
+
   bool move_boolVal() {
     assert(type_ == Type::boolVal);
     return std::move(value_.boolVal);
@@ -1902,6 +3401,26 @@ class Value final  {
   ::nebula::cpp2::Edge move_edgeVal() {
     assert(type_ == Type::edgeVal);
     return std::move(value_.edgeVal);
+  }
+
+  ::nebula::cpp2::Duration move_durationVal() {
+    assert(type_ == Type::durationVal);
+    return std::move(value_.durationVal);
+  }
+
+  ::nebula::cpp2::LocalTime move_localTimeVal() {
+    assert(type_ == Type::localTimeVal);
+    return std::move(value_.localTimeVal);
+  }
+
+  ::nebula::cpp2::Date move_dateVal() {
+    assert(type_ == Type::dateVal);
+    return std::move(value_.dateVal);
+  }
+
+  ::nebula::cpp2::LocalDatetime move_localDatetimeVal() {
+    assert(type_ == Type::localDatetimeVal);
+    return std::move(value_.localDatetimeVal);
   }
 
   template <typename..., typename T = bool>
@@ -2131,6 +3650,82 @@ class Value final  {
   template <typename..., typename T = ::nebula::cpp2::Edge>
   FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> edgeVal_ref() && {
     return {std::move(value_.edgeVal), type_, edgeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::nebula::cpp2::Duration>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> durationVal_ref() const& {
+    return {value_.durationVal, type_, durationVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::Duration>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> durationVal_ref() const&& {
+    return {std::move(value_.durationVal), type_, durationVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::Duration>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> durationVal_ref() & {
+    return {value_.durationVal, type_, durationVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::Duration>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> durationVal_ref() && {
+    return {std::move(value_.durationVal), type_, durationVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::nebula::cpp2::LocalTime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> localTimeVal_ref() const& {
+    return {value_.localTimeVal, type_, localTimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::LocalTime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> localTimeVal_ref() const&& {
+    return {std::move(value_.localTimeVal), type_, localTimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::LocalTime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> localTimeVal_ref() & {
+    return {value_.localTimeVal, type_, localTimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::LocalTime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> localTimeVal_ref() && {
+    return {std::move(value_.localTimeVal), type_, localTimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::nebula::cpp2::Date>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> dateVal_ref() const& {
+    return {value_.dateVal, type_, dateVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::Date>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> dateVal_ref() const&& {
+    return {std::move(value_.dateVal), type_, dateVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::Date>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> dateVal_ref() & {
+    return {value_.dateVal, type_, dateVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::Date>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> dateVal_ref() && {
+    return {std::move(value_.dateVal), type_, dateVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+  template <typename..., typename T = ::nebula::cpp2::LocalDatetime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&> localDatetimeVal_ref() const& {
+    return {value_.localDatetimeVal, type_, localDatetimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::LocalDatetime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<const T&&> localDatetimeVal_ref() const&& {
+    return {std::move(value_.localDatetimeVal), type_, localDatetimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::LocalDatetime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&> localDatetimeVal_ref() & {
+    return {value_.localDatetimeVal, type_, localDatetimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
+  }
+
+  template <typename..., typename T = ::nebula::cpp2::LocalDatetime>
+  FOLLY_ERASE ::apache::thrift::union_field_ref<T&&> localDatetimeVal_ref() && {
+    return {std::move(value_.localDatetimeVal), type_, localDatetimeVal, this, ::apache::thrift::detail::union_field_ref_owner_vtable_for<decltype(*this)>};
   }
   Type getType() const { return static_cast<Type>(type_); }
 
@@ -2800,7 +4395,7 @@ template <> struct TEnumDataStorage<::nebula::cpp2::Value::Type>;
 template <> struct TEnumTraits<::nebula::cpp2::Value::Type> {
   using type = ::nebula::cpp2::Value::Type;
 
-  static constexpr std::size_t const size = 12;
+  static constexpr std::size_t const size = 16;
   static folly::Range<type const*> const values;
   static folly::Range<folly::StringPiece const*> const names;
 

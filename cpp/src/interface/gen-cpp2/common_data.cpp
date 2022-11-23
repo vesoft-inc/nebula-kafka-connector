@@ -12,7 +12,7 @@
 namespace apache {
 namespace thrift {
 
-const std::array<::nebula::cpp2::ValueType, 13> TEnumDataStorage<::nebula::cpp2::ValueType>::values = {{
+const std::array<::nebula::cpp2::ValueType, 17> TEnumDataStorage<::nebula::cpp2::ValueType>::values = {{
   type::kNull,
   type::kBool,
   type::kInt8,
@@ -26,8 +26,12 @@ const std::array<::nebula::cpp2::ValueType, 13> TEnumDataStorage<::nebula::cpp2:
   type::kMap,
   type::kNode,
   type::kEdge,
+  type::kDuration,
+  type::kLocalTime,
+  type::kDate,
+  type::kLocalDatetime,
 }};
-const std::array<folly::StringPiece, 13> TEnumDataStorage<::nebula::cpp2::ValueType>::names = {{
+const std::array<folly::StringPiece, 17> TEnumDataStorage<::nebula::cpp2::ValueType>::names = {{
   "kNull",
   "kBool",
   "kInt8",
@@ -41,6 +45,10 @@ const std::array<folly::StringPiece, 13> TEnumDataStorage<::nebula::cpp2::ValueT
   "kMap",
   "kNode",
   "kEdge",
+  "kDuration",
+  "kLocalTime",
+  "kDate",
+  "kLocalDatetime",
 }};
 
 const std::array<::nebula::cpp2::ErrorCode, 170> TEnumDataStorage<::nebula::cpp2::ErrorCode>::values = {{
@@ -388,7 +396,7 @@ const std::array<folly::StringPiece, 170> TEnumDataStorage<::nebula::cpp2::Error
   "E_UNKNOWN",
 }};
 
-const std::array<::nebula::cpp2::Value::Type, 12> TEnumDataStorage<::nebula::cpp2::Value::Type>::values = {{
+const std::array<::nebula::cpp2::Value::Type, 16> TEnumDataStorage<::nebula::cpp2::Value::Type>::values = {{
   type::boolVal,
   type::int8Val,
   type::int16Val,
@@ -401,8 +409,12 @@ const std::array<::nebula::cpp2::Value::Type, 12> TEnumDataStorage<::nebula::cpp
   type::mapVal,
   type::nodeVal,
   type::edgeVal,
+  type::durationVal,
+  type::localTimeVal,
+  type::dateVal,
+  type::localDatetimeVal,
 }};
-const std::array<folly::StringPiece, 12> TEnumDataStorage<::nebula::cpp2::Value::Type>::names = {{
+const std::array<folly::StringPiece, 16> TEnumDataStorage<::nebula::cpp2::Value::Type>::names = {{
   "boolVal",
   "int8Val",
   "int16Val",
@@ -415,6 +427,10 @@ const std::array<folly::StringPiece, 12> TEnumDataStorage<::nebula::cpp2::Value:
   "mapVal",
   "nodeVal",
   "edgeVal",
+  "durationVal",
+  "localTimeVal",
+  "dateVal",
+  "localDatetimeVal",
 }};
 
 const std::array<folly::StringPiece, 1> TStructDataStorage<::nebula::cpp2::NList>::fields_names = {{
@@ -472,7 +488,86 @@ const std::array<protocol::TType, 5> TStructDataStorage<::nebula::cpp2::Edge>::f
   TType::T_MAP,
 }};
 
-const std::array<folly::StringPiece, 12> TStructDataStorage<::nebula::cpp2::Value>::fields_names = {{
+const std::array<folly::StringPiece, 3> TStructDataStorage<::nebula::cpp2::Duration>::fields_names = {{
+  "seconds",
+  "microseconds",
+  "months",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::nebula::cpp2::Duration>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::nebula::cpp2::Duration>::fields_types = {{
+  TType::T_I64,
+  TType::T_I32,
+  TType::T_I32,
+}};
+
+const std::array<folly::StringPiece, 3> TStructDataStorage<::nebula::cpp2::Date>::fields_names = {{
+  "year",
+  "month",
+  "day",
+}};
+const std::array<int16_t, 3> TStructDataStorage<::nebula::cpp2::Date>::fields_ids = {{
+  1,
+  2,
+  3,
+}};
+const std::array<protocol::TType, 3> TStructDataStorage<::nebula::cpp2::Date>::fields_types = {{
+  TType::T_I16,
+  TType::T_BYTE,
+  TType::T_BYTE,
+}};
+
+const std::array<folly::StringPiece, 4> TStructDataStorage<::nebula::cpp2::LocalTime>::fields_names = {{
+  "hour",
+  "minute",
+  "sec",
+  "microsec",
+}};
+const std::array<int16_t, 4> TStructDataStorage<::nebula::cpp2::LocalTime>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+}};
+const std::array<protocol::TType, 4> TStructDataStorage<::nebula::cpp2::LocalTime>::fields_types = {{
+  TType::T_BYTE,
+  TType::T_BYTE,
+  TType::T_BYTE,
+  TType::T_I32,
+}};
+
+const std::array<folly::StringPiece, 7> TStructDataStorage<::nebula::cpp2::LocalDatetime>::fields_names = {{
+  "year",
+  "month",
+  "day",
+  "hour",
+  "minute",
+  "sec",
+  "microsec",
+}};
+const std::array<int16_t, 7> TStructDataStorage<::nebula::cpp2::LocalDatetime>::fields_ids = {{
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7,
+}};
+const std::array<protocol::TType, 7> TStructDataStorage<::nebula::cpp2::LocalDatetime>::fields_types = {{
+  TType::T_I16,
+  TType::T_BYTE,
+  TType::T_BYTE,
+  TType::T_BYTE,
+  TType::T_BYTE,
+  TType::T_BYTE,
+  TType::T_I32,
+}};
+
+const std::array<folly::StringPiece, 16> TStructDataStorage<::nebula::cpp2::Value>::fields_names = {{
   "boolVal",
   "int8Val",
   "int16Val",
@@ -485,8 +580,12 @@ const std::array<folly::StringPiece, 12> TStructDataStorage<::nebula::cpp2::Valu
   "mapVal",
   "nodeVal",
   "edgeVal",
+  "durationVal",
+  "localTimeVal",
+  "dateVal",
+  "localDatetimeVal",
 }};
-const std::array<int16_t, 12> TStructDataStorage<::nebula::cpp2::Value>::fields_ids = {{
+const std::array<int16_t, 16> TStructDataStorage<::nebula::cpp2::Value>::fields_ids = {{
   1,
   2,
   3,
@@ -499,8 +598,12 @@ const std::array<int16_t, 12> TStructDataStorage<::nebula::cpp2::Value>::fields_
   10,
   11,
   12,
+  13,
+  14,
+  15,
+  16,
 }};
-const std::array<protocol::TType, 12> TStructDataStorage<::nebula::cpp2::Value>::fields_types = {{
+const std::array<protocol::TType, 16> TStructDataStorage<::nebula::cpp2::Value>::fields_types = {{
   TType::T_BOOL,
   TType::T_BYTE,
   TType::T_I16,
@@ -509,6 +612,10 @@ const std::array<protocol::TType, 12> TStructDataStorage<::nebula::cpp2::Value>:
   TType::T_DOUBLE,
   TType::T_DOUBLE,
   TType::T_STRING,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
+  TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,
   TType::T_STRUCT,

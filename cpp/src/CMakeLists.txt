@@ -24,6 +24,11 @@ set(NEBULA_COMMON_SOURCES
     datatypes/Node.cpp
     datatypes/Record.cpp
     datatypes/Value.cpp
+    datatypes/Date.cpp
+    datatypes/Time.cpp
+    datatypes/Datetime.cpp
+    datatypes/Duration.cpp
+
     graph/AuthResponse.cpp
     graph/ExecutionOutcome.cpp
     graph/ExecutionResponse.cpp

@@ -43,6 +43,14 @@ struct VisitUnion<::nebula::cpp2::Value> {
       return f(10, *static_cast<T&&>(t).nodeVal_ref());
     case Union::Type::edgeVal:
       return f(11, *static_cast<T&&>(t).edgeVal_ref());
+    case Union::Type::durationVal:
+      return f(12, *static_cast<T&&>(t).durationVal_ref());
+    case Union::Type::localTimeVal:
+      return f(13, *static_cast<T&&>(t).localTimeVal_ref());
+    case Union::Type::dateVal:
+      return f(14, *static_cast<T&&>(t).dateVal_ref());
+    case Union::Type::localDatetimeVal:
+      return f(15, *static_cast<T&&>(t).localDatetimeVal_ref());
     case Union::Type::__EMPTY__: ;
     }
   }

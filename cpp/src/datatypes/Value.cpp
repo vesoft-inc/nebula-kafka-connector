@@ -40,6 +40,12 @@ Value::allocator_type Value::get_allocator() const noexcept {
             return data_.node_->get_allocator();
         case Type::kEdge:
             return data_.edge_->get_allocator();
+        case Type::kDuration:
+            return data_.duration_->get_allocator();
+        case Type::kLocalTime:
+        case Type::kDate:
+        case Type::kLocalDatetime:
+            return {};
     }
     LOG(FATAL) << "Unknown value type: " << type_;
 }
@@ -156,6 +162,32 @@ Value::Value(Edge&& val, allocator_type alloc) : type_(Type::kEdge) {
     }
 }
 
+Value::Value(LocalTime val, allocator_type) : type_(Type::kLocalTime) {
+    data_.localTime_ = val;
+}
+
+Value::Value(Date val, allocator_type) : type_(Type::kDate) {
+    data_.date_ = val;
+}
+
+Value::Value(const Duration& val, allocator_type alloc) : type_(Type::kDuration) {
+    data_.duration_ = newObject<Duration>(alloc, val);
+}
+
+Value::Value(Duration&& val) noexcept : Value(std::move(val), val.get_allocator()) {}
+
+Value::Value(Duration&& val, allocator_type alloc) : type_(Type::kDuration) {
+    if (val.get_allocator() == alloc) {
+        data_.duration_ = newObject<Duration>(alloc, std::move(val));
+    } else {
+        data_.duration_ = newObject<Duration>(alloc, val);
+    }
+}
+
+Value::Value(LocalDatetime val, allocator_type) : type_(Type::kLocalDatetime) {
+    data_.localDatetime_ = val;
+}
+
 // std::allocator_traits<allocator_type>::select_on_container_copy_construction(other.get_allocator())
 Value::Value(const Value& other) : Value(other, allocator_type()) {}
 
@@ -259,6 +291,18 @@ std::string Value::toString() const {
         case Type::kEdge: {
             return data_.edge_->toString();
         }
+        case Type::kLocalTime: {
+            return data_.localTime_.toString();
+        }
+        case Type::kDate: {
+            return data_.date_.toString();
+        }
+        case Type::kDuration: {
+            return data_.duration_->toString();
+        }
+        case Type::kLocalDatetime: {
+            return data_.localDatetime_.toString();
+        }
     }
     LOG(FATAL) << "Unknown value type: " << type_;
 }
@@ -305,6 +349,15 @@ void Value::clear() {
             }
             break;
         }
+        case Type::kDuration:
+            if (data_.duration_) {
+                deleteObject(data_.duration_->get_allocator(), data_.duration_);
+            }
+            break;
+        case Type::kLocalTime:
+        case Type::kDate:
+        case Type::kLocalDatetime:
+            break;
     }
     type_ = Type::kNull;
 }
@@ -358,6 +411,22 @@ void Value::copyValue(const Value& other, const allocator_type& alloc) {
             data_.edge_ = newObject<Edge>(alloc, other.getEdge());
             break;
         }
+        case Type::kLocalTime: {
+            data_.localTime_ = other.getLocalTime();
+            break;
+        }
+        case Type::kDate: {
+            data_.date_ = other.getDate();
+            break;
+        }
+        case Type::kDuration: {
+            data_.duration_ = newObject<Duration>(alloc, other.getDuration());
+            break;
+        }
+        case Type::kLocalDatetime: {
+            data_.localDatetime_ = other.getLocalDatetime();
+            break;
+        }
     }
 }
 
@@ -365,7 +434,7 @@ void Value::moveValue(Value&& other) noexcept {
     type_ = other.type_;
     other.type_ = Type::kNull;
     std::swap(data_, other.data_);
-    std::memset(&other.data_, 0, sizeof(data_));
+    std::memset(reinterpret_cast<void*>(&other.data_), 0, sizeof(data_));
 }
 
 std::string enum2String(const Value::Type type) {
@@ -396,6 +465,14 @@ std::string enum2String(const Value::Type type) {
             return "STRING";
         case Value::Type::kNull:
             return "NULL";
+        case Value::Type::kLocalTime:
+            return "LOCALTIME";
+        case Value::Type::kDate:
+            return "DATE";
+        case Value::Type::kLocalDatetime:
+            return "LOCALDATETIME";
+        case Value::Type::kDuration:
+            return "DURATION";
     }
 
     return "UNKNOWN VALUE TYPE";
@@ -437,6 +514,14 @@ bool operator==(const Value& lhs, const Value& rhs) {
             return lhs.getNode() == rhs.getNode();
         case Value::Type::kEdge:
             return lhs.getEdge() == rhs.getEdge();
+        case Value::Type::kDuration:
+            return lhs.getDuration() == rhs.getDuration();
+        case Value::Type::kLocalTime:
+            return lhs.getLocalTime() == rhs.getLocalTime();
+        case Value::Type::kDate:
+            return lhs.getDate() == rhs.getDate();
+        case Value::Type::kLocalDatetime:
+            return lhs.getLocalDatetime() == rhs.getLocalDatetime();
         default:
             DLOG(FATAL) << "Unknown value type " << static_cast<int>(lType);
     }
@@ -481,6 +566,14 @@ bool compareWithoutDynamicId(const Value& lhs, const Value& rhs) {
             return compareWithoutDynamicId(lhs.getNode(), rhs.getNode());
         case Value::Type::kEdge:
             return compareWithoutDynamicId(lhs.getEdge(), rhs.getEdge());
+        case Value::Type::kDuration:
+            return lhs.getDuration() == rhs.getDuration();
+        case Value::Type::kLocalTime:
+            return lhs.getLocalTime() == rhs.getLocalTime();
+        case Value::Type::kDate:
+            return lhs.getDate() == rhs.getDate();
+        case Value::Type::kLocalDatetime:
+            return lhs.getLocalDatetime() == rhs.getLocalDatetime();
         default:
             DLOG(FATAL) << "Unknown value type " << static_cast<int>(lType);
     }
@@ -500,26 +593,161 @@ bool operator<(const Value& lhs, const Value& rhs) {
                    << enum2String(rType);
         return false;
     }
-    // TODO(Aiee): null is equal to null
-    if (lType == Value::Type::kNull) {
-        return true;
-    }
+
     // TODO(Aiee): Consider the equality of compatible types
     switch (lType) {
         case Value::Type::kBool:
             return lhs.getBool() < rhs.getBool();
-        case Value::Type::kInt8:
-            return lhs.getInt8() < rhs.getInt8();
-        case Value::Type::kInt16:
-            return lhs.getInt16() < rhs.getInt16();
-        case Value::Type::kInt32:
-            return lhs.getInt32() < rhs.getInt32();
-        case Value::Type::kInt64:
-            return lhs.getInt64() < rhs.getInt64();
-        case Value::Type::kFloat:
-            return lhs.getFloat() < rhs.getFloat();
-        case Value::Type::kDouble:
-            return lhs.getDouble() < rhs.getDouble();
+        case Value::Type::kInt8: {
+            switch (rType) {
+                case Value::Type::kInt8: {
+                    return lhs.getInt8() < rhs.getInt8();
+                }
+                case Value::Type::kInt16: {
+                    return lhs.getInt8() < rhs.getInt16();
+                }
+                case Value::Type::kInt32: {
+                    return lhs.getInt8() < rhs.getInt32();
+                }
+                case Value::Type::kInt64: {
+                    return lhs.getInt8() < rhs.getInt64();
+                }
+                case Value::Type::kFloat: {
+                    return lhs.getInt8() < rhs.getFloat();
+                }
+                case Value::Type::kDouble: {
+                    return lhs.getInt8() < rhs.getDouble();
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+        case Value::Type::kInt16: {
+            switch (rType) {
+                case Value::Type::kInt8: {
+                    return lhs.getInt16() < rhs.getInt8();
+                }
+                case Value::Type::kInt16: {
+                    return lhs.getInt16() < rhs.getInt16();
+                }
+                case Value::Type::kInt32: {
+                    return lhs.getInt16() < rhs.getInt32();
+                }
+                case Value::Type::kInt64: {
+                    return lhs.getInt16() < rhs.getInt64();
+                }
+                case Value::Type::kFloat: {
+                    return lhs.getInt16() < rhs.getFloat();
+                }
+                case Value::Type::kDouble: {
+                    return lhs.getInt16() < rhs.getDouble();
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+        case Value::Type::kInt32: {
+            switch (rType) {
+                case Value::Type::kInt8: {
+                    return lhs.getInt32() < rhs.getInt8();
+                }
+                case Value::Type::kInt16: {
+                    return lhs.getInt32() < rhs.getInt16();
+                }
+                case Value::Type::kInt32: {
+                    return lhs.getInt32() < rhs.getInt32();
+                }
+                case Value::Type::kInt64: {
+                    return lhs.getInt32() < rhs.getInt64();
+                }
+                case Value::Type::kFloat: {
+                    return lhs.getInt32() < rhs.getFloat();
+                }
+                case Value::Type::kDouble: {
+                    return lhs.getInt32() < rhs.getDouble();
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+        case Value::Type::kInt64: {
+            switch (rType) {
+                case Value::Type::kInt8: {
+                    return lhs.getInt64() < rhs.getInt8();
+                }
+                case Value::Type::kInt16: {
+                    return lhs.getInt64() < rhs.getInt16();
+                }
+                case Value::Type::kInt32: {
+                    return lhs.getInt64() < rhs.getInt32();
+                }
+                case Value::Type::kInt64: {
+                    return lhs.getInt64() < rhs.getInt64();
+                }
+                case Value::Type::kFloat: {
+                    return lhs.getInt64() < rhs.getFloat();
+                }
+                case Value::Type::kDouble: {
+                    return lhs.getInt64() < rhs.getDouble();
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+        case Value::Type::kFloat: {
+            switch (rType) {
+                case Value::Type::kInt8: {
+                    return lhs.getFloat() < rhs.getInt8();
+                }
+                case Value::Type::kInt16: {
+                    return lhs.getFloat() < rhs.getInt16();
+                }
+                case Value::Type::kInt32: {
+                    return lhs.getFloat() < rhs.getInt32();
+                }
+                case Value::Type::kInt64: {
+                    return lhs.getFloat() < rhs.getInt64();
+                }
+                case Value::Type::kFloat: {
+                    return lhs.getFloat() < rhs.getFloat();
+                }
+                case Value::Type::kDouble: {
+                    return lhs.getFloat() < rhs.getDouble();
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
+        case Value::Type::kDouble: {
+            switch (rType) {
+                case Value::Type::kInt8: {
+                    return lhs.getDouble() < rhs.getInt8();
+                }
+                case Value::Type::kInt16: {
+                    return lhs.getDouble() < rhs.getInt16();
+                }
+                case Value::Type::kInt32: {
+                    return lhs.getDouble() < rhs.getInt32();
+                }
+                case Value::Type::kInt64: {
+                    return lhs.getDouble() < rhs.getInt64();
+                }
+                case Value::Type::kFloat: {
+                    return lhs.getDouble() < rhs.getFloat();
+                }
+                case Value::Type::kDouble: {
+                    return lhs.getDouble() < rhs.getDouble();
+                }
+                default: {
+                    return false;
+                }
+            }
+        }
         case Value::Type::kString:
             return lhs.getString() < rhs.getString();
         case Value::Type::kList:
@@ -530,6 +758,14 @@ bool operator<(const Value& lhs, const Value& rhs) {
             return lhs.getNode() < rhs.getNode();
         case Value::Type::kEdge:
             return lhs.getEdge() < rhs.getEdge();
+        case Value::Type::kDuration:
+            return lhs.getDuration() < rhs.getDuration();
+        case Value::Type::kDate:
+            return lhs.getDate() < rhs.getDate();
+        case Value::Type::kLocalTime:
+            return lhs.getLocalTime() < rhs.getLocalTime();
+        case Value::Type::kLocalDatetime:
+            return lhs.getLocalDatetime() < rhs.getLocalDatetime();
         default:
             DLOG(FATAL) << "Unknown value type " << static_cast<int>(lType);
     }
@@ -652,6 +888,18 @@ std::size_t hash<nebula::client::Value>::operator()(
         }
         case nebula::client::Value::Type::kEdge: {
             return hash<nebula::client::Edge>()(v.getEdge());
+        }
+        case nebula::client::Value::Type::kLocalTime: {
+            return hash<nebula::client::LocalTime>()(v.getLocalTime());
+        }
+        case nebula::client::Value::Type::kDate: {
+            return hash<nebula::client::Date>()(v.getDate());
+        }
+        case nebula::client::Value::Type::kLocalDatetime: {
+            return hash<nebula::client::LocalDatetime>()(v.getLocalDatetime());
+        }
+        case nebula::client::Value::Type::kDuration: {
+            return hash<nebula::client::Duration>()(v.getDuration());
         }
     }
     LOG(FATAL) << "Unknown value type: " << v.getType();

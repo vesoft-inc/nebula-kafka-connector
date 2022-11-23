@@ -508,6 +508,501 @@ namespace apache {
 namespace thrift {
 namespace detail {
 
+void TccStructTraits<::nebula::cpp2::Duration>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::cpp2::Duration>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace nebula { namespace cpp2 {
+
+
+Duration::Duration(apache::thrift::FragileConstructor, ::std::int64_t seconds__arg, ::std::int32_t microseconds__arg, ::std::int32_t months__arg) :
+    __fbthrift_field_seconds(std::move(seconds__arg)),
+    __fbthrift_field_microseconds(std::move(microseconds__arg)),
+    __fbthrift_field_months(std::move(months__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+}
+
+
+void Duration::__clear() {
+  // clear all fields
+  this->__fbthrift_field_seconds = ::std::int64_t();
+  this->__fbthrift_field_microseconds = ::std::int32_t();
+  this->__fbthrift_field_months = ::std::int32_t();
+  __isset = {};
+}
+
+bool Duration::operator==(const Duration& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.seconds_ref() == rhs.seconds_ref())) {
+    return false;
+  }
+  if (!(lhs.microseconds_ref() == rhs.microseconds_ref())) {
+    return false;
+  }
+  if (!(lhs.months_ref() == rhs.months_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool Duration::operator<(const Duration& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.seconds_ref() == rhs.seconds_ref())) {
+    return lhs.seconds_ref() < rhs.seconds_ref();
+  }
+  if (!(lhs.microseconds_ref() == rhs.microseconds_ref())) {
+    return lhs.microseconds_ref() < rhs.microseconds_ref();
+  }
+  if (!(lhs.months_ref() == rhs.months_ref())) {
+    return lhs.months_ref() < rhs.months_ref();
+  }
+  return false;
+}
+
+
+void swap(Duration& a, Duration& b) {
+  using ::std::swap;
+  swap(a.seconds_ref().value(), b.seconds_ref().value());
+  swap(a.microseconds_ref().value(), b.microseconds_ref().value());
+  swap(a.months_ref().value(), b.months_ref().value());
+  swap(a.__isset, b.__isset);
+}
+
+template void Duration::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t Duration::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t Duration::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t Duration::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Duration::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Duration::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Duration::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Duration::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}} // nebula::cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::nebula::cpp2::Date>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::cpp2::Date>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace nebula { namespace cpp2 {
+
+Date::Date(const Date&) = default;
+Date& Date::operator=(const Date&) = default;
+Date::Date(Date&& other) noexcept  :
+    __fbthrift_field_year(std::move(other.__fbthrift_field_year)),
+    __fbthrift_field_month(std::move(other.__fbthrift_field_month)),
+    __fbthrift_field_day(std::move(other.__fbthrift_field_day)),
+    __isset(other.__isset) {
+}
+
+Date& Date::operator=(FOLLY_MAYBE_UNUSED Date&& other) noexcept {
+    this->__fbthrift_field_year = std::move(other.__fbthrift_field_year);
+    this->__fbthrift_field_month = std::move(other.__fbthrift_field_month);
+    this->__fbthrift_field_day = std::move(other.__fbthrift_field_day);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+Date::Date(apache::thrift::FragileConstructor, ::std::int16_t year__arg, ::std::int8_t month__arg, ::std::int8_t day__arg) :
+    __fbthrift_field_year(std::move(year__arg)),
+    __fbthrift_field_month(std::move(month__arg)),
+    __fbthrift_field_day(std::move(day__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+}
+
+
+void Date::__clear() {
+  // clear all fields
+  this->__fbthrift_field_year = ::std::int16_t();
+  this->__fbthrift_field_month = ::std::int8_t();
+  this->__fbthrift_field_day = ::std::int8_t();
+  __isset = {};
+}
+
+bool Date::operator==(const Date& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.year_ref() == rhs.year_ref())) {
+    return false;
+  }
+  if (!(lhs.month_ref() == rhs.month_ref())) {
+    return false;
+  }
+  if (!(lhs.day_ref() == rhs.day_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool Date::operator<(const Date& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.year_ref() == rhs.year_ref())) {
+    return lhs.year_ref() < rhs.year_ref();
+  }
+  if (!(lhs.month_ref() == rhs.month_ref())) {
+    return lhs.month_ref() < rhs.month_ref();
+  }
+  if (!(lhs.day_ref() == rhs.day_ref())) {
+    return lhs.day_ref() < rhs.day_ref();
+  }
+  return false;
+}
+
+
+void swap(Date& a, Date& b) {
+  using ::std::swap;
+  swap(a.year_ref().value(), b.year_ref().value());
+  swap(a.month_ref().value(), b.month_ref().value());
+  swap(a.day_ref().value(), b.day_ref().value());
+  swap(a.__isset, b.__isset);
+}
+
+template void Date::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t Date::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t Date::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t Date::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void Date::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t Date::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t Date::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t Date::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}} // nebula::cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::nebula::cpp2::LocalTime>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::cpp2::LocalTime>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace nebula { namespace cpp2 {
+
+LocalTime::LocalTime(const LocalTime&) = default;
+LocalTime& LocalTime::operator=(const LocalTime&) = default;
+LocalTime::LocalTime(LocalTime&& other) noexcept  :
+    __fbthrift_field_hour(std::move(other.__fbthrift_field_hour)),
+    __fbthrift_field_minute(std::move(other.__fbthrift_field_minute)),
+    __fbthrift_field_sec(std::move(other.__fbthrift_field_sec)),
+    __fbthrift_field_microsec(std::move(other.__fbthrift_field_microsec)),
+    __isset(other.__isset) {
+}
+
+LocalTime& LocalTime::operator=(FOLLY_MAYBE_UNUSED LocalTime&& other) noexcept {
+    this->__fbthrift_field_hour = std::move(other.__fbthrift_field_hour);
+    this->__fbthrift_field_minute = std::move(other.__fbthrift_field_minute);
+    this->__fbthrift_field_sec = std::move(other.__fbthrift_field_sec);
+    this->__fbthrift_field_microsec = std::move(other.__fbthrift_field_microsec);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+LocalTime::LocalTime(apache::thrift::FragileConstructor, ::std::int8_t hour__arg, ::std::int8_t minute__arg, ::std::int8_t sec__arg, ::std::int32_t microsec__arg) :
+    __fbthrift_field_hour(std::move(hour__arg)),
+    __fbthrift_field_minute(std::move(minute__arg)),
+    __fbthrift_field_sec(std::move(sec__arg)),
+    __fbthrift_field_microsec(std::move(microsec__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+}
+
+
+void LocalTime::__clear() {
+  // clear all fields
+  this->__fbthrift_field_hour = ::std::int8_t();
+  this->__fbthrift_field_minute = ::std::int8_t();
+  this->__fbthrift_field_sec = ::std::int8_t();
+  this->__fbthrift_field_microsec = ::std::int32_t();
+  __isset = {};
+}
+
+bool LocalTime::operator==(const LocalTime& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.hour_ref() == rhs.hour_ref())) {
+    return false;
+  }
+  if (!(lhs.minute_ref() == rhs.minute_ref())) {
+    return false;
+  }
+  if (!(lhs.sec_ref() == rhs.sec_ref())) {
+    return false;
+  }
+  if (!(lhs.microsec_ref() == rhs.microsec_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool LocalTime::operator<(const LocalTime& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.hour_ref() == rhs.hour_ref())) {
+    return lhs.hour_ref() < rhs.hour_ref();
+  }
+  if (!(lhs.minute_ref() == rhs.minute_ref())) {
+    return lhs.minute_ref() < rhs.minute_ref();
+  }
+  if (!(lhs.sec_ref() == rhs.sec_ref())) {
+    return lhs.sec_ref() < rhs.sec_ref();
+  }
+  if (!(lhs.microsec_ref() == rhs.microsec_ref())) {
+    return lhs.microsec_ref() < rhs.microsec_ref();
+  }
+  return false;
+}
+
+
+void swap(LocalTime& a, LocalTime& b) {
+  using ::std::swap;
+  swap(a.hour_ref().value(), b.hour_ref().value());
+  swap(a.minute_ref().value(), b.minute_ref().value());
+  swap(a.sec_ref().value(), b.sec_ref().value());
+  swap(a.microsec_ref().value(), b.microsec_ref().value());
+  swap(a.__isset, b.__isset);
+}
+
+template void LocalTime::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t LocalTime::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t LocalTime::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t LocalTime::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void LocalTime::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t LocalTime::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t LocalTime::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t LocalTime::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}} // nebula::cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
+void TccStructTraits<::nebula::cpp2::LocalDatetime>::translateFieldName(
+    folly::StringPiece _fname,
+    int16_t& fid,
+    apache::thrift::protocol::TType& _ftype) noexcept {
+  using data = apache::thrift::TStructDataStorage<::nebula::cpp2::LocalDatetime>;
+  static const st::translate_field_name_table table{
+      data::fields_size,
+      data::fields_names.data(),
+      data::fields_ids.data(),
+      data::fields_types.data()};
+  st::translate_field_name(_fname, fid, _ftype, table);
+}
+
+} // namespace detail
+} // namespace thrift
+} // namespace apache
+
+namespace nebula { namespace cpp2 {
+
+LocalDatetime::LocalDatetime(const LocalDatetime&) = default;
+LocalDatetime& LocalDatetime::operator=(const LocalDatetime&) = default;
+LocalDatetime::LocalDatetime(LocalDatetime&& other) noexcept  :
+    __fbthrift_field_year(std::move(other.__fbthrift_field_year)),
+    __fbthrift_field_month(std::move(other.__fbthrift_field_month)),
+    __fbthrift_field_day(std::move(other.__fbthrift_field_day)),
+    __fbthrift_field_hour(std::move(other.__fbthrift_field_hour)),
+    __fbthrift_field_minute(std::move(other.__fbthrift_field_minute)),
+    __fbthrift_field_sec(std::move(other.__fbthrift_field_sec)),
+    __fbthrift_field_microsec(std::move(other.__fbthrift_field_microsec)),
+    __isset(other.__isset) {
+}
+
+LocalDatetime& LocalDatetime::operator=(FOLLY_MAYBE_UNUSED LocalDatetime&& other) noexcept {
+    this->__fbthrift_field_year = std::move(other.__fbthrift_field_year);
+    this->__fbthrift_field_month = std::move(other.__fbthrift_field_month);
+    this->__fbthrift_field_day = std::move(other.__fbthrift_field_day);
+    this->__fbthrift_field_hour = std::move(other.__fbthrift_field_hour);
+    this->__fbthrift_field_minute = std::move(other.__fbthrift_field_minute);
+    this->__fbthrift_field_sec = std::move(other.__fbthrift_field_sec);
+    this->__fbthrift_field_microsec = std::move(other.__fbthrift_field_microsec);
+    __isset = other.__isset;
+    return *this;
+}
+
+
+LocalDatetime::LocalDatetime(apache::thrift::FragileConstructor, ::std::int16_t year__arg, ::std::int8_t month__arg, ::std::int8_t day__arg, ::std::int8_t hour__arg, ::std::int8_t minute__arg, ::std::int8_t sec__arg, ::std::int32_t microsec__arg) :
+    __fbthrift_field_year(std::move(year__arg)),
+    __fbthrift_field_month(std::move(month__arg)),
+    __fbthrift_field_day(std::move(day__arg)),
+    __fbthrift_field_hour(std::move(hour__arg)),
+    __fbthrift_field_minute(std::move(minute__arg)),
+    __fbthrift_field_sec(std::move(sec__arg)),
+    __fbthrift_field_microsec(std::move(microsec__arg)) {
+  __isset.set(folly::index_constant<0>(), true);
+  __isset.set(folly::index_constant<1>(), true);
+  __isset.set(folly::index_constant<2>(), true);
+  __isset.set(folly::index_constant<3>(), true);
+  __isset.set(folly::index_constant<4>(), true);
+  __isset.set(folly::index_constant<5>(), true);
+  __isset.set(folly::index_constant<6>(), true);
+}
+
+
+void LocalDatetime::__clear() {
+  // clear all fields
+  this->__fbthrift_field_year = ::std::int16_t();
+  this->__fbthrift_field_month = ::std::int8_t();
+  this->__fbthrift_field_day = ::std::int8_t();
+  this->__fbthrift_field_hour = ::std::int8_t();
+  this->__fbthrift_field_minute = ::std::int8_t();
+  this->__fbthrift_field_sec = ::std::int8_t();
+  this->__fbthrift_field_microsec = ::std::int32_t();
+  __isset = {};
+}
+
+bool LocalDatetime::operator==(const LocalDatetime& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.year_ref() == rhs.year_ref())) {
+    return false;
+  }
+  if (!(lhs.month_ref() == rhs.month_ref())) {
+    return false;
+  }
+  if (!(lhs.day_ref() == rhs.day_ref())) {
+    return false;
+  }
+  if (!(lhs.hour_ref() == rhs.hour_ref())) {
+    return false;
+  }
+  if (!(lhs.minute_ref() == rhs.minute_ref())) {
+    return false;
+  }
+  if (!(lhs.sec_ref() == rhs.sec_ref())) {
+    return false;
+  }
+  if (!(lhs.microsec_ref() == rhs.microsec_ref())) {
+    return false;
+  }
+  return true;
+}
+
+bool LocalDatetime::operator<(const LocalDatetime& rhs) const {
+  (void)rhs;
+  auto& lhs = *this;
+  (void)lhs;
+  if (!(lhs.year_ref() == rhs.year_ref())) {
+    return lhs.year_ref() < rhs.year_ref();
+  }
+  if (!(lhs.month_ref() == rhs.month_ref())) {
+    return lhs.month_ref() < rhs.month_ref();
+  }
+  if (!(lhs.day_ref() == rhs.day_ref())) {
+    return lhs.day_ref() < rhs.day_ref();
+  }
+  if (!(lhs.hour_ref() == rhs.hour_ref())) {
+    return lhs.hour_ref() < rhs.hour_ref();
+  }
+  if (!(lhs.minute_ref() == rhs.minute_ref())) {
+    return lhs.minute_ref() < rhs.minute_ref();
+  }
+  if (!(lhs.sec_ref() == rhs.sec_ref())) {
+    return lhs.sec_ref() < rhs.sec_ref();
+  }
+  if (!(lhs.microsec_ref() == rhs.microsec_ref())) {
+    return lhs.microsec_ref() < rhs.microsec_ref();
+  }
+  return false;
+}
+
+
+void swap(LocalDatetime& a, LocalDatetime& b) {
+  using ::std::swap;
+  swap(a.year_ref().value(), b.year_ref().value());
+  swap(a.month_ref().value(), b.month_ref().value());
+  swap(a.day_ref().value(), b.day_ref().value());
+  swap(a.hour_ref().value(), b.hour_ref().value());
+  swap(a.minute_ref().value(), b.minute_ref().value());
+  swap(a.sec_ref().value(), b.sec_ref().value());
+  swap(a.microsec_ref().value(), b.microsec_ref().value());
+  swap(a.__isset, b.__isset);
+}
+
+template void LocalDatetime::readNoXfer<>(apache::thrift::BinaryProtocolReader*);
+template uint32_t LocalDatetime::write<>(apache::thrift::BinaryProtocolWriter*) const;
+template uint32_t LocalDatetime::serializedSize<>(apache::thrift::BinaryProtocolWriter const*) const;
+template uint32_t LocalDatetime::serializedSizeZC<>(apache::thrift::BinaryProtocolWriter const*) const;
+template void LocalDatetime::readNoXfer<>(apache::thrift::CompactProtocolReader*);
+template uint32_t LocalDatetime::write<>(apache::thrift::CompactProtocolWriter*) const;
+template uint32_t LocalDatetime::serializedSize<>(apache::thrift::CompactProtocolWriter const*) const;
+template uint32_t LocalDatetime::serializedSizeZC<>(apache::thrift::CompactProtocolWriter const*) const;
+
+
+
+}} // nebula::cpp2
+
+namespace apache {
+namespace thrift {
+namespace detail {
+
 void TccStructTraits<::nebula::cpp2::Value>::translateFieldName(
     folly::StringPiece _fname,
     int16_t& fid,
@@ -589,6 +1084,18 @@ void Value::__clear() {
     case Type::edgeVal:
       destruct(value_.edgeVal);
       break;
+    case Type::durationVal:
+      destruct(value_.durationVal);
+      break;
+    case Type::localTimeVal:
+      destruct(value_.localTimeVal);
+      break;
+    case Type::dateVal:
+      destruct(value_.dateVal);
+      break;
+    case Type::localDatetimeVal:
+      destruct(value_.localDatetimeVal);
+      break;
     default:
       assert(false);
       break;
@@ -625,6 +1132,14 @@ bool Value::operator==(const Value& rhs) const {
       return value_.nodeVal == rhs.value_.nodeVal;
     case Type::edgeVal:
       return value_.edgeVal == rhs.value_.edgeVal;
+    case Type::durationVal:
+      return value_.durationVal == rhs.value_.durationVal;
+    case Type::localTimeVal:
+      return value_.localTimeVal == rhs.value_.localTimeVal;
+    case Type::dateVal:
+      return value_.dateVal == rhs.value_.dateVal;
+    case Type::localDatetimeVal:
+      return value_.localDatetimeVal == rhs.value_.localDatetimeVal;
     default:
       return true;
   }
@@ -669,6 +1184,30 @@ static_assert(
         ::apache::thrift::type_class::structure,
         ::nebula::cpp2::Edge>,
     "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::Duration>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::LocalTime>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::Date>,
+    "inconsistent use of json option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_json<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::LocalDatetime>,
+    "inconsistent use of json option");
 
 static_assert(
     ::apache::thrift::detail::st::gen_check_nimble<
@@ -693,6 +1232,30 @@ static_assert(
         Value,
         ::apache::thrift::type_class::structure,
         ::nebula::cpp2::Edge>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::Duration>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::LocalTime>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::Date>,
+    "inconsistent use of nimble option");
+static_assert(
+    ::apache::thrift::detail::st::gen_check_nimble<
+        Value,
+        ::apache::thrift::type_class::structure,
+        ::nebula::cpp2::LocalDatetime>,
     "inconsistent use of nimble option");
 
 }} // nebula::cpp2

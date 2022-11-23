@@ -3,6 +3,10 @@
 #ifndef COMMON_DATATYPE_VALUE_H_
 #define COMMON_DATATYPE_VALUE_H_
 
+#include "common/datatype/Date.h"
+#include "common/datatype/Datetime.h"
+#include "common/datatype/Duration.h"
+#include "common/datatype/Time.h"
 #include <memory_resource>
 
 namespace apache {
@@ -44,6 +48,12 @@ public:
         kMap = 10,
         kNode = 11,
         kEdge = 12,
+        // Temporal types
+        // TODO(Aiee) add kTime, kDatetime which contains timezone
+        kLocalTime = 13,  // Time without timezone
+        kDuration = 14,
+        kDate = 15,
+        kLocalDatetime = 16,  // Datetime without timezone
     };
     union Data {
         // Fixed length data types less or equal than 8 bytes
@@ -61,13 +71,20 @@ public:
         Map* map_;
         Node* node_;
         Edge* edge_;
-
+        // Temporal types
+        // TODO(Aiee) Add timezone support
+        Date date_;
+        LocalTime localTime_;
+        LocalDatetime localDatetime_;
+        Duration* duration_;
         // A little tricky here.
         // For an allocator-aware `Value`, we need 8 bytes to store the pmr allocator.
         // Considering that the primitive types don't need the allocator while the
         // non-primitive types store the allocator themselves, so we can use the union to store
         // the allocator temporarily.
         std::pmr::memory_resource* mr_;
+        Data() {}
+        ~Data() {}
     };
 
     Value(allocator_type alloc = allocator_type());                          // NOLINT
@@ -97,6 +114,12 @@ public:
     Value(const Edge& val, allocator_type alloc = allocator_type());         // NOLINT
     Value(Edge&& val) noexcept;                                              // NOLINT
     Value(Edge&& val, allocator_type alloc);                                 // NOLINT
+    Value(LocalTime val, allocator_type alloc = allocator_type());           // NOLINT
+    Value(Date val, allocator_type alloc = allocator_type());                // NOLINT
+    Value(const Duration& val, allocator_type alloc = allocator_type());     // NOLINT
+    Value(Duration&& val) noexcept;                                          // NOLINT
+    Value(Duration&& val, allocator_type alloc);                             // NOLINT
+    Value(LocalDatetime val, allocator_type alloc = allocator_type());       // NOLINT
 
     Value(const Value& other);
     Value(const Value& other, allocator_type alloc);
@@ -186,6 +209,22 @@ public:
         return type_ == Type::kEdge;
     }
 
+    bool isLocalTime() const {
+        return type_ == Type::kLocalTime;
+    }
+
+    bool isDuration() const {
+        return type_ == Type::kDuration;
+    }
+
+    bool isDate() const {
+        return type_ == Type::kDate;
+    }
+
+    bool isLocalDatetime() const {
+        return type_ == Type::kLocalDatetime;
+    }
+
     bool getBool() const {
         return data_.bool_;
     }
@@ -240,6 +279,22 @@ public:
         return *data_.edge_;
     }
 
+    const LocalTime& getLocalTime() const {
+        return data_.localTime_;
+    }
+
+    const Date& getDate() const {
+        return data_.date_;
+    }
+
+    const LocalDatetime& getLocalDatetime() const {
+        return data_.localDatetime_;
+    }
+
+    const Duration& getDuration() const {
+        return *data_.duration_;
+    }
+
     bool& mutableBool() {
         return data_.bool_;
     }
@@ -286,6 +341,22 @@ public:
 
     Edge& mutableEdge() {
         return *data_.edge_;
+    }
+
+    LocalTime& mutableLocalTime() {
+        return data_.localTime_;
+    }
+
+    Date& mutableDate() {
+        return data_.date_;
+    }
+
+    LocalDatetime& mutableLocalDatetime() {
+        return data_.localDatetime_;
+    }
+
+    Duration& mutableDuration() {
+        return *data_.duration_;
     }
 
     std::string toString() const;

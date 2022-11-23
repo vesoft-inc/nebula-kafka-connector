@@ -18,6 +18,10 @@ class BindingTable;
 class RecordType;
 class RawRecord;
 class BindingTable;
+struct Duration;
+struct LocalTime;
+struct LocalDatetime;
+struct Date;
 
 struct GQLStatus;
 struct ExecutionOutcome;
@@ -39,6 +43,10 @@ SPECIALIZE_CPP2OPS(nebula::client::FieldType);
 SPECIALIZE_CPP2OPS(nebula::client::RecordType);
 SPECIALIZE_CPP2OPS(nebula::client::RawRecord);
 SPECIALIZE_CPP2OPS(nebula::client::BindingTable);
+SPECIALIZE_CPP2OPS(nebula::client::Duration);
+SPECIALIZE_CPP2OPS(nebula::client::LocalTime);
+SPECIALIZE_CPP2OPS(nebula::client::Date);
+SPECIALIZE_CPP2OPS(nebula::client::LocalDatetime);
 
 SPECIALIZE_CPP2OPS(nebula::client::GQLStatus);
 SPECIALIZE_CPP2OPS(nebula::client::ExecutionOutcome);

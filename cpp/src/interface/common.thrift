@@ -14,6 +14,10 @@ cpp_include "common/datatype/thriftSerialization/MapOps-inl.h"
 cpp_include "common/datatype/thriftSerialization/NodeOps-inl.h"
 cpp_include "common/datatype/thriftSerialization/EdgeOps-inl.h"
 cpp_include "common/datatype/thriftSerialization/RecordOps-inl.h"
+cpp_include "common/datatype/thriftSerialization/DateOps-inl.h"
+cpp_include "common/datatype/thriftSerialization/DatetimeOps-inl.h"
+cpp_include "common/datatype/thriftSerialization/TimeOps-inl.h"
+cpp_include "common/datatype/thriftSerialization/DurationOps-inl.h"
 cpp_include "common/datatype/thriftSerialization/BindingTableOps-inl.h"
 
 //  Note: In order to support multiple languages, all strings
@@ -43,6 +47,10 @@ union Value {
     10: NMap mapVal;
     11: Node nodeVal;
     12: Edge edgeVal;
+    13: Duration durationVal;
+    14: LocalTime localTimeVal;
+    15: Date dateVal;
+    16: LocalDatetime localDatetimeVal;
 } (cpp.type = "nebula::client::Value")
 
 struct NList {
@@ -71,19 +79,23 @@ struct Edge {
 } (cpp.type = "nebula::client::Edge")
 
 enum ValueType {
-    kNull     = 0,        
-    kBool     = 1,   
-    kInt8     = 2,       
-    kInt16    = 3,       
-    kInt32    = 4,        
-    kInt64    = 5,      
-    kFloat    = 6,      
-    kDouble   = 7,       
-    kString   = 8,       
-    kList     = 9,     
-    kMap      = 10,    
-    kNode     = 11,    
-    kEdge     = 12,   
+    kNull          = 0,        
+    kBool          = 1,   
+    kInt8          = 2,       
+    kInt16         = 3,       
+    kInt32         = 4,        
+    kInt64         = 5,      
+    kFloat         = 6,      
+    kDouble        = 7,       
+    kString        = 8,       
+    kList          = 9,     
+    kMap           = 10,    
+    kNode          = 11,    
+    kEdge          = 12,   
+    kDuration      = 13,
+    kLocalTime     = 14,
+    kDate          = 15,
+    kLocalDatetime = 16,
 } (cpp.enum_strict, cpp.type = "nebula::client::ValueType")
 
 struct FieldType {
@@ -100,14 +112,47 @@ struct RawRecord {
     1: list<Value> (cpp.template = "std::pmr::vector") values;
 } (cpp.type = "nebula::client::RawRecord")
 
-// TODO(Aiee) Unimplemented
-# struct Record {}
-
 struct BindingTable {
     1: list<binary> (cpp.template = "std::pmr::vector") columnNames;
     2: list<RawRecord> (cpp.template = "std::pmr::deque") records;
 } (cpp.type = "nebula::client::BindingTable")
 
+// !! Struct Duration has a shadow data type defined in the Duration.h
+// So any change here needs to be reflected to the shadow type there
+struct Duration {
+    1: i64 seconds;
+    2: i32 microseconds;
+    3: i32 months;
+} (cpp.type = "nebula::client::Duration")
+
+// !! Struct Date has a shadow data type defined in the Date.h
+// So any change here needs to be reflected to the shadow type there
+struct Date {
+    1: i16 year;    // Calendar year, such as 2019
+    2: byte month;    // Calendar month: 1 - 12
+    3: byte day;      // Calendar day: 1 -31
+} (cpp.type = "nebula::client::Date")
+
+// !! Struct LocalTime has a shadow data type defined in the Date.h
+// So any change here needs to be reflected to the shadow type there
+struct LocalTime {
+    1: byte hour;         // Hour: 0 - 23
+    2: byte minute;       // Minute: 0 - 59
+    3: byte sec;          // Second: 0 - 59
+    4: i32 microsec;    // Micro-second: 0 - 999,999
+} (cpp.type = "nebula::client::LocalTime")
+
+// !! Struct LocalDatetime has a shadow data type defined in the Date.h
+// So any change here needs to be reflected to the shadow type there
+struct LocalDatetime {
+    1: i16 year;
+    2: byte month;
+    3: byte day;
+    4: byte hour;         // Hour: 0 - 23
+    5: byte minute;       // Minute: 0 - 59
+    6: byte sec;          // Second: 0 - 59
+    7: i32 microsec;    // Micro-second: 0 - 999,999
+} (cpp.type = "nebula::client::LocalDatetime")
 
 /*
  * ErrorCode for graphd, metad, storaged,raftd

@@ -51,6 +51,51 @@ struct ForEachField<::nebula::cpp2::Edge> {
 };
 
 template <>
+struct ForEachField<::nebula::cpp2::Duration> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).seconds_ref()...);
+    f(1, static_cast<T&&>(t).microseconds_ref()...);
+    f(2, static_cast<T&&>(t).months_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::nebula::cpp2::Date> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).year_ref()...);
+    f(1, static_cast<T&&>(t).month_ref()...);
+    f(2, static_cast<T&&>(t).day_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::nebula::cpp2::LocalTime> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).hour_ref()...);
+    f(1, static_cast<T&&>(t).minute_ref()...);
+    f(2, static_cast<T&&>(t).sec_ref()...);
+    f(3, static_cast<T&&>(t).microsec_ref()...);
+  }
+};
+
+template <>
+struct ForEachField<::nebula::cpp2::LocalDatetime> {
+  template <typename F, typename... T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
+    f(0, static_cast<T&&>(t).year_ref()...);
+    f(1, static_cast<T&&>(t).month_ref()...);
+    f(2, static_cast<T&&>(t).day_ref()...);
+    f(3, static_cast<T&&>(t).hour_ref()...);
+    f(4, static_cast<T&&>(t).minute_ref()...);
+    f(5, static_cast<T&&>(t).sec_ref()...);
+    f(6, static_cast<T&&>(t).microsec_ref()...);
+  }
+};
+
+template <>
 struct ForEachField<::nebula::cpp2::Value> {
   template <typename F, typename... T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, FOLLY_MAYBE_UNUSED T&&... t) const {
@@ -66,6 +111,10 @@ struct ForEachField<::nebula::cpp2::Value> {
     f(9, static_cast<T&&>(t).mapVal_ref()...);
     f(10, static_cast<T&&>(t).nodeVal_ref()...);
     f(11, static_cast<T&&>(t).edgeVal_ref()...);
+    f(12, static_cast<T&&>(t).durationVal_ref()...);
+    f(13, static_cast<T&&>(t).localTimeVal_ref()...);
+    f(14, static_cast<T&&>(t).dateVal_ref()...);
+    f(15, static_cast<T&&>(t).localDatetimeVal_ref()...);
   }
 };
 

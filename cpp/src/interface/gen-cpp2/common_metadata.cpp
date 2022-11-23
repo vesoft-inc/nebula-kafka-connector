@@ -133,6 +133,115 @@ StructMetadata<::nebula::cpp2::Edge>::gen(ThriftMetadata& metadata) {
   return res.first->second;
 }
 const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::nebula::cpp2::Duration>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("common.Duration", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& common_Duration = res.first->second;
+  common_Duration.name_ref() = "common.Duration";
+  common_Duration.is_union_ref() = false;
+  static const EncodedThriftField
+  common_Duration_fields[] = {
+    {1, "seconds", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I64_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "microseconds", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "months", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : common_Duration_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    common_Duration.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::nebula::cpp2::Date>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("common.Date", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& common_Date = res.first->second;
+  common_Date.name_ref() = "common.Date";
+  common_Date.is_union_ref() = false;
+  static const EncodedThriftField
+  common_Date_fields[] = {
+    {1, "year", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "month", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "day", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : common_Date_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    common_Date.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::nebula::cpp2::LocalTime>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("common.LocalTime", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& common_LocalTime = res.first->second;
+  common_LocalTime.name_ref() = "common.LocalTime";
+  common_LocalTime.is_union_ref() = false;
+  static const EncodedThriftField
+  common_LocalTime_fields[] = {
+    {1, "hour", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "minute", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "sec", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "microsec", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : common_LocalTime_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    common_LocalTime.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
+StructMetadata<::nebula::cpp2::LocalDatetime>::gen(ThriftMetadata& metadata) {
+  auto res = metadata.structs_ref()->emplace("common.LocalDatetime", ::apache::thrift::metadata::ThriftStruct{});
+  if (!res.second) {
+    return res.first->second;
+  }
+  ::apache::thrift::metadata::ThriftStruct& common_LocalDatetime = res.first->second;
+  common_LocalDatetime.name_ref() = "common.LocalDatetime";
+  common_LocalDatetime.is_union_ref() = false;
+  static const EncodedThriftField
+  common_LocalDatetime_fields[] = {
+    {1, "year", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I16_TYPE), std::vector<ThriftConstStruct>{}},
+    {2, "month", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {3, "day", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {4, "hour", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {5, "minute", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {6, "sec", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_BYTE_TYPE), std::vector<ThriftConstStruct>{}},
+    {7, "microsec", false, std::make_unique<Primitive>(ThriftPrimitiveType::THRIFT_I32_TYPE), std::vector<ThriftConstStruct>{}},
+  };
+  for (const auto& f : common_LocalDatetime_fields) {
+    ::apache::thrift::metadata::ThriftField field;
+    field.id_ref() = f.id;
+    field.name_ref() = f.name;
+    field.is_optional_ref() = f.is_optional;
+    f.metadata_type_interface->writeAndGenType(*field.type_ref(), metadata);
+    field.structured_annotations_ref() = f.structured_annotations;
+    common_LocalDatetime.fields_ref()->push_back(std::move(field));
+  }
+  return res.first->second;
+}
+const ::apache::thrift::metadata::ThriftStruct&
 StructMetadata<::nebula::cpp2::Value>::gen(ThriftMetadata& metadata) {
   auto res = metadata.structs_ref()->emplace("common.Value", ::apache::thrift::metadata::ThriftStruct{});
   if (!res.second) {
@@ -155,6 +264,10 @@ StructMetadata<::nebula::cpp2::Value>::gen(ThriftMetadata& metadata) {
     {10, "mapVal", false, std::make_unique<Typedef>("common.NMap", std::make_unique<Struct< ::nebula::cpp2::NMap>>("common.NMap"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {11, "nodeVal", false, std::make_unique<Typedef>("common.Node", std::make_unique<Struct< ::nebula::cpp2::Node>>("common.Node"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
     {12, "edgeVal", false, std::make_unique<Typedef>("common.Edge", std::make_unique<Struct< ::nebula::cpp2::Edge>>("common.Edge"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {13, "durationVal", false, std::make_unique<Typedef>("common.Duration", std::make_unique<Struct< ::nebula::cpp2::Duration>>("common.Duration"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {14, "localTimeVal", false, std::make_unique<Typedef>("common.LocalTime", std::make_unique<Struct< ::nebula::cpp2::LocalTime>>("common.LocalTime"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {15, "dateVal", false, std::make_unique<Typedef>("common.Date", std::make_unique<Struct< ::nebula::cpp2::Date>>("common.Date"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
+    {16, "localDatetimeVal", false, std::make_unique<Typedef>("common.LocalDatetime", std::make_unique<Struct< ::nebula::cpp2::LocalDatetime>>("common.LocalDatetime"), std::vector<ThriftConstStruct>{}), std::vector<ThriftConstStruct>{}},
   };
   for (const auto& f : common_Value_fields) {
     ::apache::thrift::metadata::ThriftField field;

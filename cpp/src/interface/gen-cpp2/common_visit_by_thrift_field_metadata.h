@@ -76,6 +76,84 @@ struct VisitByFieldId<::nebula::cpp2::Edge> {
 };
 
 template <>
+struct VisitByFieldId<::nebula::cpp2::Duration> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).seconds_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).microseconds_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).months_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::Duration");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::nebula::cpp2::Date> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).year_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).month_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).day_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::Date");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::nebula::cpp2::LocalTime> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).hour_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).minute_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).sec_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).microsec_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::LocalTime");
+    }
+  }
+};
+
+template <>
+struct VisitByFieldId<::nebula::cpp2::LocalDatetime> {
+  template <typename F, typename T>
+  void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
+    switch (fieldId) {
+    case 1:
+      return f(0, static_cast<T&&>(t).year_ref());
+    case 2:
+      return f(1, static_cast<T&&>(t).month_ref());
+    case 3:
+      return f(2, static_cast<T&&>(t).day_ref());
+    case 4:
+      return f(3, static_cast<T&&>(t).hour_ref());
+    case 5:
+      return f(4, static_cast<T&&>(t).minute_ref());
+    case 6:
+      return f(5, static_cast<T&&>(t).sec_ref());
+    case 7:
+      return f(6, static_cast<T&&>(t).microsec_ref());
+    default:
+      throwInvalidThriftId(fieldId, "::nebula::cpp2::LocalDatetime");
+    }
+  }
+};
+
+template <>
 struct VisitByFieldId<::nebula::cpp2::Value> {
   template <typename F, typename T>
   void operator()(FOLLY_MAYBE_UNUSED F&& f, int32_t fieldId, FOLLY_MAYBE_UNUSED T&& t) const {
@@ -104,6 +182,14 @@ struct VisitByFieldId<::nebula::cpp2::Value> {
       return f(10, static_cast<T&&>(t).nodeVal_ref());
     case 12:
       return f(11, static_cast<T&&>(t).edgeVal_ref());
+    case 13:
+      return f(12, static_cast<T&&>(t).durationVal_ref());
+    case 14:
+      return f(13, static_cast<T&&>(t).localTimeVal_ref());
+    case 15:
+      return f(14, static_cast<T&&>(t).dateVal_ref());
+    case 16:
+      return f(15, static_cast<T&&>(t).localDatetimeVal_ref());
     default:
       throwInvalidThriftId(fieldId, "::nebula::cpp2::Value");
     }

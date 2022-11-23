@@ -3,18 +3,16 @@
 #ifndef COMMON_DATATYPE_VALUEOPS_H_
 #define COMMON_DATATYPE_VALUEOPS_H_
 
-#include <thrift/lib/cpp/protocol/TType.h>
-#include <thrift/lib/cpp2/GeneratedCodeHelper.h>
-#include <thrift/lib/cpp2/gen/module_types_tcc.h>
-#include <thrift/lib/cpp2/protocol/CompactProtocol.h>
-#include <thrift/lib/cpp2/protocol/ProtocolReaderStructReadState.h>
-
 #include "common/datatype/Value.h"
 #include "common/datatype/thriftSerialization/CommonCpp2Ops.h"
+#include "common/datatype/thriftSerialization/DateOps-inl.h"
+#include "common/datatype/thriftSerialization/DatetimeOps-inl.h"
+#include "common/datatype/thriftSerialization/DurationOps-inl.h"
 #include "common/datatype/thriftSerialization/EdgeOps-inl.h"
 #include "common/datatype/thriftSerialization/ListOps-inl.h"
 #include "common/datatype/thriftSerialization/MapOps-inl.h"
 #include "common/datatype/thriftSerialization/NodeOps-inl.h"
+#include "common/datatype/thriftSerialization/TimeOps-inl.h"
 
 
 namespace apache {
@@ -62,6 +60,18 @@ struct TccStructTraits<nebula::client::Value> {
             _ftype = apache::thrift::protocol::T_STRUCT;
         } else if (_fname == "edgeVal") {
             fid = 12;
+            _ftype = apache::thrift::protocol::T_STRUCT;
+        } else if (_fname == "durationVal") {
+            fid = 13;
+            _ftype = apache::thrift::protocol::T_STRUCT;
+        } else if (_fname == "localTimeVal") {
+            fid = 14;
+            _ftype = apache::thrift::protocol::T_STRUCT;
+        } else if (_fname == "dateVal") {
+            fid = 15;
+            _ftype = apache::thrift::protocol::T_STRUCT;
+        } else if (_fname == "localDatetimeVal") {
+            fid = 16;
             _ftype = apache::thrift::protocol::T_STRUCT;
         }
     }
@@ -157,12 +167,40 @@ uint32_t Cpp2Ops<nebula::client::Value>::write(Protocol* proto,
             xfer += proto->writeFieldEnd();
             break;
         }
-
-        case nebula::client::Value::Type::kEdge:
+        case nebula::client::Value::Type::kEdge: {
             xfer += proto->writeFieldBegin("edgeVal", protocol::T_STRUCT, 12);
             xfer += Cpp2Ops<nebula::client::Edge>::write(proto, obj->data_.edge_);
             xfer += proto->writeFieldEnd();
             break;
+        }
+        case nebula::client::Value::Type::kDuration: {
+            xfer += proto->writeFieldBegin("durationVal", protocol::T_STRUCT, 13);
+            xfer += Cpp2Ops<nebula::client::Duration>::write(proto, obj->data_.duration_);
+            xfer += proto->writeFieldEnd();
+            break;
+        }
+        case nebula::client::Value::Type::kLocalTime: {
+            xfer += proto->writeFieldBegin("localTimeVal", protocol::T_STRUCT, 14);
+            xfer += Cpp2Ops<nebula::client::LocalTime>::write(proto, &obj->getLocalTime());
+            xfer += proto->writeFieldEnd();
+            break;
+        }
+        case nebula::client::Value::Type::kDate: {
+            xfer += proto->writeFieldBegin("dateVal", protocol::T_STRUCT, 15);
+            xfer += Cpp2Ops<nebula::client::Date>::write(proto, &obj->getDate());
+            xfer += proto->writeFieldEnd();
+            break;
+        }
+        case nebula::client::Value::Type::kLocalDatetime: {
+            xfer += proto->writeFieldBegin("localDatetimeVal", protocol::T_STRUCT, 16);
+            xfer += Cpp2Ops<nebula::client::LocalDatetime>::write(proto,
+                                                                  &obj->getLocalDatetime());
+            xfer += proto->writeFieldEnd();
+            break;
+        }
+        default: {
+            LOG(FATAL) << "Unknown type: " << static_cast<int>(obj->getType());
+        }
     }
 
     xfer += proto->writeFieldStop();
@@ -326,6 +364,51 @@ void Cpp2Ops<nebula::client::Value>::read(Protocol* proto, nebula::client::Value
                 }
                 break;
             }
+            // Duration type
+            case 13: {
+                if (readState.fieldType == apache::thrift::protocol::T_STRUCT) {
+                    obj->type_ = nebula::client::Value::Type::kDuration;
+                    obj->data_.duration_ = new nebula::client::Duration(mr);
+                    Cpp2Ops<nebula::client::Duration>::read(proto, obj->data_.duration_);
+                } else {
+                    proto->skip(readState.fieldType);
+                }
+                break;
+            }
+            // LocalTime type
+            case 14: {
+                if (readState.fieldType == apache::thrift::protocol::T_STRUCT) {
+                    obj->type_ = nebula::client::Value::Type::kLocalTime;
+                    obj->data_.localTime_ = nebula::client::LocalTime();
+                    Cpp2Ops<nebula::client::LocalTime>::read(proto, &obj->mutableLocalTime());
+                } else {
+                    proto->skip(readState.fieldType);
+                }
+                break;
+            }
+            // Date type
+            case 15: {
+                if (readState.fieldType == apache::thrift::protocol::T_STRUCT) {
+                    obj->type_ = nebula::client::Value::Type::kDate;
+                    obj->data_.date_ = nebula::client::Date();
+                    Cpp2Ops<nebula::client::Date>::read(proto, &obj->mutableDate());
+                } else {
+                    proto->skip(readState.fieldType);
+                }
+                break;
+            }
+            // LocalDatetime type
+            case 16: {
+                if (readState.fieldType == apache::thrift::protocol::T_STRUCT) {
+                    obj->type_ = nebula::client::Value::Type::kLocalDatetime;
+                    obj->data_.localDatetime_ = nebula::client::LocalDatetime();
+                    Cpp2Ops<nebula::client::LocalDatetime>::read(proto,
+                                                                 &obj->mutableLocalDatetime());
+                } else {
+                    proto->skip(readState.fieldType);
+                }
+                break;
+            }
         }
 
         readState.readFieldEnd(proto);
@@ -414,6 +497,33 @@ uint32_t Cpp2Ops<nebula::client::Value>::serializedSize(Protocol const* proto,
             xfer += Cpp2Ops<nebula::client::Edge>::serializedSize(proto, obj->data_.edge_);
             break;
         }
+        case nebula::client::Value::Type::kDuration: {
+            xfer += proto->serializedFieldSize("durationVal", protocol::T_STRUCT, 13);
+            xfer += Cpp2Ops<nebula::client::Duration>::serializedSize(proto,
+                                                                      obj->data_.duration_);
+            break;
+        }
+        case nebula::client::Value::Type::kLocalTime: {
+            xfer += proto->serializedFieldSize("localTimeVal", protocol::T_STRUCT, 14);
+            xfer += Cpp2Ops<nebula::client::LocalTime>::serializedSize(proto,
+                                                                       &obj->getLocalTime());
+            break;
+        }
+        case nebula::client::Value::Type::kDate: {
+            xfer += proto->serializedFieldSize("dateVal", protocol::T_STRUCT, 15);
+            xfer += Cpp2Ops<nebula::client::Date>::serializedSize(proto, &obj->getDate());
+            break;
+        }
+        case nebula::client::Value::Type::kLocalDatetime: {
+            xfer += proto->serializedFieldSize("localDatetimeVal", protocol::T_STRUCT, 16);
+            xfer += Cpp2Ops<nebula::client::LocalDatetime>::serializedSize(
+                    proto, &obj->getLocalDatetime());
+            break;
+        }
+        default: {
+            LOG(FATAL) << "Unknown type " << static_cast<int>(obj->getType());
+            break;
+        }
     }
 
     xfer += proto->serializedSizeStop();
@@ -495,6 +605,33 @@ uint32_t Cpp2Ops<nebula::client::Value>::serializedSizeZC(Protocol const* proto,
         case nebula::client::Value::Type::kEdge: {
             xfer += proto->serializedFieldSize("edgeVal", protocol::T_STRUCT, 12);
             xfer += Cpp2Ops<nebula::client::Edge>::serializedSizeZC(proto, obj->data_.edge_);
+            break;
+        }
+        case nebula::client::Value::Type::kDuration: {
+            xfer += proto->serializedFieldSize("durationVal", protocol::T_STRUCT, 13);
+            xfer += Cpp2Ops<nebula::client::Duration>::serializedSizeZC(proto,
+                                                                        obj->data_.duration_);
+            break;
+        }
+        case nebula::client::Value::Type::kLocalTime: {
+            xfer += proto->serializedFieldSize("localTimeVal", protocol::T_STRUCT, 14);
+            xfer += Cpp2Ops<nebula::client::LocalTime>::serializedSizeZC(proto,
+                                                                         &obj->getLocalTime());
+            break;
+        }
+        case nebula::client::Value::Type::kDate: {
+            xfer += proto->serializedFieldSize("dateVal", protocol::T_STRUCT, 15);
+            xfer += Cpp2Ops<nebula::client::Date>::serializedSizeZC(proto, &obj->getDate());
+            break;
+        }
+        case nebula::client::Value::Type::kLocalDatetime: {
+            xfer += proto->serializedFieldSize("localDatetimeVal", protocol::T_STRUCT, 16);
+            xfer += Cpp2Ops<nebula::client::LocalDatetime>::serializedSizeZC(
+                    proto, &obj->getLocalDatetime());
+            break;
+        }
+        default: {
+            LOG(FATAL) << "Unknown type " << static_cast<int>(obj->getType());
             break;
         }
     }
