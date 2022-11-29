@@ -19,3 +19,5 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 )
+
+replace github.com/vesoft-inc/nebula-ng-tools/golang => /home/yichen.wang/dev/nebula-ng-tools/golang

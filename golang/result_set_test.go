@@ -97,6 +97,34 @@ func TestAsList(t *testing.T) {
 	}
 }
 
+// func TestAsDuration(t *testing.T) {
+// 	value := nebula.Value{DurationVal: &nebula.Duration{1, 2, 3}}
+// 	valWrap := ValueWrapper{&value, testTimezone}
+// 	assert.Equal(t, true, valWrap.value.IsSetDurationVal())
+// 	assert.Equal(t, "1 2 3", valWrap.String())
+// }
+
+func TestAsDate(t *testing.T) {
+	value := nebula.Value{DateVal: &nebula.Date{2020, 12, 25}}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, true, valWrap.IsDate())
+	assert.Equal(t, "2020-12-25", valWrap.String())
+}
+
+func TestAsLocalTime(t *testing.T) {
+	value := nebula.Value{LocalTimeVal: &nebula.LocalTime{13, 12, 25, 29}}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, true, valWrap.IsLocalTime())
+	assert.Equal(t, "13:12:25.000029", valWrap.String())
+}
+
+func TestAsLocalDatetime(t *testing.T) {
+	value := nebula.Value{LocalDatetimeVal: &nebula.LocalDatetime{2020, 12, 25, 22, 12, 25, 29}}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, true, valWrap.IsLocalDatetime())
+	assert.Equal(t, "2020-12-25T22:12:25.000029", valWrap.String())
+}
+
 func TestResultSet(t *testing.T) {
 	respWithNil := &graph.ExecutionResponse{
 		&graph.ExecutionOutcome{

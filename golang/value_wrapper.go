@@ -63,6 +63,22 @@ func (valWrap ValueWrapper) IsEdge() bool {
 	return valWrap.value.IsSetEdgeVal()
 }
 
+func (valWrap ValueWrapper) IsLocalTime() bool {
+	return valWrap.value.IsSetLocalTimeVal()
+}
+
+func (valWrap ValueWrapper) IsDate() bool {
+	return valWrap.value.IsSetDateVal()
+}
+
+func (valWrap ValueWrapper) IsLocalDatetime() bool {
+	return valWrap.value.IsSetLocalDatetimeVal()
+}
+
+func (valWrap ValueWrapper) IsDuration() bool {
+	return valWrap.value.IsSetDurationVal()
+}
+
 // AsBool converts the ValueWrapper to a boolean value
 func (valWrap ValueWrapper) AsBool() (bool, error) {
 	if valWrap.value.IsSetBoolVal() {
@@ -132,6 +148,43 @@ func (valWrap ValueWrapper) AsList() ([]ValueWrapper, error) {
 	return nil, fmt.Errorf("failed to convert value %s to List", valWrap.GetType())
 }
 
+// AsDate converts the ValueWrapper to a nebula.Date
+func (valWrap ValueWrapper) AsDate() (*nebula.Date, error) {
+	if valWrap.value.IsSetDateVal() {
+		return valWrap.value.GetDateVal(), nil
+	}
+	return nil, fmt.Errorf("failed to convert value %s to Date", valWrap.GetType())
+}
+
+// AsLocalTime converts the ValueWrapper to a nebula.LocalTime
+func (valWrap ValueWrapper) AsLocalTime() (*LocalTimeWrapper, error) {
+	if valWrap.value.IsSetLocalTimeVal() {
+		rawTime := valWrap.value.GetLocalTimeVal()
+		time, err := genLocalTimeWrapper(rawTime, valWrap.timezoneInfo)
+		if err != nil {
+			return nil, err
+		}
+		return time, nil
+	}
+	return nil, fmt.Errorf("failed to convert value %s to LocalTime", valWrap.GetType())
+}
+
+// AsLocalDatetime converts the ValueWrapper to a nebula.LocalDatetime
+func (valWrap ValueWrapper) AsLocalDatetime() (*nebula.LocalDatetime, error) {
+	if valWrap.value.IsSetLocalDatetimeVal() {
+		return valWrap.value.GetLocalDatetimeVal(), nil
+	}
+	return nil, fmt.Errorf("failed to convert value %s to LocalDatetime", valWrap.GetType())
+}
+
+// AsDuration converts the ValueWrapper to a nebula.Duration
+func (valWrap ValueWrapper) AsDuration() (*nebula.Duration, error) {
+	if valWrap.value.IsSetDurationVal() {
+		return valWrap.value.GetDurationVal(), nil
+	}
+	return nil, fmt.Errorf("failed to convert value %s to Duration", valWrap.GetType())
+}
+
 // // AsMap converts the ValueWrapper to a map of string and ValueWrapper
 // func (valWrap ValueWrapper) AsMap() (map[string]ValueWrapper, error) {
 // 	if valWrap.value.IsSetMapVal() {
@@ -194,6 +247,14 @@ func (valWrap ValueWrapper) GetType() string {
 		return "node"
 	} else if valWrap.value.IsSetEdgeVal() {
 		return "edge"
+	} else if valWrap.value.IsSetDateVal() {
+		return "date"
+	} else if valWrap.value.IsSetLocalTimeVal() {
+		return "localDime"
+	} else if valWrap.value.IsSetLocalDatetimeVal() {
+		return "localDatetime"
+	} else if valWrap.value.IsSetDurationVal() {
+		return "duration"
 	} else {
 		return "Null"
 	}
@@ -242,6 +303,34 @@ func (valWrap ValueWrapper) String() string {
 			strs = append(strs, ValueWrapper{val, valWrap.timezoneInfo}.String())
 		}
 		return fmt.Sprintf("[%s]", strings.Join(strs, ", "))
+	} else if value.IsSetDateVal() { // Date yyyy-mm-dd
+		date := value.GetDateVal()
+		dateWrapper, _ := genDateWrapper(date)
+		return fmt.Sprintf("%04d-%02d-%02d",
+			dateWrapper.getYear(),
+			dateWrapper.getMonth(),
+			dateWrapper.getDay())
+	} else if value.IsSetLocalTimeVal() { // Time HH:MM:SS.MSMSMS
+		rawTime := value.GetLocalTimeVal()
+		localTime, _ := genLocalTimeWrapper(rawTime, valWrap.timezoneInfo)
+		return fmt.Sprintf("%02d:%02d:%02d.%06d",
+			localTime.getHour(),
+			localTime.getMinute(),
+			localTime.getSecond(),
+			localTime.getMicrosec())
+	} else if value.IsSetLocalDatetimeVal() { // DateTime yyyy-mm-ddTHH:MM:SS.MSMSMS
+		rawLocalDateTime := value.GetLocalDatetimeVal()
+		localDateTime, _ := genLocalDatetimeWrapper(rawLocalDateTime, valWrap.timezoneInfo)
+		return fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d.%06d",
+			localDateTime.getYear(),
+			localDateTime.getMonth(),
+			localDateTime.getDay(),
+			localDateTime.getHour(),
+			localDateTime.getMinute(),
+			localDateTime.getSecond(),
+			localDateTime.getMicrosec())
+	} else if value.IsSetDurationVal() { // Duration PnYnMnDTnHnMnS
+		return "duration type string unimplemented"
 	} else if value.IsSetMapVal() { // Map TODO(Aiee) Unimplemented
 		// // {k0: v0, k1: v1}
 		// mval := value.GetMapVal()

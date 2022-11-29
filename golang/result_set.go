@@ -195,6 +195,147 @@ const (
 	ErrorCode_E_PARTIAL_SUCCEEDED     ErrorCode = ErrorCode(nebula.ErrorCode_E_PARTIAL_SUCCEEDED)
 )
 
+type LocalTimeWrapper struct {
+	time         *nebula.LocalTime
+	timezoneInfo timezoneInfo
+}
+
+func genLocalTimeWrapper(time *nebula.LocalTime, timezoneInfo timezoneInfo) (*LocalTimeWrapper, error) {
+	if time == nil {
+		return nil, fmt.Errorf("failed to generate Time: invalid Time")
+	}
+
+	return &LocalTimeWrapper{
+		time:         time,
+		timezoneInfo: timezoneInfo,
+	}, nil
+}
+
+// getHour returns the hour in UTC
+func (t LocalTimeWrapper) getHour() int8 {
+	return t.time.Hour
+}
+
+// getHour returns the minute in UTC
+func (t LocalTimeWrapper) getMinute() int8 {
+	return t.time.Minute
+}
+
+// getHour returns the second in UTC
+func (t LocalTimeWrapper) getSecond() int8 {
+	return t.time.Sec
+}
+
+func (t LocalTimeWrapper) getMicrosec() int32 {
+	return t.time.Microsec
+}
+
+// getRawTime returns a nebula.Time object.
+func (t LocalTimeWrapper) getRawTime() *nebula.LocalTime {
+	return t.time
+}
+
+func (t1 LocalTimeWrapper) IsEqualTo(t2 LocalTimeWrapper) bool {
+	return t1.getHour() == t2.getHour() &&
+		t1.getSecond() == t2.getSecond() &&
+		t1.getSecond() == t2.getSecond() &&
+		t1.getMicrosec() == t2.getMicrosec()
+}
+
+type DateWrapper struct {
+	date *nebula.Date
+}
+
+func genDateWrapper(date *nebula.Date) (*DateWrapper, error) {
+	if date == nil {
+		return nil, fmt.Errorf("failed to generate date: invalid date")
+	}
+	return &DateWrapper{
+		date: date,
+	}, nil
+}
+
+func (d DateWrapper) getYear() int16 {
+	return d.date.Year
+}
+
+func (d DateWrapper) getMonth() int8 {
+	return d.date.Month
+}
+
+func (d DateWrapper) getDay() int8 {
+	return d.date.Day
+}
+
+// getRawDate returns a nebula.Date object.
+func (d DateWrapper) getRawDate() *nebula.Date {
+	return d.date
+}
+
+func (d1 DateWrapper) IsEqualTo(d2 DateWrapper) bool {
+	return d1.getYear() == d2.getYear() &&
+		d1.getMonth() == d2.getMonth() &&
+		d1.getDay() == d2.getDay()
+}
+
+type LocalDatetimeWrapper struct {
+	dateTime     *nebula.LocalDatetime
+	timezoneInfo timezoneInfo
+}
+
+func genLocalDatetimeWrapper(datetime *nebula.LocalDatetime, timezoneInfo timezoneInfo) (*LocalDatetimeWrapper, error) {
+	if datetime == nil {
+		return nil, fmt.Errorf("failed to generate datetime: invalid datetime")
+	}
+	return &LocalDatetimeWrapper{
+		dateTime:     datetime,
+		timezoneInfo: timezoneInfo,
+	}, nil
+}
+
+func (dt LocalDatetimeWrapper) getYear() int16 {
+	return dt.dateTime.Year
+}
+
+func (dt LocalDatetimeWrapper) getMonth() int8 {
+	return dt.dateTime.Month
+}
+
+func (dt LocalDatetimeWrapper) getDay() int8 {
+	return dt.dateTime.Day
+}
+
+func (dt LocalDatetimeWrapper) getHour() int8 {
+	return dt.dateTime.Hour
+}
+
+func (dt LocalDatetimeWrapper) getMinute() int8 {
+	return dt.dateTime.Minute
+}
+
+func (dt LocalDatetimeWrapper) getSecond() int8 {
+	return dt.dateTime.Sec
+}
+
+func (dt LocalDatetimeWrapper) getMicrosec() int32 {
+	return dt.dateTime.Microsec
+}
+
+func (dt1 LocalDatetimeWrapper) IsEqualTo(dt2 LocalDatetimeWrapper) bool {
+	return dt1.getYear() == dt2.getYear() &&
+		dt1.getMonth() == dt2.getMonth() &&
+		dt1.getDay() == dt2.getDay() &&
+		dt1.getHour() == dt2.getHour() &&
+		dt1.getSecond() == dt2.getSecond() &&
+		dt1.getSecond() == dt2.getSecond() &&
+		dt1.getMicrosec() == dt2.getMicrosec()
+}
+
+// getRawDateTime returns a nebula.DateTime object representing local dateTime in UTC.
+func (dt LocalDatetimeWrapper) getRawDateTime() *nebula.LocalDatetime {
+	return dt.dateTime
+}
+
 func genResultSet(resp *graph.ExecutionResponse, timezoneInfo timezoneInfo) (*ResultSet, error) {
 	var colNames []string
 	var colNameIndexMap = make(map[string]int)
