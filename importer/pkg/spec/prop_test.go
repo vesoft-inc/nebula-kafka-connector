@@ -145,6 +145,15 @@ var _ = Describe("Prop", func() {
 			"",
 			nil,
 		),
+		Entry("unsupported value type",
+			&Prop{
+				Name: "p1",
+				Type: "unsupported",
+			},
+			Record([]string{"1"}),
+			nil,
+			errors.ErrUnsupportedValueType,
+		),
 	)
 })
 

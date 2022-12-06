@@ -335,7 +335,7 @@ func (c *defaultClient) loopSession(session NebulaSession) {
 				var err error
 				rs, err = session.Execute(data.statement)
 				if err != nil {
-					c.logger.WithError(err).Error("open session failed")
+					c.logger.WithError(err).Error("execute statement failed")
 				}
 				return err
 			}, backoff.WithMaxRetries(exp, uint64(c.retry)))

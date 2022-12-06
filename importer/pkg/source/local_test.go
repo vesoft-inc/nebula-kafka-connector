@@ -13,6 +13,8 @@ var _ = Describe("localSource", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(s).NotTo(BeNil())
 
+		Expect(s.Config()).NotTo(BeNil())
+
 		nBytes, err := s.Size()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(nBytes).To(Equal(int64(6)))

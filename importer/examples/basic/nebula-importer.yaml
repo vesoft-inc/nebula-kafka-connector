@@ -1,0 +1,92 @@
+client:
+  addresses:
+    - "192.168.8.6:39669"
+  user: root
+  password: nebula
+  concurrencyPerAddress: 1
+  reconnectInitialInterval: 1s
+  retry: 3
+  retryInitialInterval: 1s
+graph:
+  name: basic
+  nodes:
+    - name: Person
+      id:
+        name: "id"
+        type: "INT"
+        index: 0
+      props:
+        - name: "firstName"
+          type: "STRING"
+          index: 1
+        - name: "lastName"
+          type: "STRING"
+          index: 2
+        - name: "gender"
+          type: "STRING"
+          index: 3
+        - name: "birthday"
+          type: "STRING"
+          index: 4
+        - name: "creationDate"
+          type: "STRING"
+          index: 5
+        - name: "locationIP"
+          type: "STRING"
+          index: 6
+        - name: "browserUsed"
+          type: "STRING"
+          index: 7
+        - name: "ignore"
+          type: "STRING"
+          index: 8
+          ignore: true
+      sources:
+        - path: ./examples/basic/person.csv
+          csv:
+            delimiter: "|"
+  edges:
+    - name: KNOWS # person_knows_person
+      src:
+        name: Person
+        id:
+          name: "id"
+          type: "INT"
+          index: 0
+      dst:
+        name: Person
+        id:
+          name: "id"
+          type: "INT"
+          index: 1
+      props:
+        - name: "creationDate"
+          type: "STRING"
+          index: 2
+      sources:
+        - path: ./examples/basic/knows.csv
+
+  batch: 10
+  readerConcurrency: 10
+  importerConcurrency: 10
+  statsInterval: 1s
+  hooks:
+    before:
+      - statements:
+        - |
+          CREATE GRAPH TYPE basic_type IF NOT EXISTS AS GRAPH TYPE {
+              (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
+              (Person)-[KNOWS:KNOWS{creationDate STRING}]->(Person)
+          }
+        wait: 10s
+      - statements:
+        - CREATE GRAPH basic IF NOT EXISTS OF basic_type
+        wait: 5s
+log:
+  level: INGO
+  console: true
+  files:
+   - logs/nebula-importer.log
+  fields:
+    - key: app
+      value: nebula-importer

@@ -152,7 +152,7 @@ var _ = Describe("WaitGroupMap", func() {
 					),
 				),
 			)
-			l, err := logger.New()
+			l, err := logger.New(logger.WithLevel(logger.WarnLevel))
 			Expect(err).NotTo(HaveOccurred())
 			m = New(
 				graph,
@@ -341,6 +341,7 @@ var _ = Describe("WaitGroupMap", func() {
 			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
 
 			mockSource.EXPECT().Size().Return(int64(1024*1024*1024*1024), nil)
+			mockSource.EXPECT().Config().Return(nil)
 			mockSource.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(func(p []byte) (int, error) {
 				n := copy(p, "1,np1\n")
 				return n, nil
@@ -485,6 +486,7 @@ var _ = Describe("WaitGroupMap", func() {
 			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
 
 			mockSource.EXPECT().Size().Times(2).Return(int64(1024), nil)
+			mockSource.EXPECT().Config().Times(2).Return(nil)
 			mockSource.EXPECT().Read(gomock.Any()).Times(2).Return(0, stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
 

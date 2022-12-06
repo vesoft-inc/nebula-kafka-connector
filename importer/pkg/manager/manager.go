@@ -176,11 +176,11 @@ func (m *defaultManager) ImportEdge(name string, sourceConfigs ...*source.Config
 func (m *defaultManager) Start() error {
 	m.logger.Info("manager: starting")
 
-	m.stats.Init()
-
 	if err := m.Before(); err != nil {
 		return err
 	}
+
+	m.stats.Init()
 
 	close(m.chStart)
 
@@ -195,11 +195,11 @@ func (m *defaultManager) Wait() error {
 	m.readerWaitGroup.Wait()
 	m.importerWaitGroup.Wait()
 
+	m.logStats()
+
 	if err := m.After(); err != nil {
 		return err
 	}
-
-	m.logStats()
 
 	m.logger.Info("manager: wait successfully")
 	return nil

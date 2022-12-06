@@ -47,6 +47,20 @@ func (mr *MockSourceMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockSource)(nil).Close))
 }
 
+// Config mocks base method.
+func (m *MockSource) Config() *Config {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Config")
+	ret0, _ := ret[0].(*Config)
+	return ret0
+}
+
+// Config indicates an expected call of Config.
+func (mr *MockSourceMockRecorder) Config() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Config", reflect.TypeOf((*MockSource)(nil).Config))
+}
+
 // Read mocks base method.
 func (m *MockSource) Read(p []byte) (int, error) {
 	m.ctrl.T.Helper()

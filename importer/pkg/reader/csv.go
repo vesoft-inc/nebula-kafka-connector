@@ -28,6 +28,12 @@ func NewCSVReader(s source.Source) RecordReader {
 	br := bufio.NewReader(rr)
 	cr := csv.NewReader(br)
 
+	if c := s.Config(); c != nil && c.CSV != nil {
+		if chars := []rune(c.CSV.Delimiter); len(chars) > 0 {
+			cr.Comma = chars[0]
+		}
+	}
+
 	return &csvReader{
 		s:  s,
 		rr: rr,

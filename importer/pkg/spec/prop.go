@@ -52,9 +52,9 @@ func (p *Prop) ValueStatement(record Record) (string, error) {
 	if p.Index < 0 || p.Index >= len(record) {
 		return "", p.importError(errors.ErrNoRecord, "record index %d not exists", p.Index).SetRecord(record)
 	}
-	val := record[p.Index]
-	if p.Type.Equal(ValueTypeString) {
-		val = fmt.Sprintf("%q", val)
+	val, err := p.Type.ValueStatement(record[p.Index])
+	if err != nil {
+		return "", p.importError(err, "unsupported type %s", p.Type).SetRecord(record)
 	}
 	return fmt.Sprintf(fmtPropValueStatement, p.Name, val), nil
 }

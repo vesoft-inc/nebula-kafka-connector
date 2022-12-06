@@ -10,14 +10,14 @@ import (
 
 type (
 	Graph struct {
-		Name                string         `yaml:"name"`
-		Nodes               Nodes          `yaml:"nodes"`
-		Edges               Edges          `yaml:"edges"`
-		Batch               int            `yaml:"batch,omitempty"`
-		ReaderConcurrency   int            `yaml:"readerConcurrency,omitempty"`
-		ImporterConcurrency int            `yaml:"importerConcurrency,omitempty"`
-		StatsInterval       time.Duration  `yaml:"statsInterval,omitempty"`
-		Hooks               *manager.Hooks `yaml:"hooks,omitempty"`
+		Name                string        `yaml:"name"`
+		Nodes               Nodes         `yaml:"nodes"`
+		Edges               Edges         `yaml:"edges"`
+		Batch               int           `yaml:"batch,omitempty"`
+		ReaderConcurrency   int           `yaml:"readerConcurrency,omitempty"`
+		ImporterConcurrency int           `yaml:"importerConcurrency,omitempty"`
+		StatsInterval       time.Duration `yaml:"statsInterval,omitempty"`
+		Hooks               manager.Hooks `yaml:"hooks,omitempty"`
 	}
 
 	Node struct {
@@ -36,10 +36,12 @@ type (
 
 func (g *Graph) BuildGraph(opts ...spec.GraphOption) (*spec.Graph, error) {
 	options := make([]spec.GraphOption, 0, len(g.Nodes)+len(g.Edges)+len(opts))
-	for _, node := range g.Nodes {
+	for i := range g.Nodes {
+		node := g.Nodes[i]
 		options = append(options, spec.WithGraphNodes(&node.Node))
 	}
-	for _, edge := range g.Edges {
+	for i := range g.Edges {
+		edge := g.Edges[i]
 		options = append(options, spec.WithGraphEdges(&edge.Edge))
 	}
 	options = append(options, opts...)
@@ -65,12 +67,14 @@ func (g *Graph) BuildManager(opts ...manager.Option) (manager.Manager, error) {
 
 	mgr := manager.NewWithOpts(options...)
 
-	for _, node := range g.Nodes {
+	for i := range g.Nodes {
+		node := g.Nodes[i]
 		if err := mgr.ImportNode(node.Name, node.SourceConfigs...); err != nil {
 			return nil, err
 		}
 	}
-	for _, edge := range g.Edges {
+	for i := range g.Edges {
+		edge := g.Edges[i]
 		if err := mgr.ImportEdge(edge.Name, edge.SourceConfigs...); err != nil {
 			return nil, err
 		}

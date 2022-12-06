@@ -43,8 +43,6 @@ build:
 
 test:
 	go test -gcflags=all="-l" -race -coverprofile=coverage.txt -covermode=atomic ./pkg/...
-	go tool cover -html=coverage.txt -o coverage.html
-	cat coverage.html | grep '<option value="file' | sed -E 's/.*>(.*) \((.*)%\)<.*/\2%\t\1/' | grep -v "_mock.go"
 
 docker-build:
 	docker build -t "${DOCKER_REPO}/nebula-importer:${IMAGE_TAG}" -f Dockerfile .

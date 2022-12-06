@@ -7,6 +7,7 @@ import (
 
 type (
 	Source interface {
+		Config() *Config
 		Sizer
 		io.Reader
 		io.Closer

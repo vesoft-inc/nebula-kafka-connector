@@ -15,7 +15,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/manager"
 )
 
-var _ = Describe("", func() {
+var _ = Describe("ImporterCommand", func() {
 	var (
 		patches       *gomonkey.Patches
 		ctrl          *gomock.Controller
