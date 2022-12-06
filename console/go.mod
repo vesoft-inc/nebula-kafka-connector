@@ -6,7 +6,7 @@ require (
 	github.com/c-bata/go-prompt v0.2.6
 	github.com/jedib0t/go-pretty/v6 v6.0.5
 	github.com/jievince/liner v1.2.4-0.20211229025353-9af8863139ef
-	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20220926113505-7d21b3b92c7f
+	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20221129092447-153dbb98d6da
 )
 
 require (
@@ -19,5 +19,3 @@ require (
 	github.com/rivo/uniseg v0.2.0 // indirect
 	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
 )
-
-replace github.com/vesoft-inc/nebula-ng-tools/golang => /home/yichen.wang/dev/nebula-ng-tools/golang
