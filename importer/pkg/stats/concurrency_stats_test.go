@@ -54,6 +54,8 @@ var _ = Describe("ConcurrencyStats", func() {
 
 				wg.Add(1)
 				go func(nBytes int64) {
+					concurrencyStats.RequestFailed(7)
+					concurrencyStats.RequestFailed(7)
 					concurrencyStats.Failed(nBytes, 7)
 					wg.Done()
 				}(failedBytes[i])
@@ -66,7 +68,9 @@ var _ = Describe("ConcurrencyStats", func() {
 
 				wg.Add(1)
 				go func(nBytes int64) {
-					concurrencyStats.Succeeded(nBytes, 7, 9*time.Millisecond, 11*time.Millisecond)
+					concurrencyStats.RequestSucceeded(7, 9*time.Millisecond, 11*time.Millisecond)
+					concurrencyStats.RequestSucceeded(7, 9*time.Millisecond, 11*time.Millisecond)
+					concurrencyStats.Succeeded(nBytes, 7)
 					wg.Done()
 				}(succeededBytes[i])
 			}
@@ -83,18 +87,20 @@ var _ = Describe("ConcurrencyStats", func() {
 		concurrencyStats.Init()
 		s := concurrencyStats.Stats()
 		Expect(s).To(Equal(&Stats{
-			StartTime:      initStats.StartTime,
-			ProcessedBytes: sumBytes,
-			TotalBytes:     sumBytes,
-			FailedBatches:  sumFailedBatches,
-			TotalBatches:   sumBatches,
-			FailedRecords:  sumFailedRecords,
-			TotalRecords:   sumRecords,
-			TotalLatency:   9 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches),
-			TotalReqTime:   11 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches),
+			StartTime:       initStats.StartTime,
+			ProcessedBytes:  sumBytes,
+			TotalBytes:      sumBytes,
+			FailedRecords:   sumFailedRecords,
+			TotalRecords:    sumRecords,
+			FailedRequest:   sumFailedBatches * 2,
+			TotalRequest:    sumBatches * 2,
+			TotalLatency:    9 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches) * 2,
+			TotalReqTime:    11 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches) * 2,
+			FailedProcessed: sumFailedRecords * 2,
+			TotalProcessed:  sumRecords * 2,
 		}))
 
 		Expect(s.Percentage()).To(Equal(100.0))
-		Expect(s.String()).To(ContainSubstring("Processed 100.00%"))
+		Expect(s.String()).To(ContainSubstring("100.00%("))
 	})
 })

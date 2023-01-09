@@ -32,20 +32,33 @@ func (s *ConcurrencyStats) AddTotalBytes(nBytes int64) {
 func (s *ConcurrencyStats) Failed(nBytes, nRecords int64) {
 	s.mu.Lock()
 	s.s.ProcessedBytes += nBytes
-	s.s.FailedBatches++
-	s.s.TotalBatches++
 	s.s.FailedRecords += nRecords
 	s.s.TotalRecords += nRecords
 	s.mu.Unlock()
 }
 
-func (s *ConcurrencyStats) Succeeded(nBytes, nRecords int64, latency, reqTime time.Duration) {
+func (s *ConcurrencyStats) Succeeded(nBytes, nRecords int64) {
 	s.mu.Lock()
 	s.s.ProcessedBytes += nBytes
-	s.s.TotalBatches++
 	s.s.TotalRecords += nRecords
+	s.mu.Unlock()
+}
+
+func (s *ConcurrencyStats) RequestFailed(nRecords int64) {
+	s.mu.Lock()
+	s.s.FailedRequest++
+	s.s.TotalRequest++
+	s.s.FailedProcessed += nRecords
+	s.s.TotalProcessed += nRecords
+	s.mu.Unlock()
+}
+
+func (s *ConcurrencyStats) RequestSucceeded(nRecords int64, latency, reqTime time.Duration) {
+	s.mu.Lock()
+	s.s.TotalRequest++
 	s.s.TotalLatency += latency
 	s.s.TotalReqTime += reqTime
+	s.s.TotalProcessed += nRecords
 	s.mu.Unlock()
 }
 

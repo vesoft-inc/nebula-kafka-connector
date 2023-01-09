@@ -36,7 +36,11 @@ var _ = Describe("WaitGroupMap", func() {
 			go func(key string) {
 				for i := 0; i < concurrencyPreKey; i++ {
 					go func() {
-						wgMap.Add(key, 1)
+						wgMap.Add(1, key)
+						wgMap.AddMany(1)
+						wgMap.AddMany(1, key+"11")
+						wgMap.AddMany(1, key+"21", key+"21")
+						wgMap.AddMany(1, key+"31", key+"32", key+"33")
 						wgAddKeys.Done()
 					}()
 				}
@@ -48,6 +52,10 @@ var _ = Describe("WaitGroupMap", func() {
 				for i := 0; i < concurrencyPreKey; i++ {
 					go func() {
 						wgMap.Done(key)
+						wgMap.DoneMany()
+						wgMap.DoneMany(key + "11")
+						wgMap.DoneMany(key+"21", key+"21")
+						wgMap.DoneMany(key+"31", key+"32", key+"33")
 					}()
 				}
 			}(key)
@@ -56,6 +64,10 @@ var _ = Describe("WaitGroupMap", func() {
 			go func(key string) {
 				wgAddKeys.Wait()
 				wgMap.Wait(key)
+				wgMap.WaitMany()
+				wgMap.WaitMany(key + "11")
+				wgMap.WaitMany(key+"21", key+"21")
+				wgMap.WaitMany(key+"31", key+"32", key+"33")
 				wgWaitAllKeys.Done()
 			}(key)
 		}

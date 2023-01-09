@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	stderrors "errors"
 	"os"
 	"path/filepath"
 
@@ -10,8 +11,6 @@ import (
 	. "github.com/onsi/gomega"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/manager"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 )
 
 var _ = Describe("Config", func() {
@@ -47,6 +46,7 @@ var _ = Describe("Config", func() {
 		c3 := &Config{}
 		err = c3.FromReader(bytes.NewReader(content))
 		Expect(err).NotTo(HaveOccurred())
+		Expect(c3).To(Equal(c1))
 	})
 
 	It("parse file not exists", func() {
@@ -116,8 +116,8 @@ var _ = Describe("Config", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c.Log.Files).NotTo(BeEmpty())
 
-		c.Nodes[0].Name = ""
-		graph, err := c.BuildGraph()
+		c.Sources[0].GraphName = ""
+		graph, err := c.Sources[0].BuildGraph()
 		Expect(err).To(HaveOccurred())
 		Expect(graph).To(BeNil())
 	})
@@ -128,7 +128,7 @@ var _ = Describe("Config", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c.Log.Files).NotTo(BeEmpty())
 
-		graph, err := c.BuildGraph()
+		graph, err := c.Sources[0].BuildGraph()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(graph).NotTo(BeNil())
 	})
@@ -139,11 +139,7 @@ var _ = Describe("Config", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c.Log.Files).NotTo(BeEmpty())
 
-		graph, err := c.BuildGraph()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(graph).NotTo(BeNil())
-
-		m, err := c.BuildManager(manager.WithGraph(graph))
+		m, err := c.BuildManager(nil, c.Sources)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(m).NotTo(BeNil())
 	})
@@ -154,17 +150,11 @@ var _ = Describe("Config", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c.Log.Files).NotTo(BeEmpty())
 
-		c.Graph.Nodes[0].SourceConfigs = []*source.Config{
-			{
-				Path: filepath.Join(tmpdir, "not-exists.yaml"),
-			},
-		}
-		graph, err := c.BuildGraph()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(graph).NotTo(BeNil())
+		c.Sources[0].SourceConfig.Path = filepath.Join(tmpdir, "not-exists.yaml")
 
-		m, err := c.BuildManager(manager.WithGraph(graph))
+		m, err := c.BuildManager(nil, c.Sources)
 		Expect(err).To(HaveOccurred())
+		Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
 		Expect(m).To(BeNil())
 	})
 
@@ -174,16 +164,23 @@ var _ = Describe("Config", func() {
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c.Log.Files).NotTo(BeEmpty())
 
-		c.Graph.Edges[0].SourceConfigs = []*source.Config{
-			{
-				Path: filepath.Join(tmpdir, "not-exists.yaml"),
-			},
-		}
-		graph, err := c.BuildGraph()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(graph).NotTo(BeNil())
+		c.Sources[1].SourceConfig.Path = filepath.Join(tmpdir, "not-exists.yaml")
 
-		m, err := c.BuildManager(manager.WithGraph(graph))
+		m, err := c.BuildManager(nil, c.Sources)
+		Expect(err).To(HaveOccurred())
+		Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
+		Expect(m).To(BeNil())
+	})
+
+	It("BuildManager failed at edge file", func() {
+		c := &Config{}
+		err := c.FromFile("testdata/nebula-importer.yaml")
+		Expect(err).NotTo(HaveOccurred())
+		Expect(c.Log.Files).NotTo(BeEmpty())
+
+		c.Sources[0].GraphName = ""
+
+		m, err := c.BuildManager(nil, c.Sources)
 		Expect(err).To(HaveOccurred())
 		Expect(m).To(BeNil())
 	})

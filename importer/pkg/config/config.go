@@ -9,8 +9,9 @@ import (
 
 type (
 	Config struct {
-		*Client `yaml:"client"`
-		*Graph  `yaml:"graph"`
+		Client  `yaml:"client"`
+		Manager `yaml:"manager"`
+		Sources `yaml:"sources"`
 		*Log    `yaml:"log,omitempty"`
 	}
 )

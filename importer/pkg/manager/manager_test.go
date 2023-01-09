@@ -13,19 +13,18 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
 )
 
-var _ = Describe("WaitGroupMap", func() {
+var _ = Describe("Manager", func() {
 	It("New", func() {
-		m := New(spec.NewGraph(""), client.New())
+		m := New(client.New())
 		m1, ok := m.(*defaultManager)
 		Expect(ok).To(BeTrue())
 		Expect(m1).NotTo(BeNil())
-		Expect(m1.graph).NotTo(BeNil())
 		Expect(m1.c).NotTo(BeNil())
 		Expect(m1.batch).To(Equal(0))
 		Expect(m1.readerConcurrency).To(Equal(DefaultReaderConcurrency))
@@ -40,7 +39,6 @@ var _ = Describe("WaitGroupMap", func() {
 
 	It("NewWithOpts", func() {
 		m := NewWithOpts(
-			WithGraph(spec.NewGraph("")),
 			WithClient(client.New()),
 			WithBatch(1),
 			WithReaderConcurrency(DefaultReaderConcurrency+1),
@@ -59,7 +57,6 @@ var _ = Describe("WaitGroupMap", func() {
 		m1, ok := m.(*defaultManager)
 		Expect(ok).To(BeTrue())
 		Expect(m1).NotTo(BeNil())
-		Expect(m1.graph).NotTo(BeNil())
 		Expect(m1.c).NotTo(BeNil())
 		Expect(m1.batch).To(Equal(1))
 		Expect(m1.readerConcurrency).To(Equal(DefaultReaderConcurrency + 1))
@@ -88,6 +85,7 @@ var _ = Describe("WaitGroupMap", func() {
 			batch           = 10
 			nodeRecordCount = 1005
 			edgeRecordCount = 2006
+			graph           *spec.Graph
 		)
 		BeforeEach(func() {
 			var err error
@@ -102,7 +100,7 @@ var _ = Describe("WaitGroupMap", func() {
 			mockSource = source.NewMockSource(ctrl)
 			mockClient = client.NewMockClient(ctrl)
 			mockResultSet = client.NewMockResultSet(ctrl)
-			graph := spec.NewGraph(
+			graph = spec.NewGraph(
 				"graphName",
 				spec.WithGraphNodes(
 					spec.NewNode(
@@ -118,6 +116,16 @@ var _ = Describe("WaitGroupMap", func() {
 							Name:  "nodeProp1",
 							Type:  spec.ValueTypeString,
 							Index: 1,
+						}),
+					),
+					spec.NewNode(
+						"node2",
+						spec.WithNodeID(&spec.NodeID{
+							Prop: &spec.Prop{
+								Name:  "id",
+								Type:  spec.ValueTypeInt,
+								Index: 0,
+							},
 						}),
 					),
 				),
@@ -150,12 +158,34 @@ var _ = Describe("WaitGroupMap", func() {
 							Index: 2,
 						}),
 					),
+					spec.NewEdge(
+						"edge1",
+						spec.WithEdgeSrc(&spec.EdgeNodeRef{
+							Name: "node2",
+							ID: &spec.NodeID{
+								Prop: &spec.Prop{
+									Name:  "id",
+									Type:  spec.ValueTypeInt,
+									Index: 0,
+								},
+							},
+						}),
+						spec.WithEdgeDst(&spec.EdgeNodeRef{
+							Name: "node2",
+							ID: &spec.NodeID{
+								Prop: &spec.Prop{
+									Name:  "id",
+									Type:  spec.ValueTypeInt,
+									Index: 1,
+								},
+							},
+						}),
+					),
 				),
 			)
 			l, err := logger.New(logger.WithLevel(logger.WarnLevel))
 			Expect(err).NotTo(HaveOccurred())
 			m = New(
-				graph,
 				mockClient,
 				WithBatch(batch),
 				WithLogger(l),
@@ -201,9 +231,21 @@ var _ = Describe("WaitGroupMap", func() {
 			var err error
 			loopCountPreFile := 10
 			for i := 0; i < loopCountPreFile; i++ {
-				err = m.ImportNode("node1", &source.Config{Path: nodeFile})
+				node1, _ := graph.GetNodeByName("node1")
+				node2, _ := graph.GetNodeByName("node1")
+				err = m.Import(
+					&source.Config{Path: nodeFile},
+					importer.NewNodeImporter(graph, node1, mockClient),
+					importer.NewNodeImporter(graph, node2, mockClient),
+				)
 				Expect(err).NotTo(HaveOccurred())
-				err = m.ImportEdge("edge1", &source.Config{Path: edgeFile})
+				edge1, _ := graph.GetEdgeByName("edge1")
+				edge2, _ := graph.GetEdgeByName("edge1")
+				err = m.Import(
+					&source.Config{Path: edgeFile},
+					importer.NewEdgeImporter(graph, edge1, mockClient),
+					importer.NewEdgeImporter(graph, edge2, mockClient),
+				)
 				Expect(err).NotTo(HaveOccurred())
 			}
 
@@ -212,7 +254,7 @@ var _ = Describe("WaitGroupMap", func() {
 
 			var executeFailedTimes int64 = 10
 			var currExecuteTimes int64
-			fnExecute := func(_ string) (client.ResultSet, error) {
+			fnExecute := func(statement string) (client.ResultSet, error) {
 				curr := atomic.AddInt64(&currExecuteTimes, 1)
 				if curr%100 == 0 && curr/100 <= executeFailedTimes {
 					return nil, stderrors.New("execute failed")
@@ -244,34 +286,28 @@ var _ = Describe("WaitGroupMap", func() {
 			Expect(s.StartTime.IsZero()).To(BeFalse())
 			Expect(s.ProcessedBytes).To(Equal((nodeSize + edgeSize) * int64(loopCountPreFile)))
 			Expect(s.TotalBytes).To(Equal((nodeSize + edgeSize) * int64(loopCountPreFile)))
-			Expect(s.FailedBatches).To(Equal(executeFailedTimes))
-			Expect(s.TotalBatches).To(Equal(int64(totalBatches)))
 			Expect(s.FailedRecords).NotTo(Equal(int64(0)))
 			Expect(s.FailedRecords).To(BeNumerically("<=", executeFailedTimes*int64(batch)))
 			Expect(s.TotalRecords).To(Equal(int64((nodeRecordCount + edgeRecordCount) * loopCountPreFile)))
-			Expect(s.TotalLatency).To(Equal(2 * time.Microsecond * time.Duration(int64(totalBatches)-executeFailedTimes)))
+			Expect(s.FailedRequest).To(Equal(executeFailedTimes))
+			Expect(s.TotalRequest).To(Equal(int64(totalBatches * 2)))
+			Expect(s.TotalLatency).To(Equal(2 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
+			Expect(s.FailedProcessed).NotTo(Equal(int64(0)))
+			Expect(s.FailedRecords).To(BeNumerically("<=", executeFailedTimes*int64(batch)))
+			Expect(s.TotalProcessed).To(Equal(int64((nodeRecordCount + edgeRecordCount) * loopCountPreFile * 2)))
 		})
 
-		It("ImportNode node not exists", func() {
-			err := m.ImportNode("not-exists", &source.Config{Path: nodeFile})
-			Expect(err).To(HaveOccurred())
-			Expect(stderrors.Is(err, errors.ErrNodeNotFound)).To(BeTrue())
+		It("Import without importer", func() {
+			err := m.Import(&source.Config{Path: nodeFile + "not-exists"})
+			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("ImportNode file not exists", func() {
-			err := m.ImportNode("node1", &source.Config{Path: nodeFile + "not-exists"})
-			Expect(err).To(HaveOccurred())
-			Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
-		})
-
-		It("ImportEdge edge not exists", func() {
-			err := m.ImportEdge("not-exists", &source.Config{Path: edgeFile})
-			Expect(err).To(HaveOccurred())
-			Expect(stderrors.Is(err, errors.ErrEdgeNotFound)).To(BeTrue())
-		})
-
-		It("ImportEdge file not exists", func() {
-			err := m.ImportEdge("edge1", &source.Config{Path: nodeFile + "not-exists"})
+		It("Import file not exists", func() {
+			node1, _ := graph.GetNodeByName("node1")
+			err := m.Import(
+				&source.Config{Path: nodeFile + "not-exists"},
+				importer.NewNodeImporter(graph, node1, mockClient),
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
 		})
@@ -353,7 +389,11 @@ var _ = Describe("WaitGroupMap", func() {
 			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
 			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
 
-			err := m.ImportNode("node1", &source.Config{Path: nodeFile})
+			node1, _ := graph.GetNodeByName("node1")
+			err := m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewNodeImporter(graph, node1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
 
 			err = m.Start()
@@ -416,9 +456,17 @@ var _ = Describe("WaitGroupMap", func() {
 		It("submit reader failed", func() {
 			m.(*defaultManager).readerPool.Release()
 
-			err := m.ImportNode("node1", &source.Config{Path: nodeFile})
+			node1, _ := graph.GetNodeByName("node1")
+			err := m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewNodeImporter(graph, node1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
-			err = m.ImportEdge("edge1", &source.Config{Path: edgeFile})
+			edge1, _ := graph.GetEdgeByName("edge1")
+			err = m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewEdgeImporter(graph, edge1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
 
 			mockClient.EXPECT().Open().AnyTimes().Return(nil)
@@ -439,9 +487,17 @@ var _ = Describe("WaitGroupMap", func() {
 		It("submit importer failed", func() {
 			m.(*defaultManager).importerPool.Release()
 
-			err := m.ImportNode("node1", &source.Config{Path: nodeFile})
+			node1, _ := graph.GetNodeByName("node1")
+			err := m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewNodeImporter(graph, node1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
-			err = m.ImportEdge("edge1", &source.Config{Path: edgeFile})
+			edge1, _ := graph.GetEdgeByName("edge1")
+			err = m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewEdgeImporter(graph, edge1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
 
 			mockClient.EXPECT().Open().AnyTimes().Return(nil)
@@ -467,12 +523,21 @@ var _ = Describe("WaitGroupMap", func() {
 			mockSource.EXPECT().Size().Times(2).Return(int64(0), stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
 
-			err := m.ImportNode("node1", &source.Config{Path: nodeFile})
+			node1, _ := graph.GetNodeByName("node1")
+			err := m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewNodeImporter(graph, node1, mockClient),
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("test error"))
-			err = m.ImportEdge("edge1", &source.Config{Path: edgeFile})
+			edge1, _ := graph.GetEdgeByName("edge1")
+			err = m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewEdgeImporter(graph, edge1, mockClient),
+			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("test error"))
+
 		})
 
 		It("read failed", func() {
@@ -490,9 +555,17 @@ var _ = Describe("WaitGroupMap", func() {
 			mockSource.EXPECT().Read(gomock.Any()).Times(2).Return(0, stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
 
-			err := m.ImportNode("node1", &source.Config{Path: nodeFile})
+			node1, _ := graph.GetNodeByName("node1")
+			err := m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewNodeImporter(graph, node1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
-			err = m.ImportEdge("edge1", &source.Config{Path: edgeFile})
+			edge1, _ := graph.GetEdgeByName("edge1")
+			err = m.Import(
+				&source.Config{Path: nodeFile},
+				importer.NewEdgeImporter(graph, edge1, mockClient),
+			)
 			Expect(err).NotTo(HaveOccurred())
 
 			err = m.Start()

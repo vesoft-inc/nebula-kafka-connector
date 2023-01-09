@@ -7,7 +7,7 @@ import (
 )
 
 type Client struct {
-	Addresses                []string      `yaml:"addresses"`
+	Address                  string        `yaml:"address"`
 	User                     string        `yaml:"user,omitempty"`
 	Password                 string        `yaml:"password,omitempty"`
 	ConcurrencyPerAddress    int           `yaml:"concurrencyPerAddress,omitempty"`
@@ -20,7 +20,7 @@ func (c *Client) BuildClient(opts ...client.Option) (client.Client, error) {
 	options := make([]client.Option, 0, 4+len(opts))
 	options = append(
 		options,
-		client.WithAddress(c.Addresses...),
+		client.WithAddress(c.Address),
 		client.WithUserPassword(c.User, c.Password),
 		client.WithReconnectInitialInterval(c.ReconnectInitialInterval),
 		client.WithRetry(c.Retry),

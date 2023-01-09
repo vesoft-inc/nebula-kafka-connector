@@ -1,15 +1,29 @@
 client:
-  addresses:
-    - "127.0.0.1:0"
+  address: "127.0.0.1:0"
   user: root
   password: nebula
   concurrencyPerAddress: 10
   reconnectInitialInterval: 1s
   retry: 3
   retryInitialInterval: 1s
-graph:
-  # name: graphName
-  nodes:
+
+manager:
+  batch: 100
+  readerConcurrency: 10
+  importerConcurrency: 10
+  statsInterval: 10s
+  hooks:
+    before:
+      - statements:
+        - statement1
+      - statements:
+        - statement2
+        wait: 1s
+
+sources:
+  - path: ./testdata/node1.csv
+    # graphName: graphName
+    nodes:
     - name: node1
       id:
         name: "id"
@@ -25,9 +39,25 @@ graph:
         - name: "prop3"
           type: "Double"
           index: 3
-      sources:
-       - path: ./testdata/node1.csv
-  edges:
+    - name: node2
+      id:
+        name: "id"
+        type: "INT"
+        index: 0
+      props:
+        - name: "prop1"
+          type: "STRING"
+          index: 1
+        - name: "prop2"
+          type: "int"
+          index: 2
+        - name: "prop3"
+          type: "Double"
+          index: 3
+
+  - path: ./testdata/edge1.csv
+    # graphName: graphName
+    edges:
     - name: edge1
       src:
         name: node1
@@ -45,19 +75,24 @@ graph:
         - name: "prop1"
           type: "STRING"
           index: 2
-      sources:
-       - path: ./testdata/edge1.csv
-  batch: 10
-  readerConcurrency: 10
-  importerConcurrency: 10
-  statsInterval: 10s
-  hooks:
-    before:
-      - statements:
-        - statement1
-      - statements:
-          - statement2
-        wait: 1s
+    - name: edge2
+      src:
+        name: node2
+        id:
+          name: "id"
+          type: "INT"
+          index: 0
+      dst:
+        name: node2
+        id:
+          name: "id"
+          type: "INT"
+          index: 1
+      props:
+        - name: "prop1"
+          type: "STRING"
+          index: 2
+
 log:
   level: INGO
   console: true

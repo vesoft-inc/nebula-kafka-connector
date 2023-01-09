@@ -102,12 +102,7 @@ func (o *ImporterOptions) Validate() error {
 	}
 	o.cli = cli
 
-	graph, err := cfg.BuildGraph()
-	if err != nil {
-		return err
-	}
-
-	mgr, err := cfg.BuildManager(manager.WithGraph(graph), manager.WithClient(cli), manager.WithLogger(l))
+	mgr, err := cfg.BuildManager(cli, cfg.Sources, manager.WithLogger(l))
 	if err != nil {
 		return err
 	}

@@ -133,24 +133,6 @@ var _ = Describe("ImporterCommand", func() {
 		Expect(err).To(Equal(stderrors.New("test error")))
 	})
 
-	It("complete failed", func() {
-		o := NewImporterOptions(common.IOStreams{
-			In:     os.Stdin,
-			Out:    os.Stdout,
-			ErrOut: os.Stderr,
-		})
-
-		patches.ApplyMethodReturn(o, "Complete", stderrors.New("test error"))
-
-		o.useNopLogger = true
-		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/build-manager-failed.yaml"})
-
-		err := command.Execute()
-		Expect(err).To(HaveOccurred())
-		Expect(err).To(Equal(stderrors.New("test error")))
-	})
-
 	It("manager start failed", func() {
 		patches.ApplyFuncReturn(client.New, mockClient)
 
@@ -159,8 +141,7 @@ var _ = Describe("ImporterCommand", func() {
 		mockClient.EXPECT().Close().AnyTimes().Return(nil)
 
 		patches.ApplyFuncReturn(manager.NewWithOpts, mockManager)
-		mockManager.EXPECT().ImportNode(gomock.Any(), gomock.Any()).Return(nil)
-		mockManager.EXPECT().ImportEdge(gomock.Any(), gomock.Any()).Return(nil)
+		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).Times(2).Return(nil)
 		mockManager.EXPECT().Start().Return(stderrors.New("test error"))
 
 		o := NewImporterOptions(common.IOStreams{
@@ -186,8 +167,7 @@ var _ = Describe("ImporterCommand", func() {
 		mockClient.EXPECT().Close().AnyTimes().Return(nil)
 
 		patches.ApplyFuncReturn(manager.NewWithOpts, mockManager)
-		mockManager.EXPECT().ImportNode(gomock.Any(), gomock.Any()).Return(nil)
-		mockManager.EXPECT().ImportEdge(gomock.Any(), gomock.Any()).Return(nil)
+		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).Times(2).Return(nil)
 		mockManager.EXPECT().Start().Return(nil)
 		mockManager.EXPECT().Wait().Return(stderrors.New("test error"))
 

@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	importer "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
 	source "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	stats "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/stats"
 )
@@ -35,42 +36,23 @@ func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 	return m.recorder
 }
 
-// ImportEdge mocks base method.
-func (m *MockManager) ImportEdge(name string, sourceConfigs ...*source.Config) error {
+// Import mocks base method.
+func (m *MockManager) Import(sourceConfig *source.Config, importers ...importer.Importer) error {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{name}
-	for _, a := range sourceConfigs {
+	varargs := []interface{}{sourceConfig}
+	for _, a := range importers {
 		varargs = append(varargs, a)
 	}
-	ret := m.ctrl.Call(m, "ImportEdge", varargs...)
+	ret := m.ctrl.Call(m, "Import", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// ImportEdge indicates an expected call of ImportEdge.
-func (mr *MockManagerMockRecorder) ImportEdge(name interface{}, sourceConfigs ...interface{}) *gomock.Call {
+// Import indicates an expected call of Import.
+func (mr *MockManagerMockRecorder) Import(sourceConfig interface{}, importers ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{name}, sourceConfigs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportEdge", reflect.TypeOf((*MockManager)(nil).ImportEdge), varargs...)
-}
-
-// ImportNode mocks base method.
-func (m *MockManager) ImportNode(name string, sourceConfigs ...*source.Config) error {
-	m.ctrl.T.Helper()
-	varargs := []interface{}{name}
-	for _, a := range sourceConfigs {
-		varargs = append(varargs, a)
-	}
-	ret := m.ctrl.Call(m, "ImportNode", varargs...)
-	ret0, _ := ret[0].(error)
-	return ret0
-}
-
-// ImportNode indicates an expected call of ImportNode.
-func (mr *MockManagerMockRecorder) ImportNode(name interface{}, sourceConfigs ...interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{name}, sourceConfigs...)
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ImportNode", reflect.TypeOf((*MockManager)(nil).ImportNode), varargs...)
+	varargs := append([]interface{}{sourceConfig}, importers...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Import", reflect.TypeOf((*MockManager)(nil).Import), varargs...)
 }
 
 // Start mocks base method.
