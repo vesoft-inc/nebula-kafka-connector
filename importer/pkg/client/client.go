@@ -17,10 +17,13 @@ const (
 	DefaultUser                     = "root"
 	DefaultPassword                 = "nebula"
 	DefaultReconnectInitialInterval = time.Second
-	DefaultReconnectMaxInterval     = 10 * time.Minute
+	DefaultReconnectMaxInterval     = 2 * time.Minute
 	DefaultRetry                    = 3
 	DefaultRetryInitialInterval     = time.Second
-	DefaultRetryMaxInterval         = 10 * time.Minute
+	DefaultRetryMaxInterval         = 2 * time.Minute
+	DefaultRetryRandomizationFactor = 0.1
+	DefaultRetryMultiplier          = 1.5
+	DefaultRetryMaxElapsedTime      = time.Hour
 	DefaultConcurrencyPerAddress    = 10
 	DefaultQueueSize                = 1000
 )
@@ -50,10 +53,10 @@ type (
 		wgStatementExecute       sync.WaitGroup
 		hostAddresses            []nebula.HostAddress
 		logger                   logger.Logger
-		fnNewNebulaSession       NewNebulaSessionFunc
+		fnNewSession             NewSessionFunc
 	}
 
-	NewNebulaSessionFunc func(nebula.HostAddress) NebulaSession
+	NewSessionFunc func(nebula.HostAddress) Session
 
 	Option func(*defaultClient)
 
@@ -90,9 +93,9 @@ func New(opts ...Option) Client {
 		c.logger = logger.NopLogger
 	}
 
-	if c.fnNewNebulaSession == nil {
-		c.fnNewNebulaSession = func(hostAddress nebula.HostAddress) NebulaSession {
-			return newNebulaSession(hostAddress, c.user, c.password, c.logger)
+	if c.fnNewSession == nil {
+		c.fnNewSession = func(hostAddress nebula.HostAddress) Session {
+			return newSession(hostAddress, c.user, c.password, c.logger)
 		}
 	}
 
@@ -176,9 +179,9 @@ func WithLogger(l logger.Logger) Option {
 	}
 }
 
-func WithNewNebulaSessionFunc(fn NewNebulaSessionFunc) Option {
+func WithNewSessionFunc(fn NewSessionFunc) Option {
 	return func(m *defaultClient) {
-		m.fnNewNebulaSession = fn
+		m.fnNewSession = fn
 	}
 }
 
@@ -290,9 +293,10 @@ func (c *defaultClient) worker(hostAddress nebula.HostAddress) {
 			exp := backoff.NewExponentialBackOff()
 			exp.InitialInterval = c.reconnectInitialInterval
 			exp.MaxInterval = DefaultReconnectMaxInterval
-			exp.Stop = DefaultReconnectMaxInterval
+			exp.RandomizationFactor = DefaultRetryRandomizationFactor
+			exp.Multiplier = DefaultRetryMultiplier
 
-			var session NebulaSession
+			var session Session
 			_ = backoff.Retry(func() error {
 				var err error
 				session, err = c.openSession(hostAddress)
@@ -306,15 +310,15 @@ func (c *defaultClient) worker(hostAddress nebula.HostAddress) {
 	}
 }
 
-func (c *defaultClient) openSession(hostAddress nebula.HostAddress) (NebulaSession, error) {
-	session := c.fnNewNebulaSession(hostAddress)
+func (c *defaultClient) openSession(hostAddress nebula.HostAddress) (Session, error) {
+	session := c.fnNewSession(hostAddress)
 	if err := session.Open(); err != nil {
 		return nil, err
 	}
 	return session, nil
 }
 
-func (c *defaultClient) loopSession(session NebulaSession) {
+func (c *defaultClient) loopSession(session Session) {
 	defer func() {
 		_ = session.Close()
 	}()
@@ -328,20 +332,56 @@ func (c *defaultClient) loopSession(session NebulaSession) {
 			exp := backoff.NewExponentialBackOff()
 			exp.InitialInterval = c.retryInitialInterval
 			exp.MaxInterval = DefaultRetryMaxInterval
-			exp.Stop = DefaultRetryMaxInterval
+			exp.MaxElapsedTime = DefaultRetryMaxElapsedTime
+			exp.Multiplier = DefaultRetryMultiplier
+			exp.RandomizationFactor = DefaultRetryRandomizationFactor
 
-			var rs *nebula.ResultSet
-			err := backoff.Retry(func() error {
-				var err error
+			var (
+				err   error
+				rs    ResultSet
+				retry = c.retry
+			)
+
+			// There are three cases of retry
+			// * Case 1: retry no more
+			// * Case 2. retry as much as possible
+			// * Case 3: retry with limit times
+			_ = backoff.Retry(func() error {
 				rs, err = session.Execute(data.statement)
-				if err != nil {
-					c.logger.WithError(err).Error("execute statement failed")
+				if err == nil && rs.IsSucceed() {
+					return nil
 				}
-				return err
-			}, backoff.WithMaxRetries(exp, uint64(c.retry)))
+				retryErr := err
+				if rs != nil {
+					retryErr = rs.GetError()
+
+					// Case 1: retry no more
+					if rs.IsPermanentError() {
+						// stop the retry
+						return backoff.Permanent(retryErr)
+					}
+
+					// Case 2. retry as much as possible
+					if rs.IsRetryMoreError() {
+						retry = c.retry
+						return retryErr
+					}
+				}
+
+				// Case 3: retry with limit times
+				if retry <= 0 {
+					// stop the retry
+					return backoff.Permanent(retryErr)
+				}
+				retry--
+				return retryErr
+			}, exp)
+			if err != nil {
+				c.logger.WithError(err).Error("execute statement failed")
+			}
 
 			data.ch <- ExecuteResult{
-				ResultSet: NewResultSet(rs),
+				ResultSet: rs,
 				Err:       err,
 			}
 		case <-c.done:

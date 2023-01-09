@@ -8,34 +8,33 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	nebula_ng_go "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 
-// MockNebulaSession is a mock of NebulaSession interface.
-type MockNebulaSession struct {
+// MockSession is a mock of Session interface.
+type MockSession struct {
 	ctrl     *gomock.Controller
-	recorder *MockNebulaSessionMockRecorder
+	recorder *MockSessionMockRecorder
 }
 
-// MockNebulaSessionMockRecorder is the mock recorder for MockNebulaSession.
-type MockNebulaSessionMockRecorder struct {
-	mock *MockNebulaSession
+// MockSessionMockRecorder is the mock recorder for MockSession.
+type MockSessionMockRecorder struct {
+	mock *MockSession
 }
 
-// NewMockNebulaSession creates a new mock instance.
-func NewMockNebulaSession(ctrl *gomock.Controller) *MockNebulaSession {
-	mock := &MockNebulaSession{ctrl: ctrl}
-	mock.recorder = &MockNebulaSessionMockRecorder{mock}
+// NewMockSession creates a new mock instance.
+func NewMockSession(ctrl *gomock.Controller) *MockSession {
+	mock := &MockSession{ctrl: ctrl}
+	mock.recorder = &MockSessionMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockNebulaSession) EXPECT() *MockNebulaSessionMockRecorder {
+func (m *MockSession) EXPECT() *MockSessionMockRecorder {
 	return m.recorder
 }
 
 // Close mocks base method.
-func (m *MockNebulaSession) Close() error {
+func (m *MockSession) Close() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Close")
 	ret0, _ := ret[0].(error)
@@ -43,28 +42,28 @@ func (m *MockNebulaSession) Close() error {
 }
 
 // Close indicates an expected call of Close.
-func (mr *MockNebulaSessionMockRecorder) Close() *gomock.Call {
+func (mr *MockSessionMockRecorder) Close() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockNebulaSession)(nil).Close))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockSession)(nil).Close))
 }
 
 // Execute mocks base method.
-func (m *MockNebulaSession) Execute(statement string) (*nebula_ng_go.ResultSet, error) {
+func (m *MockSession) Execute(statement string) (ResultSet, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", statement)
-	ret0, _ := ret[0].(*nebula_ng_go.ResultSet)
+	ret0, _ := ret[0].(ResultSet)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Execute indicates an expected call of Execute.
-func (mr *MockNebulaSessionMockRecorder) Execute(statement interface{}) *gomock.Call {
+func (mr *MockSessionMockRecorder) Execute(statement interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockNebulaSession)(nil).Execute), statement)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockSession)(nil).Execute), statement)
 }
 
 // Open mocks base method.
-func (m *MockNebulaSession) Open() error {
+func (m *MockSession) Open() error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Open")
 	ret0, _ := ret[0].(error)
@@ -72,7 +71,7 @@ func (m *MockNebulaSession) Open() error {
 }
 
 // Open indicates an expected call of Open.
-func (mr *MockNebulaSessionMockRecorder) Open() *gomock.Call {
+func (mr *MockSessionMockRecorder) Open() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*MockNebulaSession)(nil).Open))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Open", reflect.TypeOf((*MockSession)(nil).Open))
 }

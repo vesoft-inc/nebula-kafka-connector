@@ -1,4 +1,4 @@
-//go:generate mockgen -source=session.go -destination session_mock.go -package client NebulaSession
+//go:generate mockgen -source=session.go -destination session_mock.go -package client Session
 package client
 
 import (
@@ -10,13 +10,13 @@ import (
 )
 
 type (
-	NebulaSession interface {
+	Session interface {
 		Open() error
-		Execute(statement string) (*nebula.ResultSet, error)
+		Execute(statement string) (ResultSet, error)
 		Close() error
 	}
 
-	defaultNebulaSession struct {
+	defaultSession struct {
 		session     *nebula.Session
 		hostAddress nebula.HostAddress
 		user        string
@@ -25,11 +25,11 @@ type (
 	}
 )
 
-func newNebulaSession(hostAddress nebula.HostAddress, user, password string, l logger.Logger) NebulaSession {
+func newSession(hostAddress nebula.HostAddress, user, password string, l logger.Logger) Session {
 	if l == nil {
 		l = logger.NopLogger
 	}
-	return &defaultNebulaSession{
+	return &defaultSession{
 		hostAddress: hostAddress,
 		user:        user,
 		password:    password,
@@ -37,7 +37,7 @@ func newNebulaSession(hostAddress nebula.HostAddress, user, password string, l l
 	}
 }
 
-func (s *defaultNebulaSession) Open() error {
+func (s *defaultSession) Open() error {
 	hostAddress := s.hostAddress
 	connection := nebula.NewConnection(hostAddress)
 	if err := connection.Open(hostAddress, 1000*time.Millisecond, nil); err != nil {
@@ -62,11 +62,15 @@ func (s *defaultNebulaSession) Open() error {
 	return nil
 }
 
-func (s *defaultNebulaSession) Execute(statement string) (*nebula.ResultSet, error) {
-	return s.session.Execute(statement)
+func (s *defaultSession) Execute(statement string) (ResultSet, error) {
+	rs, err := s.session.Execute(statement)
+	if err != nil {
+		return nil, err
+	}
+	return newResultSet(rs), nil
 }
 
-func (s *defaultNebulaSession) Close() error {
+func (s *defaultSession) Close() error {
 	s.session.Release()
 	return nil
 }

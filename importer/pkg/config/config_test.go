@@ -99,11 +99,11 @@ var _ = Describe("Config", func() {
 
 		ctrl := gomock.NewController(GinkgoT())
 		defer ctrl.Finish()
-		mockNebulaSession := client.NewMockNebulaSession(ctrl)
-		mockNebulaSession.EXPECT().Open().AnyTimes().Return(nil)
-		mockNebulaSession.EXPECT().Close().AnyTimes().Return(nil)
-		cli, err := c.BuildClient(client.WithNewNebulaSessionFunc(func(_ nebula.HostAddress) client.NebulaSession {
-			return mockNebulaSession
+		mockSession := client.NewMockSession(ctrl)
+		mockSession.EXPECT().Open().AnyTimes().Return(nil)
+		mockSession.EXPECT().Close().AnyTimes().Return(nil)
+		cli, err := c.BuildClient(client.WithNewSessionFunc(func(_ nebula.HostAddress) client.Session {
+			return mockSession
 		}))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(cli).NotTo(BeNil())

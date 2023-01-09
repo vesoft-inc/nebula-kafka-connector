@@ -30,7 +30,7 @@ var _ = Describe("Client", func() {
 		Expect(c1.chExecuteDataQueue).NotTo(BeNil())
 		Expect(c1.done).NotTo(BeNil())
 		Expect(c1.logger).NotTo(BeNil())
-		Expect(c1.fnNewNebulaSession).NotTo(BeNil())
+		Expect(c1.fnNewSession).NotTo(BeNil())
 	})
 
 	It("WithAddress", func() {
@@ -74,13 +74,15 @@ var _ = Describe("Client", func() {
 
 	Describe("Open", func() {
 		var (
-			ctrl        *gomock.Controller
-			mockSession *MockNebulaSession
+			ctrl          *gomock.Controller
+			mockSession   *MockSession
+			mockResultSet *MockResultSet
 		)
 
 		BeforeEach(func() {
 			ctrl = gomock.NewController(GinkgoT())
-			mockSession = NewMockNebulaSession(ctrl)
+			mockSession = NewMockSession(ctrl)
+			mockResultSet = NewMockResultSet(ctrl)
 		})
 
 		AfterEach(func() {
@@ -124,7 +126,7 @@ var _ = Describe("Client", func() {
 		It("open session failed", func() {
 			c := New(
 				WithAddress("127.0.0.1:9669"),
-				WithNewNebulaSessionFunc(func(_ nebula.HostAddress) NebulaSession {
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -138,7 +140,7 @@ var _ = Describe("Client", func() {
 			addresses := []string{"127.0.0.1:9669", "127.0.0.2:9669"}
 			c := New(
 				WithAddress(addresses...),
-				WithNewNebulaSessionFunc(func(_ nebula.HostAddress) NebulaSession {
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -151,7 +153,7 @@ var _ = Describe("Client", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// waiting for all workers to open connection
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 
 			err = c.Close()
 			Expect(err).NotTo(HaveOccurred())
@@ -171,7 +173,7 @@ var _ = Describe("Client", func() {
 			c := New(
 				WithAddress(addresses...),
 				WithReconnectInitialInterval(time.Nanosecond),
-				WithNewNebulaSessionFunc(func(_ nebula.HostAddress) NebulaSession {
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -194,7 +196,7 @@ var _ = Describe("Client", func() {
 			Expect(err).NotTo(HaveOccurred())
 
 			// waiting for all workers to open connection
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 
 			err = c.Close()
 			Expect(err).NotTo(HaveOccurred())
@@ -206,21 +208,23 @@ var _ = Describe("Client", func() {
 				WithAddress(addresses...),
 				WithConcurrencyPerAddress(1),
 				WithQueueSize(1),
-				WithNewNebulaSessionFunc(func(_ nebula.HostAddress) NebulaSession {
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
 					return mockSession
 				}),
 			)
 
 			done := make(chan struct{})
-			fnExecute := func(_ string) (*nebula.ResultSet, error) {
+			fnExecute := func(_ string) (ResultSet, error) {
 				<-done
-				return &nebula.ResultSet{}, nil
+				return mockResultSet, nil
 			}
 
 			// 1 for check and DefaultConcurrencyPerAddress for concurrency per address
 			mockSession.EXPECT().Open().Times((1 + 1) * len(addresses)).Return(nil)
 			mockSession.EXPECT().Execute("test ExecuteChan statement").Times(1).DoAndReturn(fnExecute)
 			mockSession.EXPECT().Close().Times((1 + 1) * len(addresses)).Return(nil)
+
+			mockResultSet.EXPECT().IsSucceed().Return(true)
 
 			err := c.Open()
 			Expect(err).NotTo(HaveOccurred())
@@ -236,7 +240,7 @@ var _ = Describe("Client", func() {
 			close(done)
 
 			// waiting for all workers to open connection
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 
 			err = c.Close()
 			Expect(err).NotTo(HaveOccurred())
@@ -246,7 +250,7 @@ var _ = Describe("Client", func() {
 			addresses := []string{"127.0.0.1:9669", "127.0.0.2:9669"}
 			c := New(
 				WithAddress(addresses...),
-				WithNewNebulaSessionFunc(func(_ nebula.HostAddress) NebulaSession {
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -262,7 +266,7 @@ var _ = Describe("Client", func() {
 			close(c1.chExecuteDataQueue)
 
 			// waiting for all workers to open connection
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
 
 			close(c1.done)
 			c1.wgSession.Wait()
@@ -282,24 +286,24 @@ var _ = Describe("Client", func() {
 				WithAddress(addresses...),
 				WithRetry(executeFailedTimes),
 				WithQueueSize(executeTimes*2+executeFailedTimes*2),
-				WithNewNebulaSessionFunc(func(_ nebula.HostAddress) NebulaSession {
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
 					return mockSession
 				}),
 			)
 
-			fnExecute1 := func(_ string) (*nebula.ResultSet, error) {
+			fnExecute1 := func(_ string) (ResultSet, error) {
 				curr := atomic.AddInt64(&currExecuteTimes1, 1)
 				if curr%100 == 0 && curr/100 <= int64(executeFailedTimes) {
 					return nil, stderrors.New("execute failed")
 				}
-				return &nebula.ResultSet{}, nil
+				return mockResultSet, nil
 			}
-			fnExecute2 := func(_ string) (*nebula.ResultSet, error) {
+			fnExecute2 := func(_ string) (ResultSet, error) {
 				curr := atomic.AddInt64(&currExecuteTimes2, 1)
 				if curr%100 == 0 && curr/100 <= int64(executeFailedTimes) {
 					return nil, stderrors.New("execute failed")
 				}
-				return &nebula.ResultSet{}, nil
+				return mockResultSet, nil
 			}
 
 			// 1 for check and DefaultConcurrencyPerAddress for concurrency per address
@@ -307,6 +311,8 @@ var _ = Describe("Client", func() {
 			mockSession.EXPECT().Execute("test Execute statement").Times(executeTimes + executeFailedTimes).DoAndReturn(fnExecute1)
 			mockSession.EXPECT().Execute("test ExecuteChan statement").Times(executeTimes + executeFailedTimes).DoAndReturn(fnExecute2)
 			mockSession.EXPECT().Close().Times((1 + DefaultConcurrencyPerAddress) * len(addresses)).Return(nil)
+
+			mockResultSet.EXPECT().IsSucceed().Times(executeTimes * 2).Return(true)
 
 			err := c.Open()
 			Expect(err).NotTo(HaveOccurred())
@@ -335,7 +341,116 @@ var _ = Describe("Client", func() {
 			wg.Wait()
 
 			// waiting for all workers to open connection
-			time.Sleep(100 * time.Millisecond)
+			time.Sleep(300 * time.Millisecond)
+
+			err = c.Close()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("retry case1", func() {
+			addresses := []string{"127.0.0.1:9669"}
+			c := New(
+				WithAddress(addresses...),
+				WithRetry(3),
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+					return mockSession
+				}),
+			)
+
+			// 1 for check and DefaultConcurrencyPerAddress for concurrency per address
+			mockSession.EXPECT().Open().Times((1 + DefaultConcurrencyPerAddress) * len(addresses)).Return(nil)
+			mockSession.EXPECT().Close().AnyTimes().Return(nil)
+
+			err := c.Open()
+			Expect(err).NotTo(HaveOccurred())
+
+			// * Case 1: retry no more
+			mockSession.EXPECT().Execute("test Execute statement").Times(1).Return(mockResultSet, nil)
+			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
+			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("test error"))
+			mockResultSet.EXPECT().IsPermanentError().Times(2).Return(true)
+
+			rs, err := c.Execute("test Execute statement")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rs).NotTo(BeNil())
+			Expect(rs.IsPermanentError()).To(BeTrue())
+
+			// waiting for all workers to open connection
+			time.Sleep(300 * time.Millisecond)
+
+			err = c.Close()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("retry case2", func() {
+			addresses := []string{"127.0.0.1:9669"}
+			c := New(
+				WithAddress(addresses...),
+				WithRetryInitialInterval(time.Microsecond),
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+					return mockSession
+				}),
+			)
+
+			// 1 for check and DefaultConcurrencyPerAddress for concurrency per address
+			mockSession.EXPECT().Open().Times((1 + DefaultConcurrencyPerAddress) * len(addresses)).Return(nil)
+			mockSession.EXPECT().Close().AnyTimes().Return(nil)
+
+			err := c.Open()
+			Expect(err).NotTo(HaveOccurred())
+
+			retryTimes := DefaultRetry + 10
+			var currExecuteTimes int64
+			fnIsSucceed := func() bool {
+				curr := atomic.AddInt64(&currExecuteTimes, 1)
+				return curr > int64(retryTimes)
+			}
+
+			// * Case 2. retry as much as possible
+			mockSession.EXPECT().Execute("test Execute statement").Times(retryTimes+1).Return(mockResultSet, nil)
+			mockResultSet.EXPECT().IsSucceed().Times(retryTimes + 2).DoAndReturn(fnIsSucceed)
+			mockResultSet.EXPECT().GetError().Times(retryTimes).Return(stderrors.New("test error"))
+			mockResultSet.EXPECT().IsPermanentError().Times(retryTimes).Return(false)
+			mockResultSet.EXPECT().IsRetryMoreError().Times(retryTimes).Return(true)
+
+			rs, err := c.Execute("test Execute statement")
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rs).NotTo(BeNil())
+			Expect(rs.IsSucceed()).To(BeTrue())
+
+			// waiting for all workers to open connection
+			time.Sleep(300 * time.Millisecond)
+
+			err = c.Close()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("retry case3", func() {
+			addresses := []string{"127.0.0.1:9669"}
+			c := New(
+				WithAddress(addresses...),
+				WithRetryInitialInterval(time.Microsecond),
+				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+					return mockSession
+				}),
+			)
+
+			// 1 for check and DefaultConcurrencyPerAddress for concurrency per address
+			mockSession.EXPECT().Open().Times((1 + DefaultConcurrencyPerAddress) * len(addresses)).Return(nil)
+			mockSession.EXPECT().Close().AnyTimes().Return(nil)
+
+			err := c.Open()
+			Expect(err).NotTo(HaveOccurred())
+
+			// * Case 3: retry with limit times
+			mockSession.EXPECT().Execute("test Execute statement").Times(DefaultRetry+1).Return(nil, stderrors.New("execute failed"))
+
+			rs, err := c.Execute("test Execute statement")
+			Expect(err).To(HaveOccurred())
+			Expect(rs).To(BeNil())
+
+			// waiting for all workers to open connection
+			time.Sleep(300 * time.Millisecond)
 
 			err = c.Close()
 			Expect(err).NotTo(HaveOccurred())

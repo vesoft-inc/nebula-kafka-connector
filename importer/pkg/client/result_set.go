@@ -2,25 +2,19 @@
 package client
 
 import (
+	stderrors "errors"
+
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
-	nebulathrift "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
-	graphthrift "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 )
 
 type (
 	ResultSet interface {
-		AsStringTable() [][]string
 		GetStatus() string
 		IsSucceed() bool
-		IsSetData() bool
-		GetRows() []*nebulathrift.RawRecord
-		GetRowSize() int
-		GetColNames() []string
-		GetColSize() int
 		GetLatency() int64
-		GetRowValuesByIndex(index int) (*nebula.Record, error)
-		IsSetPlanDesc() bool
-		GetPlanDesc() *graphthrift.PlanDescription
+		GetError() error
+		IsPermanentError() bool
+		IsRetryMoreError() bool
 	}
 
 	defaultResultSet struct {
@@ -28,8 +22,25 @@ type (
 	}
 )
 
-func NewResultSet(rs *nebula.ResultSet) ResultSet {
+func newResultSet(rs *nebula.ResultSet) ResultSet {
 	return defaultResultSet{
 		ResultSet: rs,
 	}
+}
+
+func (rs defaultResultSet) GetError() error {
+	if rs.ResultSet.IsSucceed() {
+		return nil
+	}
+	return stderrors.New(rs.ResultSet.GetStatus())
+}
+
+func (defaultResultSet) IsPermanentError() bool {
+	// TODO: SYNTAX_ERROR, SEMANTIC_ERROR
+	return false
+}
+
+func (defaultResultSet) IsRetryMoreError() bool {
+	// TODO: RAFT_BUFFER_OVERFLOW
+	return false
 }

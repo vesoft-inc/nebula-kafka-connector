@@ -8,9 +8,6 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
-	nebula_ng_go "github.com/vesoft-inc/nebula-ng-tools/golang"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
-	graph "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 )
 
 // MockResultSet is a mock of ResultSet interface.
@@ -36,46 +33,18 @@ func (m *MockResultSet) EXPECT() *MockResultSetMockRecorder {
 	return m.recorder
 }
 
-// AsStringTable mocks base method.
-func (m *MockResultSet) AsStringTable() [][]string {
+// GetError mocks base method.
+func (m *MockResultSet) GetError() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "AsStringTable")
-	ret0, _ := ret[0].([][]string)
+	ret := m.ctrl.Call(m, "GetError")
+	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// AsStringTable indicates an expected call of AsStringTable.
-func (mr *MockResultSetMockRecorder) AsStringTable() *gomock.Call {
+// GetError indicates an expected call of GetError.
+func (mr *MockResultSetMockRecorder) GetError() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AsStringTable", reflect.TypeOf((*MockResultSet)(nil).AsStringTable))
-}
-
-// GetColNames mocks base method.
-func (m *MockResultSet) GetColNames() []string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetColNames")
-	ret0, _ := ret[0].([]string)
-	return ret0
-}
-
-// GetColNames indicates an expected call of GetColNames.
-func (mr *MockResultSetMockRecorder) GetColNames() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetColNames", reflect.TypeOf((*MockResultSet)(nil).GetColNames))
-}
-
-// GetColSize mocks base method.
-func (m *MockResultSet) GetColSize() int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetColSize")
-	ret0, _ := ret[0].(int)
-	return ret0
-}
-
-// GetColSize indicates an expected call of GetColSize.
-func (mr *MockResultSetMockRecorder) GetColSize() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetColSize", reflect.TypeOf((*MockResultSet)(nil).GetColSize))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetError", reflect.TypeOf((*MockResultSet)(nil).GetError))
 }
 
 // GetLatency mocks base method.
@@ -92,63 +61,6 @@ func (mr *MockResultSetMockRecorder) GetLatency() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatency", reflect.TypeOf((*MockResultSet)(nil).GetLatency))
 }
 
-// GetPlanDesc mocks base method.
-func (m *MockResultSet) GetPlanDesc() *graph.PlanDescription {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetPlanDesc")
-	ret0, _ := ret[0].(*graph.PlanDescription)
-	return ret0
-}
-
-// GetPlanDesc indicates an expected call of GetPlanDesc.
-func (mr *MockResultSetMockRecorder) GetPlanDesc() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPlanDesc", reflect.TypeOf((*MockResultSet)(nil).GetPlanDesc))
-}
-
-// GetRowSize mocks base method.
-func (m *MockResultSet) GetRowSize() int {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRowSize")
-	ret0, _ := ret[0].(int)
-	return ret0
-}
-
-// GetRowSize indicates an expected call of GetRowSize.
-func (mr *MockResultSetMockRecorder) GetRowSize() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRowSize", reflect.TypeOf((*MockResultSet)(nil).GetRowSize))
-}
-
-// GetRowValuesByIndex mocks base method.
-func (m *MockResultSet) GetRowValuesByIndex(index int) (*nebula_ng_go.Record, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRowValuesByIndex", index)
-	ret0, _ := ret[0].(*nebula_ng_go.Record)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
-}
-
-// GetRowValuesByIndex indicates an expected call of GetRowValuesByIndex.
-func (mr *MockResultSetMockRecorder) GetRowValuesByIndex(index interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRowValuesByIndex", reflect.TypeOf((*MockResultSet)(nil).GetRowValuesByIndex), index)
-}
-
-// GetRows mocks base method.
-func (m *MockResultSet) GetRows() []*nebula.RawRecord {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetRows")
-	ret0, _ := ret[0].([]*nebula.RawRecord)
-	return ret0
-}
-
-// GetRows indicates an expected call of GetRows.
-func (mr *MockResultSetMockRecorder) GetRows() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRows", reflect.TypeOf((*MockResultSet)(nil).GetRows))
-}
-
 // GetStatus mocks base method.
 func (m *MockResultSet) GetStatus() string {
 	m.ctrl.T.Helper()
@@ -163,32 +75,32 @@ func (mr *MockResultSetMockRecorder) GetStatus() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockResultSet)(nil).GetStatus))
 }
 
-// IsSetData mocks base method.
-func (m *MockResultSet) IsSetData() bool {
+// IsPermanentError mocks base method.
+func (m *MockResultSet) IsPermanentError() bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsSetData")
+	ret := m.ctrl.Call(m, "IsPermanentError")
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
-// IsSetData indicates an expected call of IsSetData.
-func (mr *MockResultSetMockRecorder) IsSetData() *gomock.Call {
+// IsPermanentError indicates an expected call of IsPermanentError.
+func (mr *MockResultSetMockRecorder) IsPermanentError() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsSetData", reflect.TypeOf((*MockResultSet)(nil).IsSetData))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsPermanentError", reflect.TypeOf((*MockResultSet)(nil).IsPermanentError))
 }
 
-// IsSetPlanDesc mocks base method.
-func (m *MockResultSet) IsSetPlanDesc() bool {
+// IsRetryMoreError mocks base method.
+func (m *MockResultSet) IsRetryMoreError() bool {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IsSetPlanDesc")
+	ret := m.ctrl.Call(m, "IsRetryMoreError")
 	ret0, _ := ret[0].(bool)
 	return ret0
 }
 
-// IsSetPlanDesc indicates an expected call of IsSetPlanDesc.
-func (mr *MockResultSetMockRecorder) IsSetPlanDesc() *gomock.Call {
+// IsRetryMoreError indicates an expected call of IsRetryMoreError.
+func (mr *MockResultSetMockRecorder) IsRetryMoreError() *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsSetPlanDesc", reflect.TypeOf((*MockResultSet)(nil).IsSetPlanDesc))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IsRetryMoreError", reflect.TypeOf((*MockResultSet)(nil).IsRetryMoreError))
 }
 
 // IsSucceed mocks base method.

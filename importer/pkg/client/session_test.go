@@ -13,9 +13,9 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 )
 
-var _ = Describe("NebulaSession", func() {
+var _ = Describe("Session", func() {
 	It("success ", func() {
-		session := newNebulaSession(nebula.HostAddress{}, "user", "password", nil)
+		session := newSession(nebula.HostAddress{}, "user", "password", nil)
 		connection := nebula.NewConnection(nebula.HostAddress{})
 		nSession := &nebula.Session{}
 		id := int64(1)
@@ -46,13 +46,14 @@ var _ = Describe("NebulaSession", func() {
 	})
 
 	It("failed", func() {
-		session := &defaultNebulaSession{
+		session := &defaultSession{
 			hostAddress: nebula.HostAddress{},
 			user:        "user",
 			password:    "password",
 			logger:      logger.NopLogger,
 		}
 		connection := nebula.NewConnection(nebula.HostAddress{})
+		nSession := &nebula.Session{}
 		id := int64(1)
 		authResp := &graph.AuthResponse{
 			Identifier: &id,
@@ -75,5 +76,25 @@ var _ = Describe("NebulaSession", func() {
 
 		err = session.Open()
 		Expect(err).To(HaveOccurred())
+
+		patches.Reset()
+
+		patches.ApplyFuncReturn(nebula.NewConnection, connection)
+		patches.ApplyMethodReturn(connection, "Open", nil)
+		patches.ApplyMethodReturn(connection, "Authenticate", authResp, nil)
+
+		patches.ApplyFuncReturn(nebula.NewSession, nSession)
+
+		patches.ApplyMethodReturn(nSession, "Execute", nil, stderrors.New("execute failed"))
+		patches.ApplyMethodReturn(nSession, "Release")
+
+		err = session.Open()
+		Expect(err).NotTo(HaveOccurred())
+		rs, err := session.Execute("")
+		Expect(err).To(HaveOccurred())
+		Expect(rs).To(BeNil())
+
+		err = session.Close()
+		Expect(err).NotTo(HaveOccurred())
 	})
 })
