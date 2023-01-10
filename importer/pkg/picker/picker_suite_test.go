@@ -1,4 +1,4 @@
-package logger
+package picker
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestLogger(t *testing.T) {
+func TestPicker(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Pkg logger Suite")
+	RunSpecs(t, "Pkg picker Suite")
 }

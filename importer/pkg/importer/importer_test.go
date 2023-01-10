@@ -63,6 +63,7 @@ var _ = Describe("Importer", func() {
 			spec.WithGraphEdges(edge),
 		)
 		graph.Complete()
+		Expect(graph.Validate()).NotTo(HaveOccurred())
 	})
 
 	AfterEach(func() {

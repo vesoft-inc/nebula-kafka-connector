@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/picker"
 )
 
 const (
@@ -14,49 +15,52 @@ const (
 
 type (
 	Prop struct {
-		Name   string    `yaml:"name"`
-		Type   ValueType `yaml:"type"`
-		Index  int       `yaml:"index"`
-		Ignore bool      `yaml:"ignore,omitempty"`
+		Name  string    `yaml:"name"`
+		Type  ValueType `yaml:"type"`
+		Index int       `yaml:"index"`
+
+		picker picker.Picker
 	}
 
 	Props []*Prop
 )
 
 func (p *Prop) Complete() {
-	if p.Ignore {
-		return
-	}
 	if p.Type == "" {
 		p.Type = ValueTypeDefault
 	}
 }
 
 func (p *Prop) Validate() error {
-	if p.Ignore {
-		return nil
-	}
 	if p.Name == "" {
 		return p.importError(errors.ErrNoPropName)
 	}
 	if !IsSupportedValueType(p.Type) {
 		return p.importError(errors.ErrUnsupportedValueType, "unsupported type %s", p.Type)
 	}
+	if err := p.initPicker(); err != nil {
+		return p.importError(err, "init picker failed")
+	}
 	return nil
 }
 
 func (p *Prop) ValueStatement(record Record) (string, error) {
-	if p.Ignore {
-		return "", nil
-	}
-	if p.Index < 0 || p.Index >= len(record) {
-		return "", p.importError(errors.ErrNoRecord, "record index %d not exists", p.Index).SetRecord(record)
-	}
-	val, err := p.Type.ValueStatement(record[p.Index])
+	val, err := p.picker.Pick(record)
 	if err != nil {
-		return "", p.importError(err, "unsupported type %s", p.Type).SetRecord(record)
+		return "", p.importError(err, "record index %d pick failed", p.Index).SetRecord(record)
 	}
-	return fmt.Sprintf(fmtPropValueStatement, p.Name, val), nil
+	return fmt.Sprintf(fmtPropValueStatement, p.Name, val.Val), nil
+}
+
+func (p *Prop) initPicker() error {
+	pickerConfig := picker.Config{
+		Indices: []int{p.Index},
+		Type:    string(p.Type),
+	}
+
+	var err error
+	p.picker, err = pickerConfig.Build()
+	return err
 }
 
 func (p *Prop) importError(err error, formatWithArgs ...any) *errors.ImportError {
@@ -81,9 +85,6 @@ func (ps Props) Validate() error {
 func (ps Props) ValueStatement(record Record) (string, error) {
 	statements := make([]string, 0, len(ps))
 	for _, prop := range ps {
-		if prop.Ignore {
-			continue
-		}
 		statement, err := prop.ValueStatement(record)
 		if err != nil {
 			return "", err

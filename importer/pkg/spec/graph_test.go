@@ -186,6 +186,8 @@ var _ = Describe("Graph", func() {
 				),
 			)
 			graph.Complete()
+			err := graph.Validate()
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("success", func() {
@@ -237,6 +239,8 @@ var _ = Describe("Graph", func() {
 				),
 			)
 			graph.Complete()
+			err := graph.Validate()
+			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("success", func() {

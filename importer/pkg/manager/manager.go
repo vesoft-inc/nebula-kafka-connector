@@ -2,6 +2,7 @@
 package manager
 
 import (
+	"fmt"
 	"io"
 	"sync"
 	"time"
@@ -308,6 +309,7 @@ func (m *defaultManager) execHooks(name HookName) error {
 			}
 		}
 		if hook.Wait != 0 {
+			m.logger.Info(fmt.Sprintf("manager: waiting %s", hook.Wait))
 			time.Sleep(hook.Wait)
 		}
 	}

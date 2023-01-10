@@ -58,10 +58,6 @@ sources:
         - name: "browserUsed"
           type: "STRING"
           index: 7
-        - name: "ignore"
-          type: "STRING"
-          index: 8
-          ignore: true
     - name: Person
       id:
         name: "id"
@@ -89,10 +85,6 @@ sources:
         - name: "browserUsed"
           type: "STRING"
           index: 7
-        - name: "ignore"
-          type: "STRING"
-          index: 8
-          ignore: true
   - path: ./examples/basic/knows.csv
     graphName: basic
     edges:

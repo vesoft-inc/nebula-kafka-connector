@@ -2,7 +2,9 @@ package spec
 
 import (
 	stderrors "errors"
+	"strings"
 
+	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
@@ -28,14 +30,6 @@ var _ = Describe("Prop", func() {
 			prop.Complete()
 			Expect(prop.Type).To(Equal(ValueTypeInt))
 		})
-
-		It("ignore type", func() {
-			prop := &Prop{
-				Ignore: true,
-			}
-			prop.Complete()
-			Expect(prop.Type.String()).To(BeEmpty())
-		})
 	})
 
 	DescribeTable(".Validate",
@@ -56,12 +50,32 @@ var _ = Describe("Prop", func() {
 		Entry("no prop name", &Prop{}, errors.ErrNoPropName),
 		Entry("unsupported value type", &Prop{Name: "a", Type: "x"}, errors.ErrUnsupportedValueType),
 		Entry("supported value type", &Prop{Name: "a", Type: ValueTypeDefault}, nil),
-		Entry("ignore", &Prop{Ignore: true}, nil),
 	)
+
+	It(".Validate init picker failed", func() {
+		prop := &Prop{Name: "a", Type: "unsupported"}
+		patches := gomonkey.NewPatches()
+		defer patches.Reset()
+
+		patches.ApplyGlobalVar(&supportedValueTypes, map[ValueType]struct{}{
+			ValueType(strings.ToUpper(string(prop.Type))): {},
+		})
+
+		err := prop.Validate()
+		Expect(err).To(HaveOccurred())
+		Expect(stderrors.Is(err, errors.ErrUnsupportedValueType)).To(BeTrue())
+	})
 
 	DescribeTable(".ValueStatement",
 		func(p *Prop, record Record, expectStatement string, expectErr error) {
-			statement, err := p.ValueStatement(record)
+			statement, err := func() (string, error) {
+				p.Complete()
+				err := p.Validate()
+				if err != nil {
+					return "", err
+				}
+				return p.ValueStatement(record)
+			}()
 			if expectErr != nil {
 				if Expect(err).To(HaveOccurred()) {
 					Expect(stderrors.Is(err, expectErr)).To(BeTrue())
@@ -77,17 +91,16 @@ var _ = Describe("Prop", func() {
 			}
 		},
 		Entry("no record empty",
-			&Prop{},
+			&Prop{Name: "p1"},
 			Record([]string{}),
 			"",
 			errors.ErrNoRecord,
 		),
 		Entry("no record",
 			&Prop{
-				Name:   "p1",
-				Type:   ValueTypeInt,
-				Index:  1,
-				Ignore: false,
+				Name:  "p1",
+				Type:  ValueTypeInt,
+				Index: 1,
 			},
 			Record([]string{"0"}),
 			"",
@@ -95,10 +108,9 @@ var _ = Describe("Prop", func() {
 		),
 		Entry("record int",
 			&Prop{
-				Name:   "p1",
-				Type:   ValueTypeInt,
-				Index:  0,
-				Ignore: false,
+				Name:  "p1",
+				Type:  ValueTypeInt,
+				Index: 0,
 			},
 			Record([]string{"1"}),
 			"p1: 1",
@@ -106,10 +118,9 @@ var _ = Describe("Prop", func() {
 		),
 		Entry("record string",
 			&Prop{
-				Name:   "p1",
-				Type:   ValueTypeString,
-				Index:  0,
-				Ignore: false,
+				Name:  "p1",
+				Type:  ValueTypeString,
+				Index: 0,
 			},
 			Record([]string{"str"}),
 			"p1: \"str\"",
@@ -117,32 +128,12 @@ var _ = Describe("Prop", func() {
 		),
 		Entry("record int",
 			&Prop{
-				Name:   "p1",
-				Type:   ValueTypeDouble,
-				Index:  0,
-				Ignore: false,
+				Name:  "p1",
+				Type:  ValueTypeDouble,
+				Index: 0,
 			},
 			Record([]string{"1.1"}),
 			"p1: 1.1",
-			nil,
-		),
-		Entry("record ignore",
-			&Prop{
-				Name:   "p1",
-				Type:   ValueTypeString,
-				Index:  0,
-				Ignore: true,
-			},
-			Record([]string{"ignore"}),
-			"",
-			nil,
-		),
-		Entry("record ignore without record",
-			&Prop{
-				Ignore: true,
-			},
-			nil,
-			"",
 			nil,
 		),
 		Entry("unsupported value type",
@@ -200,7 +191,6 @@ var _ = Describe("Props", func() {
 				&Prop{Name: "a", Type: ValueTypeInt},
 				&Prop{Name: "b", Type: ValueTypeString},
 				&Prop{Name: "c", Type: ValueTypeDouble},
-				&Prop{Ignore: true},
 			},
 			-1,
 		),
@@ -210,7 +200,6 @@ var _ = Describe("Props", func() {
 				&Prop{Name: "a", Type: ValueTypeInt},
 				&Prop{Name: "b", Type: ValueTypeString},
 				&Prop{Name: "c", Type: ValueTypeDouble},
-				&Prop{Ignore: true},
 			},
 			0,
 		),
@@ -220,7 +209,6 @@ var _ = Describe("Props", func() {
 				&Prop{Name: "failed"},
 				&Prop{Name: "b", Type: ValueTypeString},
 				&Prop{Name: "c", Type: ValueTypeDouble},
-				&Prop{Ignore: true},
 			},
 			1,
 		),
@@ -229,16 +217,21 @@ var _ = Describe("Props", func() {
 				&Prop{Name: "a", Type: ValueTypeInt},
 				&Prop{Name: "b", Type: ValueTypeString},
 				&Prop{Name: "c", Type: ValueTypeDouble},
-				&Prop{Ignore: true},
 				&Prop{Name: "failed"},
 			},
-			4,
+			3,
 		),
 	)
 
 	DescribeTable(".ValueStatement",
 		func(props Props, record Record, expectStatement string, failedIndex int) {
-			statement, err := props.ValueStatement(record)
+			statement, err := func() (string, error) {
+				props.Complete()
+				if err := props.Validate(); err != nil {
+					return "", err
+				}
+				return props.ValueStatement(record)
+			}()
 			if failedIndex >= 0 {
 				if Expect(err).To(HaveOccurred()) {
 					_, expectErr := props[failedIndex].ValueStatement(record)
@@ -261,7 +254,6 @@ var _ = Describe("Props", func() {
 				&Prop{Name: "a", Type: ValueTypeInt, Index: 0},
 				&Prop{Name: "b", Type: ValueTypeString, Index: 2},
 				&Prop{Name: "c", Type: ValueTypeDouble, Index: 1},
-				&Prop{Ignore: true},
 			},
 			[]string{"1", "1.1", "str"},
 			"{a: 1, b: \"str\", c: 1.1}",

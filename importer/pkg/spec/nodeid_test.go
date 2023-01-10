@@ -43,10 +43,13 @@ var _ = Describe("NodeID", func() {
 
 	Describe(".ValueStatement", func() {
 		It("failed", func() {
-			nodeID := &NodeID{Prop: &Prop{}}
+			nodeID := &NodeID{Prop: &Prop{Name: "id"}}
+			nodeID.Complete()
+			Expect(nodeID.Validate()).NotTo(HaveOccurred())
 			statement, err := nodeID.ValueStatement(nil)
-			prop := &Prop{}
+			prop := nodeID.Prop
 			statement1, err1 := prop.ValueStatement(nil)
+			Expect(err).To(HaveOccurred())
 			Expect(err).To(Equal(err1))
 			Expect(statement).To(Equal(statement1))
 		})
@@ -60,6 +63,8 @@ var _ = Describe("NodeID", func() {
 
 	DescribeTable(".ValueStatement",
 		func(nodeID *NodeID, record Record, exceptStatement string) {
+			nodeID.Complete()
+			Expect(nodeID.Validate()).NotTo(HaveOccurred())
 			statement, err := nodeID.ValueStatement(record)
 			props := Props{nodeID.Prop}
 			statement1, err1 := props.ValueStatement(record)
@@ -72,7 +77,7 @@ var _ = Describe("NodeID", func() {
 			Expect(statement).To(Equal(exceptStatement))
 		},
 		Entry("no record empty",
-			&NodeID{Prop: &Prop{}},
+			&NodeID{Prop: &Prop{Name: "id"}},
 			Record([]string{}),
 			"",
 		),

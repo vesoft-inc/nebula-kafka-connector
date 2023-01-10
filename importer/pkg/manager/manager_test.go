@@ -183,6 +183,8 @@ var _ = Describe("Manager", func() {
 					),
 				),
 			)
+			graph.Complete()
+			Expect(graph.Validate()).NotTo(HaveOccurred())
 			l, err := logger.New(logger.WithLevel(logger.WarnLevel))
 			Expect(err).NotTo(HaveOccurred())
 			m = New(

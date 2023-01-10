@@ -1,4 +1,4 @@
-package logger
+package utils
 
 import (
 	"testing"
@@ -7,7 +7,7 @@ import (
 	. "github.com/onsi/gomega"
 )
 
-func TestLogger(t *testing.T) {
+func TestUtils(t *testing.T) {
 	RegisterFailHandler(Fail)
-	RunSpecs(t, "Pkg logger Suite")
+	RunSpecs(t, "Pkg utils Suite")
 }
