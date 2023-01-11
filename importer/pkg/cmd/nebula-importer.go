@@ -90,6 +90,10 @@ func (o *ImporterOptions) Validate() error {
 	}
 	cfg := o.cfg
 
+	if err := cfg.Optimize(o.ConfigFile); err != nil {
+		return err
+	}
+
 	l, err := cfg.BuildLogger()
 	if err != nil {
 		return err

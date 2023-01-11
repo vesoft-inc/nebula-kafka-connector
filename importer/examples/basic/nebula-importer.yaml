@@ -33,7 +33,7 @@ manager:
 
 sources:
   # person_int
-  - path: ./examples/basic/person.csv
+  - path: ./person.csv
     csv:
       delimiter: "|"
     graphName: person_int
@@ -108,7 +108,7 @@ sources:
           nullable: true
           alternativeIndices:
             - 6
-  - path: ./examples/basic/knows.csv
+  - path: ./knows.csv
     graphName: person_int
     edges:
     - name: KNOWS # person_knows_person
@@ -193,7 +193,7 @@ sources:
         - name: "browserUsed"
           type: "STRING"
           index: 7
-  - path: ./examples/basic/knows.csv
+  - path: ./knows.csv
     graphName: person_string
     edges:
     - name: KNOWS # person_knows_person

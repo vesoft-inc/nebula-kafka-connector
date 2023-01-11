@@ -11,6 +11,7 @@ import (
 	. "github.com/onsi/gomega"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 )
 
 var _ = Describe("Config", func() {
@@ -183,5 +184,42 @@ var _ = Describe("Config", func() {
 		m, err := c.BuildManager(nil, c.Sources)
 		Expect(err).To(HaveOccurred())
 		Expect(m).To(BeNil())
+	})
+
+	It("Optimize source ", func() {
+		testPath1 := "testdata/edge.csv"
+		testPath2 := "edge.csv"
+		testPath3 := "/edge.csv"
+
+		c := &Config{
+			Sources: []Source{
+				{
+					SourceConfig: source.Config{
+						Path: testPath1,
+					},
+				},
+				{
+					SourceConfig: source.Config{
+						Path: testPath2,
+					},
+				},
+				{
+					SourceConfig: source.Config{
+						Path: testPath3,
+					},
+				},
+			},
+		}
+
+		err := c.Optimize("nebula-importer.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
+		absTestPath1, _ := filepath.Abs(testPath1)
+		absTestPath2, _ := filepath.Abs(testPath2)
+		absTestPath3, _ := filepath.Abs(testPath3)
+
+		Expect(c.Sources[0].SourceConfig.Path).To(Equal(absTestPath1))
+		Expect(c.Sources[1].SourceConfig.Path).To(Equal(absTestPath2))
+		Expect(c.Sources[2].SourceConfig.Path).To(Equal(absTestPath3))
 	})
 })

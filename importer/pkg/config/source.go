@@ -1,6 +1,8 @@
 package config
 
 import (
+	"path/filepath"
+
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
@@ -55,4 +57,25 @@ func (s *Source) BuildImporters(c client.Client) ([]importer.Importer, error) {
 		importers = append(importers, i)
 	}
 	return importers, nil
+}
+
+// OptimizeConfigPath Change source path to an absolute path in order to set it to the relative path of the config file
+func (ss Sources) OptimizeConfigPath(configPath string) error {
+	configAbsPath, err := filepath.Abs(filepath.Dir(configPath))
+	if err != nil {
+		return err
+	}
+
+	for i := range ss {
+		if filepath.IsAbs(ss[i].SourceConfig.Path) {
+			continue
+		}
+		ss[i].SourceConfig.Path = filepath.Join(configAbsPath, ss[i].SourceConfig.Path)
+	}
+
+	return nil
+}
+
+func (ss Sources) Optimize(configPath string) error {
+	return ss.OptimizeConfigPath(configPath)
 }

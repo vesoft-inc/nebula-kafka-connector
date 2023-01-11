@@ -21,7 +21,7 @@ manager:
         wait: 1s
 
 sources:
-  - path: ./testdata/no-exists.csv
+  - path: ./no-exists.csv
     graphName: graphName
     nodes:
     - name: node1
@@ -55,7 +55,7 @@ sources:
           type: "Double"
           index: 3
 
-  - path: ./testdata/edge1.csv
+  - path: ./edge1.csv
     graphName: graphName
     edges:
     - name: edge1

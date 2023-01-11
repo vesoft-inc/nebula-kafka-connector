@@ -21,7 +21,7 @@ manager:
         wait: 1s
 
 sources:
-  - path: ./testdata/node1.csv
+  - path: ./node1.csv
     graphName: graphName
     nodes:
     - name: node1
@@ -55,7 +55,7 @@ sources:
           type: "Double"
           index: 3
 
-  - path: ./testdata/edge1.csv
+  - path: ./edge1.csv
     graphName: graphName
     edges:
     - name: edge1
@@ -97,7 +97,7 @@ log:
   level: INGO
   console: true
   files:
-    - ./testdata/not-exists/nebula-importer.log
+    - ./not-exists/nebula-importer.log
   fields:
     - key: app
       value: nebula-importer
