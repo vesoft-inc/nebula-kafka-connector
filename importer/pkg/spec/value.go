@@ -8,6 +8,8 @@ import (
 )
 
 const (
+	dbNULL = "NULL"
+
 	ValueTypeInt      ValueType = "INT"
 	ValueTypeString   ValueType = "STRING"
 	ValueTypeDouble   ValueType = "DOUBLE"
@@ -16,19 +18,31 @@ const (
 	ValueTypeDefault = ValueTypeString
 )
 
-var supportedValueTypes = map[ValueType]struct{}{
-	ValueTypeInt:      {},
-	ValueTypeString:   {},
-	ValueTypeDouble:   {},
-	ValueTypeDateTime: {},
-}
+var (
+	supportedPropValueTypes = map[ValueType]struct{}{
+		ValueTypeInt:      {},
+		ValueTypeString:   {},
+		ValueTypeDouble:   {},
+		ValueTypeDateTime: {},
+	}
+
+	supportedNodeIDValueTypes = map[ValueType]struct{}{
+		ValueTypeInt:    {},
+		ValueTypeString: {},
+	}
+)
 
 type (
 	ValueType string
 )
 
-func IsSupportedValueType(t ValueType) bool {
-	_, ok := supportedValueTypes[ValueType(strings.ToUpper(t.String()))]
+func IsSupportedPropValueType(t ValueType) bool {
+	_, ok := supportedPropValueTypes[ValueType(strings.ToUpper(t.String()))]
+	return ok
+}
+
+func IsSupportedNodeIDValueType(t ValueType) bool {
+	_, ok := supportedNodeIDValueTypes[ValueType(strings.ToUpper(t.String()))]
 	return ok
 }
 
@@ -47,7 +61,7 @@ func (t ValueType) ValueStatement(val string) (string, error) {
 }
 
 func (t ValueType) Equal(vt ValueType) bool {
-	if !IsSupportedValueType(t) || !IsSupportedValueType(vt) {
+	if !IsSupportedPropValueType(t) || !IsSupportedPropValueType(vt) {
 		return false
 	}
 	return strings.EqualFold(t.String(), vt.String())

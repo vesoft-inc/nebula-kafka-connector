@@ -1,95 +1,168 @@
 package spec
 
 import (
+	stderrors "errors"
+
+	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 )
 
 var _ = Describe("NodeID", func() {
 	Describe(".Complete", func() {
-		It("no prop", func() {
+		It("empty prop", func() {
 			nodeID := &NodeID{}
 			nodeID.Complete()
-			prop := &Prop{}
-			prop.Complete()
-			Expect(nodeID.Prop).To(Equal(prop))
-		})
-
-		It("empty prop", func() {
-			nodeID := &NodeID{
-				Prop: &Prop{},
-			}
-			nodeID.Complete()
-			prop := &Prop{}
-			prop.Complete()
-			Expect(nodeID.Prop).To(Equal(prop))
+			Expect(nodeID.Type).To(Equal(ValueTypeDefault))
 		})
 	})
 
 	Describe(".Validate", func() {
 		It("failed", func() {
-			nodeID := &NodeID{Prop: &Prop{}}
+			nodeID := &NodeID{}
 			err := nodeID.Validate()
-			prop := &Prop{}
-			Expect(err).To(Equal(prop.Validate()))
-		})
-
-		It("success", func() {
-			nodeID := &NodeID{Prop: &Prop{Name: "n", Type: ValueTypeDefault}}
-			err := nodeID.Validate()
-			Expect(err).NotTo(HaveOccurred())
-		})
-	})
-
-	Describe(".ValueStatement", func() {
-		It("failed", func() {
-			nodeID := &NodeID{Prop: &Prop{Name: "id"}}
-			nodeID.Complete()
-			Expect(nodeID.Validate()).NotTo(HaveOccurred())
-			statement, err := nodeID.ValueStatement(nil)
-			prop := nodeID.Prop
-			statement1, err1 := prop.ValueStatement(nil)
 			Expect(err).To(HaveOccurred())
-			Expect(err).To(Equal(err1))
-			Expect(statement).To(Equal(statement1))
+			Expect(stderrors.Is(err, errors.ErrNoNodeIDName)).To(BeTrue())
 		})
 
 		It("success", func() {
-			nodeID := &NodeID{Prop: &Prop{Name: "n", Type: ValueTypeDefault}}
+			nodeID := &NodeID{Name: "n", Type: ValueTypeDefault}
 			err := nodeID.Validate()
 			Expect(err).NotTo(HaveOccurred())
 		})
 	})
 
 	DescribeTable(".ValueStatement",
-		func(nodeID *NodeID, record Record, exceptStatement string) {
-			nodeID.Complete()
-			Expect(nodeID.Validate()).NotTo(HaveOccurred())
-			statement, err := nodeID.ValueStatement(record)
-			props := Props{nodeID.Prop}
-			statement1, err1 := props.ValueStatement(record)
-			if err1 != nil {
-				Expect(err).To(Equal(err1))
+		func(nodeID *NodeID, record Record, expectStatement string, expectErr error) {
+			if nodeID.Function != nil {
+				patches := gomonkey.NewPatches()
+				defer patches.Reset()
+				patches.ApplyGlobalVar(&supportedNodeIDFunctions, map[string]struct{}{
+					"HASH": {},
+				})
+			}
+
+			statement, err := func() (string, error) {
+				nodeID.Complete()
+				err := nodeID.Validate()
+				if err != nil {
+					return "", err
+				}
+				return nodeID.ValueStatement(record)
+			}()
+
+			if expectErr != nil {
+				if Expect(err).To(HaveOccurred()) {
+					Expect(stderrors.Is(err, expectErr)).To(BeTrue())
+					e, ok := errors.AsImportError(err)
+					Expect(ok).To(BeTrue())
+					Expect(e.Cause()).To(Equal(expectErr))
+					Expect(e.PropName()).To(Equal(nodeID.Name))
+				}
+				Expect(statement).To(Equal(expectStatement))
 			} else {
 				Expect(err).NotTo(HaveOccurred())
+				Expect(statement).To(Equal(expectStatement))
 			}
-			Expect(statement).To(Equal(statement1))
-			Expect(statement).To(Equal(exceptStatement))
 		},
 		Entry("no record empty",
-			&NodeID{Prop: &Prop{Name: "id"}},
+			&NodeID{Name: "id"},
 			Record([]string{}),
 			"",
+			errors.ErrNoRecord,
 		),
-		Entry("value type int",
-			&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt, Index: 0}},
+		Entry("no record",
+			&NodeID{
+				Name:  "id",
+				Type:  ValueTypeInt,
+				Index: 1,
+			},
+			Record([]string{"0"}),
+			"",
+			errors.ErrNoRecord,
+		),
+		Entry("record int",
+			&NodeID{
+				Name:  "id",
+				Type:  ValueTypeInt,
+				Index: 0,
+			},
 			Record([]string{"1"}),
 			"{id: 1}",
+			nil,
 		),
-		Entry("value type string",
-			&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeString, Index: 0}},
+		Entry("record string",
+			&NodeID{
+				Name:  "id",
+				Type:  ValueTypeString,
+				Index: 0,
+			},
+			Record([]string{"id"}),
+			"{id: \"id\"}",
+			nil,
+		),
+		Entry("ConcatItems",
+			&NodeID{
+				Name:        "id",
+				Type:        ValueTypeString,
+				ConcatItems: []interface{}{"c1", 3, "c2", 1, 2, "c3", 0},
+			},
+			Record([]string{"s0", "s1", "s2", "s3"}),
+			"{id: \"c1s3c2s1s2c3s0\"}",
+			nil,
+		),
+		Entry("ConcatItems failed type",
+			&NodeID{
+				Name:        "id",
+				Type:        ValueTypeString,
+				ConcatItems: []interface{}{true},
+			},
 			Record([]string{"1"}),
-			"{id: \"1\"}",
+			"",
+			errors.ErrUnsupportedConcatItemType,
+		),
+		Entry("ConcatItems failed no record",
+			&NodeID{
+				Name:        "id",
+				Type:        ValueTypeString,
+				ConcatItems: []interface{}{"c1", 3, "c2", 1, 2, "c3", 0, 10},
+			},
+			Record([]string{"s0", "s1", "s2", "s3"}),
+			"",
+			errors.ErrNoRecord,
+		),
+		Entry("Function",
+			&NodeID{
+				Name:        "id",
+				Type:        ValueTypeInt,
+				ConcatItems: []interface{}{"c1", 3, "c2", 1, 2, "c3", 0},
+				Function:    func() *string { s := "hash"; return &s }(),
+			},
+			Record([]string{"s0", "s1", "s2", "s3"}),
+			"{id: hash(\"c1s3c2s1s2c3s0\")}",
+			nil,
+		),
+		Entry("unsupported value type",
+			&NodeID{
+				Name:  "id",
+				Type:  ValueTypeDouble,
+				Index: 0,
+			},
+			Record([]string{"1.1"}),
+			nil,
+			errors.ErrUnsupportedValueType,
+		),
+		Entry("unsupported function",
+			&NodeID{
+				Name:     "id",
+				Type:     ValueTypeInt,
+				Index:    0,
+				Function: func() *string { s := "unsupported"; return &s }(),
+			},
+			Record([]string{"1"}),
+			nil,
+			errors.ErrUnsupportedFunction,
 		),
 	)
 })

@@ -16,20 +16,27 @@ manager:
     before:
       - statements:
         - |
-          CREATE GRAPH TYPE basic_type IF NOT EXISTS AS GRAPH TYPE {
+          CREATE GRAPH TYPE person_int_type IF NOT EXISTS AS GRAPH TYPE {
               (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
+              (Person)-[KNOWS:KNOWS{creationDate STRING}]->(Person)
+          }
+        - |
+          CREATE GRAPH TYPE person_string_type IF NOT EXISTS AS GRAPH TYPE {
+              (Person(id) LABEL Person {id STRING, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
               (Person)-[KNOWS:KNOWS{creationDate STRING}]->(Person)
           }
         wait: 10s
       - statements:
-        - CREATE GRAPH basic IF NOT EXISTS OF basic_type
+        - CREATE GRAPH person_int IF NOT EXISTS OF person_int_type
+        - CREATE GRAPH person_string IF NOT EXISTS OF person_string_type
         wait: 5s
 
 sources:
+  # person_int
   - path: ./examples/basic/person.csv
     csv:
       delimiter: "|"
-    graphName: basic
+    graphName: person_int
     nodes:
     - name: Person
       id:
@@ -46,9 +53,14 @@ sources:
         - name: "gender"
           type: "STRING"
           index: 3
+          nullable: true
+          defaultValue: male
         - name: "birthday"
           type: "STRING"
           index: 4
+          nullable: true
+          nullValue: _NULL_
+          defaultValue: "NULL" # TODO: remove this to support set NULL
         - name: "creationDate"
           type: "STRING"
           index: 5
@@ -58,6 +70,9 @@ sources:
         - name: "browserUsed"
           type: "STRING"
           index: 7
+          nullable: true
+          alternativeIndices:
+            - 6
     - name: Person
       id:
         name: "id"
@@ -73,9 +88,14 @@ sources:
         - name: "gender"
           type: "STRING"
           index: 3
+          nullable: true
+          defaultValue: male
         - name: "birthday"
           type: "STRING"
           index: 4
+          nullable: true
+          nullValue: _NULL_
+          defaultValue: "NULL" # TODO: remove this to support set NULL
         - name: "creationDate"
           type: "STRING"
           index: 5
@@ -85,8 +105,11 @@ sources:
         - name: "browserUsed"
           type: "STRING"
           index: 7
+          nullable: true
+          alternativeIndices:
+            - 6
   - path: ./examples/basic/knows.csv
-    graphName: basic
+    graphName: person_int
     edges:
     - name: KNOWS # person_knows_person
       src:
@@ -105,6 +128,9 @@ sources:
         - name: "creationDate"
           type: "STRING"
           index: 2
+          nullable: true
+          nullValue: _NULL_
+          defaultValue: 0000-00-00T00:00:00
     - name: KNOWS # person_knows_person
       src:
         name: Person
@@ -122,6 +148,80 @@ sources:
         - name: "creationDate"
           type: "STRING"
           index: 2
+          nullable: true
+          nullValue: _NULL_
+          defaultValue: 0000-00-00T00:00:00
+
+  # person_string
+  - path: ./examples/basic/person.csv
+    csv:
+      delimiter: "|"
+    graphName: person_string
+    nodes:
+    - name: Person
+      id:
+        name: "id"
+        type: "STRING"
+        concatItems:
+          - person_
+          - 0
+          - _id
+      props:
+        - name: "firstName"
+          type: "STRING"
+          index: 1
+        - name: "lastName"
+          type: "STRING"
+          index: 2
+        - name: "gender"
+          type: "STRING"
+          index: 3
+          nullable: true
+          defaultValue: female
+        - name: "birthday"
+          type: "STRING"
+          index: 4
+          nullable: true
+          nullValue: _NULL_
+          defaultValue: "NULL" # TODO: remove this to support set NULL
+        - name: "creationDate"
+          type: "STRING"
+          index: 5
+        - name: "locationIP"
+          type: "STRING"
+          index: 6
+        - name: "browserUsed"
+          type: "STRING"
+          index: 7
+  - path: ./examples/basic/knows.csv
+    graphName: person_string
+    edges:
+    - name: KNOWS # person_knows_person
+      src:
+        name: Person
+        id:
+          name: "id"
+          type: "STRING"
+          concatItems:
+            - person_
+            - 0
+            - _id
+      dst:
+        name: Person
+        id:
+          name: "id"
+          type: "STRING"
+          concatItems:
+            - person_
+            - 1
+            - _id
+      props:
+        - name: "creationDate"
+          type: "STRING"
+          index: 2
+          nullable: true
+          nullValue: _NULL_
+          defaultValue: 0000-00-00T00:00:00
 
 log:
   level: INGO

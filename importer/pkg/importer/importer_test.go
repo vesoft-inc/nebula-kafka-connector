@@ -28,10 +28,8 @@ var _ = Describe("Importer", func() {
 		node = spec.NewNode(
 			"nodeName",
 			spec.WithNodeID(&spec.NodeID{
-				Prop: &spec.Prop{
-					Name: "id",
-					Type: spec.ValueTypeInt,
-				},
+				Name: "id",
+				Type: spec.ValueTypeInt,
 			}),
 		)
 		edge = spec.NewEdge(
@@ -39,21 +37,17 @@ var _ = Describe("Importer", func() {
 			spec.WithEdgeSrc(&spec.EdgeNodeRef{
 				Name: "nodeName",
 				ID: &spec.NodeID{
-					Prop: &spec.Prop{
-						Name:  "id",
-						Type:  spec.ValueTypeInt,
-						Index: 0,
-					},
+					Name:  "id",
+					Type:  spec.ValueTypeInt,
+					Index: 0,
 				},
 			}),
 			spec.WithEdgeDst(&spec.EdgeNodeRef{
 				Name: "nodeName",
 				ID: &spec.NodeID{
-					Prop: &spec.Prop{
-						Name:  "id",
-						Type:  spec.ValueTypeInt,
-						Index: 1,
-					},
+					Name:  "id",
+					Type:  spec.ValueTypeInt,
+					Index: 1,
 				},
 			}),
 		)

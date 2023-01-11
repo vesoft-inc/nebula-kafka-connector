@@ -6,9 +6,9 @@ import (
 )
 
 var _ = Describe("Value", func() {
-	DescribeTable("IsSupportedValueType",
+	DescribeTable("IsSupportedPropValueType",
 		func(t ValueType, expectIsSupported bool) {
-			Expect(IsSupportedValueType(t)).To(Equal(expectIsSupported))
+			Expect(IsSupportedPropValueType(t)).To(Equal(expectIsSupported))
 		},
 		EntryDescription("%[1]s -> %[2]t"),
 		Entry(nil, ValueTypeInt, true),

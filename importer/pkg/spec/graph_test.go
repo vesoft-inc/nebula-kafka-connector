@@ -17,10 +17,8 @@ var _ = Describe("Graph", func() {
 					NewNode(
 						"node1",
 						WithNodeID(&NodeID{
-							Prop: &Prop{
-								Name: "id1",
-								Type: ValueTypeString,
-							},
+							Name: "id1",
+							Type: ValueTypeString,
 						}),
 					),
 				),
@@ -28,10 +26,8 @@ var _ = Describe("Graph", func() {
 					NewNode(
 						"node2",
 						WithNodeID(&NodeID{
-							Prop: &Prop{
-								Name: "id2",
-								Type: ValueTypeInt,
-							},
+							Name: "id2",
+							Type: ValueTypeInt,
 						}),
 					),
 				),
@@ -41,19 +37,15 @@ var _ = Describe("Graph", func() {
 						WithEdgeSrc(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name: "id1",
-									Type: ValueTypeInt,
-								},
+								Name: "id1",
+								Type: ValueTypeInt,
 							},
 						}),
 						WithEdgeDst(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name: "id1",
-									Type: ValueTypeInt,
-								},
+								Name: "id1",
+								Type: ValueTypeInt,
 							},
 						}),
 					),
@@ -64,19 +56,15 @@ var _ = Describe("Graph", func() {
 						WithEdgeSrc(&EdgeNodeRef{
 							Name: "node2",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name: "id2",
-									Type: ValueTypeString,
-								},
+								Name: "id2",
+								Type: ValueTypeString,
 							},
 						}),
 						WithEdgeDst(&EdgeNodeRef{
 							Name: "node2",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name: "id2",
-									Type: ValueTypeString,
-								},
+								Name: "id2",
+								Type: ValueTypeString,
 							},
 						}),
 					),
@@ -87,21 +75,21 @@ var _ = Describe("Graph", func() {
 
 			Expect(graph.Nodes).To(HaveLen(2))
 			Expect(graph.Nodes[0].Name).To(Equal("node1"))
-			Expect(graph.Nodes[0].ID.Prop.Name).To(Equal("id1"))
+			Expect(graph.Nodes[0].ID.Name).To(Equal("id1"))
 			Expect(graph.Nodes[1].Name).To(Equal("node2"))
-			Expect(graph.Nodes[1].ID.Prop.Name).To(Equal("id2"))
+			Expect(graph.Nodes[1].ID.Name).To(Equal("id2"))
 
 			Expect(graph.Edges).To(HaveLen(2))
 			Expect(graph.Edges[0].Name).To(Equal("edge1"))
 			Expect(graph.Edges[0].Src.Name).To(Equal("node1"))
-			Expect(graph.Edges[0].Src.ID.Prop.Name).To(Equal("id1"))
+			Expect(graph.Edges[0].Src.ID.Name).To(Equal("id1"))
 			Expect(graph.Edges[0].Dst.Name).To(Equal("node1"))
-			Expect(graph.Edges[0].Dst.ID.Prop.Name).To(Equal("id1"))
+			Expect(graph.Edges[0].Dst.ID.Name).To(Equal("id1"))
 			Expect(graph.Edges[1].Name).To(Equal("edge2"))
 			Expect(graph.Edges[1].Src.Name).To(Equal("node2"))
-			Expect(graph.Edges[1].Src.ID.Prop.Name).To(Equal("id2"))
+			Expect(graph.Edges[1].Src.ID.Name).To(Equal("id2"))
 			Expect(graph.Edges[1].Dst.Name).To(Equal("node2"))
-			Expect(graph.Edges[1].Dst.ID.Prop.Name).To(Equal("id2"))
+			Expect(graph.Edges[1].Dst.ID.Name).To(Equal("id2"))
 		})
 	})
 
@@ -131,10 +119,8 @@ var _ = Describe("Graph", func() {
 					NewNode(
 						"node1",
 						WithNodeID(&NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeInt,
-							},
+							Name: "id",
+							Type: ValueTypeInt,
 						}),
 					),
 				),
@@ -144,19 +130,15 @@ var _ = Describe("Graph", func() {
 						WithEdgeSrc(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name: "id",
-									Type: ValueTypeInt,
-								},
+								Name: "id",
+								Type: ValueTypeInt,
 							},
 						}),
 						WithEdgeDst(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name: "id",
-									Type: ValueTypeInt,
-								},
+								Name: "id",
+								Type: ValueTypeInt,
 							},
 						}),
 					),
@@ -176,11 +158,9 @@ var _ = Describe("Graph", func() {
 					NewNode(
 						"node1",
 						WithNodeID(&NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeInt,
-								Index: 0,
-							},
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
 						}),
 					),
 				),
@@ -218,21 +198,17 @@ var _ = Describe("Graph", func() {
 						WithEdgeSrc(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name:  "id",
-									Type:  ValueTypeInt,
-									Index: 0,
-								},
+								Name:  "id",
+								Type:  ValueTypeInt,
+								Index: 0,
 							},
 						}),
 						WithEdgeDst(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{
-								Prop: &Prop{
-									Name:  "id",
-									Type:  ValueTypeInt,
-									Index: 1,
-								},
+								Name:  "id",
+								Type:  ValueTypeInt,
+								Index: 1,
 							},
 						}),
 					),

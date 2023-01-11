@@ -7,13 +7,14 @@ import (
 )
 
 const (
-	fieldMessages  = "messages"
-	fieldGraphName = "graph"
-	fieldEdgeName  = "edge"
-	fieldNodeName  = "node"
-	fieldPropName  = "prop"
-	fieldRecord    = "record"
-	fieldStatement = "statement"
+	fieldMessages   = "messages"
+	fieldGraphName  = "graph"
+	fieldEdgeName   = "edge"
+	fieldNodeName   = "node"
+	fieldNodeIDName = "nodeID"
+	fieldPropName   = "prop"
+	fieldRecord     = "record"
+	fieldStatement  = "statement"
 )
 
 var _ error = (*ImportError)(nil)
@@ -88,6 +89,14 @@ func (e *ImportError) EdgeName() string {
 	return e.getFieldString(fieldEdgeName)
 }
 
+func (e *ImportError) SetNodeIDName(nodeIDName string) *ImportError {
+	return e.withField(fieldNodeIDName, nodeIDName)
+}
+
+func (e *ImportError) NodeIDName() string {
+	return e.getFieldString(fieldNodeIDName)
+}
+
 func (e *ImportError) SetPropName(propName string) *ImportError {
 	return e.withField(fieldPropName, propName)
 }
@@ -113,7 +122,7 @@ func (e *ImportError) Statement() string {
 }
 
 func (e *ImportError) Fields() map[string]any {
-	m := make(map[string]any, len(e.fields))
+	m := make(map[string]any, len(e.fields)+1)
 	for k, v := range e.fields {
 		m[k] = v
 	}
@@ -172,6 +181,12 @@ func (e *ImportError) Error() string {
 	}
 	if edgeName := e.EdgeName(); edgeName != "" {
 		fields = append(fields, fmt.Sprintf("%s(%s)", fieldEdgeName, edgeName))
+	}
+	if nodeIDName := e.NodeIDName(); nodeIDName != "" {
+		fields = append(fields, fmt.Sprintf("%s(%s)", fieldNodeIDName, nodeIDName))
+	}
+	if propName := e.PropName(); propName != "" {
+		fields = append(fields, fmt.Sprintf("%s(%s)", fieldPropName, propName))
 	}
 	if record := e.Record(); len(record) > 0 {
 		fields = append(fields, fmt.Sprintf("%s(%s)", fieldRecord, record))

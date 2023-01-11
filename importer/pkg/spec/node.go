@@ -65,7 +65,6 @@ func (n *Node) Complete() {
 		n.ID.Complete()
 	}
 	n.Props.Complete()
-	n.propsWithID = Props{n.ID.Prop}.Append(n.Props...)
 }
 
 func (n *Node) Validate() error {
@@ -85,11 +84,13 @@ func (n *Node) Validate() error {
 		return n.importError(err)
 	}
 
-	return nil
-}
+	n.propsWithID = Props{&Prop{
+		Name:   n.ID.Name,
+		Type:   n.ID.Type,
+		picker: n.ID.picker,
+	}}.Append(n.Props...)
 
-func (n *Node) importError(err error, formatWithArgs ...any) *errors.ImportError { //nolint:unparam
-	return errors.AsOrNewImportError(err, formatWithArgs...).SetNodeName(n.Name)
+	return nil
 }
 
 func (n *Node) ValueStatement(graphName string, records ...Record) (string, error) {
@@ -102,6 +103,10 @@ func (n *Node) ValueStatement(graphName string, records ...Record) (string, erro
 		values = append(values, fmt.Sprintf(fmtNodeValueStatement, statement))
 	}
 	return fmt.Sprintf(fmtNodePrefixStatement, graphName, n.Name, strings.Join(values, ", ")), nil
+}
+
+func (n *Node) importError(err error, formatWithArgs ...any) *errors.ImportError { //nolint:unparam
+	return errors.AsOrNewImportError(err, formatWithArgs...).SetNodeName(n.Name)
 }
 
 func (ns Nodes) Complete() {

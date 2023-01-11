@@ -112,7 +112,7 @@ var _ = Describe("ImportError", func() {
 		})
 	})
 
-	Describe("Fields", func() {
+	It("Fields", func() {
 		importError := AsOrNewImportError(stderrors.New("test error"))
 		Expect(importError.Fields()).To(BeEmpty())
 
@@ -127,6 +127,9 @@ var _ = Describe("ImportError", func() {
 
 		importError.SetEdgeName("")
 		Expect(importError.EdgeName()).To(BeEmpty())
+
+		importError.SetNodeIDName("")
+		Expect(importError.NodeIDName()).To(BeEmpty())
 
 		importError.SetPropName("")
 		Expect(importError.PropName()).To(BeEmpty())
@@ -152,6 +155,9 @@ var _ = Describe("ImportError", func() {
 		importError.SetEdgeName("edgeName")
 		Expect(importError.EdgeName()).To(Equal("edgeName"))
 
+		importError.SetNodeIDName("nodeIDName")
+		Expect(importError.NodeIDName()).To(Equal("nodeIDName"))
+
 		importError.SetPropName("propName")
 		Expect(importError.PropName()).To(Equal("propName"))
 
@@ -166,11 +172,12 @@ var _ = Describe("ImportError", func() {
 			"graph":     "graphName",
 			"node":      "nodeName",
 			"edge":      "edgeName",
+			"nodeID":    "nodeIDName",
 			"prop":      "propName",
 			"record":    []string{"record1", "record2"},
 			"statement": "test statement",
 		}))
-		Expect(importError.Error()).To(Equal("graph(graphName): node(nodeName): edge(edgeName): record([record1 record2]): statement(test statement): messagestest message, test message 1: test error"))
+		Expect(importError.Error()).To(Equal("graph(graphName): node(nodeName): edge(edgeName): nodeID(nodeIDName): prop(propName): record([record1 record2]): statement(test statement): messagestest message, test message 1: test error"))
 	})
 
 	It("withField", func() {

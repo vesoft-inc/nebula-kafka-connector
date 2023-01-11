@@ -17,19 +17,15 @@ var _ = Describe("Edge", func() {
 				WithEdgeSrc(&EdgeNodeRef{
 					Name: "srcNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeInt,
-						},
+						Name: "id",
+						Type: ValueTypeInt,
 					},
 				}),
 				WithEdgeDst(&EdgeNodeRef{
 					Name: "dstNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeString,
-						},
+						Name: "id",
+						Type: ValueTypeString,
 					},
 				}),
 				WithEdgeProps(&Prop{Name: "prop1", Type: ValueTypeString}),
@@ -40,12 +36,12 @@ var _ = Describe("Edge", func() {
 			Expect(edge.Name).To(Equal("name"))
 
 			Expect(edge.Src.Name).To(Equal("srcNodeName"))
-			Expect(edge.Src.ID.Prop.Name).To(Equal("id"))
-			Expect(edge.Src.ID.Prop.Type).To(Equal(ValueTypeInt))
+			Expect(edge.Src.ID.Name).To(Equal("id"))
+			Expect(edge.Src.ID.Type).To(Equal(ValueTypeInt))
 
 			Expect(edge.Dst.Name).To(Equal("dstNodeName"))
-			Expect(edge.Dst.ID.Prop.Name).To(Equal("id"))
-			Expect(edge.Dst.ID.Prop.Type).To(Equal(ValueTypeString))
+			Expect(edge.Dst.ID.Name).To(Equal("id"))
+			Expect(edge.Dst.ID.Type).To(Equal(ValueTypeString))
 
 			Expect(edge.Props).To(HaveLen(2))
 			Expect(edge.Props[0].Name).To(Equal("prop1"))
@@ -82,10 +78,8 @@ var _ = Describe("Edge", func() {
 			edge := NewEdge("name", WithEdgeSrc(&EdgeNodeRef{
 				Name: "srcNodeName",
 				ID: &NodeID{
-					Prop: &Prop{
-						Name: "id",
-						Type: ValueTypeInt,
-					},
+					Name: "id",
+					Type: ValueTypeInt,
 				},
 			}))
 			err := edge.Validate()
@@ -97,10 +91,8 @@ var _ = Describe("Edge", func() {
 			edge := NewEdge("name", WithEdgeSrc(&EdgeNodeRef{
 				Name: "srcNodeName",
 				ID: &NodeID{
-					Prop: &Prop{
-						Name: "id",
-						Type: ValueTypeInt,
-					},
+					Name: "id",
+					Type: ValueTypeInt,
 				},
 			}), WithEdgeDst(&EdgeNodeRef{
 				Name: "dstNodeName",
@@ -114,18 +106,16 @@ var _ = Describe("Edge", func() {
 			edge := NewEdge("name", WithEdgeSrc(&EdgeNodeRef{
 				Name: "srcNodeName",
 				ID: &NodeID{
-					Prop: &Prop{
-						Name: "id",
-						Type: ValueTypeInt,
-					},
+					Name: "id",
+					Type: ValueTypeInt,
 				},
 			}), WithEdgeDst(&EdgeNodeRef{
 				Name: "dstNodeName",
-				ID:   &NodeID{Prop: &Prop{}},
+				ID:   &NodeID{},
 			}))
 			err := edge.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(stderrors.Is(err, errors.ErrNoPropName)).To(BeTrue())
+			Expect(stderrors.Is(err, errors.ErrNoNodeIDName)).To(BeTrue())
 		})
 
 		It("props validate failed", func() {
@@ -134,19 +124,15 @@ var _ = Describe("Edge", func() {
 				WithEdgeSrc(&EdgeNodeRef{
 					Name: "srcNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeInt,
-						},
+						Name: "id",
+						Type: ValueTypeInt,
 					},
 				}),
 				WithEdgeDst(&EdgeNodeRef{
 					Name: "dstNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeString,
-						},
+						Name: "id",
+						Type: ValueTypeString,
 					},
 				}),
 				WithEdgeProps(&Prop{Name: "prop"}),
@@ -162,19 +148,15 @@ var _ = Describe("Edge", func() {
 				WithEdgeSrc(&EdgeNodeRef{
 					Name: "srcNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeInt,
-						},
+						Name: "id",
+						Type: ValueTypeInt,
 					},
 				}),
 				WithEdgeDst(&EdgeNodeRef{
 					Name: "dstNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeString,
-						},
+						Name: "id",
+						Type: ValueTypeString,
 					},
 				}),
 			)
@@ -188,19 +170,15 @@ var _ = Describe("Edge", func() {
 				WithEdgeSrc(&EdgeNodeRef{
 					Name: "srcNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeInt,
-						},
+						Name: "id",
+						Type: ValueTypeInt,
 					},
 				}),
 				WithEdgeDst(&EdgeNodeRef{
 					Name: "dstNodeName",
 					ID: &NodeID{
-						Prop: &Prop{
-							Name: "id",
-							Type: ValueTypeString,
-						},
+						Name: "id",
+						Type: ValueTypeString,
 					},
 				}),
 				WithEdgeProps(&Prop{Name: "prop", Type: ValueTypeString}),
@@ -219,21 +197,17 @@ var _ = Describe("Edge", func() {
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeInt,
-								Index: 0,
-							},
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
 						},
 					}),
 					WithEdgeDst(&EdgeNodeRef{
 						Name: "dstNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeString,
-								Index: 1,
-							},
+							Name:  "id",
+							Type:  ValueTypeString,
+							Index: 1,
 						},
 					}),
 				)
@@ -277,21 +251,17 @@ var _ = Describe("Edge", func() {
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeInt,
-								Index: 0,
-							},
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
 						},
 					}),
 					WithEdgeDst(&EdgeNodeRef{
 						Name: "dstNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeString,
-								Index: 1,
-							},
+							Name:  "id",
+							Type:  ValueTypeString,
+							Index: 1,
 						},
 					}),
 					WithEdgeProps(
@@ -345,21 +315,17 @@ var _ = Describe("Edge", func() {
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeInt,
-								Index: 0,
-							},
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
 						},
 					}),
 					WithEdgeDst(&EdgeNodeRef{
 						Name: "dstNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name:  "id",
-								Type:  ValueTypeString,
-								Index: 1,
-							},
+							Name:  "id",
+							Type:  ValueTypeString,
+							Index: 1,
 						},
 					}),
 					WithEdgeProps(
@@ -417,19 +383,15 @@ var _ = Describe("Edges", func() {
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeInt,
-							},
+							Name: "id",
+							Type: ValueTypeInt,
 						},
 					}),
 					WithEdgeDst(&EdgeNodeRef{
 						Name: "dstNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeString,
-							},
+							Name: "id",
+							Type: ValueTypeString,
 						},
 					}),
 					WithEdgeProps(&Prop{}),
@@ -439,19 +401,15 @@ var _ = Describe("Edges", func() {
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeInt,
-							},
+							Name: "id",
+							Type: ValueTypeInt,
 						},
 					}),
 					WithEdgeDst(&EdgeNodeRef{
 						Name: "dstNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeString,
-							},
+							Name: "id",
+							Type: ValueTypeString,
 						},
 					}),
 					WithEdgeProps(&Prop{}),
@@ -473,19 +431,15 @@ var _ = Describe("Edges", func() {
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeInt,
-							},
+							Name: "id",
+							Type: ValueTypeInt,
 						},
 					}),
 					WithEdgeDst(&EdgeNodeRef{
 						Name: "dstNodeName",
 						ID: &NodeID{
-							Prop: &Prop{
-								Name: "id",
-								Type: ValueTypeString,
-							},
+							Name: "id",
+							Type: ValueTypeString,
 						},
 					}),
 				))

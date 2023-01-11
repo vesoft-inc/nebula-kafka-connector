@@ -106,11 +106,9 @@ var _ = Describe("Manager", func() {
 					spec.NewNode(
 						"node1",
 						spec.WithNodeID(&spec.NodeID{
-							Prop: &spec.Prop{
-								Name:  "id",
-								Type:  spec.ValueTypeInt,
-								Index: 0,
-							},
+							Name:  "id",
+							Type:  spec.ValueTypeInt,
+							Index: 0,
 						}),
 						spec.WithNodeProps(&spec.Prop{
 							Name:  "nodeProp1",
@@ -121,11 +119,9 @@ var _ = Describe("Manager", func() {
 					spec.NewNode(
 						"node2",
 						spec.WithNodeID(&spec.NodeID{
-							Prop: &spec.Prop{
-								Name:  "id",
-								Type:  spec.ValueTypeInt,
-								Index: 0,
-							},
+							Name:  "id",
+							Type:  spec.ValueTypeInt,
+							Index: 0,
 						}),
 					),
 				),
@@ -135,21 +131,17 @@ var _ = Describe("Manager", func() {
 						spec.WithEdgeSrc(&spec.EdgeNodeRef{
 							Name: "node1",
 							ID: &spec.NodeID{
-								Prop: &spec.Prop{
-									Name:  "id",
-									Type:  spec.ValueTypeInt,
-									Index: 0,
-								},
+								Name:  "id",
+								Type:  spec.ValueTypeInt,
+								Index: 0,
 							},
 						}),
 						spec.WithEdgeDst(&spec.EdgeNodeRef{
 							Name: "node1",
 							ID: &spec.NodeID{
-								Prop: &spec.Prop{
-									Name:  "id",
-									Type:  spec.ValueTypeInt,
-									Index: 1,
-								},
+								Name:  "id",
+								Type:  spec.ValueTypeInt,
+								Index: 1,
 							},
 						}),
 						spec.WithEdgeProps(&spec.Prop{
@@ -163,21 +155,17 @@ var _ = Describe("Manager", func() {
 						spec.WithEdgeSrc(&spec.EdgeNodeRef{
 							Name: "node2",
 							ID: &spec.NodeID{
-								Prop: &spec.Prop{
-									Name:  "id",
-									Type:  spec.ValueTypeInt,
-									Index: 0,
-								},
+								Name:  "id",
+								Type:  spec.ValueTypeInt,
+								Index: 0,
 							},
 						}),
 						spec.WithEdgeDst(&spec.EdgeNodeRef{
 							Name: "node2",
 							ID: &spec.NodeID{
-								Prop: &spec.Prop{
-									Name:  "id",
-									Type:  spec.ValueTypeInt,
-									Index: 1,
-								},
+								Name:  "id",
+								Type:  spec.ValueTypeInt,
+								Index: 1,
 							},
 						}),
 					),

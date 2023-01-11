@@ -15,22 +15,21 @@ var _ = Describe("Node", func() {
 				"name",
 				WithNodeLabels("labels"),
 				WithNodeID(&NodeID{
-					Prop: &Prop{
-						Name: "id",
-						Type: ValueTypeInt,
-					},
+					Name: "id",
+					Type: ValueTypeInt,
 				}),
 				WithNodeProps(&Prop{Name: "prop1", Type: ValueTypeString}),
 				WithNodeProps(&Prop{Name: "prop2", Type: ValueTypeInt}),
 			)
 			node.Complete()
+			Expect(node.Validate()).NotTo(HaveOccurred())
 
 			Expect(node.Name).To(Equal("name"))
 
 			Expect(node.Labels).To(Equal("labels"))
 
-			Expect(node.ID.Prop.Name).To(Equal("id"))
-			Expect(node.ID.Prop.Type).To(Equal(ValueTypeInt))
+			Expect(node.ID.Name).To(Equal("id"))
+			Expect(node.ID.Type).To(Equal(ValueTypeInt))
 
 			Expect(node.Props).To(HaveLen(2))
 			Expect(node.Props[0].Name).To(Equal("prop1"))
@@ -48,7 +47,7 @@ var _ = Describe("Node", func() {
 		})
 
 		It("should complete without labels", func() {
-			node := NewNode("name", WithNodeID(&NodeID{Prop: &Prop{}}), WithNodeProps(&Prop{}))
+			node := NewNode("name", WithNodeID(&NodeID{}), WithNodeProps(&Prop{}))
 			node.Complete()
 
 			Expect(node.Name).To(Equal("name"))
@@ -73,17 +72,17 @@ var _ = Describe("Node", func() {
 		It("id validate failed", func() {
 			node := NewNode(
 				"name",
-				WithNodeID(&NodeID{&Prop{}}),
+				WithNodeID(&NodeID{}),
 			)
 			err := node.Validate()
 			Expect(err).To(HaveOccurred())
-			Expect(stderrors.Is(err, errors.ErrNoPropName)).To(BeTrue())
+			Expect(stderrors.Is(err, errors.ErrNoNodeIDName)).To(BeTrue())
 		})
 
 		It("props validate failed", func() {
 			node := NewNode(
 				"name",
-				WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}}),
+				WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt}),
 				WithNodeProps(&Prop{Name: "prop"}),
 			)
 			err := node.Validate()
@@ -94,7 +93,7 @@ var _ = Describe("Node", func() {
 		It("success without props", func() {
 			node := NewNode(
 				"name",
-				WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}}),
+				WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt}),
 			)
 			err := node.Validate()
 			Expect(err).NotTo(HaveOccurred())
@@ -103,7 +102,7 @@ var _ = Describe("Node", func() {
 		It("success with props", func() {
 			node := NewNode(
 				"name",
-				WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}}),
+				WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt}),
 				WithNodeProps(&Prop{Name: "prop", Type: ValueTypeString}),
 			)
 			err := node.Validate()
@@ -117,7 +116,7 @@ var _ = Describe("Node", func() {
 			BeforeEach(func() {
 				node = NewNode(
 					"name",
-					WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt, Index: 0}}),
+					WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt, Index: 0}),
 				)
 				node.Complete()
 				err := node.Validate()
@@ -149,7 +148,7 @@ var _ = Describe("Node", func() {
 			BeforeEach(func() {
 				node = NewNode(
 					"name",
-					WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt, Index: 0}}),
+					WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt, Index: 0}),
 					WithNodeProps(
 						&Prop{Name: "prop1", Type: ValueTypeString, Index: 2},
 					),
@@ -184,7 +183,7 @@ var _ = Describe("Node", func() {
 			BeforeEach(func() {
 				node = NewNode(
 					"name",
-					WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt, Index: 0}}),
+					WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt, Index: 0}),
 					WithNodeProps(
 						&Prop{Name: "prop1", Type: ValueTypeString, Index: 2},
 						&Prop{Name: "prop2", Type: ValueTypeDouble, Index: 1},
@@ -221,8 +220,8 @@ var _ = Describe("Nodes", func() {
 	Describe(".Complete", func() {
 		It("default value type", func() {
 			nodes := Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Prop: &Prop{}}), WithNodeProps(&Prop{})),
-				NewNode("name2", WithNodeID(&NodeID{Prop: &Prop{}}), WithNodeProps(&Prop{})),
+				NewNode("name1", WithNodeID(&NodeID{}), WithNodeProps(&Prop{})),
+				NewNode("name2", WithNodeID(&NodeID{}), WithNodeProps(&Prop{})),
 			}
 			nodes.Complete()
 			Expect(nodes).To(HaveLen(2))
@@ -249,40 +248,40 @@ var _ = Describe("Nodes", func() {
 		),
 		Entry("success",
 			Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name2", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name3", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name4", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
+				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 			},
 			-1,
 		),
 		Entry("failed at 0",
 			Nodes{
 				NewNode(""),
-				NewNode("name1", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name2", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name3", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name4", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
+				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 			},
 			0,
 		),
 		Entry("failed at 1",
 			Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
+				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 				NewNode("failed"),
-				NewNode("name2", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name3", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name4", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
+				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 			},
 			1,
 		),
 		Entry("failed at end",
 			Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name2", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name3", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("name4", WithNodeID(&NodeID{Prop: &Prop{Name: "id", Type: ValueTypeInt}})),
-				NewNode("failed", WithNodeID(&NodeID{Prop: &Prop{}})),
+				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("failed", WithNodeID(&NodeID{})),
 			},
 			4,
 		),

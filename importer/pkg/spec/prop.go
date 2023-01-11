@@ -15,9 +15,13 @@ const (
 
 type (
 	Prop struct {
-		Name  string    `yaml:"name"`
-		Type  ValueType `yaml:"type"`
-		Index int       `yaml:"index"`
+		Name               string    `yaml:"name"`
+		Type               ValueType `yaml:"type"`
+		Index              int       `yaml:"index"`
+		Nullable           bool      `yaml:"nullable"`
+		NullValue          string    `yaml:"nullValue"`
+		AlternativeIndices []int     `yaml:"alternativeIndices,omitempty"`
+		DefaultValue       *string   `yaml:"defaultValue"`
 
 		picker picker.Picker
 	}
@@ -35,7 +39,7 @@ func (p *Prop) Validate() error {
 	if p.Name == "" {
 		return p.importError(errors.ErrNoPropName)
 	}
-	if !IsSupportedValueType(p.Type) {
+	if !IsSupportedPropValueType(p.Type) {
 		return p.importError(errors.ErrUnsupportedValueType, "unsupported type %s", p.Type)
 	}
 	if err := p.initPicker(); err != nil {
@@ -56,6 +60,17 @@ func (p *Prop) initPicker() error {
 	pickerConfig := picker.Config{
 		Indices: []int{p.Index},
 		Type:    string(p.Type),
+	}
+
+	if p.Nullable {
+		pickerConfig.Nullable = func(s string) bool {
+			return s == p.NullValue
+		}
+		pickerConfig.NullValue = dbNULL
+		if len(p.AlternativeIndices) > 0 {
+			pickerConfig.Indices = append(pickerConfig.Indices, p.AlternativeIndices...)
+		}
+		pickerConfig.DefaultValue = p.DefaultValue
 	}
 
 	var err error
