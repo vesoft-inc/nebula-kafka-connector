@@ -36,3 +36,20 @@ func (c *Config) FromFile(name string) error {
 func (c *Config) Yaml() (data []byte, err error) {
 	return yaml.Marshal(c)
 }
+
+func (c *Config) Optimize(configPath string) error {
+	if err := c.Log.OptimizeFilePath(configPath); err != nil {
+		return err
+	}
+
+	if err := c.Sources.OptimizeConfigPath(configPath); err != nil {
+		return err
+	}
+	sources, err := c.OptimizeWildCard()
+	if err != nil {
+		return err
+	}
+	c.Sources = sources
+
+	return nil
+}

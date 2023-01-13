@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
@@ -76,6 +77,24 @@ func (ss Sources) OptimizeConfigPath(configPath string) error {
 	return nil
 }
 
-func (ss Sources) Optimize(configPath string) error {
-	return ss.OptimizeConfigPath(configPath)
+// OptimizeWildCard Convert sources with wildcards to a new sources
+func (ss Sources) OptimizeWildCard() (Sources, error) {
+	nss := make(Sources, 0, len(ss))
+	for i := range ss {
+		paths, err := filepath.Glob(ss[i].SourceConfig.Path)
+		if err != nil {
+			return nil, err
+		}
+		if len(paths) == 0 {
+			return nil, fmt.Errorf("no file found for %s", ss[i].SourceConfig.Path)
+		}
+
+		for _, path := range paths {
+			ns := ss[i]
+			ns.SourceConfig.Path = path
+			nss = append(nss, ns)
+		}
+	}
+
+	return nss, nil
 }

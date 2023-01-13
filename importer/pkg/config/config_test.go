@@ -185,10 +185,10 @@ var _ = Describe("Config", func() {
 		Expect(m).To(BeNil())
 	})
 
-	It("Optimize source ", func() {
-		testPath1 := "testdata/edge.csv"
-		testPath2 := "edge.csv"
-		testPath3 := "/edge.csv"
+	It("Optimize source config", func() {
+		testPath1 := "testdata/node1.csv"
+		testPath2, _ := filepath.Abs("testdata/edge1.csv")
+		testPath3 := "testdata/wildcards/*.csv"
 
 		c := &Config{
 			Sources: []Source{
@@ -214,11 +214,50 @@ var _ = Describe("Config", func() {
 		Expect(err).NotTo(HaveOccurred())
 
 		absTestPath1, _ := filepath.Abs(testPath1)
-		absTestPath2, _ := filepath.Abs(testPath2)
-		absTestPath3, _ := filepath.Abs(testPath3)
+		absTestWildcardPath1, _ := filepath.Abs("testdata/wildcards/node1.csv")
+		absTestWildcardPath2, _ := filepath.Abs("testdata/wildcards/node2.csv")
 
+		Expect(len(c.Sources)).To(Equal(4))
 		Expect(c.Sources[0].SourceConfig.Path).To(Equal(absTestPath1))
-		Expect(c.Sources[1].SourceConfig.Path).To(Equal(absTestPath2))
-		Expect(c.Sources[2].SourceConfig.Path).To(Equal(absTestPath3))
+		Expect(c.Sources[1].SourceConfig.Path).To(Equal(testPath2))
+		Expect(c.Sources[2].SourceConfig.Path).To(Equal(absTestWildcardPath1))
+		Expect(c.Sources[3].SourceConfig.Path).To(Equal(absTestWildcardPath2))
+	})
+
+	It("Optimize source wildcard failed", func() {
+		c := &Config{
+			Sources: []Source{
+				{
+					SourceConfig: source.Config{
+						Path: "notfound.csv",
+					},
+				},
+			},
+		}
+
+		err := c.Optimize("nebula-importer.yaml")
+		Expect(err).To(HaveOccurred())
+	})
+
+	It("Optimize log file", func() {
+		testPath1 := "logs/nebula-importer.log"
+		testPath2, _ := filepath.Abs("logs/abspath.log")
+
+		c := &Config{
+			Log: &Log{
+				Files: []string{
+					testPath1,
+					testPath2,
+				},
+			},
+		}
+
+		err := c.Optimize("nebula-importer.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
+		absTestPath1, _ := filepath.Abs(testPath1)
+
+		Expect(c.Log.Files[0]).To(Equal(absTestPath1))
+		Expect(c.Log.Files[1]).To(Equal(testPath2))
 	})
 })

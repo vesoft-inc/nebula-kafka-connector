@@ -1,6 +1,10 @@
 package config
 
-import "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
+import (
+	"path/filepath"
+
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
+)
 
 type Log struct {
 	Level   *string       `yaml:"level,omitempty"`
@@ -27,4 +31,25 @@ func (l *Log) BuildLogger(opts ...logger.Option) (logger.Logger, error) {
 	}
 	options = append(options, opts...)
 	return logger.New(options...)
+}
+
+// OptimizeFilePath Change file path to an absolute path in order to set it to the relative path of the config file
+func (l *Log) OptimizeFilePath(configPath string) error {
+	if l == nil {
+		return nil
+	}
+
+	configAbsPath, err := filepath.Abs(filepath.Dir(configPath))
+	if err != nil {
+		return err
+	}
+
+	for i := range l.Files {
+		if filepath.IsAbs(l.Files[i]) {
+			continue
+		}
+		l.Files[i] = filepath.Join(configAbsPath, l.Files[i])
+	}
+
+	return nil
 }
