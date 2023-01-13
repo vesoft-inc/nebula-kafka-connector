@@ -7,7 +7,8 @@ type (
 	}
 
 	CSVConfig struct {
-		Delimiter string `yaml:"delimiter,omitempty"`
+		Delimiter  string `yaml:"delimiter,omitempty"`
+		WithHeader bool   `yaml:"withHeader,omitempty"`
 	}
 )
 

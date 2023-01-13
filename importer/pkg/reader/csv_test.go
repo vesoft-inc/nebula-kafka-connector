@@ -124,4 +124,47 @@ var _ = Describe("csvReader", func() {
 			Expect(record).To(BeEmpty())
 		})
 	})
+
+	Describe("with withHeader", func() {
+		var s source.Source
+		BeforeEach(func() {
+			var err error
+			s, err = source.Open(&source.Config{
+				Path: "testdata/local_withHeader.csv",
+				CSV: &source.CSVConfig{
+					WithHeader: true,
+				},
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(s).NotTo(BeNil())
+		})
+		AfterEach(func() {
+			err := s.Close()
+			Expect(err).NotTo(HaveOccurred())
+		})
+
+		It("should success", func() {
+			var (
+				nBytes int64
+				n      int
+				record spec.Record
+				err    error
+			)
+			r := NewCSVReader(s)
+			nBytes, err = r.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(14)))
+
+			n, record, err = r.Read()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(14))
+			Expect(record).To(Equal(spec.Record{"1", "2", "3"}))
+
+			n, record, err = r.Read()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(record).To(BeEmpty())
+		})
+	})
 })
