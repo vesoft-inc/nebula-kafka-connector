@@ -9,7 +9,6 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 )
@@ -31,6 +30,29 @@ var _ = Describe("Client", func() {
 		Expect(c1.done).NotTo(BeNil())
 		Expect(c1.logger).NotTo(BeNil())
 		Expect(c1.fnNewSession).NotTo(BeNil())
+	})
+
+	It("WithVersion", func() {
+		c := New(WithAddress("127.0.0.1:9669"))
+		c1, ok := c.(*defaultClient)
+		Expect(ok).To(BeTrue())
+		Expect(c1.fnNewSession).NotTo(BeNil())
+		session := c1.fnNewSession(HostAddress{})
+		Expect(session).To(BeAssignableToTypeOf(&defaultSessionV5{}))
+
+		c = New(WithAddress("127.0.0.1:9669"), WithV3())
+		c1, ok = c.(*defaultClient)
+		Expect(ok).To(BeTrue())
+		Expect(c1.fnNewSession).NotTo(BeNil())
+		session = c1.fnNewSession(HostAddress{})
+		Expect(session).To(BeAssignableToTypeOf(&defaultSessionV3{}))
+
+		c = New(WithAddress("127.0.0.1:9669"), WithV5())
+		c1, ok = c.(*defaultClient)
+		Expect(ok).To(BeTrue())
+		Expect(c1.fnNewSession).NotTo(BeNil())
+		session = c1.fnNewSession(HostAddress{})
+		Expect(session).To(BeAssignableToTypeOf(&defaultSessionV5{}))
 	})
 
 	It("WithAddress", func() {
@@ -126,7 +148,7 @@ var _ = Describe("Client", func() {
 		It("open session failed", func() {
 			c := New(
 				WithAddress("127.0.0.1:9669"),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -140,7 +162,7 @@ var _ = Describe("Client", func() {
 			addresses := []string{"127.0.0.1:9669", "127.0.0.2:9669"}
 			c := New(
 				WithAddress(addresses...),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -173,7 +195,7 @@ var _ = Describe("Client", func() {
 			c := New(
 				WithAddress(addresses...),
 				WithReconnectInitialInterval(time.Nanosecond),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -208,7 +230,7 @@ var _ = Describe("Client", func() {
 				WithAddress(addresses...),
 				WithConcurrencyPerAddress(1),
 				WithQueueSize(1),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -250,7 +272,7 @@ var _ = Describe("Client", func() {
 			addresses := []string{"127.0.0.1:9669", "127.0.0.2:9669"}
 			c := New(
 				WithAddress(addresses...),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -286,7 +308,7 @@ var _ = Describe("Client", func() {
 				WithAddress(addresses...),
 				WithRetry(executeFailedTimes),
 				WithQueueSize(executeTimes*2+executeFailedTimes*2),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -352,7 +374,7 @@ var _ = Describe("Client", func() {
 			c := New(
 				WithAddress(addresses...),
 				WithRetry(3),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -387,7 +409,7 @@ var _ = Describe("Client", func() {
 			c := New(
 				WithAddress(addresses...),
 				WithRetryInitialInterval(time.Microsecond),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)
@@ -430,7 +452,7 @@ var _ = Describe("Client", func() {
 			c := New(
 				WithAddress(addresses...),
 				WithRetryInitialInterval(time.Microsecond),
-				WithNewSessionFunc(func(_ nebula.HostAddress) Session {
+				WithNewSessionFunc(func(_ HostAddress) Session {
 					return mockSession
 				}),
 			)

@@ -93,7 +93,7 @@ var _ = Describe("Importer", func() {
 		It("execute IsSucceed false", func() {
 			mockClient.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
 			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
-			mockResultSet.EXPECT().GetStatus().Times(1).Return("status failed")
+			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("status failed"))
 			resp, err := nodeImporter.Import(spec.Record{"id"})
 			Expect(err).To(HaveOccurred())
 			importError, ok := errors.AsImportError(err)
@@ -143,7 +143,7 @@ var _ = Describe("Importer", func() {
 		It("execute IsSucceed false", func() {
 			mockClient.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
 			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
-			mockResultSet.EXPECT().GetStatus().Times(1).Return("status failed")
+			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("status failed"))
 			resp, err := nodeImporter.Import(spec.Record{"id1", "id2"})
 			Expect(err).To(HaveOccurred())
 			importError, ok := errors.AsImportError(err)

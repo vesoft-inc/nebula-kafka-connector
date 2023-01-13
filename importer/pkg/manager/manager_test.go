@@ -348,7 +348,7 @@ var _ = Describe("Manager", func() {
 				mockResultSet.EXPECT().IsSucceed().Return(false),
 			)
 			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
-			mockResultSet.EXPECT().GetStatus().AnyTimes().Return("exec failed")
+			mockResultSet.EXPECT().GetError().AnyTimes().Return(stderrors.New("exec failed"))
 
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())

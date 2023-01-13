@@ -9,7 +9,6 @@ import (
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 )
@@ -103,7 +102,7 @@ var _ = Describe("Config", func() {
 		mockSession := client.NewMockSession(ctrl)
 		mockSession.EXPECT().Open().AnyTimes().Return(nil)
 		mockSession.EXPECT().Close().AnyTimes().Return(nil)
-		cli, err := c.BuildClient(client.WithNewSessionFunc(func(_ nebula.HostAddress) client.Session {
+		cli, err := c.BuildClient(client.WithNewSessionFunc(func(_ client.HostAddress) client.Session {
 			return mockSession
 		}))
 		Expect(err).NotTo(HaveOccurred())

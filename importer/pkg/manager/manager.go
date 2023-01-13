@@ -302,7 +302,7 @@ func (m *defaultManager) execHooks(name HookName) error {
 			}
 			if !rs.IsSucceed() {
 				err = errors.NewImportError(err,
-					"manager: exec failed in %s hook, %s", name, rs.GetStatus(),
+					"manager: exec failed in %s hook, %s", name, rs.GetError(),
 				).SetStatement(statement)
 				m.logError(err, "")
 				return err

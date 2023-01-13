@@ -61,20 +61,6 @@ func (mr *MockResultSetMockRecorder) GetLatency() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetLatency", reflect.TypeOf((*MockResultSet)(nil).GetLatency))
 }
 
-// GetStatus mocks base method.
-func (m *MockResultSet) GetStatus() string {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetStatus")
-	ret0, _ := ret[0].(string)
-	return ret0
-}
-
-// GetStatus indicates an expected call of GetStatus.
-func (mr *MockResultSetMockRecorder) GetStatus() *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetStatus", reflect.TypeOf((*MockResultSet)(nil).GetStatus))
-}
-
 // IsPermanentError mocks base method.
 func (m *MockResultSet) IsPermanentError() bool {
 	m.ctrl.T.Helper()

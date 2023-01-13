@@ -73,7 +73,7 @@ func (i *defaultImporter) Import(records ...spec.Record) (*ImportResp, error) {
 		return nil, errors.NewImportError(err).SetGraphName(i.graph.Name).SetStatement(statement)
 	}
 	if !rs.IsSucceed() {
-		return nil, errors.NewImportError(err, "the status is %s ", rs.GetStatus()).
+		return nil, errors.NewImportError(err, "the execute error is %s ", rs.GetError()).
 			SetGraphName(i.graph.Name).
 			SetStatement(statement)
 	}

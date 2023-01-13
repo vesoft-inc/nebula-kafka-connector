@@ -9,13 +9,13 @@ import (
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 
-var _ = Describe("ResultSet", func() {
-	It("newResultSet ", func() {
+var _ = Describe("ResultSetV5", func() {
+	It("newResultSetV5", func() {
 		patches := gomonkey.NewPatches()
 		defer patches.Reset()
 
 		nRS := nebula.ResultSet{}
-		rs := newResultSet(&nRS)
+		rs := newResultSetV5(&nRS)
 
 		patches.ApplyMethodReturn(nRS, "IsSucceed", true)
 

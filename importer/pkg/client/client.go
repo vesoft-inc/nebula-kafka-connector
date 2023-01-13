@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff/v4"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 )
@@ -36,6 +35,11 @@ type (
 		Close() error
 	}
 
+	HostAddress struct {
+		Host string
+		Port int
+	}
+
 	defaultClient struct {
 		addresses                []string
 		user                     string
@@ -51,12 +55,12 @@ type (
 		done                     chan struct{}
 		wgSession                sync.WaitGroup
 		wgStatementExecute       sync.WaitGroup
-		hostAddresses            []nebula.HostAddress
+		hostAddresses            []HostAddress
 		logger                   logger.Logger
 		fnNewSession             NewSessionFunc
 	}
 
-	NewSessionFunc func(nebula.HostAddress) Session
+	NewSessionFunc func(HostAddress) Session
 
 	Option func(*defaultClient)
 
@@ -94,9 +98,7 @@ func New(opts ...Option) Client {
 	}
 
 	if c.fnNewSession == nil {
-		c.fnNewSession = func(hostAddress nebula.HostAddress) Session {
-			return newSession(hostAddress, c.user, c.password, c.logger)
-		}
+		WithV5()(c)
 	}
 
 	return c
@@ -111,6 +113,22 @@ func WithAddress(addresses ...string) Option {
 				c.addresses = append(c.addresses, addr)
 			}
 		}
+	}
+}
+
+func WithV3() Option {
+	return func(c *defaultClient) {
+		WithNewSessionFunc(func(hostAddress HostAddress) Session {
+			return newSessionV3(hostAddress, c.user, c.password, c.logger)
+		})(c)
+	}
+}
+
+func WithV5() Option {
+	return func(c *defaultClient) {
+		WithNewSessionFunc(func(hostAddress HostAddress) Session {
+			return newSessionV5(hostAddress, c.user, c.password, c.logger)
+		})(c)
 	}
 }
 
@@ -198,7 +216,7 @@ func (c *defaultClient) Open() error {
 		if err != nil {
 			return errors.ErrInvalidAddress
 		}
-		hostAddress := nebula.HostAddress{Host: hostPort[0], Port: port}
+		hostAddress := HostAddress{Host: hostPort[0], Port: port}
 		session, err := c.openSession(hostAddress)
 		if err != nil {
 			return err
@@ -284,7 +302,7 @@ func (c *defaultClient) startWorkers() {
 	}
 }
 
-func (c *defaultClient) worker(hostAddress nebula.HostAddress) {
+func (c *defaultClient) worker(hostAddress HostAddress) {
 	for {
 		select {
 		case <-c.done:
@@ -310,7 +328,7 @@ func (c *defaultClient) worker(hostAddress nebula.HostAddress) {
 	}
 }
 
-func (c *defaultClient) openSession(hostAddress nebula.HostAddress) (Session, error) {
+func (c *defaultClient) openSession(hostAddress HostAddress) (Session, error) {
 	session := c.fnNewSession(hostAddress)
 	if err := session.Open(); err != nil {
 		return nil, err

@@ -8,14 +8,15 @@ import (
 	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 )
 
-var _ = Describe("Session", func() {
-	It("success ", func() {
-		session := newSession(nebula.HostAddress{}, "user", "password", nil)
+var _ = Describe("SessionV5", func() {
+	It("success", func() {
+		session := newSessionV5(HostAddress{}, "user", "password", nil)
 		connection := nebula.NewConnection(nebula.HostAddress{})
 		nSession := &nebula.Session{}
 		id := int64(1)
@@ -46,12 +47,7 @@ var _ = Describe("Session", func() {
 	})
 
 	It("failed", func() {
-		session := &defaultSession{
-			hostAddress: nebula.HostAddress{},
-			user:        "user",
-			password:    "password",
-			logger:      logger.NopLogger,
-		}
+		session := newSessionV5(HostAddress{}, "user", "password", logger.NopLogger)
 		connection := nebula.NewConnection(nebula.HostAddress{})
 		nSession := &nebula.Session{}
 		id := int64(1)

@@ -11,6 +11,7 @@ require (
 	github.com/onsi/gomega v1.24.0
 	github.com/panjf2000/ants v1.2.1
 	github.com/spf13/cobra v1.6.1
+	github.com/vesoft-inc/nebula-go/v3 v3.3.1
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20221102090826-aa7db5c6ca6d
 	go.uber.org/zap v1.23.0
 	gopkg.in/yaml.v3 v3.0.1
