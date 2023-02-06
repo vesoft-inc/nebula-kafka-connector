@@ -228,6 +228,12 @@ issues:
       text: "shadow: declaration of"
       linters:
         - govet
+    - source: go:generate
+      text: "line is [\\d]+ characters"
+      linters:
+        - lll
+        - revive
+
     - source: "// [@]?doc[s]?[ ]?:" # for docs comment
       text: "line is [\\d]+ characters"
       linters:

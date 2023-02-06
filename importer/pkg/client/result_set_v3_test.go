@@ -3,11 +3,11 @@
 package client
 
 import (
+	nebula "github.com/vesoft-inc/nebula-go/v3"
+
 	"github.com/agiledragon/gomonkey/v2"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-
-	nebula "github.com/vesoft-inc/nebula-go/v3"
 )
 
 var _ = Describe("ResultSetV3", func() {

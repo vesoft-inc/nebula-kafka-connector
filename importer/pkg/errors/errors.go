@@ -5,8 +5,10 @@ import (
 )
 
 var (
+	ErrUnsupportedClientVersion  = stderrors.New("unsupported client version")
 	ErrNoAddresses               = stderrors.New("no addresses")
 	ErrInvalidAddress            = stderrors.New("invalid address")
+	ErrNoSpaceName               = stderrors.New("no space name")
 	ErrNoGraphName               = stderrors.New("no graph name")
 	ErrNoNodeName                = stderrors.New("no node name")
 	ErrNoNodeID                  = stderrors.New("no node id")

@@ -37,7 +37,9 @@ func (s *defaultSessionV3) Open() error {
 	hostAddress := s.hostAddress
 	pool, err := nebula.NewConnectionPool(
 		[]nebula.HostAddress{hostAddress},
-		nebula.PoolConfig{},
+		nebula.PoolConfig{
+			MaxConnPoolSize: 1,
+		},
 		newNebulaLogger(s.logger.With(logger.Field{
 			Key:   "address",
 			Value: fmt.Sprintf("%s:%d", hostAddress.Host, hostAddress.Port),

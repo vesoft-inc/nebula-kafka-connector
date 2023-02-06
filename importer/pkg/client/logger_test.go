@@ -1,8 +1,9 @@
 package client
 
 import (
-	. "github.com/onsi/ginkgo/v2"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
+
+	. "github.com/onsi/ginkgo/v2"
 )
 
 var _ = Describe("nebulaLogger", func() {

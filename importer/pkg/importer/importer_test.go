@@ -2,87 +2,54 @@ package importer
 
 import (
 	stderrors "errors"
+	"sync"
 	"time"
+
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
+	specbase "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec/base"
 
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
 )
 
 var _ = Describe("Importer", func() {
 	var (
-		ctrl          *gomock.Controller
-		mockClient    *client.MockClient
-		mockResultSet *client.MockResultSet
-		node          *spec.Node
-		edge          *spec.Edge
-		graph         *spec.Graph
+		ctrl           *gomock.Controller
+		mockClientPool *client.MockPool
+		mockResultSet  *client.MockResultSet
+		mockBuilder    *specbase.MockStatementBuilder
 	)
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
-		mockClient = client.NewMockClient(ctrl)
+		mockClientPool = client.NewMockPool(ctrl)
 		mockResultSet = client.NewMockResultSet(ctrl)
-		node = spec.NewNode(
-			"nodeName",
-			spec.WithNodeID(&spec.NodeID{
-				Name: "id",
-				Type: spec.ValueTypeInt,
-			}),
-		)
-		edge = spec.NewEdge(
-			"edgeName",
-			spec.WithEdgeSrc(&spec.EdgeNodeRef{
-				Name: "nodeName",
-				ID: &spec.NodeID{
-					Name:  "id",
-					Type:  spec.ValueTypeInt,
-					Index: 0,
-				},
-			}),
-			spec.WithEdgeDst(&spec.EdgeNodeRef{
-				Name: "nodeName",
-				ID: &spec.NodeID{
-					Name:  "id",
-					Type:  spec.ValueTypeInt,
-					Index: 1,
-				},
-			}),
-		)
-		graph = spec.NewGraph(
-			"graphName",
-			spec.WithGraphNodes(node),
-			spec.WithGraphEdges(edge),
-		)
-		graph.Complete()
-		Expect(graph.Validate()).NotTo(HaveOccurred())
+		mockBuilder = specbase.NewMockStatementBuilder(ctrl)
 	})
 
 	AfterEach(func() {
 		ctrl.Finish()
 	})
 
-	Describe("NewNodeImporter", func() {
-		var nodeImporter Importer
-		BeforeEach(func() {
-			nodeImporter = NewNodeImporter(graph, node, mockClient)
-			Expect(nodeImporter.Node()).NotTo(BeNil())
-			Expect(nodeImporter.Edge()).To(BeNil())
-			Expect(nodeImporter.Graph()).NotTo(BeNil())
-		})
+	Describe("New", func() {
+		It("build failed", func() {
+			mockBuilder.EXPECT().Build(gomock.Any()).Return("", errors.ErrNoRecord)
 
-		It("empty records", func() {
-			resp, err := nodeImporter.Import(spec.Record{})
+			i := New(mockBuilder, mockClientPool)
+			resp, err := i.Import(spec.Record{})
 			Expect(err).To(HaveOccurred())
 			Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 			Expect(resp).To(BeNil())
 		})
 
 		It("execute failed", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).Return(nil, stderrors.New("test error"))
-			resp, err := nodeImporter.Import(spec.Record{"id"})
+			mockBuilder.EXPECT().Build(gomock.Any()).Return("statement", nil)
+			mockClientPool.EXPECT().Execute(gomock.Any()).Return(nil, stderrors.New("test error"))
+
+			i := New(mockBuilder, mockClientPool)
+			resp, err := i.Import(spec.Record{"id"})
 			Expect(err).To(HaveOccurred())
 			importError, ok := errors.AsImportError(err)
 			Expect(ok).To(BeTrue())
@@ -91,10 +58,13 @@ var _ = Describe("Importer", func() {
 		})
 
 		It("execute IsSucceed false", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
+			mockBuilder.EXPECT().Build(gomock.Any()).Return("statement", nil)
+			mockClientPool.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
 			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
 			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("status failed"))
-			resp, err := nodeImporter.Import(spec.Record{"id"})
+
+			i := New(mockBuilder, mockClientPool)
+			resp, err := i.Import(spec.Record{"id"})
 			Expect(err).To(HaveOccurred())
 			importError, ok := errors.AsImportError(err)
 			Expect(ok).To(BeTrue())
@@ -103,61 +73,59 @@ var _ = Describe("Importer", func() {
 			Expect(resp).To(BeNil())
 		})
 
-		It("execute success", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
+		It("execute successfully", func() {
+			mockBuilder.EXPECT().Build(gomock.Any()).Times(1).Return("statement", nil)
+			mockClientPool.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
 			mockResultSet.EXPECT().IsSucceed().Times(1).Return(true)
 			mockResultSet.EXPECT().GetLatency().Times(1).Return(int64(10))
-			resp, err := nodeImporter.Import(spec.Record{"id"})
+
+			i := New(mockBuilder, mockClientPool)
+			i.Wait()
+			defer i.Done()
+			resp, err := i.Import(spec.Record{"id"})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resp).NotTo(BeNil())
 			Expect(resp.Latency).To(Equal(time.Microsecond * time.Duration(10)))
 		})
-	})
 
-	Describe("NewEdgeImporter", func() {
-		var nodeImporter Importer
-		BeforeEach(func() {
-			nodeImporter = NewEdgeImporter(graph, edge, mockClient)
-			Expect(nodeImporter.Node()).To(BeNil())
-			Expect(nodeImporter.Edge()).NotTo(BeNil())
-			Expect(nodeImporter.Graph()).NotTo(BeNil())
-		})
+		It("execute successfully with Wait and Done", func() {
+			mockBuilder.EXPECT().Build(gomock.Any()).Times(2).Return("statement", nil)
+			mockClientPool.EXPECT().Execute(gomock.Any()).Times(2).Return(mockResultSet, nil)
+			mockResultSet.EXPECT().IsSucceed().Times(2).Return(true)
+			mockResultSet.EXPECT().GetLatency().Times(2).Return(int64(10))
 
-		It("empty records", func() {
-			resp, err := nodeImporter.Import(spec.Record{})
-			Expect(err).To(HaveOccurred())
-			Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
-			Expect(resp).To(BeNil())
-		})
+			var (
+				wg              sync.WaitGroup
+				isImporter1Done = false
+			)
+			wg.Add(1)
+			// i2 need to wait i1
+			i1 := New(mockBuilder, mockClientPool,
+				WithDoneFunc(func() {
+					time.Sleep(time.Millisecond)
+					isImporter1Done = true
+					wg.Done()
+				}),
+			)
+			i2 := New(mockBuilder, mockClientPool,
+				WithWaitFunc(func() {
+					wg.Wait()
+					Expect(isImporter1Done).To(BeTrue())
+				}),
+			)
 
-		It("execute failed", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).Return(nil, stderrors.New("test error"))
-			resp, err := nodeImporter.Import(spec.Record{"id1", "id2"})
-			Expect(err).To(HaveOccurred())
-			importError, ok := errors.AsImportError(err)
-			Expect(ok).To(BeTrue())
-			Expect(importError.Statement()).NotTo(BeEmpty())
-			Expect(resp).To(BeNil())
-		})
+			go func() {
+				i1.Wait()
+				defer i1.Done()
+				resp, err := i1.Import(spec.Record{"id"})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(resp).NotTo(BeNil())
+				Expect(resp.Latency).To(Equal(time.Microsecond * time.Duration(10)))
+			}()
 
-		It("execute IsSucceed false", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
-			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("status failed"))
-			resp, err := nodeImporter.Import(spec.Record{"id1", "id2"})
-			Expect(err).To(HaveOccurred())
-			importError, ok := errors.AsImportError(err)
-			Expect(ok).To(BeTrue())
-			Expect(importError.Messages).To(ContainElement(ContainSubstring("status failed")))
-			Expect(importError.Statement()).NotTo(BeEmpty())
-			Expect(resp).To(BeNil())
-		})
-
-		It("execute success", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(1).Return(true)
-			mockResultSet.EXPECT().GetLatency().Times(1).Return(int64(10))
-			resp, err := nodeImporter.Import(spec.Record{"id1", "id2"})
+			i2.Wait()
+			defer i2.Done()
+			resp, err := i2.Import(spec.Record{"id"})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resp).NotTo(BeNil())
 			Expect(resp.Latency).To(Equal(time.Microsecond * time.Duration(10)))

@@ -5,13 +5,13 @@ package client
 import (
 	stderrors "errors"
 
-	"github.com/agiledragon/gomonkey/v2"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
+
+	"github.com/agiledragon/gomonkey/v2"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("SessionV5", func() {

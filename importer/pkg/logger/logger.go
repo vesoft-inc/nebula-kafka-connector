@@ -26,5 +26,9 @@ func New(opts ...Option) (Logger, error) {
 		opt(&o)
 	}
 
-	return newZapLogger(&o)
+	l, err := newZapLogger(&o)
+	if err != nil {
+		return nil, err
+	}
+	return l, nil
 }

@@ -6,27 +6,30 @@ import (
 	stderrors "errors"
 	"os"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/cmd/common"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/manager"
+
 	"github.com/agiledragon/gomonkey/v2"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/cmd/common"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/manager"
 )
 
 var _ = Describe("ImporterCommand", func() {
 	var (
-		patches       *gomonkey.Patches
-		ctrl          *gomock.Controller
-		mockClient    *client.MockClient
-		mockResultSet *client.MockResultSet
-		mockManager   *manager.MockManager
+		patches        *gomonkey.Patches
+		ctrl           *gomock.Controller
+		mockClient     *client.MockClient
+		mockClientPool *client.MockPool
+		mockResultSet  *client.MockResultSet
+		mockManager    *manager.MockManager
 	)
 	BeforeEach(func() {
 		patches = gomonkey.NewPatches()
 		ctrl = gomock.NewController(GinkgoT())
 		mockClient = client.NewMockClient(ctrl)
+		mockClientPool = client.NewMockPool(ctrl)
 		mockResultSet = client.NewMockResultSet(ctrl)
 		mockManager = manager.NewMockManager(ctrl)
 	})
@@ -35,8 +38,13 @@ var _ = Describe("ImporterCommand", func() {
 		patches.Reset()
 	})
 
-	It("success", func() {
-		patches.ApplyFuncReturn(client.New, mockClient)
+	It("successfully", func() {
+		patches.ApplyFuncReturn(client.NewPool, mockClientPool)
+
+		mockClientPool.EXPECT().GetClient(gomock.Any()).AnyTimes().Return(mockClient, nil)
+		mockClientPool.EXPECT().Open().AnyTimes().Return(nil)
+		mockClientPool.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
+		mockClientPool.EXPECT().Close().AnyTimes().Return(nil)
 
 		mockClient.EXPECT().Open().AnyTimes().Return(nil)
 		mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
@@ -45,10 +53,15 @@ var _ = Describe("ImporterCommand", func() {
 		mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
 		mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
 
-		command := NewDefaultImporterCommand()
-		command.SetArgs([]string{"-c", "testdata/nebula-importer.yaml"})
-		err := command.Execute()
-		Expect(err).NotTo(HaveOccurred())
+		for _, f := range []string{
+			"testdata/nebula-importer.v3.yaml",
+			"testdata/nebula-importer.v5.yaml",
+		} {
+			command := NewDefaultImporterCommand()
+			command.SetArgs([]string{"-c", f})
+			err := command.Execute()
+			Expect(err).NotTo(HaveOccurred())
+		}
 	})
 
 	It("parse file failed", func() {
@@ -58,59 +71,16 @@ var _ = Describe("ImporterCommand", func() {
 		Expect(err).To(HaveOccurred())
 	})
 
-	It("build logger failed", func() {
+	It("optimize failed", func() {
 		command := NewDefaultImporterCommand()
-		command.SetArgs([]string{"-c", "testdata/build-logger-failed.yaml"})
+		command.SetArgs([]string{"-c", "testdata/optimize-failed.yaml"})
 		err := command.Execute()
 		Expect(err).To(HaveOccurred())
 	})
 
-	It("build client failed", func() {
-		o := NewImporterOptions(common.IOStreams{
-			In:     os.Stdin,
-			Out:    os.Stdout,
-			ErrOut: os.Stderr,
-		})
-		o.useNopLogger = true
-		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/nebula-importer.yaml"})
-		err := command.Execute()
-		Expect(err).To(HaveOccurred())
-	})
-
-	It("build graph failed", func() {
-		patches.ApplyFuncReturn(client.New, mockClient)
-
-		mockClient.EXPECT().Open().AnyTimes().Return(nil)
-		mockClient.EXPECT().Close().AnyTimes().Return(nil)
-
-		o := NewImporterOptions(common.IOStreams{
-			In:     os.Stdin,
-			Out:    os.Stdout,
-			ErrOut: os.Stderr,
-		})
-		o.useNopLogger = true
-		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/build-graph-failed.yaml"})
-		err := command.Execute()
-		Expect(err).To(HaveOccurred())
-	})
-
-	It("build manager failed", func() {
-		patches.ApplyFuncReturn(client.New, mockClient)
-
-		mockClient.EXPECT().Open().AnyTimes().Return(nil)
-		mockClient.EXPECT().Close().AnyTimes().Return(nil)
-
-		o := NewImporterOptions(common.IOStreams{
-			In:     os.Stdin,
-			Out:    os.Stdout,
-			ErrOut: os.Stderr,
-		})
-		o.useNopLogger = true
-		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/build-manager-failed.yaml"})
-
+	It("build failed", func() {
+		command := NewDefaultImporterCommand()
+		command.SetArgs([]string{"-c", "testdata/build-failed.yaml"})
 		err := command.Execute()
 		Expect(err).To(HaveOccurred())
 	})
@@ -126,7 +96,7 @@ var _ = Describe("ImporterCommand", func() {
 
 		o.useNopLogger = true
 		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/build-manager-failed.yaml"})
+		command.SetArgs([]string{"-c", "testdata/nebula-importer.v5.yaml"})
 
 		err := command.Execute()
 		Expect(err).To(HaveOccurred())
@@ -134,14 +104,8 @@ var _ = Describe("ImporterCommand", func() {
 	})
 
 	It("manager start failed", func() {
-		patches.ApplyFuncReturn(client.New, mockClient)
-
-		mockClient.EXPECT().Open().AnyTimes().Return(nil)
-		mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
-		mockClient.EXPECT().Close().AnyTimes().Return(nil)
-
 		patches.ApplyFuncReturn(manager.NewWithOpts, mockManager)
-		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).Times(2).Return(nil)
+		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 		mockManager.EXPECT().Start().Return(stderrors.New("test error"))
 
 		o := NewImporterOptions(common.IOStreams{
@@ -152,7 +116,7 @@ var _ = Describe("ImporterCommand", func() {
 
 		o.useNopLogger = true
 		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/nebula-importer.yaml"})
+		command.SetArgs([]string{"-c", "testdata/nebula-importer.v5.yaml"})
 
 		err := command.Execute()
 		Expect(err).To(HaveOccurred())
@@ -160,14 +124,8 @@ var _ = Describe("ImporterCommand", func() {
 	})
 
 	It("manager wait failed", func() {
-		patches.ApplyFuncReturn(client.New, mockClient)
-
-		mockClient.EXPECT().Open().AnyTimes().Return(nil)
-		mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
-		mockClient.EXPECT().Close().AnyTimes().Return(nil)
-
 		patches.ApplyFuncReturn(manager.NewWithOpts, mockManager)
-		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).Times(2).Return(nil)
+		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 		mockManager.EXPECT().Start().Return(nil)
 		mockManager.EXPECT().Wait().Return(stderrors.New("test error"))
 
@@ -179,7 +137,7 @@ var _ = Describe("ImporterCommand", func() {
 
 		o.useNopLogger = true
 		command := NewImporterCommand(o)
-		command.SetArgs([]string{"-c", "testdata/nebula-importer.yaml"})
+		command.SetArgs([]string{"-c", "testdata/nebula-importer.v5.yaml"})
 
 		err := command.Execute()
 		Expect(err).To(HaveOccurred())

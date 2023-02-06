@@ -1,3 +1,4 @@
+//go:generate mockgen -source=importer.go -destination importer_mock.go -package importer Importer
 package importer
 
 import (
@@ -10,10 +11,9 @@ import (
 
 type (
 	Importer interface {
-		Graph() *spec.Graph
-		Node() *spec.Node
-		Edge() *spec.Edge
+		Wait()
 		Import(records ...spec.Record) (*ImportResp, error)
+		Done()
 	}
 
 	ImportResp struct {
@@ -26,55 +26,74 @@ type (
 		Err  error
 	}
 
+	Option func(*defaultImporter)
+
 	defaultImporter struct {
-		graph  *spec.Graph
-		node   *spec.Node
-		edge   *spec.Edge
-		client client.Client
+		builder spec.StatementBuilder
+		pool    client.Pool
+		fnWait  func()
+		fnDone  func()
 	}
 )
 
-func NewNodeImporter(graph *spec.Graph, node *spec.Node, c client.Client) Importer {
-	return &defaultImporter{
-		graph:  graph,
-		node:   node,
-		client: c,
+func New(builder spec.StatementBuilder, pool client.Pool, opts ...Option) Importer {
+	options := make([]Option, 0, 2+len(opts))
+	options = append(options, WithStatementBuilder(builder), WithClientPool(pool))
+	options = append(options, opts...)
+	return NewWithOpts(options...)
+}
+
+func NewWithOpts(opts ...Option) Importer {
+	i := &defaultImporter{}
+	for _, opt := range opts {
+		opt(i)
+	}
+	return i
+}
+
+func WithStatementBuilder(builder spec.StatementBuilder) Option {
+	return func(i *defaultImporter) {
+		i.builder = builder
 	}
 }
 
-func NewEdgeImporter(graph *spec.Graph, edge *spec.Edge, c client.Client) Importer {
-	return &defaultImporter{
-		graph:  graph,
-		edge:   edge,
-		client: c,
+func WithClientPool(p client.Pool) Option {
+	return func(i *defaultImporter) {
+		i.pool = p
 	}
 }
 
-func (i *defaultImporter) Graph() *spec.Graph {
-	return i.graph
+func WithWaitFunc(fn func()) Option {
+	return func(i *defaultImporter) {
+		i.fnWait = fn
+	}
 }
 
-func (i *defaultImporter) Node() *spec.Node {
-	return i.node
+func WithDoneFunc(fn func()) Option {
+	return func(i *defaultImporter) {
+		i.fnDone = fn
+	}
 }
 
-func (i *defaultImporter) Edge() *spec.Edge {
-	return i.edge
+func (i *defaultImporter) Wait() {
+	if i.fnWait != nil {
+		i.fnWait()
+	}
 }
 
 func (i *defaultImporter) Import(records ...spec.Record) (*ImportResp, error) {
-	statement, err := i.importStatement(records...)
+	statement, err := i.builder.Build(records...)
 	if err != nil {
 		return nil, err
 	}
 	start := time.Now()
-	rs, err := i.client.Execute(statement)
+	rs, err := i.pool.Execute(statement)
 	if err != nil {
-		return nil, errors.NewImportError(err).SetGraphName(i.graph.Name).SetStatement(statement)
+		return nil, errors.NewImportError(err).
+			SetStatement(statement)
 	}
 	if !rs.IsSucceed() {
 		return nil, errors.NewImportError(err, "the execute error is %s ", rs.GetError()).
-			SetGraphName(i.graph.Name).
 			SetStatement(statement)
 	}
 
@@ -84,19 +103,8 @@ func (i *defaultImporter) Import(records ...spec.Record) (*ImportResp, error) {
 	}, nil
 }
 
-func (i *defaultImporter) importStatement(records ...spec.Record) (string, error) {
-	var statement string
-	var err error
-	if i.node != nil {
-		statement, err = i.graph.NodeStatement(i.node, records...)
-		if err != nil {
-			return "", err
-		}
-	} else {
-		statement, err = i.graph.EdgeStatement(i.edge, records...)
-		if err != nil {
-			return "", err
-		}
+func (i *defaultImporter) Done() {
+	if i.fnDone != nil {
+		i.fnDone()
 	}
-	return statement, nil
 }

@@ -3,261 +3,138 @@ package config
 import (
 	"bytes"
 	stderrors "errors"
-	"os"
-	"path/filepath"
 
-	"github.com/golang/mock/gomock"
+	configbase "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/base"
+	configv3 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/v3"
+	configv5 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/v5"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
+	"gopkg.in/yaml.v3"
 )
 
-var _ = Describe("Config", func() {
-	var (
-		tmpdir string
-	)
-
-	BeforeEach(func() {
-		var err error
-		tmpdir, err = os.MkdirTemp("", "test")
-		Expect(err).NotTo(HaveOccurred())
-	})
-	AfterEach(func() {
-		err := os.RemoveAll(tmpdir)
-		Expect(err).NotTo(HaveOccurred())
-	})
-
-	It("parse", func() {
-		c1 := &Config{}
-		err := c1.FromFile("testdata/nebula-importer.yaml")
+var _ = Describe("FromFile", func() {
+	It("successfully v3", func() {
+		c1, err := FromFile("testdata/nebula-importer.v3.yaml")
 		Expect(err).NotTo(HaveOccurred())
 
-		content, err := c1.Yaml()
+		cv3, ok := c1.(*configv3.Config)
+		Expect(ok).To(BeTrue())
+		Expect(cv3).NotTo(BeNil())
+
+		Expect(cv3.Client.Version).To(Equal(configbase.ClientVersion3))
+		Expect(cv3.Log.Files).To(HaveLen(1))
+		Expect(cv3.Manager.GraphName).To(Equal("graphName"))
+		Expect(cv3.Manager.GraphName).To(Equal("graphName"))
+		Expect(cv3.Sources).To(HaveLen(3))
+		Expect(cv3.Sources[0].Nodes).To(HaveLen(2))
+		Expect(cv3.Sources[0].Edges).To(HaveLen(0))
+		Expect(cv3.Sources[1].Nodes).To(HaveLen(0))
+		Expect(cv3.Sources[1].Edges).To(HaveLen(2))
+		Expect(cv3.Sources[2].Nodes).To(HaveLen(2))
+		Expect(cv3.Sources[2].Edges).To(HaveLen(2))
+
+		content, err := yaml.Marshal(c1)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(content).NotTo(BeEmpty())
 
-		c2 := &Config{}
-		Expect(err).NotTo(HaveOccurred())
-		err = c2.FromBytes(content)
+		c2, err := FromBytes(content)
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c2).To(Equal(c1))
 
-		c3 := &Config{}
-		err = c3.FromReader(bytes.NewReader(content))
+		c3, err := FromReader(bytes.NewReader(content))
 		Expect(err).NotTo(HaveOccurred())
 		Expect(c3).To(Equal(c1))
 	})
 
-	It("parse file not exists", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/not-exists.yaml")
+	It("successfully v5", func() {
+		c1, err := FromFile("testdata/nebula-importer.v5.yaml")
+		Expect(err).NotTo(HaveOccurred())
+
+		cv5, ok := c1.(*configv5.Config)
+		Expect(ok).To(BeTrue())
+		Expect(cv5).NotTo(BeNil())
+
+		Expect(cv5.Client.Version).To(Equal(configbase.ClientVersion5))
+		Expect(cv5.Log.Files).To(HaveLen(1))
+		Expect(cv5.Manager.GraphName).To(Equal("graphName"))
+		Expect(cv5.Manager.GraphName).To(Equal("graphName"))
+		Expect(cv5.Sources).To(HaveLen(3))
+		Expect(cv5.Sources[0].Nodes).To(HaveLen(2))
+		Expect(cv5.Sources[0].Edges).To(HaveLen(0))
+		Expect(cv5.Sources[1].Nodes).To(HaveLen(0))
+		Expect(cv5.Sources[1].Edges).To(HaveLen(2))
+		Expect(cv5.Sources[2].Nodes).To(HaveLen(2))
+		Expect(cv5.Sources[2].Edges).To(HaveLen(2))
+
+		content, err := yaml.Marshal(c1)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(content).NotTo(BeEmpty())
+
+		c2, err := FromBytes(content)
+		Expect(err).NotTo(HaveOccurred())
+		Expect(c2).To(Equal(c1))
+
+		c3, err := FromReader(bytes.NewReader(content))
+		Expect(err).NotTo(HaveOccurred())
+		Expect(c3).To(Equal(c1))
+	})
+
+	It("configuration file not exists", func() {
+		c, err := FromFile("testdata/not-exists.yaml")
 		Expect(err).To(HaveOccurred())
+		Expect(c).To(BeNil())
 	})
+})
 
-	It("BuildLogger failed", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		c.Log.Files = []string{filepath.Join(tmpdir, "not-exists", "1.log")}
-		l, err := c.BuildLogger()
+var _ = Describe("FromBytes", func() {
+	It("Unmarshal failed 1", func() {
+		c, err := FromBytes([]byte(`
+client:
+  version: : v
+  
+`))
 		Expect(err).To(HaveOccurred())
-		Expect(l).To(BeNil())
+		Expect(c).To(BeNil())
 	})
 
-	It("BuildLogger success", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		c.Log.Files = []string{filepath.Join(tmpdir, "1.log")}
-		l, err := c.BuildLogger()
-		Expect(err).NotTo(HaveOccurred())
-		defer l.Close()
-		Expect(l).NotTo(BeNil())
-	})
-
-	It("BuildClient failed", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		cli, err := c.BuildClient()
+	It("Unmarshal failed 2", func() {
+		c, err := FromBytes([]byte(`
+client:
+  version: v3
+log:
+  files: ""
+`))
 		Expect(err).To(HaveOccurred())
-		Expect(cli).To(BeNil())
+		Expect(c).To(BeNil())
 	})
 
-	It("BuildLogger success", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		ctrl := gomock.NewController(GinkgoT())
-		defer ctrl.Finish()
-		mockSession := client.NewMockSession(ctrl)
-		mockSession.EXPECT().Open().AnyTimes().Return(nil)
-		mockSession.EXPECT().Close().AnyTimes().Return(nil)
-		cli, err := c.BuildClient(client.WithNewSessionFunc(func(_ client.HostAddress) client.Session {
-			return mockSession
-		}))
-		Expect(err).NotTo(HaveOccurred())
-		Expect(cli).NotTo(BeNil())
-		cli.Close()
-	})
-
-	It("BuildGraph failed", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		c.Sources[0].GraphName = ""
-		graph, err := c.Sources[0].BuildGraph()
+	It("unsupported client version failed", func() {
+		c, err := FromBytes([]byte(`
+client:
+  version: v
+`))
 		Expect(err).To(HaveOccurred())
-		Expect(graph).To(BeNil())
+		Expect(stderrors.Is(err, errors.ErrUnsupportedClientVersion)).To(BeTrue())
+		Expect(c).To(BeNil())
 	})
+})
 
-	It("BuildGraph success", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
+type testErrorReader struct {
+	err error
+}
 
-		graph, err := c.Sources[0].BuildGraph()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(graph).NotTo(BeNil())
-	})
+func (r testErrorReader) Read([]byte) (n int, err error) {
+	return 0, r.err
+}
 
-	It("BuildManager success", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		m, err := c.BuildManager(nil, c.Sources)
-		Expect(err).NotTo(HaveOccurred())
-		Expect(m).NotTo(BeNil())
-	})
-
-	It("BuildManager failed at node file", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		c.Sources[0].SourceConfig.Path = filepath.Join(tmpdir, "not-exists.yaml")
-
-		m, err := c.BuildManager(nil, c.Sources)
+var _ = Describe("FromBytes", func() {
+	It("Unmarshal failed 1", func() {
+		c, err := FromReader(testErrorReader{
+			err: stderrors.New("read failed"),
+		})
 		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
-		Expect(m).To(BeNil())
-	})
-
-	It("BuildManager failed at edge file", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		c.Sources[1].SourceConfig.Path = filepath.Join(tmpdir, "not-exists.yaml")
-
-		m, err := c.BuildManager(nil, c.Sources)
-		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
-		Expect(m).To(BeNil())
-	})
-
-	It("BuildManager failed at edge file", func() {
-		c := &Config{}
-		err := c.FromFile("testdata/nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-		Expect(c.Log.Files).NotTo(BeEmpty())
-
-		c.Sources[0].GraphName = ""
-
-		m, err := c.BuildManager(nil, c.Sources)
-		Expect(err).To(HaveOccurred())
-		Expect(m).To(BeNil())
-	})
-
-	It("Optimize source config", func() {
-		testPath1 := "testdata/node1.csv"
-		testPath2, _ := filepath.Abs("testdata/edge1.csv")
-		testPath3 := "testdata/wildcards/*.csv"
-
-		c := &Config{
-			Sources: []Source{
-				{
-					SourceConfig: source.Config{
-						Path: testPath1,
-					},
-				},
-				{
-					SourceConfig: source.Config{
-						Path: testPath2,
-					},
-				},
-				{
-					SourceConfig: source.Config{
-						Path: testPath3,
-					},
-				},
-			},
-		}
-
-		err := c.Optimize("nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-
-		absTestPath1, _ := filepath.Abs(testPath1)
-		absTestWildcardPath1, _ := filepath.Abs("testdata/wildcards/node1.csv")
-		absTestWildcardPath2, _ := filepath.Abs("testdata/wildcards/node2.csv")
-
-		Expect(len(c.Sources)).To(Equal(4))
-		Expect(c.Sources[0].SourceConfig.Path).To(Equal(absTestPath1))
-		Expect(c.Sources[1].SourceConfig.Path).To(Equal(testPath2))
-		Expect(c.Sources[2].SourceConfig.Path).To(Equal(absTestWildcardPath1))
-		Expect(c.Sources[3].SourceConfig.Path).To(Equal(absTestWildcardPath2))
-	})
-
-	It("Optimize source wildcard failed", func() {
-		c := &Config{
-			Sources: []Source{
-				{
-					SourceConfig: source.Config{
-						Path: "notfound.csv",
-					},
-				},
-			},
-		}
-
-		err := c.Optimize("nebula-importer.yaml")
-		Expect(err).To(HaveOccurred())
-	})
-
-	It("Optimize log file", func() {
-		testPath1 := "logs/nebula-importer.log"
-		testPath2, _ := filepath.Abs("logs/abspath.log")
-
-		c := &Config{
-			Log: &Log{
-				Files: []string{
-					testPath1,
-					testPath2,
-				},
-			},
-		}
-
-		err := c.Optimize("nebula-importer.yaml")
-		Expect(err).NotTo(HaveOccurred())
-
-		absTestPath1, _ := filepath.Abs(testPath1)
-
-		Expect(c.Log.Files[0]).To(Equal(absTestPath1))
-		Expect(c.Log.Files[1]).To(Equal(testPath2))
+		Expect(c).To(BeNil())
 	})
 })

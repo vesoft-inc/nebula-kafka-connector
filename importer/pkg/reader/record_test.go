@@ -1,9 +1,10 @@
 package reader
 
 import (
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 )
 
 var _ = Describe("RecordReader", func() {

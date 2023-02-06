@@ -8,24 +8,26 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/agiledragon/gomonkey/v2"
-	"github.com/golang/mock/gomock"
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
+
+	"github.com/agiledragon/gomonkey/v2"
+	"github.com/golang/mock/gomock"
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Manager", func() {
 	It("New", func() {
-		m := New(client.New())
+		m := New(client.NewPool())
 		m1, ok := m.(*defaultManager)
 		Expect(ok).To(BeTrue())
 		Expect(m1).NotTo(BeNil())
-		Expect(m1.c).NotTo(BeNil())
+		Expect(m1.pool).NotTo(BeNil())
+		Expect(m1.getClientOptions).To(BeNil())
 		Expect(m1.batch).To(Equal(0))
 		Expect(m1.readerConcurrency).To(Equal(DefaultReaderConcurrency))
 		Expect(m1.readerPool).NotTo(BeNil())
@@ -39,7 +41,9 @@ var _ = Describe("Manager", func() {
 
 	It("NewWithOpts", func() {
 		m := NewWithOpts(
-			WithClient(client.New()),
+			WithGraphName("graphName"),
+			WithClientPool(client.NewPool()),
+			WithGetClientOptions(client.WithClientInitFunc(nil)),
 			WithBatch(1),
 			WithReaderConcurrency(DefaultReaderConcurrency+1),
 			WithImporterConcurrency(DefaultImporterConcurrency+1),
@@ -57,7 +61,8 @@ var _ = Describe("Manager", func() {
 		m1, ok := m.(*defaultManager)
 		Expect(ok).To(BeTrue())
 		Expect(m1).NotTo(BeNil())
-		Expect(m1.c).NotTo(BeNil())
+		Expect(m1.pool).NotTo(BeNil())
+		Expect(m1.getClientOptions).NotTo(BeNil())
 		Expect(m1.batch).To(Equal(1))
 		Expect(m1.readerConcurrency).To(Equal(DefaultReaderConcurrency + 1))
 		Expect(m1.readerPool).NotTo(BeNil())
@@ -80,12 +85,13 @@ var _ = Describe("Manager", func() {
 			ctrl            *gomock.Controller
 			mockSource      *source.MockSource
 			mockClient      *client.MockClient
+			mockClientPool  *client.MockPool
 			mockResultSet   *client.MockResultSet
+			mockImporter    *importer.MockImporter
 			m               Manager
 			batch           = 10
 			nodeRecordCount = 1005
 			edgeRecordCount = 2006
-			graph           *spec.Graph
 		)
 		BeforeEach(func() {
 			var err error
@@ -99,84 +105,14 @@ var _ = Describe("Manager", func() {
 			ctrl = gomock.NewController(GinkgoT())
 			mockSource = source.NewMockSource(ctrl)
 			mockClient = client.NewMockClient(ctrl)
+			mockClientPool = client.NewMockPool(ctrl)
 			mockResultSet = client.NewMockResultSet(ctrl)
-			graph = spec.NewGraph(
-				"graphName",
-				spec.WithGraphNodes(
-					spec.NewNode(
-						"node1",
-						spec.WithNodeID(&spec.NodeID{
-							Name:  "id",
-							Type:  spec.ValueTypeInt,
-							Index: 0,
-						}),
-						spec.WithNodeProps(&spec.Prop{
-							Name:  "nodeProp1",
-							Type:  spec.ValueTypeString,
-							Index: 1,
-						}),
-					),
-					spec.NewNode(
-						"node2",
-						spec.WithNodeID(&spec.NodeID{
-							Name:  "id",
-							Type:  spec.ValueTypeInt,
-							Index: 0,
-						}),
-					),
-				),
-				spec.WithGraphEdges(
-					spec.NewEdge(
-						"edge1",
-						spec.WithEdgeSrc(&spec.EdgeNodeRef{
-							Name: "node1",
-							ID: &spec.NodeID{
-								Name:  "id",
-								Type:  spec.ValueTypeInt,
-								Index: 0,
-							},
-						}),
-						spec.WithEdgeDst(&spec.EdgeNodeRef{
-							Name: "node1",
-							ID: &spec.NodeID{
-								Name:  "id",
-								Type:  spec.ValueTypeInt,
-								Index: 1,
-							},
-						}),
-						spec.WithEdgeProps(&spec.Prop{
-							Name:  "edgeProp1",
-							Type:  spec.ValueTypeString,
-							Index: 2,
-						}),
-					),
-					spec.NewEdge(
-						"edge1",
-						spec.WithEdgeSrc(&spec.EdgeNodeRef{
-							Name: "node2",
-							ID: &spec.NodeID{
-								Name:  "id",
-								Type:  spec.ValueTypeInt,
-								Index: 0,
-							},
-						}),
-						spec.WithEdgeDst(&spec.EdgeNodeRef{
-							Name: "node2",
-							ID: &spec.NodeID{
-								Name:  "id",
-								Type:  spec.ValueTypeInt,
-								Index: 1,
-							},
-						}),
-					),
-				),
-			)
-			graph.Complete()
-			Expect(graph.Validate()).NotTo(HaveOccurred())
+			mockImporter = importer.NewMockImporter(ctrl)
+
 			l, err := logger.New(logger.WithLevel(logger.WarnLevel))
 			Expect(err).NotTo(HaveOccurred())
 			m = New(
-				mockClient,
+				mockClientPool,
 				WithBatch(batch),
 				WithLogger(l),
 				WithBeforeHooks(&Hook{
@@ -217,45 +153,51 @@ var _ = Describe("Manager", func() {
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("concurrency success", func() {
+		It("concurrency successfully", func() {
 			var err error
 			loopCountPreFile := 10
 			for i := 0; i < loopCountPreFile; i++ {
-				node1, _ := graph.GetNodeByName("node1")
-				node2, _ := graph.GetNodeByName("node1")
 				err = m.Import(
 					&source.Config{Path: nodeFile},
-					importer.NewNodeImporter(graph, node1, mockClient),
-					importer.NewNodeImporter(graph, node2, mockClient),
+					mockImporter,
+					mockImporter,
 				)
 				Expect(err).NotTo(HaveOccurred())
-				edge1, _ := graph.GetEdgeByName("edge1")
-				edge2, _ := graph.GetEdgeByName("edge1")
 				err = m.Import(
 					&source.Config{Path: edgeFile},
-					importer.NewEdgeImporter(graph, edge1, mockClient),
-					importer.NewEdgeImporter(graph, edge2, mockClient),
+					mockImporter,
+					mockImporter,
 				)
 				Expect(err).NotTo(HaveOccurred())
 			}
 
-			mockClient.EXPECT().Open().AnyTimes().Return(nil)
-			mockClient.EXPECT().Close().AnyTimes().Return(nil)
+			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
+
+				mockClientPool.EXPECT().Open().Return(nil),
+
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
+			)
 
 			var executeFailedTimes int64 = 10
 			var currExecuteTimes int64
-			fnExecute := func(statement string) (client.ResultSet, error) {
+			fnImport := func(records ...spec.Record) (*importer.ImportResp, error) {
 				curr := atomic.AddInt64(&currExecuteTimes, 1)
 				if curr%100 == 0 && curr/100 <= executeFailedTimes {
-					return nil, stderrors.New("execute failed")
+					return nil, stderrors.New("import failed")
 				}
-				return mockResultSet, nil
+				return &importer.ImportResp{
+					Latency: 2 * time.Microsecond,
+					ReqTime: 3 * time.Microsecond,
+				}, nil
 			}
-
-			mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().DoAndReturn(fnExecute)
-
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
+			mockImporter.EXPECT().Wait().Times(loopCountPreFile * 4)
+			mockImporter.EXPECT().Import(gomock.Any()).AnyTimes().DoAndReturn(fnImport)
+			mockImporter.EXPECT().Done().Times(loopCountPreFile * 4)
 
 			err = m.Start()
 			Expect(err).NotTo(HaveOccurred())
@@ -282,6 +224,7 @@ var _ = Describe("Manager", func() {
 			Expect(s.FailedRequest).To(Equal(executeFailedTimes))
 			Expect(s.TotalRequest).To(Equal(int64(totalBatches * 2)))
 			Expect(s.TotalLatency).To(Equal(2 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
+			Expect(s.TotalReqTime).To(Equal(3 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
 			Expect(s.FailedProcessed).NotTo(Equal(int64(0)))
 			Expect(s.FailedRecords).To(BeNumerically("<=", executeFailedTimes*int64(batch)))
 			Expect(s.TotalProcessed).To(Equal(int64((nodeRecordCount + edgeRecordCount) * loopCountPreFile * 2)))
@@ -293,17 +236,41 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("Import file not exists", func() {
-			node1, _ := graph.GetNodeByName("node1")
 			err := m.Import(
 				&source.Config{Path: nodeFile + "not-exists"},
-				importer.NewNodeImporter(graph, node1, mockClient),
+				mockImporter,
 			)
 			Expect(err).To(HaveOccurred())
 			Expect(stderrors.Is(err, os.ErrNotExist)).To(BeTrue())
 		})
 
+		It("get client failed", func() {
+			mockClientPool.EXPECT().GetClient(gomock.Any()).Return(nil, stderrors.New("test error"))
+
+			err := m.Start()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("test error"))
+		})
+
 		It("exec before failed", func() {
-			mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(nil, stderrors.New("test error"))
+			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(nil, stderrors.New("test error")),
+			)
+
+			err := m.Start()
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("test error"))
+		})
+
+		It("client pool open failed", func() {
+			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
+
+				mockClientPool.EXPECT().Open().Return(stderrors.New("test error")),
+			)
 
 			err := m.Start()
 			Expect(err).To(HaveOccurred())
@@ -311,11 +278,16 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("exec after failed", func() {
-			mockClient.EXPECT().Execute("before statement").AnyTimes().Return(mockResultSet, nil)
-			mockClient.EXPECT().Execute("after statement").AnyTimes().Return(nil, stderrors.New("test error"))
+			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
 
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
+				mockClientPool.EXPECT().Open().Return(nil),
+
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(nil, stderrors.New("test error")),
+			)
 
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
@@ -326,32 +298,45 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("stop successfully", func() {
-			mockClient.EXPECT().Execute("before statement").AnyTimes().Return(mockResultSet, nil)
-			mockClient.EXPECT().Execute("after statement").AnyTimes().Return(mockResultSet, nil)
+			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
 
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
+				mockClientPool.EXPECT().Open().Return(nil),
+
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
+			)
 
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
+
+			time.Sleep(100 * time.Millisecond)
 
 			err = m.Stop()
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("stop failed", func() {
-			mockClient.EXPECT().Execute("before statement").AnyTimes().Return(mockResultSet, nil)
-			mockClient.EXPECT().Execute("after statement").AnyTimes().Return(mockResultSet, nil)
-
 			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
 				mockResultSet.EXPECT().IsSucceed().Return(true),
+
+				mockClientPool.EXPECT().Open().Return(nil),
+
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
 				mockResultSet.EXPECT().IsSucceed().Return(false),
+				mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("exec failed")),
 			)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
-			mockResultSet.EXPECT().GetError().AnyTimes().Return(stderrors.New("exec failed"))
 
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
+
+			time.Sleep(100 * time.Millisecond)
 
 			err = m.Stop()
 			Expect(err).To(HaveOccurred())
@@ -363,31 +348,40 @@ var _ = Describe("Manager", func() {
 				return mockSource, nil
 			})
 
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
+			gomock.InOrder(
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
+
+				mockClientPool.EXPECT().Open().Return(nil),
+
+				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
+				mockResultSet.EXPECT().IsSucceed().Return(true),
+			)
 
 			mockSource.EXPECT().Size().Return(int64(1024*1024*1024*1024), nil)
-			mockSource.EXPECT().Config().Return(nil)
+			mockSource.EXPECT().Config().Return(&source.Config{})
 			mockSource.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(func(p []byte) (int, error) {
 				n := copy(p, "1,np1\n")
 				return n, nil
 			})
 			mockSource.EXPECT().Close().Return(nil)
 
-			mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
-			mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
+			mockImporter.EXPECT().Wait().Times(1)
+			mockImporter.EXPECT().Import(gomock.Any()).AnyTimes().Return(&importer.ImportResp{}, nil)
+			mockImporter.EXPECT().Done().Times(1)
 
-			node1, _ := graph.GetNodeByName("node1")
 			err := m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewNodeImporter(graph, node1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
 
 			err = m.Start()
 			Expect(err).NotTo(HaveOccurred())
+
+			time.Sleep(100 * time.Millisecond)
 
 			err = m.Stop()
 			Expect(err).NotTo(HaveOccurred())
@@ -396,6 +390,9 @@ var _ = Describe("Manager", func() {
 		It("no hooks", func() {
 			m.(*defaultManager).hooks.Before = nil
 			m.(*defaultManager).hooks.After = nil
+
+			mockClientPool.EXPECT().Open().Return(nil)
+
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
 
@@ -412,6 +409,9 @@ var _ = Describe("Manager", func() {
 				{Statements: []string{""}},
 				nil,
 			}
+
+			mockClientPool.EXPECT().Open().Return(nil)
+
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
 
@@ -423,6 +423,9 @@ var _ = Describe("Manager", func() {
 			m.(*defaultManager).hooks.Before = nil
 			m.(*defaultManager).hooks.After = nil
 			m.(*defaultManager).statsInterval = 0
+
+			mockClientPool.EXPECT().Open().Return(nil)
+
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
 
@@ -433,39 +436,38 @@ var _ = Describe("Manager", func() {
 		It("stats interval print", func() {
 			m.(*defaultManager).hooks.Before = nil
 			m.(*defaultManager).hooks.After = nil
-			m.(*defaultManager).statsInterval = time.Microsecond / 2
+			m.(*defaultManager).statsInterval = 10 * time.Microsecond
+
+			mockClientPool.EXPECT().Open().Return(nil)
+
 			err := m.Start()
 			Expect(err).NotTo(HaveOccurred())
 
-			time.Sleep(time.Microsecond)
+			time.Sleep(100 * time.Millisecond)
 
 			err = m.Wait()
 			Expect(err).NotTo(HaveOccurred())
 		})
 
 		It("submit reader failed", func() {
+			m.(*defaultManager).hooks.Before = nil
+			m.(*defaultManager).hooks.After = nil
 			m.(*defaultManager).readerPool.Release()
 
-			node1, _ := graph.GetNodeByName("node1")
+			mockClientPool.EXPECT().Open().Return(nil)
+
+			mockImporter.EXPECT().Done().Times(2)
+
 			err := m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewNodeImporter(graph, node1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
-			edge1, _ := graph.GetEdgeByName("edge1")
 			err = m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewEdgeImporter(graph, edge1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
-
-			mockClient.EXPECT().Open().AnyTimes().Return(nil)
-			mockClient.EXPECT().Close().AnyTimes().Return(nil)
-
-			mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
-
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
 
 			err = m.Start()
 			Expect(err).NotTo(HaveOccurred())
@@ -475,28 +477,25 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("submit importer failed", func() {
+			m.(*defaultManager).hooks.Before = nil
+			m.(*defaultManager).hooks.After = nil
 			m.(*defaultManager).importerPool.Release()
 
-			node1, _ := graph.GetNodeByName("node1")
+			mockClientPool.EXPECT().Open().Return(nil)
+
+			mockImporter.EXPECT().Wait().Times(2)
+			mockImporter.EXPECT().Done().Times(2)
+
 			err := m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewNodeImporter(graph, node1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
-			edge1, _ := graph.GetEdgeByName("edge1")
 			err = m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewEdgeImporter(graph, edge1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
-
-			mockClient.EXPECT().Open().AnyTimes().Return(nil)
-			mockClient.EXPECT().Close().AnyTimes().Return(nil)
-
-			mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
-
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
 
 			err = m.Start()
 			Expect(err).NotTo(HaveOccurred())
@@ -506,6 +505,8 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("get size failed", func() {
+			m.(*defaultManager).hooks.Before = nil
+			m.(*defaultManager).hooks.After = nil
 			patches.ApplyGlobalVar(&sourceOpen, func(_ *source.Config) (source.Source, error) {
 				return mockSource, nil
 			})
@@ -513,48 +514,44 @@ var _ = Describe("Manager", func() {
 			mockSource.EXPECT().Size().Times(2).Return(int64(0), stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
 
-			node1, _ := graph.GetNodeByName("node1")
 			err := m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewNodeImporter(graph, node1, mockClient),
-			)
-			Expect(err).To(HaveOccurred())
-			Expect(err.Error()).To(ContainSubstring("test error"))
-			edge1, _ := graph.GetEdgeByName("edge1")
-			err = m.Import(
-				&source.Config{Path: nodeFile},
-				importer.NewEdgeImporter(graph, edge1, mockClient),
+				mockImporter,
 			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("test error"))
 
+			err = m.Import(
+				&source.Config{Path: nodeFile}, mockImporter,
+			)
+			Expect(err).To(HaveOccurred())
+			Expect(err.Error()).To(ContainSubstring("test error"))
 		})
 
 		It("read failed", func() {
+			m.(*defaultManager).hooks.Before = nil
+			m.(*defaultManager).hooks.After = nil
 			patches.ApplyGlobalVar(&sourceOpen, func(_ *source.Config) (source.Source, error) {
 				return mockSource, nil
 			})
 
-			mockClient.EXPECT().Execute("before statement").AnyTimes().Return(mockResultSet, nil)
-			mockClient.EXPECT().Execute("after statement").AnyTimes().Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-			mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
-
+			mockClientPool.EXPECT().Open().Return(nil)
 			mockSource.EXPECT().Size().Times(2).Return(int64(1024), nil)
 			mockSource.EXPECT().Config().Times(2).Return(nil)
 			mockSource.EXPECT().Read(gomock.Any()).Times(2).Return(0, stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
 
-			node1, _ := graph.GetNodeByName("node1")
+			mockImporter.EXPECT().Wait().Times(2)
+			mockImporter.EXPECT().Done().Times(2)
+
 			err := m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewNodeImporter(graph, node1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
-			edge1, _ := graph.GetEdgeByName("edge1")
 			err = m.Import(
 				&source.Config{Path: nodeFile},
-				importer.NewEdgeImporter(graph, edge1, mockClient),
+				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
 

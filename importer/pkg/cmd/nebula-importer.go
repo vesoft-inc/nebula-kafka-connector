@@ -3,13 +3,14 @@ package cmd
 import (
 	"os"
 
-	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/cmd/common"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/manager"
+
+	"github.com/spf13/cobra"
 )
 
 type (
@@ -17,10 +18,10 @@ type (
 		common.IOStreams
 		Arguments    []string
 		ConfigFile   string
-		cfg          config.Config
+		cfg          config.Configurator
 		logger       logger.Logger
 		useNopLogger bool // for test
-		cli          client.Client
+		pool         client.Pool
 		mgr          manager.Manager
 	}
 )
@@ -57,8 +58,8 @@ func NewImporterCommand(o *ImporterOptions) *cobra.Command {
 					fields := logger.MapToFields(e.Fields())
 					l.SkipCaller(1).WithError(e.Cause()).Error("failed to execute", fields...)
 				}
-				if o.cli != nil {
-					_ = o.cli.Close()
+				if o.pool != nil {
+					_ = o.pool.Close()
 				}
 				if o.logger != nil {
 					_ = o.logger.Sync()
@@ -85,32 +86,24 @@ func (*ImporterOptions) Complete(_ *cobra.Command, _ []string) error {
 }
 
 func (o *ImporterOptions) Validate() error {
-	if err := o.cfg.FromFile(o.ConfigFile); err != nil {
-		return err
-	}
-	cfg := o.cfg
-
-	if err := cfg.Optimize(o.ConfigFile); err != nil {
-		return err
-	}
-
-	l, err := cfg.BuildLogger()
+	cfg, err := config.FromFile(o.ConfigFile)
 	if err != nil {
 		return err
 	}
-	o.logger = l
 
-	cli, err := cfg.BuildClient(client.WithLogger(l))
-	if err != nil {
+	if err = cfg.Optimize(o.ConfigFile); err != nil {
 		return err
 	}
-	o.cli = cli
 
-	mgr, err := cfg.BuildManager(cli, cfg.Sources, manager.WithLogger(l))
-	if err != nil {
+	if err = cfg.Build(); err != nil {
 		return err
 	}
-	o.mgr = mgr
+
+	o.cfg = cfg
+	o.logger = cfg.GetLogger()
+	o.pool = cfg.GetClientPool()
+	o.mgr = cfg.GetManager()
+
 	return nil
 }
 

@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/panjf2000/ants"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
@@ -16,6 +15,8 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/stats"
+
+	"github.com/panjf2000/ants"
 )
 
 const (
@@ -36,7 +37,9 @@ type (
 	}
 
 	defaultManager struct {
-		c                   client.Client
+		graphName           string
+		pool                client.Pool
+		getClientOptions    []client.Option
 		stats               *stats.ConcurrencyStats
 		batch               int
 		readerConcurrency   int
@@ -49,16 +52,15 @@ type (
 		hooks               *Hooks
 		chStart             chan struct{}
 		done                chan struct{}
-		wgNodes             *WaitGroupMap
 		logger              logger.Logger
 	}
 
 	Option func(*defaultManager)
 )
 
-func New(c client.Client, opts ...Option) Manager {
-	options := make([]Option, 0, 2+len(opts))
-	options = append(options, WithClient(c))
+func New(pool client.Pool, opts ...Option) Manager {
+	options := make([]Option, 0, 1+len(opts))
+	options = append(options, WithClientPool(pool))
 	options = append(options, opts...)
 	return NewWithOpts(options...)
 }
@@ -72,7 +74,6 @@ func NewWithOpts(opts ...Option) Manager {
 		hooks:               &Hooks{},
 		chStart:             make(chan struct{}),
 		done:                make(chan struct{}),
-		wgNodes:             NewWaitGroups(),
 	}
 
 	for _, opt := range opts {
@@ -89,9 +90,21 @@ func NewWithOpts(opts ...Option) Manager {
 	return m
 }
 
-func WithClient(c client.Client) Option {
+func WithGraphName(graphName string) Option {
 	return func(m *defaultManager) {
-		m.c = c
+		m.graphName = graphName
+	}
+}
+
+func WithClientPool(pool client.Pool) Option {
+	return func(m *defaultManager) {
+		m.pool = pool
+	}
+}
+
+func WithGetClientOptions(opts ...client.Option) Option {
+	return func(m *defaultManager) {
+		m.getClientOptions = opts
 	}
 }
 
@@ -148,11 +161,10 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 	if len(importers) == 0 {
 		return nil
 	}
-	graph := importers[0].Graph()
 	log := m.logger.With(logger.Field{Key: "source", Value: sourceConfig.String()})
 	s, err := sourceOpen(sourceConfig)
 	if err != nil {
-		err = errors.NewImportError(err, "manager: open import source failed").SetGraphName(graph.Name)
+		err = errors.NewImportError(err, "manager: open import source failed").SetGraphName(m.graphName)
 		m.logError(err, "")
 		return err
 	}
@@ -160,7 +172,7 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 	nBytes, err := s.Size()
 	if err != nil {
 		_ = s.Close()
-		err = errors.NewImportError(err, "manager: get size of import source failed").SetGraphName(graph.Name)
+		err = errors.NewImportError(err, "manager: get size of import source failed").SetGraphName(m.graphName)
 		m.logError(err, "")
 		return err
 	}
@@ -169,26 +181,11 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 	rr := reader.NewRecordReader(s)
 	bcr := reader.NewBatchRecordReader(rr, m.batch)
 
-	var (
-		nodeNames     []string
-		edgeNodeNames []string
-	)
-	for _, i := range importers {
-		node := i.Node()
-		if node != nil {
-			nodeNames = append(nodeNames, node.Name)
-		}
-		edge := i.Edge()
-		if edge != nil {
-			edgeNodeNames = append(edgeNodeNames, edge.Src.Name, edge.Dst.Name)
-		}
-	}
-
-	m.wgNodes.AddMany(1, nodeNames...)
-
 	m.readerWaitGroup.Add(1)
 	cleanup := func() {
-		m.wgNodes.DoneMany(nodeNames...)
+		for _, i := range importers {
+			i.Done()
+		}
 		m.readerWaitGroup.Done()
 		s.Close()
 	}
@@ -198,9 +195,9 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 			<-m.chStart
 			defer cleanup()
 
-			// wait the dependent Node to be done
-			m.wgNodes.WaitMany(edgeNodeNames...)
-
+			for _, i := range importers {
+				i.Wait()
+			}
 			_ = m.loopImport(bcr, importers...)
 		})
 		if err != nil {
@@ -221,6 +218,11 @@ func (m *defaultManager) Start() error {
 	}
 
 	m.stats.Init()
+
+	if err := m.pool.Open(); err != nil {
+		m.logger.WithError(err).Error("manager: start client pool failed")
+		return err
+	}
 
 	close(m.chStart)
 
@@ -284,6 +286,8 @@ func (m *defaultManager) execHooks(name HookName) error {
 	if len(hooks) == 0 {
 		return nil
 	}
+
+	var cli client.Client
 	for _, hook := range hooks {
 		if hook == nil {
 			continue
@@ -292,7 +296,15 @@ func (m *defaultManager) execHooks(name HookName) error {
 			if statement == "" {
 				continue
 			}
-			rs, err := m.c.Execute(statement)
+
+			if cli == nil {
+				var err error
+				cli, err = m.pool.GetClient(m.getClientOptions...)
+				if err != nil {
+					return err
+				}
+			}
+			rs, err := cli.Execute(statement)
 			if err != nil {
 				err = errors.NewImportError(err,
 					"manager: exec failed in %s hook", name,
@@ -317,7 +329,6 @@ func (m *defaultManager) execHooks(name HookName) error {
 }
 
 func (m *defaultManager) loopImport(r reader.BatchRecordReader, importers ...importer.Importer) error {
-	graph := importers[0].Graph()
 	for {
 		select {
 		case <-m.done:
@@ -326,7 +337,7 @@ func (m *defaultManager) loopImport(r reader.BatchRecordReader, importers ...imp
 			nBytes, records, err := r.ReadBatch()
 			if err != nil {
 				if err != io.EOF {
-					err = errors.NewImportError(err, "manager: read batch failed").SetGraphName(graph.Name)
+					err = errors.NewImportError(err, "manager: read batch failed").SetGraphName(m.graphName)
 					m.logError(err, "")
 					return err
 				}

@@ -4,11 +4,11 @@ import (
 	stderrors "errors"
 	"io"
 
-	. "github.com/onsi/ginkgo/v2"
-	. "github.com/onsi/gomega"
-
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
+
+	. "github.com/onsi/ginkgo/v2"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("csvReader", func() {

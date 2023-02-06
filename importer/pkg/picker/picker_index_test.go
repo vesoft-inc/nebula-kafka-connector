@@ -3,9 +3,10 @@ package picker
 import (
 	stderrors "errors"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 )
 
 var _ = Describe("IndexPicker", func() {

@@ -39,7 +39,8 @@ var _ = Describe("string", func() {
 	DescribeTable("IsDigit",
 		func(b byte, isDigit bool) {
 			Expect(IsDigit(b)).To(Equal(isDigit))
-		}, EntryDescription("IsDigit('%[1]c') == %[2]t"),
+		},
+		EntryDescription("IsDigit('%[1]c') == %[2]t"),
 		Entry(nil, byte(0), false),
 		Entry(nil, byte('0')-1, false),
 		Entry(nil, byte('0'), true),
@@ -61,7 +62,8 @@ var _ = Describe("string", func() {
 	DescribeTable("IsDigit",
 		func(b byte, isDigit bool) {
 			Expect(IsHexDigit(b)).To(Equal(isDigit))
-		}, EntryDescription("IsDigit('%[1]c') == %[2]t"),
+		},
+		EntryDescription("IsDigit('%[1]c') == %[2]t"),
 		Entry(nil, byte(0), false),
 		Entry(nil, byte('0')-1, false),
 		Entry(nil, byte('0'), true),
@@ -92,5 +94,26 @@ var _ = Describe("string", func() {
 		Entry(nil, byte('F'), true),
 		Entry(nil, byte('F')+1, false),
 		Entry(nil, byte('\n'), false),
+	)
+
+	DescribeTable("ConvertIdentifier",
+		func(s, expect string) {
+			Expect(ConvertIdentifier(s)).To(Equal(expect))
+		},
+		EntryDescription("ConvertIdentifier(%[1]s) = %[2]s"),
+		Entry(nil, "", "``"),
+		Entry(nil, "`", "`\\``"),
+		Entry(nil, "``", "`\\`\\``"),
+		Entry(nil, "a`b`c", "`a\\`b\\`c`"),
+		Entry(nil, "`a`b`c", "`\\`a\\`b\\`c`"),
+		Entry(nil, "a`b`c`", "`a\\`b\\`c\\``"),
+		Entry(nil, "`a`b`c`", "`\\`a\\`b\\`c\\``"),
+		Entry(nil, "\\", "`\\\\`"),
+		Entry(nil, "\\\\", "`\\\\\\\\`"),
+		Entry(nil, "a\\b\\c", "`a\\\\b\\\\c`"),
+		Entry(nil, "\\a\\b\\c", "`\\\\a\\\\b\\\\c`"),
+		Entry(nil, "a\\b\\c\\", "`a\\\\b\\\\c\\\\`"),
+		Entry(nil, "\\a\\b\\c\\", "`\\\\a\\\\b\\\\c\\\\`"),
+		Entry(nil, "`\\a\\`b`\\c\\`", "`\\`\\\\a\\\\\\`b\\`\\\\c\\\\\\``"),
 	)
 })

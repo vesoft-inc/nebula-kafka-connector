@@ -2,4 +2,4 @@
 
 !.gitignore
 !README.md
-!nebula-importer.yaml
+!sf.*.yaml

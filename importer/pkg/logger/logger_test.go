@@ -15,4 +15,9 @@ var _ = Describe("Level", func() {
 		err = l.Close()
 		Expect(err).NotTo(HaveOccurred())
 	})
+	It("New failed", func() {
+		l, err := New(WithConsole(false), WithFiles("not-exists/1.log"))
+		Expect(err).To(HaveOccurred())
+		Expect(l).To(BeNil())
+	})
 })

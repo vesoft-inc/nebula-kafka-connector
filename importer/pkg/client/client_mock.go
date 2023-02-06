@@ -62,21 +62,6 @@ func (mr *MockClientMockRecorder) Execute(statement interface{}) *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Execute", reflect.TypeOf((*MockClient)(nil).Execute), statement)
 }
 
-// ExecuteChan mocks base method.
-func (m *MockClient) ExecuteChan(statement string) (<-chan ExecuteResult, bool) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ExecuteChan", statement)
-	ret0, _ := ret[0].(<-chan ExecuteResult)
-	ret1, _ := ret[1].(bool)
-	return ret0, ret1
-}
-
-// ExecuteChan indicates an expected call of ExecuteChan.
-func (mr *MockClientMockRecorder) ExecuteChan(statement interface{}) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ExecuteChan", reflect.TypeOf((*MockClient)(nil).ExecuteChan), statement)
-}
-
 // Open mocks base method.
 func (m *MockClient) Open() error {
 	m.ctrl.T.Helper()
