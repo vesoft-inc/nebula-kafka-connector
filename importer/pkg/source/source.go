@@ -19,6 +19,19 @@ type (
 )
 
 func Open(c *Config) (Source, error) {
-	// TODO: support hdfs, s3, blob and so on
-	return openLocalFile(c)
+	// TODO: support blob and so on
+	switch {
+	case c.S3 != nil:
+		return openS3File(c)
+	case c.OSS != nil:
+		return openOSSFile(c)
+	case c.FTP != nil:
+		return openFTPFile(c)
+	case c.SFTP != nil:
+		return openSFTPFile(c)
+	case c.HDFS != nil:
+		return openHDFSFile(c)
+	default:
+		return openLocalFile(c)
+	}
 }
