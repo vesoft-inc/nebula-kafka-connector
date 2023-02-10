@@ -158,6 +158,7 @@ var _ = Describe("Graph", func() {
 				WithGraphNodes(
 					NewNode(
 						"node1",
+						WithNodeGraphName("graphName"),
 						WithNodeID(&NodeID{
 							Name:  "id",
 							Type:  ValueTypeInt,
@@ -206,6 +207,7 @@ var _ = Describe("Graph", func() {
 				WithGraphEdges(
 					NewEdge(
 						"edge1",
+						WithEdgeGraphName("graphName"),
 						WithEdgeSrc(&EdgeNodeRef{
 							Name: "node1",
 							ID: &NodeID{

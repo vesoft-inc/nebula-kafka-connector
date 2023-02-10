@@ -2,8 +2,9 @@ package source
 
 import (
 	"fmt"
-	"github.com/colinmarc/hdfs/v2"
 	"io"
+
+	"github.com/colinmarc/hdfs/v2"
 )
 
 var _ Source = (*hdfsSource)(nil)

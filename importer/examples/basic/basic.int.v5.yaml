@@ -9,9 +9,9 @@ client:
 
 manager:
   graphName: basic_int
-  batch: 100
-  readerConcurrency: 10
-  importerConcurrency: 10
+  batch: 128
+  readerConcurrency: 50
+  importerConcurrency: 512
   statsInterval: 10s
   hooks:
     before:

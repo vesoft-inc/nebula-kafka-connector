@@ -187,6 +187,53 @@ var _ = Describe("Edge", func() {
 			err := edge.Validate()
 			Expect(err).NotTo(HaveOccurred())
 		})
+
+		It("WithRank failed", func() {
+			edge := NewEdge(
+				"name",
+				WithEdgeSrc(&EdgeNodeRef{
+					Name: "srcNodeName",
+					ID: &NodeID{
+						Name: "id",
+						Type: ValueTypeInt,
+					},
+				}),
+				WithEdgeDst(&EdgeNodeRef{
+					Name: "dstNodeName",
+					ID: &NodeID{
+						Name: "id",
+						Type: ValueTypeString,
+					},
+				}),
+				WithRank(&Rank{Index: -1}),
+			)
+			err := edge.Validate()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, errors.ErrInvalidIndex)).To(BeTrue())
+		})
+
+		It("WithRank successfully", func() {
+			edge := NewEdge(
+				"name",
+				WithEdgeSrc(&EdgeNodeRef{
+					Name: "srcNodeName",
+					ID: &NodeID{
+						Name: "id",
+						Type: ValueTypeInt,
+					},
+				}),
+				WithEdgeDst(&EdgeNodeRef{
+					Name: "dstNodeName",
+					ID: &NodeID{
+						Name: "id",
+						Type: ValueTypeString,
+					},
+				}),
+				WithRank(&Rank{Index: 0}),
+			)
+			err := edge.Validate()
+			Expect(err).NotTo(HaveOccurred())
+		})
 	})
 
 	Describe(".InsertStatement", func() {
@@ -218,26 +265,26 @@ var _ = Describe("Edge", func() {
 			})
 
 			It("one record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT EDGE `name`() VALUES 1->\"id1\":()"))
 			})
 
 			It("two record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT EDGE `name`() VALUES 1->\"id1\":(), 2->\"id2\":()"))
 			})
 
 			It("src failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{})
+				statement, err := edge.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("dst failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1"})
+				statement, err := edge.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -275,33 +322,33 @@ var _ = Describe("Edge", func() {
 			})
 
 			It("one record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`) VALUES 1->\"id1\":(\"str1\")"))
 			})
 
 			It("two record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`) VALUES 1->\"id1\":(\"str1\"), 2->\"id2\":(\"str2\")"))
 			})
 
 			It("src failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{})
+				statement, err := edge.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("dst failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1"})
+				statement, err := edge.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("props failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -340,33 +387,106 @@ var _ = Describe("Edge", func() {
 			})
 
 			It("one record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\":(\"str1\", 1.1)"))
 			})
 
 			It("two record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\":(\"str1\", 1.1), 2->\"id2\":(\"str2\", 2.2)"))
 			})
 
 			It("src failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{})
+				statement, err := edge.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("dst failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1"})
+				statement, err := edge.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("props failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
+				Expect(err).To(HaveOccurred())
+				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
+				Expect(statement).To(BeEmpty())
+			})
+		})
+
+		When("WithRank", func() {
+			var edge *Edge
+			BeforeEach(func() {
+				edge = NewEdge(
+					"name",
+					WithEdgeSrc(&EdgeNodeRef{
+						Name: "srcNodeName",
+						ID: &NodeID{
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
+						},
+					}),
+					WithEdgeDst(&EdgeNodeRef{
+						Name: "dstNodeName",
+						ID: &NodeID{
+							Name:  "id",
+							Type:  ValueTypeString,
+							Index: 1,
+						},
+					}),
+					WithRank(&Rank{Index: 2}),
+					WithEdgeProps(
+						&Prop{Name: "prop1", Type: ValueTypeString, Index: 4},
+						&Prop{Name: "prop2", Type: ValueTypeDouble, Index: 3},
+					),
+				)
+				edge.Complete()
+				err := edge.Validate()
+				Expect(err).NotTo(HaveOccurred())
+			})
+
+			It("one record", func() {
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1", "1.1", "str1"})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\"@1:(\"str1\", 1.1)"))
+			})
+
+			It("two record", func() {
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1", "1.1", "str1"}, []string{"2", "id2", "2", "2.2", "str2"})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\"@1:(\"str1\", 1.1), 2->\"id2\"@2:(\"str2\", 2.2)"))
+			})
+
+			It("src failed", func() {
+				statement, err := edge.InsertStatement([]string{})
+				Expect(err).To(HaveOccurred())
+				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
+				Expect(statement).To(BeEmpty())
+			})
+
+			It("dst failed", func() {
+				statement, err := edge.InsertStatement([]string{"1"})
+				Expect(err).To(HaveOccurred())
+				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
+				Expect(statement).To(BeEmpty())
+			})
+
+			It("rank failed", func() {
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
+				Expect(err).To(HaveOccurred())
+				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
+				Expect(statement).To(BeEmpty())
+			})
+
+			It("props failed", func() {
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())

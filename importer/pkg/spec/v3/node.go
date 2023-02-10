@@ -4,17 +4,9 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/bytebufferpool"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/utils"
-)
-
-const (
-	// INSERT VERTEX <tag_type> ( <prop_name_list> VALUES
-	//		<vid> : ( <prop_value_list> )
-	//		[, <vid> : ( <prop_value_list> ), ...]
-	fmtNodeInsertStatement  = "INSERT VERTEX %s VALUES %s"
-	fmtNodeNamePropNameList = "%s(%s)"
-	fmtNodeValue            = "%s:(%s)"
 )
 
 type (
@@ -24,7 +16,7 @@ type (
 		ID    *NodeID `yaml:"id"`
 		Props Props   `yaml:"props,omitempty"`
 
-		namePropNameList string // name(prop_name, ..., prop_name)
+		insertPrefix string // // "INSERT EDGE name(prop_name, ..., prop_name) VALUES "
 	}
 
 	Nodes []*Node
@@ -36,10 +28,7 @@ func NewNode(name string, opts ...NodeOption) *Node {
 	n := &Node{
 		Name: name,
 	}
-
-	for _, opt := range opts {
-		opt(n)
-	}
+	n.Options(opts...)
 
 	return n
 }
@@ -56,6 +45,13 @@ func WithNodeProps(props ...*Prop) NodeOption {
 	}
 }
 
+func (n *Node) Options(opts ...NodeOption) *Node {
+	for _, opt := range opts {
+		opt(n)
+	}
+	return n
+}
+
 func (n *Node) Complete() {
 	if n.ID != nil {
 		n.ID.Complete()
@@ -63,8 +59,8 @@ func (n *Node) Complete() {
 	}
 	n.Props.Complete()
 
-	n.namePropNameList = fmt.Sprintf(
-		fmtNodeNamePropNameList,
+	n.insertPrefix = fmt.Sprintf(
+		"INSERT VERTEX %s(%s) VALUES ",
 		utils.ConvertIdentifier(n.Name),
 		strings.Join(n.Props.NameList(), ", "),
 	)
@@ -90,20 +86,33 @@ func (n *Node) Validate() error {
 	return nil
 }
 
-func (n *Node) InsertStatement(graphName string, records ...Record) (string, error) {
-	values := make([]string, 0, len(records))
-	for _, record := range records {
+func (n *Node) InsertStatement(records ...Record) (string, error) {
+	buff := bytebufferpool.Get()
+	defer bytebufferpool.Put(buff)
+
+	buff.SetString(n.insertPrefix)
+
+	for i, record := range records {
 		idValue, err := n.ID.Value(record)
 		if err != nil {
-			return "", n.importError(err).SetGraphName(graphName)
+			return "", n.importError(err)
 		}
-		propValueList, err := n.Props.ValueList(record)
+		propsValueList, err := n.Props.ValueList(record)
 		if err != nil {
-			return "", n.importError(err).SetGraphName(graphName)
+			return "", n.importError(err)
 		}
-		values = append(values, fmt.Sprintf(fmtNodeValue, idValue, strings.Join(propValueList, ", ")))
+
+		if i > 0 {
+			_, _ = buff.WriteString(", ")
+		}
+
+		// "%s:(%s)"
+		_, _ = buff.WriteString(idValue)
+		_, _ = buff.WriteString(":(")
+		_, _ = buff.WriteStringSlice(propsValueList, ", ")
+		_, _ = buff.WriteString(")")
 	}
-	return fmt.Sprintf(fmtNodeInsertStatement, n.namePropNameList, strings.Join(values, ", ")), nil
+	return buff.String(), nil
 }
 
 func (n *Node) importError(err error, formatWithArgs ...any) *errors.ImportError { //nolint:unparam

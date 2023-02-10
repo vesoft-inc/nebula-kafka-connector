@@ -34,7 +34,6 @@ var _ = Describe("Config", func() {
 		testcases := []struct {
 			name     string
 			c        Config
-			fn       func(*Config)
 			buildErr error
 			cases    []recordCase
 		}{
@@ -286,6 +285,20 @@ var _ = Describe("Config", func() {
 					Type:    "unsupported",
 				},
 				buildErr: errors.ErrUnsupportedValueType,
+			},
+			{
+				name: "index invalid",
+				c: Config{
+					Indices: []int{-1},
+				},
+				buildErr: errors.ErrInvalidIndex,
+			},
+			{
+				name: "concat items index invalid",
+				c: Config{
+					ConcatItems: []any{"str", -1},
+				},
+				buildErr: errors.ErrInvalidIndex,
 			},
 			{
 				name: "index Nullable",
@@ -735,22 +748,14 @@ var _ = Describe("Config", func() {
 			{
 				name: "concat items",
 				c: Config{
-					Indices: []int{1, 2, 3},
-					Type:    "string",
+					ConcatItems: []any{"c1", 4, 5, "c2", 6, "c3"},
+					Indices:     []int{1, 2, 3},
+					Type:        "string",
 					Nullable: func(s string) bool {
 						return s == ""
 					},
 					NullValue:    "NULL",
 					DefaultValue: &strStr1,
-				},
-				fn: func(c *Config) {
-					c.ConcatItems.
-						AddConstant("c1").
-						AddIndex(4).
-						AddIndex(5).
-						AddConstant("c2").
-						AddIndex(6).
-						AddConstant("c3")
 				},
 				cases: []recordCase{
 					{
@@ -774,23 +779,15 @@ var _ = Describe("Config", func() {
 			{
 				name: "concat items Function",
 				c: Config{
-					Indices: []int{1, 2, 3},
-					Type:    "string",
+					ConcatItems: []any{"c1", 4, 5, "c2", 6, "c3"},
+					Indices:     []int{1, 2, 3},
+					Type:        "string",
 					Nullable: func(s string) bool {
 						return s == ""
 					},
 					NullValue:    "NULL",
 					DefaultValue: &strStr1,
 					Function:     &strFunHash,
-				},
-				fn: func(c *Config) {
-					c.ConcatItems.
-						AddConstant("c1").
-						AddIndex(4).
-						AddIndex(5).
-						AddConstant("c2").
-						AddIndex(6).
-						AddConstant("c3")
 				},
 				cases: []recordCase{
 					{
@@ -848,9 +845,6 @@ var _ = Describe("Config", func() {
 		for _, tc := range testcases {
 			tc := tc
 			It(tc.name, func() {
-				if tc.fn != nil {
-					tc.fn(&tc.c)
-				}
 				p, err := tc.c.Build()
 				if tc.buildErr != nil {
 					Expect(err).To(HaveOccurred())

@@ -17,7 +17,7 @@ import (
 //	Function
 //	CheckOnPost
 type Config struct {
-	ConcatItems  ConcatItems        // Concat index column, constant, or mixed.
+	ConcatItems  []any              // Concat index column, constant, or mixed. int for index column, string for constant.
 	Indices      []int              // Set index columns, the first non-null.
 	Nullable     func(string) bool  // Determine whether it is null. Optional.
 	NullValue    string             // Set null value when it is null. Optional.
@@ -27,13 +27,23 @@ type Config struct {
 	CheckOnPost  func(*Value) error // Set the value check function on post.
 }
 
+//revive:disable-next-line:cyclomatic
 func (c *Config) Build() (Picker, error) {
+	for i := range c.Indices {
+		if c.Indices[i] < 0 {
+			return nil, errors.ErrInvalidIndex
+		}
+	}
 	var retPicker Picker
 	var nullHandled bool
 	switch {
-	case c.ConcatItems.Len() > 0:
+	case len(c.ConcatItems) > 0:
+		concatItems := ConcatItems{}
+		if err := concatItems.Add(c.ConcatItems...); err != nil {
+			return nil, err
+		}
 		retPicker = ConcatPicker{
-			items: c.ConcatItems,
+			items: concatItems,
 		}
 	case len(c.Indices) == 1:
 		retPicker = IndexPicker(c.Indices[0])
@@ -100,6 +110,7 @@ func (c *Config) Build() (Picker, error) {
 	if c.CheckOnPost != nil {
 		converters = append(converters, ConverterFunc(func(v *Value) (*Value, error) {
 			if err := c.CheckOnPost(v); err != nil {
+				v.Release()
 				return nil, err
 			}
 			return v, nil

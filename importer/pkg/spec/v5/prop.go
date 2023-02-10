@@ -51,6 +51,7 @@ func (p *Prop) Value(record Record) (string, error) {
 	if err != nil {
 		return "", p.importError(err, "record index %d pick failed", p.Index).SetRecord(record)
 	}
+	defer val.Release()
 	return fmt.Sprintf(fmtPropValue, p.Name, val.Val), nil
 }
 

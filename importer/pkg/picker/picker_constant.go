@@ -6,9 +6,6 @@ var (
 
 type ConstantPicker string
 
-func (cp ConstantPicker) Pick(_ []string) (v *Value, err error) {
-	return &Value{
-		Val:    string(cp),
-		IsNull: false,
-	}, nil
+func (cp ConstantPicker) Pick(_ []string) (*Value, error) {
+	return NewValue(string(cp)), nil
 }

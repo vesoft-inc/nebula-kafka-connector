@@ -20,8 +20,8 @@ import (
 )
 
 const (
-	DefaultReaderConcurrency   = 10
-	DefaultImporterConcurrency = 10
+	DefaultReaderConcurrency   = 50
+	DefaultImporterConcurrency = 512
 	DefaultStatsInterval       = time.Second * 10
 )
 

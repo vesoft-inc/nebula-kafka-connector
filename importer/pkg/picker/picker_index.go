@@ -15,8 +15,5 @@ func (ip IndexPicker) Pick(record []string) (*Value, error) {
 	if index < 0 || index >= len(record) {
 		return nil, errors.ErrNoRecord
 	}
-	return &Value{
-		Val:    record[index],
-		IsNull: false,
-	}, nil
+	return NewValue(record[index]), nil
 }

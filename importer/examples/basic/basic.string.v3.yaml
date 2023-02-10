@@ -10,9 +10,9 @@ client:
 
 manager:
   spaceName: basic_string
-  batch: 100
-  readerConcurrency: 10
-  importerConcurrency: 10
+  batch: 128
+  readerConcurrency: 50
+  importerConcurrency: 512
   statsInterval: 10s
   hooks:
     before:
@@ -29,7 +29,7 @@ sources:
   - path: ./person.csv
     csv:
       delimiter: "|"
-    tags::
+    tags:
     - name: Person
       id:
         type: "STRING"

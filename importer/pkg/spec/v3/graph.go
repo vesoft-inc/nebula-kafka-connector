@@ -72,9 +72,9 @@ func (g *Graph) Validate() error {
 }
 
 func (g *Graph) InsertNodeStatement(n *Node, records ...Record) (string, error) {
-	statement, err := n.InsertStatement(g.Name, records...)
+	statement, err := n.InsertStatement(records...)
 	if err != nil {
-		return "", g.importError(err).SetNodeName(n.Name)
+		return "", g.importError(err).SetGraphName(g.Name).SetNodeName(n.Name)
 	}
 	return statement, nil
 }
@@ -86,9 +86,9 @@ func (g *Graph) InsertNodeBuilder(n *Node) specbase.StatementBuilder {
 }
 
 func (g *Graph) InsertEdgeStatement(e *Edge, records ...Record) (string, error) {
-	statement, err := e.InsertStatement(g.Name, records...)
+	statement, err := e.InsertStatement(records...)
 	if err != nil {
-		return "", g.importError(err).SetEdgeName(e.Name)
+		return "", g.importError(err).SetGraphName(g.Name).SetEdgeName(e.Name)
 	}
 	return statement, nil
 }

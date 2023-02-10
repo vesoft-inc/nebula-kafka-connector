@@ -1,7 +1,7 @@
 package picker
 
 import (
-	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
@@ -109,7 +109,7 @@ func NewTypeConverter(t string) (Converter, error) {
 }
 
 func (TypeStringConverter) Convert(v *Value) (*Value, error) {
-	v.Val = fmt.Sprintf("%q", v.Val)
+	v.Val = strconv.Quote(v.Val)
 	return v, nil
 }
 

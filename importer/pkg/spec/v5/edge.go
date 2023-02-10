@@ -2,14 +2,9 @@ package specv5
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/bytebufferpool"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
-)
-
-const (
-	fmtEdgeInsertStatement = "USE %s INSERT EDGE %s %s" // "USE graph INSERT EDGE name (props),(props)"
-	fmtEdgeValue           = "({%s})-[{%s}]->({%s})"    // "(srcID)-[props]->(dstID)"
 )
 
 type (
@@ -18,6 +13,9 @@ type (
 		Src   *EdgeNodeRef `yaml:"src"`
 		Dst   *EdgeNodeRef `yaml:"dst"`
 		Props Props        `yaml:"props,omitempty"`
+
+		graphName    string
+		insertPrefix string // "USE %s INSERT EDGE %s "
 	}
 
 	EdgeNodeRef struct {
@@ -34,12 +32,15 @@ func NewEdge(name string, opts ...EdgeOption) *Edge {
 	e := &Edge{
 		Name: name,
 	}
-
-	for _, opt := range opts {
-		opt(e)
-	}
+	e.Options(opts...)
 
 	return e
+}
+
+func WithEdgeGraphName(name string) EdgeOption {
+	return func(e *Edge) {
+		e.graphName = name
+	}
 }
 
 func WithEdgeSrc(src *EdgeNodeRef) EdgeOption {
@@ -60,6 +61,13 @@ func WithEdgeProps(props ...*Prop) EdgeOption {
 	}
 }
 
+func (e *Edge) Options(opts ...EdgeOption) *Edge {
+	for _, opt := range opts {
+		opt(e)
+	}
+	return e
+}
+
 func (e *Edge) Complete() {
 	if e.Src != nil {
 		e.Src.Complete()
@@ -68,6 +76,12 @@ func (e *Edge) Complete() {
 		e.Dst.Complete()
 	}
 	e.Props.Complete()
+
+	e.insertPrefix = fmt.Sprintf(
+		"USE %s INSERT EDGE %s ",
+		e.graphName,
+		e.Name,
+	)
 }
 
 func (e *Edge) Validate() error {
@@ -98,29 +112,40 @@ func (e *Edge) Validate() error {
 	return nil
 }
 
-func (e *Edge) InsertStatement(graphName string, records ...Record) (string, error) {
-	values := make([]string, 0, len(records))
-	for _, record := range records {
+func (e *Edge) InsertStatement(records ...Record) (string, error) {
+	buff := bytebufferpool.Get()
+	defer bytebufferpool.Put(buff)
+
+	buff.SetString(e.insertPrefix)
+
+	for i, record := range records {
 		srcIDValue, err := e.Src.IDValue(record)
 		if err != nil {
-			return "", e.importError(err).SetGraphName(graphName)
+			return "", e.importError(err)
 		}
 		dstIDValue, err := e.Dst.IDValue(record)
 		if err != nil {
-			return "", e.importError(err).SetGraphName(graphName)
+			return "", e.importError(err)
 		}
 		propsValueList, err := e.Props.ValueList(record)
 		if err != nil {
-			return "", e.importError(err).SetGraphName(graphName)
+			return "", e.importError(err)
 		}
-		values = append(values, fmt.Sprintf(
-			fmtEdgeValue,
-			srcIDValue,
-			strings.Join(propsValueList, ", "),
-			dstIDValue,
-		))
+
+		if i > 0 {
+			_, _ = buff.WriteString(", ")
+		}
+
+		// "({%s})-[{%s}]->({%s})"
+		_, _ = buff.WriteString("({")
+		_, _ = buff.WriteString(srcIDValue)
+		_, _ = buff.WriteString("})-[{")
+		_, _ = buff.WriteStringSlice(propsValueList, ", ")
+		_, _ = buff.WriteString("}]->({")
+		_, _ = buff.WriteString(dstIDValue)
+		_, _ = buff.WriteString("})")
 	}
-	return fmt.Sprintf(fmtEdgeInsertStatement, graphName, e.Name, strings.Join(values, ", ")), nil
+	return buff.String(), nil
 }
 
 func (e *Edge) importError(err error, formatWithArgs ...any) *errors.ImportError { //nolint:unparam

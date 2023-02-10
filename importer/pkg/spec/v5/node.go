@@ -2,14 +2,9 @@ package specv5
 
 import (
 	"fmt"
-	"strings"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/bytebufferpool"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/errors"
-)
-
-const (
-	fmtNodeInsertStatement = "USE %s INSERT NODE %s %s" // "USE graph INSERT NODE name (props),(props)"
-	fmtNodeValue           = "({%s})"                   // "(props)"
 )
 
 type (
@@ -18,7 +13,9 @@ type (
 		ID    *NodeID `yaml:"id"`
 		Props Props   `yaml:"props,omitempty"`
 
-		propsWithID Props
+		graphName    string
+		insertPrefix string // "USE %s INSERT NODE %s "
+		propsWithID  Props
 	}
 
 	Nodes []*Node
@@ -30,12 +27,15 @@ func NewNode(name string, opts ...NodeOption) *Node {
 	n := &Node{
 		Name: name,
 	}
-
-	for _, opt := range opts {
-		opt(n)
-	}
+	n.Options(opts...)
 
 	return n
+}
+
+func WithNodeGraphName(name string) NodeOption {
+	return func(n *Node) {
+		n.graphName = name
+	}
 }
 
 func WithNodeID(id *NodeID) NodeOption {
@@ -50,11 +50,24 @@ func WithNodeProps(props ...*Prop) NodeOption {
 	}
 }
 
+func (n *Node) Options(opts ...NodeOption) *Node {
+	for _, opt := range opts {
+		opt(n)
+	}
+	return n
+}
+
 func (n *Node) Complete() {
 	if n.ID != nil {
 		n.ID.Complete()
 	}
 	n.Props.Complete()
+
+	n.insertPrefix = fmt.Sprintf(
+		"USE %s INSERT NODE %s ",
+		n.graphName,
+		n.Name,
+	)
 }
 
 func (n *Node) Validate() error {
@@ -83,16 +96,28 @@ func (n *Node) Validate() error {
 	return nil
 }
 
-func (n *Node) InsertStatement(graphName string, records ...Record) (string, error) {
-	values := make([]string, 0, len(records))
-	for _, record := range records {
+func (n *Node) InsertStatement(records ...Record) (string, error) {
+	buff := bytebufferpool.Get()
+	defer bytebufferpool.Put(buff)
+
+	buff.SetString(n.insertPrefix)
+
+	for i, record := range records {
 		propsValueList, err := n.propsWithID.ValueList(record)
 		if err != nil {
-			return "", n.importError(err).SetGraphName(graphName)
+			return "", n.importError(err)
 		}
-		values = append(values, fmt.Sprintf(fmtNodeValue, strings.Join(propsValueList, ", ")))
+
+		if i > 0 {
+			_, _ = buff.WriteString(", ")
+		}
+
+		// "({%s})"
+		_, _ = buff.WriteString("({")
+		_, _ = buff.WriteStringSlice(propsValueList, ", ")
+		_, _ = buff.WriteString("})")
 	}
-	return fmt.Sprintf(fmtNodeInsertStatement, graphName, n.Name, strings.Join(values, ", ")), nil
+	return buff.String(), nil
 }
 
 func (n *Node) importError(err error, formatWithArgs ...any) *errors.ImportError { //nolint:unparam

@@ -48,6 +48,7 @@ func (p *Prop) Value(record Record) (string, error) {
 	if err != nil {
 		return "", p.importError(err, "record index %d pick failed", p.Index).SetRecord(record)
 	}
+	defer val.Release()
 	return val.Val, nil
 }
 

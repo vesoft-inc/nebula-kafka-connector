@@ -82,6 +82,7 @@ var _ = Describe("Node", func() {
 		It("success without props", func() {
 			node := NewNode(
 				"name",
+				WithNodeGraphName("graphName"),
 				WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt}),
 			)
 			err := node.Validate()
@@ -105,6 +106,7 @@ var _ = Describe("Node", func() {
 			BeforeEach(func() {
 				node = NewNode(
 					"name",
+					WithNodeGraphName("graphName"),
 					WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt, Index: 0}),
 				)
 				node.Complete()
@@ -113,19 +115,19 @@ var _ = Describe("Node", func() {
 			})
 
 			It("one record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT NODE name ({id: 1})"))
 			})
 
 			It("two record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT NODE name ({id: 1}), ({id: 2})"))
 			})
 
 			It("failed id no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{})
+				statement, err := node.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -137,6 +139,7 @@ var _ = Describe("Node", func() {
 			BeforeEach(func() {
 				node = NewNode(
 					"name",
+					WithNodeGraphName("graphName"),
 					WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt, Index: 0}),
 					WithNodeProps(
 						&Prop{Name: "prop1", Type: ValueTypeString, Index: 2},
@@ -148,26 +151,26 @@ var _ = Describe("Node", func() {
 			})
 
 			It("one record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT NODE name ({id: 1, prop1: \"str1\"})"))
 			})
 
 			It("two record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT NODE name ({id: 1, prop1: \"str1\"}), ({id: 2, prop1: \"str2\"})"))
 			})
 
 			It("failed id no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{})
+				statement, err := node.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("failed prop no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1"})
+				statement, err := node.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -179,6 +182,7 @@ var _ = Describe("Node", func() {
 			BeforeEach(func() {
 				node = NewNode(
 					"name",
+					WithNodeGraphName("graphName"),
 					WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt, Index: 0}),
 					WithNodeProps(
 						&Prop{Name: "prop1", Type: ValueTypeString, Index: 2},
@@ -191,26 +195,26 @@ var _ = Describe("Node", func() {
 			})
 
 			It("one record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT NODE name ({id: 1, prop1: \"str1\", prop2: 1.1})"))
 			})
 
 			It("two record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT NODE name ({id: 1, prop1: \"str1\", prop2: 1.1}), ({id: 2, prop1: \"str2\", prop2: 2.2})"))
 			})
 
 			It("failed id no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{})
+				statement, err := node.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("failed prop no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1"})
+				statement, err := node.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -223,8 +227,8 @@ var _ = Describe("Nodes", func() {
 	Describe(".Complete", func() {
 		It("default value type", func() {
 			nodes := Nodes{
-				NewNode("name1", WithNodeID(&NodeID{}), WithNodeProps(&Prop{})),
-				NewNode("name2", WithNodeID(&NodeID{}), WithNodeProps(&Prop{})),
+				NewNode("name1", WithNodeGraphName("graphName"), WithNodeID(&NodeID{}), WithNodeProps(&Prop{})),
+				NewNode("name2", WithNodeGraphName("graphName"), WithNodeID(&NodeID{}), WithNodeProps(&Prop{})),
 			}
 			nodes.Complete()
 			Expect(nodes).To(HaveLen(2))
@@ -249,40 +253,40 @@ var _ = Describe("Nodes", func() {
 		),
 		Entry("success",
 			Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name1", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 			},
 			-1,
 		),
 		Entry("failed at 0",
 			Nodes{
 				NewNode(""),
-				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name1", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 			},
 			0,
 		),
 		Entry("failed at 1",
 			Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name1", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 				NewNode("failed"),
-				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
 			},
 			1,
 		),
 		Entry("failed at end",
 			Nodes{
-				NewNode("name1", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name2", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name3", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("name4", WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
-				NewNode("failed", WithNodeID(&NodeID{})),
+				NewNode("name1", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name2", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name3", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("name4", WithNodeGraphName("graphName"), WithNodeID(&NodeID{Name: "id", Type: ValueTypeInt})),
+				NewNode("failed", WithNodeGraphName("graphName"), WithNodeID(&NodeID{})),
 			},
 			4,
 		),

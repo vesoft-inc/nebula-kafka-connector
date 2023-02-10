@@ -34,8 +34,6 @@ var _ = Describe("Node", func() {
 			Expect(node.Props[0].Type).To(Equal(ValueTypeString))
 			Expect(node.Props[1].Name).To(Equal("prop2"))
 			Expect(node.Props[1].Type).To(Equal(ValueTypeInt))
-
-			Expect(node.namePropNameList).To(Equal("`name`(`prop1`, `prop2`)"))
 		})
 	})
 
@@ -107,19 +105,19 @@ var _ = Describe("Node", func() {
 			})
 
 			It("one record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT VERTEX `name`() VALUES 1:()"))
 			})
 
 			It("two record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT VERTEX `name`() VALUES 1:(), 2:()"))
 			})
 
 			It("failed id no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{})
+				statement, err := node.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -142,26 +140,26 @@ var _ = Describe("Node", func() {
 			})
 
 			It("one record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT VERTEX `name`(`prop1`) VALUES 1:(\"str1\")"))
 			})
 
 			It("two record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT VERTEX `name`(`prop1`) VALUES 1:(\"str1\"), 2:(\"str2\")"))
 			})
 
 			It("failed id no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{})
+				statement, err := node.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("failed prop no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1"})
+				statement, err := node.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -185,26 +183,26 @@ var _ = Describe("Node", func() {
 			})
 
 			It("one record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT VERTEX `name`(`prop1`, `prop2`) VALUES 1:(\"str1\", 1.1)"))
 			})
 
 			It("two record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
+				statement, err := node.InsertStatement([]string{"1", "1.1", "str1"}, []string{"2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("INSERT VERTEX `name`(`prop1`, `prop2`) VALUES 1:(\"str1\", 1.1), 2:(\"str2\", 2.2)"))
 			})
 
 			It("failed id no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{})
+				statement, err := node.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("failed prop no record", func() {
-				statement, err := node.InsertStatement("graphName", []string{"1"})
+				statement, err := node.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())

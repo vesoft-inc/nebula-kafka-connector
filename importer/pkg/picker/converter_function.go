@@ -1,6 +1,8 @@
 package picker
 
-import "fmt"
+import (
+	"strconv"
+)
 
 var (
 	_ Converter = FunctionConverter{}
@@ -22,7 +24,7 @@ func (fc FunctionConverter) Convert(v *Value) (*Value, error) {
 }
 
 func (fc FunctionStringConverter) Convert(v *Value) (*Value, error) {
-	v.Val = getFuncValue(fc.Name, fmt.Sprintf("%q", v.Val))
+	v.Val = getFuncValue(fc.Name, strconv.Quote(v.Val))
 	return v, nil
 }
 

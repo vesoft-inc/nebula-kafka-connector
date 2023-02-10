@@ -195,6 +195,7 @@ var _ = Describe("Edge", func() {
 			BeforeEach(func() {
 				edge = NewEdge(
 					"name",
+					WithEdgeGraphName("graphName"),
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
@@ -218,26 +219,26 @@ var _ = Describe("Edge", func() {
 			})
 
 			It("one record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT EDGE name ({id: 1})-[{}]->({id: \"id1\"})"))
 			})
 
 			It("two record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT EDGE name ({id: 1})-[{}]->({id: \"id1\"}), ({id: 2})-[{}]->({id: \"id2\"})"))
 			})
 
 			It("src failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{})
+				statement, err := edge.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("dst failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1"})
+				statement, err := edge.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -249,6 +250,7 @@ var _ = Describe("Edge", func() {
 			BeforeEach(func() {
 				edge = NewEdge(
 					"name",
+					WithEdgeGraphName("graphName"),
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
@@ -275,33 +277,33 @@ var _ = Describe("Edge", func() {
 			})
 
 			It("one record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT EDGE name ({id: 1})-[{prop1: \"str1\"}]->({id: \"id1\"})"))
 			})
 
 			It("two record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT EDGE name ({id: 1})-[{prop1: \"str1\"}]->({id: \"id1\"}), ({id: 2})-[{prop1: \"str2\"}]->({id: \"id2\"})"))
 			})
 
 			It("src failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{})
+				statement, err := edge.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("dst failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1"})
+				statement, err := edge.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("props failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -313,6 +315,7 @@ var _ = Describe("Edge", func() {
 			BeforeEach(func() {
 				edge = NewEdge(
 					"name",
+					WithEdgeGraphName("graphName"),
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{
@@ -340,33 +343,33 @@ var _ = Describe("Edge", func() {
 			})
 
 			It("one record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT EDGE name ({id: 1})-[{prop1: \"str1\", prop2: 1.1}]->({id: \"id1\"})"))
 			})
 
 			It("two record", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
+				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(statement).To(Equal("USE graphName INSERT EDGE name ({id: 1})-[{prop1: \"str1\", prop2: 1.1}]->({id: \"id1\"}), ({id: 2})-[{prop1: \"str2\", prop2: 2.2}]->({id: \"id2\"})"))
 			})
 
 			It("src failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{})
+				statement, err := edge.InsertStatement([]string{})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("dst failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1"})
+				statement, err := edge.InsertStatement([]string{"1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
 			})
 
 			It("props failed", func() {
-				statement, err := edge.InsertStatement("graphName", []string{"1", "id1"})
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
@@ -429,6 +432,7 @@ var _ = Describe("Edges", func() {
 			for i := 1; i <= 4; i++ {
 				edges = append(edges, NewEdge(
 					fmt.Sprintf("name%d", i),
+					WithEdgeGraphName("graphName"),
 					WithEdgeSrc(&EdgeNodeRef{
 						Name: "srcNodeName",
 						ID: &NodeID{

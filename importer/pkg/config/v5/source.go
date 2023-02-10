@@ -56,11 +56,11 @@ func (ss *Sources) OptimizePathWildCard() error {
 func (s *Source) BuildGraph(graphName string, opts ...specv5.GraphOption) (*specv5.Graph, error) {
 	options := make([]specv5.GraphOption, 0, len(s.Nodes)+len(s.Edges)+len(opts))
 	for i := range s.Nodes {
-		node := s.Nodes[i]
+		node := s.Nodes[i].Options(specv5.WithNodeGraphName(graphName))
 		options = append(options, specv5.WithGraphNodes(node))
 	}
 	for i := range s.Edges {
-		edge := s.Edges[i]
+		edge := s.Edges[i].Options(specv5.WithEdgeGraphName(graphName))
 		options = append(options, specv5.WithGraphEdges(edge))
 	}
 	options = append(options, opts...)

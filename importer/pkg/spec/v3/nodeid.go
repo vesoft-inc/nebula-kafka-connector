@@ -60,6 +60,7 @@ func (id *NodeID) Value(record Record) (string, error) {
 		}
 		return "", id.importError(err, "record index %d pick failed", id.Index).SetRecord(record)
 	}
+	defer val.Release()
 	return val.Val, nil
 }
 
@@ -70,19 +71,7 @@ func (id *NodeID) initPicker() error {
 	}
 
 	if len(id.ConcatItems) > 0 {
-		for i, item := range id.ConcatItems {
-			switch val := item.(type) {
-			case int:
-				pickerConfig.ConcatItems.AddIndex(val)
-			case string:
-				pickerConfig.ConcatItems.AddConstant(val)
-			default:
-				return id.importError(
-					errors.ErrUnsupportedConcatItemType,
-					"ConcatItems only support string and int, but the %d is %T", i, val,
-				)
-			}
-		}
+		pickerConfig.ConcatItems = id.ConcatItems
 	} else {
 		pickerConfig.Indices = []int{id.Index}
 	}

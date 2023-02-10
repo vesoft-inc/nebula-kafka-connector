@@ -6,7 +6,7 @@ import (
 )
 
 const (
-	DefaultBatchSize = 100
+	DefaultBatchSize = 128
 )
 
 type (
