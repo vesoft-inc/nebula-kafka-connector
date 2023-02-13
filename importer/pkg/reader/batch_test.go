@@ -9,197 +9,265 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
+	pkgerrors "github.com/pkg/errors"
 )
 
 var _ = Describe("BatchRecordReader", func() {
-	var (
-		s  source.Source
-		rr RecordReader
-	)
-	BeforeEach(func() {
-		var err error
-		s, err = source.Open(&source.Config{
-			Path: "testdata/local.csv",
+	When("successfully", func() {
+		var (
+			s  source.Source
+			rr RecordReader
+		)
+		BeforeEach(func() {
+			var err error
+			s, err = source.Open(&source.Config{
+				Path: "testdata/local.csv",
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(s).NotTo(BeNil())
+			rr = NewRecordReader(s)
+			Expect(rr).NotTo(BeNil())
 		})
-		Expect(err).NotTo(HaveOccurred())
-		Expect(s).NotTo(BeNil())
-		rr = NewRecordReader(s)
-		Expect(rr).NotTo(BeNil())
+		AfterEach(func() {
+			err := s.Close()
+			Expect(err).NotTo(HaveOccurred())
+		})
+		It("default batch", func() {
+			var (
+				nBytes  int64
+				n       int
+				records []spec.Record
+				err     error
+			)
+			br := NewBatchRecordReader(rr, 0)
+			nBytes, err = br.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(33)))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(33))
+			Expect(records).To(Equal([]spec.Record{
+				{"1", "2", "3"},
+				{"4", " 5", "6"},
+				{" 7", "8", " 9"},
+				{"10", " 11 ", " 12"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(records).To(BeEmpty())
+		})
+
+		It("1 batch", func() {
+			var (
+				nBytes  int64
+				n       int
+				records []spec.Record
+				err     error
+			)
+			br := NewBatchRecordReader(rr, 1)
+			nBytes, err = br.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(33)))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(6))
+			Expect(records).To(Equal([]spec.Record{
+				{"1", "2", "3"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(7))
+			Expect(records).To(Equal([]spec.Record{
+				{"4", " 5", "6"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(8))
+			Expect(records).To(Equal([]spec.Record{
+				{" 7", "8", " 9"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(12))
+			Expect(records).To(Equal([]spec.Record{
+				{"10", " 11 ", " 12"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(records).To(BeEmpty())
+		})
+
+		It("2 batch", func() {
+			var (
+				nBytes  int64
+				n       int
+				records []spec.Record
+				err     error
+			)
+			br := NewBatchRecordReader(rr, 2)
+			nBytes, err = br.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(33)))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(13))
+			Expect(records).To(Equal([]spec.Record{
+				{"1", "2", "3"},
+				{"4", " 5", "6"},
+			}))
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(20))
+			Expect(records).To(Equal([]spec.Record{
+				{" 7", "8", " 9"},
+				{"10", " 11 ", " 12"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(records).To(BeEmpty())
+		})
+
+		It("3 batch", func() {
+			var (
+				nBytes  int64
+				n       int
+				records []spec.Record
+				err     error
+			)
+			br := NewBatchRecordReader(rr, 3)
+			nBytes, err = br.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(33)))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(21))
+			Expect(records).To(Equal([]spec.Record{
+				{"1", "2", "3"},
+				{"4", " 5", "6"},
+				{" 7", "8", " 9"},
+			}))
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(12))
+			Expect(records).To(Equal([]spec.Record{
+				{"10", " 11 ", " 12"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(records).To(BeEmpty())
+		})
+
+		It("4 batch", func() {
+			var (
+				nBytes  int64
+				n       int
+				records []spec.Record
+				err     error
+			)
+			br := NewBatchRecordReader(rr, 4)
+			nBytes, err = br.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(33)))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(33))
+			Expect(records).To(Equal([]spec.Record{
+				{"1", "2", "3"},
+				{"4", " 5", "6"},
+				{" 7", "8", " 9"},
+				{"10", " 11 ", " 12"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(records).To(BeEmpty())
+		})
 	})
-	AfterEach(func() {
-		err := s.Close()
-		Expect(err).NotTo(HaveOccurred())
-	})
-	It("default batch", func() {
+
+	When("failed", func() {
 		var (
-			nBytes  int64
-			n       int
-			records []spec.Record
-			err     error
+			s  source.Source
+			rr RecordReader
 		)
-		br := NewBatchRecordReader(rr, 0)
-		nBytes, err = br.Size()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(nBytes).To(Equal(int64(33)))
+		BeforeEach(func() {
+			var err error
+			s, err = source.Open(&source.Config{
+				Path: "testdata/local_failed.csv",
+			})
+			Expect(err).NotTo(HaveOccurred())
+			Expect(s).NotTo(BeNil())
+			rr = NewRecordReader(s)
+			Expect(rr).NotTo(BeNil())
+		})
+		AfterEach(func() {
+			err := s.Close()
+			Expect(err).NotTo(HaveOccurred())
+		})
 
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(33))
-		Expect(records).To(Equal([]spec.Record{
-			{"1", "2", "3"},
-			{"4", " 5", "6"},
-			{" 7", "8", " 9"},
-			{"10", " 11 ", " 12"},
-		}))
+		It("", func() {
+			var (
+				nBytes  int64
+				n       int
+				records []spec.Record
+				err     error
+			)
+			br := NewBatchRecordReader(rr, 2)
+			nBytes, err = br.Size()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(nBytes).To(Equal(int64(16)))
 
-		n, records, err = br.ReadBatch()
-		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
-		Expect(n).To(Equal(0))
-		Expect(records).To(BeEmpty())
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(13))
+			Expect(records).To(Equal([]spec.Record{
+				{"id1"},
+				{"id3"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).NotTo(HaveOccurred())
+			Expect(n).To(Equal(3))
+			Expect(records).To(Equal([]spec.Record{
+				{"id4"},
+			}))
+
+			n, records, err = br.ReadBatch()
+			Expect(err).To(HaveOccurred())
+			Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
+			Expect(n).To(Equal(0))
+			Expect(records).To(BeEmpty())
+		})
 	})
+})
 
-	It("1 batch", func() {
-		var (
-			nBytes  int64
-			n       int
-			records []spec.Record
-			err     error
-		)
-		br := NewBatchRecordReader(rr, 1)
-		nBytes, err = br.Size()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(nBytes).To(Equal(int64(33)))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(6))
-		Expect(records).To(Equal([]spec.Record{
-			{"1", "2", "3"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(7))
-		Expect(records).To(Equal([]spec.Record{
-			{"4", " 5", "6"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(8))
-		Expect(records).To(Equal([]spec.Record{
-			{" 7", "8", " 9"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(12))
-		Expect(records).To(Equal([]spec.Record{
-			{"10", " 11 ", " 12"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
-		Expect(n).To(Equal(0))
-		Expect(records).To(BeEmpty())
-	})
-
-	It("2 batch", func() {
-		var (
-			nBytes  int64
-			n       int
-			records []spec.Record
-			err     error
-		)
-		br := NewBatchRecordReader(rr, 2)
-		nBytes, err = br.Size()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(nBytes).To(Equal(int64(33)))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(13))
-		Expect(records).To(Equal([]spec.Record{
-			{"1", "2", "3"},
-			{"4", " 5", "6"},
-		}))
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(20))
-		Expect(records).To(Equal([]spec.Record{
-			{" 7", "8", " 9"},
-			{"10", " 11 ", " 12"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
-		Expect(n).To(Equal(0))
-		Expect(records).To(BeEmpty())
-	})
-
-	It("3 batch", func() {
-		var (
-			nBytes  int64
-			n       int
-			records []spec.Record
-			err     error
-		)
-		br := NewBatchRecordReader(rr, 3)
-		nBytes, err = br.Size()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(nBytes).To(Equal(int64(33)))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(21))
-		Expect(records).To(Equal([]spec.Record{
-			{"1", "2", "3"},
-			{"4", " 5", "6"},
-			{" 7", "8", " 9"},
-		}))
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(12))
-		Expect(records).To(Equal([]spec.Record{
-			{"10", " 11 ", " 12"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
-		Expect(n).To(Equal(0))
-		Expect(records).To(BeEmpty())
-	})
-
-	It("4 batch", func() {
-		var (
-			nBytes  int64
-			n       int
-			records []spec.Record
-			err     error
-		)
-		br := NewBatchRecordReader(rr, 4)
-		nBytes, err = br.Size()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(nBytes).To(Equal(int64(33)))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).NotTo(HaveOccurred())
-		Expect(n).To(Equal(33))
-		Expect(records).To(Equal([]spec.Record{
-			{"1", "2", "3"},
-			{"4", " 5", "6"},
-			{" 7", "8", " 9"},
-			{"10", " 11 ", " 12"},
-		}))
-
-		n, records, err = br.ReadBatch()
-		Expect(err).To(HaveOccurred())
-		Expect(stderrors.Is(err, io.EOF)).To(BeTrue())
-		Expect(n).To(Equal(0))
-		Expect(records).To(BeEmpty())
+var _ = Describe("continueError", func() {
+	It("", func() {
+		var baseErr = stderrors.New("test error")
+		err := NewContinueError(baseErr)
+		Expect(err.Error()).To(Equal(baseErr.Error()))
+		Expect(stderrors.Unwrap(err)).To(Equal(baseErr))
+		Expect(pkgerrors.Cause(err)).To(Equal(baseErr))
 	})
 })

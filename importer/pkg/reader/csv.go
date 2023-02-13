@@ -3,6 +3,7 @@ package reader
 import (
 	"bufio"
 	"encoding/csv"
+	stderrors "errors"
 	"io"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
@@ -65,12 +66,23 @@ func (r *csvReader) Read() (int, spec.Record, error) {
 		// if read header, read and move to next line
 		record, err := r.cr.Read()
 		if err != nil {
-			return 0, record, err
+			return 0, record, r.wrapErr(err)
 		}
 	}
 
 	record, err := r.cr.Read()
-	return r.rr.Take(r.br.Buffered()), record, err
+	return r.rr.Take(r.br.Buffered()), record, r.wrapErr(err)
+}
+
+func (*csvReader) wrapErr(err error) error {
+	if err == nil {
+		return nil
+	}
+
+	if pe := new(csv.ParseError); stderrors.As(err, &pe) {
+		err = NewContinueError(err)
+	}
+	return err
 }
 
 func (r *remainingReader) Read(p []byte) (n int, err error) {

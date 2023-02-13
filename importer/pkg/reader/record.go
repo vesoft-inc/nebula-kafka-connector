@@ -5,10 +5,6 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
 )
 
-const (
-	DefaultBatchSize = 128
-)
-
 type (
 	RecordReader interface {
 		source.Sizer

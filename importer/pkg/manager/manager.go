@@ -179,7 +179,7 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 	m.stats.AddTotalBytes(nBytes)
 
 	rr := reader.NewRecordReader(s)
-	bcr := reader.NewBatchRecordReader(rr, m.batch)
+	bcr := reader.NewBatchRecordReader(rr, m.batch, reader.WithLogger(log))
 
 	m.readerWaitGroup.Add(1)
 	cleanup := func() {
@@ -353,15 +353,17 @@ func (m *defaultManager) submitImporterTask(nBytes int, records spec.Records, im
 	if err := m.importerPool.Submit(func() {
 		defer m.importerWaitGroup.Done()
 		var isFailed bool
-		for _, i := range importers {
-			result, err := i.Import(records...)
-			if err != nil {
-				m.logError(err, "manager: import failed")
-				m.onRequestFailed(records)
-				isFailed = true
-				// do not return, continue the subsequent importer.
-			} else {
-				m.onRequestSucceeded(records, result)
+		if len(records) > 0 {
+			for _, i := range importers {
+				result, err := i.Import(records...)
+				if err != nil {
+					m.logError(err, "manager: import failed")
+					m.onRequestFailed(records)
+					isFailed = true
+					// do not return, continue the subsequent importer.
+				} else {
+					m.onRequestSucceeded(records, result)
+				}
 			}
 		}
 		if isFailed {

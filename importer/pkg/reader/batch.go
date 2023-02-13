@@ -1,7 +1,7 @@
 package reader
 
 import (
-	"io"
+	stderrors "errors"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
@@ -13,20 +13,26 @@ type (
 		ReadBatch() (int, spec.Records, error)
 	}
 
+	continueError struct {
+		Err error
+	}
+
 	defaultBatchReader struct {
-		rr    RecordReader
-		batch int
-		eof   bool
+		*options
+		rr RecordReader
 	}
 )
 
-func NewBatchRecordReader(rr RecordReader, batch int) BatchRecordReader {
-	if batch <= 0 {
-		batch = DefaultBatchSize
-	}
+func NewBatchRecordReader(rr RecordReader, batch int, opts ...Option) BatchRecordReader {
 	return &defaultBatchReader{
-		rr:    rr,
-		batch: batch,
+		options: newOptions(append(opts, WithBatch(batch))...),
+		rr:      rr,
+	}
+}
+
+func NewContinueError(err error) error {
+	return &continueError{
+		Err: err,
 	}
 }
 
@@ -40,21 +46,38 @@ func (r *defaultBatchReader) ReadBatch() (int, spec.Records, error) {
 		records    = make(spec.Records, 0, r.batch)
 	)
 
-	if r.eof {
-		return 0, nil, io.EOF
-	}
-
-	for i := 0; i < r.batch; i++ {
+	for batch := 0; batch < r.batch; {
 		n, record, err := r.rr.Read()
-		if err != nil {
-			if err != io.EOF || totalBytes == 0 {
-				return 0, nil, err
-			}
-			r.eof = true
-			break
-		}
 		totalBytes += n
+		if err != nil {
+			// case1: Read continue error.
+			if ce := new(continueError); stderrors.As(err, &ce) {
+				r.logger.WithError(ce.Err).Error("read source failed")
+				continue
+			}
+
+			// case2: Read error and still have records.
+			if totalBytes > 0 {
+				break
+			}
+
+			// Read error and have no records.
+			return 0, nil, err
+		}
+		batch++
 		records = append(records, record)
 	}
 	return totalBytes, records, nil
+}
+
+func (ce *continueError) Error() string {
+	return ce.Err.Error()
+}
+
+func (ce *continueError) Cause() error {
+	return ce.Err
+}
+
+func (ce *continueError) Unwrap() error {
+	return ce.Err
 }
