@@ -56,12 +56,13 @@ func (s *defaultSessionV5) Open() error {
 	return nil
 }
 
-func (s *defaultSessionV5) Execute(statement string) (ResultSet, error) {
+func (s *defaultSessionV5) Execute(statement string) (Response, error) {
+	startTime := time.Now()
 	rs, err := s.session.Execute(statement)
 	if err != nil {
 		return nil, err
 	}
-	return newResultSetV5(rs), nil
+	return newResponseV5(rs, time.Since(startTime)), nil
 }
 
 func (s *defaultSessionV5) Close() error {

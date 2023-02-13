@@ -102,12 +102,12 @@ func (c *Config) GetManager() manager.Manager {
 }
 
 func (c *Config) clientInitFunc(cli client.Client) error {
-	rs, err := cli.Execute(fmt.Sprintf("USE %s", utils.ConvertIdentifier(c.Manager.GraphName)))
+	resp, err := cli.Execute(fmt.Sprintf("USE %s", utils.ConvertIdentifier(c.Manager.GraphName)))
 	if err != nil {
 		return err
 	}
-	if !rs.IsSucceed() {
-		return rs.GetError()
+	if !resp.IsSucceed() {
+		return resp.GetError()
 	}
 	return nil
 }

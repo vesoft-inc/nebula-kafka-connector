@@ -34,8 +34,8 @@ type (
 	}
 
 	ExecuteResult struct {
-		ResultSet ResultSet
-		Err       error
+		Response Response
+		Err      error
 	}
 )
 
@@ -76,7 +76,7 @@ func (p *defaultPool) Open() error {
 	return nil
 }
 
-func (p *defaultPool) Execute(statement string) (ResultSet, error) {
+func (p *defaultPool) Execute(statement string) (Response, error) {
 	if p.IsClosed() {
 		return nil, ErrClosed
 	}
@@ -90,7 +90,7 @@ func (p *defaultPool) Execute(statement string) (ResultSet, error) {
 	}
 	p.chExecuteDataQueue <- data
 	result := <-ch
-	return result.ResultSet, result.Err
+	return result.Response, result.Err
 }
 
 func (p *defaultPool) ExecuteChan(statement string) (<-chan ExecuteResult, bool) {
@@ -198,10 +198,10 @@ func (p *defaultPool) loop(c Client) {
 			if !ok {
 				continue
 			}
-			rs, err := c.Execute(data.statement)
+			resp, err := c.Execute(data.statement)
 			data.ch <- ExecuteResult{
-				ResultSet: rs,
-				Err:       err,
+				Response: resp,
+				Err:      err,
 			}
 		case <-p.done:
 			return

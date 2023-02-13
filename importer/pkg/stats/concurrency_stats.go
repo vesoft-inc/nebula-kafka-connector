@@ -53,11 +53,11 @@ func (s *ConcurrencyStats) RequestFailed(nRecords int64) {
 	s.mu.Unlock()
 }
 
-func (s *ConcurrencyStats) RequestSucceeded(nRecords int64, latency, reqTime time.Duration) {
+func (s *ConcurrencyStats) RequestSucceeded(nRecords int64, latency, respTime time.Duration) {
 	s.mu.Lock()
 	s.s.TotalRequest++
 	s.s.TotalLatency += latency
-	s.s.TotalReqTime += reqTime
+	s.s.TotalRespTime += respTime
 	s.s.TotalProcessed += nRecords
 	s.mu.Unlock()
 }

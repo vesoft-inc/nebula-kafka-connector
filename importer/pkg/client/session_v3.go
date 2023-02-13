@@ -3,6 +3,7 @@ package client
 
 import (
 	"fmt"
+	"time"
 
 	nebula "github.com/vesoft-inc/nebula-go/v3"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
@@ -59,12 +60,13 @@ func (s *defaultSessionV3) Open() error {
 	return nil
 }
 
-func (s *defaultSessionV3) Execute(statement string) (ResultSet, error) {
+func (s *defaultSessionV3) Execute(statement string) (Response, error) {
+	startTime := time.Now()
 	rs, err := s.session.Execute(statement)
 	if err != nil {
 		return nil, err
 	}
-	return newResultSetV3(rs), nil
+	return newResponseV3(rs, time.Since(startTime)), nil
 }
 
 func (s *defaultSessionV3) Close() error {

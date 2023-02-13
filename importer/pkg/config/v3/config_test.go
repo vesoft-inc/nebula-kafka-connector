@@ -97,17 +97,17 @@ var _ = Describe("Config", func() {
 
 var _ = Describe("clientInitFunc", func() {
 	var (
-		c             Config
-		ctrl          *gomock.Controller
-		mockClient    *client.MockClient
-		mockResultSet *client.MockResultSet
+		c            Config
+		ctrl         *gomock.Controller
+		mockClient   *client.MockClient
+		mockResponse *client.MockResponse
 	)
 
 	BeforeEach(func() {
 		c.Manager.GraphName = "graphName"
 		ctrl = gomock.NewController(GinkgoT())
 		mockClient = client.NewMockClient(ctrl)
-		mockResultSet = client.NewMockResultSet(ctrl)
+		mockResponse = client.NewMockResponse(ctrl)
 	})
 	AfterEach(func() {
 		ctrl.Finish()
@@ -119,15 +119,15 @@ var _ = Describe("clientInitFunc", func() {
 	})
 
 	It("Execute IsSucceed false", func() {
-		mockClient.EXPECT().Execute("USE `graphName`").Return(mockResultSet, nil)
-		mockResultSet.EXPECT().IsSucceed().Return(false)
-		mockResultSet.EXPECT().GetError().Return(stderrors.New("execute error"))
+		mockClient.EXPECT().Execute("USE `graphName`").Return(mockResponse, nil)
+		mockResponse.EXPECT().IsSucceed().Return(false)
+		mockResponse.EXPECT().GetError().Return(stderrors.New("execute error"))
 		Expect(c.clientInitFunc(mockClient)).To(HaveOccurred())
 	})
 
 	It("successfully", func() {
-		mockClient.EXPECT().Execute("USE `graphName`").Return(mockResultSet, nil)
-		mockResultSet.EXPECT().IsSucceed().Return(true)
+		mockClient.EXPECT().Execute("USE `graphName`").Return(mockResponse, nil)
+		mockResponse.EXPECT().IsSucceed().Return(true)
 		Expect(c.clientInitFunc(mockClient)).NotTo(HaveOccurred())
 	})
 })

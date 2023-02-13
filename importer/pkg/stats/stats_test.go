@@ -13,7 +13,7 @@ var _ = Describe("Stats", func() {
 			s := &Stats{
 				StartTime: time.Now(),
 			}
-			Expect(s.String()).Should(Equal("0s 0.00%(0 B/0 B) Records{Finished: 0, Failed: 0, Rate: 0.00/s}, Requests{Finished: 0, Failed: 0, Latency: 0s/0s, Rate: 0.00/s}, Processed{Finished: 0, Failed: 0, Rate: 0.00/s}"))
+			Expect(s.String()).Should(Equal("0s ... 0.00%(0 B/0 B) Records{Finished: 0, Failed: 0, Rate: 0.00/s}, Requests{Finished: 0, Failed: 0, Latency: 0s/0s, Rate: 0.00/s}, Processed{Finished: 0, Failed: 0, Rate: 0.00/s}"))
 		})
 		It("TotalRecords is not zero", func() {
 			s := &Stats{
@@ -25,11 +25,11 @@ var _ = Describe("Stats", func() {
 				FailedRequest:   1,
 				TotalRequest:    12,
 				TotalLatency:    time.Second * 12,
-				TotalReqTime:    2 * time.Second * 12,
+				TotalRespTime:   2 * time.Second * 12,
 				FailedProcessed: 2,
 				TotalProcessed:  5,
 			}
-			Expect(s.String()).Should(Equal("10s 33.33%(100 KiB/300 KiB) Records{Finished: 1234, Failed: 23, Rate: 123.40/s}, Requests{Finished: 12, Failed: 1, Latency: 1s/2s, Rate: 1.20/s}, Processed{Finished: 5, Failed: 2, Rate: 0.50/s}"))
+			Expect(s.String()).Should(Equal("10s 20s 33.33%(100 KiB/300 KiB) Records{Finished: 1234, Failed: 23, Rate: 123.40/s}, Requests{Finished: 12, Failed: 1, Latency: 1s/2s, Rate: 1.20/s}, Processed{Finished: 5, Failed: 2, Rate: 0.50/s}"))
 		})
 	})
 })

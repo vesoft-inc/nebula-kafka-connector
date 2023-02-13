@@ -3,6 +3,6 @@ package client
 
 type Session interface {
 	Open() error
-	Execute(statement string) (ResultSet, error)
+	Execute(statement string) (Response, error)
 	Close() error
 }

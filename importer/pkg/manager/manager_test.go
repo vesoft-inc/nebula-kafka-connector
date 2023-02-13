@@ -86,7 +86,7 @@ var _ = Describe("Manager", func() {
 			mockSource      *source.MockSource
 			mockClient      *client.MockClient
 			mockClientPool  *client.MockPool
-			mockResultSet   *client.MockResultSet
+			mockResponse    *client.MockResponse
 			mockImporter    *importer.MockImporter
 			m               Manager
 			batch           = 10
@@ -106,7 +106,7 @@ var _ = Describe("Manager", func() {
 			mockSource = source.NewMockSource(ctrl)
 			mockClient = client.NewMockClient(ctrl)
 			mockClientPool = client.NewMockPool(ctrl)
-			mockResultSet = client.NewMockResultSet(ctrl)
+			mockResponse = client.NewMockResponse(ctrl)
 			mockImporter = importer.NewMockImporter(ctrl)
 
 			l, err := logger.New(logger.WithLevel(logger.WarnLevel))
@@ -173,14 +173,14 @@ var _ = Describe("Manager", func() {
 
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 
 				mockClientPool.EXPECT().Open().Return(nil),
 
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 			)
 
 			var executeFailedTimes int64 = 10
@@ -191,8 +191,8 @@ var _ = Describe("Manager", func() {
 					return nil, stderrors.New("import failed")
 				}
 				return &importer.ImportResp{
-					Latency: 2 * time.Microsecond,
-					ReqTime: 3 * time.Microsecond,
+					Latency:  2 * time.Microsecond,
+					RespTime: 3 * time.Microsecond,
 				}, nil
 			}
 			mockImporter.EXPECT().Wait().Times(loopCountPreFile * 4)
@@ -224,7 +224,7 @@ var _ = Describe("Manager", func() {
 			Expect(s.FailedRequest).To(Equal(executeFailedTimes))
 			Expect(s.TotalRequest).To(Equal(int64(totalBatches * 2)))
 			Expect(s.TotalLatency).To(Equal(2 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
-			Expect(s.TotalReqTime).To(Equal(3 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
+			Expect(s.TotalRespTime).To(Equal(3 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
 			Expect(s.FailedProcessed).NotTo(Equal(int64(0)))
 			Expect(s.FailedRecords).To(BeNumerically("<=", executeFailedTimes*int64(batch)))
 			Expect(s.TotalProcessed).To(Equal(int64((nodeRecordCount + edgeRecordCount) * loopCountPreFile * 2)))
@@ -266,8 +266,8 @@ var _ = Describe("Manager", func() {
 		It("client pool open failed", func() {
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 
 				mockClientPool.EXPECT().Open().Return(stderrors.New("test error")),
 			)
@@ -280,8 +280,8 @@ var _ = Describe("Manager", func() {
 		It("exec after failed", func() {
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 
 				mockClientPool.EXPECT().Open().Return(nil),
 
@@ -300,14 +300,14 @@ var _ = Describe("Manager", func() {
 		It("stop successfully", func() {
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 
 				mockClientPool.EXPECT().Open().Return(nil),
 
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 			)
 
 			err := m.Start()
@@ -322,15 +322,15 @@ var _ = Describe("Manager", func() {
 		It("stop failed", func() {
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 
 				mockClientPool.EXPECT().Open().Return(nil),
 
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(false),
-				mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("exec failed")),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(false),
+				mockResponse.EXPECT().GetError().Times(1).Return(stderrors.New("exec failed")),
 			)
 
 			err := m.Start()
@@ -350,14 +350,14 @@ var _ = Describe("Manager", func() {
 
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 
 				mockClientPool.EXPECT().Open().Return(nil),
 
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
-				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResultSet, nil),
-				mockResultSet.EXPECT().IsSucceed().Return(true),
+				mockClient.EXPECT().Execute("after statement").Times(1).Return(mockResponse, nil),
+				mockResponse.EXPECT().IsSucceed().Return(true),
 			)
 
 			mockSource.EXPECT().Size().Return(int64(1024*1024*1024*1024), nil)

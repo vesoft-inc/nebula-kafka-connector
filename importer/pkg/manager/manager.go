@@ -304,7 +304,7 @@ func (m *defaultManager) execHooks(name HookName) error {
 					return err
 				}
 			}
-			rs, err := cli.Execute(statement)
+			resp, err := cli.Execute(statement)
 			if err != nil {
 				err = errors.NewImportError(err,
 					"manager: exec failed in %s hook", name,
@@ -312,9 +312,9 @@ func (m *defaultManager) execHooks(name HookName) error {
 				m.logError(err, "")
 				return err
 			}
-			if !rs.IsSucceed() {
+			if !resp.IsSucceed() {
 				err = errors.NewImportError(err,
-					"manager: exec failed in %s hook, %s", name, rs.GetError(),
+					"manager: exec failed in %s hook, %s", name, resp.GetError(),
 				).SetStatement(statement)
 				m.logError(err, "")
 				return err
@@ -408,7 +408,7 @@ func (m *defaultManager) onRequestFailed(records spec.Records) {
 }
 
 func (m *defaultManager) onRequestSucceeded(records spec.Records, result *importer.ImportResp) {
-	m.stats.RequestSucceeded(int64(len(records)), result.Latency, result.ReqTime)
+	m.stats.RequestSucceeded(int64(len(records)), result.Latency, result.RespTime)
 }
 
 func (m *defaultManager) logError(err error, msg string, fields ...logger.Field) { //nolint:unparam

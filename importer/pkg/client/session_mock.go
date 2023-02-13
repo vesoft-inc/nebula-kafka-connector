@@ -48,10 +48,10 @@ func (mr *MockSessionMockRecorder) Close() *gomock.Call {
 }
 
 // Execute mocks base method.
-func (m *MockSession) Execute(statement string) (ResultSet, error) {
+func (m *MockSession) Execute(statement string) (Response, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Execute", statement)
-	ret0, _ := ret[0].(ResultSet)
+	ret0, _ := ret[0].(Response)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

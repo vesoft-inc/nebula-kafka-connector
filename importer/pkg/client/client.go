@@ -13,7 +13,7 @@ import (
 type (
 	Client interface {
 		Open() error
-		Execute(statement string) (ResultSet, error)
+		Execute(statement string) (Response, error)
 		Close() error
 	}
 
@@ -73,7 +73,7 @@ func (c *defaultClient) Open() error {
 	return nil
 }
 
-func (c *defaultClient) Execute(statement string) (ResultSet, error) {
+func (c *defaultClient) Execute(statement string) (Response, error) {
 	exp := backoff.NewExponentialBackOff()
 	exp.InitialInterval = c.retryInitialInterval
 	exp.MaxInterval = DefaultRetryMaxInterval
@@ -83,7 +83,7 @@ func (c *defaultClient) Execute(statement string) (ResultSet, error) {
 
 	var (
 		err   error
-		rs    ResultSet
+		resp  Response
 		retry = c.retry
 	)
 
@@ -92,22 +92,22 @@ func (c *defaultClient) Execute(statement string) (ResultSet, error) {
 	// * Case 2. retry as much as possible
 	// * Case 3: retry with limit times
 	_ = backoff.Retry(func() error {
-		rs, err = c.session.Execute(statement)
-		if err == nil && rs.IsSucceed() {
+		resp, err = c.session.Execute(statement)
+		if err == nil && resp.IsSucceed() {
 			return nil
 		}
 		retryErr := err
-		if rs != nil {
-			retryErr = rs.GetError()
+		if resp != nil {
+			retryErr = resp.GetError()
 
 			// Case 1: retry no more
-			if rs.IsPermanentError() {
+			if resp.IsPermanentError() {
 				// stop the retry
 				return backoff.Permanent(retryErr)
 			}
 
 			// Case 2. retry as much as possible
-			if rs.IsRetryMoreError() {
+			if resp.IsRetryMoreError() {
 				retry = c.retry
 				return retryErr
 			}
@@ -124,7 +124,7 @@ func (c *defaultClient) Execute(statement string) (ResultSet, error) {
 	if err != nil {
 		c.logger.WithError(err).Error("execute statement failed")
 	}
-	return rs, err
+	return resp, err
 }
 
 func (c *defaultClient) Close() error {

@@ -19,13 +19,13 @@ var _ = Describe("Importer", func() {
 	var (
 		ctrl           *gomock.Controller
 		mockClientPool *client.MockPool
-		mockResultSet  *client.MockResultSet
+		mockResponse   *client.MockResponse
 		mockBuilder    *specbase.MockStatementBuilder
 	)
 	BeforeEach(func() {
 		ctrl = gomock.NewController(GinkgoT())
 		mockClientPool = client.NewMockPool(ctrl)
-		mockResultSet = client.NewMockResultSet(ctrl)
+		mockResponse = client.NewMockResponse(ctrl)
 		mockBuilder = specbase.NewMockStatementBuilder(ctrl)
 	})
 
@@ -59,9 +59,9 @@ var _ = Describe("Importer", func() {
 
 		It("execute IsSucceed false", func() {
 			mockBuilder.EXPECT().Build(gomock.Any()).Return("statement", nil)
-			mockClientPool.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
-			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("status failed"))
+			mockClientPool.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResponse, nil)
+			mockResponse.EXPECT().IsSucceed().Times(1).Return(false)
+			mockResponse.EXPECT().GetError().Times(1).Return(stderrors.New("status failed"))
 
 			i := New(mockBuilder, mockClientPool)
 			resp, err := i.Import(spec.Record{"id"})
@@ -75,9 +75,10 @@ var _ = Describe("Importer", func() {
 
 		It("execute successfully", func() {
 			mockBuilder.EXPECT().Build(gomock.Any()).Times(1).Return("statement", nil)
-			mockClientPool.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(1).Return(true)
-			mockResultSet.EXPECT().GetLatency().Times(1).Return(int64(10))
+			mockClientPool.EXPECT().Execute(gomock.Any()).Times(1).Return(mockResponse, nil)
+			mockResponse.EXPECT().IsSucceed().Times(1).Return(true)
+			mockResponse.EXPECT().GetLatency().Times(1).Return(time.Microsecond * 10)
+			mockResponse.EXPECT().GetRespTime().AnyTimes().Return(time.Microsecond * 12)
 
 			i := New(mockBuilder, mockClientPool)
 			i.Wait()
@@ -86,13 +87,15 @@ var _ = Describe("Importer", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resp).NotTo(BeNil())
 			Expect(resp.Latency).To(Equal(time.Microsecond * time.Duration(10)))
+			Expect(resp.RespTime).To(Equal(time.Microsecond * time.Duration(12)))
 		})
 
 		It("execute successfully with Wait and Done", func() {
 			mockBuilder.EXPECT().Build(gomock.Any()).Times(2).Return("statement", nil)
-			mockClientPool.EXPECT().Execute(gomock.Any()).Times(2).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(2).Return(true)
-			mockResultSet.EXPECT().GetLatency().Times(2).Return(int64(10))
+			mockClientPool.EXPECT().Execute(gomock.Any()).Times(2).Return(mockResponse, nil)
+			mockResponse.EXPECT().IsSucceed().Times(2).Return(true)
+			mockResponse.EXPECT().GetLatency().Times(2).Return(time.Microsecond * 10)
+			mockResponse.EXPECT().GetRespTime().AnyTimes().Return(time.Microsecond * 12)
 
 			var (
 				wg              sync.WaitGroup
@@ -129,6 +132,7 @@ var _ = Describe("Importer", func() {
 			Expect(err).NotTo(HaveOccurred())
 			Expect(resp).NotTo(BeNil())
 			Expect(resp.Latency).To(Equal(time.Microsecond * time.Duration(10)))
+			Expect(resp.RespTime).To(Equal(time.Microsecond * time.Duration(12)))
 		})
 	})
 })

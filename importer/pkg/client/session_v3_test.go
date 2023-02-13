@@ -30,9 +30,9 @@ var _ = Describe("SessionV3", func() {
 
 		err := session.Open()
 		Expect(err).NotTo(HaveOccurred())
-		rs, err := session.Execute("")
+		resp, err := session.Execute("")
 		Expect(err).NotTo(HaveOccurred())
-		Expect(rs).NotTo(BeNil())
+		Expect(resp).NotTo(BeNil())
 
 		err = session.Close()
 		Expect(err).NotTo(HaveOccurred())
@@ -69,9 +69,9 @@ var _ = Describe("SessionV3", func() {
 
 		err = session.Open()
 		Expect(err).NotTo(HaveOccurred())
-		rs, err := session.Execute("")
+		resp, err := session.Execute("")
 		Expect(err).To(HaveOccurred())
-		Expect(rs).To(BeNil())
+		Expect(resp).To(BeNil())
 
 		err = session.Close()
 		Expect(err).NotTo(HaveOccurred())

@@ -1,6 +1,8 @@
 package logger
 
 import (
+	"time"
+
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 )
@@ -31,6 +33,18 @@ var _ = Describe("Option", func() {
 		o := options{}
 		WithFields(fields...)(&o)
 		Expect(o.fields).To(Equal(fields))
+	})
+
+	It("WithConsole", func() {
+		o := options{}
+		WithConsole(true)(&o)
+		Expect(o.console).To(Equal(true))
+	})
+
+	It("WithConsole", func() {
+		o := options{}
+		WithTimeLayout(time.RFC3339)(&o)
+		Expect(o.timeLayout).To(Equal(time.RFC3339))
 	})
 
 	It("nopLogger", func() {

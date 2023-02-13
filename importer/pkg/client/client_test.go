@@ -118,16 +118,16 @@ var _ = Describe("Clientxxx", func() {
 
 	Describe(".Execute", func() {
 		var (
-			c             Client
-			ctrl          *gomock.Controller
-			mockSession   *MockSession
-			mockResultSet *MockResultSet
+			c            Client
+			ctrl         *gomock.Controller
+			mockSession  *MockSession
+			mockResponse *MockResponse
 		)
 
 		BeforeEach(func() {
 			ctrl = gomock.NewController(GinkgoT())
 			mockSession = NewMockSession(ctrl)
-			mockResultSet = NewMockResultSet(ctrl)
+			mockResponse = NewMockResponse(ctrl)
 			c = NewClient(
 				WithAddress("127.0.0.1:9669"),
 				WithRetryInitialInterval(time.Microsecond),
@@ -147,15 +147,15 @@ var _ = Describe("Clientxxx", func() {
 
 		It("retry case1", func() {
 			// * Case 1: retry no more
-			mockSession.EXPECT().Execute("test Execute statement").Times(1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(1).Return(false)
-			mockResultSet.EXPECT().GetError().Times(1).Return(stderrors.New("test error"))
-			mockResultSet.EXPECT().IsPermanentError().Times(2).Return(true)
+			mockSession.EXPECT().Execute("test Execute statement").Times(1).Return(mockResponse, nil)
+			mockResponse.EXPECT().IsSucceed().Times(1).Return(false)
+			mockResponse.EXPECT().GetError().Times(1).Return(stderrors.New("test error"))
+			mockResponse.EXPECT().IsPermanentError().Times(2).Return(true)
 
-			rs, err := c.Execute("test Execute statement")
+			resp, err := c.Execute("test Execute statement")
 			Expect(err).NotTo(HaveOccurred())
-			Expect(rs).NotTo(BeNil())
-			Expect(rs.IsPermanentError()).To(BeTrue())
+			Expect(resp).NotTo(BeNil())
+			Expect(resp.IsPermanentError()).To(BeTrue())
 		})
 
 		It("retry case2", func() {
@@ -167,34 +167,34 @@ var _ = Describe("Clientxxx", func() {
 			}
 
 			// * Case 2. retry as much as possible
-			mockSession.EXPECT().Execute("test Execute statement").Times(retryTimes+1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(retryTimes + 2).DoAndReturn(fnIsSucceed)
-			mockResultSet.EXPECT().GetError().Times(retryTimes).Return(stderrors.New("test error"))
-			mockResultSet.EXPECT().IsPermanentError().Times(retryTimes).Return(false)
-			mockResultSet.EXPECT().IsRetryMoreError().Times(retryTimes).Return(true)
+			mockSession.EXPECT().Execute("test Execute statement").Times(retryTimes+1).Return(mockResponse, nil)
+			mockResponse.EXPECT().IsSucceed().Times(retryTimes + 2).DoAndReturn(fnIsSucceed)
+			mockResponse.EXPECT().GetError().Times(retryTimes).Return(stderrors.New("test error"))
+			mockResponse.EXPECT().IsPermanentError().Times(retryTimes).Return(false)
+			mockResponse.EXPECT().IsRetryMoreError().Times(retryTimes).Return(true)
 
-			rs, err := c.Execute("test Execute statement")
+			resp, err := c.Execute("test Execute statement")
 			Expect(err).NotTo(HaveOccurred())
-			Expect(rs).NotTo(BeNil())
-			Expect(rs.IsSucceed()).To(BeTrue())
+			Expect(resp).NotTo(BeNil())
+			Expect(resp.IsSucceed()).To(BeTrue())
 		})
 
 		It("retry case3", func() {
 			// * Case 3: retry with limit times
 			mockSession.EXPECT().Execute("test Execute statement").Times(DefaultRetry+1).Return(nil, stderrors.New("execute failed"))
 
-			rs, err := c.Execute("test Execute statement")
+			resp, err := c.Execute("test Execute statement")
 			Expect(err).To(HaveOccurred())
-			Expect(rs).To(BeNil())
+			Expect(resp).To(BeNil())
 		})
 
 		It("successfully", func() {
-			mockSession.EXPECT().Execute("test Execute statement").Times(1).Return(mockResultSet, nil)
-			mockResultSet.EXPECT().IsSucceed().Times(1).Return(true)
+			mockSession.EXPECT().Execute("test Execute statement").Times(1).Return(mockResponse, nil)
+			mockResponse.EXPECT().IsSucceed().Times(1).Return(true)
 
-			rs, err := c.Execute("test Execute statement")
+			resp, err := c.Execute("test Execute statement")
 			Expect(err).NotTo(HaveOccurred())
-			Expect(rs).NotTo(BeNil())
+			Expect(resp).NotTo(BeNil())
 		})
 	})
 

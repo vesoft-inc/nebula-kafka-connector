@@ -154,10 +154,10 @@ var _ = Describe("Pool", func() {
 			err = pool.Close()
 			Expect(err).NotTo(HaveOccurred())
 
-			rs, err := pool.Execute("test Execute statement")
+			resp, err := pool.Execute("test Execute statement")
 			Expect(err).To(HaveOccurred())
 			Expect(err).To(Equal(ErrClosed))
-			Expect(rs).To(BeNil())
+			Expect(resp).To(BeNil())
 
 			chExecuteResult, ok := pool.ExecuteChan("test ExecuteChan statement")
 			Expect(ok).To(BeFalse())
@@ -210,15 +210,15 @@ var _ = Describe("Pool", func() {
 
 	Describe(".Execute&.ExecuteChan", func() {
 		var (
-			ctrl          *gomock.Controller
-			mockClient    *MockClient
-			mockResultSet *MockResultSet
+			ctrl         *gomock.Controller
+			mockClient   *MockClient
+			mockResponse *MockResponse
 		)
 
 		BeforeEach(func() {
 			ctrl = gomock.NewController(GinkgoT())
 			mockClient = NewMockClient(ctrl)
-			mockResultSet = NewMockResultSet(ctrl)
+			mockResponse = NewMockResponse(ctrl)
 		})
 
 		AfterEach(func() {
@@ -246,9 +246,9 @@ var _ = Describe("Pool", func() {
 			)
 
 			wg.Add(clientOpenTimes)
-			fnExecute := func(_ string) (ResultSet, error) {
+			fnExecute := func(_ string) (Response, error) {
 				<-wait
-				return mockResultSet, nil
+				return mockResponse, nil
 			}
 
 			mockClient.EXPECT().Open().Times(clientOpenTimes).DoAndReturn(func() error {
@@ -342,8 +342,8 @@ var _ = Describe("Pool", func() {
 				defer wg.Done()
 				return nil
 			})
-			mockClient.EXPECT().Execute("test Execute statement").Times(executeTimes).Return(mockResultSet, nil)
-			mockClient.EXPECT().Execute("test ExecuteChan statement").Times(executeTimes).Return(mockResultSet, nil)
+			mockClient.EXPECT().Execute("test Execute statement").Times(executeTimes).Return(mockResponse, nil)
+			mockClient.EXPECT().Execute("test ExecuteChan statement").Times(executeTimes).Return(mockResponse, nil)
 			mockClient.EXPECT().Close().Times(clientOpenTimes).Return(nil)
 
 			err := pool.Open()
@@ -355,9 +355,9 @@ var _ = Describe("Pool", func() {
 				go func() {
 					defer GinkgoRecover()
 					defer wgExecutes.Done()
-					rs, err := pool.Execute("test Execute statement")
+					resp, err := pool.Execute("test Execute statement")
 					Expect(err).NotTo(HaveOccurred())
-					Expect(rs).NotTo(BeNil())
+					Expect(resp).NotTo(BeNil())
 				}()
 
 				wgExecutes.Add(1)
@@ -367,9 +367,9 @@ var _ = Describe("Pool", func() {
 					chExecuteResult, ok := pool.ExecuteChan("test ExecuteChan statement")
 					Expect(ok).To(BeTrue())
 					executeResult := <-chExecuteResult
-					rs, err := executeResult.ResultSet, executeResult.Err
+					resp, err := executeResult.Response, executeResult.Err
 					Expect(err).NotTo(HaveOccurred())
-					Expect(rs).NotTo(BeNil())
+					Expect(resp).NotTo(BeNil())
 				}()
 			}
 			wgExecutes.Wait()

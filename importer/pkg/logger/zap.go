@@ -19,6 +19,9 @@ func newZapLogger(o *options) (*zapLogger, error) {
 
 	var cores []zapcore.Core
 	encoderCfg := zap.NewProductionEncoderConfig()
+	if o.timeLayout != "" {
+		encoderCfg.EncodeTime = zapcore.TimeEncoderOfLayout(o.timeLayout)
+	}
 	if o.console {
 		cores = append(cores,
 			zapcore.NewCore(

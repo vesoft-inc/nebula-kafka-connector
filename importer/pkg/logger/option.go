@@ -1,16 +1,20 @@
 package logger
 
+import "time"
+
 var defaultOptions = options{
-	level:   InfoLevel,
-	console: true,
+	level:      InfoLevel,
+	console:    true,
+	timeLayout: time.RFC3339,
 }
 
 type (
 	options struct {
-		level   Level
-		fields  Fields
-		console bool
-		files   []string
+		level      Level
+		fields     Fields
+		console    bool
+		timeLayout string
+		files      []string
 	}
 	Option func(*options)
 )
@@ -36,6 +40,12 @@ func WithFields(fields ...Field) Option {
 func WithConsole(console bool) Option {
 	return func(o *options) {
 		o.console = console
+	}
+}
+
+func WithTimeLayout(layout string) Option {
+	return func(o *options) {
+		o.timeLayout = layout
 	}
 }
 

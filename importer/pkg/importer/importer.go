@@ -17,8 +17,8 @@ type (
 	}
 
 	ImportResp struct {
-		Latency time.Duration
-		ReqTime time.Duration
+		Latency  time.Duration
+		RespTime time.Duration
 	}
 
 	ImportResult struct {
@@ -86,20 +86,20 @@ func (i *defaultImporter) Import(records ...spec.Record) (*ImportResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	start := time.Now()
-	rs, err := i.pool.Execute(statement)
+
+	resp, err := i.pool.Execute(statement)
 	if err != nil {
 		return nil, errors.NewImportError(err).
 			SetStatement(statement)
 	}
-	if !rs.IsSucceed() {
-		return nil, errors.NewImportError(err, "the execute error is %s ", rs.GetError()).
+	if !resp.IsSucceed() {
+		return nil, errors.NewImportError(err, "the execute error is %s ", resp.GetError()).
 			SetStatement(statement)
 	}
 
 	return &ImportResp{
-		ReqTime: time.Since(start),
-		Latency: time.Duration(rs.GetLatency()) * time.Microsecond,
+		RespTime: resp.GetRespTime(),
+		Latency:  resp.GetLatency(),
 	}, nil
 }
 

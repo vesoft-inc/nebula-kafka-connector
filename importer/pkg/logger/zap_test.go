@@ -5,6 +5,7 @@ import (
 	stderrors "errors"
 	"os"
 	"path/filepath"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -271,7 +272,7 @@ var _ = Describe("zapLogger", func() {
 		})
 	})
 
-	DescribeTable("",
+	DescribeTable("toZapLevel",
 		func(lvl Level, zapLvl zapcore.Level) {
 			Expect(toZapLevel(lvl)).To(Equal(zapLvl))
 		},
@@ -292,6 +293,19 @@ var _ = Describe("zapLogger", func() {
 		)
 		l, err = newZapLogger(&options{
 			console: true,
+		})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(l).NotTo(BeNil())
+		_ = l.Close()
+	})
+
+	It("enable console", func() {
+		var (
+			l   Logger
+			err error
+		)
+		l, err = newZapLogger(&options{
+			timeLayout: time.RFC3339,
 		})
 		Expect(err).NotTo(HaveOccurred())
 		Expect(l).NotTo(BeNil())

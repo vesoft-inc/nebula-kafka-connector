@@ -95,7 +95,7 @@ var _ = Describe("ConcurrencyStats", func() {
 			FailedRequest:   sumFailedBatches * 2,
 			TotalRequest:    sumBatches * 2,
 			TotalLatency:    9 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches) * 2,
-			TotalReqTime:    11 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches) * 2,
+			TotalRespTime:   11 * time.Millisecond * time.Duration(sumBatches-sumFailedBatches) * 2,
 			FailedProcessed: sumFailedRecords * 2,
 			TotalProcessed:  sumRecords * 2,
 		}))

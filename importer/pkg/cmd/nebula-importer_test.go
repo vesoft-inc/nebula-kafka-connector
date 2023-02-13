@@ -5,6 +5,7 @@ package cmd
 import (
 	stderrors "errors"
 	"os"
+	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/cmd/common"
@@ -22,7 +23,7 @@ var _ = Describe("ImporterCommand", func() {
 		ctrl           *gomock.Controller
 		mockClient     *client.MockClient
 		mockClientPool *client.MockPool
-		mockResultSet  *client.MockResultSet
+		mockResponse   *client.MockResponse
 		mockManager    *manager.MockManager
 	)
 	BeforeEach(func() {
@@ -30,7 +31,7 @@ var _ = Describe("ImporterCommand", func() {
 		ctrl = gomock.NewController(GinkgoT())
 		mockClient = client.NewMockClient(ctrl)
 		mockClientPool = client.NewMockPool(ctrl)
-		mockResultSet = client.NewMockResultSet(ctrl)
+		mockResponse = client.NewMockResponse(ctrl)
 		mockManager = manager.NewMockManager(ctrl)
 	})
 	AfterEach(func() {
@@ -43,15 +44,16 @@ var _ = Describe("ImporterCommand", func() {
 
 		mockClientPool.EXPECT().GetClient(gomock.Any()).AnyTimes().Return(mockClient, nil)
 		mockClientPool.EXPECT().Open().AnyTimes().Return(nil)
-		mockClientPool.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
+		mockClientPool.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResponse, nil)
 		mockClientPool.EXPECT().Close().AnyTimes().Return(nil)
 
 		mockClient.EXPECT().Open().AnyTimes().Return(nil)
-		mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResultSet, nil)
+		mockClient.EXPECT().Execute(gomock.Any()).AnyTimes().Return(mockResponse, nil)
 		mockClient.EXPECT().Close().AnyTimes().Return(nil)
 
-		mockResultSet.EXPECT().IsSucceed().AnyTimes().Return(true)
-		mockResultSet.EXPECT().GetLatency().AnyTimes().Return(int64(2))
+		mockResponse.EXPECT().IsSucceed().AnyTimes().Return(true)
+		mockResponse.EXPECT().GetLatency().AnyTimes().Return(time.Microsecond * 2)
+		mockResponse.EXPECT().GetRespTime().AnyTimes().Return(time.Microsecond * 2)
 
 		for _, f := range []string{
 			"testdata/nebula-importer.v3.yaml",

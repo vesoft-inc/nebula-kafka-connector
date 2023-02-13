@@ -418,10 +418,6 @@ sources:
           id:
             type: "INT"
             index: 1
-        sources:
-          - path: ./social_network/dynamic/forum_hasModerator_person.csv
-            csv:
-              delimiter: "|"
 
   - path: ./social_network/dynamic/forum_containerOf_post.csv
     csv:
