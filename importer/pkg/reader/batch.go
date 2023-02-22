@@ -1,14 +1,17 @@
+//go:generate mockgen -source=batch.go -destination batch_mock.go -package reader BatchRecordReader
 package reader
 
 import (
 	stderrors "errors"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
 )
 
 type (
 	BatchRecordReader interface {
+		Source() source.Source
 		source.Sizer
 		ReadBatch() (int, spec.Records, error)
 	}
@@ -24,16 +27,21 @@ type (
 )
 
 func NewBatchRecordReader(rr RecordReader, batch int, opts ...Option) BatchRecordReader {
-	return &defaultBatchReader{
+	brr := &defaultBatchReader{
 		options: newOptions(append(opts, WithBatch(batch))...),
 		rr:      rr,
 	}
+	brr.logger = brr.logger.With(logger.Field{Key: "source", Value: rr.Source().Name()})
+	return brr
 }
 
 func NewContinueError(err error) error {
 	return &continueError{
 		Err: err,
 	}
+}
+func (r *defaultBatchReader) Source() source.Source {
+	return r.rr.Source()
 }
 
 func (r *defaultBatchReader) Size() (int64, error) {

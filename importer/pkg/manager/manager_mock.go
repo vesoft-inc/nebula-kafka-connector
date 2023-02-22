@@ -9,6 +9,7 @@ import (
 
 	gomock "github.com/golang/mock/gomock"
 	importer "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
+	reader "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/reader"
 	source "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	stats "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/stats"
 )
@@ -37,9 +38,9 @@ func (m *MockManager) EXPECT() *MockManagerMockRecorder {
 }
 
 // Import mocks base method.
-func (m *MockManager) Import(sourceConfig *source.Config, importers ...importer.Importer) error {
+func (m *MockManager) Import(s source.Source, brr reader.BatchRecordReader, importers ...importer.Importer) error {
 	m.ctrl.T.Helper()
-	varargs := []interface{}{sourceConfig}
+	varargs := []interface{}{s, brr}
 	for _, a := range importers {
 		varargs = append(varargs, a)
 	}
@@ -49,9 +50,9 @@ func (m *MockManager) Import(sourceConfig *source.Config, importers ...importer.
 }
 
 // Import indicates an expected call of Import.
-func (mr *MockManagerMockRecorder) Import(sourceConfig interface{}, importers ...interface{}) *gomock.Call {
+func (mr *MockManagerMockRecorder) Import(s, brr interface{}, importers ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	varargs := append([]interface{}{sourceConfig}, importers...)
+	varargs := append([]interface{}{s, brr}, importers...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Import", reflect.TypeOf((*MockManager)(nil).Import), varargs...)
 }
 

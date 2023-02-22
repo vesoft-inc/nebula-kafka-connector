@@ -68,6 +68,7 @@ sources:
           type: "STRING"
           index: 7
   - path: ./knows.csv
+    batch: 256
     edges:
     - name: KNOWS # person_knows_person
       src:

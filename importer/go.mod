@@ -9,6 +9,7 @@ require (
 	github.com/cenkalti/backoff/v4 v4.1.3
 	github.com/colinmarc/hdfs/v2 v2.3.0
 	github.com/dustin/go-humanize v1.0.0
+	github.com/fclairamb/ftpserverlib v0.21.0
 	github.com/golang/mock v1.6.0
 	github.com/jlaffaye/ftp v0.1.0
 	github.com/onsi/ginkgo/v2 v2.4.0
@@ -21,12 +22,13 @@ require (
 	github.com/vesoft-inc/nebula-go/v3 v3.3.1
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20221102090826-aa7db5c6ca6d
 	go.uber.org/zap v1.23.0
-	golang.org/x/crypto v0.0.0-20211215153901-e495a2d5b3d3
+	golang.org/x/crypto v0.5.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
 	github.com/facebook/fbthrift v0.31.1-0.20211129061412-801ed7f9f295 // indirect
+	github.com/fclairamb/go-log v0.4.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect
 	github.com/hashicorp/errwrap v1.0.0 // indirect
@@ -42,13 +44,14 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
+	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
-	golang.org/x/net v0.1.0 // indirect
-	golang.org/x/sys v0.1.0 // indirect
-	golang.org/x/text v0.4.0 // indirect
+	golang.org/x/net v0.5.0 // indirect
+	golang.org/x/sys v0.4.0 // indirect
+	golang.org/x/text v0.6.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
-	google.golang.org/protobuf v1.28.0 // indirect
+	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )

@@ -7,9 +7,15 @@ import (
 
 var _ = Describe("localSource", func() {
 	It("exists", func() {
-		s, err := openLocalFile(&Config{
-			Path: "testdata/local.txt",
+		s := newLocalSource(&Config{
+			Local: &LocalConfig{
+				Path: "testdata/local.txt",
+			},
 		})
+
+		Expect(s.Name()).To(Equal("local testdata/local.txt"))
+
+		err := s.Open()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(s).NotTo(BeNil())
 
@@ -29,17 +35,22 @@ var _ = Describe("localSource", func() {
 	})
 
 	It("not exists", func() {
-		s, err := openLocalFile(&Config{
-			Path: "testdata/not-exists.txt",
+		s := newLocalSource(&Config{
+			Local: &LocalConfig{
+				Path: "testdata/not-exists.txt",
+			},
 		})
+		err := s.Open()
 		Expect(err).To(HaveOccurred())
-		Expect(s).To(BeNil())
 	})
 
 	It("get size failed", func() {
-		s, err := openLocalFile(&Config{
-			Path: "testdata/local.txt",
+		s := newLocalSource(&Config{
+			Local: &LocalConfig{
+				Path: "testdata/local.txt",
+			},
 		})
+		err := s.Open()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(s).NotTo(BeNil())
 

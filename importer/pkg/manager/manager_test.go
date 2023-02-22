@@ -2,19 +2,18 @@ package manager
 
 import (
 	stderrors "errors"
-	"fmt"
+	"io"
 	"os"
-	"path/filepath"
 	"sync/atomic"
 	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/reader"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec"
 
-	"github.com/agiledragon/gomonkey/v2"
 	"github.com/golang/mock/gomock"
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -76,34 +75,25 @@ var _ = Describe("Manager", func() {
 
 	Describe("Run", func() {
 		var (
-			tmpdir          string
-			nodeFile        string
-			nodeSize        int64
-			edgeFile        string
-			edgeSize        int64
-			patches         *gomonkey.Patches
-			ctrl            *gomock.Controller
-			mockSource      *source.MockSource
-			mockClient      *client.MockClient
-			mockClientPool  *client.MockPool
-			mockResponse    *client.MockResponse
-			mockImporter    *importer.MockImporter
-			m               Manager
-			batch           = 10
-			nodeRecordCount = 1005
-			edgeRecordCount = 2006
+			tmpdir                string
+			ctrl                  *gomock.Controller
+			mockSource            *source.MockSource
+			mockBatchRecordReader *reader.MockBatchRecordReader
+			mockClient            *client.MockClient
+			mockClientPool        *client.MockPool
+			mockResponse          *client.MockResponse
+			mockImporter          *importer.MockImporter
+			m                     Manager
+			batch                 = 10
 		)
 		BeforeEach(func() {
 			var err error
 			tmpdir, err = os.MkdirTemp("", "test")
 			Expect(err).NotTo(HaveOccurred())
 
-			nodeFile = filepath.Join(tmpdir, "node1.csv")
-			edgeFile = filepath.Join(tmpdir, "edge1.csv")
-
-			patches = gomonkey.NewPatches()
 			ctrl = gomock.NewController(GinkgoT())
 			mockSource = source.NewMockSource(ctrl)
+			mockBatchRecordReader = reader.NewMockBatchRecordReader(ctrl)
 			mockClient = client.NewMockClient(ctrl)
 			mockClientPool = client.NewMockPool(ctrl)
 			mockResponse = client.NewMockResponse(ctrl)
@@ -124,31 +114,10 @@ var _ = Describe("Manager", func() {
 					Wait:       time.Second,
 				}),
 			)
-
-			fNode, err := os.Create(nodeFile)
-			Expect(err).NotTo(HaveOccurred())
-			defer fNode.Close()
-			for i := 0; i < nodeRecordCount; i++ {
-				fNode.WriteString(fmt.Sprintf("%d,np%d\n", i, i))
-			}
-			fiNode, err := fNode.Stat()
-			Expect(err).NotTo(HaveOccurred())
-			nodeSize = fiNode.Size()
-
-			fEdge, err := os.Create(edgeFile)
-			Expect(err).NotTo(HaveOccurred())
-			defer fEdge.Close()
-			for i := 0; i < edgeRecordCount; i++ {
-				fEdge.WriteString(fmt.Sprintf("%d,%d,ep%d\n", i, i, i))
-			}
-			fiNode, err = fEdge.Stat()
-			Expect(err).NotTo(HaveOccurred())
-			edgeSize = fiNode.Size()
 		})
 
 		AfterEach(func() {
 			ctrl.Finish()
-			patches.Reset()
 			err := os.RemoveAll(tmpdir)
 			Expect(err).NotTo(HaveOccurred())
 		})
@@ -156,15 +125,51 @@ var _ = Describe("Manager", func() {
 		It("concurrency successfully", func() {
 			var err error
 			loopCountPreFile := 10
+
+			fnNewSource := func() source.Source {
+				mockSource = source.NewMockSource(ctrl)
+
+				mockSource.EXPECT().Name().Times(2).Return("source name")
+				mockSource.EXPECT().Open().Times(1).Return(nil)
+				mockSource.EXPECT().Size().Times(1).Return(int64(12345), nil)
+				mockSource.EXPECT().Close().Times(1).Return(nil)
+
+				return mockSource
+			}
+
+			fnNewBatchRecordReader := func(count int64) reader.BatchRecordReader {
+				mockBatchRecordReader = reader.NewMockBatchRecordReader(ctrl)
+				var currBatchRecordReaderCount int64
+				fnReadBatch := func() (int, spec.Records, error) {
+					if curr := atomic.AddInt64(&currBatchRecordReaderCount, 1); curr > count {
+						return 0, nil, io.EOF
+					}
+					return 11, spec.Records{
+						[]string{"0123"},
+						[]string{"4567"},
+						[]string{"890"},
+					}, nil
+				}
+				mockBatchRecordReader.EXPECT().ReadBatch().Times(int(count) + 1).DoAndReturn(fnReadBatch)
+				return mockBatchRecordReader
+			}
+
+			var (
+				batchRecordReaderNodeCount int64 = 1017
+				batchRecordReaderEdgeCount int64 = 1037
+			)
+
 			for i := 0; i < loopCountPreFile; i++ {
 				err = m.Import(
-					&source.Config{Path: nodeFile},
+					fnNewSource(),
+					fnNewBatchRecordReader(batchRecordReaderNodeCount),
 					mockImporter,
 					mockImporter,
 				)
 				Expect(err).NotTo(HaveOccurred())
 				err = m.Import(
-					&source.Config{Path: edgeFile},
+					fnNewSource(),
+					fnNewBatchRecordReader(batchRecordReaderEdgeCount),
 					mockImporter,
 					mockImporter,
 				)
@@ -206,38 +211,41 @@ var _ = Describe("Manager", func() {
 			Expect(err).NotTo(HaveOccurred())
 			s := m.Stats()
 
-			getBatches := func(recordCount int) int {
-				batches := recordCount / batch
-				if recordCount%batch != 0 {
-					batches++
-				}
-				return batches
-			}
-			totalBatches := (getBatches(nodeRecordCount) + getBatches(edgeRecordCount)) * loopCountPreFile
+			totalBatches := (batchRecordReaderNodeCount + batchRecordReaderEdgeCount) * int64(loopCountPreFile)
+			processedBytes := (11*batchRecordReaderNodeCount + 11*batchRecordReaderEdgeCount) * int64(loopCountPreFile)
+			totalBytes := 12345 * int64(loopCountPreFile) * 2
+			totalRecords := totalBatches * 3
 
 			Expect(s.StartTime.IsZero()).To(BeFalse())
-			Expect(s.ProcessedBytes).To(Equal((nodeSize + edgeSize) * int64(loopCountPreFile)))
-			Expect(s.TotalBytes).To(Equal((nodeSize + edgeSize) * int64(loopCountPreFile)))
+			Expect(s.ProcessedBytes).To(Equal(processedBytes))
+			Expect(s.TotalBytes).To(Equal(totalBytes))
 			Expect(s.FailedRecords).NotTo(Equal(int64(0)))
 			Expect(s.FailedRecords).To(BeNumerically("<=", executeFailedTimes*int64(batch)))
-			Expect(s.TotalRecords).To(Equal(int64((nodeRecordCount + edgeRecordCount) * loopCountPreFile)))
+			Expect(s.TotalRecords).To(Equal(totalRecords))
 			Expect(s.FailedRequest).To(Equal(executeFailedTimes))
-			Expect(s.TotalRequest).To(Equal(int64(totalBatches * 2)))
-			Expect(s.TotalLatency).To(Equal(2 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
-			Expect(s.TotalRespTime).To(Equal(3 * time.Microsecond * time.Duration(int64(totalBatches*2)-executeFailedTimes)))
+			Expect(s.TotalRequest).To(Equal(totalBatches * 2))
+			Expect(s.TotalLatency).To(Equal(2 * time.Microsecond * time.Duration((totalBatches*2)-executeFailedTimes)))
+			Expect(s.TotalRespTime).To(Equal(3 * time.Microsecond * time.Duration((totalBatches*2)-executeFailedTimes)))
 			Expect(s.FailedProcessed).NotTo(Equal(int64(0)))
 			Expect(s.FailedRecords).To(BeNumerically("<=", executeFailedTimes*int64(batch)))
-			Expect(s.TotalProcessed).To(Equal(int64((nodeRecordCount + edgeRecordCount) * loopCountPreFile * 2)))
+			Expect(s.TotalProcessed).To(Equal(totalRecords * 2))
 		})
 
 		It("Import without importer", func() {
-			err := m.Import(&source.Config{Path: nodeFile + "not-exists"})
+			err := m.Import(
+				mockSource,
+				mockBatchRecordReader,
+			)
 			Expect(err).NotTo(HaveOccurred())
 		})
 
-		It("Import file not exists", func() {
+		It("source open failed", func() {
+			mockSource.EXPECT().Name().Return("source name")
+			mockSource.EXPECT().Open().Return(os.ErrNotExist)
+
 			err := m.Import(
-				&source.Config{Path: nodeFile + "not-exists"},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).To(HaveOccurred())
@@ -344,10 +352,6 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("stop without read finished", func() {
-			patches.ApplyGlobalVar(&sourceOpen, func(_ *source.Config) (source.Source, error) {
-				return mockSource, nil
-			})
-
 			gomock.InOrder(
 				mockClientPool.EXPECT().GetClient(gomock.Any()).Return(mockClient, nil),
 				mockClient.EXPECT().Execute("before statement").Times(1).Return(mockResponse, nil),
@@ -360,20 +364,24 @@ var _ = Describe("Manager", func() {
 				mockResponse.EXPECT().IsSucceed().Return(true),
 			)
 
+			mockSource.EXPECT().Name().Times(2).Return("source name")
+			mockSource.EXPECT().Open().Return(nil)
 			mockSource.EXPECT().Size().Return(int64(1024*1024*1024*1024), nil)
-			mockSource.EXPECT().Config().Return(&source.Config{})
-			mockSource.EXPECT().Read(gomock.Any()).AnyTimes().DoAndReturn(func(p []byte) (int, error) {
-				n := copy(p, "1,np1\n")
-				return n, nil
-			})
 			mockSource.EXPECT().Close().Return(nil)
+
+			mockBatchRecordReader.EXPECT().ReadBatch().AnyTimes().Return(11, spec.Records{
+				[]string{"0123"},
+				[]string{"4567"},
+				[]string{"890"},
+			}, nil)
 
 			mockImporter.EXPECT().Wait().Times(1)
 			mockImporter.EXPECT().Import(gomock.Any()).AnyTimes().Return(&importer.ImportResp{}, nil)
 			mockImporter.EXPECT().Done().Times(1)
 
 			err := m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
@@ -454,17 +462,24 @@ var _ = Describe("Manager", func() {
 			m.(*defaultManager).hooks.After = nil
 			m.(*defaultManager).readerPool.Release()
 
+			mockSource.EXPECT().Name().Times(2).Return("source name")
+			mockSource.EXPECT().Open().Times(2).Return(nil)
+			mockSource.EXPECT().Size().Times(2).Return(int64(1024), nil)
+			mockSource.EXPECT().Close().Times(2).Return(nil)
+
 			mockClientPool.EXPECT().Open().Return(nil)
 
 			mockImporter.EXPECT().Done().Times(2)
 
 			err := m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
 			err = m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
@@ -481,18 +496,34 @@ var _ = Describe("Manager", func() {
 			m.(*defaultManager).hooks.After = nil
 			m.(*defaultManager).importerPool.Release()
 
+			mockSource.EXPECT().Name().Times(2 + 2).Return("source name")
+			mockSource.EXPECT().Open().Times(2).Return(nil)
+			mockSource.EXPECT().Size().Times(2).Return(int64(1024), nil)
+			mockSource.EXPECT().Close().Times(2).Return(nil)
+
+			gomock.InOrder(
+				mockBatchRecordReader.EXPECT().ReadBatch().Times(2).Return(11, spec.Records{
+					[]string{"0123"},
+					[]string{"4567"},
+					[]string{"890"},
+				}, nil),
+				mockBatchRecordReader.EXPECT().ReadBatch().Times(2).Return(0, spec.Records(nil), io.EOF),
+			)
+
 			mockClientPool.EXPECT().Open().Return(nil)
 
 			mockImporter.EXPECT().Wait().Times(2)
 			mockImporter.EXPECT().Done().Times(2)
 
 			err := m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
 			err = m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
@@ -507,22 +538,24 @@ var _ = Describe("Manager", func() {
 		It("get size failed", func() {
 			m.(*defaultManager).hooks.Before = nil
 			m.(*defaultManager).hooks.After = nil
-			patches.ApplyGlobalVar(&sourceOpen, func(_ *source.Config) (source.Source, error) {
-				return mockSource, nil
-			})
 
+			mockSource.EXPECT().Name().Times(2).Return("source name")
+			mockSource.EXPECT().Open().Times(2).Return(nil)
 			mockSource.EXPECT().Size().Times(2).Return(int64(0), stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
 
 			err := m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("test error"))
 
 			err = m.Import(
-				&source.Config{Path: nodeFile}, mockImporter,
+				mockSource,
+				mockBatchRecordReader,
+				mockImporter,
 			)
 			Expect(err).To(HaveOccurred())
 			Expect(err.Error()).To(ContainSubstring("test error"))
@@ -531,26 +564,27 @@ var _ = Describe("Manager", func() {
 		It("read failed", func() {
 			m.(*defaultManager).hooks.Before = nil
 			m.(*defaultManager).hooks.After = nil
-			patches.ApplyGlobalVar(&sourceOpen, func(_ *source.Config) (source.Source, error) {
-				return mockSource, nil
-			})
 
 			mockClientPool.EXPECT().Open().Return(nil)
+			mockSource.EXPECT().Name().Times(2 + 2).Return("source name")
+			mockSource.EXPECT().Open().Times(2).Return(nil)
 			mockSource.EXPECT().Size().Times(2).Return(int64(1024), nil)
-			mockSource.EXPECT().Config().Times(2).Return(nil)
-			mockSource.EXPECT().Read(gomock.Any()).Times(2).Return(0, stderrors.New("test error"))
 			mockSource.EXPECT().Close().Times(2).Return(nil)
+
+			mockBatchRecordReader.EXPECT().ReadBatch().Times(2).Return(0, spec.Records(nil), stderrors.New("test error"))
 
 			mockImporter.EXPECT().Wait().Times(2)
 			mockImporter.EXPECT().Done().Times(2)
 
 			err := m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())
 			err = m.Import(
-				&source.Config{Path: nodeFile},
+				mockSource,
+				mockBatchRecordReader,
 				mockImporter,
 			)
 			Expect(err).NotTo(HaveOccurred())

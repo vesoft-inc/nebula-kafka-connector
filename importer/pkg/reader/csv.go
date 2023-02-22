@@ -17,7 +17,7 @@ type (
 	}
 
 	csvReader struct {
-		s  source.Source
+		*baseReader
 		rr *remainingReader
 		br *bufio.Reader
 		cr *csv.Reader
@@ -46,7 +46,9 @@ func NewCSVReader(s source.Source) RecordReader {
 	}
 
 	return &csvReader{
-		s:  s,
+		baseReader: &baseReader{
+			s: s,
+		},
 		rr: rr,
 		br: br,
 		cr: cr,

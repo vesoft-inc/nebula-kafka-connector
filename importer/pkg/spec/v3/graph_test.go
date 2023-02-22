@@ -175,12 +175,12 @@ var _ = Describe("Graph", func() {
 			node := graph.Nodes[0]
 			statement, err := graph.InsertNodeStatement(node, []string{"1"})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(statement).To(Equal("INSERT VERTEX `node1`() VALUES 1:()"))
+			Expect(statement).To(Equal("INSERT VERTEX IGNORE_EXISTED_INDEX `node1`() VALUES 1:()"))
 
 			b := graph.InsertNodeBuilder(node)
 			statement, err = b.Build([]string{"1"})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(statement).To(Equal("INSERT VERTEX `node1`() VALUES 1:()"))
+			Expect(statement).To(Equal("INSERT VERTEX IGNORE_EXISTED_INDEX `node1`() VALUES 1:()"))
 		})
 
 		It("failed", func() {
@@ -234,12 +234,12 @@ var _ = Describe("Graph", func() {
 			edge := graph.Edges[0]
 			statement, err := graph.InsertEdgeStatement(edge, []string{"1", "2"})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(statement).To(Equal("INSERT EDGE `edge1`() VALUES 1->2:()"))
+			Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `edge1`() VALUES 1->2:()"))
 
 			b := graph.InsertEdgeBuilder(edge)
 			statement, err = b.Build([]string{"1", "2"})
 			Expect(err).NotTo(HaveOccurred())
-			Expect(statement).To(Equal("INSERT EDGE `edge1`() VALUES 1->2:()"))
+			Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `edge1`() VALUES 1->2:()"))
 		})
 
 		It("failed", func() {

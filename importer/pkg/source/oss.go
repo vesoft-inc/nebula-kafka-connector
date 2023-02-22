@@ -12,61 +12,80 @@ import (
 var _ Source = (*ossSource)(nil)
 
 type (
+	OSSConfig struct {
+		Endpoint  string `yaml:"endpoint,omitempty"`
+		AccessKey string `yaml:"accessKey,omitempty"`
+		SecretKey string `yaml:"secretKey,omitempty"`
+		Bucket    string `yaml:"bucket,omitempty"`
+		Key       string `yaml:"key,omitempty"`
+	}
+
 	ossSource struct {
-		c    *Config
-		obj  io.ReadCloser
-		size int64
+		c      *Config
+		cli    *oss.Client
+		bucket *oss.Bucket
+		r      io.ReadCloser
 	}
 )
 
-func openOSSFile(c *Config) (*ossSource, error) {
-	client, err := oss.New(c.OSS.Endpoint, c.OSS.AccessKey, c.OSS.SecretKey)
+func newOSSSource(c *Config) Source {
+	return &ossSource{
+		c: c,
+	}
+}
+
+func (s *ossSource) Name() string {
+	return s.c.OSS.String()
+}
+
+func (s *ossSource) Open() error {
+	cli, err := oss.New(s.c.OSS.Endpoint, s.c.OSS.AccessKey, s.c.OSS.SecretKey)
 	if err != nil {
-		return nil, fmt.Errorf("create oss client faild: %w", err)
+		return err
 	}
 
-	bucket, err := client.Bucket(c.OSS.Bucket)
+	bucket, err := cli.Bucket(s.c.OSS.Bucket)
 	if err != nil {
-		return nil, fmt.Errorf("get oss bucket faild: %w", err)
+		return err
 	}
 
-	// get object size
-	key := strings.TrimLeft(c.OSS.Key, "/")
-	meta, err := bucket.GetObjectMeta(key)
+	r, err := bucket.GetObject(strings.TrimLeft(s.c.OSS.Key, "/"))
 	if err != nil {
-		return nil, err
+		return err
+	}
+
+	s.cli = cli
+	s.bucket = bucket
+	s.r = r
+
+	return nil
+}
+
+func (s *ossSource) Config() *Config {
+	return s.c
+}
+
+func (s *ossSource) Size() (int64, error) {
+	meta, err := s.bucket.GetObjectMeta(strings.TrimLeft(s.c.OSS.Key, "/"))
+	if err != nil {
+		return 0, err
 	}
 	contentLength := meta.Get("Content-Length")
 	size, err := strconv.ParseInt(contentLength, 10, 64)
 	if err != nil {
-		return nil, err
+		return 0, err
 	}
-
-	// get object
-	obj, err := bucket.GetObject(key)
-	if err != nil {
-		return nil, err
-	}
-
-	return &ossSource{
-		c:    c,
-		obj:  obj,
-		size: size,
-	}, nil
+	return size, nil
 }
 
-func (o *ossSource) Config() *Config {
-	return o.c
+func (s *ossSource) Read(p []byte) (int, error) {
+	return s.r.Read(p)
 }
 
-func (o *ossSource) Size() (int64, error) {
-	return o.size, nil
+func (s *ossSource) Close() error {
+	return s.r.Close()
 }
 
-func (o *ossSource) Read(p []byte) (int, error) {
-	return o.obj.Read(p)
-}
-
-func (o *ossSource) Close() error {
-	return o.obj.Close()
+func (c *OSSConfig) String() string {
+	return fmt.Sprintf("oss %s %s/%s", c.Endpoint, c.Bucket, c.Key)
 }

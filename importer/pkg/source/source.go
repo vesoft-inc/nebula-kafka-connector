@@ -8,6 +8,8 @@ import (
 type (
 	Source interface {
 		Config() *Config
+		Name() string
+		Open() error
 		Sizer
 		io.Reader
 		io.Closer
@@ -18,20 +20,20 @@ type (
 	}
 )
 
-func Open(c *Config) (Source, error) {
+func New(c *Config) (Source, error) {
 	// TODO: support blob and so on
 	switch {
 	case c.S3 != nil:
-		return openS3File(c)
+		return newS3Source(c), nil
 	case c.OSS != nil:
-		return openOSSFile(c)
+		return newOSSSource(c), nil
 	case c.FTP != nil:
-		return openFTPFile(c)
+		return newFTPSource(c), nil
 	case c.SFTP != nil:
-		return openSFTPFile(c)
+		return newSFTPSource(c), nil
 	case c.HDFS != nil:
-		return openHDFSFile(c)
+		return newHDFSSource(c), nil
 	default:
-		return openLocalFile(c)
+		return newLocalSource(c), nil
 	}
 }

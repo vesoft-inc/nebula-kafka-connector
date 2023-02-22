@@ -2,7 +2,7 @@ package source
 
 import (
 	"fmt"
-	"io"
+	"os"
 	"time"
 
 	"github.com/pkg/sftp"
@@ -12,51 +12,78 @@ import (
 var _ Source = (*sftpSource)(nil)
 
 type (
+	SFTPConfig struct {
+		Host       string `yaml:"host,omitempty"`
+		Port       int    `yaml:"port,omitempty"`
+		User       string `yaml:"user,omitempty"`
+		Password   string `yaml:"password,omitempty"`
+		KeyFile    string `yaml:"keyFile,omitempty"`
+		KeyData    string `yaml:"keyData,omitempty"`
+		Passphrase string `yaml:"passphrase,omitempty"`
+		Path       string `yaml:"path,omitempty"`
+	}
+
 	sftpSource struct {
-		c    *Config
-		obj  io.ReadCloser
-		size int64
+		c       *Config
+		sshCli  *ssh.Client
+		sftpCli *sftp.Client
+		f       *sftp.File
 	}
 )
 
-func openSFTPFile(c *Config) (*sftpSource, error) {
-	// open connection to SFTP server
-	authMethod, err := getSSHAuthMethod(c.SFTP.SSHPwd, c.SFTP.SSHKey, c.SFTP.Passphrase)
-	if err != nil {
-		return nil, err
+func newSFTPSource(c *Config) Source {
+	return &sftpSource{
+		c: c,
 	}
-	conn, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", c.SFTP.Host, c.SFTP.Port), &ssh.ClientConfig{
-		User:            c.SFTP.SSHUser,
+}
+
+func (s *sftpSource) Name() string {
+	return s.c.SFTP.String()
+}
+
+func (s *sftpSource) Open() error {
+	keyData := s.c.SFTP.KeyData
+	if keyData == "" && s.c.SFTP.KeyFile != "" {
+		keyDataBytes, err := os.ReadFile(s.c.SFTP.KeyFile)
+		if err != nil {
+			return err
+		}
+		keyData = string(keyDataBytes)
+	}
+
+	authMethod, err := getSSHAuthMethod(s.c.SFTP.Password, keyData, s.c.SFTP.Passphrase)
+	if err != nil {
+		return err
+	}
+
+	sshCli, err := ssh.Dial("tcp", fmt.Sprintf("%s:%d", s.c.SFTP.Host, s.c.SFTP.Port), &ssh.ClientConfig{
+		User:            s.c.SFTP.User,
 		Auth:            []ssh.AuthMethod{authMethod},
 		Timeout:         time.Second * 5,
 		HostKeyCallback: ssh.InsecureIgnoreHostKey(), //nolint: gosec
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	client, err := sftp.NewClient(conn)
+	sftpCli, err := sftp.NewClient(sshCli)
 	if err != nil {
-		return nil, err
+		_ = sshCli.Close()
+		return err
 	}
 
-	// open the file
-	obj, err := client.Open(c.SFTP.Path)
+	f, err := sftpCli.Open(s.c.SFTP.Path)
 	if err != nil {
-		return nil, err
+		_ = sftpCli.Close()
+		_ = sshCli.Close()
+		return err
 	}
 
-	// get the file size
-	stat, err := obj.Stat()
-	if err != nil {
-		return nil, err
-	}
+	s.sshCli = sshCli
+	s.sftpCli = sftpCli
+	s.f = f
 
-	return &sftpSource{
-		c:    c,
-		obj:  obj,
-		size: stat.Size(),
-	}, nil
+	return nil
 }
 
 func (s *sftpSource) Config() *Config {
@@ -64,26 +91,34 @@ func (s *sftpSource) Config() *Config {
 }
 
 func (s *sftpSource) Size() (int64, error) {
-	return s.size, nil
+	fi, err := s.f.Stat()
+	if err != nil {
+		return 0, err
+	}
+	return fi.Size(), nil
 }
 
 func (s *sftpSource) Read(p []byte) (int, error) {
-	return s.obj.Read(p)
+	return s.f.Read(p)
 }
 
 func (s *sftpSource) Close() error {
-	return s.obj.Close()
+	defer func() {
+		_ = s.sftpCli.Close()
+		_ = s.sshCli.Close()
+	}()
+	return s.f.Close()
 }
 
-func getSSHAuthMethod(sshPwd, sshKey, passphrase string) (ssh.AuthMethod, error) {
-	if sshKey != "" {
-		key, err := getSSHSigner(sshKey, passphrase)
+func getSSHAuthMethod(password, keyData, passphrase string) (ssh.AuthMethod, error) {
+	if keyData != "" {
+		key, err := getSSHSigner(keyData, passphrase)
 		if err != nil {
 			return nil, err
 		}
 		return ssh.PublicKeys(key), nil
 	}
-	return ssh.Password(sshPwd), nil
+	return ssh.Password(password), nil
 }
 
 func getSSHSigner(keyData, passphrase string) (ssh.Signer, error) {
@@ -91,4 +126,8 @@ func getSSHSigner(keyData, passphrase string) (ssh.Signer, error) {
 		return ssh.ParsePrivateKeyWithPassphrase([]byte(keyData), []byte(passphrase))
 	}
 	return ssh.ParsePrivateKey([]byte(keyData))
+}
+
+func (c *SFTPConfig) String() string {
+	return fmt.Sprintf("sftp %s:%d %s", c.Host, c.Port, c.Path)
 }

@@ -2,53 +2,88 @@ package source
 
 import (
 	"fmt"
-	"io"
+	"strings"
 
 	"github.com/colinmarc/hdfs/v2"
+	"github.com/colinmarc/hdfs/v2/hadoopconf"
 )
 
 var _ Source = (*hdfsSource)(nil)
 
 type (
+	HDFSConfig struct {
+		Address string `yaml:"address,omitempty"`
+		User    string `yaml:"user,omitempty"`
+		Path    string `yaml:"path,omitempty"`
+	}
+
 	hdfsSource struct {
-		c    *Config
-		obj  io.ReadCloser
-		size int64
+		c   *Config
+		cli *hdfs.Client
+		r   *hdfs.FileReader
 	}
 )
 
-func openHDFSFile(c *Config) (*hdfsSource, error) {
-	// open connection to HDFS server
-	client, err := hdfs.New(fmt.Sprintf("%s:%d", c.HDFS.Host, c.HDFS.Port))
-	if err != nil {
-		return nil, err
-	}
-
-	// open the file
-	obj, err := client.Open(c.HDFS.Path)
-	if err != nil {
-		return nil, err
-	}
-
+func newHDFSSource(c *Config) Source {
 	return &hdfsSource{
-		c:    c,
-		obj:  obj,
-		size: obj.Stat().Size(),
-	}, nil
+		c: c,
+	}
 }
 
-func (o *hdfsSource) Config() *Config {
-	return o.c
+func (s *hdfsSource) Name() string {
+	return s.c.HDFS.String()
 }
 
-func (o *hdfsSource) Size() (int64, error) {
-	return o.size, nil
+func (s *hdfsSource) Open() error {
+	// TODO: support kerberos
+	conf, err := hadoopconf.LoadFromEnvironment()
+	if err != nil {
+		return err
+	}
+
+	options := hdfs.ClientOptionsFromConf(conf)
+	if s.c.HDFS.Address != "" {
+		options.Addresses = strings.Split(s.c.HDFS.Address, ",")
+	}
+
+	cli, err := hdfs.NewClient(hdfs.ClientOptions{
+		Addresses: strings.Split(s.c.HDFS.Address, ","),
+		User:      s.c.HDFS.User,
+	})
+	if err != nil {
+		return err
+	}
+
+	r, err := cli.Open(s.c.HDFS.Path)
+	if err != nil {
+		return err
+	}
+
+	s.cli = cli
+	s.r = r
+
+	return nil
 }
 
-func (o *hdfsSource) Read(p []byte) (int, error) {
-	return o.obj.Read(p)
+func (s *hdfsSource) Config() *Config {
+	return s.c
 }
 
-func (o *hdfsSource) Close() error {
-	return o.obj.Close()
+func (s *hdfsSource) Size() (int64, error) {
+	return s.r.Stat().Size(), nil
+}
+
+func (s *hdfsSource) Read(p []byte) (int, error) {
+	return s.r.Read(p)
+}
+
+func (s *hdfsSource) Close() error {
+	defer func() {
+		_ = s.cli.Close()
+	}()
+	return s.r.Close()
+}
+
+func (c *HDFSConfig) String() string {
+	return fmt.Sprintf("hdfs %s %s", c.Address, c.Path)
 }

@@ -267,13 +267,13 @@ var _ = Describe("Edge", func() {
 			It("one record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`() VALUES 1->\"id1\":()"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`() VALUES 1->\"id1\":()"))
 			})
 
 			It("two record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`() VALUES 1->\"id1\":(), 2->\"id2\":()"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`() VALUES 1->\"id1\":(), 2->\"id2\":()"))
 			})
 
 			It("src failed", func() {
@@ -324,13 +324,13 @@ var _ = Describe("Edge", func() {
 			It("one record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`) VALUES 1->\"id1\":(\"str1\")"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`(`prop1`) VALUES 1->\"id1\":(\"str1\")"))
 			})
 
 			It("two record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`) VALUES 1->\"id1\":(\"str1\"), 2->\"id2\":(\"str2\")"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`(`prop1`) VALUES 1->\"id1\":(\"str1\"), 2->\"id2\":(\"str2\")"))
 			})
 
 			It("src failed", func() {
@@ -389,13 +389,13 @@ var _ = Describe("Edge", func() {
 			It("one record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\":(\"str1\", 1.1)"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`(`prop1`, `prop2`) VALUES 1->\"id1\":(\"str1\", 1.1)"))
 			})
 
 			It("two record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1.1", "str1"}, []string{"2", "id2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\":(\"str1\", 1.1), 2->\"id2\":(\"str2\", 2.2)"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`(`prop1`, `prop2`) VALUES 1->\"id1\":(\"str1\", 1.1), 2->\"id2\":(\"str2\", 2.2)"))
 			})
 
 			It("src failed", func() {
@@ -455,13 +455,13 @@ var _ = Describe("Edge", func() {
 			It("one record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1", "1.1", "str1"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\"@1:(\"str1\", 1.1)"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`(`prop1`, `prop2`) VALUES 1->\"id1\"@1:(\"str1\", 1.1)"))
 			})
 
 			It("two record", func() {
 				statement, err := edge.InsertStatement([]string{"1", "id1", "1", "1.1", "str1"}, []string{"2", "id2", "2", "2.2", "str2"})
 				Expect(err).NotTo(HaveOccurred())
-				Expect(statement).To(Equal("INSERT EDGE `name`(`prop1`, `prop2`) VALUES 1->\"id1\"@1:(\"str1\", 1.1), 2->\"id2\"@2:(\"str2\", 2.2)"))
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`(`prop1`, `prop2`) VALUES 1->\"id1\"@1:(\"str1\", 1.1), 2->\"id2\"@2:(\"str2\", 2.2)"))
 			})
 
 			It("src failed", func() {
@@ -490,6 +490,67 @@ var _ = Describe("Edge", func() {
 				Expect(err).To(HaveOccurred())
 				Expect(stderrors.Is(err, errors.ErrNoRecord)).To(BeTrue())
 				Expect(statement).To(BeEmpty())
+			})
+		})
+
+		When("WithEdgeIgnoreExistedIndex", func() {
+			It("WithEdgeIgnoreExistedIndex false", func() {
+				edge := NewEdge(
+					"name",
+					WithEdgeSrc(&EdgeNodeRef{
+						Name: "srcNodeName",
+						ID: &NodeID{
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
+						},
+					}),
+					WithEdgeDst(&EdgeNodeRef{
+						Name: "dstNodeName",
+						ID: &NodeID{
+							Name:  "id",
+							Type:  ValueTypeString,
+							Index: 1,
+						},
+					}),
+					WithEdgeIgnoreExistedIndex(false),
+				)
+				edge.Complete()
+				err := edge.Validate()
+				Expect(err).NotTo(HaveOccurred())
+
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(statement).To(Equal("INSERT EDGE `name`() VALUES 1->\"id1\":()"))
+			})
+			It("WithEdgeIgnoreExistedIndex true", func() {
+				edge := NewEdge(
+					"name",
+					WithEdgeSrc(&EdgeNodeRef{
+						Name: "srcNodeName",
+						ID: &NodeID{
+							Name:  "id",
+							Type:  ValueTypeInt,
+							Index: 0,
+						},
+					}),
+					WithEdgeDst(&EdgeNodeRef{
+						Name: "dstNodeName",
+						ID: &NodeID{
+							Name:  "id",
+							Type:  ValueTypeString,
+							Index: 1,
+						},
+					}),
+					WithEdgeIgnoreExistedIndex(true),
+				)
+				edge.Complete()
+				err := edge.Validate()
+				Expect(err).NotTo(HaveOccurred())
+
+				statement, err := edge.InsertStatement([]string{"1", "id1"})
+				Expect(err).NotTo(HaveOccurred())
+				Expect(statement).To(Equal("INSERT EDGE IGNORE_EXISTED_INDEX `name`() VALUES 1->\"id1\":()"))
 			})
 		})
 	})

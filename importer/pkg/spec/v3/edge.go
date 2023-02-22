@@ -17,6 +17,8 @@ type (
 		Rank  *Rank        `yaml:"rank"`
 		Props Props        `yaml:"props,omitempty"`
 
+		IgnoreExistedIndex *bool `yaml:"ignoreExistedIndex,omitempty"`
+
 		fnInsertStatement func(records ...Record) (string, error)
 		insertPrefix      string // "INSERT EDGE name(prop_name, ..., prop_name) VALUES "
 	}
@@ -64,6 +66,12 @@ func WithEdgeProps(props ...*Prop) EdgeOption {
 	}
 }
 
+func WithEdgeIgnoreExistedIndex(ignore bool) EdgeOption {
+	return func(e *Edge) {
+		e.IgnoreExistedIndex = &ignore
+	}
+}
+
 func (e *Edge) Options(opts ...EdgeOption) *Edge {
 	for _, opt := range opts {
 		opt(e)
@@ -95,8 +103,14 @@ func (e *Edge) Complete() {
 
 	e.Props.Complete()
 
+	// default enable IGNORE_EXISTED_INDEX
+	insertPrefixFmt := "INSERT EDGE IGNORE_EXISTED_INDEX %s(%s) VALUES "
+	if e.IgnoreExistedIndex != nil && !*e.IgnoreExistedIndex {
+		insertPrefixFmt = "INSERT EDGE %s(%s) VALUES "
+	}
+
 	e.insertPrefix = fmt.Sprintf(
-		"INSERT EDGE %s(%s) VALUES ",
+		insertPrefixFmt,
 		utils.ConvertIdentifier(e.Name),
 		strings.Join(e.Props.NameList(), ", "),
 	)

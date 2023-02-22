@@ -3,6 +3,7 @@ package configv5
 import (
 	"path/filepath"
 
+	configbase "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/base"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	specv5 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec/v5"
 
@@ -20,8 +21,12 @@ var _ = Describe("Manager", func() {
 				},
 				Sources: Sources{
 					{
-						SourceConfig: source.Config{
-							Path: filepath.Join("testdata", "file10"),
+						Source: configbase.Source{
+							SourceConfig: source.Config{
+								Local: &source.LocalConfig{
+									Path: filepath.Join("testdata", "file10"),
+								},
+							},
 						},
 						Nodes: specv5.Nodes{
 							&specv5.Node{
@@ -44,7 +49,9 @@ var _ = Describe("Manager", func() {
 		})
 
 		It("Importer failed", func() {
-			c.Sources[0].SourceConfig.Path = filepath.Join("testdata", "not-exists.csv")
+			c.Sources[0].SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "not-exists.csv"),
+			}
 			Expect(c.Build()).To(HaveOccurred())
 		})
 

@@ -72,7 +72,7 @@ func (c *Config) Build() error {
 	if err != nil {
 		return err
 	}
-	mgr, err = c.Manager.BuildManager(c.wgMap, pool, c.Sources, manager.WithLogger(l))
+	mgr, err = c.Manager.BuildManager(c.wgMap, l, pool, c.Sources)
 	if err != nil {
 		return err
 	}

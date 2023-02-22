@@ -16,6 +16,8 @@ type (
 		ID    *NodeID `yaml:"id"`
 		Props Props   `yaml:"props,omitempty"`
 
+		IgnoreExistedIndex *bool `yaml:"ignoreExistedIndex,omitempty"`
+
 		insertPrefix string // // "INSERT EDGE name(prop_name, ..., prop_name) VALUES "
 	}
 
@@ -45,6 +47,12 @@ func WithNodeProps(props ...*Prop) NodeOption {
 	}
 }
 
+func WithNodeIgnoreExistedIndex(ignore bool) NodeOption {
+	return func(n *Node) {
+		n.IgnoreExistedIndex = &ignore
+	}
+}
+
 func (n *Node) Options(opts ...NodeOption) *Node {
 	for _, opt := range opts {
 		opt(n)
@@ -59,8 +67,13 @@ func (n *Node) Complete() {
 	}
 	n.Props.Complete()
 
+	// default enable IGNORE_EXISTED_INDEX
+	insertPrefixFmt := "INSERT VERTEX IGNORE_EXISTED_INDEX %s(%s) VALUES "
+	if n.IgnoreExistedIndex != nil && !*n.IgnoreExistedIndex {
+		insertPrefixFmt = "INSERT VERTEX %s(%s) VALUES "
+	}
 	n.insertPrefix = fmt.Sprintf(
-		"INSERT VERTEX %s(%s) VALUES ",
+		insertPrefixFmt,
 		utils.ConvertIdentifier(n.Name),
 		strings.Join(n.Props.NameList(), ", "),
 	)

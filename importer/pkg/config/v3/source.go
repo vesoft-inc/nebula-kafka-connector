@@ -6,17 +6,17 @@ import (
 	"path/filepath"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
+	configbase "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/base"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	specv3 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec/v3"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/utils"
 )
 
 type (
 	Source struct {
-		SourceConfig source.Config `yaml:",inline"`
-		Nodes        specv3.Nodes  `yaml:"tags,omitempty"`
-		Edges        specv3.Edges  `yaml:"edges,omitempty"`
+		configbase.Source `yaml:",inline"`
+		Nodes             specv3.Nodes `yaml:"tags,omitempty"`
+		Edges             specv3.Edges `yaml:"edges,omitempty"`
 	}
 
 	Sources []Source
@@ -67,7 +67,9 @@ func (s *Source) BuildImporters(graphName string, pool client.Pool) ([]importer.
 func (ss Sources) OptimizePath(configPath string) error {
 	configPathDir := filepath.Dir(configPath)
 	for i := range ss {
-		ss[i].SourceConfig.Path = utils.RelativePathBaseOn(configPathDir, ss[i].SourceConfig.Path)
+		if ss[i].SourceConfig.Local != nil {
+			ss[i].SourceConfig.Local.Path = utils.RelativePathBaseOn(configPathDir, ss[i].SourceConfig.Local.Path)
+		}
 	}
 	return nil
 }
@@ -76,18 +78,22 @@ func (ss Sources) OptimizePath(configPath string) error {
 func (ss *Sources) OptimizePathWildCard() error {
 	nss := make(Sources, 0, len(*ss))
 	for i := range *ss {
-		paths, err := filepath.Glob((*ss)[i].SourceConfig.Path)
-		if err != nil {
-			return err
-		}
-		if len(paths) == 0 {
-			return &os.PathError{Op: "open", Path: (*ss)[i].SourceConfig.Path, Err: fs.ErrNotExist}
-		}
+		if (*ss)[i].SourceConfig.Local != nil {
+			paths, err := filepath.Glob((*ss)[i].SourceConfig.Local.Path)
+			if err != nil {
+				return err
+			}
+			if len(paths) == 0 {
+				return &os.PathError{Op: "open", Path: (*ss)[i].SourceConfig.Local.Path, Err: fs.ErrNotExist}
+			}
 
-		for _, path := range paths {
-			cpy := (*ss)[i]
-			cpy.SourceConfig.Path = path
-			nss = append(nss, cpy)
+			for _, path := range paths {
+				cpy := (*ss)[i]
+				cpySourceConfig := cpy.SourceConfig.Clone()
+				cpy.SourceConfig = *cpySourceConfig
+				cpy.SourceConfig.Local.Path = path
+				nss = append(nss, cpy)
+			}
 		}
 	}
 	*ss = nss

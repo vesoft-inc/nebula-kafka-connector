@@ -25,11 +25,9 @@ const (
 	DefaultStatsInterval       = time.Second * 10
 )
 
-var sourceOpen = source.Open
-
 type (
 	Manager interface {
-		Import(sourceConfig *source.Config, importers ...importer.Importer) error
+		Import(s source.Source, brr reader.BatchRecordReader, importers ...importer.Importer) error
 		Start() error
 		Wait() error
 		Stats() *stats.Stats
@@ -157,15 +155,16 @@ func WithLogger(l logger.Logger) Option {
 	}
 }
 
-func (m *defaultManager) Import(sourceConfig *source.Config, importers ...importer.Importer) error {
+func (m *defaultManager) Import(s source.Source, brr reader.BatchRecordReader, importers ...importer.Importer) error {
 	if len(importers) == 0 {
 		return nil
 	}
-	log := m.logger.With(logger.Field{Key: "source", Value: sourceConfig.String()})
-	s, err := sourceOpen(sourceConfig)
-	if err != nil {
+
+	logSourceField := logger.Field{Key: "source", Value: s.Name()}
+
+	if err := s.Open(); err != nil {
 		err = errors.NewImportError(err, "manager: open import source failed").SetGraphName(m.graphName)
-		m.logError(err, "")
+		m.logError(err, "", logSourceField)
 		return err
 	}
 
@@ -173,13 +172,10 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 	if err != nil {
 		_ = s.Close()
 		err = errors.NewImportError(err, "manager: get size of import source failed").SetGraphName(m.graphName)
-		m.logError(err, "")
+		m.logError(err, "", logSourceField)
 		return err
 	}
 	m.stats.AddTotalBytes(nBytes)
-
-	rr := reader.NewRecordReader(s)
-	bcr := reader.NewBatchRecordReader(rr, m.batch, reader.WithLogger(log))
 
 	m.readerWaitGroup.Add(1)
 	cleanup := func() {
@@ -198,15 +194,15 @@ func (m *defaultManager) Import(sourceConfig *source.Config, importers ...import
 			for _, i := range importers {
 				i.Wait()
 			}
-			_ = m.loopImport(bcr, importers...)
+			_ = m.loopImport(s, brr, importers...)
 		})
 		if err != nil {
 			cleanup()
-			m.logError(err, "manager: submit reader failed")
+			m.logError(err, "manager: submit reader failed", logSourceField)
 		}
 	}()
 
-	log.Info("manager: add import source successfully")
+	m.logger.Info("manager: add import source successfully", logSourceField)
 	return nil
 }
 
@@ -328,7 +324,8 @@ func (m *defaultManager) execHooks(name HookName) error {
 	return nil
 }
 
-func (m *defaultManager) loopImport(r reader.BatchRecordReader, importers ...importer.Importer) error {
+func (m *defaultManager) loopImport(s source.Source, r reader.BatchRecordReader, importers ...importer.Importer) error {
+	logSourceField := logger.Field{Key: "source", Value: s.Name()}
 	for {
 		select {
 		case <-m.done:
@@ -338,7 +335,7 @@ func (m *defaultManager) loopImport(r reader.BatchRecordReader, importers ...imp
 			if err != nil {
 				if err != io.EOF {
 					err = errors.NewImportError(err, "manager: read batch failed").SetGraphName(m.graphName)
-					m.logError(err, "")
+					m.logError(err, "", logSourceField)
 					return err
 				}
 				return nil
@@ -413,7 +410,7 @@ func (m *defaultManager) onRequestSucceeded(records spec.Records, result *import
 	m.stats.RequestSucceeded(int64(len(records)), result.Latency, result.RespTime)
 }
 
-func (m *defaultManager) logError(err error, msg string, fields ...logger.Field) { //nolint:unparam
+func (m *defaultManager) logError(err error, msg string, fields ...logger.Field) {
 	e := errors.AsOrNewImportError(err)
 	fields = append(fields, logger.MapToFields(e.Fields())...)
 	m.logger.SkipCaller(1).WithError(e.Cause()).Error(msg, fields...)

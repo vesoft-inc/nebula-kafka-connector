@@ -16,11 +16,15 @@ var _ = Describe("csvReader", func() {
 		var s source.Source
 		BeforeEach(func() {
 			var err error
-			s, err = source.Open(&source.Config{
-				Path: "testdata/local.csv",
+			s, err = source.New(&source.Config{
+				Local: &source.LocalConfig{
+					Path: "testdata/local.csv",
+				},
 			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(s).NotTo(BeNil())
+			err = s.Open()
+			Expect(err).NotTo(HaveOccurred())
 		})
 		AfterEach(func() {
 			err := s.Close()
@@ -71,14 +75,18 @@ var _ = Describe("csvReader", func() {
 		var s source.Source
 		BeforeEach(func() {
 			var err error
-			s, err = source.Open(&source.Config{
-				Path: "testdata/local_delimiter.csv",
+			s, err = source.New(&source.Config{
+				Local: &source.LocalConfig{
+					Path: "testdata/local_delimiter.csv",
+				},
 				CSV: &source.CSVConfig{
 					Delimiter: "|",
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(s).NotTo(BeNil())
+			err = s.Open()
+			Expect(err).NotTo(HaveOccurred())
 		})
 		AfterEach(func() {
 			err := s.Close()
@@ -129,14 +137,18 @@ var _ = Describe("csvReader", func() {
 		var s source.Source
 		BeforeEach(func() {
 			var err error
-			s, err = source.Open(&source.Config{
-				Path: "testdata/local_withHeader.csv",
+			s, err = source.New(&source.Config{
+				Local: &source.LocalConfig{
+					Path: "testdata/local_withHeader.csv",
+				},
 				CSV: &source.CSVConfig{
 					WithHeader: true,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(s).NotTo(BeNil())
+			err = s.Open()
+			Expect(err).NotTo(HaveOccurred())
 		})
 		AfterEach(func() {
 			err := s.Close()
@@ -172,14 +184,18 @@ var _ = Describe("csvReader", func() {
 		var s source.Source
 		BeforeEach(func() {
 			var err error
-			s, err = source.Open(&source.Config{
-				Path: "testdata/local_withHeader_failed.csv",
+			s, err = source.New(&source.Config{
+				Local: &source.LocalConfig{
+					Path: "testdata/local_withHeader_failed.csv",
+				},
 				CSV: &source.CSVConfig{
 					WithHeader: true,
 				},
 			})
 			Expect(err).NotTo(HaveOccurred())
 			Expect(s).NotTo(BeNil())
+			err = s.Open()
+			Expect(err).NotTo(HaveOccurred())
 		})
 		AfterEach(func() {
 			err := s.Close()

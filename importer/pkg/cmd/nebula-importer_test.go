@@ -107,7 +107,7 @@ var _ = Describe("ImporterCommand", func() {
 
 	It("manager start failed", func() {
 		patches.ApplyFuncReturn(manager.NewWithOpts, mockManager)
-		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+		mockManager.EXPECT().Import(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 		mockManager.EXPECT().Start().Return(stderrors.New("test error"))
 
 		o := NewImporterOptions(common.IOStreams{
@@ -127,7 +127,7 @@ var _ = Describe("ImporterCommand", func() {
 
 	It("manager wait failed", func() {
 		patches.ApplyFuncReturn(manager.NewWithOpts, mockManager)
-		mockManager.EXPECT().Import(gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
+		mockManager.EXPECT().Import(gomock.Any(), gomock.Any(), gomock.Any()).AnyTimes().Return(nil)
 		mockManager.EXPECT().Start().Return(nil)
 		mockManager.EXPECT().Wait().Return(stderrors.New("test error"))
 

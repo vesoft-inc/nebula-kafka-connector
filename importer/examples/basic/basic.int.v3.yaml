@@ -34,6 +34,7 @@ sources:
       id:
         type: "INT"
         index: 0
+      ignoreExistedIndex: true
       props:
         - name: "firstName"
           type: "STRING"
@@ -68,6 +69,7 @@ sources:
         type: "INT"
         index: 0
         function: hash
+      ignoreExistedIndex: true
       props:
         - name: "firstName"
           type: "STRING"
@@ -108,6 +110,7 @@ sources:
         id:
           type: "INT"
           index: 1
+      ignoreExistedIndex: true
       props:
         - name: "creationDate"
           type: "DATETIME"
@@ -128,6 +131,7 @@ sources:
           function: hash
       rank:
         index: 0
+      ignoreExistedIndex: false
       props:
         - name: "creationDate"
           type: "DATETIME"

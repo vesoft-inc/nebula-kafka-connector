@@ -11,9 +11,14 @@ var _ = Describe("RecordReader", func() {
 	var s source.Source
 	BeforeEach(func() {
 		var err error
-		s, err = source.Open(&source.Config{
-			Path: "testdata/local.csv",
+		s, err = source.New(&source.Config{
+			Local: &source.LocalConfig{
+				Path: "testdata/local.csv",
+			},
 		})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(s).NotTo(BeNil())
+		err = s.Open()
 		Expect(err).NotTo(HaveOccurred())
 		Expect(s).NotTo(BeNil())
 	})

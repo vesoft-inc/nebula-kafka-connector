@@ -1,3 +1,4 @@
+//go:generate mockgen -source=record.go -destination record_mock.go -package reader RecordReader
 package reader
 
 import (
@@ -7,6 +8,7 @@ import (
 
 type (
 	RecordReader interface {
+		Source() source.Source
 		source.Sizer
 		Read() (int, spec.Record, error)
 	}

@@ -5,6 +5,7 @@ import (
 	"path/filepath"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
+	configbase "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/base"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	specv3 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec/v3"
 
@@ -19,8 +20,12 @@ var _ = Describe("Config", func() {
 			c := &Config{
 				Sources: Sources{
 					Source{
-						SourceConfig: source.Config{
-							Path: "[a-b",
+						Source: configbase.Source{
+							SourceConfig: source.Config{
+								Local: &source.LocalConfig{
+									Path: "[a-b",
+								},
+							},
 						},
 					},
 				},
@@ -32,8 +37,12 @@ var _ = Describe("Config", func() {
 			c := &Config{
 				Sources: Sources{
 					Source{
-						SourceConfig: source.Config{
-							Path: filepath.Join("testdata", "file*"),
+						Source: configbase.Source{
+							SourceConfig: source.Config{
+								Local: &source.LocalConfig{
+									Path: filepath.Join("testdata", "file*"),
+								},
+							},
 						},
 					},
 				},
@@ -51,8 +60,12 @@ var _ = Describe("Config", func() {
 				},
 				Sources: Sources{
 					{
-						SourceConfig: source.Config{
-							Path: filepath.Join("testdata", "file10"),
+						Source: configbase.Source{
+							SourceConfig: source.Config{
+								Local: &source.LocalConfig{
+									Path: filepath.Join("testdata", "file10"),
+								},
+							},
 						},
 						Nodes: specv3.Nodes{
 							&specv3.Node{

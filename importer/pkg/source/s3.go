@@ -2,7 +2,6 @@ package source
 
 import (
 	"fmt"
-	"io"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -14,41 +13,58 @@ import (
 var _ Source = (*s3Source)(nil)
 
 type (
+	S3Config struct {
+		Endpoint  string `yaml:"endpoint,omitempty"`
+		Region    string `yaml:"region,omitempty"`
+		AccessKey string `yaml:"accessKey,omitempty"`
+		SecretKey string `yaml:"secretKey,omitempty"`
+		Token     string `yaml:"token,omitempty"`
+		Bucket    string `yaml:"bucket,omitempty"`
+		Key       string `yaml:"key,omitempty"`
+	}
+
 	s3Source struct {
-		c    *Config
-		obj  io.ReadCloser
-		size int64
+		c   *Config
+		obj *s3.GetObjectOutput
 	}
 )
 
-func openS3File(c *Config) (*s3Source, error) {
-	creds := credentials.NewStaticCredentials(c.S3.AccessKey, c.S3.SecretKey, c.S3.Token)
+func newS3Source(c *Config) Source {
+	return &s3Source{
+		c: c,
+	}
+}
+
+func (s *s3Source) Name() string {
+	return s.c.S3.String()
+}
+
+func (s *s3Source) Open() error {
+	creds := credentials.NewStaticCredentials(s.c.S3.AccessKey, s.c.S3.SecretKey, s.c.S3.Token)
 
 	sess, err := session.NewSession(&aws.Config{
-		Region:           aws.String(c.S3.Region),
-		Endpoint:         aws.String(c.S3.Endpoint),
+		Region:           aws.String(s.c.S3.Region),
+		Endpoint:         aws.String(s.c.S3.Endpoint),
 		S3ForcePathStyle: aws.Bool(true),
 		Credentials:      creds,
 	})
 	if err != nil {
-		return nil, fmt.Errorf("create s3 session faild: %w", err)
+		return err
 	}
 
 	svc := s3.New(sess)
 
-	resp, err := svc.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(c.S3.Bucket),
-		Key:    aws.String(strings.TrimLeft(c.S3.Key, "/")),
+	obj, err := svc.GetObject(&s3.GetObjectInput{
+		Bucket: aws.String(s.c.S3.Bucket),
+		Key:    aws.String(strings.TrimLeft(s.c.S3.Key, "/")),
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
-	return &s3Source{
-		c:    c,
-		obj:  resp.Body,
-		size: *resp.ContentLength,
-	}, nil
+	s.obj = obj
+
+	return nil
 }
 
 func (s *s3Source) Config() *Config {
@@ -56,13 +72,17 @@ func (s *s3Source) Config() *Config {
 }
 
 func (s *s3Source) Size() (int64, error) {
-	return s.size, nil
+	return *s.obj.ContentLength, nil
 }
 
 func (s *s3Source) Read(p []byte) (int, error) {
-	return s.obj.Read(p)
+	return s.obj.Body.Read(p)
 }
 
 func (s *s3Source) Close() error {
-	return s.obj.Close()
+	return s.obj.Body.Close()
+}
+
+func (c *S3Config) String() string {
+	return fmt.Sprintf("s3 %s:%s %s/%s", c.Region, c.Endpoint, c.Bucket, c.Key)
 }

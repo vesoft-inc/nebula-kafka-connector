@@ -4,6 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	specv3 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec/v3"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -133,14 +134,16 @@ var _ = Describe("Sources", func() {
 				sources = make(Sources, len(files))
 			}
 			for i, file := range files {
-				sources[i].SourceConfig.Path = file
+				sources[i].SourceConfig.Local = &source.LocalConfig{
+					Path: file,
+				}
 			}
 			Expect(sources.OptimizePath(configPath)).NotTo(HaveOccurred())
 			var sourcePaths []string
 			if sources != nil {
 				sourcePaths = make([]string, len(sources))
 				for i := range sources {
-					sourcePaths[i] = sources[i].SourceConfig.Path
+					sourcePaths[i] = sources[i].SourceConfig.Local.Path
 				}
 			}
 			Expect(sourcePaths).To(Equal(expectFiles))
@@ -180,63 +183,87 @@ var _ = Describe("Sources", func() {
 
 		It("rel:WildCard:yes", func() {
 			sources := make(Sources, 1)
-			sources[0].SourceConfig.Path = filepath.Join("testdata", "file*")
+			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file*"),
+			}
 			Expect(sources.OptimizePathWildCard()).NotTo(HaveOccurred())
 			if Expect(sources).To(HaveLen(3)) {
-				Expect(sources[0].SourceConfig.Path).To(Equal(filepath.Join("testdata", "file10")))
-				Expect(sources[1].SourceConfig.Path).To(Equal(filepath.Join("testdata", "file11")))
-				Expect(sources[2].SourceConfig.Path).To(Equal(filepath.Join("testdata", "file20")))
+				Expect(sources[0].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file10")))
+				Expect(sources[1].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file11")))
+				Expect(sources[2].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file20")))
 			}
 		})
 
 		It("rel:WildCard:no", func() {
 			sources := make(Sources, 3)
-			sources[0].SourceConfig.Path = filepath.Join("testdata", "file10")
-			sources[1].SourceConfig.Path = filepath.Join("testdata", "file11")
-			sources[2].SourceConfig.Path = filepath.Join("testdata", "file20")
+			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file10"),
+			}
+			sources[1].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file11"),
+			}
+			sources[2].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file20"),
+			}
 
 			Expect(sources.OptimizePathWildCard()).NotTo(HaveOccurred())
 			if Expect(sources).To(HaveLen(3)) {
-				Expect(sources[0].SourceConfig.Path).To(Equal(filepath.Join("testdata", "file10")))
-				Expect(sources[1].SourceConfig.Path).To(Equal(filepath.Join("testdata", "file11")))
-				Expect(sources[2].SourceConfig.Path).To(Equal(filepath.Join("testdata", "file20")))
+				Expect(sources[0].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file10")))
+				Expect(sources[1].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file11")))
+				Expect(sources[2].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file20")))
 			}
 		})
 
 		It("abs:WildCard:yes", func() {
 			sources := make(Sources, 1)
-			sources[0].SourceConfig.Path = filepath.Join(wd, "testdata", "file*")
+			sources[0].SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join(wd, "testdata", "file*"),
+			}
 			Expect(sources.OptimizePathWildCard()).NotTo(HaveOccurred())
 			if Expect(sources).To(HaveLen(3)) {
-				Expect(sources[0].SourceConfig.Path).To(Equal(filepath.Join(wd, "testdata", "file10")))
-				Expect(sources[1].SourceConfig.Path).To(Equal(filepath.Join(wd, "testdata", "file11")))
-				Expect(sources[2].SourceConfig.Path).To(Equal(filepath.Join(wd, "testdata", "file20")))
+				Expect(sources[0].SourceConfig.Local.Path).To(Equal(filepath.Join(wd, "testdata", "file10")))
+				Expect(sources[1].SourceConfig.Local.Path).To(Equal(filepath.Join(wd, "testdata", "file11")))
+				Expect(sources[2].SourceConfig.Local.Path).To(Equal(filepath.Join(wd, "testdata", "file20")))
 			}
 		})
 
 		It("abs:WildCard:no", func() {
 			sources := make(Sources, 3)
-			sources[0].SourceConfig.Path = filepath.Join(wd, "testdata", "file10")
-			sources[1].SourceConfig.Path = filepath.Join(wd, "testdata", "file11")
-			sources[2].SourceConfig.Path = filepath.Join(wd, "testdata", "file20")
+			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join(wd, "testdata", "file10"),
+			}
+			sources[1].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join(wd, "testdata", "file11"),
+			}
+			sources[2].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join(wd, "testdata", "file20"),
+			}
 
 			Expect(sources.OptimizePathWildCard()).NotTo(HaveOccurred())
 			if Expect(sources).To(HaveLen(3)) {
-				Expect(sources[0].SourceConfig.Path).To(Equal(filepath.Join(wd, "testdata", "file10")))
-				Expect(sources[1].SourceConfig.Path).To(Equal(filepath.Join(wd, "testdata", "file11")))
-				Expect(sources[2].SourceConfig.Path).To(Equal(filepath.Join(wd, "testdata", "file20")))
+				Expect(sources[0].SourceConfig.Local.Path).To(Equal(filepath.Join(wd, "testdata", "file10")))
+				Expect(sources[1].SourceConfig.Local.Path).To(Equal(filepath.Join(wd, "testdata", "file11")))
+				Expect(sources[2].SourceConfig.Local.Path).To(Equal(filepath.Join(wd, "testdata", "file20")))
 			}
 		})
 
 		It("failed", func() {
 			sources := make(Sources, 2)
-			sources[0].SourceConfig.Path = filepath.Join("testdata", "file*")
-			sources[1].SourceConfig.Path = filepath.Join("testdata", "[a-b")
+			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file*"),
+			}
+			sources[1].SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "[a-b"),
+			}
 			Expect(sources.OptimizePathWildCard()).To(HaveOccurred())
 
 			sources = make(Sources, 2)
-			sources[0].SourceConfig.Path = filepath.Join("testdata", "file*")
-			sources[1].SourceConfig.Path = filepath.Join("testdata", "not-exists")
+			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file*"),
+			}
+			sources[1].SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "not-exists"),
+			}
 			Expect(sources.OptimizePathWildCard()).To(HaveOccurred())
 		})
 	})

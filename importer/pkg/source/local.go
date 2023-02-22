@@ -1,25 +1,40 @@
 package source
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 var _ Source = (*localSource)(nil)
 
 type (
+	LocalConfig struct {
+		Path string `yaml:"path,omitempty"`
+	}
+
 	localSource struct {
 		c *Config
 		f *os.File
 	}
 )
 
-func openLocalFile(c *Config) (*localSource, error) {
-	f, err := os.Open(c.Path)
-	if err != nil {
-		return nil, err
-	}
+func newLocalSource(c *Config) Source {
 	return &localSource{
 		c: c,
-		f: f,
-	}, nil
+	}
+}
+
+func (s *localSource) Name() string {
+	return s.c.Local.String()
+}
+
+func (s *localSource) Open() error {
+	f, err := os.Open(s.c.Local.Path)
+	if err != nil {
+		return err
+	}
+	s.f = f
+	return nil
 }
 func (s *localSource) Config() *Config {
 	return s.c
@@ -39,4 +54,8 @@ func (s *localSource) Read(p []byte) (int, error) {
 
 func (s *localSource) Close() error {
 	return s.f.Close()
+}
+
+func (c *LocalConfig) String() string {
+	return fmt.Sprintf("local %s", c.Path)
 }

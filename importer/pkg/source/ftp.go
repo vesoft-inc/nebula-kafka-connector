@@ -2,7 +2,6 @@ package source
 
 import (
 	"fmt"
-	"io"
 	"time"
 
 	"github.com/jlaffaye/ftp"
@@ -11,57 +10,82 @@ import (
 var _ Source = (*ftpSource)(nil)
 
 type (
+	FTPConfig struct {
+		Host     string `yaml:"host,omitempty"`
+		Port     int    `yaml:"port,omitempty"`
+		User     string `yaml:"username,omitempty"`
+		Password string `yaml:"password,omitempty"`
+		Path     string `yaml:"path,omitempty"`
+	}
+
 	ftpSource struct {
 		c    *Config
-		obj  io.ReadCloser
+		conn *ftp.ServerConn
+		r    *ftp.Response
 		size int64
 	}
 )
 
-func openFTPFile(c *Config) (*ftpSource, error) {
-	// open connection to FTP server
-	client, err := ftp.Dial(fmt.Sprintf("%s:%d", c.FTP.Host, c.FTP.Port), ftp.DialWithTimeout(5*time.Second))
-	if err != nil {
-		return nil, err
-	}
-
-	// login to ftp server
-	err = client.Login(c.FTP.Username, c.FTP.Password)
-	if err != nil {
-		return nil, fmt.Errorf("login to ftp server failed: %w", err)
-	}
-
-	// get the file size
-	size, err := client.FileSize(c.FTP.Path)
-	if err != nil {
-		return nil, fmt.Errorf("getting file size failed: %w", err)
-	}
-
-	// open the file
-	obj, err := client.Retr(c.FTP.Path)
-	if err != nil {
-		return nil, fmt.Errorf("opening file failed: %w", err)
-	}
-
+func newFTPSource(c *Config) Source {
 	return &ftpSource{
-		c:    c,
-		obj:  obj,
-		size: size,
-	}, nil
+		c: c,
+	}
 }
 
-func (f *ftpSource) Config() *Config {
-	return f.c
+func (s *ftpSource) Name() string {
+	return s.c.FTP.String()
 }
 
-func (f *ftpSource) Size() (int64, error) {
-	return f.size, nil
+func (s *ftpSource) Open() error {
+	conn, err := ftp.Dial(fmt.Sprintf("%s:%d", s.c.FTP.Host, s.c.FTP.Port), ftp.DialWithTimeout(5*time.Second))
+	if err != nil {
+		return err
+	}
+
+	err = conn.Login(s.c.FTP.User, s.c.FTP.Password)
+	if err != nil {
+		_ = conn.Quit()
+		return err
+	}
+
+	size, err := conn.FileSize(s.c.FTP.Path)
+	if err != nil {
+		_ = conn.Quit()
+		return err
+	}
+
+	r, err := conn.Retr(s.c.FTP.Path)
+	if err != nil {
+		_ = conn.Quit()
+		return err
+	}
+
+	s.conn = conn
+	s.r = r
+	s.size = size
+
+	return nil
 }
 
-func (f *ftpSource) Read(p []byte) (int, error) {
-	return f.obj.Read(p)
+func (s *ftpSource) Config() *Config {
+	return s.c
 }
 
-func (f *ftpSource) Close() error {
-	return f.obj.Close()
+func (s *ftpSource) Size() (int64, error) {
+	return s.size, nil
+}
+
+func (s *ftpSource) Read(p []byte) (int, error) {
+	return s.r.Read(p)
+}
+
+func (s *ftpSource) Close() error {
+	defer func() {
+		_ = s.conn.Quit()
+	}()
+	return s.r.Close()
+}
+
+func (c *FTPConfig) String() string {
+	return fmt.Sprintf("ftp %s:%d %s", c.Host, c.Port, c.Path)
 }

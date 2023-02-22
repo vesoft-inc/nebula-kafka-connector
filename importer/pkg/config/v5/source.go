@@ -6,52 +6,21 @@ import (
 	"path/filepath"
 
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/client"
+	configbase "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/config/base"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/importer"
-	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/source"
 	specv5 "github.com/vesoft-inc/nebula-ng-tools/importer/pkg/spec/v5"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/utils"
 )
 
 type (
 	Source struct {
-		SourceConfig source.Config `yaml:",inline"`
-		Nodes        specv5.Nodes  `yaml:"nodes,omitempty"`
-		Edges        specv5.Edges  `yaml:"edges,omitempty"`
+		configbase.Source `yaml:",inline"`
+		Nodes             specv5.Nodes `yaml:"nodes,omitempty"`
+		Edges             specv5.Edges `yaml:"edges,omitempty"`
 	}
 
 	Sources []Source
 )
-
-// OptimizePath optimizes relative paths base to the configuration file path
-func (ss Sources) OptimizePath(configPath string) error {
-	configPathDir := filepath.Dir(configPath)
-	for i := range ss {
-		ss[i].SourceConfig.Path = utils.RelativePathBaseOn(configPathDir, ss[i].SourceConfig.Path)
-	}
-	return nil
-}
-
-// OptimizePathWildCard optimizes the wildcards in the paths
-func (ss *Sources) OptimizePathWildCard() error {
-	nss := make(Sources, 0, len(*ss))
-	for i := range *ss {
-		paths, err := filepath.Glob((*ss)[i].SourceConfig.Path)
-		if err != nil {
-			return err
-		}
-		if len(paths) == 0 {
-			return &os.PathError{Op: "open", Path: (*ss)[i].SourceConfig.Path, Err: fs.ErrNotExist}
-		}
-
-		for _, path := range paths {
-			cpy := (*ss)[i]
-			cpy.SourceConfig.Path = path
-			nss = append(nss, cpy)
-		}
-	}
-	*ss = nss
-	return nil
-}
 
 func (s *Source) BuildGraph(graphName string, opts ...specv5.GraphOption) (*specv5.Graph, error) {
 	options := make([]specv5.GraphOption, 0, len(s.Nodes)+len(s.Edges)+len(opts))
@@ -97,4 +66,41 @@ func (s *Source) BuildImporters(wgMap *utils.WaitGroupMap, graphName string, poo
 		importers = append(importers, i)
 	}
 	return importers, nil
+}
+
+// OptimizePath optimizes relative paths base to the configuration file path
+func (ss Sources) OptimizePath(configPath string) error {
+	configPathDir := filepath.Dir(configPath)
+	for i := range ss {
+		if ss[i].SourceConfig.Local != nil {
+			ss[i].SourceConfig.Local.Path = utils.RelativePathBaseOn(configPathDir, ss[i].SourceConfig.Local.Path)
+		}
+	}
+	return nil
+}
+
+// OptimizePathWildCard optimizes the wildcards in the paths
+func (ss *Sources) OptimizePathWildCard() error {
+	nss := make(Sources, 0, len(*ss))
+	for i := range *ss {
+		if (*ss)[i].SourceConfig.Local != nil {
+			paths, err := filepath.Glob((*ss)[i].SourceConfig.Local.Path)
+			if err != nil {
+				return err
+			}
+			if len(paths) == 0 {
+				return &os.PathError{Op: "open", Path: (*ss)[i].SourceConfig.Local.Path, Err: fs.ErrNotExist}
+			}
+
+			for _, path := range paths {
+				cpy := (*ss)[i]
+				cpySourceConfig := cpy.SourceConfig.Clone()
+				cpy.SourceConfig = *cpySourceConfig
+				cpy.SourceConfig.Local.Path = path
+				nss = append(nss, cpy)
+			}
+		}
+	}
+	*ss = nss
+	return nil
 }
