@@ -40,14 +40,17 @@ func (s *s3Source) Name() string {
 }
 
 func (s *s3Source) Open() error {
-	creds := credentials.NewStaticCredentials(s.c.S3.AccessKey, s.c.S3.SecretKey, s.c.S3.Token)
-
-	sess, err := session.NewSession(&aws.Config{
+	awsConfig := &aws.Config{
 		Region:           aws.String(s.c.S3.Region),
 		Endpoint:         aws.String(s.c.S3.Endpoint),
 		S3ForcePathStyle: aws.Bool(true),
-		Credentials:      creds,
-	})
+	}
+
+	if s.c.S3.AccessKey != "" || s.c.S3.SecretKey != "" || s.c.S3.Token != "" {
+		awsConfig.Credentials = credentials.NewStaticCredentials(s.c.S3.AccessKey, s.c.S3.SecretKey, s.c.S3.Token)
+	}
+
+	sess, err := session.NewSession(awsConfig)
 	if err != nil {
 		return err
 	}

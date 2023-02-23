@@ -94,6 +94,8 @@ func (ss *Sources) OptimizePathWildCard() error {
 				cpy.SourceConfig.Local.Path = path
 				nss = append(nss, cpy)
 			}
+		} else {
+			nss = append(nss, (*ss)[i])
 		}
 	}
 	*ss = nss

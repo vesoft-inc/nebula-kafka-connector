@@ -52,7 +52,6 @@ sources:
   - path: ./social_network/static/place.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Place
         id:
@@ -72,7 +71,6 @@ sources:
   - path: ./social_network/static/organisation.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Organisation
         id:
@@ -92,7 +90,6 @@ sources:
   - path: ./social_network/dynamic/person.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Person
         id:
@@ -124,7 +121,6 @@ sources:
   - path: ./social_network/dynamic/forum.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Forum
         id:
@@ -141,7 +137,6 @@ sources:
   - path: ./social_network/dynamic/post.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Post
         id:
@@ -173,7 +168,6 @@ sources:
   - path: ./social_network/dynamic/comment.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Comment
         id:
@@ -199,7 +193,6 @@ sources:
   - path: ./social_network/static/tag.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: Tag
         id:
@@ -216,7 +209,6 @@ sources:
   - path: ./social_network/static/tagclass.csv
     csv:
       delimiter: "|"
-    graphName: sf
     tags:
       - name: TagClass
         id:
@@ -233,7 +225,6 @@ sources:
   - path: ./social_network/static/place_isPartOf_place.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: IS_PART_OF # PLACE_IS_PART_OF_PLACE
         src:
@@ -248,7 +239,6 @@ sources:
   - path: ./social_network/static/organisation_isLocatedIn_place.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: IS_LOCATED_IN # ORGANISATION_IS_LOCATED_IN_PLACE
         src:
@@ -263,7 +253,6 @@ sources:
   - path: ./social_network/dynamic/person_isLocatedIn_place.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: IS_LOCATED_IN # PERSON_IS_LOCATED_IN_PLACE
         src:
@@ -278,7 +267,6 @@ sources:
   - path: ./social_network/dynamic/person_studyAt_organisation.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: STUDY_AT # PERSON_STUDY_AT_ORGANISATION
         src:
@@ -297,7 +285,6 @@ sources:
   - path: ./social_network/dynamic/person_workAt_organisation.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: WORK_AT # PERSON_WORK_AT_ORGANISATION
         src:
@@ -316,7 +303,6 @@ sources:
   - path: ./social_network/dynamic/person_knows_person.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: KNOWS # PERSON_KNOWS_PERSON
         src:
@@ -335,7 +321,6 @@ sources:
   - path: ./social_network/dynamic/person_likes_post.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: LIKES_POST # PERSON_LIKES_POST
         src:
@@ -354,7 +339,6 @@ sources:
   - path: ./social_network/dynamic/person_likes_comment.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: LIKES_COMMENT # PERSON_LIKES_COMMENT
         src:
@@ -373,7 +357,6 @@ sources:
   - path: ./social_network/dynamic/person_hasInterest_tag.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_INTEREST # PERSON_HAS_INTEREST_TAG
         src:
@@ -388,7 +371,6 @@ sources:
   - path: ./social_network/dynamic/forum_hasMember_person.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_MEMBER # FORUM_HAS_MEMBER_PERSON
         src:
@@ -407,7 +389,6 @@ sources:
   - path: ./social_network/dynamic/forum_hasModerator_person.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_MODERATOR # FORUM_HAS_MODERATOR_PERSON
         src:
@@ -422,7 +403,6 @@ sources:
   - path: ./social_network/dynamic/forum_containerOf_post.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: CONTAINER_OF # FORUM_CONTAINER_OF_POST
         src:
@@ -437,7 +417,6 @@ sources:
   - path: ./social_network/dynamic/forum_hasTag_tag.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_TAG # FORUM_HAS_TAG_TAG
         src:
@@ -452,7 +431,6 @@ sources:
   - path: ./social_network/dynamic/post_isLocatedIn_place.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: IS_LOCATED_IN # POST_IS_LOCATED_IN_PLACE
         src:
@@ -467,7 +445,6 @@ sources:
   - path: ./social_network/dynamic/post_hasCreator_person.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: POST_HAS_CREATOR # POST_HAS_CREATOR_PERSON
         src:
@@ -482,7 +459,6 @@ sources:
   - path: ./social_network/dynamic/post_hasTag_tag.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_TAG # POST_HAS_TAG_TAG
         src:
@@ -497,7 +473,6 @@ sources:
   - path: ./social_network/dynamic/comment_isLocatedIn_place.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: IS_LOCATED_IN # COMMENT_IS_LOCATED_IN_PLACE
         src:
@@ -512,7 +487,6 @@ sources:
   - path: ./social_network/dynamic/comment_hasCreator_person.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: COMMENT_HAS_CREATOR # COMMENT_HAS_CREATOR_PERSON
         src:
@@ -527,7 +501,6 @@ sources:
   - path: ./social_network/dynamic/comment_replyOf_post.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: REPLY_OF_POST # COMMENT_REPLY_OF_POST
         src:
@@ -542,7 +515,6 @@ sources:
   - path: ./social_network/dynamic/comment_replyOf_comment.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: REPLY_OF_COMMENT # COMMENT_REPLY_OF_COMMENT
         src:
@@ -557,7 +529,6 @@ sources:
   - path: ./social_network/dynamic/comment_hasTag_tag.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_TAG # COMMENT_HAS_TAG_TAG
         src:
@@ -572,7 +543,6 @@ sources:
   - path: ./social_network/static/tag_hasType_tagclass.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: HAS_TYPE # TAG_HAS_TYPE_TAGCLASS
         src:
@@ -587,7 +557,6 @@ sources:
   - path: ./social_network/static/tagclass_isSubclassOf_tagclass.csv
     csv:
       delimiter: "|"
-    graphName: sf
     edges:
       - name: IS_SUBCLASS_OF # TAGCLASS_IS_SUBCLASS_OF_TAGCLASS
         src:

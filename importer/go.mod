@@ -17,6 +17,7 @@ require (
 	github.com/panjf2000/ants v1.2.1
 	github.com/pkg/errors v0.9.1
 	github.com/pkg/sftp v1.13.5
+	github.com/spf13/afero v1.9.3
 	github.com/spf13/cobra v1.6.1
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/vesoft-inc/nebula-go/v3 v3.3.1
@@ -44,7 +45,6 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/kr/fs v0.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
-	github.com/spf13/afero v1.9.3 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect

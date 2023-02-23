@@ -247,6 +247,23 @@ var _ = Describe("Sources", func() {
 			}
 		})
 
+		It("rel:WildCard:yes:s3", func() {
+			sources := make(Sources, 2)
+			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
+				Path: filepath.Join("testdata", "file*"),
+			}
+			sources[1].Source.SourceConfig.S3 = &source.S3Config{
+				Bucket: "bucket",
+			}
+			Expect(sources.OptimizePathWildCard()).NotTo(HaveOccurred())
+			if Expect(sources).To(HaveLen(4)) {
+				Expect(sources[0].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file10")))
+				Expect(sources[1].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file11")))
+				Expect(sources[2].SourceConfig.Local.Path).To(Equal(filepath.Join("testdata", "file20")))
+				Expect(sources[3].SourceConfig.S3.Bucket).To(Equal("bucket"))
+			}
+		})
+
 		It("failed", func() {
 			sources := make(Sources, 2)
 			sources[0].Source.SourceConfig.Local = &source.LocalConfig{
