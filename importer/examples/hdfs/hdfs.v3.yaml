@@ -9,7 +9,7 @@ client:
   retryInitialInterval: 1s
 
 manager:
-  spaceName: s3_examples
+  spaceName: hdfs_examples
   batch: 128
   readerConcurrency: 50
   importerConcurrency: 512
@@ -18,8 +18,8 @@ manager:
     before:
       - statements:
         - |
-          CREATE SPACE IF NOT EXISTS `s3_examples`(PARTITION_NUM = 20, REPLICA_FACTOR = 1, vid_type = INT);
-          USE `s3_examples`;
+          CREATE SPACE IF NOT EXISTS `hdfs_examples`(PARTITION_NUM = 20, REPLICA_FACTOR = 1, vid_type = INT);
+          USE `hdfs_examples`;
           CREATE TAG IF NOT EXISTS `Tag`(`date` STRING);
         wait: 10s
 
@@ -33,30 +33,10 @@ log:
       value: nebula-importer
 
 sources:
-  - s3: # AWS s3
-      region: us-east-1
-      bucket: gdelt-open-data
-      key: events/20190918.export.csv
-      # accessKey: ""
-      # secretKey: ""
-    csv:
-      delimiter: "\t"
-    tags:
-      - name: Tag
-        id:
-          type: "INT"
-          index: 0
-        props:
-          - name: "date"
-            type: "STRING"
-            index: 1
-  - s3: # MinIO
-      endpoint: http://127.0.0.1:9000/
-      region: us-east-1
-      bucket: gdelt-open-data
-      key: events/20190918.export.csv
-      accessKey: "accessKey"
-      secretKey: "secretKey"
+  - hdfs:
+      address: "127.0.0.1:8020"
+      user: "hdfs"
+      path: "/events/20190918.export.csv"
     csv:
       delimiter: "\t"
     tags:

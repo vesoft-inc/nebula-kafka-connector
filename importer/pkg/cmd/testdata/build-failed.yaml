@@ -42,7 +42,7 @@ sources:
           index: 3
 
 log:
-  level: INGO
+  level: INFO
   console: true
   files:
    - nebula-importer.log

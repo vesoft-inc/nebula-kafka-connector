@@ -9,7 +9,7 @@ client:
   retryInitialInterval: 1s
 
 manager:
-  spaceName: basic_string
+  spaceName: basic_string_examples
   batch: 128
   readerConcurrency: 50
   importerConcurrency: 512
@@ -18,9 +18,9 @@ manager:
     before:
       - statements:
         - |
-          DROP SPACE IF EXISTS basic_string;
-          CREATE SPACE IF NOT EXISTS basic_string(partition_num=5, replica_factor=1, vid_type=FIXED_STRING(64));
-          USE basic_string;
+          DROP SPACE IF EXISTS basic_string_examples;
+          CREATE SPACE IF NOT EXISTS basic_string_examples(partition_num=5, replica_factor=1, vid_type=FIXED_STRING(64));
+          USE basic_string_examples;
           CREATE TAG Person(firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate DATETIME, locationIP STRING, browserUsed STRING);
           CREATE EDGE KNOWS(creationDate DATETIME);
         wait: 10s
@@ -90,7 +90,7 @@ sources:
           defaultValue: 0000-00-00T00:00:00
 
 log:
-  level: INGO
+  level: INFO
   console: true
   files:
    - logs/nebula-importer.log

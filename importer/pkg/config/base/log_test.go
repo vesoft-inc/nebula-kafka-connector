@@ -27,7 +27,7 @@ var _ = Describe("Log", func() {
 		})
 		It("failed", func() {
 			var (
-				level   = "INGO"
+				level   = "INFO"
 				console = true
 			)
 			configLog := Log{
@@ -43,7 +43,7 @@ var _ = Describe("Log", func() {
 
 		It("success", func() {
 			var (
-				level   = "INGO"
+				level   = "INFO"
 				console = true
 			)
 			configLog := Log{

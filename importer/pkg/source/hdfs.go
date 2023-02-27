@@ -45,11 +45,9 @@ func (s *hdfsSource) Open() error {
 	if s.c.HDFS.Address != "" {
 		options.Addresses = strings.Split(s.c.HDFS.Address, ",")
 	}
+	options.User = s.c.HDFS.User
 
-	cli, err := hdfs.NewClient(hdfs.ClientOptions{
-		Addresses: strings.Split(s.c.HDFS.Address, ","),
-		User:      s.c.HDFS.User,
-	})
+	cli, err := hdfs.NewClient(options)
 	if err != nil {
 		return err
 	}

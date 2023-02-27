@@ -9,7 +9,7 @@ client:
   retryInitialInterval: 1s
 
 manager:
-  graphName: basic_string
+  graphName: basic_string_examples
   batch: 128
   readerConcurrency: 50
   importerConcurrency: 512
@@ -18,13 +18,13 @@ manager:
     before:
       - statements:
         - |
-          CREATE GRAPH TYPE basic_string_type IF NOT EXISTS AS GRAPH TYPE {
+          CREATE GRAPH TYPE basic_string_examples_type IF NOT EXISTS AS GRAPH TYPE {
               (Person(id) LABEL Person {id STRING, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
               (Person)-[KNOWS:KNOWS{creationDate STRING}]->(Person)
           }
         wait: 10s
       - statements:
-        - CREATE GRAPH basic_string IF NOT EXISTS OF basic_string_type
+        - CREATE GRAPH basic_string_examples IF NOT EXISTS OF basic_string_examples_type
         wait: 5s
 
 sources:
@@ -98,7 +98,7 @@ sources:
           defaultValue: 0000-00-00T00:00:00
 
 log:
-  level: INGO
+  level: INFO
   console: true
   files:
    - logs/nebula-importer.log
