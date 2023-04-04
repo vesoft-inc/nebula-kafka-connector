@@ -14,7 +14,7 @@ import (
 )
 
 type ResultSet struct {
-	resp            *graph.ExecutionResponse
+	resp            graph.ExecutionResponse
 	columnNames     []string
 	colNameIndexMap map[string]int
 	timezoneInfo    timezoneInfo
@@ -50,9 +50,9 @@ func (res ResultSet) IsSetData() bool {
 }
 
 // Returns all rows
-func (res ResultSet) GetRows() []*nebula.RawRecord {
+func (res ResultSet) GetRows() []nebula.Row {
 	if res.resp.ExecutionOutcome.Result_ == nil {
-		var empty []*nebula.RawRecord
+		var empty []nebula.Row
 		return empty
 	}
 	return res.resp.ExecutionOutcome.Result_.Records
@@ -75,8 +75,8 @@ func (res ResultSet) GetLatency() int64 {
 }
 
 func checkIndex(index int, list interface{}) error {
-	if _, ok := list.([]*nebula.RawRecord); ok {
-		if index < 0 || index >= len(list.([]*nebula.RawRecord)) {
+	if _, ok := list.([]nebula.Row); ok {
+		if index < 0 || index >= len(list.([]nebula.Row)) {
 			return fmt.Errorf("failed to get Value, the index is out of range")
 		}
 		return nil
@@ -92,6 +92,7 @@ func checkIndex(index int, list interface{}) error {
 // Returns all values in the row at given index
 func (res ResultSet) GetRowValuesByIndex(index int) (*Record, error) {
 	if err := checkIndex(index, res.resp.ExecutionOutcome.Result_.Records); err != nil {
+		fmt.Printf("Failed at checking the index %d: %s\n", index, err.Error())
 		return nil, err
 	}
 	valWrap, err := genValWraps(res.resp.ExecutionOutcome.Result_.Records[index], res.timezoneInfo)
@@ -110,7 +111,7 @@ func (res ResultSet) IsSetPlanDesc() bool {
 	return res.resp.ExecutionOutcome.PlanDesc != nil
 }
 
-func (res ResultSet) GetPlanDesc() *graph.PlanDescription {
+func (res ResultSet) GetPlanDesc() graph.PlanDescription {
 	return res.resp.ExecutionOutcome.PlanDesc
 }
 
@@ -130,7 +131,7 @@ func (record Record) GetValueByIndex(index int) (*ValueWrapper, error) {
 }
 
 type Node struct {
-	rawNode      *nebula.Node
+	rawNode      nebula.Node
 	timezoneInfo timezoneInfo
 }
 
@@ -154,7 +155,7 @@ func (node *Node) String() string {
 }
 
 type Edge struct {
-	rawEdge      *nebula.Edge
+	rawEdge      nebula.Edge
 	timezoneInfo timezoneInfo
 }
 
@@ -196,11 +197,11 @@ const (
 )
 
 type LocalTimeWrapper struct {
-	time         *nebula.LocalTime
+	time         nebula.LocalTime
 	timezoneInfo timezoneInfo
 }
 
-func genLocalTimeWrapper(time *nebula.LocalTime, timezoneInfo timezoneInfo) (*LocalTimeWrapper, error) {
+func genLocalTimeWrapper(time nebula.LocalTime, timezoneInfo timezoneInfo) (*LocalTimeWrapper, error) {
 	if time == nil {
 		return nil, fmt.Errorf("failed to generate Time: invalid Time")
 	}
@@ -231,7 +232,7 @@ func (t LocalTimeWrapper) getMicrosec() int32 {
 }
 
 // getRawTime returns a nebula.Time object.
-func (t LocalTimeWrapper) getRawTime() *nebula.LocalTime {
+func (t LocalTimeWrapper) getRawTime() nebula.LocalTime {
 	return t.time
 }
 
@@ -243,10 +244,10 @@ func (t1 LocalTimeWrapper) IsEqualTo(t2 LocalTimeWrapper) bool {
 }
 
 type DateWrapper struct {
-	date *nebula.Date
+	date nebula.Date
 }
 
-func genDateWrapper(date *nebula.Date) (*DateWrapper, error) {
+func genDateWrapper(date nebula.Date) (*DateWrapper, error) {
 	if date == nil {
 		return nil, fmt.Errorf("failed to generate date: invalid date")
 	}
@@ -268,7 +269,7 @@ func (d DateWrapper) getDay() int8 {
 }
 
 // getRawDate returns a nebula.Date object.
-func (d DateWrapper) getRawDate() *nebula.Date {
+func (d DateWrapper) getRawDate() nebula.Date {
 	return d.date
 }
 
@@ -279,11 +280,11 @@ func (d1 DateWrapper) IsEqualTo(d2 DateWrapper) bool {
 }
 
 type LocalDatetimeWrapper struct {
-	dateTime     *nebula.LocalDatetime
+	dateTime     nebula.LocalDatetime
 	timezoneInfo timezoneInfo
 }
 
-func genLocalDatetimeWrapper(datetime *nebula.LocalDatetime, timezoneInfo timezoneInfo) (*LocalDatetimeWrapper, error) {
+func genLocalDatetimeWrapper(datetime nebula.LocalDatetime, timezoneInfo timezoneInfo) (*LocalDatetimeWrapper, error) {
 	if datetime == nil {
 		return nil, fmt.Errorf("failed to generate datetime: invalid datetime")
 	}
@@ -332,11 +333,11 @@ func (dt1 LocalDatetimeWrapper) IsEqualTo(dt2 LocalDatetimeWrapper) bool {
 }
 
 // getRawDateTime returns a nebula.DateTime object representing local dateTime in UTC.
-func (dt LocalDatetimeWrapper) getRawDateTime() *nebula.LocalDatetime {
+func (dt LocalDatetimeWrapper) getRawDateTime() nebula.LocalDatetime {
 	return dt.dateTime
 }
 
-func genResultSet(resp *graph.ExecutionResponse, timezoneInfo timezoneInfo) (*ResultSet, error) {
+func genResultSet(resp graph.ExecutionResponse, timezoneInfo timezoneInfo) (*ResultSet, error) {
 	var colNames []string
 	var colNameIndexMap = make(map[string]int)
 
@@ -362,7 +363,7 @@ func genResultSet(resp *graph.ExecutionResponse, timezoneInfo timezoneInfo) (*Re
 	}, nil
 }
 
-func genValWraps(row *nebula.RawRecord, timezoneInfo timezoneInfo) ([]*ValueWrapper, error) {
+func genValWraps(row nebula.Row, timezoneInfo timezoneInfo) ([]*ValueWrapper, error) {
 	if row == nil {
 		return nil, fmt.Errorf("failed to generate valueWrapper: invalid row")
 	}
@@ -376,7 +377,7 @@ func genValWraps(row *nebula.RawRecord, timezoneInfo timezoneInfo) ([]*ValueWrap
 	return valWraps, nil
 }
 
-func genNode(rawNode *nebula.Node, timezoneInfo timezoneInfo) (*Node, error) {
+func genNode(rawNode nebula.Node, timezoneInfo timezoneInfo) (*Node, error) {
 	if rawNode == nil {
 		return nil, fmt.Errorf("failed to generate Node: invalid rawNode")
 	}
@@ -387,7 +388,7 @@ func genNode(rawNode *nebula.Node, timezoneInfo timezoneInfo) (*Node, error) {
 	}, nil
 }
 
-func genEdge(edge *nebula.Edge, timezoneInfo timezoneInfo) (*Edge, error) {
+func genEdge(edge nebula.Edge, timezoneInfo timezoneInfo) (*Edge, error) {
 	if edge == nil {
 		return nil, fmt.Errorf("failed to generate Node: invalid rawEdge")
 	}
@@ -420,11 +421,11 @@ func prettyFormatJsonString(value []byte) string {
 	return prettyJson.String()
 }
 
-func name(planNodeDesc *graph.PlanNodeDescription) string {
+func name(planNodeDesc graph.PlanNodeDescription) string {
 	return fmt.Sprintf("%s_%d", planNodeDesc.GetName(), planNodeDesc.GetId())
 }
 
-func condEdgeLabel(condNode *graph.PlanNodeDescription, doBranch bool) string {
+func condEdgeLabel(condNode graph.PlanNodeDescription, doBranch bool) string {
 	name := strings.ToLower(string(condNode.GetName()))
 	if strings.HasPrefix(name, "select") {
 		if doBranch {
@@ -440,7 +441,7 @@ func condEdgeLabel(condNode *graph.PlanNodeDescription, doBranch bool) string {
 	return ""
 }
 
-func nodeString(planNodeDesc *graph.PlanNodeDescription, planNodeName string) string {
+func nodeString(planNodeDesc graph.PlanNodeDescription, planNodeName string) string {
 	var outputVar = graphvizString(string(planNodeDesc.GetOutputVar()))
 	var inputVar string
 	if planNodeDesc.IsSetDescription() {
@@ -468,7 +469,7 @@ func conditionalNodeString(name string) string {
 	return fmt.Sprintf("\t\"%s\"[shape=diamond];\n", name)
 }
 
-func nodeById(p *graph.PlanDescription, nodeId int64) *graph.PlanNodeDescription {
+func nodeById(p graph.PlanDescription, nodeId int64) graph.PlanNodeDescription {
 	line := p.GetNodeIndexMap()[nodeId]
 	return p.GetPlanNodeDescs()[line]
 }

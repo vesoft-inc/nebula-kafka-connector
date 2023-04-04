@@ -11,7 +11,7 @@ import (
 )
 
 type ValueWrapper struct {
-	value        *nebula.Value
+	value        nebula.Value
 	timezoneInfo timezoneInfo
 }
 
@@ -51,8 +51,8 @@ func (valWrap ValueWrapper) IsList() bool {
 	return valWrap.value.IsSetListVal()
 }
 
-func (valWrap ValueWrapper) IsMap() bool {
-	return valWrap.value.IsSetMapVal()
+func (valWrap ValueWrapper) IsRecord() bool {
+	return valWrap.value.IsSetRecordVal()
 }
 
 func (valWrap ValueWrapper) IsNode() bool {
@@ -149,7 +149,7 @@ func (valWrap ValueWrapper) AsList() ([]ValueWrapper, error) {
 }
 
 // AsDate converts the ValueWrapper to a nebula.Date
-func (valWrap ValueWrapper) AsDate() (*nebula.Date, error) {
+func (valWrap ValueWrapper) AsDate() (nebula.Date, error) {
 	if valWrap.value.IsSetDateVal() {
 		return valWrap.value.GetDateVal(), nil
 	}
@@ -170,7 +170,7 @@ func (valWrap ValueWrapper) AsLocalTime() (*LocalTimeWrapper, error) {
 }
 
 // AsLocalDatetime converts the ValueWrapper to a nebula.LocalDatetime
-func (valWrap ValueWrapper) AsLocalDatetime() (*nebula.LocalDatetime, error) {
+func (valWrap ValueWrapper) AsLocalDatetime() (nebula.LocalDatetime, error) {
 	if valWrap.value.IsSetLocalDatetimeVal() {
 		return valWrap.value.GetLocalDatetimeVal(), nil
 	}
@@ -178,7 +178,7 @@ func (valWrap ValueWrapper) AsLocalDatetime() (*nebula.LocalDatetime, error) {
 }
 
 // AsDuration converts the ValueWrapper to a nebula.Duration
-func (valWrap ValueWrapper) AsDuration() (*nebula.Duration, error) {
+func (valWrap ValueWrapper) AsDuration() (nebula.Duration, error) {
 	if valWrap.value.IsSetDurationVal() {
 		return valWrap.value.GetDurationVal(), nil
 	}
@@ -241,8 +241,8 @@ func (valWrap ValueWrapper) GetType() string {
 		return "string"
 	} else if valWrap.value.IsSetListVal() {
 		return "list"
-	} else if valWrap.value.IsSetMapVal() {
-		return "map"
+	} else if valWrap.value.IsSetRecordVal() {
+		return "record"
 	} else if valWrap.value.IsSetNodeVal() {
 		return "node"
 	} else if valWrap.value.IsSetEdgeVal() {
@@ -331,7 +331,7 @@ func (valWrap ValueWrapper) String() string {
 			localDateTime.getMicrosec())
 	} else if value.IsSetDurationVal() { // Duration PnYnMnDTnHnMnS
 		return "duration type string unimplemented"
-	} else if value.IsSetMapVal() { // Map TODO(Aiee) Unimplemented
+	} else if value.IsSetRecordVal() { // Map TODO(Aiee) Unimplemented
 		// // {k0: v0, k1: v1}
 		// mval := value.GetMapVal()
 		// var keyList []string

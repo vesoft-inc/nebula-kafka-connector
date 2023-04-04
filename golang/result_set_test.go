@@ -20,7 +20,7 @@ var testTimezone timezoneInfo = timezoneInfo{0, []byte("UTC")}
 
 // TODO(Aiee) To add more
 func TestAsNull(t *testing.T) {
-	null := nebula.Value{}
+	null := nebula.XValue_{}
 	valWrap := ValueWrapper{&null, testTimezone}
 	assert.Equal(t, "__NULL__", valWrap.String())
 	assert.Equal(t, null, *valWrap.value)
@@ -29,7 +29,7 @@ func TestAsNull(t *testing.T) {
 func TestAsBool(t *testing.T) {
 	bval := new(bool)
 	*bval = true
-	value := nebula.Value{BoolVal: bval}
+	value := nebula.XValue_{BoolVal: bval}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsBool())
 	assert.Equal(t, "true", valWrap.String())
@@ -40,7 +40,7 @@ func TestAsBool(t *testing.T) {
 func TestAsInt(t *testing.T) {
 	val := new(int64)
 	*val = 100
-	value := nebula.Value{Int64Val: val}
+	value := nebula.XValue_{Int64Val: val}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, "int64", valWrap.GetType())
 	assert.Equal(t, "100", valWrap.String())
@@ -51,11 +51,11 @@ func TestAsInt(t *testing.T) {
 func TestAsFloat(t *testing.T) {
 	val := new(float64)
 	*val = 100.111
-	value := nebula.Value{FloatVal: val}
+	value := nebula.XValue_{FloatVal: val}
 	valWrap := ValueWrapper{&value, testTimezone}
 	val2 := new(float64)
 	*val2 = 100.00
-	value2 := nebula.Value{FloatVal: val2}
+	value2 := nebula.XValue_{FloatVal: val2}
 	valWrap2 := ValueWrapper{&value2, testTimezone}
 	assert.Equal(t, "100.111", valWrap.String())
 	assert.Equal(t, "100.0", valWrap2.String())
@@ -66,7 +66,7 @@ func TestAsFloat(t *testing.T) {
 
 func TestAsString(t *testing.T) {
 	val := "test_string"
-	value := nebula.Value{StringVal: []byte(val)}
+	value := nebula.XValue_{StringVal: []byte(val)}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsString())
 	assert.Equal(t, "\"test_string\"", valWrap.String())
@@ -75,13 +75,13 @@ func TestAsString(t *testing.T) {
 }
 
 func TestAsList(t *testing.T) {
-	var valList = []*nebula.Value{
+	var valList = []*nebula.XValue_{
 		{StringVal: []byte("elem1")},
 		{StringVal: []byte("elem2")},
 		{StringVal: []byte("elem3")},
 	}
-	value := nebula.Value{
-		ListVal: &nebula.NList{Values: valList},
+	value := nebula.XValue_{
+		ListVal: &nebula.XNList_{Values: valList},
 	}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, "[\"elem1\", \"elem2\", \"elem3\"]", valWrap.String())
@@ -105,30 +105,30 @@ func TestAsList(t *testing.T) {
 // }
 
 func TestAsDate(t *testing.T) {
-	value := nebula.Value{DateVal: &nebula.Date{2020, 12, 25}}
+	value := nebula.XValue_{DateVal: &nebula.XDate_{2020, 12, 25}}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsDate())
 	assert.Equal(t, "2020-12-25", valWrap.String())
 }
 
 func TestAsLocalTime(t *testing.T) {
-	value := nebula.Value{LocalTimeVal: &nebula.LocalTime{13, 12, 25, 29}}
+	value := nebula.XValue_{LocalTimeVal: &nebula.XLocalTime_{13, 12, 25, 29}}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsLocalTime())
 	assert.Equal(t, "13:12:25.000029", valWrap.String())
 }
 
 func TestAsLocalDatetime(t *testing.T) {
-	value := nebula.Value{LocalDatetimeVal: &nebula.LocalDatetime{2020, 12, 25, 22, 12, 25, 29}}
+	value := nebula.XValue_{LocalDatetimeVal: &nebula.XLocalDatetime_{2020, 12, 25, 22, 12, 25, 29}}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsLocalDatetime())
 	assert.Equal(t, "2020-12-25T22:12:25.000029", valWrap.String())
 }
 
 func TestResultSet(t *testing.T) {
-	respWithNil := &graph.ExecutionResponse{
-		&graph.ExecutionOutcome{
-			&graph.GQLStatus{
+	respWithNil := &graph.XExecutionResponse_{
+		&graph.XExecutionOutcome_{
+			&graph.XGQLStatus_{
 				[]byte("ERROR"),
 			}, nil, nil,
 		}, 1000,
@@ -145,18 +145,18 @@ func TestResultSet(t *testing.T) {
 	// Fill a binding table
 	var int64 = int64(100)
 	var str = []byte("test_string")
-	respWithData := &graph.ExecutionResponse{
-		&graph.ExecutionOutcome{
-			&graph.GQLStatus{
+	respWithData := &graph.XExecutionResponse_{
+		&graph.XExecutionOutcome_{
+			&graph.XGQLStatus_{
 				[]byte("SUCCESS"),
 			}, nil, nil,
 		}, 1000,
 	}
 
-	respWithData.ExecutionOutcome.Result_ = &nebula.BindingTable{
+	respWithData.ExecutionOutcome.Result_ = &nebula.XBindingTable_{
 		ColumnNames: [][]byte{[]byte("col1"), []byte("col2")},
-		Records: []*nebula.RawRecord{
-			{[]*nebula.Value{nebula.NewValue().SetInt64Val(&int64),
+		Records: []nebula.Row{
+			{[]*nebula.XValue_{nebula.NewValue().SetInt64Val(&int64),
 				nebula.NewValue().SetStringVal(str)}},
 		},
 	}
@@ -178,10 +178,10 @@ func TestString(t *testing.T) {
 
 	// Node
 	{
-		rawNode := &nebula.Node{
+		rawNode := &nebula.XNode_{
 			1111,
 			2222,
-			map[string]*nebula.Value{
+			map[string]nebula.Value{
 				"key1": {StringVal: []byte("value1")},
 				"key2": {StringVal: []byte("value2")},
 			},
@@ -196,12 +196,12 @@ func TestString(t *testing.T) {
 
 	// Edge
 	{
-		rawEdge := &nebula.Edge{
+		rawEdge := &nebula.XEdge_{
 			1111,
 			2222,
 			3333,
 			4444,
-			map[string]*nebula.Value{
+			map[string]nebula.Value{
 				"key1": {StringVal: []byte("value1")},
 				"key2": {StringVal: []byte("value2")},
 				"key3": {StringVal: []byte("value3")},

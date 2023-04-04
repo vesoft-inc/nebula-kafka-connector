@@ -80,7 +80,7 @@ func (cn *connection) reopen() error {
 }
 
 // authenticate authenticates a user with a password
-func (cn *connection) Authenticate(username, password string) (*graph.AuthResponse, error) {
+func (cn *connection) Authenticate(username, password string) (graph.AuthResponse, error) {
 	// Prepare the request
 	authReq := &graph.AuthReq{
 		Username:      []byte(username),
@@ -105,7 +105,7 @@ func (cn *connection) Authenticate(username, password string) (*graph.AuthRespon
 }
 
 // execute executes a gql query
-func (cn *connection) execute(Identifier int64, stmt string) (*graph.ExecutionResponse, error) {
+func (cn *connection) execute(Identifier int64, stmt string) (graph.ExecutionResponse, error) {
 	resp, err := cn.graphService.Execute(Identifier, []byte(stmt))
 	if err != nil {
 		// reopen the connection if timeout

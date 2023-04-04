@@ -10,7 +10,7 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	nebula0 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
+  nebula0 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
 
 )
 
@@ -24,55 +24,103 @@ var _ = context.Background
 var _ = nebula0.GoUnusedProtection__
 var GoUnusedProtection__ int;
 
+type ProfilingStats = *XProfilingStats_
+
+func ProfilingStatsPtr(v ProfilingStats) *ProfilingStats { return &v }
+
+func NewProfilingStats() ProfilingStats { return NewXProfilingStats_() }
+
+type Pair = *XPair_
+
+func PairPtr(v Pair) *Pair { return &v }
+
+func NewPair() Pair { return NewXPair_() }
+
+type PlanNodeDescription = *XPlanNodeDescription_
+
+func PlanNodeDescriptionPtr(v PlanNodeDescription) *PlanNodeDescription { return &v }
+
+func NewPlanNodeDescription() PlanNodeDescription { return NewXPlanNodeDescription_() }
+
+type PlanDescription = *XPlanDescription_
+
+func PlanDescriptionPtr(v PlanDescription) *PlanDescription { return &v }
+
+func NewPlanDescription() PlanDescription { return NewXPlanDescription_() }
+
+type GQLStatus = *XGQLStatus_
+
+func GQLStatusPtr(v GQLStatus) *GQLStatus { return &v }
+
+func NewGQLStatus() GQLStatus { return NewXGQLStatus_() }
+
+type ExecutionOutcome = *XExecutionOutcome_
+
+func ExecutionOutcomePtr(v ExecutionOutcome) *ExecutionOutcome { return &v }
+
+func NewExecutionOutcome() ExecutionOutcome { return NewXExecutionOutcome_() }
+
+type ExecutionResponse = *XExecutionResponse_
+
+func ExecutionResponsePtr(v ExecutionResponse) *ExecutionResponse { return &v }
+
+func NewExecutionResponse() ExecutionResponse { return NewXExecutionResponse_() }
+
+type AuthResponse = *XAuthResponse_
+
+func AuthResponsePtr(v AuthResponse) *AuthResponse { return &v }
+
+func NewAuthResponse() AuthResponse { return NewXAuthResponse_() }
+
 // Attributes:
 //  - Rows
 //  - ExecDurationInUs
 //  - TotalDurationInUs
 //  - OtherStats
-type ProfilingStats struct {
-  Rows int64 `thrift:"rows,1,required" db:"rows" json:"rows"`
-  ExecDurationInUs int64 `thrift:"exec_duration_in_us,2,required" db:"exec_duration_in_us" json:"exec_duration_in_us"`
-  TotalDurationInUs int64 `thrift:"total_duration_in_us,3,required" db:"total_duration_in_us" json:"total_duration_in_us"`
+type XProfilingStats_ struct {
+  Rows int64 `thrift:"rows,1" db:"rows" json:"rows"`
+  ExecDurationInUs int64 `thrift:"exec_duration_in_us,2" db:"exec_duration_in_us" json:"exec_duration_in_us"`
+  TotalDurationInUs int64 `thrift:"total_duration_in_us,3" db:"total_duration_in_us" json:"total_duration_in_us"`
   OtherStats map[string][]byte `thrift:"other_stats,4,optional" db:"other_stats" json:"other_stats,omitempty"`
 }
 
-func NewProfilingStats() *ProfilingStats {
-  return &ProfilingStats{}
+func NewXProfilingStats_() *XProfilingStats_ {
+  return &XProfilingStats_{}
 }
 
 
-func (p *ProfilingStats) GetRows() int64 {
+func (p *XProfilingStats_) GetRows() int64 {
   return p.Rows
 }
 
-func (p *ProfilingStats) GetExecDurationInUs() int64 {
+func (p *XProfilingStats_) GetExecDurationInUs() int64 {
   return p.ExecDurationInUs
 }
 
-func (p *ProfilingStats) GetTotalDurationInUs() int64 {
+func (p *XProfilingStats_) GetTotalDurationInUs() int64 {
   return p.TotalDurationInUs
 }
-var ProfilingStats_OtherStats_DEFAULT map[string][]byte
+var XProfilingStats__OtherStats_DEFAULT map[string][]byte
 
-func (p *ProfilingStats) GetOtherStats() map[string][]byte {
+func (p *XProfilingStats_) GetOtherStats() map[string][]byte {
   return p.OtherStats
 }
-func (p *ProfilingStats) IsSetOtherStats() bool {
+func (p *XProfilingStats_) IsSetOtherStats() bool {
   return p != nil && p.OtherStats != nil
 }
 
-type ProfilingStatsBuilder struct {
-  obj *ProfilingStats
+type XProfilingStats_Builder struct {
+  obj *XProfilingStats_
 }
 
-func NewProfilingStatsBuilder() *ProfilingStatsBuilder{
-  return &ProfilingStatsBuilder{
-    obj: NewProfilingStats(),
+func NewXProfilingStats_Builder() *XProfilingStats_Builder{
+  return &XProfilingStats_Builder{
+    obj: NewXProfilingStats_(),
   }
 }
 
-func (p ProfilingStatsBuilder) Emit() *ProfilingStats{
-  return &ProfilingStats{
+func (p XProfilingStats_Builder) Emit() *XProfilingStats_{
+  return &XProfilingStats_{
     Rows: p.obj.Rows,
     ExecDurationInUs: p.obj.ExecDurationInUs,
     TotalDurationInUs: p.obj.TotalDurationInUs,
@@ -80,54 +128,51 @@ func (p ProfilingStatsBuilder) Emit() *ProfilingStats{
   }
 }
 
-func (p *ProfilingStatsBuilder) Rows(rows int64) *ProfilingStatsBuilder {
-  p.obj.Rows = rows
-  return p
+func (x *XProfilingStats_Builder) Rows(rows int64) *XProfilingStats_Builder {
+  x.obj.Rows = rows
+  return x
 }
 
-func (p *ProfilingStatsBuilder) ExecDurationInUs(execDurationInUs int64) *ProfilingStatsBuilder {
-  p.obj.ExecDurationInUs = execDurationInUs
-  return p
+func (x *XProfilingStats_Builder) ExecDurationInUs(execDurationInUs int64) *XProfilingStats_Builder {
+  x.obj.ExecDurationInUs = execDurationInUs
+  return x
 }
 
-func (p *ProfilingStatsBuilder) TotalDurationInUs(totalDurationInUs int64) *ProfilingStatsBuilder {
-  p.obj.TotalDurationInUs = totalDurationInUs
-  return p
+func (x *XProfilingStats_Builder) TotalDurationInUs(totalDurationInUs int64) *XProfilingStats_Builder {
+  x.obj.TotalDurationInUs = totalDurationInUs
+  return x
 }
 
-func (p *ProfilingStatsBuilder) OtherStats(otherStats map[string][]byte) *ProfilingStatsBuilder {
-  p.obj.OtherStats = otherStats
-  return p
+func (x *XProfilingStats_Builder) OtherStats(otherStats map[string][]byte) *XProfilingStats_Builder {
+  x.obj.OtherStats = otherStats
+  return x
 }
 
-func (p *ProfilingStats) SetRows(rows int64) *ProfilingStats {
-  p.Rows = rows
-  return p
+func (x *XProfilingStats_) SetRows(rows int64) *XProfilingStats_ {
+  x.Rows = rows
+  return x
 }
 
-func (p *ProfilingStats) SetExecDurationInUs(execDurationInUs int64) *ProfilingStats {
-  p.ExecDurationInUs = execDurationInUs
-  return p
+func (x *XProfilingStats_) SetExecDurationInUs(execDurationInUs int64) *XProfilingStats_ {
+  x.ExecDurationInUs = execDurationInUs
+  return x
 }
 
-func (p *ProfilingStats) SetTotalDurationInUs(totalDurationInUs int64) *ProfilingStats {
-  p.TotalDurationInUs = totalDurationInUs
-  return p
+func (x *XProfilingStats_) SetTotalDurationInUs(totalDurationInUs int64) *XProfilingStats_ {
+  x.TotalDurationInUs = totalDurationInUs
+  return x
 }
 
-func (p *ProfilingStats) SetOtherStats(otherStats map[string][]byte) *ProfilingStats {
-  p.OtherStats = otherStats
-  return p
+func (x *XProfilingStats_) SetOtherStats(otherStats map[string][]byte) *XProfilingStats_ {
+  x.OtherStats = otherStats
+  return x
 }
 
-func (p *ProfilingStats) Read(iprot thrift.Protocol) error {
+func (p *XProfilingStats_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetRows bool = false;
-  var issetExecDurationInUs bool = false;
-  var issetTotalDurationInUs bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -140,17 +185,14 @@ func (p *ProfilingStats) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetRows = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
       }
-      issetExecDurationInUs = true
     case 3:
       if err := p.ReadField3(iprot); err != nil {
         return err
       }
-      issetTotalDurationInUs = true
     case 4:
       if err := p.ReadField4(iprot); err != nil {
         return err
@@ -167,19 +209,10 @@ func (p *ProfilingStats) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetRows{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Rows is not set"));
-  }
-  if !issetExecDurationInUs{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field ExecDurationInUs is not set"));
-  }
-  if !issetTotalDurationInUs{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field TotalDurationInUs is not set"));
-  }
   return nil
 }
 
-func (p *ProfilingStats)  ReadField1(iprot thrift.Protocol) error {
+func (p *XProfilingStats_)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
@@ -188,7 +221,7 @@ func (p *ProfilingStats)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ProfilingStats)  ReadField2(iprot thrift.Protocol) error {
+func (p *XProfilingStats_)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -197,7 +230,7 @@ func (p *ProfilingStats)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ProfilingStats)  ReadField3(iprot thrift.Protocol) error {
+func (p *XProfilingStats_)  ReadField3(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
     return thrift.PrependError("error reading field 3: ", err)
   } else {
@@ -206,7 +239,7 @@ func (p *ProfilingStats)  ReadField3(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ProfilingStats)  ReadField4(iprot thrift.Protocol) error {
+func (p *XProfilingStats_)  ReadField4(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -234,8 +267,8 @@ func (p *ProfilingStats)  ReadField4(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ProfilingStats) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("ProfilingStats"); err != nil {
+func (p *XProfilingStats_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_ProfilingStats_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -248,7 +281,7 @@ func (p *ProfilingStats) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ProfilingStats) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XProfilingStats_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("rows", thrift.I64, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:rows: ", p), err) }
   if err := oprot.WriteI64(int64(p.Rows)); err != nil {
@@ -258,7 +291,7 @@ func (p *ProfilingStats) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ProfilingStats) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XProfilingStats_) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("exec_duration_in_us", thrift.I64, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:exec_duration_in_us: ", p), err) }
   if err := oprot.WriteI64(int64(p.ExecDurationInUs)); err != nil {
@@ -268,7 +301,7 @@ func (p *ProfilingStats) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ProfilingStats) writeField3(oprot thrift.Protocol) (err error) {
+func (p *XProfilingStats_) writeField3(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("total_duration_in_us", thrift.I64, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:total_duration_in_us: ", p), err) }
   if err := oprot.WriteI64(int64(p.TotalDurationInUs)); err != nil {
@@ -278,7 +311,7 @@ func (p *ProfilingStats) writeField3(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ProfilingStats) writeField4(oprot thrift.Protocol) (err error) {
+func (p *XProfilingStats_) writeField4(oprot thrift.Protocol) (err error) {
   if p.IsSetOtherStats() {
     if err := oprot.WriteFieldBegin("other_stats", thrift.MAP, 4); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:other_stats: ", p), err) }
@@ -300,7 +333,7 @@ func (p *ProfilingStats) writeField4(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ProfilingStats) String() string {
+func (p *XProfilingStats_) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -309,73 +342,71 @@ func (p *ProfilingStats) String() string {
   execDurationInUsVal := fmt.Sprintf("%v", p.ExecDurationInUs)
   totalDurationInUsVal := fmt.Sprintf("%v", p.TotalDurationInUs)
   otherStatsVal := fmt.Sprintf("%v", p.OtherStats)
-  return fmt.Sprintf("ProfilingStats({Rows:%s ExecDurationInUs:%s TotalDurationInUs:%s OtherStats:%s})", rowsVal, execDurationInUsVal, totalDurationInUsVal, otherStatsVal)
+  return fmt.Sprintf("XProfilingStats_({Rows:%s ExecDurationInUs:%s TotalDurationInUs:%s OtherStats:%s})", rowsVal, execDurationInUsVal, totalDurationInUsVal, otherStatsVal)
 }
 
 // Attributes:
 //  - Key
 //  - Value
-type Pair struct {
-  Key []byte `thrift:"key,1,required" db:"key" json:"key"`
-  Value []byte `thrift:"value,2,required" db:"value" json:"value"`
+type XPair_ struct {
+  Key []byte `thrift:"key,1" db:"key" json:"key"`
+  Value []byte `thrift:"value,2" db:"value" json:"value"`
 }
 
-func NewPair() *Pair {
-  return &Pair{}
+func NewXPair_() *XPair_ {
+  return &XPair_{}
 }
 
 
-func (p *Pair) GetKey() []byte {
+func (p *XPair_) GetKey() []byte {
   return p.Key
 }
 
-func (p *Pair) GetValue() []byte {
+func (p *XPair_) GetValue() []byte {
   return p.Value
 }
-type PairBuilder struct {
-  obj *Pair
+type XPair_Builder struct {
+  obj *XPair_
 }
 
-func NewPairBuilder() *PairBuilder{
-  return &PairBuilder{
-    obj: NewPair(),
+func NewXPair_Builder() *XPair_Builder{
+  return &XPair_Builder{
+    obj: NewXPair_(),
   }
 }
 
-func (p PairBuilder) Emit() *Pair{
-  return &Pair{
+func (p XPair_Builder) Emit() *XPair_{
+  return &XPair_{
     Key: p.obj.Key,
     Value: p.obj.Value,
   }
 }
 
-func (p *PairBuilder) Key(key []byte) *PairBuilder {
-  p.obj.Key = key
-  return p
+func (x *XPair_Builder) Key(key []byte) *XPair_Builder {
+  x.obj.Key = key
+  return x
 }
 
-func (p *PairBuilder) Value(value []byte) *PairBuilder {
-  p.obj.Value = value
-  return p
+func (x *XPair_Builder) Value(value []byte) *XPair_Builder {
+  x.obj.Value = value
+  return x
 }
 
-func (p *Pair) SetKey(key []byte) *Pair {
-  p.Key = key
-  return p
+func (x *XPair_) SetKey(key []byte) *XPair_ {
+  x.Key = key
+  return x
 }
 
-func (p *Pair) SetValue(value []byte) *Pair {
-  p.Value = value
-  return p
+func (x *XPair_) SetValue(value []byte) *XPair_ {
+  x.Value = value
+  return x
 }
 
-func (p *Pair) Read(iprot thrift.Protocol) error {
+func (p *XPair_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetKey bool = false;
-  var issetValue bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -388,12 +419,10 @@ func (p *Pair) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetKey = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
       }
-      issetValue = true
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -406,16 +435,10 @@ func (p *Pair) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetKey{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Key is not set"));
-  }
-  if !issetValue{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Value is not set"));
-  }
   return nil
 }
 
-func (p *Pair)  ReadField1(iprot thrift.Protocol) error {
+func (p *XPair_)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
@@ -424,7 +447,7 @@ func (p *Pair)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *Pair)  ReadField2(iprot thrift.Protocol) error {
+func (p *XPair_)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -433,8 +456,8 @@ func (p *Pair)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *Pair) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("Pair"); err != nil {
+func (p *XPair_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_Pair_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -445,7 +468,7 @@ func (p *Pair) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *Pair) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XPair_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("key", thrift.STRING, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:key: ", p), err) }
   if err := oprot.WriteBinary(p.Key); err != nil {
@@ -455,7 +478,7 @@ func (p *Pair) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *Pair) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XPair_) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("value", thrift.STRING, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:value: ", p), err) }
   if err := oprot.WriteBinary(p.Value); err != nil {
@@ -465,14 +488,14 @@ func (p *Pair) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *Pair) String() string {
+func (p *XPair_) String() string {
   if p == nil {
     return "<nil>"
   }
 
   keyVal := fmt.Sprintf("%v", p.Key)
   valueVal := fmt.Sprintf("%v", p.Value)
-  return fmt.Sprintf("Pair({Key:%s Value:%s})", keyVal, valueVal)
+  return fmt.Sprintf("XPair_({Key:%s Value:%s})", keyVal, valueVal)
 }
 
 // Attributes:
@@ -482,70 +505,70 @@ func (p *Pair) String() string {
 //  - Description
 //  - Profiles
 //  - Dependencies
-type PlanNodeDescription struct {
-  Name []byte `thrift:"name,1,required" db:"name" json:"name"`
-  Id int64 `thrift:"id,2,required" db:"id" json:"id"`
-  OutputVar []byte `thrift:"output_var,3,required" db:"output_var" json:"output_var"`
-  Description []*Pair `thrift:"description,4,optional" db:"description" json:"description,omitempty"`
-  Profiles []*ProfilingStats `thrift:"profiles,5,optional" db:"profiles" json:"profiles,omitempty"`
+type XPlanNodeDescription_ struct {
+  Name []byte `thrift:"name,1" db:"name" json:"name"`
+  Id int64 `thrift:"id,2" db:"id" json:"id"`
+  OutputVar []byte `thrift:"output_var,3" db:"output_var" json:"output_var"`
+  Description []Pair `thrift:"description,4,optional" db:"description" json:"description,omitempty"`
+  Profiles []ProfilingStats `thrift:"profiles,5,optional" db:"profiles" json:"profiles,omitempty"`
   Dependencies []int64 `thrift:"dependencies,6,optional" db:"dependencies" json:"dependencies,omitempty"`
 }
 
-func NewPlanNodeDescription() *PlanNodeDescription {
-  return &PlanNodeDescription{}
+func NewXPlanNodeDescription_() *XPlanNodeDescription_ {
+  return &XPlanNodeDescription_{}
 }
 
 
-func (p *PlanNodeDescription) GetName() []byte {
+func (p *XPlanNodeDescription_) GetName() []byte {
   return p.Name
 }
 
-func (p *PlanNodeDescription) GetId() int64 {
+func (p *XPlanNodeDescription_) GetId() int64 {
   return p.Id
 }
 
-func (p *PlanNodeDescription) GetOutputVar() []byte {
+func (p *XPlanNodeDescription_) GetOutputVar() []byte {
   return p.OutputVar
 }
-var PlanNodeDescription_Description_DEFAULT []*Pair
+var XPlanNodeDescription__Description_DEFAULT []*Pair
 
-func (p *PlanNodeDescription) GetDescription() []*Pair {
+func (p *XPlanNodeDescription_) GetDescription() []Pair {
   return p.Description
 }
-var PlanNodeDescription_Profiles_DEFAULT []*ProfilingStats
+var XPlanNodeDescription__Profiles_DEFAULT []*ProfilingStats
 
-func (p *PlanNodeDescription) GetProfiles() []*ProfilingStats {
+func (p *XPlanNodeDescription_) GetProfiles() []ProfilingStats {
   return p.Profiles
 }
-var PlanNodeDescription_Dependencies_DEFAULT []int64
+var XPlanNodeDescription__Dependencies_DEFAULT []int64
 
-func (p *PlanNodeDescription) GetDependencies() []int64 {
+func (p *XPlanNodeDescription_) GetDependencies() []int64 {
   return p.Dependencies
 }
-func (p *PlanNodeDescription) IsSetDescription() bool {
+func (p *XPlanNodeDescription_) IsSetDescription() bool {
   return p != nil && p.Description != nil
 }
 
-func (p *PlanNodeDescription) IsSetProfiles() bool {
+func (p *XPlanNodeDescription_) IsSetProfiles() bool {
   return p != nil && p.Profiles != nil
 }
 
-func (p *PlanNodeDescription) IsSetDependencies() bool {
+func (p *XPlanNodeDescription_) IsSetDependencies() bool {
   return p != nil && p.Dependencies != nil
 }
 
-type PlanNodeDescriptionBuilder struct {
-  obj *PlanNodeDescription
+type XPlanNodeDescription_Builder struct {
+  obj *XPlanNodeDescription_
 }
 
-func NewPlanNodeDescriptionBuilder() *PlanNodeDescriptionBuilder{
-  return &PlanNodeDescriptionBuilder{
-    obj: NewPlanNodeDescription(),
+func NewXPlanNodeDescription_Builder() *XPlanNodeDescription_Builder{
+  return &XPlanNodeDescription_Builder{
+    obj: NewXPlanNodeDescription_(),
   }
 }
 
-func (p PlanNodeDescriptionBuilder) Emit() *PlanNodeDescription{
-  return &PlanNodeDescription{
+func (p XPlanNodeDescription_Builder) Emit() *XPlanNodeDescription_{
+  return &XPlanNodeDescription_{
     Name: p.obj.Name,
     Id: p.obj.Id,
     OutputVar: p.obj.OutputVar,
@@ -555,74 +578,71 @@ func (p PlanNodeDescriptionBuilder) Emit() *PlanNodeDescription{
   }
 }
 
-func (p *PlanNodeDescriptionBuilder) Name(name []byte) *PlanNodeDescriptionBuilder {
-  p.obj.Name = name
-  return p
+func (x *XPlanNodeDescription_Builder) Name(name []byte) *XPlanNodeDescription_Builder {
+  x.obj.Name = name
+  return x
 }
 
-func (p *PlanNodeDescriptionBuilder) Id(id int64) *PlanNodeDescriptionBuilder {
-  p.obj.Id = id
-  return p
+func (x *XPlanNodeDescription_Builder) Id(id int64) *XPlanNodeDescription_Builder {
+  x.obj.Id = id
+  return x
 }
 
-func (p *PlanNodeDescriptionBuilder) OutputVar(outputVar []byte) *PlanNodeDescriptionBuilder {
-  p.obj.OutputVar = outputVar
-  return p
+func (x *XPlanNodeDescription_Builder) OutputVar(outputVar []byte) *XPlanNodeDescription_Builder {
+  x.obj.OutputVar = outputVar
+  return x
 }
 
-func (p *PlanNodeDescriptionBuilder) Description(description []*Pair) *PlanNodeDescriptionBuilder {
-  p.obj.Description = description
-  return p
+func (x *XPlanNodeDescription_Builder) Description(description []Pair) *XPlanNodeDescription_Builder {
+  x.obj.Description = description
+  return x
 }
 
-func (p *PlanNodeDescriptionBuilder) Profiles(profiles []*ProfilingStats) *PlanNodeDescriptionBuilder {
-  p.obj.Profiles = profiles
-  return p
+func (x *XPlanNodeDescription_Builder) Profiles(profiles []ProfilingStats) *XPlanNodeDescription_Builder {
+  x.obj.Profiles = profiles
+  return x
 }
 
-func (p *PlanNodeDescriptionBuilder) Dependencies(dependencies []int64) *PlanNodeDescriptionBuilder {
-  p.obj.Dependencies = dependencies
-  return p
+func (x *XPlanNodeDescription_Builder) Dependencies(dependencies []int64) *XPlanNodeDescription_Builder {
+  x.obj.Dependencies = dependencies
+  return x
 }
 
-func (p *PlanNodeDescription) SetName(name []byte) *PlanNodeDescription {
-  p.Name = name
-  return p
+func (x *XPlanNodeDescription_) SetName(name []byte) *XPlanNodeDescription_ {
+  x.Name = name
+  return x
 }
 
-func (p *PlanNodeDescription) SetId(id int64) *PlanNodeDescription {
-  p.Id = id
-  return p
+func (x *XPlanNodeDescription_) SetId(id int64) *XPlanNodeDescription_ {
+  x.Id = id
+  return x
 }
 
-func (p *PlanNodeDescription) SetOutputVar(outputVar []byte) *PlanNodeDescription {
-  p.OutputVar = outputVar
-  return p
+func (x *XPlanNodeDescription_) SetOutputVar(outputVar []byte) *XPlanNodeDescription_ {
+  x.OutputVar = outputVar
+  return x
 }
 
-func (p *PlanNodeDescription) SetDescription(description []*Pair) *PlanNodeDescription {
-  p.Description = description
-  return p
+func (x *XPlanNodeDescription_) SetDescription(description []Pair) *XPlanNodeDescription_ {
+  x.Description = description
+  return x
 }
 
-func (p *PlanNodeDescription) SetProfiles(profiles []*ProfilingStats) *PlanNodeDescription {
-  p.Profiles = profiles
-  return p
+func (x *XPlanNodeDescription_) SetProfiles(profiles []ProfilingStats) *XPlanNodeDescription_ {
+  x.Profiles = profiles
+  return x
 }
 
-func (p *PlanNodeDescription) SetDependencies(dependencies []int64) *PlanNodeDescription {
-  p.Dependencies = dependencies
-  return p
+func (x *XPlanNodeDescription_) SetDependencies(dependencies []int64) *XPlanNodeDescription_ {
+  x.Dependencies = dependencies
+  return x
 }
 
-func (p *PlanNodeDescription) Read(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetName bool = false;
-  var issetId bool = false;
-  var issetOutputVar bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -635,17 +655,14 @@ func (p *PlanNodeDescription) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetName = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
       }
-      issetId = true
     case 3:
       if err := p.ReadField3(iprot); err != nil {
         return err
       }
-      issetOutputVar = true
     case 4:
       if err := p.ReadField4(iprot); err != nil {
         return err
@@ -670,19 +687,10 @@ func (p *PlanNodeDescription) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetName{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Name is not set"));
-  }
-  if !issetId{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Id is not set"));
-  }
-  if !issetOutputVar{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field OutputVar is not set"));
-  }
   return nil
 }
 
-func (p *PlanNodeDescription)  ReadField1(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
@@ -691,7 +699,7 @@ func (p *PlanNodeDescription)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription)  ReadField2(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -700,7 +708,7 @@ func (p *PlanNodeDescription)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription)  ReadField3(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_)  ReadField3(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 3: ", err)
   } else {
@@ -709,12 +717,12 @@ func (p *PlanNodeDescription)  ReadField3(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription)  ReadField4(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_)  ReadField4(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]*Pair, 0, size)
+  tSlice := make([]Pair, 0, size)
   p.Description =  tSlice
   for i := 0; i < size; i ++ {
     _elem3 := NewPair()
@@ -729,12 +737,12 @@ func (p *PlanNodeDescription)  ReadField4(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription)  ReadField5(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_)  ReadField5(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]*ProfilingStats, 0, size)
+  tSlice := make([]ProfilingStats, 0, size)
   p.Profiles =  tSlice
   for i := 0; i < size; i ++ {
     _elem4 := NewProfilingStats()
@@ -749,7 +757,7 @@ func (p *PlanNodeDescription)  ReadField5(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription)  ReadField6(iprot thrift.Protocol) error {
+func (p *XPlanNodeDescription_)  ReadField6(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -771,8 +779,8 @@ func (p *PlanNodeDescription)  ReadField6(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("PlanNodeDescription"); err != nil {
+func (p *XPlanNodeDescription_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_PlanNodeDescription_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -787,7 +795,7 @@ func (p *PlanNodeDescription) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanNodeDescription) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XPlanNodeDescription_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("name", thrift.STRING, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:name: ", p), err) }
   if err := oprot.WriteBinary(p.Name); err != nil {
@@ -797,7 +805,7 @@ func (p *PlanNodeDescription) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanNodeDescription) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XPlanNodeDescription_) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("id", thrift.I64, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:id: ", p), err) }
   if err := oprot.WriteI64(int64(p.Id)); err != nil {
@@ -807,7 +815,7 @@ func (p *PlanNodeDescription) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanNodeDescription) writeField3(oprot thrift.Protocol) (err error) {
+func (p *XPlanNodeDescription_) writeField3(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("output_var", thrift.STRING, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:output_var: ", p), err) }
   if err := oprot.WriteBinary(p.OutputVar); err != nil {
@@ -817,7 +825,7 @@ func (p *PlanNodeDescription) writeField3(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanNodeDescription) writeField4(oprot thrift.Protocol) (err error) {
+func (p *XPlanNodeDescription_) writeField4(oprot thrift.Protocol) (err error) {
   if p.IsSetDescription() {
     if err := oprot.WriteFieldBegin("description", thrift.LIST, 4); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:description: ", p), err) }
@@ -838,7 +846,7 @@ func (p *PlanNodeDescription) writeField4(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanNodeDescription) writeField5(oprot thrift.Protocol) (err error) {
+func (p *XPlanNodeDescription_) writeField5(oprot thrift.Protocol) (err error) {
   if p.IsSetProfiles() {
     if err := oprot.WriteFieldBegin("profiles", thrift.LIST, 5); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 5:profiles: ", p), err) }
@@ -859,7 +867,7 @@ func (p *PlanNodeDescription) writeField5(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanNodeDescription) writeField6(oprot thrift.Protocol) (err error) {
+func (p *XPlanNodeDescription_) writeField6(oprot thrift.Protocol) (err error) {
   if p.IsSetDependencies() {
     if err := oprot.WriteFieldBegin("dependencies", thrift.LIST, 6); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 6:dependencies: ", p), err) }
@@ -879,7 +887,7 @@ func (p *PlanNodeDescription) writeField6(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanNodeDescription) String() string {
+func (p *XPlanNodeDescription_) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -890,7 +898,7 @@ func (p *PlanNodeDescription) String() string {
   descriptionVal := fmt.Sprintf("%v", p.Description)
   profilesVal := fmt.Sprintf("%v", p.Profiles)
   dependenciesVal := fmt.Sprintf("%v", p.Dependencies)
-  return fmt.Sprintf("PlanNodeDescription({Name:%s Id:%s OutputVar:%s Description:%s Profiles:%s Dependencies:%s})", nameVal, idVal, outputVarVal, descriptionVal, profilesVal, dependenciesVal)
+  return fmt.Sprintf("XPlanNodeDescription_({Name:%s Id:%s OutputVar:%s Description:%s Profiles:%s Dependencies:%s})", nameVal, idVal, outputVarVal, descriptionVal, profilesVal, dependenciesVal)
 }
 
 // Attributes:
@@ -898,45 +906,45 @@ func (p *PlanNodeDescription) String() string {
 //  - NodeIndexMap
 //  - Format
 //  - OptimizeTimeInUs
-type PlanDescription struct {
-  PlanNodeDescs []*PlanNodeDescription `thrift:"plan_node_descs,1,required" db:"plan_node_descs" json:"plan_node_descs"`
-  NodeIndexMap map[int64]int64 `thrift:"node_index_map,2,required" db:"node_index_map" json:"node_index_map"`
-  Format []byte `thrift:"format,3,required" db:"format" json:"format"`
-  OptimizeTimeInUs int32 `thrift:"optimize_time_in_us,4,required" db:"optimize_time_in_us" json:"optimize_time_in_us"`
+type XPlanDescription_ struct {
+  PlanNodeDescs []PlanNodeDescription `thrift:"plan_node_descs,1" db:"plan_node_descs" json:"plan_node_descs"`
+  NodeIndexMap map[int64]int64 `thrift:"node_index_map,2" db:"node_index_map" json:"node_index_map"`
+  Format []byte `thrift:"format,3" db:"format" json:"format"`
+  OptimizeTimeInUs int32 `thrift:"optimize_time_in_us,4" db:"optimize_time_in_us" json:"optimize_time_in_us"`
 }
 
-func NewPlanDescription() *PlanDescription {
-  return &PlanDescription{}
+func NewXPlanDescription_() *XPlanDescription_ {
+  return &XPlanDescription_{}
 }
 
 
-func (p *PlanDescription) GetPlanNodeDescs() []*PlanNodeDescription {
+func (p *XPlanDescription_) GetPlanNodeDescs() []PlanNodeDescription {
   return p.PlanNodeDescs
 }
 
-func (p *PlanDescription) GetNodeIndexMap() map[int64]int64 {
+func (p *XPlanDescription_) GetNodeIndexMap() map[int64]int64 {
   return p.NodeIndexMap
 }
 
-func (p *PlanDescription) GetFormat() []byte {
+func (p *XPlanDescription_) GetFormat() []byte {
   return p.Format
 }
 
-func (p *PlanDescription) GetOptimizeTimeInUs() int32 {
+func (p *XPlanDescription_) GetOptimizeTimeInUs() int32 {
   return p.OptimizeTimeInUs
 }
-type PlanDescriptionBuilder struct {
-  obj *PlanDescription
+type XPlanDescription_Builder struct {
+  obj *XPlanDescription_
 }
 
-func NewPlanDescriptionBuilder() *PlanDescriptionBuilder{
-  return &PlanDescriptionBuilder{
-    obj: NewPlanDescription(),
+func NewXPlanDescription_Builder() *XPlanDescription_Builder{
+  return &XPlanDescription_Builder{
+    obj: NewXPlanDescription_(),
   }
 }
 
-func (p PlanDescriptionBuilder) Emit() *PlanDescription{
-  return &PlanDescription{
+func (p XPlanDescription_Builder) Emit() *XPlanDescription_{
+  return &XPlanDescription_{
     PlanNodeDescs: p.obj.PlanNodeDescs,
     NodeIndexMap: p.obj.NodeIndexMap,
     Format: p.obj.Format,
@@ -944,55 +952,51 @@ func (p PlanDescriptionBuilder) Emit() *PlanDescription{
   }
 }
 
-func (p *PlanDescriptionBuilder) PlanNodeDescs(planNodeDescs []*PlanNodeDescription) *PlanDescriptionBuilder {
-  p.obj.PlanNodeDescs = planNodeDescs
-  return p
+func (x *XPlanDescription_Builder) PlanNodeDescs(planNodeDescs []PlanNodeDescription) *XPlanDescription_Builder {
+  x.obj.PlanNodeDescs = planNodeDescs
+  return x
 }
 
-func (p *PlanDescriptionBuilder) NodeIndexMap(nodeIndexMap map[int64]int64) *PlanDescriptionBuilder {
-  p.obj.NodeIndexMap = nodeIndexMap
-  return p
+func (x *XPlanDescription_Builder) NodeIndexMap(nodeIndexMap map[int64]int64) *XPlanDescription_Builder {
+  x.obj.NodeIndexMap = nodeIndexMap
+  return x
 }
 
-func (p *PlanDescriptionBuilder) Format(format []byte) *PlanDescriptionBuilder {
-  p.obj.Format = format
-  return p
+func (x *XPlanDescription_Builder) Format(format []byte) *XPlanDescription_Builder {
+  x.obj.Format = format
+  return x
 }
 
-func (p *PlanDescriptionBuilder) OptimizeTimeInUs(optimizeTimeInUs int32) *PlanDescriptionBuilder {
-  p.obj.OptimizeTimeInUs = optimizeTimeInUs
-  return p
+func (x *XPlanDescription_Builder) OptimizeTimeInUs(optimizeTimeInUs int32) *XPlanDescription_Builder {
+  x.obj.OptimizeTimeInUs = optimizeTimeInUs
+  return x
 }
 
-func (p *PlanDescription) SetPlanNodeDescs(planNodeDescs []*PlanNodeDescription) *PlanDescription {
-  p.PlanNodeDescs = planNodeDescs
-  return p
+func (x *XPlanDescription_) SetPlanNodeDescs(planNodeDescs []PlanNodeDescription) *XPlanDescription_ {
+  x.PlanNodeDescs = planNodeDescs
+  return x
 }
 
-func (p *PlanDescription) SetNodeIndexMap(nodeIndexMap map[int64]int64) *PlanDescription {
-  p.NodeIndexMap = nodeIndexMap
-  return p
+func (x *XPlanDescription_) SetNodeIndexMap(nodeIndexMap map[int64]int64) *XPlanDescription_ {
+  x.NodeIndexMap = nodeIndexMap
+  return x
 }
 
-func (p *PlanDescription) SetFormat(format []byte) *PlanDescription {
-  p.Format = format
-  return p
+func (x *XPlanDescription_) SetFormat(format []byte) *XPlanDescription_ {
+  x.Format = format
+  return x
 }
 
-func (p *PlanDescription) SetOptimizeTimeInUs(optimizeTimeInUs int32) *PlanDescription {
-  p.OptimizeTimeInUs = optimizeTimeInUs
-  return p
+func (x *XPlanDescription_) SetOptimizeTimeInUs(optimizeTimeInUs int32) *XPlanDescription_ {
+  x.OptimizeTimeInUs = optimizeTimeInUs
+  return x
 }
 
-func (p *PlanDescription) Read(iprot thrift.Protocol) error {
+func (p *XPlanDescription_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetPlanNodeDescs bool = false;
-  var issetNodeIndexMap bool = false;
-  var issetFormat bool = false;
-  var issetOptimizeTimeInUs bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -1005,22 +1009,18 @@ func (p *PlanDescription) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetPlanNodeDescs = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
       }
-      issetNodeIndexMap = true
     case 3:
       if err := p.ReadField3(iprot); err != nil {
         return err
       }
-      issetFormat = true
     case 4:
       if err := p.ReadField4(iprot); err != nil {
         return err
       }
-      issetOptimizeTimeInUs = true
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -1033,27 +1033,15 @@ func (p *PlanDescription) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetPlanNodeDescs{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field PlanNodeDescs is not set"));
-  }
-  if !issetNodeIndexMap{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field NodeIndexMap is not set"));
-  }
-  if !issetFormat{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Format is not set"));
-  }
-  if !issetOptimizeTimeInUs{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field OptimizeTimeInUs is not set"));
-  }
   return nil
 }
 
-func (p *PlanDescription)  ReadField1(iprot thrift.Protocol) error {
+func (p *XPlanDescription_)  ReadField1(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]*PlanNodeDescription, 0, size)
+  tSlice := make([]PlanNodeDescription, 0, size)
   p.PlanNodeDescs =  tSlice
   for i := 0; i < size; i ++ {
     _elem6 := NewPlanNodeDescription()
@@ -1068,7 +1056,7 @@ func (p *PlanDescription)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanDescription)  ReadField2(iprot thrift.Protocol) error {
+func (p *XPlanDescription_)  ReadField2(iprot thrift.Protocol) error {
   _, _, size, err := iprot.ReadMapBegin()
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
@@ -1096,7 +1084,7 @@ func (p *PlanDescription)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanDescription)  ReadField3(iprot thrift.Protocol) error {
+func (p *XPlanDescription_)  ReadField3(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 3: ", err)
   } else {
@@ -1105,7 +1093,7 @@ func (p *PlanDescription)  ReadField3(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanDescription)  ReadField4(iprot thrift.Protocol) error {
+func (p *XPlanDescription_)  ReadField4(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI32(); err != nil {
     return thrift.PrependError("error reading field 4: ", err)
   } else {
@@ -1114,8 +1102,8 @@ func (p *PlanDescription)  ReadField4(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanDescription) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("PlanDescription"); err != nil {
+func (p *XPlanDescription_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_PlanDescription_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -1128,7 +1116,7 @@ func (p *PlanDescription) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *PlanDescription) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XPlanDescription_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("plan_node_descs", thrift.LIST, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:plan_node_descs: ", p), err) }
   if err := oprot.WriteListBegin(thrift.STRUCT, len(p.PlanNodeDescs)); err != nil {
@@ -1147,7 +1135,7 @@ func (p *PlanDescription) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanDescription) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XPlanDescription_) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("node_index_map", thrift.MAP, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:node_index_map: ", p), err) }
   if err := oprot.WriteMapBegin(thrift.I64, thrift.I64, len(p.NodeIndexMap)); err != nil {
@@ -1167,7 +1155,7 @@ func (p *PlanDescription) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanDescription) writeField3(oprot thrift.Protocol) (err error) {
+func (p *XPlanDescription_) writeField3(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("format", thrift.STRING, 3); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:format: ", p), err) }
   if err := oprot.WriteBinary(p.Format); err != nil {
@@ -1177,7 +1165,7 @@ func (p *PlanDescription) writeField3(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanDescription) writeField4(oprot thrift.Protocol) (err error) {
+func (p *XPlanDescription_) writeField4(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("optimize_time_in_us", thrift.I32, 4); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 4:optimize_time_in_us: ", p), err) }
   if err := oprot.WriteI32(int32(p.OptimizeTimeInUs)); err != nil {
@@ -1187,7 +1175,7 @@ func (p *PlanDescription) writeField4(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *PlanDescription) String() string {
+func (p *XPlanDescription_) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -1196,55 +1184,54 @@ func (p *PlanDescription) String() string {
   nodeIndexMapVal := fmt.Sprintf("%v", p.NodeIndexMap)
   formatVal := fmt.Sprintf("%v", p.Format)
   optimizeTimeInUsVal := fmt.Sprintf("%v", p.OptimizeTimeInUs)
-  return fmt.Sprintf("PlanDescription({PlanNodeDescs:%s NodeIndexMap:%s Format:%s OptimizeTimeInUs:%s})", planNodeDescsVal, nodeIndexMapVal, formatVal, optimizeTimeInUsVal)
+  return fmt.Sprintf("XPlanDescription_({PlanNodeDescs:%s NodeIndexMap:%s Format:%s OptimizeTimeInUs:%s})", planNodeDescsVal, nodeIndexMapVal, formatVal, optimizeTimeInUsVal)
 }
 
 // Attributes:
 //  - Status
-type GQLStatus struct {
-  Status []byte `thrift:"status,1,required" db:"status" json:"status"`
+type XGQLStatus_ struct {
+  Status []byte `thrift:"status,1" db:"status" json:"status"`
 }
 
-func NewGQLStatus() *GQLStatus {
-  return &GQLStatus{}
+func NewXGQLStatus_() *XGQLStatus_ {
+  return &XGQLStatus_{}
 }
 
 
-func (p *GQLStatus) GetStatus() []byte {
+func (p *XGQLStatus_) GetStatus() []byte {
   return p.Status
 }
-type GQLStatusBuilder struct {
-  obj *GQLStatus
+type XGQLStatus_Builder struct {
+  obj *XGQLStatus_
 }
 
-func NewGQLStatusBuilder() *GQLStatusBuilder{
-  return &GQLStatusBuilder{
-    obj: NewGQLStatus(),
+func NewXGQLStatus_Builder() *XGQLStatus_Builder{
+  return &XGQLStatus_Builder{
+    obj: NewXGQLStatus_(),
   }
 }
 
-func (p GQLStatusBuilder) Emit() *GQLStatus{
-  return &GQLStatus{
+func (p XGQLStatus_Builder) Emit() *XGQLStatus_{
+  return &XGQLStatus_{
     Status: p.obj.Status,
   }
 }
 
-func (g *GQLStatusBuilder) Status(status []byte) *GQLStatusBuilder {
-  g.obj.Status = status
-  return g
+func (x *XGQLStatus_Builder) Status(status []byte) *XGQLStatus_Builder {
+  x.obj.Status = status
+  return x
 }
 
-func (g *GQLStatus) SetStatus(status []byte) *GQLStatus {
-  g.Status = status
-  return g
+func (x *XGQLStatus_) SetStatus(status []byte) *XGQLStatus_ {
+  x.Status = status
+  return x
 }
 
-func (p *GQLStatus) Read(iprot thrift.Protocol) error {
+func (p *XGQLStatus_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetStatus bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -1257,7 +1244,6 @@ func (p *GQLStatus) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetStatus = true
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -1270,13 +1256,10 @@ func (p *GQLStatus) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetStatus{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Status is not set"));
-  }
   return nil
 }
 
-func (p *GQLStatus)  ReadField1(iprot thrift.Protocol) error {
+func (p *XGQLStatus_)  ReadField1(iprot thrift.Protocol) error {
   if v, err := iprot.ReadBinary(); err != nil {
     return thrift.PrependError("error reading field 1: ", err)
   } else {
@@ -1285,8 +1268,8 @@ func (p *GQLStatus)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *GQLStatus) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("GQLStatus"); err != nil {
+func (p *XGQLStatus_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_GQLStatus_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
@@ -1296,7 +1279,7 @@ func (p *GQLStatus) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *GQLStatus) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XGQLStatus_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("status", thrift.STRING, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:status: ", p), err) }
   if err := oprot.WriteBinary(p.Status); err != nil {
@@ -1306,118 +1289,117 @@ func (p *GQLStatus) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *GQLStatus) String() string {
+func (p *XGQLStatus_) String() string {
   if p == nil {
     return "<nil>"
   }
 
   statusVal := fmt.Sprintf("%v", p.Status)
-  return fmt.Sprintf("GQLStatus({Status:%s})", statusVal)
+  return fmt.Sprintf("XGQLStatus_({Status:%s})", statusVal)
 }
 
 // Attributes:
 //  - GqlStatus
 //  - Result_
 //  - PlanDesc
-type ExecutionOutcome struct {
-  GqlStatus *GQLStatus `thrift:"gqlStatus,1,required" db:"gqlStatus" json:"gqlStatus"`
-  Result_ *nebula0.BindingTable `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
-  PlanDesc *PlanDescription `thrift:"plan_desc,3,optional" db:"plan_desc" json:"plan_desc,omitempty"`
+type XExecutionOutcome_ struct {
+  GqlStatus GQLStatus `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
+  Result_ nebula0.BindingTable `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
+  PlanDesc PlanDescription `thrift:"plan_desc,3,optional" db:"plan_desc" json:"plan_desc,omitempty"`
 }
 
-func NewExecutionOutcome() *ExecutionOutcome {
-  return &ExecutionOutcome{
+func NewXExecutionOutcome_() *XExecutionOutcome_ {
+  return &XExecutionOutcome_{
     GqlStatus: NewGQLStatus(),
   }
 }
 
-var ExecutionOutcome_GqlStatus_DEFAULT *GQLStatus
-func (p *ExecutionOutcome) GetGqlStatus() *GQLStatus {
+var XExecutionOutcome__GqlStatus_DEFAULT GQLStatus
+func (p *XExecutionOutcome_) GetGqlStatus() GQLStatus {
   if !p.IsSetGqlStatus() {
-    return ExecutionOutcome_GqlStatus_DEFAULT
+    return XExecutionOutcome__GqlStatus_DEFAULT
   }
-return p.GqlStatus
+  return p.GqlStatus
 }
-var ExecutionOutcome_Result__DEFAULT *nebula0.BindingTable
-func (p *ExecutionOutcome) GetResult_() *nebula0.BindingTable {
+var XExecutionOutcome__Result__DEFAULT nebula0.BindingTable
+func (p *XExecutionOutcome_) GetResult_() nebula0.BindingTable {
   if !p.IsSetResult_() {
-    return ExecutionOutcome_Result__DEFAULT
+    return XExecutionOutcome__Result__DEFAULT
   }
-return p.Result_
+  return p.Result_
 }
-var ExecutionOutcome_PlanDesc_DEFAULT *PlanDescription
-func (p *ExecutionOutcome) GetPlanDesc() *PlanDescription {
+var XExecutionOutcome__PlanDesc_DEFAULT PlanDescription
+func (p *XExecutionOutcome_) GetPlanDesc() PlanDescription {
   if !p.IsSetPlanDesc() {
-    return ExecutionOutcome_PlanDesc_DEFAULT
+    return XExecutionOutcome__PlanDesc_DEFAULT
   }
-return p.PlanDesc
+  return p.PlanDesc
 }
-func (p *ExecutionOutcome) IsSetGqlStatus() bool {
+func (p *XExecutionOutcome_) IsSetGqlStatus() bool {
   return p != nil && p.GqlStatus != nil
 }
 
-func (p *ExecutionOutcome) IsSetResult_() bool {
+func (p *XExecutionOutcome_) IsSetResult_() bool {
   return p != nil && p.Result_ != nil
 }
 
-func (p *ExecutionOutcome) IsSetPlanDesc() bool {
+func (p *XExecutionOutcome_) IsSetPlanDesc() bool {
   return p != nil && p.PlanDesc != nil
 }
 
-type ExecutionOutcomeBuilder struct {
-  obj *ExecutionOutcome
+type XExecutionOutcome_Builder struct {
+  obj *XExecutionOutcome_
 }
 
-func NewExecutionOutcomeBuilder() *ExecutionOutcomeBuilder{
-  return &ExecutionOutcomeBuilder{
-    obj: NewExecutionOutcome(),
+func NewXExecutionOutcome_Builder() *XExecutionOutcome_Builder{
+  return &XExecutionOutcome_Builder{
+    obj: NewXExecutionOutcome_(),
   }
 }
 
-func (p ExecutionOutcomeBuilder) Emit() *ExecutionOutcome{
-  return &ExecutionOutcome{
+func (p XExecutionOutcome_Builder) Emit() *XExecutionOutcome_{
+  return &XExecutionOutcome_{
     GqlStatus: p.obj.GqlStatus,
     Result_: p.obj.Result_,
     PlanDesc: p.obj.PlanDesc,
   }
 }
 
-func (e *ExecutionOutcomeBuilder) GqlStatus(gqlStatus *GQLStatus) *ExecutionOutcomeBuilder {
-  e.obj.GqlStatus = gqlStatus
-  return e
+func (x *XExecutionOutcome_Builder) GqlStatus(gqlStatus GQLStatus) *XExecutionOutcome_Builder {
+  x.obj.GqlStatus = gqlStatus
+  return x
 }
 
-func (e *ExecutionOutcomeBuilder) Result_(result *nebula0.BindingTable) *ExecutionOutcomeBuilder {
-  e.obj.Result_ = result
-  return e
+func (x *XExecutionOutcome_Builder) Result_(result nebula0.BindingTable) *XExecutionOutcome_Builder {
+  x.obj.Result_ = result
+  return x
 }
 
-func (e *ExecutionOutcomeBuilder) PlanDesc(planDesc *PlanDescription) *ExecutionOutcomeBuilder {
-  e.obj.PlanDesc = planDesc
-  return e
+func (x *XExecutionOutcome_Builder) PlanDesc(planDesc PlanDescription) *XExecutionOutcome_Builder {
+  x.obj.PlanDesc = planDesc
+  return x
 }
 
-func (e *ExecutionOutcome) SetGqlStatus(gqlStatus *GQLStatus) *ExecutionOutcome {
-  e.GqlStatus = gqlStatus
-  return e
+func (x *XExecutionOutcome_) SetGqlStatus(gqlStatus GQLStatus) *XExecutionOutcome_ {
+  x.GqlStatus = gqlStatus
+  return x
 }
 
-func (e *ExecutionOutcome) SetResult_(result *nebula0.BindingTable) *ExecutionOutcome {
-  e.Result_ = result
-  return e
+func (x *XExecutionOutcome_) SetResult_(result nebula0.BindingTable) *XExecutionOutcome_ {
+  x.Result_ = result
+  return x
 }
 
-func (e *ExecutionOutcome) SetPlanDesc(planDesc *PlanDescription) *ExecutionOutcome {
-  e.PlanDesc = planDesc
-  return e
+func (x *XExecutionOutcome_) SetPlanDesc(planDesc PlanDescription) *XExecutionOutcome_ {
+  x.PlanDesc = planDesc
+  return x
 }
 
-func (p *ExecutionOutcome) Read(iprot thrift.Protocol) error {
+func (p *XExecutionOutcome_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetGqlStatus bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -1430,7 +1412,6 @@ func (p *ExecutionOutcome) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetGqlStatus = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
@@ -1451,13 +1432,10 @@ func (p *ExecutionOutcome) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetGqlStatus{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field GqlStatus is not set"));
-  }
   return nil
 }
 
-func (p *ExecutionOutcome)  ReadField1(iprot thrift.Protocol) error {
+func (p *XExecutionOutcome_)  ReadField1(iprot thrift.Protocol) error {
   p.GqlStatus = NewGQLStatus()
   if err := p.GqlStatus.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.GqlStatus), err)
@@ -1465,7 +1443,7 @@ func (p *ExecutionOutcome)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionOutcome)  ReadField2(iprot thrift.Protocol) error {
+func (p *XExecutionOutcome_)  ReadField2(iprot thrift.Protocol) error {
   p.Result_ = nebula0.NewBindingTable()
   if err := p.Result_.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Result_), err)
@@ -1473,7 +1451,7 @@ func (p *ExecutionOutcome)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionOutcome)  ReadField3(iprot thrift.Protocol) error {
+func (p *XExecutionOutcome_)  ReadField3(iprot thrift.Protocol) error {
   p.PlanDesc = NewPlanDescription()
   if err := p.PlanDesc.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.PlanDesc), err)
@@ -1481,8 +1459,8 @@ func (p *ExecutionOutcome)  ReadField3(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionOutcome) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("ExecutionOutcome"); err != nil {
+func (p *XExecutionOutcome_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_ExecutionOutcome_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -1494,7 +1472,7 @@ func (p *ExecutionOutcome) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionOutcome) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XExecutionOutcome_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("gqlStatus", thrift.STRUCT, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:gqlStatus: ", p), err) }
   if err := p.GqlStatus.Write(oprot); err != nil {
@@ -1505,7 +1483,7 @@ func (p *ExecutionOutcome) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ExecutionOutcome) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XExecutionOutcome_) writeField2(oprot thrift.Protocol) (err error) {
   if p.IsSetResult_() {
     if err := oprot.WriteFieldBegin("result", thrift.STRUCT, 2); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:result: ", p), err) }
@@ -1518,7 +1496,7 @@ func (p *ExecutionOutcome) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ExecutionOutcome) writeField3(oprot thrift.Protocol) (err error) {
+func (p *XExecutionOutcome_) writeField3(oprot thrift.Protocol) (err error) {
   if p.IsSetPlanDesc() {
     if err := oprot.WriteFieldBegin("plan_desc", thrift.STRUCT, 3); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 3:plan_desc: ", p), err) }
@@ -1531,7 +1509,7 @@ func (p *ExecutionOutcome) writeField3(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ExecutionOutcome) String() string {
+func (p *XExecutionOutcome_) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -1554,82 +1532,80 @@ func (p *ExecutionOutcome) String() string {
   } else {
     planDescVal = fmt.Sprintf("%v", p.PlanDesc)
   }
-  return fmt.Sprintf("ExecutionOutcome({GqlStatus:%s Result_:%s PlanDesc:%s})", gqlStatusVal, resultVal, planDescVal)
+  return fmt.Sprintf("XExecutionOutcome_({GqlStatus:%s Result_:%s PlanDesc:%s})", gqlStatusVal, resultVal, planDescVal)
 }
 
 // Attributes:
 //  - ExecutionOutcome
 //  - LatencyInUs
-type ExecutionResponse struct {
-  ExecutionOutcome *ExecutionOutcome `thrift:"executionOutcome,1,required" db:"executionOutcome" json:"executionOutcome"`
-  LatencyInUs int64 `thrift:"latencyInUs,2,required" db:"latencyInUs" json:"latencyInUs"`
+type XExecutionResponse_ struct {
+  ExecutionOutcome ExecutionOutcome `thrift:"executionOutcome,1" db:"executionOutcome" json:"executionOutcome"`
+  LatencyInUs int64 `thrift:"latencyInUs,2" db:"latencyInUs" json:"latencyInUs"`
 }
 
-func NewExecutionResponse() *ExecutionResponse {
-  return &ExecutionResponse{
+func NewXExecutionResponse_() *XExecutionResponse_ {
+  return &XExecutionResponse_{
     ExecutionOutcome: NewExecutionOutcome(),
   }
 }
 
-var ExecutionResponse_ExecutionOutcome_DEFAULT *ExecutionOutcome
-func (p *ExecutionResponse) GetExecutionOutcome() *ExecutionOutcome {
+var XExecutionResponse__ExecutionOutcome_DEFAULT ExecutionOutcome
+func (p *XExecutionResponse_) GetExecutionOutcome() ExecutionOutcome {
   if !p.IsSetExecutionOutcome() {
-    return ExecutionResponse_ExecutionOutcome_DEFAULT
+    return XExecutionResponse__ExecutionOutcome_DEFAULT
   }
-return p.ExecutionOutcome
+  return p.ExecutionOutcome
 }
 
-func (p *ExecutionResponse) GetLatencyInUs() int64 {
+func (p *XExecutionResponse_) GetLatencyInUs() int64 {
   return p.LatencyInUs
 }
-func (p *ExecutionResponse) IsSetExecutionOutcome() bool {
+func (p *XExecutionResponse_) IsSetExecutionOutcome() bool {
   return p != nil && p.ExecutionOutcome != nil
 }
 
-type ExecutionResponseBuilder struct {
-  obj *ExecutionResponse
+type XExecutionResponse_Builder struct {
+  obj *XExecutionResponse_
 }
 
-func NewExecutionResponseBuilder() *ExecutionResponseBuilder{
-  return &ExecutionResponseBuilder{
-    obj: NewExecutionResponse(),
+func NewXExecutionResponse_Builder() *XExecutionResponse_Builder{
+  return &XExecutionResponse_Builder{
+    obj: NewXExecutionResponse_(),
   }
 }
 
-func (p ExecutionResponseBuilder) Emit() *ExecutionResponse{
-  return &ExecutionResponse{
+func (p XExecutionResponse_Builder) Emit() *XExecutionResponse_{
+  return &XExecutionResponse_{
     ExecutionOutcome: p.obj.ExecutionOutcome,
     LatencyInUs: p.obj.LatencyInUs,
   }
 }
 
-func (e *ExecutionResponseBuilder) ExecutionOutcome(executionOutcome *ExecutionOutcome) *ExecutionResponseBuilder {
-  e.obj.ExecutionOutcome = executionOutcome
-  return e
+func (x *XExecutionResponse_Builder) ExecutionOutcome(executionOutcome ExecutionOutcome) *XExecutionResponse_Builder {
+  x.obj.ExecutionOutcome = executionOutcome
+  return x
 }
 
-func (e *ExecutionResponseBuilder) LatencyInUs(latencyInUs int64) *ExecutionResponseBuilder {
-  e.obj.LatencyInUs = latencyInUs
-  return e
+func (x *XExecutionResponse_Builder) LatencyInUs(latencyInUs int64) *XExecutionResponse_Builder {
+  x.obj.LatencyInUs = latencyInUs
+  return x
 }
 
-func (e *ExecutionResponse) SetExecutionOutcome(executionOutcome *ExecutionOutcome) *ExecutionResponse {
-  e.ExecutionOutcome = executionOutcome
-  return e
+func (x *XExecutionResponse_) SetExecutionOutcome(executionOutcome ExecutionOutcome) *XExecutionResponse_ {
+  x.ExecutionOutcome = executionOutcome
+  return x
 }
 
-func (e *ExecutionResponse) SetLatencyInUs(latencyInUs int64) *ExecutionResponse {
-  e.LatencyInUs = latencyInUs
-  return e
+func (x *XExecutionResponse_) SetLatencyInUs(latencyInUs int64) *XExecutionResponse_ {
+  x.LatencyInUs = latencyInUs
+  return x
 }
 
-func (p *ExecutionResponse) Read(iprot thrift.Protocol) error {
+func (p *XExecutionResponse_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetExecutionOutcome bool = false;
-  var issetLatencyInUs bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -1642,12 +1618,10 @@ func (p *ExecutionResponse) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetExecutionOutcome = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
       }
-      issetLatencyInUs = true
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -1660,16 +1634,10 @@ func (p *ExecutionResponse) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetExecutionOutcome{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field ExecutionOutcome is not set"));
-  }
-  if !issetLatencyInUs{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field LatencyInUs is not set"));
-  }
   return nil
 }
 
-func (p *ExecutionResponse)  ReadField1(iprot thrift.Protocol) error {
+func (p *XExecutionResponse_)  ReadField1(iprot thrift.Protocol) error {
   p.ExecutionOutcome = NewExecutionOutcome()
   if err := p.ExecutionOutcome.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.ExecutionOutcome), err)
@@ -1677,7 +1645,7 @@ func (p *ExecutionResponse)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionResponse)  ReadField2(iprot thrift.Protocol) error {
+func (p *XExecutionResponse_)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -1686,8 +1654,8 @@ func (p *ExecutionResponse)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionResponse) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("ExecutionResponse"); err != nil {
+func (p *XExecutionResponse_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_ExecutionResponse_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -1698,7 +1666,7 @@ func (p *ExecutionResponse) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *ExecutionResponse) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XExecutionResponse_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("executionOutcome", thrift.STRUCT, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:executionOutcome: ", p), err) }
   if err := p.ExecutionOutcome.Write(oprot); err != nil {
@@ -1709,7 +1677,7 @@ func (p *ExecutionResponse) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ExecutionResponse) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XExecutionResponse_) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("latencyInUs", thrift.I64, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:latencyInUs: ", p), err) }
   if err := oprot.WriteI64(int64(p.LatencyInUs)); err != nil {
@@ -1719,7 +1687,7 @@ func (p *ExecutionResponse) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *ExecutionResponse) String() string {
+func (p *XExecutionResponse_) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -1731,7 +1699,7 @@ func (p *ExecutionResponse) String() string {
     executionOutcomeVal = fmt.Sprintf("%v", p.ExecutionOutcome)
   }
   latencyInUsVal := fmt.Sprintf("%v", p.LatencyInUs)
-  return fmt.Sprintf("ExecutionResponse({ExecutionOutcome:%s LatencyInUs:%s})", executionOutcomeVal, latencyInUsVal)
+  return fmt.Sprintf("XExecutionResponse_({ExecutionOutcome:%s LatencyInUs:%s})", executionOutcomeVal, latencyInUsVal)
 }
 
 // Attributes:
@@ -1740,10 +1708,10 @@ func (p *ExecutionResponse) String() string {
 //  - ClientType
 //  - ClientVersion
 type AuthReq struct {
-  Username []byte `thrift:"username,1,required" db:"username" json:"username"`
-  Password []byte `thrift:"password,2,required" db:"password" json:"password"`
-  ClientType []byte `thrift:"client_type,3,required" db:"client_type" json:"client_type"`
-  ClientVersion []byte `thrift:"client_version,4,required" db:"client_version" json:"client_version"`
+  Username []byte `thrift:"username,1" db:"username" json:"username"`
+  Password []byte `thrift:"password,2" db:"password" json:"password"`
+  ClientType []byte `thrift:"client_type,3" db:"client_type" json:"client_type"`
+  ClientVersion []byte `thrift:"client_version,4" db:"client_version" json:"client_version"`
 }
 
 func NewAuthReq() *AuthReq {
@@ -1830,10 +1798,6 @@ func (p *AuthReq) Read(iprot thrift.Protocol) error {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetUsername bool = false;
-  var issetPassword bool = false;
-  var issetClientType bool = false;
-  var issetClientVersion bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -1846,22 +1810,18 @@ func (p *AuthReq) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetUsername = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
       }
-      issetPassword = true
     case 3:
       if err := p.ReadField3(iprot); err != nil {
         return err
       }
-      issetClientType = true
     case 4:
       if err := p.ReadField4(iprot); err != nil {
         return err
       }
-      issetClientVersion = true
     default:
       if err := iprot.Skip(fieldTypeId); err != nil {
         return err
@@ -1873,18 +1833,6 @@ func (p *AuthReq) Read(iprot thrift.Protocol) error {
   }
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
-  }
-  if !issetUsername{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Username is not set"));
-  }
-  if !issetPassword{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field Password is not set"));
-  }
-  if !issetClientType{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field ClientType is not set"));
-  }
-  if !issetClientVersion{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field ClientVersion is not set"));
   }
   return nil
 }
@@ -1994,82 +1942,81 @@ func (p *AuthReq) String() string {
 // Attributes:
 //  - GqlStatus
 //  - Identifier
-type AuthResponse struct {
-  GqlStatus *GQLStatus `thrift:"gqlStatus,1,required" db:"gqlStatus" json:"gqlStatus"`
+type XAuthResponse_ struct {
+  GqlStatus GQLStatus `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
   Identifier *int64 `thrift:"identifier,2,optional" db:"identifier" json:"identifier,omitempty"`
 }
 
-func NewAuthResponse() *AuthResponse {
-  return &AuthResponse{
+func NewXAuthResponse_() *XAuthResponse_ {
+  return &XAuthResponse_{
     GqlStatus: NewGQLStatus(),
   }
 }
 
-var AuthResponse_GqlStatus_DEFAULT *GQLStatus
-func (p *AuthResponse) GetGqlStatus() *GQLStatus {
+var XAuthResponse__GqlStatus_DEFAULT GQLStatus
+func (p *XAuthResponse_) GetGqlStatus() GQLStatus {
   if !p.IsSetGqlStatus() {
-    return AuthResponse_GqlStatus_DEFAULT
+    return XAuthResponse__GqlStatus_DEFAULT
   }
-return p.GqlStatus
+  return p.GqlStatus
 }
-var AuthResponse_Identifier_DEFAULT int64
-func (p *AuthResponse) GetIdentifier() int64 {
+var XAuthResponse__Identifier_DEFAULT int64
+func (p *XAuthResponse_) GetIdentifier() int64 {
   if !p.IsSetIdentifier() {
-    return AuthResponse_Identifier_DEFAULT
+    return XAuthResponse__Identifier_DEFAULT
   }
-return *p.Identifier
+  return *p.Identifier
 }
-func (p *AuthResponse) IsSetGqlStatus() bool {
+func (p *XAuthResponse_) IsSetGqlStatus() bool {
   return p != nil && p.GqlStatus != nil
 }
 
-func (p *AuthResponse) IsSetIdentifier() bool {
+func (p *XAuthResponse_) IsSetIdentifier() bool {
   return p != nil && p.Identifier != nil
 }
 
-type AuthResponseBuilder struct {
-  obj *AuthResponse
+type XAuthResponse_Builder struct {
+  obj *XAuthResponse_
 }
 
-func NewAuthResponseBuilder() *AuthResponseBuilder{
-  return &AuthResponseBuilder{
-    obj: NewAuthResponse(),
+func NewXAuthResponse_Builder() *XAuthResponse_Builder{
+  return &XAuthResponse_Builder{
+    obj: NewXAuthResponse_(),
   }
 }
 
-func (p AuthResponseBuilder) Emit() *AuthResponse{
-  return &AuthResponse{
+func (p XAuthResponse_Builder) Emit() *XAuthResponse_{
+  return &XAuthResponse_{
     GqlStatus: p.obj.GqlStatus,
     Identifier: p.obj.Identifier,
   }
 }
 
-func (a *AuthResponseBuilder) GqlStatus(gqlStatus *GQLStatus) *AuthResponseBuilder {
-  a.obj.GqlStatus = gqlStatus
-  return a
+func (x *XAuthResponse_Builder) GqlStatus(gqlStatus GQLStatus) *XAuthResponse_Builder {
+  x.obj.GqlStatus = gqlStatus
+  return x
 }
 
-func (a *AuthResponseBuilder) Identifier(identifier *int64) *AuthResponseBuilder {
-  a.obj.Identifier = identifier
-  return a
+func (x *XAuthResponse_Builder) Identifier(identifier *int64) *XAuthResponse_Builder {
+  x.obj.Identifier = identifier
+  return x
 }
 
-func (a *AuthResponse) SetGqlStatus(gqlStatus *GQLStatus) *AuthResponse {
-  a.GqlStatus = gqlStatus
-  return a
+func (x *XAuthResponse_) SetGqlStatus(gqlStatus GQLStatus) *XAuthResponse_ {
+  x.GqlStatus = gqlStatus
+  return x
 }
 
-func (a *AuthResponse) SetIdentifier(identifier *int64) *AuthResponse {
-  a.Identifier = identifier
-  return a
+func (x *XAuthResponse_) SetIdentifier(identifier *int64) *XAuthResponse_ {
+  x.Identifier = identifier
+  return x
 }
 
-func (p *AuthResponse) Read(iprot thrift.Protocol) error {
+func (p *XAuthResponse_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
 
-  var issetGqlStatus bool = false;
 
   for {
     _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
@@ -2082,7 +2029,6 @@ func (p *AuthResponse) Read(iprot thrift.Protocol) error {
       if err := p.ReadField1(iprot); err != nil {
         return err
       }
-      issetGqlStatus = true
     case 2:
       if err := p.ReadField2(iprot); err != nil {
         return err
@@ -2099,13 +2045,10 @@ func (p *AuthResponse) Read(iprot thrift.Protocol) error {
   if err := iprot.ReadStructEnd(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
   }
-  if !issetGqlStatus{
-    return thrift.NewProtocolExceptionWithType(thrift.INVALID_DATA, fmt.Errorf("Required field GqlStatus is not set"));
-  }
   return nil
 }
 
-func (p *AuthResponse)  ReadField1(iprot thrift.Protocol) error {
+func (p *XAuthResponse_)  ReadField1(iprot thrift.Protocol) error {
   p.GqlStatus = NewGQLStatus()
   if err := p.GqlStatus.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.GqlStatus), err)
@@ -2113,7 +2056,7 @@ func (p *AuthResponse)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *AuthResponse)  ReadField2(iprot thrift.Protocol) error {
+func (p *XAuthResponse_)  ReadField2(iprot thrift.Protocol) error {
   if v, err := iprot.ReadI64(); err != nil {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
@@ -2122,8 +2065,8 @@ func (p *AuthResponse)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *AuthResponse) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("AuthResponse"); err != nil {
+func (p *XAuthResponse_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_AuthResponse_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -2134,7 +2077,7 @@ func (p *AuthResponse) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *AuthResponse) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XAuthResponse_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("gqlStatus", thrift.STRUCT, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:gqlStatus: ", p), err) }
   if err := p.GqlStatus.Write(oprot); err != nil {
@@ -2145,7 +2088,7 @@ func (p *AuthResponse) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *AuthResponse) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XAuthResponse_) writeField2(oprot thrift.Protocol) (err error) {
   if p.IsSetIdentifier() {
     if err := oprot.WriteFieldBegin("identifier", thrift.I64, 2); err != nil {
       return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:identifier: ", p), err) }
@@ -2157,7 +2100,7 @@ func (p *AuthResponse) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *AuthResponse) String() string {
+func (p *XAuthResponse_) String() string {
   if p == nil {
     return "<nil>"
   }
@@ -2174,6 +2117,6 @@ func (p *AuthResponse) String() string {
   } else {
     identifierVal = fmt.Sprintf("%v", *p.Identifier)
   }
-  return fmt.Sprintf("AuthResponse({GqlStatus:%s Identifier:%s})", gqlStatusVal, identifierVal)
+  return fmt.Sprintf("XAuthResponse_({GqlStatus:%s Identifier:%s})", gqlStatusVal, identifierVal)
 }
 

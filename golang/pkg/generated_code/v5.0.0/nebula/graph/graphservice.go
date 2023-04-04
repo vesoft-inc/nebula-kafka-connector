@@ -25,28 +25,28 @@ var _ = nebula0.GoUnusedProtection__
 type GraphService interface {
   // Parameters:
   //  - AuthReq
-  Authenticate(ctx context.Context, authReq *AuthReq) (_r *AuthResponse, err error)
+  Authenticate(ctx context.Context, authReq *AuthReq) (_r AuthResponse, err error)
   // Parameters:
   //  - SessionId
   Signout(ctx context.Context, sessionId int64) (err error)
   // Parameters:
   //  - SessionId
   //  - Stmt
-  Execute(ctx context.Context, sessionId int64, stmt []byte) (_r *ExecutionResponse, err error)
+  Execute(ctx context.Context, sessionId int64, stmt []byte) (_r ExecutionResponse, err error)
 }
 
 type GraphServiceClientInterface interface {
   thrift.ClientInterface
   // Parameters:
   //  - AuthReq
-  Authenticate(authReq *AuthReq) (_r *AuthResponse, err error)
+  Authenticate(authReq *AuthReq) (_r AuthResponse, err error)
   // Parameters:
   //  - SessionId
   Signout(sessionId int64) (err error)
   // Parameters:
   //  - SessionId
   //  - Stmt
-  Execute(sessionId int64, stmt []byte) (_r *ExecutionResponse, err error)
+  Execute(sessionId int64, stmt []byte) (_r ExecutionResponse, err error)
 }
 
 type GraphServiceClient struct {
@@ -80,7 +80,7 @@ func NewGraphServiceClientProtocol(prot thrift.Protocol) *GraphServiceClient {
 
 // Parameters:
 //  - AuthReq
-func (p *GraphServiceClient) Authenticate(authReq *AuthReq) (_r *AuthResponse, err error) {
+func (p *GraphServiceClient) Authenticate(authReq *AuthReq) (_r AuthResponse, err error) {
   args := GraphServiceAuthenticateArgs{
     AuthReq : authReq,
   }
@@ -90,12 +90,12 @@ func (p *GraphServiceClient) Authenticate(authReq *AuthReq) (_r *AuthResponse, e
 }
 
 
-func (p *GraphServiceClient) recvAuthenticate() (value *AuthResponse, err error) {
-  var result GraphServiceAuthenticateResult
-  err = p.CC.RecvMsg("authenticate", &result)
+func (p *GraphServiceClient) recvAuthenticate() (value AuthResponse, err error) {
+  var __result GraphServiceAuthenticateResult
+  err = p.CC.RecvMsg("authenticate", &__result)
   if err != nil { return }
 
-  return result.GetSuccess(), nil
+  return __result.GetSuccess(), nil
 }
 
 // Parameters:
@@ -112,7 +112,7 @@ func (p *GraphServiceClient) Signout(sessionId int64) (err error) {
 // Parameters:
 //  - SessionId
 //  - Stmt
-func (p *GraphServiceClient) Execute(sessionId int64, stmt []byte) (_r *ExecutionResponse, err error) {
+func (p *GraphServiceClient) Execute(sessionId int64, stmt []byte) (_r ExecutionResponse, err error) {
   args := GraphServiceExecuteArgs{
     SessionId : sessionId,
     Stmt : stmt,
@@ -123,12 +123,12 @@ func (p *GraphServiceClient) Execute(sessionId int64, stmt []byte) (_r *Executio
 }
 
 
-func (p *GraphServiceClient) recvExecute() (value *ExecutionResponse, err error) {
-  var result GraphServiceExecuteResult
-  err = p.CC.RecvMsg("execute", &result)
+func (p *GraphServiceClient) recvExecute() (value ExecutionResponse, err error) {
+  var __result GraphServiceExecuteResult
+  err = p.CC.RecvMsg("execute", &__result)
   if err != nil { return }
 
-  return result.GetSuccess(), nil
+  return __result.GetSuccess(), nil
 }
 
 
@@ -170,7 +170,7 @@ func NewGraphServiceThreadsafeClientProtocol(prot thrift.Protocol) *GraphService
 
 // Parameters:
 //  - AuthReq
-func (p *GraphServiceThreadsafeClient) Authenticate(authReq *AuthReq) (_r *AuthResponse, err error) {
+func (p *GraphServiceThreadsafeClient) Authenticate(authReq *AuthReq) (_r AuthResponse, err error) {
   p.Mu.Lock()
   defer p.Mu.Unlock()
   args := GraphServiceAuthenticateArgs{
@@ -182,12 +182,12 @@ func (p *GraphServiceThreadsafeClient) Authenticate(authReq *AuthReq) (_r *AuthR
 }
 
 
-func (p *GraphServiceThreadsafeClient) recvAuthenticate() (value *AuthResponse, err error) {
-  var result GraphServiceAuthenticateResult
-  err = p.CC.RecvMsg("authenticate", &result)
+func (p *GraphServiceThreadsafeClient) recvAuthenticate() (value AuthResponse, err error) {
+  var __result GraphServiceAuthenticateResult
+  err = p.CC.RecvMsg("authenticate", &__result)
   if err != nil { return }
 
-  return result.GetSuccess(), nil
+  return __result.GetSuccess(), nil
 }
 
 // Parameters:
@@ -206,7 +206,7 @@ func (p *GraphServiceThreadsafeClient) Signout(sessionId int64) (err error) {
 // Parameters:
 //  - SessionId
 //  - Stmt
-func (p *GraphServiceThreadsafeClient) Execute(sessionId int64, stmt []byte) (_r *ExecutionResponse, err error) {
+func (p *GraphServiceThreadsafeClient) Execute(sessionId int64, stmt []byte) (_r ExecutionResponse, err error) {
   p.Mu.Lock()
   defer p.Mu.Unlock()
   args := GraphServiceExecuteArgs{
@@ -219,12 +219,12 @@ func (p *GraphServiceThreadsafeClient) Execute(sessionId int64, stmt []byte) (_r
 }
 
 
-func (p *GraphServiceThreadsafeClient) recvExecute() (value *ExecutionResponse, err error) {
-  var result GraphServiceExecuteResult
-  err = p.CC.RecvMsg("execute", &result)
+func (p *GraphServiceThreadsafeClient) recvExecute() (value ExecutionResponse, err error) {
+  var __result GraphServiceExecuteResult
+  err = p.CC.RecvMsg("execute", &__result)
   if err != nil { return }
 
-  return result.GetSuccess(), nil
+  return __result.GetSuccess(), nil
 }
 
 
@@ -250,15 +250,15 @@ func NewGraphServiceChannelClient(channel thrift.RequestChannel) *GraphServiceCh
 
 // Parameters:
 //  - AuthReq
-func (p *GraphServiceChannelClient) Authenticate(ctx context.Context, authReq *AuthReq) (_r *AuthResponse, err error) {
+func (p *GraphServiceChannelClient) Authenticate(ctx context.Context, authReq *AuthReq) (_r AuthResponse, err error) {
   args := GraphServiceAuthenticateArgs{
     AuthReq : authReq,
   }
-  var result GraphServiceAuthenticateResult
-  err = p.RequestChannel.Call(ctx, "authenticate", &args, &result)
+  var __result GraphServiceAuthenticateResult
+  err = p.RequestChannel.Call(ctx, "authenticate", &args, &__result)
   if err != nil { return }
 
-  return result.GetSuccess(), nil
+  return __result.GetSuccess(), nil
 }
 
 // Parameters:
@@ -276,16 +276,16 @@ func (p *GraphServiceChannelClient) Signout(ctx context.Context, sessionId int64
 // Parameters:
 //  - SessionId
 //  - Stmt
-func (p *GraphServiceChannelClient) Execute(ctx context.Context, sessionId int64, stmt []byte) (_r *ExecutionResponse, err error) {
+func (p *GraphServiceChannelClient) Execute(ctx context.Context, sessionId int64, stmt []byte) (_r ExecutionResponse, err error) {
   args := GraphServiceExecuteArgs{
     SessionId : sessionId,
     Stmt : stmt,
   }
-  var result GraphServiceExecuteResult
-  err = p.RequestChannel.Call(ctx, "execute", &args, &result)
+  var __result GraphServiceExecuteResult
+  err = p.RequestChannel.Call(ctx, "execute", &args, &__result)
   if err != nil { return }
 
-  return result.GetSuccess(), nil
+  return __result.GetSuccess(), nil
 }
 
 
@@ -371,7 +371,7 @@ func (p *graphServiceProcessorAuthenticate) Write(seqId int32, result thrift.Wri
 
 func (p *graphServiceProcessorAuthenticate) RunContext(ctx context.Context, argStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
   args := argStruct.(*GraphServiceAuthenticateArgs)
-  var result GraphServiceAuthenticateResult
+  var __result GraphServiceAuthenticateResult
   if retval, err := p.handler.Authenticate(ctx, args.AuthReq); err != nil {
     switch err.(type) {
     default:
@@ -379,9 +379,9 @@ func (p *graphServiceProcessorAuthenticate) RunContext(ctx context.Context, argS
       return x, x
     }
   } else {
-    result.Success = retval
+    __result.Success = retval
   }
-  return &result, nil
+  return &__result, nil
 }
 
 type graphServiceProcessorSignout struct {
@@ -473,7 +473,7 @@ func (p *graphServiceProcessorExecute) Write(seqId int32, result thrift.Writable
 
 func (p *graphServiceProcessorExecute) RunContext(ctx context.Context, argStruct thrift.Struct) (thrift.WritableStruct, thrift.ApplicationException) {
   args := argStruct.(*GraphServiceExecuteArgs)
-  var result GraphServiceExecuteResult
+  var __result GraphServiceExecuteResult
   if retval, err := p.handler.Execute(ctx, args.SessionId, args.Stmt); err != nil {
     switch err.(type) {
     default:
@@ -481,9 +481,9 @@ func (p *graphServiceProcessorExecute) RunContext(ctx context.Context, argStruct
       return x, x
     }
   } else {
-    result.Success = retval
+    __result.Success = retval
   }
-  return &result, nil
+  return &__result, nil
 }
 
 
@@ -507,7 +507,13 @@ func (p *GraphServiceAuthenticateArgs) GetAuthReq() *AuthReq {
   if !p.IsSetAuthReq() {
     return GraphServiceAuthenticateArgs_AuthReq_DEFAULT
   }
-return p.AuthReq
+  return p.AuthReq
+}
+func (p *GraphServiceAuthenticateArgs) DefaultGetAuthReq() *AuthReq {
+  if !p.IsSetAuthReq() {
+    return NewAuthReq()
+  }
+  return p.AuthReq
 }
 func (p *GraphServiceAuthenticateArgs) IsSetAuthReq() bool {
   return p != nil && p.AuthReq != nil
@@ -619,19 +625,19 @@ func (p *GraphServiceAuthenticateArgs) String() string {
 //  - Success
 type GraphServiceAuthenticateResult struct {
   thrift.IResponse
-  Success *AuthResponse `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
+  Success *XAuthResponse_ `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
 }
 
 func NewGraphServiceAuthenticateResult() *GraphServiceAuthenticateResult {
   return &GraphServiceAuthenticateResult{}
 }
 
-var GraphServiceAuthenticateResult_Success_DEFAULT *AuthResponse
-func (p *GraphServiceAuthenticateResult) GetSuccess() *AuthResponse {
+var GraphServiceAuthenticateResult_Success_DEFAULT *XAuthResponse_
+func (p *GraphServiceAuthenticateResult) GetSuccess() *XAuthResponse_ {
   if !p.IsSetSuccess() {
     return GraphServiceAuthenticateResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *GraphServiceAuthenticateResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -653,12 +659,12 @@ func (p GraphServiceAuthenticateResultBuilder) Emit() *GraphServiceAuthenticateR
   }
 }
 
-func (g *GraphServiceAuthenticateResultBuilder) Success(success *AuthResponse) *GraphServiceAuthenticateResultBuilder {
+func (g *GraphServiceAuthenticateResultBuilder) Success(success AuthResponse) *GraphServiceAuthenticateResultBuilder {
   g.obj.Success = success
   return g
 }
 
-func (g *GraphServiceAuthenticateResult) SetSuccess(success *AuthResponse) *GraphServiceAuthenticateResult {
+func (g *GraphServiceAuthenticateResult) SetSuccess(success AuthResponse) *GraphServiceAuthenticateResult {
   g.Success = success
   return g
 }
@@ -1011,19 +1017,19 @@ func (p *GraphServiceExecuteArgs) String() string {
 //  - Success
 type GraphServiceExecuteResult struct {
   thrift.IResponse
-  Success *ExecutionResponse `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
+  Success ExecutionResponse `thrift:"success,0,optional" db:"success" json:"success,omitempty"`
 }
 
 func NewGraphServiceExecuteResult() *GraphServiceExecuteResult {
   return &GraphServiceExecuteResult{}
 }
 
-var GraphServiceExecuteResult_Success_DEFAULT *ExecutionResponse
-func (p *GraphServiceExecuteResult) GetSuccess() *ExecutionResponse {
+var GraphServiceExecuteResult_Success_DEFAULT ExecutionResponse
+func (p *GraphServiceExecuteResult) GetSuccess() ExecutionResponse {
   if !p.IsSetSuccess() {
     return GraphServiceExecuteResult_Success_DEFAULT
   }
-return p.Success
+  return p.Success
 }
 func (p *GraphServiceExecuteResult) IsSetSuccess() bool {
   return p != nil && p.Success != nil
@@ -1045,12 +1051,12 @@ func (p GraphServiceExecuteResultBuilder) Emit() *GraphServiceExecuteResult{
   }
 }
 
-func (g *GraphServiceExecuteResultBuilder) Success(success *ExecutionResponse) *GraphServiceExecuteResultBuilder {
+func (g *GraphServiceExecuteResultBuilder) Success(success ExecutionResponse) *GraphServiceExecuteResultBuilder {
   g.obj.Success = success
   return g
 }
 
-func (g *GraphServiceExecuteResult) SetSuccess(success *ExecutionResponse) *GraphServiceExecuteResult {
+func (g *GraphServiceExecuteResult) SetSuccess(success ExecutionResponse) *GraphServiceExecuteResult {
   g.Success = success
   return g
 }
