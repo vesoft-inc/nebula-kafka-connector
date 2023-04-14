@@ -153,7 +153,7 @@ func TestResultSet(t *testing.T) {
 		}, 1000,
 	}
 
-	respWithData.ExecutionOutcome.Result_ = &nebula.XBindingTable_{
+	respWithData.ExecutionOutcome.Result_ = &nebula.XResultTable_{
 		ColumnNames: [][]byte{[]byte("col1"), []byte("col2")},
 		Records: []nebula.Row{
 			{[]*nebula.XValue_{nebula.NewValue().SetInt64Val(&int64),

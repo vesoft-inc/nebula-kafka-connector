@@ -1304,7 +1304,7 @@ func (p *XGQLStatus_) String() string {
 //  - PlanDesc
 type XExecutionOutcome_ struct {
   GqlStatus GQLStatus `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
-  Result_ nebula0.BindingTable `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
+  Result_ nebula0.ResultTable `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
   PlanDesc PlanDescription `thrift:"plan_desc,3,optional" db:"plan_desc" json:"plan_desc,omitempty"`
 }
 
@@ -1321,8 +1321,8 @@ func (p *XExecutionOutcome_) GetGqlStatus() GQLStatus {
   }
   return p.GqlStatus
 }
-var XExecutionOutcome__Result__DEFAULT nebula0.BindingTable
-func (p *XExecutionOutcome_) GetResult_() nebula0.BindingTable {
+var XExecutionOutcome__Result__DEFAULT nebula0.ResultTable
+func (p *XExecutionOutcome_) GetResult_() nebula0.ResultTable {
   if !p.IsSetResult_() {
     return XExecutionOutcome__Result__DEFAULT
   }
@@ -1370,7 +1370,7 @@ func (x *XExecutionOutcome_Builder) GqlStatus(gqlStatus GQLStatus) *XExecutionOu
   return x
 }
 
-func (x *XExecutionOutcome_Builder) Result_(result nebula0.BindingTable) *XExecutionOutcome_Builder {
+func (x *XExecutionOutcome_Builder) Result_(result nebula0.ResultTable) *XExecutionOutcome_Builder {
   x.obj.Result_ = result
   return x
 }
@@ -1385,7 +1385,7 @@ func (x *XExecutionOutcome_) SetGqlStatus(gqlStatus GQLStatus) *XExecutionOutcom
   return x
 }
 
-func (x *XExecutionOutcome_) SetResult_(result nebula0.BindingTable) *XExecutionOutcome_ {
+func (x *XExecutionOutcome_) SetResult_(result nebula0.ResultTable) *XExecutionOutcome_ {
   x.Result_ = result
   return x
 }
@@ -1444,7 +1444,7 @@ func (p *XExecutionOutcome_)  ReadField1(iprot thrift.Protocol) error {
 }
 
 func (p *XExecutionOutcome_)  ReadField2(iprot thrift.Protocol) error {
-  p.Result_ = nebula0.NewBindingTable()
+  p.Result_ = nebula0.NewResultTable()
   if err := p.Result_.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Result_), err)
   }

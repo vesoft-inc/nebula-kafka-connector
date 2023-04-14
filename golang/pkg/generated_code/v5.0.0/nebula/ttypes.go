@@ -1112,11 +1112,11 @@ func RowPtr(v Row) *Row { return &v }
 
 func NewRow() Row { return NewXRow_() }
 
-type BindingTable = *XBindingTable_
+type ResultTable = *XResultTable_
 
-func BindingTablePtr(v BindingTable) *BindingTable { return &v }
+func ResultTablePtr(v ResultTable) *ResultTable { return &v }
 
-func NewBindingTable() BindingTable { return NewXBindingTable_() }
+func NewResultTable() ResultTable { return NewXResultTable_() }
 
 // Attributes:
 //  - Seconds
@@ -4430,61 +4430,61 @@ func (p *XRow_) String() string {
 // Attributes:
 //  - ColumnNames
 //  - Records
-type XBindingTable_ struct {
+type XResultTable_ struct {
   ColumnNames [][]byte `thrift:"columnNames,1" db:"columnNames" json:"columnNames"`
   Records []Row `thrift:"records,2" db:"records" json:"records"`
 }
 
-func NewXBindingTable_() *XBindingTable_ {
-  return &XBindingTable_{}
+func NewXResultTable_() *XResultTable_ {
+  return &XResultTable_{}
 }
 
 
-func (p *XBindingTable_) GetColumnNames() [][]byte {
+func (p *XResultTable_) GetColumnNames() [][]byte {
   return p.ColumnNames
 }
 
-func (p *XBindingTable_) GetRecords() []Row {
+func (p *XResultTable_) GetRecords() []Row {
   return p.Records
 }
-type XBindingTable_Builder struct {
-  obj *XBindingTable_
+type XResultTable_Builder struct {
+  obj *XResultTable_
 }
 
-func NewXBindingTable_Builder() *XBindingTable_Builder{
-  return &XBindingTable_Builder{
-    obj: NewXBindingTable_(),
+func NewXResultTable_Builder() *XResultTable_Builder{
+  return &XResultTable_Builder{
+    obj: NewXResultTable_(),
   }
 }
 
-func (p XBindingTable_Builder) Emit() *XBindingTable_{
-  return &XBindingTable_{
+func (p XResultTable_Builder) Emit() *XResultTable_{
+  return &XResultTable_{
     ColumnNames: p.obj.ColumnNames,
     Records: p.obj.Records,
   }
 }
 
-func (x *XBindingTable_Builder) ColumnNames(columnNames [][]byte) *XBindingTable_Builder {
+func (x *XResultTable_Builder) ColumnNames(columnNames [][]byte) *XResultTable_Builder {
   x.obj.ColumnNames = columnNames
   return x
 }
 
-func (x *XBindingTable_Builder) Records(records []Row) *XBindingTable_Builder {
+func (x *XResultTable_Builder) Records(records []Row) *XResultTable_Builder {
   x.obj.Records = records
   return x
 }
 
-func (x *XBindingTable_) SetColumnNames(columnNames [][]byte) *XBindingTable_ {
+func (x *XResultTable_) SetColumnNames(columnNames [][]byte) *XResultTable_ {
   x.ColumnNames = columnNames
   return x
 }
 
-func (x *XBindingTable_) SetRecords(records []Row) *XBindingTable_ {
+func (x *XResultTable_) SetRecords(records []Row) *XResultTable_ {
   x.Records = records
   return x
 }
 
-func (p *XBindingTable_) Read(iprot thrift.Protocol) error {
+func (p *XResultTable_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
   }
@@ -4520,7 +4520,7 @@ func (p *XBindingTable_) Read(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *XBindingTable_)  ReadField1(iprot thrift.Protocol) error {
+func (p *XResultTable_)  ReadField1(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -4542,7 +4542,7 @@ func (p *XBindingTable_)  ReadField1(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *XBindingTable_)  ReadField2(iprot thrift.Protocol) error {
+func (p *XResultTable_)  ReadField2(iprot thrift.Protocol) error {
   _, size, err := iprot.ReadListBegin()
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
@@ -4562,8 +4562,8 @@ func (p *XBindingTable_)  ReadField2(iprot thrift.Protocol) error {
   return nil
 }
 
-func (p *XBindingTable_) Write(oprot thrift.Protocol) error {
-  if err := oprot.WriteStructBegin("_BindingTable_"); err != nil {
+func (p *XResultTable_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_ResultTable_"); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
   if err := p.writeField1(oprot); err != nil { return err }
   if err := p.writeField2(oprot); err != nil { return err }
@@ -4574,7 +4574,7 @@ func (p *XBindingTable_) Write(oprot thrift.Protocol) error {
   return nil
 }
 
-func (p *XBindingTable_) writeField1(oprot thrift.Protocol) (err error) {
+func (p *XResultTable_) writeField1(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("columnNames", thrift.LIST, 1); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:columnNames: ", p), err) }
   if err := oprot.WriteListBegin(thrift.STRING, len(p.ColumnNames)); err != nil {
@@ -4592,7 +4592,7 @@ func (p *XBindingTable_) writeField1(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *XBindingTable_) writeField2(oprot thrift.Protocol) (err error) {
+func (p *XResultTable_) writeField2(oprot thrift.Protocol) (err error) {
   if err := oprot.WriteFieldBegin("records", thrift.LIST, 2); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:records: ", p), err) }
   if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Records)); err != nil {
@@ -4611,13 +4611,13 @@ func (p *XBindingTable_) writeField2(oprot thrift.Protocol) (err error) {
   return err
 }
 
-func (p *XBindingTable_) String() string {
+func (p *XResultTable_) String() string {
   if p == nil {
     return "<nil>"
   }
 
   columnNamesVal := fmt.Sprintf("%v", p.ColumnNames)
   recordsVal := fmt.Sprintf("%v", p.Records)
-  return fmt.Sprintf("XBindingTable_({ColumnNames:%s Records:%s})", columnNamesVal, recordsVal)
+  return fmt.Sprintf("XResultTable_({ColumnNames:%s Records:%s})", columnNamesVal, recordsVal)
 }
 
