@@ -1,3 +1,4 @@
+"""
 CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS GRAPH TYPE {
 (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, kind STRING}),
 (Forum(id) LABEL Forum {id INT, title STRING, creationDate INT}),
@@ -30,7 +31,7 @@ CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS GRAPH TYPE {
 (Comment)-[HAS_CREATOR_2:HAS_CREATOR]->(Person),
 (Person)-[LIKES_1:LIKES{creationDate INT}]->(Post),
 (Person)-[LIKES_2:LIKES{creationDate INT}]->(Comment)}
-
+"""
 :sleep 10
 
 CREATE GRAPH ldbc IF NOT EXISTS OF ldbc_type
@@ -39,6 +40,7 @@ CREATE GRAPH ldbc IF NOT EXISTS OF ldbc_type
 
 // (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, kind
 // STRING})
+"""
 USE ldbc INSERT NODE Place
 ({id:1, name:"Beijing", url:"https://beijing.com", kind:"city"}),
 ({id:2, name:"Shanghai", url:"https://shanghai.com", kind:"city"}),
@@ -46,194 +48,253 @@ USE ldbc INSERT NODE Place
 ({id:4, name:"Chongqing", url:"https://chongqing.com", kind:"city"}),
 ({id:5, name:"Chengdu", url:"https://chengdu.com", kind:"city"}),
 ({id:6, name:"Shenzhen", url:"https://shenzhen.com", kind:"city"})
-
+"""
 // (Forum(id) LABEL Forum {id INT, title STRING, creationDate INT})
+"""
 USE ldbc INSERT NODE Forum
 ({id:1, title:"forum1", creationDate:1}),
 ({id:2, title:"forum2", creationDate:2}),
 ({id:3, title:"forum3", creationDate:3}),
 ({id:4, title:"forum4", creationDate:4})
-
+"""
 // (Comment(id) LABELS Comment&Message {id INT, creationDate INT, locationIP STRING,
 // browserUsed STRING, content STRING, extent INT})
+"""
 USE ldbc INSERT NODE Comment
 ({id:1, creationDate:1, locationIP:"192.168.1", browserUsed:"Chrome", content:"comment1", extent:8}),
 ({id:2, creationDate:2, locationIP:"192.168.2", browserUsed:"Firefox", content:"comment2", extent:8}),
 ({id:3, creationDate:3, locationIP:"192.168.3", browserUsed:"IE", content:"comment3", extent:8}),
 ({id:4, creationDate:4, locationIP:"192.168.4", browserUsed:"Chrome", content:"comment4", extent:8})
+"""
 
 // (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING,
 // birthday STRING, creationDate INT, locationIP STRING, browserUsed STRING})
+"""
 USE ldbc INSERT NODE Person
 ({id:1, firstName:"Kyle", lastName:"cao", gender:"male", birthday:"10-26", creationDate:1, locationIP:"192.168.1", browserUsed:"Chrome"}),
 ({id:2, firstName:"Tim", lastName:"Duncan", gender:"male", birthday:"1-3", creationDate:2, locationIP:"192.168.2", browserUsed:"IE"}),
 ({id:3, firstName:"Ming", lastName:"Yao", gender:"male", birthday:"10-11", creationDate:3, locationIP:"192.168.3", browserUsed:"Firefox"}),
 ({id:4, firstName:"Sophie", lastName:"Marceau", gender:"female", birthday:"10-20", creationDate:4, locationIP:"192.168.4", browserUsed:"Chrome"})
+"""
 
 // (Tag(id) LABEL Tag {id INT, name STRING, url STRING})
+"""
 USE ldbc INSERT NODE Tag
 ({id:1, name:"tag1", url:"https://tag1.com"}),
 ({id:2, name:"tag2", url:"https://tag2.com"}),
 ({id:3, name:"tag3", url:"https://tag3.com"}),
 ({id:4, name:"tag4", url:"https://tag4.com"})
+"""
 
 // (Post(id) LABELS Post&Message {id INT, imageFile STRING, creationDate INT, locationIP
 // STRING, browserUsed STRING, content STRING, extent INT, language STRING})
+"""
 USE ldbc INSERT NODE Post
 ({id:1, imageFile:"post1.png", creationDate:1, locationIP:"192.168.1", browserUsed:"Chrome", content:"post1", extent:8, language:"Chinese"}),
 ({id:2, imageFile:"post2.png", creationDate:2, locationIP:"192.168.2", browserUsed:"Firefox", content:"post2", extent:8, language:"English"}),
 ({id:3, imageFile:"post3.png", creationDate:3, locationIP:"192.168.3", browserUsed:"IE", content:"post3", extent:8, language:"English"}),
 ({id:4, imageFile:"post4.png", creationDate:4, locationIP:"192.168.4", browserUsed:"Chrome", content:"post4", extent:8, language:"French"})
+"""
 
 // (TagClass(id) LABEL TagClass {id INT, name STRING, url STRING})
+"""
 USE ldbc INSERT NODE TagClass
 ({id:1, name:"tagClass1", url:"https://tagClass1.com"}),
 ({id:2, name:"tagClass2", url:"https://tagClass2.com"}),
 ({id:3, name:"tagClass3", url:"https://tagClass3.com"}),
 ({id:4, name:"tagClass4", url:"https://tagClass4.com"})
+"""
 
 // (Organisation(id) LABELS University&Company {id INT, kind STRING, name STRING,
 // url STRING})
+"""
 USE ldbc INSERT NODE Organisation
 ({id:1, kind:"1", name:"org1", url:"https://org1.com"}),
 ({id:2, kind:"2", name:"org2", url:"https://org2.com"}),
 ({id:3, kind:"3", name:"org3", url:"https://org3.com"}),
 ({id:4, kind:"4", name:"org4", url:"https://org4.com"})
+"""
 
 // (Person)-[HAS_INTEREST:HAS_INTEREST]->(Tag)
+"""
 USE ldbc INSERT EDGE HAS_INTEREST
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Person)-[WORK_AT:WORK_AT{workFrom INT}]->(Organisation)
+"""
 USE ldbc INSERT EDGE WORK_AT
 ({id:1})-[{workFrom:1}]->({id:1}),
 ({id:2})-[{workFrom:2}]->({id:2}),
 ({id:3})-[{workFrom:3}]->({id:3})
+"""
 
 // (Person)-[IS_LOCATED_IN:IS_LOCATED_IN]->(Place)
+"""
 USE ldbc INSERT EDGE IS_LOCATED_IN_1
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Comment)-[IS_LOCATED_IN:IS_LOCATED_IN]->(Place)
+"""
 USE ldbc INSERT EDGE IS_LOCATED_IN_2
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Post)-[IS_LOCATED_IN:IS_LOCATED_IN]->(Place)
+"""
 USE ldbc INSERT EDGE IS_LOCATED_IN_3
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Organisation)-[IS_LOCATED_IN:IS_LOCATED_IN]->(Place)
+"""
 USE ldbc INSERT EDGE IS_LOCATED_IN_4
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Place)-[IS_PART_OF:IS_PART_OF]->(Place)
+"""
 USE ldbc INSERT EDGE IS_PART_OF
 ({id:1})-[{}]->({id:4}),
 ({id:2})-[{}]->({id:5}),
 ({id:3})-[{}]->({id:6})
+"""
 
 // (Tag)-[HAS_TYPE:HAS_TYPE]->(TagClass)
+"""
 USE ldbc INSERT EDGE HAS_TYPE
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Comment)-[REPLY_OF_1:REPLY_OF]->(Post)
+"""
 USE ldbc INSERT EDGE REPLY_OF_1
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Comment)-[REPLY_OF_2:REPLY_OF]->(Comment)
+"""
 USE ldbc INSERT EDGE REPLY_OF_2
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Person)-[KNOWS:KNOWS{creationDate INT}]->(Person)
+"""
 USE ldbc INSERT EDGE KNOWS
 ({id:1})-[{creationDate:1}]->({id:1}),
 ({id:2})-[{creationDate:1}]->({id:2}),
 ({id:3})-[{creationDate:1}]->({id:3})
+"""
 
 // (Forum)-[CONTAINER_OF:CONTAINER_OF]->(Post)
+"""
 USE ldbc INSERT EDGE CONTAINER_OF
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Forum)-[HAS_MEMBER:HAS_MEMBER]->(Person)
+"""
 USE ldbc INSERT EDGE HAS_MEMBER
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Forum)-[HAS_MODERATOR:HAS_MODERATOR]->(Person)
+"""
 USE ldbc INSERT EDGE HAS_MODERATOR
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Person)-[STUDY_AT:STUDY_AT{classYear INT}]->(Organisation)
+"""
 USE ldbc INSERT EDGE STUDY_AT
 ({id:1})-[{classYear:1}]->({id:1}),
 ({id:2})-[{classYear:1}]->({id:2}),
 ({id:3})-[{classYear:1}]->({id:3})
+"""
 
 // (TagClass)-[IS_SUBCLASS_OF:IS_SUBCLASS_OF]->(TagClass)
+"""
 USE ldbc INSERT EDGE IS_SUBCLASS_OF
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Forum)-[HAS_TAG_1:HAS_TAG]->(Tag)
+"""
 USE ldbc INSERT EDGE HAS_TAG_1
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Post)-[HAS_TAG_2:HAS_TAG]->(Tag)
+"""
 USE ldbc INSERT EDGE HAS_TAG_2
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Comment)-[HAS_TAG_3:HAS_TAG]->(Tag)
+"""
 USE ldbc INSERT EDGE HAS_TAG_3
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Person)<-[HAS_CREATOR_1:HAS_CREATOR]-(Post)
+"""
 USE ldbc INSERT EDGE HAS_CREATOR_1
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Person)-[HAS_CREATOR_2:HAS_CREATOR]->(Comment)
+"""
 USE ldbc INSERT EDGE HAS_CREATOR_2
 ({id:1})-[{}]->({id:1}),
 ({id:2})-[{}]->({id:2}),
 ({id:3})-[{}]->({id:3})
+"""
 
 // (Person)-[LIKES_1:LIKES{creationDate INT}]->(Post)
+"""
 USE ldbc INSERT EDGE LIKES_1
 ({id:1})-[{creationDate:1}]->({id:1}),
 ({id:2})-[{creationDate:2}]->({id:2}),
 ({id:3})-[{creationDate:3}]->({id:3})
+"""
 
 // (Person)-[LIKES_2:LIKES{creationDate INT}]->(Comment)
+"""
 USE ldbc INSERT EDGE LIKES_2
 ({id:1})-[{creationDate:1}]->({id:1}),
 ({id:2})-[{creationDate:2}]->({id:2}),
 ({id:3})-[{creationDate:3}]->({id:3})
+"""
