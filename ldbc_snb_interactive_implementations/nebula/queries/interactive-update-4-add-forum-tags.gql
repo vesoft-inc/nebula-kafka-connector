@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE HAS_TAG_1 ({$forumId})-[{}]->({id: $tagId});

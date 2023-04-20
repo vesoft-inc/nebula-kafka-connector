@@ -1,0 +1,3 @@
+USE sf01
+INSERT EDGE REPLY_OF_1 ({id: $commentId})-[{}]->({id: $replyToPostId});
+

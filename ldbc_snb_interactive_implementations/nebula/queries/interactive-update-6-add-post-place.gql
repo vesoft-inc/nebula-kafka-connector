@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE  IS_LOCATED_IN_3 ({id: $postId})-[{}]->({id: $countryId});

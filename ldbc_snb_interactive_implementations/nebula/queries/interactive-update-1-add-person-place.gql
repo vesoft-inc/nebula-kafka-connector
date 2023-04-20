@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE IS_LOCATED_IN_1 ({id:$personId})-[{}]->({id:$cityId});

@@ -1,0 +1,14 @@
+// IS3. Friends of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = $personId)-[r:KNOWS]-(friend)
+ORDER BY
+  r.creationDate DESC,
+  friend.id ASC
+RETURN
+  friend.id AS personId,
+  friend.firstName AS firstName,
+  friend.lastName AS lastName,
+  r.creationDate AS friendshipCreationDate

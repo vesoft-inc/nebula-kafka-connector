@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE KNOWS ({id:$person1Id})-[{}]->({id:$person2Id});

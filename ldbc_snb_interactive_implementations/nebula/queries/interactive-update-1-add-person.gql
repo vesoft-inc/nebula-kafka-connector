@@ -1,0 +1,9 @@
+USE sf01
+INSERT NODE Person ({id: $personId,
+                     firstName: $personFirstName,
+                     lastName: $personLastName,
+                     gender: $gender,
+                     birthday: $birthday,
+                     creationDate: $creationDate,
+                     locationIP: $locationIP,
+                     browserUsed: $browserUsed});

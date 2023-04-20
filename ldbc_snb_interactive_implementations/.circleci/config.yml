@@ -1,0 +1,323 @@
+version: 2.1
+orbs:
+  slack: circleci/slack@3.4.2
+workflows:
+  version: 2
+  build:
+    jobs:
+      - test
+
+jobs:
+  test:
+    resource_class: xlarge
+    machine:
+      image: ubuntu-2204:2022.04.2
+    steps:
+      - checkout
+      - run:
+          name: Install dependencies
+          command: |
+            export DEBIAN_FRONTEND=noninteractive
+            export NEEDRESTART_SUSPEND=a
+            sudo apt update && sudo apt install -y zstd
+            scripts/install-dependencies.sh
+      - run:
+          # Install Java 17 (Ubuntu 22.04 has Java 17 by default)
+          name: Install OpenJDK 17
+          command: |
+            sudo apt-get update && sudo apt-get install -y openjdk-17-jdk
+            sudo update-alternatives --set java /usr/lib/jvm/java-17-openjdk-amd64/bin/java
+            sudo update-alternatives --set javac /usr/lib/jvm/java-17-openjdk-amd64/bin/javac
+            java -version
+      - run:
+          name: Build project
+          command: scripts/build.sh
+      - run:
+          name: Download small data set for Cypher
+          command: |
+            # Cypher
+            cd cypher
+            scripts/get-sample-data-set.sh
+            cd ..
+      - run:
+          name: Download small data set for Postgres
+          command: |
+            # Postgres
+            cd postgres
+            scripts/get-sample-data-set.sh
+            cd ..
+      - run:
+          name: Download small data set for updates
+          command: |
+            # regular CSVs for updates
+            wget -q https://ldbcouncil.org/ldbc_snb_datagen_spark/social-network-sf0.003-bi-composite-merged-fk.zip
+            unzip -q social-network-sf0.003-bi-composite-merged-fk.zip
+      - run:
+          name: Convert SF0.003 update streams
+          command: |
+            git clone https://github.com/ldbc/ldbc_snb_interactive_driver
+            cd ldbc_snb_interactive_driver/scripts/
+            ./install-dependencies.sh
+            export LDBC_SNB_DATA_ROOT_DIRECTORY=../../social-network-sf0.003-bi-composite-merged-fk
+            ./convert.sh
+            mv inserts ../../update-streams/
+            mv deletes ../../update-streams/
+            cd ../..
+      - run:
+          name: Generate parameters for SF0.003
+          command: |
+            export LDBC_SNB_IMPLS_DIR=$(pwd)
+            cd ldbc_snb_interactive_driver/paramgen
+            scripts/get-sample-data.sh
+            . scripts/use-sample-data.sh
+            mv paramgen_window_values.json paramgen_window_values.bak.json
+            mv paramgen_window_values_test.json paramgen_window_values.json
+            scripts/paramgen.sh
+            mv paramgen_window_values.bak.json paramgen_window_values.json
+            cd ..
+            mv parameters/*.parquet ${LDBC_SNB_IMPLS_DIR}/parameters/
+      ### Umbra
+      - run:
+          name: Load Umbra Docker image
+          command: |
+            . umbra/scripts/vars.sh
+            # ${UMBRA_URL_PREFIX} should be set as a sercet variable
+            curl -s ${UMBRA_URL_PREFIX}${UMBRA_VERSION}.tar.gz | docker load
+      - run:
+          name: Tiny data set - Load Umbra database and create a backup
+          command: |
+            cd umbra
+            scripts/get-sample-data-set.sh
+            . scripts/use-sample-data-set.sh
+            scripts/load-in-one-step.sh
+            scripts/backup-database.sh
+            cd ..
+      - run:
+          name: Tiny data set - Create validation parameters with Umbra
+          command: |
+            cd umbra
+            driver/create-validation-parameters.sh
+            cp validation_params.json validation_params_umbra_tiny.json
+            scripts/stop.sh
+            cd ..
+      ### Neo4j
+      - run:
+          name: Tiny data set - Load Neo4j database and create a backup
+          command: |
+            cd cypher
+            . scripts/use-sample-data-set.sh
+            scripts/load-in-one-step.sh
+            scripts/backup-database.sh
+            cd ..
+      - run:
+          name: Tiny data set - Create validation parameters with Neo4j project
+          command: |
+            cd cypher
+            driver/create-validation-parameters.sh
+            scripts/stop.sh
+            cp validation_params.json validation_params_cypher_tiny.json
+            cd ..
+      ### Umbra
+      - run:
+          name: Tiny data set - Cross-validate the Umbra project based on the results from Neo4j
+          command: |
+            cp cypher/validation_params_cypher_tiny.json umbra/validation_params.json
+            cd umbra
+            . scripts/use-sample-data-set.sh
+            scripts/restore-database.sh
+            driver/validate.sh | tee validation-log.txt
+            scripts/stop.sh
+            grep 'Validation Result: PASS' validation-log.txt
+            cd ..
+      - run:
+          name: Tiny data set - Benchmark Umbra
+          command: |
+            cd umbra
+            . scripts/use-sample-data-set.sh
+            scripts/restore-database.sh
+            driver/benchmark.sh
+            scripts/stop.sh
+            cd ..
+      ### PostgreSQL
+      - run:
+          name: Tiny data set - Load PostgreSQL database and create a backup
+          command: |
+            cd postgres
+            . scripts/use-sample-data-set.sh
+            scripts/load-in-one-step.sh
+            scripts/backup-database.sh
+            cd ..
+      - run:
+          name: Tiny data set - Create validation parameters with PostgreSQL
+          command: |
+            cd postgres
+            driver/create-validation-parameters.sh
+            scripts/stop.sh
+            cp validation_params.json validation_params_postgres_tiny.json
+            cd ..
+      ### Neo4j
+      - run:
+          name: Tiny data set - Cross-validate the Neo4j project based on the results from PostgreSQL
+          command: |
+            cp postgres/validation_params_postgres_tiny.json cypher/validation_params.json
+            cd cypher
+            scripts/restore-database.sh
+            driver/validate.sh | tee validation-log.txt
+            scripts/stop.sh
+            grep 'Validation Result: PASS' validation-log.txt
+            cd ..
+      - run:
+          name: Tiny data set - Benchmark Neo4j
+          command: |
+            cd cypher
+            scripts/restore-database.sh
+            driver/benchmark.sh
+            scripts/stop.sh
+            cd ..
+      ### PostgreSQL
+      - run:
+          name: Tiny data set - Cross-validate the PostgreSQL project based on the results from Neo4j
+          command: |
+            cp cypher/validation_params_cypher_tiny.json postgres/validation_params.json
+            cd postgres
+            scripts/restore-database.sh
+            driver/validate.sh | tee validation-log.txt
+            scripts/stop.sh
+            grep 'Validation Result: PASS' validation-log.txt
+            cd ..
+      - run:
+          name: Tiny data set - Benchmark PostgreSQL
+          command: |
+            cd postgres
+            scripts/restore-database.sh
+            driver/benchmark.sh
+            scripts/stop.sh
+            cd ..
+      ### Generate SF1 data sets
+      - run:
+          name: Generate SF1 data sets
+          command: |
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            export DATA_INPUT_TYPE=csv
+            export LDBC_SNB_DRIVER_DIR=`pwd`/ldbc_snb_interactive_driver
+            export LDBC_SNB_DATAGEN_MAX_MEM=8G
+            export USE_DATAGEN_DOCKER=true
+            export SF=1
+            scripts/generate-all.sh
+      ### Neo4j
+      - run:
+          name: SF1 data set - Load Neo4j database and create a backup
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd cypher
+            . scripts/use-datagen-data-set.sh
+            scripts/load-in-one-step.sh
+            scripts/backup-database.sh
+            cd ..
+      - run:
+          name: SF1 data set - Create validation parameters with Neo4j project
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd cypher
+            . scripts/use-datagen-data-set.sh
+            sed -i "s|ldbc.snb.interactive.LdbcQuery13a_enable = true|ldbc.snb.interactive.LdbcQuery13a_enable = false|g" driver/create-validation-parameters-sf${SF}.properties
+            sed -i "s|ldbc.snb.interactive.LdbcQuery13b_enable = true|ldbc.snb.interactive.LdbcQuery13b_enable = false|g" driver/create-validation-parameters-sf${SF}.properties
+            sed -i "s|ldbc.snb.interactive.LdbcQuery14a_enable = true|ldbc.snb.interactive.LdbcQuery14a_enable = false|g" driver/create-validation-parameters-sf${SF}.properties
+            sed -i "s|ldbc.snb.interactive.LdbcQuery14b_enable = true|ldbc.snb.interactive.LdbcQuery14b_enable = false|g" driver/create-validation-parameters-sf${SF}.properties
+            driver/create-validation-parameters.sh driver/create-validation-parameters-sf${SF}.properties
+            scripts/stop.sh
+            cp validation_params.json validation_params_cypher_sf${SF}.json
+            cd ..
+      ### PostgreSQL
+      - run:
+          name: SF1 data set - Load PostgreSQL database and create a backup
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd postgres
+            . scripts/use-datagen-data-set.sh
+            scripts/load-in-one-step.sh
+            scripts/backup-database.sh
+            cd ..
+      - run:
+          name: SF1 data set - Cross-validate the PostgreSQL project based on the results from Neo4j
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cp cypher/validation_params_cypher_sf${SF}.json postgres/validation_params.json
+            cd postgres
+            . scripts/use-datagen-data-set.sh
+            scripts/restore-database.sh
+            sed -i "s|ldbc.snb.interactive.parameters_dir=../parameters/|ldbc.snb.interactive.parameters_dir=../parameters-sf${SF}/|" driver/validate.properties
+            driver/validate.sh | tee validation-log.txt
+            scripts/stop.sh
+            grep 'Validation Result: PASS' validation-log.txt
+            cd ..
+      ### Umbra
+      - run:
+          name: SF1 data set - Load Umbra database and create a backup
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd umbra
+            . scripts/use-datagen-data-set.sh
+            scripts/load-in-one-step.sh
+            scripts/backup-database.sh
+            cd ..
+      - run:
+          name: SF1 data set - Cross-validate the Umbra project based on the results from Neo4j
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cp cypher/validation_params_cypher_sf${SF}.json umbra/validation_params.json
+            cd umbra
+            . scripts/use-datagen-data-set.sh
+            scripts/restore-database.sh
+            sed -i "s|ldbc.snb.interactive.parameters_dir=../parameters/|ldbc.snb.interactive.parameters_dir=../parameters-sf${SF}/|" driver/validate.properties
+            driver/validate.sh | tee validation-log.txt
+            scripts/stop.sh
+            grep 'Validation Result: PASS' validation-log.txt
+            cd ..
+      ### Neo4j
+      - run:
+          name: SF1 data set - Benchmark Neo4j
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd cypher
+            . scripts/use-datagen-data-set.sh
+            scripts/restore-database.sh
+            driver/benchmark.sh driver/benchmark-sf${SF}.properties
+            scripts/stop.sh
+            cd ..
+      ### PostgreSQL
+      - run:
+          name: SF1 data set - Benchmark PostgreSQL
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd postgres
+            sed -i "s|ldbc.snb.interactive.LdbcQuery13a_enable = true|ldbc.snb.interactive.LdbcQuery13a_enable = false|g" driver/benchmark-sf${SF}.properties
+            sed -i "s|ldbc.snb.interactive.LdbcQuery13b_enable = true|ldbc.snb.interactive.LdbcQuery13b_enable = false|g" driver/benchmark-sf${SF}.properties
+            sed -i "s|ldbc.snb.interactive.LdbcQuery14a_enable = true|ldbc.snb.interactive.LdbcQuery14a_enable = false|g" driver/benchmark-sf${SF}.properties
+            sed -i "s|ldbc.snb.interactive.LdbcQuery14b_enable = true|ldbc.snb.interactive.LdbcQuery14b_enable = false|g" driver/benchmark-sf${SF}.properties
+            . scripts/use-datagen-data-set.sh
+            scripts/restore-database.sh
+            driver/benchmark.sh driver/benchmark-sf${SF}.properties
+            scripts/stop.sh
+            cd ..
+      ### Umbra
+      - run:
+          name: SF1 data set - Benchmark Umbra
+          command: |
+            export SF=1
+            export LDBC_SNB_DATAGEN_DIR=`pwd`
+            cd umbra
+            . scripts/use-datagen-data-set.sh
+            scripts/restore-database.sh
+            driver/benchmark.sh driver/benchmark-sf${SF}.properties
+            scripts/stop.sh
+            cd ..
+      - slack/status

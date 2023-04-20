@@ -1,0 +1,34 @@
+// Q10. Friend recommendation
+/*
+:param [{ personId, month }] => { RETURN
+  4398046511333 AS personId,
+  5 AS month
+}
+*/
+USE sf01
+MATCH (person:Person)-[:KNOWS]-{2}(friend),(friend)-[:IS_LOCATED_IN]->(city:City)
+    WHERE friend <> person AND size( VALUE{ USE sf01 MATCH p0 = (friend)-[:KNOWS]-(person) RETURN p0} ) <> 0
+    LET person = person,
+        city = city,
+        friend = friend,
+        birthday = datetime({epochMillis: friend.birthday})
+        WHERE (birthday.month=$month AND birthday.day>=21) OR (birthday.month=($month%12)+1 AND birthday.day<22)
+RETURN DISTINCT friend, city, person
+NEXT
+USE sf01
+OPTIONAL MATCH (friend)<-[:HAS_CREATOR]-(post:Post)
+AGGREGATE posts = collect(post) GROUP BY friend, city, person
+LET friend = friend,
+    city = city,
+    postCount = size(posts),
+    commonPostCount = size(List[p IN posts WHERE size(VALUE{ USE sf01 MATCH innerPath = (p)-[:HAS_TAG]->()<-[:HAS_INTEREST]-(person) RETURN innerPath}) <> 0]),
+    personId = friend.id
+ORDER BY commonInterestScore DESC, personId ASC LIMIT 10
+RETURN
+    personId,
+    friend.firstName AS personFirstName,
+    friend.lastName AS personLastName,
+    friend.birthday AS personBirthday,
+    commonPostCount - (postCount - commonPostCount) AS commonInterestScore,
+    friend.gender AS personGender,
+    city.name AS personCityName

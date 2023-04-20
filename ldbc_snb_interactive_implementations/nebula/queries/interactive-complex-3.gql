@@ -1,0 +1,40 @@
+// Q3. Friends and friends of friends that have been to given countries
+/*
+:param [{ personId, countryXName, countryYName, startDate, endDate }] => { RETURN
+  6597069766734 AS personId,
+  "Angola" AS countryXName,
+  "Colombia" AS countryYName,
+  1275393600000 AS startDate,
+  1277812800000 AS endDate
+}
+*/
+USE sf01
+MATCH (countryX:Country {name : $countryXName}),
+      (countryY:Country {name : $countryYName}),
+      (person:Person {id : $personId})
+LET person=person, countryX=countryX, countryY=countryY
+LIMIT 1
+MATCH (city:City)-[:IS_PART_OF]->(country:Country)
+WHERE country IN [countryX, countryY]
+AGGREGATE cities=collect(city) GROUP BY person, countryX, countryY
+MATCH (person)-[:KNOWS]-{1,2}(friend)-[:IS_LOCATED_IN]->(city)
+WHERE person <> friend AND city NOT IN cities
+RETURN DISTINCT friend, countryX, countryY
+NEXT
+USE sf01
+MATCH (message)-[:HAS_CREATOR]->(friend), (message)-[:IS_LOCATED_IN]->(country)
+WHERE $endDate > message.creationDate AND message.creationDate >= $startDate AND country IN [countryX, countryY]
+LET
+  friend=friend,
+  messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
+  messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
+AGGREGATE xCount=sum(messageX), yCount=sum(messageY) GROUP BY friend
+WHERE xCount > 0 AND yCount > 0
+ORDER BY xCount+yCount DESC, friend.id ASC
+LIMIT 20
+RETURN friend.id AS friendId,
+  friend.firstName AS friendFirstName,
+  friend.lastName AS friendLastName,
+  xCount,
+  yCount,
+  xCount + yCount AS xyCount

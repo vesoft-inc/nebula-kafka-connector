@@ -1,0 +1,9 @@
+USE sf01
+INSERT NODE Post({id: $postId,
+                  creationDate: $creationDate,
+                  locationIP: $locationIP,
+                  browserUsed: $browserUsed,
+                  language: $language,
+                  content: $content,
+                  imageFile: $imageFile,
+                  length: $length});

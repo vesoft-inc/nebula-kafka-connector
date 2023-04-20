@@ -1,0 +1,2 @@
+USE sf01
+INSERT NODE Forum ({id:$forumId, title: $forumTitle, creationDate: $creationDate});

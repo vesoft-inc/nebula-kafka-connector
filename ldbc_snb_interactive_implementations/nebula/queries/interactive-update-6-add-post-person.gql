@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE HAS_CREATOR_1 ({id: $postId})-[{}]->({id: $authorPersonId});

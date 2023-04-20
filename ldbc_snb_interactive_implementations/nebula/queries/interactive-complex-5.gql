@@ -1,0 +1,25 @@
+// Q5. New groups
+/*
+:param [{ personId, minDate }] => { RETURN
+  6597069766734 AS personId,
+  1288612800000 AS minDate
+}
+*/
+USE sf01
+MATCH (person:Person {id : $personId})-[:KNOWS]-{1,2}(otherPerson)
+    WHERE person <> otherPerson
+RETURN DISTINCT otherPerson
+NEXT
+USE sf01
+MATCH (forum)-[membership:HAS_MEMBER WHERE membership.creationDate > $minDate]->(otherPerson)
+    AGGREGATE otherPersons=collect(otherPerson) GROUP BY forum
+    OPTIONAL MATCH (otherPerson2)<-[:HAS_CREATOR]-(post)<-[:CONTAINER_OF]-(forum)
+        FILTER WHERE otherPerson2 IN otherPersons
+        AGGREGATE postCount=count(post) GROUP BY forum
+        ORDER BY
+        postCount DESC,
+        forum.id ASC
+LIMIT 20
+RETURN
+  forum.title AS forumName,
+  postCount

@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE CONTAINER_OF ({id:$forumId})-[{}]->({id:$postId});

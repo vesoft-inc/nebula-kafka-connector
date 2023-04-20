@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE STUDY_AT ({id: $personId})-[{classYear: $studiesFromYear}]->({id:$organizationId});

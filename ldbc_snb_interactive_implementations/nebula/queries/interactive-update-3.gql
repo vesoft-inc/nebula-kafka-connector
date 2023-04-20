@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE LIKES_2 ({id:$personId})-[{creationDate:$creationDate}]->({id:commentId});

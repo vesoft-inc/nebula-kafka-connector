@@ -1,0 +1,26 @@
+// Q6. Tag co-occurrence
+/*
+:param [{ personId, tagName }] => { RETURN
+  4398046511333 AS personId,
+  "Carl_Gustaf_Emil_Mannerheim" AS tagName
+}
+*/
+USE sf01
+MATCH (knownTag:Tag {name : $tagName})
+LET knownTagId=knownTag.id
+MATCH (person:Person)-[:KNOWS]-{1,2}(friend)
+WHERE person <> friend
+AGGREGATE friends=collect(distinct friend) GROUP BY knownTagId
+FOR f in friends
+    MATCH (post:Post)-[:HAS_CREATOR]->(f),
+          (post)-[:HAS_TAG]->(t:Tag {id: knownTagId}),
+          (post)-[:HAS_TAG]->(tag:Tag)
+    WHERE t <> tag
+    AGGREGATE postCount=count(post) GROUP BY tag
+ORDER BY
+  postCount DESC,
+  tag.name ASC
+LIMIT 10
+RETURN
+  tag.name AS tagName,
+  postCount

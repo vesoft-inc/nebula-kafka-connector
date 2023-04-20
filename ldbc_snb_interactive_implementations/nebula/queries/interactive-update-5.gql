@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE HAS_MEMBER ({id:forumId})-[{}]->({id:$personId});

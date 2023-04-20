@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE WORK_AT ({id: $personId})-[{workFrom: $worksFromYear}]->({id: $organizationId});

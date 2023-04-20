@@ -1,0 +1,2 @@
+USE sf01
+INSERT EDGE HAS_INTEREST ({id:$personId})-[{}]->({id:$tagId});

@@ -1,0 +1,9 @@
+// IS4. Content of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = $messageId)
+RETURN
+   m.creationDate as messageCreationDate,
+   coalesce(m.content, m.imageFile) as messageContent

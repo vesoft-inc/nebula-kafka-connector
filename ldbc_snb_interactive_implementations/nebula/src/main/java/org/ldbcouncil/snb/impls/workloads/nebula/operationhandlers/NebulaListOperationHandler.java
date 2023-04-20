@@ -1,0 +1,54 @@
+package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
+
+import com.vesoft.nebula.client.graph.exception.AuthFailedException;
+import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
+import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
+import org.ldbcouncil.snb.driver.DbException;
+import org.ldbcouncil.snb.driver.Operation;
+import org.ldbcouncil.snb.driver.ResultReporter;
+import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
+import org.ldbcouncil.snb.impls.workloads.operationhandlers.ListOperationHandler;
+
+import java.io.UnsupportedEncodingException;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.net.Session;
+
+public abstract class NebulaListOperationHandler<TOperation extends Operation<List<TOperationResult>>, TOperationResult>
+        implements ListOperationHandler<TOperationResult,TOperation,NebulaDbConnectionState>
+{
+
+    public abstract TOperationResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException;
+
+    public abstract Map<String, Object> getParameters(NebulaDbConnectionState state, TOperation operation );
+
+    @Override
+    public void executeOperation( TOperation operation, NebulaDbConnectionState state,
+                                  ResultReporter resultReporter ) throws DbException {
+        try {
+            Session session = state.getSession();
+            String query = getQueryString(state, operation);
+            // not implement parameter in session interface yet.
+            final Map<String, Object> parameters = getParameters(state, operation );
+            state.logQuery(operation.getClass().getSimpleName(), query);
+
+            final List<TOperationResult> results = new ArrayList<>();
+
+            final ResultSet resultSet = session.execute(query);
+            long recordSize = resultSet.rowsSize();
+            for (int i = 0; i < recordSize; ++i) {
+                final ResultSet.Record record = resultSet.rowValues(i);
+                results.add(toResult(record));
+            }
+            resultReporter.report( results.size(), results, operation );
+        } catch (AuthFailedException | NotValidConnectionException | ClientServerIncompatibleException |
+                 IOErrorException | ParseException | UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+}

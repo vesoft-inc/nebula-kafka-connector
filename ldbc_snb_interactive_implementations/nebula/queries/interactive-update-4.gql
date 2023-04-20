@@ -1,0 +1,6 @@
+MATCH (p:Person {id: $moderatorPersonId})
+INSERT (f:Forum {id: $forumId, title: $forumTitle, creationDate: $creationDate})-[:HAS_MODERATOR]->(p)
+LEFT f = f
+UNWIND $tagIds AS tagId
+  MATCH (t:Tag {id: tagId})
+  INSERT (f)-[:HAS_TAG]->(t)

@@ -1,0 +1,7 @@
+USE sf01
+INSERT NODE Comment ({id: $commentId,
+                      creationDate: $creationDate,
+                      locationIP: $locationIP,
+                      browserUsed: $browserUsed,
+                      content: $content,
+                      length: $length});

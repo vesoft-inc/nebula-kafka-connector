@@ -1,0 +1,17 @@
+// Q13. Single shortest path
+/*
+:param [{ person1Id, person2Id }] => { RETURN
+  8796093022390 AS person1Id,
+  8796093022357 AS person2Id
+}
+*/
+USE sf01
+MATCH
+  (person1:Person {id: $person1Id}),
+  (person2:Person {id: $person2Id})
+  path1 = ANY SHORTEST PATH (person1)-[:KNOWS]-{1,10}(person2)
+RETURN
+  CASE path1
+      WHEN IS NULL THEN -1
+      ELSE length(path1)
+  END AS shortestPathLength

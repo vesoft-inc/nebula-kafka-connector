@@ -1,0 +1,51 @@
+// Q1. Transitive friends with certain name
+/*
+:param [{ personId, firstName }] => { RETURN
+  4398046511333 AS personId,
+  "Jose" AS firstName
+}
+*/
+USE sf01
+MATCH (p:Person{id:$personId}), (friend:Person{firstName:$firstName})
+    WHERE p<>friend
+    LET p=p, friend=friend
+    MATCH path1 = ANY SHORTEST PATH (p)-[:KNOWS]-{1,3}(friend)
+    AGGREGATE distance=min(length(path1)) GROUP BY friend
+ORDER BY
+  distance ASC,
+  friend.lastName ASC,
+  toInteger(friend.id) ASC
+LIMIT 20
+
+MATCH (friend)-[:IS_LOCATED_IN]->(friendCity:City)
+OPTIONAL MATCH (friend)-[studyAt:STUDY_AT]->(uni:University)-[:IS_LOCATED_IN]->(uniCity:City)
+AGGREGATE unis=collect(
+  CASE uni.name
+      WHEN null THEN null
+      ELSE LIST [uni.name, studyAt.classYear, uniCity.name]
+  END ) GROUP BY friend, friendCity, distance
+OPTIONAL MATCH (friend)-[workAt:WORK_AT]->(company:Company)-[:IS_LOCATED_IN]->(companyCountry:Country)
+AGGREGATE companies=collect(
+  CASE company.name
+      WHEN null THEN null
+      ELSE LIST [company.name, workAt.workFrom, companyCountry.name]
+  END ) GROUP BY friend, unis, friendCity, distance
+ORDER BY
+  distanceFromPerson ASC,
+  friendLastName ASC,
+  toInteger(friendId) ASC
+LIMIT 20
+RETURN
+  friend.id AS friendId,
+  friend.lastName AS friendLastName,
+  distance AS distanceFromPerson,
+  friend.birthday AS friendBirthday,
+  friend.creationDate AS friendCreationDate,
+  friend.gender AS friendGender,
+  friend.browserUsed AS friendBrowserUsed,
+  friend.locationIP AS friendLocationIp,
+  friend.email AS friendEmails,
+  friend.speaks AS friendLanguages,
+  friendCity.name AS friendCityName,
+  unis AS friendUniversities,
+  companies AS friendCompanies
