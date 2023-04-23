@@ -228,8 +228,6 @@ github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6Kllzaw
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/vesoft-inc/nebula-go/v3 v3.3.1 h1:5DxUxswEQvK9gkK6Y/X4fhX+bmIeHIJrn+b2q7tE3HM=
 github.com/vesoft-inc/nebula-go/v3 v3.3.1/go.mod h1:+sXv05jYQBARdTbTcIEsWVXCnF/6ttOlDK35xQ6m54s=
-github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20221102090826-aa7db5c6ca6d h1:JijYZaDbrzrvRxgYp+LIJSUoVeWZw6U6Qel2Ip0d/bU=
-github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20221102090826-aa7db5c6ca6d/go.mod h1:f1tsG7BLd/uz9MK37Z7rR9NjvAk3hGrLyO3xl+F0Eqg=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=

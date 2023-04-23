@@ -209,9 +209,7 @@ var _ = Describe("Sources", func() {
 	)
 
 	Describe(".OptimizePathWildCard", func() {
-		var (
-			wd string
-		)
+		var wd string
 		BeforeEach(func() {
 			var err error
 			wd, err = os.Getwd()

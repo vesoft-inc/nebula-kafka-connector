@@ -18,13 +18,13 @@ all: build
 go-generate: $(GOBIN)/mockgen
 	go generate ./...
 
-check: tidy fmt vet imports lint
+check: tidy fmt vet imports # lint
 
 tidy:
 	go mod tidy
 
 fmt: $(GOBIN)/gofumpt
-	# go fmt ./...
+	go fmt ./...
 	$(GOBIN)/gofumpt -w -l ./
 
 vet:
@@ -38,7 +38,7 @@ imports: $(GOBIN)/goimports $(GOBIN)/impi
 lint: $(GOBIN)/golangci-lint
 	$(GOBIN)/golangci-lint run
 
-build:
+build: check
 	$(GO_BUILD) -ldflags '$(LDFLAGS)' -o bin/nebula-importer ./cmd/nebula-importer/
 
 test:

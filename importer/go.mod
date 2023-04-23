@@ -21,7 +21,7 @@ require (
 	github.com/spf13/cobra v1.6.1
 	github.com/valyala/bytebufferpool v1.0.0
 	github.com/vesoft-inc/nebula-go/v3 v3.3.1
-	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20221102090826-aa7db5c6ca6d
+	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0
 	go.uber.org/zap v1.23.0
 	golang.org/x/crypto v0.5.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -55,3 +55,5 @@ require (
 	google.golang.org/protobuf v1.28.1 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
+
+replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang

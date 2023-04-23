@@ -36,6 +36,7 @@ func (s *localSource) Open() error {
 	s.f = f
 	return nil
 }
+
 func (s *localSource) Config() *Config {
 	return s.c
 }

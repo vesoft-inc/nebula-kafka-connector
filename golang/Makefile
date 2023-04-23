@@ -5,9 +5,11 @@ default: build
 build: fmt
 	go mod tidy
 	go build
+
 unit:
 	go mod tidy
 	go test -v -race --covermode=atomic --coverprofile coverage.out
+
 test:
 	go mod tidy
 	go test -v -race --tags=integration --covermode=atomic --coverprofile coverage.out

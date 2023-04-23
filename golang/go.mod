@@ -1,6 +1,6 @@
 module github.com/vesoft-inc/nebula-ng-tools/golang
 
-go 1.17
+go 1.18
 
 require (
 	github.com/facebook/fbthrift v0.31.1-0.20211129061412-801ed7f9f295

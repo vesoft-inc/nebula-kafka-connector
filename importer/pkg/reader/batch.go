@@ -40,6 +40,7 @@ func NewContinueError(err error) error {
 		Err: err,
 	}
 }
+
 func (r *defaultBatchReader) Source() source.Source {
 	return r.rr.Source()
 }

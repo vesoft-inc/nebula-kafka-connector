@@ -20,7 +20,7 @@ var _ = Describe("SessionV5", func() {
 		connection := nebula.NewConnection(nebula.HostAddress{})
 		nSession := &nebula.Session{}
 		id := int64(1)
-		authResp := &graph.AuthResponse{
+		authResp := &graph.XAuthResponse_{
 			Identifier: &id,
 		}
 
@@ -51,7 +51,7 @@ var _ = Describe("SessionV5", func() {
 		connection := nebula.NewConnection(nebula.HostAddress{})
 		nSession := &nebula.Session{}
 		id := int64(1)
-		authResp := &graph.AuthResponse{
+		authResp := &graph.XAuthResponse_{
 			Identifier: &id,
 		}
 
