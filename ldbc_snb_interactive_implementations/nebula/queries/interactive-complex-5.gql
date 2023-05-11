@@ -5,13 +5,13 @@
   1288612800000 AS minDate
 }
 */
-USE sf01
+USE $graphName
 MATCH (person:Person {id : $personId})-[:KNOWS]-{1,2}(otherPerson)
     WHERE person <> otherPerson
 RETURN DISTINCT otherPerson
 NEXT
-USE sf01
-MATCH (forum)-[membership:HAS_MEMBER WHERE membership.creationDate > $minDate]->(otherPerson)
+USE $graphName
+MATCH (forum)-[membership:HAS_MEMBER WHERE membership.joinDate > $minDate]->(otherPerson)
     AGGREGATE otherPersons=collect(otherPerson) GROUP BY forum
     OPTIONAL MATCH (otherPerson2)<-[:HAS_CREATOR]-(post)<-[:CONTAINER_OF]-(forum)
         FILTER WHERE otherPerson2 IN otherPersons

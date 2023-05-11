@@ -5,8 +5,10 @@
   1287230400000 AS maxDate
 }
 */
-USE sf01
+USE $graphName
 MATCH (person:Person {id: $personId})-[:KNOWS]-(friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < $maxDate)
+ORDER BY message.creationDate DESC, message.id ASC
+LIMIT 20
 RETURN
     friend.id AS personId,
     friend.firstName AS personFirstName,
@@ -14,5 +16,3 @@ RETURN
     message.id AS postOrCommentId,
     coalesce(message.content, message.imageFile) AS postOrCommentContent,
     message.creationDate AS postOrCommentCreationDate
-ORDER BY postOrCommentCreationDate DESC, toInteger(postOrCommentId) ASC
-LIMIT 20

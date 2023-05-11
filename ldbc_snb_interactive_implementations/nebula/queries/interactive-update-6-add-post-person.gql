@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE HAS_CREATOR_1 ({id: $postId})-[{}]->({id: $authorPersonId});
+USE $graphName
+INSERT EDGE POST_HAS_CREATOR_PERSON ({id: $postId})-[{}]->({id: $authorPersonId});

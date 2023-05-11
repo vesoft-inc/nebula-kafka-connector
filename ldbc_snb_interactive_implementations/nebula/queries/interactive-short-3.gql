@@ -2,7 +2,7 @@
 /*
 :param personId: 10995116277794
  */
-USE sf01
+USE $graphName
 MATCH (n:Person WHERE n.id = $personId)-[r:KNOWS]-(friend)
 ORDER BY
   r.creationDate DESC,

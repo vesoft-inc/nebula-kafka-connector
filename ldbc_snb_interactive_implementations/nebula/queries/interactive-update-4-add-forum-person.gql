@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE HAS_MODERATOR ({id: $forumId})-[{}]->({id: $moderatorPersonId});
+USE $graphName
+INSERT EDGE FORUM_HAS_MODERATOR_PERSON ({id: $forumId})-[{}]->({id: $moderatorPersonId});

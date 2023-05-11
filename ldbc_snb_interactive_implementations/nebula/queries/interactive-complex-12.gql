@@ -5,7 +5,7 @@
   "Monarch" AS tagClassName
 }
 */
-USE sf01
+USE $graphName
 MATCH (tag:Tag)-[:HAS_TYPE|IS_SUBCLASS_OF]->{0,3}(baseTagClass:TagClass)
 WHERE tag.name = $tagClassName OR baseTagClass.name = $tagClassName
 AGGREGATE tags=collect(tag.id)

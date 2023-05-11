@@ -1,2 +1,2 @@
-USE sf01
+USE $graphName
 INSERT NODE Forum ({id:$forumId, title: $forumTitle, creationDate: $creationDate});

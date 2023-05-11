@@ -5,7 +5,7 @@
   "Carl_Gustaf_Emil_Mannerheim" AS tagName
 }
 */
-USE sf01
+USE $graphName
 MATCH (knownTag:Tag {name : $tagName})
 LET knownTagId=knownTag.id
 MATCH (person:Person)-[:KNOWS]-{1,2}(friend)

@@ -1,4 +1,4 @@
-USE sf01
+USE $graphName
 INSERT NODE Comment ({id: $commentId,
                       creationDate: $creationDate,
                       locationIP: $locationIP,

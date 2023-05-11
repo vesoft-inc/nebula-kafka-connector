@@ -18,7 +18,9 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
         try {
             Session session = state.getSession();
             List<String> queryStrings = getQueryString(state, operation);
+            String graphName = state.getGraphName();
             for (String queryString : queryStrings) {
+                queryString = queryString.replace("$graphName", graphName);
                 state.logQuery(operation.getClass().getSimpleName(), queryString);
                 ResultSet result = session.execute(queryString);
                 if (!result.isSucceeded()) {

@@ -2,7 +2,7 @@
 /*
 :param messageId: 206158432794
  */
-USE sf01
+USE $graphName
 MATCH (m:Message WHERE m.id = $messageId)<-[:REPLY_OF]-(c:Comment)-[:HAS_CREATOR]->(p:Person)
     OPTIONAL MATCH (m)-[:HAS_CREATOR]->(a:Person)-[r:KNOWS]-(p)
     ORDER BY c.creationDate DESC, p.id

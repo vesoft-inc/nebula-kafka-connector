@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE  REPLY_OF_2 ({id: $commentId})-[{}]->({id: $replyToCommentId});
+USE $graphName
+INSERT EDGE  COMMENT_REPLY_OF_COMMENT ({id: $commentId})-[{}]->({id: $replyToCommentId});

@@ -1,4 +1,4 @@
-USE sf01
+USE $graphName
 INSERT NODE Post({id: $postId,
                   creationDate: $creationDate,
                   locationIP: $locationIP,

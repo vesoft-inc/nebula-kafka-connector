@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE IS_LOCATED_IN_1 ({id:$personId})-[{}]->({id:$cityId});
+USE $graphName
+INSERT EDGE PERSON_IS_LOCATED_IN_PLACE ({id:$personId})-[{}]->({id:$cityId});

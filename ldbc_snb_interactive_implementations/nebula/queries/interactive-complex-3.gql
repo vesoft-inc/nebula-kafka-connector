@@ -8,7 +8,7 @@
   1277812800000 AS endDate
 }
 */
-USE sf01
+USE $graphName
 MATCH (countryX:Country {name : $countryXName}),
       (countryY:Country {name : $countryYName}),
       (person:Person {id : $personId})
@@ -21,7 +21,7 @@ MATCH (person)-[:KNOWS]-{1,2}(friend)-[:IS_LOCATED_IN]->(city)
 WHERE person <> friend AND city NOT IN cities
 RETURN DISTINCT friend, countryX, countryY
 NEXT
-USE sf01
+USE $graphName
 MATCH (message)-[:HAS_CREATOR]->(friend), (message)-[:IS_LOCATED_IN]->(country)
 WHERE $endDate > message.creationDate AND message.creationDate >= $startDate AND country IN [countryX, countryY]
 LET

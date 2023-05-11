@@ -2,7 +2,7 @@
 /*
 :param messageId: 206158431836
  */
-USE sf01
+USE $graphName
 MATCH (m:Message WHERE m.id = $messageId)-[:REPLY_OF]->{0,3}(p:Post)<-[:CONTAINER_OF]-(f:Forum)-[:HAS_MODERATOR]->(mod:Person)
 RETURN
   f.id AS forumId,

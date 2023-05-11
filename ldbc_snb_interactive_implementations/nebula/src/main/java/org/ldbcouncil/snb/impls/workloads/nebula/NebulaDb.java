@@ -41,9 +41,8 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
 
         @Override
         public String getQueryString(NebulaDbConnectionState state, LdbcQuery1 operation) {
-            // (TODO) jmq, we not implement parameters in query yet.
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery1);
-            return state.getQueryStore().getQuery1(operation);
+            return  state.getQueryStore().getQuery1(operation);
         }
 
         @Override

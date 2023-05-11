@@ -6,13 +6,13 @@
   1277856000000 AS endDate
 }
 */
-USE sf01
+USE $graphName
 MATCH
   (person:Person {id : $personId})-[:KNOWS]-(friend:Person),
   (friend)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(tag)
 RETURN DISTINCT tag, post
 NEXT
-USE sf01
+USE $graphName
 LET tag=tag,
     CASE
         WHEN $endDate > post.creationDate AND post.creationDate >= $startDate THEN 1

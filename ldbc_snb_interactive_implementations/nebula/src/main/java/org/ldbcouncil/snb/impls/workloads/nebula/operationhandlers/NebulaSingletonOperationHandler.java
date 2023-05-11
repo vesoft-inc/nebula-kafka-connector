@@ -31,8 +31,10 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
         try {
             Session session = state.getSession();
             String query = getQueryString(state, operation);
+            String graphName = state.getGraphName();
+            query = query.replace("$graphName", graphName);
             // not implement parameter in session yet
-            final Map<String, Object> parameters = getParameters(state, operation );
+            // final Map<String, Object> parameters = getParameters(state, operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
 
             final ResultSet resultSet = session.execute(query);

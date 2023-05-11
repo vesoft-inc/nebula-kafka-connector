@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE HAS_TAG_1 ({$forumId})-[{}]->({id: $tagId});
+USE $graphName
+INSERT EDGE FORUM_HAS_TAG_TAG ({$forumId})-[{}]->({id: $tagId});

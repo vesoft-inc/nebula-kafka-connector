@@ -33,8 +33,10 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
         try {
             Session session = state.getSession();
             String query = getQueryString(state, operation);
+            String graphName = state.getGraphName();
+            query = query.replace("$graphName", graphName);
             // not implement parameter in session interface yet.
-            final Map<String, Object> parameters = getParameters(state, operation );
+            // final Map<String, Object> parameters = getParameters(state, operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
 
             final List<TOperationResult> results = new ArrayList<>();

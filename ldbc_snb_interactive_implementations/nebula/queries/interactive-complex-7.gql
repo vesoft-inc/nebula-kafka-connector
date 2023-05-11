@@ -2,7 +2,7 @@
 /*
 :param personId: 4398046511268
 */
-USE sf01
+USE $graphName
 MATCH (person:Person {id: $personId})<-[:HAS_CREATOR]-(message:Message)<-[like:LIKES]-(liker:Person)
   LET liker=liker, message=message, likeTime=likes.creationDate, person=person
   ORDER BY likeTime DESC, message.id ASC
@@ -20,4 +20,4 @@ RETURN
   latestLike.msg.id AS commentOrPostId,
   coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS commentOrPostContent,
   toInteger(floor(toFloat(latestLike.likeTime - latestLike.msg.creationDate)/1000.0)/60.0) AS minutesLatency,
-  size( VALUE{ USE sf01 MATCH p0 = (liker)-[:KNOWS]-(person) RETURN p0} ) == 0 AS isNew
+  size( VALUE{USE $graphName MATCH p0 = (liker)-[:KNOWS]-(person) RETURN p0} ) == 0 AS isNew

@@ -34,7 +34,9 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
         try {
             Session session = state.getSession();
             String query = getQueryString(state, operation);
-            final Map<String, Object> parameters = getParameters( operation );
+            String graphName = state.getGraphName();
+            query = query.replace("$graphName", graphName);
+            // final Map<String, Object> parameters = getParameters( operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
             final ResultSet resultSet = session.execute(query);
             resultReporter.report( 0, LdbcNoResult.INSTANCE, operation );

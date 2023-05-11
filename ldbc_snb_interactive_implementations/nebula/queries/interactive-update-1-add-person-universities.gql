@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE STUDY_AT ({id: $personId})-[{classYear: $studiesFromYear}]->({id:$organizationId});
+USE $graphName
+INSERT EDGE PERSON_STUDY_AT_ORGANISATION ({id: $personId})-[{classYear: $studiesFromYear}]->({id:$organizationId});

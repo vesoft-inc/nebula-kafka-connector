@@ -2,7 +2,7 @@
 /*
 :param messageId: 206158431836
  */
-USE sf01
+USE $graphName
 MATCH (m:Message WHERE m.id = $messageId)
 RETURN
    m.creationDate as messageCreationDate,

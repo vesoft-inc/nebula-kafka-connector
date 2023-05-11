@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE LIKES_1 ({id: $personId})-[{creationDate:$creationDate}]->({id:$postId});
+USE $graphName
+INSERT EDGE PERSON_LIKES_POST ({id: $personId})-[{creationDate:$creationDate}]->({id:$postId});

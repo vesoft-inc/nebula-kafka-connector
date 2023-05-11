@@ -29,6 +29,7 @@ public class NebulaInteractiveTest extends InteractiveTest {
         properties.put("printQueryNames", "true");
         properties.put("printQueryStrings", "true");
         properties.put("printQueryResults", "true");
+        properties.put("graphName", "sf10");
         properties.put("queryDir", queryDir);
         return properties;
     }

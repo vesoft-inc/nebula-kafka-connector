@@ -5,7 +5,7 @@
   14 AS person1Id,
   27 AS person2Id
 }
-USE sf01
+USE $graphName
 MATCH path0 = ALL SHORTEST PATH (person1:Person {id : $person1Id})-[:KNOWS]-{1,15}(person2:Person {id : $person2Id})
 LET pathNodes = nodes(path0)
 RETURN
@@ -15,15 +15,15 @@ RETURN
       List[prev IN List[pathNodes[idx-1]] |
           List[curr IN List[pathNodes[idx]] |
               weight + size(VALUE {
-                  USE sf01
+                  USE $graphName
                   MATCH p = (curr)<-[:HAS_CREATOR]-(:`Comment`)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(prev)
                   RETURN p
               })*1.0 + size(VALUE {
-                  USE sf01
+                  USE $graphName
                   MATCH p = (prev)<-[:HAS_CREATOR]-(:`Comment`)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(curr)
                   RETURN p
               })*1.0 + size(VALUE {
-                  USE sf01
+                  USE $graphName
                   MATCH p = (prev)-[:HAS_CREATOR]-(:`Comment`)-[:REPLY_OF]-(:`Comment`)-[:HAS_CREATOR]-(curr)
                   RETURN p
               })*0.5
@@ -31,6 +31,6 @@ RETURN
       ][0][0]
   ) AS pathWight
 NEXT
-USE sf01
+USE $graphName
 ORDER BY pathWight DESC
 RETURN pathWight

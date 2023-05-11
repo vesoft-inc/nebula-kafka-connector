@@ -1,4 +1,4 @@
-USE sf01
+USE $graphName
 INSERT NODE Person ({id: $personId,
                      firstName: $personFirstName,
                      lastName: $personLastName,

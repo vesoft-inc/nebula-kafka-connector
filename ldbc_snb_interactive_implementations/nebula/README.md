@@ -1,13 +1,34 @@
-# LDBC SNB Interactive Neo4j/Cypher implementation
+# LDBC SNB Interactive Nebula5.0 implementation
 
 This directory contains the [Neo4j/Cypher](http://www.opencypher.org/) implementation of the Interactive workload of the [LDBC SNB benchmark](https://github.com/ldbc/ldbc_snb_docs).
 
 ## Setup
+* Bash
+* Java 11
+1、 Since the nebula 5.0 kernel and surrounding tools have not been released, so temporary java client alternative
+      git clone -b  temp_java_client_using_old_thrift https://github.com/Nicole00/nebula-ng-tools.git
+      cd nebula-ng-tools/java
+      mvn clean install -Dmaven.javadoc.skip=true -Dmaven.test.skip=true -Dgpg.skip
+2、 Java environment requirements
+      Download Address https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html
+      Install JDK. under the ubuntu system. sudo dpkg -i jdk-11.0.13_linux-x64_bin.deb
+      Configure environment variables
+      export JAVA_HOME=/usr/lib/jvm/jdk-11.0.13
+      export PATH=$PATH:$JAVA_HOME/bin
+      Check whether the JDK is configured successfully: Enter java -version in the terminal, if the output version number is the installed JDK version number, it means the installation is successful
+3、 LDBC driver
+      DownLoad Address https://github.com/ldbc/ldbc_snb_interactive_driver
+      cd ldbc_snb_driver
+      mvn clean package -DskipTests (Need to modify java version in pom.xml to 11)
+
+some problems encountered when generating cypher data:
+   pip install backports.zoneinfo (ldbc_snb_driver/scripts/create_update_stream.py and ldbc_snb_driver/paramgen/paramgen.py  from zoneinfo import ZoneInfo -> from backports.zoneinfo import ZoneInfo)
+   pip install duckdb
+   pip install networkit
 
 The recommended environment is that the benchmark scripts (Bash) and the LDBC driver (Java 8) run on the host machine, while the Neo4j database runs in a Docker container. Therefore, the requirements are as follows:
 
-* Bash
-* Java 8
+
 * Docker 19+
 * enough free space in the directory `${NEO4J_CONTAINER_ROOT}` (its default value is specified in `scripts/vars.sh`)
 

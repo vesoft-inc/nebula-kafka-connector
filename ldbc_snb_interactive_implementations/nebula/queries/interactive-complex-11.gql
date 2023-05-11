@@ -6,12 +6,12 @@
   2011 AS workFromYear
 }
 */
-USE sf01
+USE $graphName
 MATCH (person:Person {id: $personId })-[:KNOWS]-{1,2}(friend:Person)
 WHERE person <> friend
 RETURN DISTINCT friend
 NEXT
-USE sf01
+USE $graphName
 MATCH (friend)-[workAt:WORK_AT WHERE workAt.workFrom < $workFromYear]->(company:Company)-[:IS_LOCATED_IN]->(:Country {name : $countryName})
 ORDER BY
   workAt.workFrom ASC,

@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE HAS_MEMBER ({id:forumId})-[{}]->({id:$personId});
+USE $graphName
+INSERT EDGE FORUM_HAS_MEMBER_PERSON ({id:forumId})-[{joinDate: $creationDate}]->({id:$personId});

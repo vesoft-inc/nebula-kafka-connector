@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE KNOWS ({id:$person1Id})-[{}]->({id:$person2Id});
+USE $graphName
+INSERT EDGE PERSON_KNOWS_PERSON ({id:$person1Id})-[{creationDate : $creationDate}]->({id:$person2Id});

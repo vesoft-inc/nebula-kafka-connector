@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE IS_LOCATED_IN_2 ({id: $commentId})-[{}]->({id:$countryId});
+USE $graphName
+INSERT EDGE COMMENT_IS_LOCATED_IN_PLACE ({id: $commentId})-[{}]->({id:$countryId});

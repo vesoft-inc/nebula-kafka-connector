@@ -1,2 +1,2 @@
-USE sf01
-INSERT EDGE HAS_INTEREST ({id:$personId})-[{}]->({id:$tagId});
+USE $graphName
+INSERT EDGE PERSON_HAS_INTEREST_TAG ({id:$personId})-[{}]->({id:$tagId});
