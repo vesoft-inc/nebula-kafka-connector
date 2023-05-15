@@ -7,20 +7,28 @@ import (
 const (
 	dbNULL = "NULL"
 
-	ValueTypeInt      ValueType = "INT"
-	ValueTypeString   ValueType = "STRING"
-	ValueTypeDouble   ValueType = "DOUBLE"
-	ValueTypeDateTime ValueType = "DATETIME"
+	ValueTypeInt           ValueType = "INT"
+	ValueTypeString        ValueType = "STRING"
+	ValueTypeDouble        ValueType = "DOUBLE"
+	ValueTypeDate          ValueType = "DATE"
+	ValueTypeTime          ValueType = "TIME"
+	ValueTypeLocalTime     ValueType = "LOCALTIME"
+	ValueTypeDateTime      ValueType = "DATETIME"
+	ValueTypeLocalDateTime ValueType = "LOCALDATETIME"
 
 	ValueTypeDefault = ValueTypeString
 )
 
 var (
 	supportedPropValueTypes = map[ValueType]struct{}{
-		ValueTypeInt:      {},
-		ValueTypeString:   {},
-		ValueTypeDouble:   {},
-		ValueTypeDateTime: {},
+		ValueTypeInt:           {},
+		ValueTypeString:        {},
+		ValueTypeDouble:        {},
+		ValueTypeDate:          {},
+		ValueTypeTime:          {},
+		ValueTypeLocalTime:     {},
+		ValueTypeDateTime:      {},
+		ValueTypeLocalDateTime: {},
 	}
 
 	supportedNodeIDValueTypes = map[ValueType]struct{}{

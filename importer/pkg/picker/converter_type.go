@@ -16,7 +16,9 @@ var (
 	_ Converter = TypeStringConverter{}
 	_ Converter = TypeDateConverter{}
 	_ Converter = TypeTimeConverter{}
+	_ Converter = TypeLocalTimeConverter{}
 	_ Converter = TypeDatetimeConverter{}
+	_ Converter = TypeLocalDatetimeConverter{}
 	_ Converter = TypeTimestampConverter{}
 	_ Converter = TypeGeoConverter{}
 	_ Converter = TypeGeoPointConverter{}
@@ -39,7 +41,11 @@ type (
 
 	TypeTimeConverter = FunctionStringConverter
 
+	TypeLocalTimeConverter = FunctionStringConverter
+
 	TypeDatetimeConverter = FunctionStringConverter
+
+	TypeLocalDatetimeConverter = FunctionStringConverter
 
 	TypeTimestampConverter struct {
 		fc  FunctionConverter
@@ -75,9 +81,17 @@ func NewTypeConverter(t string) (Converter, error) {
 		return TypeTimeConverter{
 			Name: "TIME",
 		}, nil
+	case "LOCALTIME":
+		return TypeLocalTimeConverter{
+			Name: "LOCALTIME",
+		}, nil
 	case "DATETIME":
 		return TypeDatetimeConverter{
 			Name: "DATETIME",
+		}, nil
+	case "LOCALDATETIME":
+		return TypeLocalDatetimeConverter{
+			Name: "LOCALDATETIME",
 		}, nil
 	case "TIMESTAMP":
 		return TypeTimestampConverter{

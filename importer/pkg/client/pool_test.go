@@ -242,12 +242,16 @@ var _ = Describe("Pool", func() {
 				// 1 for check and DefaultConcurrencyPerAddress for concurrency per address
 				clientOpenTimes = (1 + 1) * len(addresses)
 				wg              sync.WaitGroup
-				wait            = make(chan struct{})
+				received        = make(chan struct{}, 1)
+				filled          = make(chan struct{})
+				waitToExec      = make(chan struct{})
 			)
 
 			wg.Add(clientOpenTimes)
 			fnExecute := func(_ string) (Response, error) {
-				<-wait
+				received <- struct{}{}
+				<-filled
+				<-waitToExec
 				return mockResponse, nil
 			}
 
@@ -255,21 +259,32 @@ var _ = Describe("Pool", func() {
 				defer wg.Done()
 				return nil
 			})
-			mockClient.EXPECT().Execute("test ExecuteChan statement").Times(1).DoAndReturn(fnExecute)
+			mockClient.EXPECT().Execute("test ExecuteChan statement").MaxTimes(2).DoAndReturn(fnExecute)
 			mockClient.EXPECT().Close().Times(clientOpenTimes).Return(nil)
 
 			err := pool.Open()
 			Expect(err).NotTo(HaveOccurred())
 
+			// send request
 			chExecuteResult, ok := pool.ExecuteChan("test ExecuteChan statement")
 			Expect(ok).To(BeTrue())
 			Expect(chExecuteResult).NotTo(BeNil())
+
+			// already receive from chan
+			<-received
+
+			// fill up the chan
+			chExecuteResult, ok = pool.ExecuteChan("test ExecuteChan statement")
+			Expect(ok).To(BeTrue())
+			Expect(chExecuteResult).NotTo(BeNil())
+			close(filled)
 
 			chExecuteResult, ok = pool.ExecuteChan("test ExecuteChan statement")
 			Expect(ok).To(BeFalse())
 			Expect(chExecuteResult).To(BeNil())
 
-			close(wait)
+			// start to execute
+			close(waitToExec)
 
 			wg.Wait()
 
