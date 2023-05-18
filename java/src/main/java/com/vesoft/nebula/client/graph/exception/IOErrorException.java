@@ -15,6 +15,8 @@ public class IOErrorException extends Exception {
 
     public static final int E_CONNECT_BROKEN = 2;
 
+    public static final int E_SERVER_BAD = 3;
+
     public static final int E_TIME_OUT = 4;
 
     public static final int E_NO_OPEN = 5;

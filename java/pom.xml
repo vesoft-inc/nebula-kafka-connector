@@ -5,9 +5,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.vesoft</groupId>
-    <artifactId>java</artifactId>
-    <version>5.0-SNAPSHOT</version>
-    <packaging>pom</packaging>
+    <artifactId>nebula-client</artifactId>
+    <version>5.0.0</version>
 
     <properties>
         <commons-lang.version>2.6</commons-lang.version>

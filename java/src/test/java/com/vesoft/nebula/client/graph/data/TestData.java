@@ -11,6 +11,7 @@ import com.vesoft.nebula.Edge;
 import com.vesoft.nebula.NList;
 import com.vesoft.nebula.Node;
 import com.vesoft.nebula.RawRecord;
+import com.vesoft.nebula.Row;
 import com.vesoft.nebula.Value;
 import com.vesoft.nebula.graph.ExecutionOutcome;
 import com.vesoft.nebula.graph.ExecutionResponse;
@@ -36,7 +37,7 @@ public class TestData {
             value.setInt64Val(j);
             props.put(String.format("prop%d", j).getBytes(), value);
         }
-        int nodeType = 0;
+        short nodeType = 0;
         return new Node(vid, nodeType, props);
     }
 
@@ -56,7 +57,7 @@ public class TestData {
         Map<byte[], Value> props1 = new HashMap<>();
         props1.put("prop".getBytes(), new Value(Value.INT64VAL, (long) 100));
         long nodeId = 1;
-        int nodeType = 0;
+        short nodeType = 0;
         return new Node(nodeId, nodeType, props1);
     }
 
@@ -84,13 +85,13 @@ public class TestData {
         map.put("key1".getBytes(), new Value(Value.INT64VAL, 1L));
         map.put("key2".getBytes(), new Value(Value.INT64VAL, 2L));
 
-        final RawRecord row = new RawRecord(Arrays.asList(
+        final Row row = new Row(Arrays.asList(
                 new Value(),
                 new Value(Value.BOOLVAL, false),
                 new Value(Value.INT64VAL, 1L),
                 new Value(Value.INT32VAL, 2),
-                new Value(Value.INT16VAL, (short)3),
-                new Value(Value.INT8VAL, (byte)4),
+                new Value(Value.INT16VAL, (short) 3),
+                new Value(Value.INT8VAL, (byte) 4),
                 new Value(Value.FLOATVAL, 10.01),
                 new Value(Value.DOUBLEVAL, 20.01),
                 new Value(Value.STRINGVAL, "value1".getBytes()),

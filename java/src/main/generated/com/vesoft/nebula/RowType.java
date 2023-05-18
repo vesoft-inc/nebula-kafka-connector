@@ -10,22 +10,15 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class RecordType implements TBase, java.io.Serializable, Cloneable, Comparable<RecordType> {
-  private static final TStruct STRUCT_DESC = new TStruct("RecordType");
+public class RowType implements TBase, java.io.Serializable, Cloneable, Comparable<RowType> {
+  private static final TStruct STRUCT_DESC = new TStruct("_RowType_");
   private static final TField FIELD_TYPE_FIELD_DESC = new TField("fieldType", TType.LIST, (short)1);
   private static final TField FIELD_NAME_INDEX_MAP_FIELD_DESC = new TField("fieldNameIndexMap", TType.MAP, (short)2);
 
@@ -51,13 +44,13 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(RecordType.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(RowType.class, metaDataMap);
   }
 
-  public RecordType() {
+  public RowType() {
   }
 
-  public RecordType(
+  public RowType(
       List<FieldType> fieldType,
       Map<byte[],Integer> fieldNameIndexMap) {
     this();
@@ -82,8 +75,8 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
       return this;
     }
 
-    public RecordType build() {
-      RecordType result = new RecordType();
+    public RowType build() {
+      RowType result = new RowType();
       result.setFieldType(this.fieldType);
       result.setFieldNameIndexMap(this.fieldNameIndexMap);
       return result;
@@ -97,7 +90,7 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public RecordType(RecordType other) {
+  public RowType(RowType other) {
     if (other.isSetFieldType()) {
       this.fieldType = TBaseHelper.deepCopy(other.fieldType);
     }
@@ -106,15 +99,15 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
     }
   }
 
-  public RecordType deepCopy() {
-    return new RecordType(this);
+  public RowType deepCopy() {
+    return new RowType(this);
   }
 
   public List<FieldType> getFieldType() {
     return this.fieldType;
   }
 
-  public RecordType setFieldType(List<FieldType> fieldType) {
+  public RowType setFieldType(List<FieldType> fieldType) {
     this.fieldType = fieldType;
     return this;
   }
@@ -138,7 +131,7 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
     return this.fieldNameIndexMap;
   }
 
-  public RecordType setFieldNameIndexMap(Map<byte[],Integer> fieldNameIndexMap) {
+  public RowType setFieldNameIndexMap(Map<byte[],Integer> fieldNameIndexMap) {
     this.fieldNameIndexMap = fieldNameIndexMap;
     return this;
   }
@@ -201,9 +194,9 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof RecordType))
+    if (!(_that instanceof RowType))
       return false;
-    RecordType that = (RecordType)_that;
+    RowType that = (RowType)_that;
 
     if (!TBaseHelper.equalsNobinary(this.isSetFieldType(), that.isSetFieldType(), this.fieldType, that.fieldType)) { return false; }
 
@@ -218,7 +211,7 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
   }
 
   @Override
-  public int compareTo(RecordType other) {
+  public int compareTo(RowType other) {
     if (other == null) {
       // See java.lang.Comparable docs
       throw new NullPointerException();
@@ -262,16 +255,16 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
         case FIELDTYPE:
           if (__field.type == TType.LIST) {
             {
-              TList _list14 = iprot.readListBegin();
-              this.fieldType = new ArrayList<FieldType>(Math.max(0, _list14.size));
-              for (int _i15 = 0; 
-                   (_list14.size < 0) ? iprot.peekList() : (_i15 < _list14.size); 
-                   ++_i15)
+              TList _list19 = iprot.readListBegin();
+              this.fieldType = new ArrayList<FieldType>(Math.max(0, _list19.size));
+              for (int _i20 = 0; 
+                   (_list19.size < 0) ? iprot.peekList() : (_i20 < _list19.size); 
+                   ++_i20)
               {
-                FieldType _elem16;
-                _elem16 = new FieldType();
-                _elem16.read(iprot);
-                this.fieldType.add(_elem16);
+                FieldType _elem21;
+                _elem21 = new FieldType();
+                _elem21.read(iprot);
+                this.fieldType.add(_elem21);
               }
               iprot.readListEnd();
             }
@@ -282,17 +275,17 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
         case FIELDNAMEINDEXMAP:
           if (__field.type == TType.MAP) {
             {
-              TMap _map17 = iprot.readMapBegin();
-              this.fieldNameIndexMap = new HashMap<byte[],Integer>(Math.max(0, 2*_map17.size));
-              for (int _i18 = 0; 
-                   (_map17.size < 0) ? iprot.peekMap() : (_i18 < _map17.size); 
-                   ++_i18)
+              TMap _map22 = iprot.readMapBegin();
+              this.fieldNameIndexMap = new HashMap<byte[],Integer>(Math.max(0, 2*_map22.size));
+              for (int _i23 = 0; 
+                   (_map22.size < 0) ? iprot.peekMap() : (_i23 < _map22.size); 
+                   ++_i23)
               {
-                byte[] _key19;
-                int _val20;
-                _key19 = iprot.readBinary();
-                _val20 = iprot.readI32();
-                this.fieldNameIndexMap.put(_key19, _val20);
+                byte[] _key24;
+                int _val25;
+                _key24 = iprot.readBinary();
+                _val25 = iprot.readI32();
+                this.fieldNameIndexMap.put(_key24, _val25);
               }
               iprot.readMapEnd();
             }
@@ -321,8 +314,8 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
       oprot.writeFieldBegin(FIELD_TYPE_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.fieldType.size()));
-        for (FieldType _iter21 : this.fieldType)        {
-          _iter21.write(oprot);
+        for (FieldType _iter26 : this.fieldType)        {
+          _iter26.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -332,9 +325,9 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
       oprot.writeFieldBegin(FIELD_NAME_INDEX_MAP_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.I32, this.fieldNameIndexMap.size()));
-        for (Map.Entry<byte[], Integer> _iter22 : this.fieldNameIndexMap.entrySet())        {
-          oprot.writeBinary(_iter22.getKey());
-          oprot.writeI32(_iter22.getValue());
+        for (Map.Entry<byte[], Integer> _iter27 : this.fieldNameIndexMap.entrySet())        {
+          oprot.writeBinary(_iter27.getKey());
+          oprot.writeI32(_iter27.getValue());
         }
         oprot.writeMapEnd();
       }
@@ -354,7 +347,7 @@ public class RecordType implements TBase, java.io.Serializable, Cloneable, Compa
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("RecordType");
+    StringBuilder sb = new StringBuilder("_RowType_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

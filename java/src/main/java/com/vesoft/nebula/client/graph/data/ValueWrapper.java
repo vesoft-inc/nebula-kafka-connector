@@ -9,7 +9,9 @@ import com.vesoft.nebula.Value;
 import com.vesoft.nebula.client.graph.exception.InvalidValueException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
+import javax.management.relation.RelationService;
 
 public class ValueWrapper {
     public static class NullType {
@@ -76,8 +78,8 @@ public class ValueWrapper {
                 return "EDGE";
             case Value.LISTVAL:
                 return "LIST";
-            case Value.MAPVAL:
-                return "MAP";
+            // case Value.MAPVAL:
+            //     return "MAP";
             default:
                 throw new IllegalArgumentException("Unknown field id " + value.getSetField());
         }
@@ -201,16 +203,6 @@ public class ValueWrapper {
     }
 
 
-    /**
-     * judge the Value is Map type, the Map type is the nebula's type
-     *
-     * @return boolean
-     */
-    public boolean isMap() {
-        return value.getSetField() == Value.MAPVAL;
-    }
-
-
     public boolean isNode() {
         return value.getSetField() == Value.NODEVAL;
     }
@@ -284,40 +276,34 @@ public class ValueWrapper {
                 "Cannot get field double because value's type is " + descType());
     }
 
-    /**
-     * Convert the original data type Value to ArrayList
-     *
-     * @return ArrayList of ValueWrapper
-     * @throws InvalidValueException if the value type is not list
-     */
-    public ArrayList<ValueWrapper> asList() throws InvalidValueException {
-        if (value.getSetField() != Value.LISTVAL) {
-            throw new InvalidValueException(
-                    "Cannot get field type `list' because value's type is " + descType());
-        }
-        ArrayList<ValueWrapper> values = new ArrayList<>();
-        for (Value value : value.getListVal().getValues()) {
-            values.add(new ValueWrapper(value, decodeType, timezoneOffset));
-        }
-        return values;
-    }
-
-    public Vertex asNode() throws InvalidValueException, UnsupportedEncodingException {
-        if (value.getSetField() == Value.NODEVAL) {
-            return (Vertex) new Vertex(value.getNodeVal())
-                    .setDecodeType(decodeType);
+    public List<ValueWrapper> asList() throws InvalidValueException {
+        if (value.getSetField() == Value.LISTVAL) {
+            List<ValueWrapper> values = new ArrayList<>();
+            for (Value value : value.getListVal().getValues()) {
+                values.add(new ValueWrapper(value, decodeType));
+            }
+            return values;
         }
         throw new InvalidValueException(
-                "Cannot get field Node because value's type is " + descType());
+                "Cannot get field `list` because value's type is " + descType());
+    }
+
+    public Vertex asNode() throws InvalidValueException {
+        if (value.getSetField() == Value.NODEVAL) {
+            return new Vertex(value.getNodeVal());
+        }
+        throw new InvalidValueException(
+                "cannot get field node because value's type is " + descType());
     }
 
     public Relationship asEdge() throws InvalidValueException {
         if (value.getSetField() == Value.EDGEVAL) {
-            return (Relationship) new Relationship(value.getEdgeVal()).setDecodeType(decodeType);
+            return new Relationship(value.getEdgeVal());
         }
         throw new InvalidValueException(
-                "Cannot get field Edge because value's type is " + descType());
+                "cannot get field node because value's type is " + descType());
     }
+
 
     @Override
     public boolean equals(Object o) {
@@ -355,12 +341,6 @@ public class ValueWrapper {
                 return String.valueOf(asDouble());
             } else if (isString()) {
                 return "\"" + asString() + "\"";
-            } else if (isList()) {
-                return asList().toString();
-            } else if (isNode()) {
-                return asNode().toString();
-            } else if (isEdge()) {
-                return asEdge().toString();
             }
             return "Unknown type: " + descType();
         } catch (UnsupportedEncodingException e) {

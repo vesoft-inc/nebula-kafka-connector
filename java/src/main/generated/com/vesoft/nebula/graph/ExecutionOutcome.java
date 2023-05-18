@@ -6,32 +6,24 @@
  */
 package com.vesoft.nebula.graph;
 
-import java.util.List;
-import java.util.ArrayList;
+import com.vesoft.nebula.BindingTable;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("ExecutionOutcome");
+  private static final TStruct STRUCT_DESC = new TStruct("_ExecutionOutcome_");
   private static final TField GQL_STATUS_FIELD_DESC = new TField("gqlStatus", TType.STRUCT, (short)1);
   private static final TField RESULT_FIELD_DESC = new TField("result", TType.STRUCT, (short)2);
   private static final TField PLAN_DESC_FIELD_DESC = new TField("plan_desc", TType.STRUCT, (short)3);
 
   public GQLStatus gqlStatus;
-  public com.vesoft.nebula.BindingTable result;
+  public BindingTable result;
   public PlanDescription plan_desc;
   public static final int GQLSTATUS = 1;
   public static final int RESULT = 2;
@@ -43,10 +35,10 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(GQLSTATUS, new FieldMetaData("gqlStatus", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(GQLSTATUS, new FieldMetaData("gqlStatus", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, GQLStatus.class)));
     tmpMetaDataMap.put(RESULT, new FieldMetaData("result", TFieldRequirementType.OPTIONAL, 
-        new StructMetaData(TType.STRUCT, com.vesoft.nebula.BindingTable.class)));
+        new StructMetaData(TType.STRUCT, BindingTable.class)));
     tmpMetaDataMap.put(PLAN_DESC, new FieldMetaData("plan_desc", TFieldRequirementType.OPTIONAL, 
         new StructMetaData(TType.STRUCT, PlanDescription.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
@@ -67,7 +59,7 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
 
   public ExecutionOutcome(
       GQLStatus gqlStatus,
-      com.vesoft.nebula.BindingTable result,
+      BindingTable result,
       PlanDescription plan_desc) {
     this();
     this.gqlStatus = gqlStatus;
@@ -77,7 +69,7 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
 
   public static class Builder {
     private GQLStatus gqlStatus;
-    private com.vesoft.nebula.BindingTable result;
+    private BindingTable result;
     private PlanDescription plan_desc;
 
     public Builder() {
@@ -88,7 +80,7 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
       return this;
     }
 
-    public Builder setResult(final com.vesoft.nebula.BindingTable result) {
+    public Builder setResult(final BindingTable result) {
       this.result = result;
       return this;
     }
@@ -154,11 +146,11 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
     }
   }
 
-  public com.vesoft.nebula.BindingTable getResult() {
+  public BindingTable getResult() {
     return this.result;
   }
 
-  public ExecutionOutcome setResult(com.vesoft.nebula.BindingTable result) {
+  public ExecutionOutcome setResult(BindingTable result) {
     this.result = result;
     return this;
   }
@@ -216,7 +208,7 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
       if (__value == null) {
         unsetResult();
       } else {
-        setResult((com.vesoft.nebula.BindingTable)__value);
+        setResult((BindingTable)__value);
       }
       break;
 
@@ -294,7 +286,7 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
           break;
         case RESULT:
           if (__field.type == TType.STRUCT) {
-            this.result = new com.vesoft.nebula.BindingTable();
+            this.result = new BindingTable();
             this.result.read(iprot);
           } else { 
             TProtocolUtil.skip(iprot, __field.type);
@@ -358,7 +350,7 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("ExecutionOutcome");
+    StringBuilder sb = new StringBuilder("_ExecutionOutcome_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -409,9 +401,6 @@ public class ExecutionOutcome implements TBase, java.io.Serializable, Cloneable 
 
   public void validate() throws TException {
     // check for required fields
-    if (gqlStatus == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'gqlStatus' was not present! Struct: " + toString());
-    }
   }
 
 }

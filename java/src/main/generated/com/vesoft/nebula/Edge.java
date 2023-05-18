@@ -6,26 +6,18 @@
  */
 package com.vesoft.nebula;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class Edge implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("Edge");
+  private static final TStruct STRUCT_DESC = new TStruct("_Edge_");
   private static final TField SRC_ID_FIELD_DESC = new TField("srcID", TType.I64, (short)1);
   private static final TField DST_ID_FIELD_DESC = new TField("dstID", TType.I64, (short)2);
   private static final TField EDGE_TYPE_ID_FIELD_DESC = new TField("edgeTypeID", TType.I32, (short)3);
@@ -36,7 +28,7 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
   public long dstID;
   public int edgeTypeID;
   public long rank;
-  public Map<byte[],Value> properties;
+  public Map<byte[], Value> properties;
   public static final int SRCID = 1;
   public static final int DSTID = 2;
   public static final int EDGETYPEID = 3;
@@ -81,7 +73,7 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
       long dstID,
       int edgeTypeID,
       long rank,
-      Map<byte[],Value> properties) {
+      Map<byte[], Value> properties) {
     this();
     this.srcID = srcID;
     setSrcIDIsSet(true);
@@ -99,7 +91,7 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
     private long dstID;
     private int edgeTypeID;
     private long rank;
-    private Map<byte[],Value> properties;
+    private Map<byte[], Value> properties;
 
     BitSet __optional_isset = new BitSet(4);
 
@@ -130,7 +122,7 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
       return this;
     }
 
-    public Builder setProperties(final Map<byte[],Value> properties) {
+    public Builder setProperties(final Map<byte[], Value> properties) {
       this.properties = properties;
       return this;
     }
@@ -269,11 +261,11 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
     __isset_bit_vector.set(__RANK_ISSET_ID, __value);
   }
 
-  public Map<byte[],Value> getProperties() {
+  public Map<byte[], Value> getProperties() {
     return this.properties;
   }
 
-  public Edge setProperties(Map<byte[],Value> properties) {
+  public Edge setProperties(Map<byte[], Value> properties) {
     this.properties = properties;
     return this;
   }
@@ -332,7 +324,7 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
       if (__value == null) {
         unsetProperties();
       } else {
-        setProperties((Map<byte[],Value>)__value);
+        setProperties((Map<byte[], Value>)__value);
       }
       break;
 
@@ -437,18 +429,18 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
         case PROPERTIES:
           if (__field.type == TType.MAP) {
             {
-              TMap _map9 = iprot.readMapBegin();
-              this.properties = new HashMap<byte[],Value>(Math.max(0, 2*_map9.size));
-              for (int _i10 = 0; 
-                   (_map9.size < 0) ? iprot.peekMap() : (_i10 < _map9.size); 
-                   ++_i10)
+              TMap _map14 = iprot.readMapBegin();
+              this.properties = new HashMap<byte[], Value>(Math.max(0, 2*_map14.size));
+              for (int _i15 = 0; 
+                   (_map14.size < 0) ? iprot.peekMap() : (_i15 < _map14.size); 
+                   ++_i15)
               {
-                byte[] _key11;
-                Value _val12;
-                _key11 = iprot.readBinary();
-                _val12 = new Value();
-                _val12.read(iprot);
-                this.properties.put(_key11, _val12);
+                byte[] _key16;
+                Value _val17;
+                _key16 = iprot.readBinary();
+                _val17 = new Value();
+                _val17.read(iprot);
+                this.properties.put(_key16, _val17);
               }
               iprot.readMapEnd();
             }
@@ -489,9 +481,9 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(PROPERTIES_FIELD_DESC);
       {
         oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.properties.size()));
-        for (Map.Entry<byte[], Value> _iter13 : this.properties.entrySet())        {
-          oprot.writeBinary(_iter13.getKey());
-          _iter13.getValue().write(oprot);
+        for (Map.Entry<byte[], Value> _iter18 : this.properties.entrySet())        {
+          oprot.writeBinary(_iter18.getKey());
+          _iter18.getValue().write(oprot);
         }
         oprot.writeMapEnd();
       }
@@ -511,7 +503,7 @@ public class Edge implements TBase, java.io.Serializable, Cloneable {
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("Edge");
+    StringBuilder sb = new StringBuilder("_Edge_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

@@ -6,12 +6,9 @@
  */
 package com.vesoft.nebula.graph;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.io.Serializable;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
@@ -19,7 +16,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
 import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
 import com.facebook.thrift.server.*;
@@ -49,7 +45,7 @@ public class GraphService {
 
   }
 
-  public static class Client extends EventHandlerBase implements Iface, TClientIf {
+  public static class Client extends EventHandlerBase implements Iface, TClientIf, Serializable {
     public Client(TProtocol prot)
     {
       this(prot, prot);

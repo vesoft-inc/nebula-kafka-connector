@@ -6,26 +6,17 @@
  */
 package com.vesoft.nebula.graph;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class GQLStatus implements TBase, java.io.Serializable, Cloneable, Comparable<GQLStatus> {
-  private static final TStruct STRUCT_DESC = new TStruct("GQLStatus");
+  private static final TStruct STRUCT_DESC = new TStruct("_GQLStatus_");
   private static final TField STATUS_FIELD_DESC = new TField("status", TType.STRING, (short)1);
 
   public byte[] status;
@@ -37,7 +28,7 @@ public class GQLStatus implements TBase, java.io.Serializable, Cloneable, Compar
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(STATUS, new FieldMetaData("status", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(STATUS, new FieldMetaData("status", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -236,7 +227,7 @@ public class GQLStatus implements TBase, java.io.Serializable, Cloneable, Compar
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("GQLStatus");
+    StringBuilder sb = new StringBuilder("_GQLStatus_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -264,9 +255,6 @@ public class GQLStatus implements TBase, java.io.Serializable, Cloneable, Compar
 
   public void validate() throws TException {
     // check for required fields
-    if (status == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'status' was not present! Struct: " + toString());
-    }
   }
 
 }

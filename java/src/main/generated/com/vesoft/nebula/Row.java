@@ -6,6 +6,8 @@
  */
 package com.vesoft.nebula;
 
+import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Collections;
@@ -15,11 +17,11 @@ import com.facebook.thrift.meta_data.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
-public class RawRecord implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("_NRecord_");
-  private static final TField VALUES_FIELD_DESC = new TField("values", TType.MAP, (short)1);
+public class Row implements TBase, java.io.Serializable, Cloneable {
+  private static final TStruct STRUCT_DESC = new TStruct("_Row_");
+  private static final TField VALUES_FIELD_DESC = new TField("values", TType.LIST, (short)1);
 
-  public Map<byte[], Value> values;
+  public List<Value> values;
   public static final int VALUES = 1;
 
   // isset id assignments
@@ -29,38 +31,37 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
     tmpMetaDataMap.put(VALUES, new FieldMetaData("values", TFieldRequirementType.DEFAULT, 
-        new MapMetaData(TType.MAP, 
-            new FieldValueMetaData(TType.STRING), 
+        new ListMetaData(TType.LIST, 
             new StructMetaData(TType.STRUCT, Value.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
   static {
-    FieldMetaData.addStructMetaDataMap(RawRecord.class, metaDataMap);
+    FieldMetaData.addStructMetaDataMap(Row.class, metaDataMap);
   }
 
-  public RawRecord() {
+  public Row() {
   }
 
-  public RawRecord(
-      Map<byte[], Value> values) {
+  public Row(
+      List<Value> values) {
     this();
     this.values = values;
   }
 
   public static class Builder {
-    private Map<byte[], Value> values;
+    private List<Value> values;
 
     public Builder() {
     }
 
-    public Builder setValues(final Map<byte[], Value> values) {
+    public Builder setValues(final List<Value> values) {
       this.values = values;
       return this;
     }
 
-    public RawRecord build() {
-      RawRecord result = new RawRecord();
+    public Row build() {
+      Row result = new Row();
       result.setValues(this.values);
       return result;
     }
@@ -73,21 +74,21 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
   /**
    * Performs a deep copy on <i>other</i>.
    */
-  public RawRecord(RawRecord other) {
+  public Row(Row other) {
     if (other.isSetValues()) {
       this.values = TBaseHelper.deepCopy(other.values);
     }
   }
 
-  public RawRecord deepCopy() {
-    return new RawRecord(this);
+  public Row deepCopy() {
+    return new Row(this);
   }
 
-  public Map<byte[], Value> getValues() {
+  public List<Value> getValues() {
     return this.values;
   }
 
-  public RawRecord setValues(Map<byte[], Value> values) {
+  public Row setValues(List<Value> values) {
     this.values = values;
     return this;
   }
@@ -114,7 +115,7 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
       if (__value == null) {
         unsetValues();
       } else {
-        setValues((Map<byte[], Value>)__value);
+        setValues((List<Value>)__value);
       }
       break;
 
@@ -139,11 +140,11 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
       return false;
     if (this == _that)
       return true;
-    if (!(_that instanceof RawRecord))
+    if (!(_that instanceof Row))
       return false;
-    RawRecord that = (RawRecord)_that;
+    Row that = (Row)_that;
 
-    if (!TBaseHelper.equalsSlow(this.isSetValues(), that.isSetValues(), this.values, that.values)) { return false; }
+    if (!TBaseHelper.equalsNobinary(this.isSetValues(), that.isSetValues(), this.values, that.values)) { return false; }
 
     return true;
   }
@@ -165,22 +166,20 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
       switch (__field.id)
       {
         case VALUES:
-          if (__field.type == TType.MAP) {
+          if (__field.type == TType.LIST) {
             {
-              TMap _map4 = iprot.readMapBegin();
-              this.values = new HashMap<byte[], Value>(Math.max(0, 2*_map4.size));
-              for (int _i5 = 0; 
-                   (_map4.size < 0) ? iprot.peekMap() : (_i5 < _map4.size); 
-                   ++_i5)
+              TList _list28 = iprot.readListBegin();
+              this.values = new ArrayList<Value>(Math.max(0, _list28.size));
+              for (int _i29 = 0; 
+                   (_list28.size < 0) ? iprot.peekList() : (_i29 < _list28.size); 
+                   ++_i29)
               {
-                byte[] _key6;
-                Value _val7;
-                _key6 = iprot.readBinary();
-                _val7 = new Value();
-                _val7.read(iprot);
-                this.values.put(_key6, _val7);
+                Value _elem30;
+                _elem30 = new Value();
+                _elem30.read(iprot);
+                this.values.add(_elem30);
               }
-              iprot.readMapEnd();
+              iprot.readListEnd();
             }
           } else { 
             TProtocolUtil.skip(iprot, __field.type);
@@ -206,12 +205,11 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
     if (this.values != null) {
       oprot.writeFieldBegin(VALUES_FIELD_DESC);
       {
-        oprot.writeMapBegin(new TMap(TType.STRING, TType.STRUCT, this.values.size()));
-        for (Map.Entry<byte[], Value> _iter8 : this.values.entrySet())        {
-          oprot.writeBinary(_iter8.getKey());
-          _iter8.getValue().write(oprot);
+        oprot.writeListBegin(new TList(TType.STRUCT, this.values.size()));
+        for (Value _iter31 : this.values)        {
+          _iter31.write(oprot);
         }
-        oprot.writeMapEnd();
+        oprot.writeListEnd();
       }
       oprot.writeFieldEnd();
     }
@@ -229,7 +227,7 @@ public class RawRecord implements TBase, java.io.Serializable, Cloneable {
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("_NRecord_");
+    StringBuilder sb = new StringBuilder("_Row_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

@@ -10,27 +10,20 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class BindingTable implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("BindingTable");
+  private static final TStruct STRUCT_DESC = new TStruct("_BindingTable_");
   private static final TField COLUMN_NAMES_FIELD_DESC = new TField("columnNames", TType.LIST, (short)1);
   private static final TField RECORDS_FIELD_DESC = new TField("records", TType.LIST, (short)2);
 
   public List<byte[]> columnNames;
-  public List<RawRecord> records;
+  public List<Row> records;
   public static final int COLUMNNAMES = 1;
   public static final int RECORDS = 2;
 
@@ -45,7 +38,7 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
             new FieldValueMetaData(TType.STRING))));
     tmpMetaDataMap.put(RECORDS, new FieldMetaData("records", TFieldRequirementType.DEFAULT, 
         new ListMetaData(TType.LIST, 
-            new StructMetaData(TType.STRUCT, RawRecord.class))));
+            new StructMetaData(TType.STRUCT, Row.class))));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -58,7 +51,7 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
 
   public BindingTable(
       List<byte[]> columnNames,
-      List<RawRecord> records) {
+      List<Row> records) {
     this();
     this.columnNames = columnNames;
     this.records = records;
@@ -66,7 +59,7 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
 
   public static class Builder {
     private List<byte[]> columnNames;
-    private List<RawRecord> records;
+    private List<Row> records;
 
     public Builder() {
     }
@@ -76,7 +69,7 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
       return this;
     }
 
-    public Builder setRecords(final List<RawRecord> records) {
+    public Builder setRecords(final List<Row> records) {
       this.records = records;
       return this;
     }
@@ -133,11 +126,11 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
     }
   }
 
-  public List<RawRecord> getRecords() {
+  public List<Row> getRecords() {
     return this.records;
   }
 
-  public BindingTable setRecords(List<RawRecord> records) {
+  public BindingTable setRecords(List<Row> records) {
     this.records = records;
     return this;
   }
@@ -172,7 +165,7 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
       if (__value == null) {
         unsetRecords();
       } else {
-        setRecords((List<RawRecord>)__value);
+        setRecords((List<Row>)__value);
       }
       break;
 
@@ -230,15 +223,15 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
         case COLUMNNAMES:
           if (__field.type == TType.LIST) {
             {
-              TList _list27 = iprot.readListBegin();
-              this.columnNames = new ArrayList<byte[]>(Math.max(0, _list27.size));
-              for (int _i28 = 0; 
-                   (_list27.size < 0) ? iprot.peekList() : (_i28 < _list27.size); 
-                   ++_i28)
+              TList _list32 = iprot.readListBegin();
+              this.columnNames = new ArrayList<byte[]>(Math.max(0, _list32.size));
+              for (int _i33 = 0; 
+                   (_list32.size < 0) ? iprot.peekList() : (_i33 < _list32.size); 
+                   ++_i33)
               {
-                byte[] _elem29;
-                _elem29 = iprot.readBinary();
-                this.columnNames.add(_elem29);
+                byte[] _elem34;
+                _elem34 = iprot.readBinary();
+                this.columnNames.add(_elem34);
               }
               iprot.readListEnd();
             }
@@ -249,16 +242,16 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
         case RECORDS:
           if (__field.type == TType.LIST) {
             {
-              TList _list30 = iprot.readListBegin();
-              this.records = new ArrayList<RawRecord>(Math.max(0, _list30.size));
-              for (int _i31 = 0; 
-                   (_list30.size < 0) ? iprot.peekList() : (_i31 < _list30.size); 
-                   ++_i31)
+              TList _list35 = iprot.readListBegin();
+              this.records = new ArrayList<Row>(Math.max(0, _list35.size));
+              for (int _i36 = 0; 
+                   (_list35.size < 0) ? iprot.peekList() : (_i36 < _list35.size); 
+                   ++_i36)
               {
-                RawRecord _elem32;
-                _elem32 = new RawRecord();
-                _elem32.read(iprot);
-                this.records.add(_elem32);
+                Row _elem37;
+                _elem37 = new Row();
+                _elem37.read(iprot);
+                this.records.add(_elem37);
               }
               iprot.readListEnd();
             }
@@ -287,8 +280,8 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(COLUMN_NAMES_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRING, this.columnNames.size()));
-        for (byte[] _iter33 : this.columnNames)        {
-          oprot.writeBinary(_iter33);
+        for (byte[] _iter38 : this.columnNames)        {
+          oprot.writeBinary(_iter38);
         }
         oprot.writeListEnd();
       }
@@ -298,8 +291,8 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
       oprot.writeFieldBegin(RECORDS_FIELD_DESC);
       {
         oprot.writeListBegin(new TList(TType.STRUCT, this.records.size()));
-        for (RawRecord _iter34 : this.records)        {
-          _iter34.write(oprot);
+        for (Row _iter39 : this.records)        {
+          _iter39.write(oprot);
         }
         oprot.writeListEnd();
       }
@@ -319,7 +312,7 @@ public class BindingTable implements TBase, java.io.Serializable, Cloneable {
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("BindingTable");
+    StringBuilder sb = new StringBuilder("_BindingTable_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

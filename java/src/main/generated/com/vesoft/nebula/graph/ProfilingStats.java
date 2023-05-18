@@ -6,26 +6,18 @@
  */
 package com.vesoft.nebula.graph;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class ProfilingStats implements TBase, java.io.Serializable, Cloneable, Comparable<ProfilingStats> {
-  private static final TStruct STRUCT_DESC = new TStruct("ProfilingStats");
+  private static final TStruct STRUCT_DESC = new TStruct("_ProfilingStats_");
   private static final TField ROWS_FIELD_DESC = new TField("rows", TType.I64, (short)1);
   private static final TField EXEC_DURATION_IN_US_FIELD_DESC = new TField("exec_duration_in_us", TType.I64, (short)2);
   private static final TField TOTAL_DURATION_IN_US_FIELD_DESC = new TField("total_duration_in_us", TType.I64, (short)3);
@@ -50,11 +42,11 @@ public class ProfilingStats implements TBase, java.io.Serializable, Cloneable, C
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(ROWS, new FieldMetaData("rows", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(ROWS, new FieldMetaData("rows", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I64)));
-    tmpMetaDataMap.put(EXEC_DURATION_IN_US, new FieldMetaData("exec_duration_in_us", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(EXEC_DURATION_IN_US, new FieldMetaData("exec_duration_in_us", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I64)));
-    tmpMetaDataMap.put(TOTAL_DURATION_IN_US, new FieldMetaData("total_duration_in_us", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(TOTAL_DURATION_IN_US, new FieldMetaData("total_duration_in_us", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I64)));
     tmpMetaDataMap.put(OTHER_STATS, new FieldMetaData("other_stats", TFieldRequirementType.OPTIONAL, 
         new MapMetaData(TType.MAP, 
@@ -461,15 +453,6 @@ public class ProfilingStats implements TBase, java.io.Serializable, Cloneable, C
 
 
     // check for required fields of primitive type, which can't be checked in the validate method
-    if (!isSetRows()) {
-      throw new TProtocolException("Required field 'rows' was not found in serialized data! Struct: " + toString());
-    }
-    if (!isSetExec_duration_in_us()) {
-      throw new TProtocolException("Required field 'exec_duration_in_us' was not found in serialized data! Struct: " + toString());
-    }
-    if (!isSetTotal_duration_in_us()) {
-      throw new TProtocolException("Required field 'total_duration_in_us' was not found in serialized data! Struct: " + toString());
-    }
     validate();
   }
 
@@ -514,7 +497,7 @@ public class ProfilingStats implements TBase, java.io.Serializable, Cloneable, C
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("ProfilingStats");
+    StringBuilder sb = new StringBuilder("_ProfilingStats_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -561,9 +544,6 @@ public class ProfilingStats implements TBase, java.io.Serializable, Cloneable, C
 
   public void validate() throws TException {
     // check for required fields
-    // alas, we cannot check 'rows' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'exec_duration_in_us' because it's a primitive and you chose the non-beans generator.
-    // alas, we cannot check 'total_duration_in_us' because it's a primitive and you chose the non-beans generator.
   }
 
 }

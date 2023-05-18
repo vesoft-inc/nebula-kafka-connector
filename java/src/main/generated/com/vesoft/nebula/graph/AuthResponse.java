@@ -6,26 +6,18 @@
  */
 package com.vesoft.nebula.graph;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class AuthResponse implements TBase, java.io.Serializable, Cloneable, Comparable<AuthResponse> {
-  private static final TStruct STRUCT_DESC = new TStruct("AuthResponse");
+  private static final TStruct STRUCT_DESC = new TStruct("_AuthResponse_");
   private static final TField GQL_STATUS_FIELD_DESC = new TField("gqlStatus", TType.STRUCT, (short)1);
   private static final TField IDENTIFIER_FIELD_DESC = new TField("identifier", TType.I64, (short)2);
 
@@ -42,7 +34,7 @@ public class AuthResponse implements TBase, java.io.Serializable, Cloneable, Com
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(GQLSTATUS, new FieldMetaData("gqlStatus", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(GQLSTATUS, new FieldMetaData("gqlStatus", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, GQLStatus.class)));
     tmpMetaDataMap.put(IDENTIFIER, new FieldMetaData("identifier", TFieldRequirementType.OPTIONAL, 
         new FieldValueMetaData(TType.I64)));
@@ -325,7 +317,7 @@ public class AuthResponse implements TBase, java.io.Serializable, Cloneable, Com
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("AuthResponse");
+    StringBuilder sb = new StringBuilder("_AuthResponse_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -358,9 +350,6 @@ public class AuthResponse implements TBase, java.io.Serializable, Cloneable, Com
 
   public void validate() throws TException {
     // check for required fields
-    if (gqlStatus == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'gqlStatus' was not present! Struct: " + toString());
-    }
   }
 
 }

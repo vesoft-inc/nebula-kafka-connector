@@ -11,6 +11,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class Vertex extends BaseDataObject {
@@ -50,17 +51,13 @@ public class Vertex extends BaseDataObject {
         return label;
     }
 
-    /**
-     * get property values from the node
-     *
-     * @return the list of ValueWrapper
-     */
-    public List<ValueWrapper> values() {
-        List<ValueWrapper> values = new ArrayList<>();
-        for (Value val : node.properties.values()) {
-            values.add(new ValueWrapper(val, getDecodeType()));
+
+    public Map<String, ValueWrapper> properties() {
+        Map<String, ValueWrapper> props = new HashMap<>();
+        for (Map.Entry<byte[], Value> p : node.getProperties().entrySet()) {
+            props.put(new String(p.getKey()), new ValueWrapper(p.getValue(), getDecodeType()));
         }
-        return values;
+        return props;
     }
 
     /**
@@ -75,23 +72,6 @@ public class Vertex extends BaseDataObject {
             keys.add(new String(name, getDecodeType()));
         }
         return keys;
-    }
-
-    /**
-     * get property names and values from the node
-     *
-     * @return the HashMap, key is property name, value is ValueWrapper
-     * @throws UnsupportedEncodingException decode error exception
-     */
-    public HashMap<String, ValueWrapper> properties()
-            throws UnsupportedEncodingException {
-        HashMap<String, ValueWrapper> properties = new HashMap();
-        for (byte[] name : node.properties.keySet()) {
-            properties.put(new String(name, getDecodeType()),
-                    new ValueWrapper(node.properties.get(name),
-                            getDecodeType()));
-        }
-        return properties;
     }
 
     @Override
@@ -114,10 +94,6 @@ public class Vertex extends BaseDataObject {
     @Override
     public String toString() {
         List<String> propStrs = new ArrayList<>();
-        for (byte[] key : node.properties.keySet()) {
-            propStrs.add(new String(key) + ": " + new ValueWrapper(node.properties.get(key),
-                    getDecodeType()).toString());
-        }
 
         return String.format("(%d:%d {%s})", vid, node.nodeTypeID, String.join(" ", propStrs));
     }

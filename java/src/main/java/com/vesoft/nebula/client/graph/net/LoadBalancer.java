@@ -1,7 +1,7 @@
 package com.vesoft.nebula.client.graph.net;
 
 import com.vesoft.nebula.client.graph.data.HostAddress;
-import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
+import java.util.List;
 
 public interface LoadBalancer {
     HostAddress getAddress();
@@ -11,4 +11,6 @@ public interface LoadBalancer {
     void updateServersStatus();
 
     boolean isServersOK();
+
+    List<HostAddress> getGoodAddresses();
 }

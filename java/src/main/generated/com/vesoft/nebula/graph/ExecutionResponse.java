@@ -6,26 +6,18 @@
  */
 package com.vesoft.nebula.graph;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class ExecutionResponse implements TBase, java.io.Serializable, Cloneable {
-  private static final TStruct STRUCT_DESC = new TStruct("ExecutionResponse");
+  private static final TStruct STRUCT_DESC = new TStruct("_ExecutionResponse_");
   private static final TField EXECUTION_OUTCOME_FIELD_DESC = new TField("executionOutcome", TType.STRUCT, (short)1);
   private static final TField LATENCY_IN_US_FIELD_DESC = new TField("latencyInUs", TType.I64, (short)2);
 
@@ -42,9 +34,9 @@ public class ExecutionResponse implements TBase, java.io.Serializable, Cloneable
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(EXECUTIONOUTCOME, new FieldMetaData("executionOutcome", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(EXECUTIONOUTCOME, new FieldMetaData("executionOutcome", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, ExecutionOutcome.class)));
-    tmpMetaDataMap.put(LATENCYINUS, new FieldMetaData("latencyInUs", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(LATENCYINUS, new FieldMetaData("latencyInUs", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I64)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -257,9 +249,6 @@ public class ExecutionResponse implements TBase, java.io.Serializable, Cloneable
 
 
     // check for required fields of primitive type, which can't be checked in the validate method
-    if (!isSetLatencyInUs()) {
-      throw new TProtocolException("Required field 'latencyInUs' was not found in serialized data! Struct: " + toString());
-    }
     validate();
   }
 
@@ -289,7 +278,7 @@ public class ExecutionResponse implements TBase, java.io.Serializable, Cloneable
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("ExecutionResponse");
+    StringBuilder sb = new StringBuilder("_ExecutionResponse_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -319,10 +308,6 @@ public class ExecutionResponse implements TBase, java.io.Serializable, Cloneable
 
   public void validate() throws TException {
     // check for required fields
-    if (executionOutcome == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'executionOutcome' was not present! Struct: " + toString());
-    }
-    // alas, we cannot check 'latencyInUs' because it's a primitive and you chose the non-beans generator.
   }
 
 }

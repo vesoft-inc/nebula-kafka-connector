@@ -5,17 +5,14 @@
 
 package com.vesoft.nebula.client.graph.net;
 
-
 import com.vesoft.nebula.NList;
 import com.vesoft.nebula.Value;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.graph.ExecutionResponse;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,26 +35,31 @@ public class Session implements Serializable {
 
     private final long sessionID;
     private SyncConnection connection;
-    private final NebulaPool pool;
+    private final int connTimeout;
+    private final int requestTimeout;
+    private final LoadBalancer loadBalancer;
     private final Boolean retryConnect;
-    private final AtomicBoolean connectionIsBroken = new AtomicBoolean(false);
 
     /**
      * Constructor
      *
      * @param connection   the connection from the pool
      * @param authResult   the auth result from graph service
-     * @param connPool     the connection pool
+     * @param loadBalancer the loadBalancer
      * @param retryConnect whether to retry after the connection is disconnected
      */
-    public Session(SyncConnection connection,
+    protected Session(SyncConnection connection,
+                   int connTimeout,
+                   int requestTimeout,
                    AuthResult authResult,
-                   NebulaPool connPool,
-                   Boolean retryConnect) {
+                   Boolean retryConnect,
+                   LoadBalancer loadBalancer) {
         this.connection = connection;
         this.sessionID = authResult.getSessionId();
-        this.pool = connPool;
+        this.loadBalancer = loadBalancer;
         this.retryConnect = retryConnect;
+        this.connTimeout = connTimeout;
+        this.requestTimeout = requestTimeout;
     }
 
     /**
@@ -67,48 +69,8 @@ public class Session implements Serializable {
      *             such as insert ngql `INSERT VERTEX person(name) VALUES "Tom":("Tom");`
      * @return The ResultSet
      */
-    public synchronized ResultSet execute(
-            String stmt)
-            throws IOErrorException {
-        if (connection == null) {
-            throw new IOErrorException(IOErrorException.E_CONNECT_BROKEN,
-                    "The session was released, couldn't use again.");
-        }
-
-        if (connectionIsBroken.get() && retryConnect) {
-            if (retryConnect()) {
-                ExecutionResponse resp =
-                        connection.execute(sessionID, stmt);
-                return new ResultSet(resp);
-            } else {
-                throw new IOErrorException(IOErrorException.E_ALL_BROKEN,
-                        "All servers are broken.");
-            }
-        }
-
-        try {
-            ExecutionResponse resp = connection.execute(sessionID, stmt);
-            return new ResultSet(resp);
-        } catch (IOErrorException ie) {
-            if (ie.getType() == IOErrorException.E_CONNECT_BROKEN) {
-                connectionIsBroken.set(true);
-                pool.updateServerStatus();
-
-                if (retryConnect) {
-                    if (retryConnect()) {
-                        connectionIsBroken.set(false);
-                        ExecutionResponse resp =
-                                connection.execute(sessionID, stmt);
-                        return new ResultSet(resp);
-                    } else {
-                        connectionIsBroken.set(true);
-                        throw new IOErrorException(IOErrorException.E_ALL_BROKEN,
-                                "All servers are broken.");
-                    }
-                }
-            }
-            throw ie;
-        }
+    protected synchronized ResultSet execute(String stmt) throws IOErrorException {
+        return new ResultSet(connection.execute(sessionID, stmt));
     }
 
     /**
@@ -116,11 +78,23 @@ public class Session implements Serializable {
      *
      * @return boolean
      */
-    public synchronized boolean ping() {
+    protected synchronized boolean ping() {
         if (connection == null) {
             return false;
         }
         return connection.ping();
+    }
+
+    /**
+     * check current session is ok
+     *
+     * @return boolean
+     */
+    protected synchronized boolean pingSession() throws IOErrorException {
+        if (connection == null) {
+            return false;
+        }
+        return connection.ping(sessionID);
     }
 
     /**
@@ -129,13 +103,12 @@ public class Session implements Serializable {
      * and the connection will be reuse.
      * This function is called if the user is no longer using the session.
      */
-    public synchronized void release() {
+    protected synchronized void release() {
         if (connection == null) {
             return;
         }
         try {
             connection.signout(sessionID);
-            pool.returnConnection(connection);
         } catch (Exception e) {
             log.warn("Release session or return object to pool failed:" + e.getMessage());
         }
@@ -147,7 +120,7 @@ public class Session implements Serializable {
      *
      * @return HostAddress the graph service address
      */
-    public synchronized HostAddress getGraphHost() {
+    protected synchronized HostAddress getGraphHost() {
         if (connection == null) {
             return null;
         }
@@ -158,21 +131,22 @@ public class Session implements Serializable {
      * set current connection is invalid, and get a new connection from the pool,
      * if get connection failed, return false, else return true
      *
-     * @return true or false
      */
-    private boolean retryConnect() {
-        try {
-            pool.setInvalidateConnection(connection);
-            SyncConnection newConn = pool.getConnection();
-            if (newConn == null) {
-                log.error("Get connection object failed.");
-                return false;
+    protected void retryConnect() throws IOErrorException {
+        List<HostAddress> goodHosts = loadBalancer.getGoodAddresses();
+        int tryConnect = goodHosts.size();
+        SyncConnection newConnection = new SyncConnection();
+        while (tryConnect-- > 0) {
+            try {
+                newConnection.open(loadBalancer.getAddress(), connTimeout, requestTimeout);
+                break;
+            } catch (IOErrorException e) {
+                if (tryConnect == 0 || !retryConnect) {
+                    throw e;
+                } else {
+                    log.warn("connect failed, " + e.getMessage());
+                }
             }
-            connection = newConn;
-            return true;
-        } catch (Exception e) {
-            log.error("Reconnected failed: " + e);
-            return false;
         }
     }
 

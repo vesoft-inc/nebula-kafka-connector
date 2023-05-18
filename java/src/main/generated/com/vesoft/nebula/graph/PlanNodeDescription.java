@@ -10,22 +10,16 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class PlanNodeDescription implements TBase, java.io.Serializable, Cloneable, Comparable<PlanNodeDescription> {
-  private static final TStruct STRUCT_DESC = new TStruct("PlanNodeDescription");
+  private static final TStruct STRUCT_DESC = new TStruct("_PlanNodeDescription_");
   private static final TField NAME_FIELD_DESC = new TField("name", TType.STRING, (short)1);
   private static final TField ID_FIELD_DESC = new TField("id", TType.I64, (short)2);
   private static final TField OUTPUT_VAR_FIELD_DESC = new TField("output_var", TType.STRING, (short)3);
@@ -54,11 +48,11 @@ public class PlanNodeDescription implements TBase, java.io.Serializable, Cloneab
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(NAME, new FieldMetaData("name", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(NAME, new FieldMetaData("name", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
-    tmpMetaDataMap.put(ID, new FieldMetaData("id", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(ID, new FieldMetaData("id", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I64)));
-    tmpMetaDataMap.put(OUTPUT_VAR, new FieldMetaData("output_var", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(OUTPUT_VAR, new FieldMetaData("output_var", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     tmpMetaDataMap.put(DESCRIPTION, new FieldMetaData("description", TFieldRequirementType.OPTIONAL, 
         new ListMetaData(TType.LIST, 
@@ -616,9 +610,6 @@ public class PlanNodeDescription implements TBase, java.io.Serializable, Cloneab
 
 
     // check for required fields of primitive type, which can't be checked in the validate method
-    if (!isSetId()) {
-      throw new TProtocolException("Required field 'id' was not found in serialized data! Struct: " + toString());
-    }
     validate();
   }
 
@@ -692,7 +683,7 @@ public class PlanNodeDescription implements TBase, java.io.Serializable, Cloneab
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("PlanNodeDescription");
+    StringBuilder sb = new StringBuilder("_PlanNodeDescription_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -785,13 +776,6 @@ public class PlanNodeDescription implements TBase, java.io.Serializable, Cloneab
 
   public void validate() throws TException {
     // check for required fields
-    if (name == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'name' was not present! Struct: " + toString());
-    }
-    // alas, we cannot check 'id' because it's a primitive and you chose the non-beans generator.
-    if (output_var == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'output_var' was not present! Struct: " + toString());
-    }
   }
 
 }

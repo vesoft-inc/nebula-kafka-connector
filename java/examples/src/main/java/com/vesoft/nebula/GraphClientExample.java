@@ -5,14 +5,12 @@
 
 package com.vesoft.nebula;
 
-import com.vesoft.nebula.client.graph.NebulaPoolConfig;
-import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
-import com.vesoft.nebula.client.graph.net.NebulaPool;
-import com.vesoft.nebula.client.graph.net.Session;
+import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import java.io.UnsupportedEncodingException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
@@ -20,84 +18,116 @@ import org.slf4j.LoggerFactory;
 
 public class GraphClientExample {
     private static final Logger log = LoggerFactory.getLogger(GraphClientExample.class);
-    static String ip = "127.0.0.1";
-    static int port = 10669;
+    static String host = "192.168.8.6:3713";
+    static String user = "root";
+    static String passwd = "nebula";
 
     public static void main(String[] args) {
-        NebulaPool pool = new NebulaPool();
-        Session session = null;
+        NebulaClient client = null;
         try {
             // init the NebulaPool and get session
-            NebulaPoolConfig nebulaPoolConfig = new NebulaPoolConfig();
-            nebulaPoolConfig.setMaxConnSize(100);
-            List<HostAddress> addresses = Arrays.asList(new HostAddress(ip, port));
-            boolean initResult = pool.init(addresses, nebulaPoolConfig);
-            if (!initResult) {
-                log.error("pool init failed.");
-                return;
-            }
-            session = pool.getSession("root", "nebula", false);
+            client = NebulaClient.builder(host, user, passwd)
+                    .setConnectTimeoutMills(1000)
+                    .setRequestTimeoutMills(3000)
+                    .setMaxSessionSize(10)
+                    .setMinSessionSize(1)
+                    .setRetryTimes(3)
+                    .setIntervalTimeMills(1000)
+                    .setReconnect(true)
+                    .setBlockWhenExhausted(true)
+                    .setMaxWaitMills(1000)
+                    .setStrictlyServerHealthy(true)
+                    .build();
 
-            // create schema and insert data
-            String createSchema = "CREATE GRAPH TYPE graph_type IF NOT EXISTS AS GRAPH TYPE {"
-                    + "(node_type(id) LABEL player {id INT, name STRING}),"
-                    + "(node_type)-[edge_type LABEL follow {followness INT}]->(node_type)}";
-            ResultSet resp = session.execute(createSchema);
-            if (!resp.isSucceeded()) {
-                log.error(String.format("Execute: `%s', failed: %s",
-                        createSchema, resp.getGqlStatus()));
-                System.exit(1);
-            }
-            TimeUnit.SECONDS.sleep(5);
-
-            String createGraph = "CREATE GRAPH nba IF NOT EXISTS OF graph_type";
-            resp = session.execute(createGraph);
-            if (!resp.isSucceeded()) {
-                log.error(String.format("Execute `%s`, failed: %s", createGraph,
-                        resp.getGqlStatus()));
-                System.exit(1);
-            }
-            TimeUnit.SECONDS.sleep(5);
-
-            String insertVertexes = "USE nba INSERT NODE node_type ({id:1, name:\"Tim\"}),"
-                    + "({id:2, name:\"Jerry\"}),({id:3, name:\"Kyle\"})";
-            resp = session.execute(insertVertexes);
-            if (!resp.isSucceeded()) {
-                log.error(String.format("Execute: `%s', failed: %s",
-                        insertVertexes, resp.getGqlStatus()));
-                System.exit(1);
-            }
-
-            String insertEdges = "USE nba INSERT EDGE edge_type ({id:1})-[{followness:90}]->"
-                    + "({id:2}),({id:2})-[{followness:100}]->({id:3})";
-            resp = session.execute(insertEdges);
-            if (!resp.isSucceeded()) {
-                log.error(String.format("Execute: `%s', failed: %s",
-                        insertEdges, resp.getGqlStatus()));
-                System.exit(1);
-            }
-
-
-            // make query
-            String query = "from nba match (m)-[:follow]->(p) return value "
-                    + "{from nba match pa=(m)-[:follow]->(p) return pa} AS pas";
-            resp = session.execute(query);
-            if (!resp.isSucceeded()) {
-                log.error(String.format("Execute: `%s', failed: %s",
-                        query, resp.getGqlStatus()));
-                System.exit(1);
-            }
-            printResult(resp);
-
+            createGraphType(client);
+            createGraph(client);
+            insertData(client);
+            query(client);
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
         } finally {
-            if (session != null) {
-                session.release();
+            if (client != null) {
+                client.close();
             }
-            pool.close();
         }
+    }
+
+    private static void createGraphType(NebulaClient client) throws IOErrorException,
+            InterruptedException, NoValidSessionException {
+        String createSchema = "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS GRAPH TYPE {"
+                + "(node_type_player(id) LABEL player {id INT, name STRING, score FLOAT, gender"
+                + " bool, rate DOUBLE}),(node_type_player)-[edge_type_follow LABEL follow "
+                + "{followness INT, likeness FLOAT64}]->(node_type_player)}";
+        ResultSet resp = client.execute(createSchema);
+        if (!resp.isSucceeded()) {
+            log.error(String.format("Execute: `%s', failed: %s",
+                    createSchema, resp.getGqlStatus()));
+            System.out.println("create graph type failed, " + resp.getGqlStatus());
+            System.exit(1);
+        }
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    private static void createGraph(NebulaClient client) throws IOErrorException,
+            InterruptedException, NoValidSessionException {
+        String createGraph = "CREATE GRAPH nba IF NOT EXISTS OF graph_type_nba";
+        ResultSet resp = client.execute(createGraph);
+        if (!resp.isSucceeded()) {
+            log.error(String.format("Execute `%s`, failed: %s", createGraph,
+                    resp.getGqlStatus()));
+            System.out.println("create graph failed, " + resp.getGqlStatus());
+            System.exit(1);
+        }
+        TimeUnit.SECONDS.sleep(5);
+    }
+
+    private static void insertData(NebulaClient client) throws IOErrorException,
+            NoValidSessionException {
+        String insertVertexes = " USE nba INSERT NODE node_type_player ({id:1, name:\"Tim\", "
+                + "score: 87.0, gender: true, rate: 7.32}),({id:2, name:\"Jerry\", score: 95.0,"
+                + " gender: false, rate: 4.01}),({id:3, name:\"Kyle\", score: 100, gender: "
+                + "true, rate: 9.99})";
+        ResultSet resp = client.execute(insertVertexes);
+        if (!resp.isSucceeded()) {
+            log.error(String.format("Execute: `%s', failed: %s",
+                    insertVertexes, resp.getGqlStatus()));
+            System.out.println("insert graph node failed, " + resp.getGqlStatus());
+            System.exit(1);
+        }
+
+        String insertEdges = "USE nba INSERT EDGE edge_type_follow ({id:1})-[{followness:90, "
+                + "likeness: 66.8}]->({id:2}),({id:2})-[{followness:100, likeness: 93.35}]->"
+                + "({id:3})";
+        resp = client.execute(insertEdges);
+        if (!resp.isSucceeded()) {
+            log.error(String.format("Execute: `%s', failed: %s",
+                    insertEdges, resp.getGqlStatus()));
+            System.out.println("insert graph edge failed, " + resp.getGqlStatus());
+            System.exit(1);
+        }
+    }
+
+    private static void query(NebulaClient client) throws IOErrorException,
+            UnsupportedEncodingException, NoValidSessionException {
+        String queryNode = "USE nba MATCH (v:player) RETURN v.id, v.name, v.score, v.gender, "
+                + "v.rate";
+        ResultSet resp = client.execute(queryNode);
+        if (!resp.isSucceeded()) {
+            log.error(String.format("Execute: `%s', failed: %s",
+                    queryNode, resp.getGqlStatus()));
+        }
+        printResult(resp);
+
+        System.out.println("\n\n");
+
+        String queryEdge = "USE nba MATCH ()-[e:follow]->() RETURN e.followness, e.likeness";
+        resp = client.execute(queryEdge);
+        if (!resp.isSucceeded()) {
+            log.error(String.format("Execute: `%s', failed: %s",
+                    queryNode, resp.getGqlStatus()));
+        }
+        printResult(resp);
     }
 
 
@@ -105,7 +135,7 @@ public class GraphClientExample {
         List<String> colNames = resultSet.keys();
         System.out.print("| ");
         for (String name : colNames) {
-            System.out.printf("%s |", name);
+            System.out.printf("%15s |", name);
         }
         System.out.println();
         for (int i = 0; i < resultSet.rowsSize(); i++) {
@@ -123,15 +153,6 @@ public class GraphClientExample {
                 }
                 if (value.isString()) {
                     System.out.printf("%15s |", value.asString());
-                }
-                if (value.isNode()) {
-                    System.out.printf("%15s |", value.asNode());
-                }
-                if (value.isEdge()) {
-                    System.out.printf("%15s |", value.asEdge());
-                }
-                if (value.isList()) {
-                    System.out.printf("%15s |", value.asList());
                 }
             }
             System.out.println();

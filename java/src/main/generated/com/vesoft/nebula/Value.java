@@ -6,26 +6,17 @@
  */
 package com.vesoft.nebula;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial", "unchecked" })
 public class Value extends TUnion<Value> {
-  private static final TStruct STRUCT_DESC = new TStruct("Value");
+  private static final TStruct STRUCT_DESC = new TStruct("_Value_");
   private static final TField BOOL_VAL_FIELD_DESC = new TField("boolVal", TType.BOOL, (short)1);
   private static final TField INT8_VAL_FIELD_DESC = new TField("int8Val", TType.BYTE, (short)2);
   private static final TField INT16_VAL_FIELD_DESC = new TField("int16Val", TType.I16, (short)3);
@@ -35,9 +26,13 @@ public class Value extends TUnion<Value> {
   private static final TField DOUBLE_VAL_FIELD_DESC = new TField("doubleVal", TType.DOUBLE, (short)7);
   private static final TField STRING_VAL_FIELD_DESC = new TField("stringVal", TType.STRING, (short)8);
   private static final TField LIST_VAL_FIELD_DESC = new TField("listVal", TType.STRUCT, (short)9);
-  private static final TField MAP_VAL_FIELD_DESC = new TField("mapVal", TType.STRUCT, (short)10);
+  private static final TField RECORD_VAL_FIELD_DESC = new TField("recordVal", TType.STRUCT, (short)10);
   private static final TField NODE_VAL_FIELD_DESC = new TField("nodeVal", TType.STRUCT, (short)11);
   private static final TField EDGE_VAL_FIELD_DESC = new TField("edgeVal", TType.STRUCT, (short)12);
+  private static final TField DURATION_VAL_FIELD_DESC = new TField("durationVal", TType.STRUCT, (short)13);
+  private static final TField LOCAL_TIME_VAL_FIELD_DESC = new TField("localTimeVal", TType.STRUCT, (short)14);
+  private static final TField DATE_VAL_FIELD_DESC = new TField("dateVal", TType.STRUCT, (short)15);
+  private static final TField LOCAL_DATETIME_VAL_FIELD_DESC = new TField("localDatetimeVal", TType.STRUCT, (short)16);
 
   public static final int BOOLVAL = 1;
   public static final int INT8VAL = 2;
@@ -48,9 +43,13 @@ public class Value extends TUnion<Value> {
   public static final int DOUBLEVAL = 7;
   public static final int STRINGVAL = 8;
   public static final int LISTVAL = 9;
-  public static final int MAPVAL = 10;
+  public static final int RECORDVAL = 10;
   public static final int NODEVAL = 11;
   public static final int EDGEVAL = 12;
+  public static final int DURATIONVAL = 13;
+  public static final int LOCALTIMEVAL = 14;
+  public static final int DATEVAL = 15;
+  public static final int LOCALDATETIMEVAL = 16;
 
   public static final Map<Integer, FieldMetaData> metaDataMap;
 
@@ -74,12 +73,20 @@ public class Value extends TUnion<Value> {
         new FieldValueMetaData(TType.STRING)));
     tmpMetaDataMap.put(LISTVAL, new FieldMetaData("listVal", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, NList.class)));
-    tmpMetaDataMap.put(MAPVAL, new FieldMetaData("mapVal", TFieldRequirementType.DEFAULT, 
-        new StructMetaData(TType.STRUCT, NMap.class)));
+    tmpMetaDataMap.put(RECORDVAL, new FieldMetaData("recordVal", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, RawRecord.class)));
     tmpMetaDataMap.put(NODEVAL, new FieldMetaData("nodeVal", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, Node.class)));
     tmpMetaDataMap.put(EDGEVAL, new FieldMetaData("edgeVal", TFieldRequirementType.DEFAULT, 
         new StructMetaData(TType.STRUCT, Edge.class)));
+    tmpMetaDataMap.put(DURATIONVAL, new FieldMetaData("durationVal", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, Duration.class)));
+    tmpMetaDataMap.put(LOCALTIMEVAL, new FieldMetaData("localTimeVal", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, LocalTime.class)));
+    tmpMetaDataMap.put(DATEVAL, new FieldMetaData("dateVal", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, Date.class)));
+    tmpMetaDataMap.put(LOCALDATETIMEVAL, new FieldMetaData("localDatetimeVal", TFieldRequirementType.DEFAULT, 
+        new StructMetaData(TType.STRUCT, LocalDatetime.class)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
 
@@ -153,9 +160,9 @@ public class Value extends TUnion<Value> {
     return x;
   }
 
-  public static Value mapVal(NMap __value) {
+  public static Value recordVal(RawRecord __value) {
     Value x = new Value();
-    x.setMapVal(__value);
+    x.setRecordVal(__value);
     return x;
   }
 
@@ -168,6 +175,30 @@ public class Value extends TUnion<Value> {
   public static Value edgeVal(Edge __value) {
     Value x = new Value();
     x.setEdgeVal(__value);
+    return x;
+  }
+
+  public static Value durationVal(Duration __value) {
+    Value x = new Value();
+    x.setDurationVal(__value);
+    return x;
+  }
+
+  public static Value localTimeVal(LocalTime __value) {
+    Value x = new Value();
+    x.setLocalTimeVal(__value);
+    return x;
+  }
+
+  public static Value dateVal(Date __value) {
+    Value x = new Value();
+    x.setDateVal(__value);
+    return x;
+  }
+
+  public static Value localDatetimeVal(LocalDatetime __value) {
+    Value x = new Value();
+    x.setLocalDatetimeVal(__value);
     return x;
   }
 
@@ -219,22 +250,42 @@ public class Value extends TUnion<Value> {
         if (__value instanceof NList) {
           break;
         }
-        throw new ClassCastException("Was expecting value of type NList for field 'listVal', but got " + __value.getClass().getSimpleName());
-      case MAPVAL:
-        if (__value instanceof NMap) {
+        throw new ClassCastException("Was expecting value of type _NList_ for field 'listVal', but got " + __value.getClass().getSimpleName());
+      case RECORDVAL:
+        if (__value instanceof RawRecord) {
           break;
         }
-        throw new ClassCastException("Was expecting value of type NMap for field 'mapVal', but got " + __value.getClass().getSimpleName());
+        throw new ClassCastException("Was expecting value of type _NRecord_ for field 'recordVal', but got " + __value.getClass().getSimpleName());
       case NODEVAL:
         if (__value instanceof Node) {
           break;
         }
-        throw new ClassCastException("Was expecting value of type Node for field 'nodeVal', but got " + __value.getClass().getSimpleName());
+        throw new ClassCastException("Was expecting value of type _Node_ for field 'nodeVal', but got " + __value.getClass().getSimpleName());
       case EDGEVAL:
         if (__value instanceof Edge) {
           break;
         }
-        throw new ClassCastException("Was expecting value of type Edge for field 'edgeVal', but got " + __value.getClass().getSimpleName());
+        throw new ClassCastException("Was expecting value of type _Edge_ for field 'edgeVal', but got " + __value.getClass().getSimpleName());
+      case DURATIONVAL:
+        if (__value instanceof Duration) {
+          break;
+        }
+        throw new ClassCastException("Was expecting value of type _Duration_ for field 'durationVal', but got " + __value.getClass().getSimpleName());
+      case LOCALTIMEVAL:
+        if (__value instanceof LocalTime) {
+          break;
+        }
+        throw new ClassCastException("Was expecting value of type _LocalTime_ for field 'localTimeVal', but got " + __value.getClass().getSimpleName());
+      case DATEVAL:
+        if (__value instanceof Date) {
+          break;
+        }
+        throw new ClassCastException("Was expecting value of type _Date_ for field 'dateVal', but got " + __value.getClass().getSimpleName());
+      case LOCALDATETIMEVAL:
+        if (__value instanceof LocalDatetime) {
+          break;
+        }
+        throw new ClassCastException("Was expecting value of type _LocalDatetime_ for field 'localDatetimeVal', but got " + __value.getClass().getSimpleName());
       default:
         throw new IllegalArgumentException("Unknown field id " + setField);
     }
@@ -297,8 +348,8 @@ public class Value extends TUnion<Value> {
               setField_ = __field.id;
             }
             break;
-          case MAPVAL:
-            if (__field.type == MAP_VAL_FIELD_DESC.type) {
+          case RECORDVAL:
+            if (__field.type == RECORD_VAL_FIELD_DESC.type) {
               setField_ = __field.id;
             }
             break;
@@ -312,12 +363,32 @@ public class Value extends TUnion<Value> {
               setField_ = __field.id;
             }
             break;
+          case DURATIONVAL:
+            if (__field.type == DURATION_VAL_FIELD_DESC.type) {
+              setField_ = __field.id;
+            }
+            break;
+          case LOCALTIMEVAL:
+            if (__field.type == LOCAL_TIME_VAL_FIELD_DESC.type) {
+              setField_ = __field.id;
+            }
+            break;
+          case DATEVAL:
+            if (__field.type == DATE_VAL_FIELD_DESC.type) {
+              setField_ = __field.id;
+            }
+            break;
+          case LOCALDATETIMEVAL:
+            if (__field.type == LOCAL_DATETIME_VAL_FIELD_DESC.type) {
+              setField_ = __field.id;
+            }
+            break;
         }
       }
       iprot.readFieldEnd();
       TField __stopField = iprot.readFieldBegin();
       if (__stopField.type != TType.STOP) {
-        throw new TProtocolException(TProtocolException.INVALID_DATA, "Union 'Value' is missing a STOP byte");
+        throw new TProtocolException(TProtocolException.INVALID_DATA, "Union '_Value_' is missing a STOP byte");
       }
     }
     iprot.readStructEnd();
@@ -390,12 +461,12 @@ public class Value extends TUnion<Value> {
           return listVal;
         }
         break;
-      case MAPVAL:
-        if (__field.type == MAP_VAL_FIELD_DESC.type) {
-          NMap mapVal;
-          mapVal = new NMap();
-          mapVal.read(iprot);
-          return mapVal;
+      case RECORDVAL:
+        if (__field.type == RECORD_VAL_FIELD_DESC.type) {
+          RawRecord recordVal;
+          recordVal = new RawRecord();
+          recordVal.read(iprot);
+          return recordVal;
         }
         break;
       case NODEVAL:
@@ -412,6 +483,38 @@ public class Value extends TUnion<Value> {
           edgeVal = new Edge();
           edgeVal.read(iprot);
           return edgeVal;
+        }
+        break;
+      case DURATIONVAL:
+        if (__field.type == DURATION_VAL_FIELD_DESC.type) {
+          Duration durationVal;
+          durationVal = new Duration();
+          durationVal.read(iprot);
+          return durationVal;
+        }
+        break;
+      case LOCALTIMEVAL:
+        if (__field.type == LOCAL_TIME_VAL_FIELD_DESC.type) {
+          LocalTime localTimeVal;
+          localTimeVal = new LocalTime();
+          localTimeVal.read(iprot);
+          return localTimeVal;
+        }
+        break;
+      case DATEVAL:
+        if (__field.type == DATE_VAL_FIELD_DESC.type) {
+          Date dateVal;
+          dateVal = new Date();
+          dateVal.read(iprot);
+          return dateVal;
+        }
+        break;
+      case LOCALDATETIMEVAL:
+        if (__field.type == LOCAL_DATETIME_VAL_FIELD_DESC.type) {
+          LocalDatetime localDatetimeVal;
+          localDatetimeVal = new LocalDatetime();
+          localDatetimeVal.read(iprot);
+          return localDatetimeVal;
         }
         break;
     }
@@ -458,9 +561,9 @@ public class Value extends TUnion<Value> {
         NList listVal = (NList)getFieldValue();
         listVal.write(oprot);
         return;
-      case MAPVAL:
-        NMap mapVal = (NMap)getFieldValue();
-        mapVal.write(oprot);
+      case RECORDVAL:
+        RawRecord recordVal = (RawRecord)getFieldValue();
+        recordVal.write(oprot);
         return;
       case NODEVAL:
         Node nodeVal = (Node)getFieldValue();
@@ -469,6 +572,22 @@ public class Value extends TUnion<Value> {
       case EDGEVAL:
         Edge edgeVal = (Edge)getFieldValue();
         edgeVal.write(oprot);
+        return;
+      case DURATIONVAL:
+        Duration durationVal = (Duration)getFieldValue();
+        durationVal.write(oprot);
+        return;
+      case LOCALTIMEVAL:
+        LocalTime localTimeVal = (LocalTime)getFieldValue();
+        localTimeVal.write(oprot);
+        return;
+      case DATEVAL:
+        Date dateVal = (Date)getFieldValue();
+        dateVal.write(oprot);
+        return;
+      case LOCALDATETIMEVAL:
+        LocalDatetime localDatetimeVal = (LocalDatetime)getFieldValue();
+        localDatetimeVal.write(oprot);
         return;
       default:
         throw new IllegalStateException("Cannot write union with unknown field " + setField);
@@ -496,12 +615,20 @@ public class Value extends TUnion<Value> {
         return STRING_VAL_FIELD_DESC;
       case LISTVAL:
         return LIST_VAL_FIELD_DESC;
-      case MAPVAL:
-        return MAP_VAL_FIELD_DESC;
+      case RECORDVAL:
+        return RECORD_VAL_FIELD_DESC;
       case NODEVAL:
         return NODE_VAL_FIELD_DESC;
       case EDGEVAL:
         return EDGE_VAL_FIELD_DESC;
+      case DURATIONVAL:
+        return DURATION_VAL_FIELD_DESC;
+      case LOCALTIMEVAL:
+        return LOCAL_TIME_VAL_FIELD_DESC;
+      case DATEVAL:
+        return DATE_VAL_FIELD_DESC;
+      case LOCALDATETIMEVAL:
+        return LOCAL_DATETIME_VAL_FIELD_DESC;
       default:
         throw new IllegalArgumentException("Unknown field id " + setField);
     }
@@ -608,12 +735,12 @@ public class Value extends TUnion<Value> {
     __setValue(LISTVAL, __value);
   }
 
-  public NMap getMapVal() {
-    return (NMap) __getValue(MAPVAL);
+  public RawRecord getRecordVal() {
+    return (RawRecord) __getValue(RECORDVAL);
   }
 
-  public void setMapVal(NMap __value) {
-    __setValue(MAPVAL, __value);
+  public void setRecordVal(RawRecord __value) {
+    __setValue(RECORDVAL, __value);
   }
 
   public Node getNodeVal() {
@@ -630,6 +757,38 @@ public class Value extends TUnion<Value> {
 
   public void setEdgeVal(Edge __value) {
     __setValue(EDGEVAL, __value);
+  }
+
+  public Duration getDurationVal() {
+    return (Duration) __getValue(DURATIONVAL);
+  }
+
+  public void setDurationVal(Duration __value) {
+    __setValue(DURATIONVAL, __value);
+  }
+
+  public LocalTime getLocalTimeVal() {
+    return (LocalTime) __getValue(LOCALTIMEVAL);
+  }
+
+  public void setLocalTimeVal(LocalTime __value) {
+    __setValue(LOCALTIMEVAL, __value);
+  }
+
+  public Date getDateVal() {
+    return (Date) __getValue(DATEVAL);
+  }
+
+  public void setDateVal(Date __value) {
+    __setValue(DATEVAL, __value);
+  }
+
+  public LocalDatetime getLocalDatetimeVal() {
+    return (LocalDatetime) __getValue(LOCALDATETIMEVAL);
+  }
+
+  public void setLocalDatetimeVal(LocalDatetime __value) {
+    __setValue(LOCALDATETIMEVAL, __value);
   }
 
   public boolean equals(Object other) {

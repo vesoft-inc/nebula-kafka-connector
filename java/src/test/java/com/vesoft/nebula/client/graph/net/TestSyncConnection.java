@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.client.graph.net;
 
-import com.vesoft.nebula.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.graph.ExecutionResponse;
 import org.junit.Assert;
@@ -17,7 +16,7 @@ public class TestSyncConnection {
         try {
             // Test open
             SyncConnection connection = new SyncConnection();
-            connection.open(new HostAddress("127.0.0.1", 9671), 1000);
+            connection.open(new HostAddress("127.0.0.1", 9671), 1000, 1000);
 
             // Test authenticate
             AuthResult authResult = connection.authenticate("root", "nebula");

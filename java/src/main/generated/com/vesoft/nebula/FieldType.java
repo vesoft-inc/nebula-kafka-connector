@@ -6,31 +6,22 @@
  */
 package com.vesoft.nebula;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
-import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class FieldType implements TBase, java.io.Serializable, Cloneable, Comparable<FieldType> {
-  private static final TStruct STRUCT_DESC = new TStruct("FieldType");
+  private static final TStruct STRUCT_DESC = new TStruct("_FieldType_");
   private static final TField FILED_NAME_FIELD_DESC = new TField("filedName", TType.STRING, (short)1);
   private static final TField VALUE_TYPE_FIELD_DESC = new TField("valueType", TType.I32, (short)2);
 
   public byte[] filedName;
-  public ValueType valueType;
+  public Type valueType;
   public static final int FILEDNAME = 1;
   public static final int VALUETYPE = 2;
 
@@ -56,7 +47,7 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
 
   public FieldType(
       byte[] filedName,
-      ValueType valueType) {
+      Type valueType) {
     this();
     this.filedName = filedName;
     this.valueType = valueType;
@@ -64,7 +55,7 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
 
   public static class Builder {
     private byte[] filedName;
-    private ValueType valueType;
+    private Type valueType;
 
     public Builder() {
     }
@@ -74,7 +65,7 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
       return this;
     }
 
-    public Builder setValueType(final ValueType valueType) {
+    public Builder setValueType(final Type valueType) {
       this.valueType = valueType;
       return this;
     }
@@ -131,11 +122,11 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
     }
   }
 
-  public ValueType getValueType() {
+  public Type getValueType() {
     return this.valueType;
   }
 
-  public FieldType setValueType(ValueType valueType) {
+  public FieldType setValueType(Type valueType) {
     this.valueType = valueType;
     return this;
   }
@@ -169,7 +160,7 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
       if (__value == null) {
         unsetValueType();
       } else {
-        setValueType((ValueType)__value);
+        setValueType((Type)__value);
       }
       break;
 
@@ -264,7 +255,7 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
           break;
         case VALUETYPE:
           if (__field.type == TType.I32) {
-            this.valueType = ValueType.findByValue(iprot.readI32());
+            this.valueType = Type.findByValue(iprot.readI32());
           } else { 
             TProtocolUtil.skip(iprot, __field.type);
           }
@@ -310,7 +301,7 @@ public class FieldType implements TBase, java.io.Serializable, Cloneable, Compar
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("FieldType");
+    StringBuilder sb = new StringBuilder("_FieldType_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);

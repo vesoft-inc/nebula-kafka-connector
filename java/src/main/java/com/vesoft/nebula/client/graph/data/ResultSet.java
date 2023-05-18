@@ -7,6 +7,7 @@ package com.vesoft.nebula.client.graph.data;
 
 import com.vesoft.nebula.BindingTable;
 import com.vesoft.nebula.RawRecord;
+import com.vesoft.nebula.Row;
 import com.vesoft.nebula.Value;
 import com.vesoft.nebula.graph.ExecutionResponse;
 import com.vesoft.nebula.graph.PlanDescription;
@@ -25,7 +26,7 @@ public class ResultSet {
         private final List<ValueWrapper> colValues = new ArrayList<>();
         private List<String> columnNames = new ArrayList<>();
 
-        public Record(List<String> columnNames, RawRecord row, String decodeType) {
+        public Record(List<String> columnNames, Row row, String decodeType) {
             if (columnNames == null) {
                 return;
             }
@@ -230,7 +231,7 @@ public class ResultSet {
         if (response.executionOutcome.result == null) {
             throw new RuntimeException("Empty data");
         }
-        List<RawRecord> records = response.executionOutcome.result.records;
+        List<Row> records = response.executionOutcome.result.records;
         if (index >= records.size()) {
             throw new ArrayIndexOutOfBoundsException();
         }
@@ -252,7 +253,7 @@ public class ResultSet {
             throw new ArrayIndexOutOfBoundsException();
         }
         List<ValueWrapper> values = new ArrayList<>();
-        List<RawRecord> records = response.executionOutcome.result.records;
+        List<Row> records = response.executionOutcome.result.records;
         for (int i = 0; i < records.size(); i++) {
             values.add(new ValueWrapper(records.get(i).values.get(index), decodeType));
         }
@@ -264,7 +265,7 @@ public class ResultSet {
      *
      * @return the list of Row
      */
-    public List<RawRecord> getRows() {
+    public List<Row> getRows() {
         if (response.executionOutcome.result == null) {
             throw new RuntimeException("Empty data");
         }

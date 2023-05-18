@@ -10,22 +10,16 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.HashSet;
 import java.util.Collections;
 import java.util.BitSet;
 import java.util.Arrays;
 import com.facebook.thrift.*;
-import com.facebook.thrift.annotations.*;
-import com.facebook.thrift.async.*;
 import com.facebook.thrift.meta_data.*;
-import com.facebook.thrift.server.*;
-import com.facebook.thrift.transport.*;
 import com.facebook.thrift.protocol.*;
 
 @SuppressWarnings({ "unused", "serial" })
 public class PlanDescription implements TBase, java.io.Serializable, Cloneable, Comparable<PlanDescription> {
-  private static final TStruct STRUCT_DESC = new TStruct("PlanDescription");
+  private static final TStruct STRUCT_DESC = new TStruct("_PlanDescription_");
   private static final TField PLAN_NODE_DESCS_FIELD_DESC = new TField("plan_node_descs", TType.LIST, (short)1);
   private static final TField NODE_INDEX_MAP_FIELD_DESC = new TField("node_index_map", TType.MAP, (short)2);
   private static final TField FORMAT_FIELD_DESC = new TField("format", TType.STRING, (short)3);
@@ -48,16 +42,16 @@ public class PlanDescription implements TBase, java.io.Serializable, Cloneable, 
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(PLAN_NODE_DESCS, new FieldMetaData("plan_node_descs", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(PLAN_NODE_DESCS, new FieldMetaData("plan_node_descs", TFieldRequirementType.DEFAULT, 
         new ListMetaData(TType.LIST, 
             new StructMetaData(TType.STRUCT, PlanNodeDescription.class))));
-    tmpMetaDataMap.put(NODE_INDEX_MAP, new FieldMetaData("node_index_map", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(NODE_INDEX_MAP, new FieldMetaData("node_index_map", TFieldRequirementType.DEFAULT, 
         new MapMetaData(TType.MAP, 
             new FieldValueMetaData(TType.I64), 
             new FieldValueMetaData(TType.I64))));
-    tmpMetaDataMap.put(FORMAT, new FieldMetaData("format", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(FORMAT, new FieldMetaData("format", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
-    tmpMetaDataMap.put(OPTIMIZE_TIME_IN_US, new FieldMetaData("optimize_time_in_us", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(OPTIMIZE_TIME_IN_US, new FieldMetaData("optimize_time_in_us", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.I32)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -456,9 +450,6 @@ public class PlanDescription implements TBase, java.io.Serializable, Cloneable, 
 
 
     // check for required fields of primitive type, which can't be checked in the validate method
-    if (!isSetOptimize_time_in_us()) {
-      throw new TProtocolException("Required field 'optimize_time_in_us' was not found in serialized data! Struct: " + toString());
-    }
     validate();
   }
 
@@ -511,7 +502,7 @@ public class PlanDescription implements TBase, java.io.Serializable, Cloneable, 
     String indentStr = prettyPrint ? TBaseHelper.getIndentedString(indent) : "";
     String newLine = prettyPrint ? "\n" : "";
     String space = prettyPrint ? " " : "";
-    StringBuilder sb = new StringBuilder("PlanDescription");
+    StringBuilder sb = new StringBuilder("_PlanDescription_");
     sb.append(space);
     sb.append("(");
     sb.append(newLine);
@@ -568,16 +559,6 @@ public class PlanDescription implements TBase, java.io.Serializable, Cloneable, 
 
   public void validate() throws TException {
     // check for required fields
-    if (plan_node_descs == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'plan_node_descs' was not present! Struct: " + toString());
-    }
-    if (node_index_map == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'node_index_map' was not present! Struct: " + toString());
-    }
-    if (format == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'format' was not present! Struct: " + toString());
-    }
-    // alas, we cannot check 'optimize_time_in_us' because it's a primitive and you chose the non-beans generator.
   }
 
 }

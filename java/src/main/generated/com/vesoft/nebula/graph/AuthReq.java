@@ -46,13 +46,13 @@ public class AuthReq implements TBase, java.io.Serializable, Cloneable, Comparab
 
   static {
     Map<Integer, FieldMetaData> tmpMetaDataMap = new HashMap<Integer, FieldMetaData>();
-    tmpMetaDataMap.put(USERNAME, new FieldMetaData("username", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(USERNAME, new FieldMetaData("username", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
-    tmpMetaDataMap.put(PASSWORD, new FieldMetaData("password", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(PASSWORD, new FieldMetaData("password", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
-    tmpMetaDataMap.put(CLIENT_TYPE, new FieldMetaData("client_type", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(CLIENT_TYPE, new FieldMetaData("client_type", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
-    tmpMetaDataMap.put(CLIENT_VERSION, new FieldMetaData("client_version", TFieldRequirementType.REQUIRED, 
+    tmpMetaDataMap.put(CLIENT_VERSION, new FieldMetaData("client_version", TFieldRequirementType.DEFAULT, 
         new FieldValueMetaData(TType.STRING)));
     metaDataMap = Collections.unmodifiableMap(tmpMetaDataMap);
   }
@@ -534,18 +534,6 @@ public class AuthReq implements TBase, java.io.Serializable, Cloneable, Comparab
 
   public void validate() throws TException {
     // check for required fields
-    if (username == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'username' was not present! Struct: " + toString());
-    }
-    if (password == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'password' was not present! Struct: " + toString());
-    }
-    if (client_type == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'client_type' was not present! Struct: " + toString());
-    }
-    if (client_version == null) {
-      throw new TProtocolException(TProtocolException.MISSING_REQUIRED_FIELD, "Required field 'client_version' was not present! Struct: " + toString());
-    }
   }
 
 }
