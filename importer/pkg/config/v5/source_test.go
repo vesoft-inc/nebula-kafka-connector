@@ -133,6 +133,10 @@ var _ = Describe("Source", func() {
 				isN2Done    = false
 			)
 
+			for _, i := range importers {
+				i.Add(1)
+			}
+
 			wg.Add(1)
 			go func() {
 				defer wg.Done()

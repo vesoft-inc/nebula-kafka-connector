@@ -90,7 +90,7 @@ var _ = Describe("Importer", func() {
 			Expect(resp.RespTime).To(Equal(time.Microsecond * time.Duration(12)))
 		})
 
-		It("execute successfully with Wait and Done", func() {
+		It("execute successfully with Add, Wait and Done", func() {
 			mockBuilder.EXPECT().Build(gomock.Any()).Times(2).Return("statement", nil)
 			mockClientPool.EXPECT().Execute(gomock.Any()).Times(2).Return(mockResponse, nil)
 			mockResponse.EXPECT().IsSucceed().Times(2).Return(true)
@@ -101,9 +101,11 @@ var _ = Describe("Importer", func() {
 				wg              sync.WaitGroup
 				isImporter1Done = false
 			)
-			wg.Add(1)
 			// i2 need to wait i1
 			i1 := New(mockBuilder, mockClientPool,
+				WithAddFunc(func(delta int) {
+					wg.Add(delta)
+				}),
 				WithDoneFunc(func() {
 					time.Sleep(time.Millisecond)
 					isImporter1Done = true
@@ -116,6 +118,9 @@ var _ = Describe("Importer", func() {
 					Expect(isImporter1Done).To(BeTrue())
 				}),
 			)
+
+			i1.Add(1)
+			i2.Add(1)
 
 			go func() {
 				i1.Wait()

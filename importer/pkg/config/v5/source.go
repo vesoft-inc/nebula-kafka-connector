@@ -50,19 +50,25 @@ func (s *Source) BuildImporters(wgMap *utils.WaitGroupMap, graphName string, poo
 	for k := range s.Nodes {
 		node := s.Nodes[k]
 		builder := graph.InsertNodeBuilder(node)
-		wgMap.Add(1, node.Name)
-		i := importer.New(builder, pool, importer.WithDoneFunc(func() {
-			wgMap.Done(node.Name)
-		}))
+		i := importer.New(builder, pool,
+			importer.WithAddFunc(func(delta int) {
+				wgMap.Add(delta, node.Name)
+			}),
+			importer.WithDoneFunc(func() {
+				wgMap.Done(node.Name)
+			}),
+		)
 		importers = append(importers, i)
 	}
 
 	for k := range s.Edges {
 		edge := s.Edges[k]
 		builder := graph.InsertEdgeBuilder(edge)
-		i := importer.New(builder, pool, importer.WithWaitFunc(func() {
-			wgMap.WaitMany(edge.Src.Name, edge.Dst.Name)
-		}))
+		i := importer.New(builder, pool,
+			importer.WithWaitFunc(func() {
+				wgMap.WaitMany(edge.Src.Name, edge.Dst.Name)
+			}),
+		)
 		importers = append(importers, i)
 	}
 	return importers, nil

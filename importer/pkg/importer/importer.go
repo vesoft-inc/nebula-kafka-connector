@@ -11,9 +11,12 @@ import (
 
 type (
 	Importer interface {
-		Wait()
 		Import(records ...spec.Record) (*ImportResp, error)
+
+		// Add Done Wait for synchronize, similar to sync.WaitGroup.
+		Add(delta int)
 		Done()
+		Wait()
 	}
 
 	ImportResp struct {
@@ -31,8 +34,10 @@ type (
 	defaultImporter struct {
 		builder spec.StatementBuilder
 		pool    client.Pool
-		fnWait  func()
-		fnDone  func()
+
+		fnAdd  func(delta int)
+		fnDone func()
+		fnWait func()
 	}
 )
 
@@ -47,6 +52,15 @@ func NewWithOpts(opts ...Option) Importer {
 	i := &defaultImporter{}
 	for _, opt := range opts {
 		opt(i)
+	}
+	if i.fnAdd == nil {
+		i.fnAdd = func(delta int) {}
+	}
+	if i.fnDone == nil {
+		i.fnDone = func() {}
+	}
+	if i.fnWait == nil {
+		i.fnWait = func() {}
 	}
 	return i
 }
@@ -63,9 +77,9 @@ func WithClientPool(p client.Pool) Option {
 	}
 }
 
-func WithWaitFunc(fn func()) Option {
+func WithAddFunc(fn func(delta int)) Option {
 	return func(i *defaultImporter) {
-		i.fnWait = fn
+		i.fnAdd = fn
 	}
 }
 
@@ -75,9 +89,9 @@ func WithDoneFunc(fn func()) Option {
 	}
 }
 
-func (i *defaultImporter) Wait() {
-	if i.fnWait != nil {
-		i.fnWait()
+func WithWaitFunc(fn func()) Option {
+	return func(i *defaultImporter) {
+		i.fnWait = fn
 	}
 }
 
@@ -103,8 +117,14 @@ func (i *defaultImporter) Import(records ...spec.Record) (*ImportResp, error) {
 	}, nil
 }
 
+func (i *defaultImporter) Add(delta int) {
+	i.fnAdd(delta)
+}
+
 func (i *defaultImporter) Done() {
-	if i.fnDone != nil {
-		i.fnDone()
-	}
+	i.fnDone()
+}
+
+func (i *defaultImporter) Wait() {
+	i.fnWait()
 }

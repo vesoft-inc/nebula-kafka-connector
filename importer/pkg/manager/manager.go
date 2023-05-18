@@ -179,9 +179,13 @@ func (m *defaultManager) Import(s source.Source, brr reader.BatchRecordReader, i
 	m.stats.AddTotalBytes(nBytes)
 
 	m.readerWaitGroup.Add(1)
+	for _, i := range importers {
+		i.Add(1) // Add 1 for start, will call Done after i.Import finish
+	}
+
 	cleanup := func() {
 		for _, i := range importers {
-			i.Done()
+			i.Done() // Done 1 for finish, corresponds to start
 		}
 		m.readerWaitGroup.Done()
 		s.Close()
@@ -347,9 +351,20 @@ func (m *defaultManager) loopImport(s source.Source, r reader.BatchRecordReader,
 }
 
 func (m *defaultManager) submitImporterTask(nBytes int, records spec.Records, importers ...importer.Importer) {
+	importersDone := func() {
+		for _, i := range importers {
+			i.Done() // Done 1 for batch
+		}
+	}
+
+	for _, i := range importers {
+		i.Add(1) // Add 1 for batch
+	}
 	m.importerWaitGroup.Add(1)
 	if err := m.importerPool.Submit(func() {
 		defer m.importerWaitGroup.Done()
+		defer importersDone()
+
 		var isFailed bool
 		if len(records) > 0 {
 			for _, i := range importers {
@@ -370,6 +385,7 @@ func (m *defaultManager) submitImporterTask(nBytes int, records spec.Records, im
 			m.onSucceeded(nBytes, records)
 		}
 	}); err != nil {
+		importersDone()
 		m.importerWaitGroup.Done()
 		m.logError(err, "manager: submit importer failed")
 	}

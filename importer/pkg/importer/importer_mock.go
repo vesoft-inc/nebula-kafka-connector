@@ -34,6 +34,18 @@ func (m *MockImporter) EXPECT() *MockImporterMockRecorder {
 	return m.recorder
 }
 
+// Add mocks base method.
+func (m *MockImporter) Add(delta int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Add", delta)
+}
+
+// Add indicates an expected call of Add.
+func (mr *MockImporterMockRecorder) Add(delta interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockImporter)(nil).Add), delta)
+}
+
 // Done mocks base method.
 func (m *MockImporter) Done() {
 	m.ctrl.T.Helper()
