@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE PERSON_HAS_INTEREST_TAG ({id:$personId})-[{}]->({id:$tagId});
+INSERT EDGE PERSON_HAS_INTEREST_TAG ({id:$personId})-[{}]->({id:$tagId})

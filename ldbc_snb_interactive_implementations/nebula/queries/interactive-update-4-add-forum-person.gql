@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE FORUM_HAS_MODERATOR_PERSON ({id: $forumId})-[{}]->({id: $moderatorPersonId});
+INSERT EDGE FORUM_HAS_MODERATOR_PERSON ({id: $forumId})-[{}]->({id: $moderatorPersonId})

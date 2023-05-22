@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE  COMMENT_REPLY_OF_COMMENT ({id: $commentId})-[{}]->({id: $replyToCommentId});
+INSERT EDGE  COMMENT_REPLY_OF_COMMENT ({id: $commentId})-[{}]->({id: $replyToCommentId})

@@ -6,7 +6,7 @@
 }
 */
 USE $graphName
-MATCH (person:Person {id: $personId})<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < $maxDate)
+MATCH (person:Person {id: $personId})<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < localdatetime($maxDate))
 ORDER BY message.creationDate DESC, message.id ASC
 LIMIT 20
 RETURN

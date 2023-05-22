@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE POST_HAS_TAG_TAG ({id: $postId})-[{}]->({id: tagId});
+INSERT EDGE POST_HAS_TAG_TAG ({id: $postId})-[{}]->({id: $tagId})

@@ -23,7 +23,7 @@ RETURN DISTINCT friend, countryX, countryY
 NEXT
 USE $graphName
 MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
-WHERE $endDate > message.creationDate AND message.creationDate >= $startDate AND country IN [countryX, countryY]
+WHERE localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate) AND country IN [countryX, countryY]
 LET
   friend=friend,
   messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,

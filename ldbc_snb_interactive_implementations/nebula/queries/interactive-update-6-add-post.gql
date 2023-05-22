@@ -1,9 +1,9 @@
 USE $graphName
 INSERT NODE Post({id: $postId,
-                  creationDate: $creationDate,
+                  creationDate: localdatetime($creationDate),
                   locationIP: $locationIP,
                   browserUsed: $browserUsed,
                   language: $language,
                   content: $content,
                   imageFile: $imageFile,
-                  extent: $length});
+                  extent: $length})

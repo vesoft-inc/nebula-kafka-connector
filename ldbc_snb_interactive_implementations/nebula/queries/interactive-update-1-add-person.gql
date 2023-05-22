@@ -3,9 +3,9 @@ INSERT NODE Person ({id: $personId,
                      firstName: $personFirstName,
                      lastName: $personLastName,
                      gender: $gender,
-                     birthday: $birthday,
-                     creationDate: $creationDate,
+                     birthday: date($birthday),
+                     creationDate: localdatetime($creationDate),
                      locationIP: $locationIP,
                      browserUsed: $browserUsed,
                      email: $emails,
-                     speaks: $languages});
+                     speaks: $languages})

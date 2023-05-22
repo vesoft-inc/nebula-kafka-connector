@@ -1,7 +1,5 @@
 package nebula;
 
-import com.vesoft.nebula.LocalDatetime;
-import org.ldbcouncil.snb.driver.workloads.interactive.db.DummyLdbcSnbInteractiveDb;
 import org.ldbcouncil.snb.driver.workloads.interactive.*;
 import org.ldbcouncil.snb.impls.workloads.interactive.InteractiveTest;
 import org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb;
@@ -21,6 +19,7 @@ public class NebulaInteractiveTest extends InteractiveTest {
     String user = "nebula";
     String password = "123";
     String queryDir = "queries";
+    String requestTimeout = "500";
 
     @Override
     public Map<String, String> getProperties() {
@@ -28,6 +27,7 @@ public class NebulaInteractiveTest extends InteractiveTest {
         properties.put("endpoint", endpoint);
         properties.put("user", user);
         properties.put("password", password);
+        properties.put("requestTimeout", requestTimeout);
         properties.put("printQueryNames", "true");
         properties.put("printQueryStrings", "true");
         properties.put("printQueryResults", "true");

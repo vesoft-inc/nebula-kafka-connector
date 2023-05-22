@@ -1,7 +1,7 @@
 USE $graphName
 INSERT NODE Comment ({id: $commentId,
-                      creationDate: $creationDate,
+                      creationDate: localdatetime($creationDate),
                       locationIP: $locationIP,
                       browserUsed: $browserUsed,
                       content: $content,
-                      extent: $length});
+                      extent: $length})

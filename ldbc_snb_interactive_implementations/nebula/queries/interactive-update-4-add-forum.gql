@@ -1,2 +1,2 @@
 USE $graphName
-INSERT NODE Forum ({id:$forumId, title: $forumTitle, creationDate: $creationDate});
+INSERT NODE Forum ({id:$forumId, title: $forumTitle, creationDate: localdatetime($creationDate)})

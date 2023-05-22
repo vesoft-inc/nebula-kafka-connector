@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE  POST_IS_LOCATED_IN_PLACE ({id: $postId})-[{}]->({id: $countryId});
+INSERT EDGE  POST_IS_LOCATED_IN_PLACE ({id: $postId})-[{}]->({id: $countryId})

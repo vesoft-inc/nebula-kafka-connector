@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE FORUM_CONTAINER_OF_POST ({id:$forumId})-[{}]->({id:$postId});
+INSERT EDGE FORUM_CONTAINER_OF_POST ({id:$forumId})-[{}]->({id:$postId})

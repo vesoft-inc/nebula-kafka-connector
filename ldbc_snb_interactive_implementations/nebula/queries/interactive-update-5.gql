@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE FORUM_HAS_MEMBER_PERSON ({id:forumId})-[{joinDate: $creationDate}]->({id:$personId});
+INSERT EDGE FORUM_HAS_MEMBER_PERSON ({id:forumId})-[{joinDate: localdatetime($creationDate)}]->({id:$personId})

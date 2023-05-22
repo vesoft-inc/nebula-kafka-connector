@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE POST_HAS_CREATOR_PERSON ({id: $postId})-[{}]->({id: $authorPersonId});
+INSERT EDGE POST_HAS_CREATOR_PERSON ({id: $postId})-[{}]->({id: $authorPersonId})
