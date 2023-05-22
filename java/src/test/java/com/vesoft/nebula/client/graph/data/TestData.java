@@ -7,7 +7,10 @@ package com.vesoft.nebula.client.graph.data;
 
 
 import com.vesoft.nebula.BindingTable;
+import com.vesoft.nebula.Date;
 import com.vesoft.nebula.Edge;
+import com.vesoft.nebula.LocalDatetime;
+import com.vesoft.nebula.LocalTime;
 import com.vesoft.nebula.NList;
 import com.vesoft.nebula.Node;
 import com.vesoft.nebula.RawRecord;
@@ -73,6 +76,22 @@ public class TestData {
         int edgeType = type;
         long rank = 10;
         return new Edge(srcId, dstId, edgeType, rank, props);
+    }
+
+    private LocalTime getSimpleLocalTime() {
+        LocalTime time = new LocalTime((byte) 12, (byte) 20, (byte) 15, 30);
+        return time;
+    }
+
+    private LocalDatetime getSimpleLocalDateTime() {
+        LocalDatetime datetime = new LocalDatetime((short) 2023, (byte) 1, (byte) 1, (byte) 12,
+                (byte) 20, (byte) 15, 30);
+        return datetime;
+    }
+
+    private Date getSimpleDate() {
+        Date date = new Date((short) 2023, (byte) 1, (byte) 1);
+        return date;
     }
 
 
@@ -276,21 +295,36 @@ public class TestData {
         try {
             // test node
             ValueWrapper valueWrapper = new ValueWrapper(
-                    new Value(Value.NODEVAL, getSimpleNode()), "utf-8", 28800);
+                    new Value(Value.NODEVAL, getSimpleNode()), "utf-8");
             String expectString =
                     "(1:0 {prop: 100})";
             Assert.assertEquals(expectString, valueWrapper.asNode().toString());
 
             // test relationship
             valueWrapper = new ValueWrapper(
-                    new Value(Value.EDGEVAL, getSimpleEdge(false)), "utf-8", 28800);
+                    new Value(Value.EDGEVAL, getSimpleEdge(false)), "utf-8");
             expectString = "(1)-[:1@10{edge_prop: 100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             valueWrapper = new ValueWrapper(
-                    new Value(Value.EDGEVAL, getSimpleEdge(true)), "utf-8", 28800);
+                    new Value(Value.EDGEVAL, getSimpleEdge(true)), "utf-8");
             expectString = "(2)-[:-1@10{edge_prop: 100}]->(1)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
+
+            valueWrapper = new ValueWrapper(new Value(Value.LOCALTIMEVAL, getSimpleLocalTime()),
+                    "utf-8");
+            expectString = "12:20:15.000030";
+            Assert.assertEquals(expectString, valueWrapper.asLocalTime().toString());
+
+            valueWrapper = new ValueWrapper(new Value(Value.LOCALDATETIMEVAL,
+                    getSimpleLocalDateTime()), "utf-8");
+            expectString = "2023-01-01T12:20:15.000030";
+            Assert.assertEquals(expectString, valueWrapper.asLocalDateTime().toString());
+
+            valueWrapper = new ValueWrapper(new Value(Value.DATEVAL, getSimpleDate()), "utf-8");
+            expectString = "2023-01-01";
+            Assert.assertEquals(expectString, valueWrapper.asDate().toString());
+
 
         } catch (Exception e) {
             e.printStackTrace();

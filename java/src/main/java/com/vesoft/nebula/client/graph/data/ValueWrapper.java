@@ -11,7 +11,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import javax.management.relation.RelationService;
 
 public class ValueWrapper {
     public static class NullType {
@@ -60,7 +59,6 @@ public class ValueWrapper {
 
     private final Value value;
     private String decodeType = "utf-8";
-    private int timezoneOffset = 0;
 
     private String descType() {
         switch (value.getSetField()) {
@@ -93,19 +91,6 @@ public class ValueWrapper {
     public ValueWrapper(Value value, String decodeType) {
         this.value = value;
         this.decodeType = decodeType;
-        this.timezoneOffset = 0;
-    }
-
-    /**
-     * @param value          the Value get from service
-     * @param decodeType     the decodeType get from the service to decode the byte array,
-     *                       but now the service no return the decodeType, so use the utf-8
-     * @param timezoneOffset the timezone offset get from the service to calculate local time
-     */
-    public ValueWrapper(Value value, String decodeType, int timezoneOffset) {
-        this.value = value;
-        this.decodeType = decodeType;
-        this.timezoneOffset = timezoneOffset;
     }
 
     /**
@@ -211,6 +196,18 @@ public class ValueWrapper {
         return value.getSetField() == Value.EDGEVAL;
     }
 
+    public boolean isLocalTime() {
+        return value.getSetField() == Value.LOCALTIMEVAL;
+    }
+
+    public boolean isLocalDateTime() {
+        return value.getSetField() == Value.LOCALDATETIMEVAL;
+    }
+
+    public boolean isDate() {
+        return value.getSetField() == Value.DATEVAL;
+    }
+
     /**
      * Convert the original data type Value to boolean
      *
@@ -302,6 +299,30 @@ public class ValueWrapper {
         }
         throw new InvalidValueException(
                 "cannot get field node because value's type is " + descType());
+    }
+
+    public NTime asLocalTime() throws InvalidValueException {
+        if (value.getSetField() == Value.LOCALTIMEVAL) {
+            return new NTime(value.getLocalTimeVal());
+        }
+        throw new InvalidValueException(
+                "cannot get field LocalTime because value's type is " + descType());
+    }
+
+    public NDate asDate() throws InvalidValueException {
+        if (value.getSetField() == Value.DATEVAL) {
+            return new NDate(value.getDateVal());
+        }
+        throw new InvalidValueException(
+                "cannot get field Date because value's type is " + descType());
+    }
+
+    public NDateTime asLocalDateTime() throws InvalidValueException {
+        if (value.getSetField() == Value.LOCALDATETIMEVAL) {
+            return new NDateTime(value.getLocalDatetimeVal());
+        }
+        throw new InvalidValueException(
+                "cannot get field LocalTime because value's type is " + descType());
     }
 
 
