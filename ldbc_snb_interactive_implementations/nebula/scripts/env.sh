@@ -6,8 +6,7 @@ SCRIPT_DIR=$(dirname $(readlink -f "$0"))
 # Directory of this project
 PROJECT_DIR=$(dirname ${SCRIPT_DIR})
 # target data
-# DATA_DIR=${PROJECT_DIR}/data
-DATA_DIR=/home/vesoft/ldbc_test_5.0/sf01
+DATA_DIR=${PROJECT_DIR}/data
 #LDBC home
 LDBC_HOME=${DATA_DIR}/ldbc_snb_datagen
 

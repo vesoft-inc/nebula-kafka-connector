@@ -19,8 +19,6 @@ import java.util.Map;
 public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends BaseDbConnectionState<TDbQueryStore>
 {
     private NebulaClient client = null;
-    private final String username;
-    private final String password;
     private final String graphName;
 
     public String getGraphName() {
@@ -31,12 +29,13 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         super(properties, store);
 
         final String endpointURI = properties.get( "endpoint" );
-        username = properties.get( "user" );
-        password = properties.get( "password" );
+        final String username = properties.get( "user" );
+        final String password = properties.get( "password" );
+        final int requestTimeout = Integer.parseInt(properties.get("requestTimeout"));
         graphName = properties.get("graphName");
         try {
             client = NebulaClient.builder(endpointURI, username, password)
-                    .setRequestTimeoutMills(500*1000)
+                    .setRequestTimeoutMills(requestTimeout*1000)
                     .setMaxSessionSize(10)
                     .setMinSessionSize(1)
                     .setRetryTimes(3)
