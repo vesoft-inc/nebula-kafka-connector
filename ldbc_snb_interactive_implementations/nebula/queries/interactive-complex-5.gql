@@ -6,14 +6,14 @@
 }
 */
 USE $graphName
-MATCH (person:Person {id : $personId})-[:KNOWS]-{1,2}(otherPerson)
+MATCH (person:Person {id : $personId})<-[:KNOWS]->{1,2}(otherPerson:Person)
     WHERE person <> otherPerson
 RETURN DISTINCT otherPerson
 NEXT
 USE $graphName
-MATCH (forum)-[membership:HAS_MEMBER WHERE membership.joinDate > $minDate]->(otherPerson)
+MATCH (forum:Forum)-[membership:HAS_MEMBER WHERE membership.joinDate > $minDate]->(otherPerson:Person)
     AGGREGATE otherPersons=collect(otherPerson) GROUP BY forum
-    OPTIONAL MATCH (otherPerson2)<-[:HAS_CREATOR]-(post)<-[:CONTAINER_OF]-(forum)
+    OPTIONAL MATCH (otherPerson2:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
         FILTER WHERE otherPerson2 IN otherPersons
         AGGREGATE postCount=count(post) GROUP BY forum
         ORDER BY

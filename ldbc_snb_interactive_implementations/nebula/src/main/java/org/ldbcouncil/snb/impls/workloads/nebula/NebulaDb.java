@@ -2,9 +2,11 @@ package org.ldbcouncil.snb.impls.workloads.nebula;
 
 import com.google.common.collect.ImmutableMap;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
+import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.control.LoggingService;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.*;
+import org.ldbcouncil.snb.driver.workloads.interactive.*;
 import org.ldbcouncil.snb.impls.workloads.QueryType;
 import org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler;
 import org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler;
@@ -21,6 +23,8 @@ import java.util.stream.Collectors;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
 
+import static org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter.convertDateTimesToEpoch;
+
 public class NebulaDb extends BaseDb<NebulaQueryStore>
 {
 
@@ -29,7 +33,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
     {
         try {
             dcs = new NebulaDbConnectionState<>(properties, new NebulaQueryStore(properties.get("queryDir")));
-        } catch (UnknownHostException e) {
+        } catch (UnknownHostException | IOErrorException e) {
             throw new RuntimeException(e);
         }
     }
@@ -51,7 +55,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         }
 
         @Override
-        public LdbcQuery1Result toResult(ResultSet.Record record ) throws UnsupportedEncodingException {
+        public LdbcQuery1Result toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
 
             List<String> emails = new ArrayList<>();
             if ( !record.get( 8 ).isNull() ) {
@@ -81,8 +85,8 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long friendId = record.get( 0 ).asLong();
             String friendLastName = record.get( 1 ).asString();
             int distanceFromPerson = (int) record.get( 2 ).asLong();
-            long friendBirthday = record.get( 3 ).asLong();
-            long friendCreationDate = record.get( 4 ).asLong();
+            long friendBirthday = NebulaConverter.convertDateToEpoch(record.get( 3 ).asDate().toString());
+            long friendCreationDate = NebulaConverter.convertDateTimesToEpoch(record.get( 4 ).asLocalDateTime().toString());
             String friendGender = record.get( 5 ).asString();
             String friendBrowserUsed = record.get( 6 ).asString();
             String friendLocationIp = record.get( 7 ).asString();
@@ -125,7 +129,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             String personLastName = record.get( 2 ).asString();
             long messageId = record.get( 3 ).asLong();
             String messageContent = record.get( 4 ).asString();
-            long messageCreationDate = record.get( 5 ).asLong();
+            long messageCreationDate = convertDateTimesToEpoch(record.get(5).asLocalDateTime().toString());
 
             return new LdbcQuery2Result(
                     personId,
@@ -137,47 +141,16 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         }
     }
 
-    public static class InteractiveQuery3a extends NebulaListOperationHandler<LdbcQuery3a, LdbcQuery3Result>
+    public static class InteractiveQuery3 extends NebulaListOperationHandler<LdbcQuery3, LdbcQuery3Result>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcQuery3a operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcQuery3 operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery3);
             return state.getQueryStore().getQuery3(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery3a operation) {
-            return state.getQueryStore().getQuery3Map(operation);
-        }
-
-        @Override
-        public LdbcQuery3Result toResult(ResultSet.Record record ) throws UnsupportedEncodingException {
-            long personId = record.get( 0 ).asLong();
-            String personFirstName = record.get( 1 ).asString();
-            String personLastName = record.get( 2 ).asString();
-            int xCount = (int) record.get( 3 ).asLong();
-            int yCount = (int) record.get( 4 ).asLong();
-            int count = (int) record.get( 5 ).asLong();
-            return new LdbcQuery3Result(
-                    personId,
-                    personFirstName,
-                    personLastName,
-                    xCount,
-                    yCount,
-                    count );
-        }
-    }
-
-    public static class InteractiveQuery3b extends NebulaListOperationHandler<LdbcQuery3b, LdbcQuery3Result>
-    {
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcQuery3b operation) {
-            // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery3);
-            return state.getQueryStore().getQuery3(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery3b operation) {
+        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery3 operation) {
             return state.getQueryStore().getQuery3Map(operation);
         }
 
@@ -276,14 +249,15 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         }
 
         @Override
-        public LdbcQuery7Result toResult(ResultSet.Record record ) throws  UnsupportedEncodingException {
+        public LdbcQuery7Result toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
             long personId = record.get( 0 ).asLong();
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
-            long likeCreationDate = record.get( 3 ).asLong();
+            long likeCreationDate = convertDateTimesToEpoch(record.get(3).asLocalDateTime().toString());
             long messageId = record.get( 4 ).asLong();
             String messageContent = record.get( 5 ).asString();
-            int minutesLatency = (int) record.get( 6 ).asLong();
+            int minutesLatency = NebulaConverter.convertStartAndEndDateToLatency(
+                    record.get(6).asLocalDateTime().toString(), record.get(3).asLocalDateTime().toString());
             boolean isNew = record.get( 7 ).asBoolean();
             return new LdbcQuery7Result(
                     personId,
@@ -315,7 +289,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = record.get( 0 ).asLong();
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
-            long commentCreationDate = record.get( 3 ).asLong();
+            long commentCreationDate = convertDateTimesToEpoch(record.get(3).asLocalDateTime().toString());
             long commentId = record.get( 4 ).asLong();
             String commentContent = record.get( 5 ).asString();
             return new LdbcQuery8Result(
@@ -348,7 +322,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             String personLastName = record.get( 2 ).asString();
             long messageId = record.get( 3 ).asLong();
             String messageContent = record.get( 4 ).asString();
-            long messageCreationDate = record.get( 5 ).asLong();
+            long messageCreationDate = convertDateTimesToEpoch(record.get(5).asLocalDateTime().toString());
             return new LdbcQuery9Result(
                     personId,
                     personFirstName,
@@ -454,16 +428,16 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         }
     }
 
-    public static class InteractiveQuery13a extends NebulaSingletonOperationHandler<LdbcQuery13a, LdbcQuery13Result>
+    public static class InteractiveQuery13 extends NebulaSingletonOperationHandler<LdbcQuery13, LdbcQuery13Result>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcQuery13a operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcQuery13 operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery13);
             return state.getQueryStore().getQuery13(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery13a operation) {
+        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery13 operation) {
             return state.getQueryStore().getQuery13Map(operation);
         }
 
@@ -478,70 +452,16 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         }
     }
 
-    public static class InteractiveQuery13b extends NebulaSingletonOperationHandler<LdbcQuery13b,LdbcQuery13Result>
+    public static class InteractiveQuery14 extends NebulaListOperationHandler<LdbcQuery14, LdbcQuery14Result>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcQuery13b operation) {
-            // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery13);
-            return state.getQueryStore().getQuery13(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery13b operation) {
-            return state.getQueryStore().getQuery13Map(operation);
-        }
-
-        @Override
-        public LdbcQuery13Result toResult(ResultSet.Record record )
-        {
-            if(record != null) {
-                return new LdbcQuery13Result( (int) record.get( 0 ).asLong() );
-            } else {
-                return new LdbcQuery13Result(-1);
-            }
-        }
-    }
-
-    public static class InteractiveQuery14a extends NebulaListOperationHandler<LdbcQuery14a, LdbcQuery14Result>
-    {
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcQuery14a operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcQuery14 operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery14);
             return state.getQueryStore().getQuery14(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery14a operation) {
-            return state.getQueryStore().getQuery14Map(operation);
-        }
-
-        @Override
-        public LdbcQuery14Result toResult(ResultSet.Record record ) throws ParseException
-        {
-            List<Long> personIdsInPath = new ArrayList<>();
-            if (!record.get(0).isNull()) {
-                List<ValueWrapper> values = record.get(0).asList();
-                for (ValueWrapper val : values) {
-                    personIdsInPath.add(val.asLong());
-                }
-            }
-            long pathWeight = record.get( 1 ).asLong();
-            return new LdbcQuery14Result(
-                    personIdsInPath,
-                    pathWeight );
-        }
-    }
-
-    public static class InteractiveQuery14b extends NebulaListOperationHandler<LdbcQuery14b, LdbcQuery14Result>
-    {
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcQuery14b operation) {
-            // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveComplexQuery14);
-            return state.getQueryStore().getQuery14(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery14b operation) {
+        public Map<String, Object> getParameters(NebulaDbConnectionState state, LdbcQuery14 operation) {
             return state.getQueryStore().getQuery14Map(operation);
         }
 
@@ -581,12 +501,12 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             if (record != null){
                 String firstName = record.get( 0 ).asString();
                 String lastName = record.get( 1 ).asString();
-                long birthday = record.get( 2 ).asLong();
+                long birthday = NebulaConverter.convertDateToEpoch(record.get(2).asDate().toString());
                 String locationIP = record.get( 3 ).asString();
                 String browserUsed = record.get( 4 ).asString();
                 long cityId = record.get( 5 ).asLong();
                 String gender = record.get( 6 ).asString();
-                long creationDate = record.get( 7 ).asLong();
+                long creationDate = convertDateTimesToEpoch(record.get(7).asLocalDateTime().toString());
                 return new LdbcShortQuery1PersonProfileResult(
                         firstName,
                         lastName,
@@ -623,7 +543,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             if (record != null){
                 long messageId = record.get( 0 ).asLong();
                 String messageContent = record.get( 1 ).asString();
-                long messageCreationDate = record.get( 2 ).asLong();
+                long messageCreationDate = convertDateTimesToEpoch(record.get(2).asLocalDateTime().toString());
                 long originalPostId = record.get( 3 ).asLong();
                 long originalPostAuthorId = record.get( 4 ).asLong();
                 String originalPostAuthorFirstName = record.get( 5 ).asString();
@@ -662,7 +582,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = record.get( 0 ).asLong();
             String firstName = record.get( 1 ).asString();
             String lastName = record.get( 2 ).asString();
-            long friendshipCreationDate = record.get( 3 ).asLong();
+            long friendshipCreationDate = convertDateTimesToEpoch(record.get(3).asLocalDateTime().toString());
             return new LdbcShortQuery3PersonFriendsResult(
                     personId,
                     firstName,
@@ -688,7 +608,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         public LdbcShortQuery4MessageContentResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
             if (record != null){
             // Pay attention, the spec's and the implementation's parameter orders are different.
-            long messageCreationDate = record.get( 0 ).asLong();
+            long messageCreationDate = convertDateTimesToEpoch(record.get(0).asLocalDateTime().toString());
             String messageContent = record.get( 1 ).asString();
             return new LdbcShortQuery4MessageContentResult(
                     messageContent,
@@ -786,7 +706,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         public LdbcShortQuery7MessageRepliesResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
             long commentId = record.get( 0 ).asLong();
             String commentContent = record.get( 1 ).asString();
-            long commentCreationDate = record.get( 2 ).asLong();
+            long commentCreationDate = convertDateTimesToEpoch(record.get(2).asLocalDateTime().toString());
             long replyAuthorId = record.get( 3 ).asLong();
             String replyAuthorFirstName = record.get( 4 ).asString();
             String replyAuthorLastName = record.get( 5 ).asString();
@@ -804,242 +724,116 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
 
     // Interactive inserts
 
-    public static class Insert1AddPerson extends NebulaMultipleUpdateOperationHandler<LdbcInsert1AddPerson>
+    public static class Update1AddPerson extends NebulaMultipleUpdateOperationHandler<LdbcUpdate1AddPerson>
     {
         @Override
-        public List<String> getQueryString(NebulaDbConnectionState state, LdbcInsert1AddPerson operation) {
+        public List<String> getQueryString(NebulaDbConnectionState state, LdbcUpdate1AddPerson operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert1);
             // (TODO) jmq, runtime insert is not implemete yet.
-            return state.getQueryStore().getInsert1Multiple(operation);
+            return state.getQueryStore().getUpdate1Multiple(operation);
         }
     }
 
-    public static class Insert2AddPostLike extends NebulaUpdateOperationHandler<LdbcInsert2AddPostLike>
+    public static class Update2AddPostLike extends NebulaUpdateOperationHandler<LdbcUpdate2AddPostLike>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcInsert2AddPostLike operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcUpdate2AddPostLike operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert2);
-            return state.getQueryStore().getInsert2(operation);
+            return state.getQueryStore().getUpdate2(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters( LdbcInsert2AddPostLike operation )
+        public Map<String, Object> getParameters( LdbcUpdate2AddPostLike operation )
         {
             return ImmutableMap.<String, Object>builder()
-                               .put( LdbcInsert2AddPostLike.PERSON_ID, operation.getPersonId() )
-                               .put( LdbcInsert2AddPostLike.POST_ID, operation.getPostId() )
-                               .put( LdbcInsert2AddPostLike.CREATION_DATE, operation.getCreationDate().getTime() )
+                               .put( LdbcUpdate2AddPostLike.PERSON_ID, operation.getPersonId() )
+                               .put( LdbcUpdate2AddPostLike.POST_ID, operation.getPostId() )
+                               .put( LdbcUpdate2AddPostLike.CREATION_DATE, operation.getCreationDate().getTime() )
                                .build();
         }
     }
 
-    public static class Insert3AddCommentLike extends NebulaUpdateOperationHandler<LdbcInsert3AddCommentLike>
+    public static class Update3AddCommentLike extends NebulaUpdateOperationHandler<LdbcUpdate3AddCommentLike>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcInsert3AddCommentLike operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcUpdate3AddCommentLike operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert3);
-            return state.getQueryStore().getInsert3(operation);
+            return state.getQueryStore().getUpdate3(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters( LdbcInsert3AddCommentLike operation )
+        public Map<String, Object> getParameters( LdbcUpdate3AddCommentLike operation )
         {
             return ImmutableMap.<String, Object>builder()
-                               .put( LdbcInsert3AddCommentLike.PERSON_ID, operation.getPersonId() )
-                               .put( LdbcInsert3AddCommentLike.COMMENT_ID, operation.getCommentId() )
-                               .put( LdbcInsert3AddCommentLike.CREATION_DATE, operation.getCreationDate().getTime() )
+                               .put( LdbcUpdate3AddCommentLike.PERSON_ID, operation.getPersonId() )
+                               .put( LdbcUpdate3AddCommentLike.COMMENT_ID, operation.getCommentId() )
+                               .put( LdbcUpdate3AddCommentLike.CREATION_DATE, operation.getCreationDate().getTime() )
                                .build();
         }
     }
 
-    public static class Insert4AddForum extends NebulaMultipleUpdateOperationHandler<LdbcInsert4AddForum>
+    public static class Update4AddForum extends NebulaMultipleUpdateOperationHandler<LdbcUpdate4AddForum>
     {
         @Override
-        public List<String> getQueryString(NebulaDbConnectionState state, LdbcInsert4AddForum operation) {
+        public List<String> getQueryString(NebulaDbConnectionState state, LdbcUpdate4AddForum operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert4);
-            return state.getQueryStore().getInsert4Multiple(operation);
+            return state.getQueryStore().getUpdate4Multiple(operation);
         }
     }
 
-    public static class Insert5AddForumMembership extends NebulaUpdateOperationHandler<LdbcInsert5AddForumMembership>
+    public static class Update5AddForumMembership extends NebulaUpdateOperationHandler<LdbcUpdate5AddForumMembership>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcInsert5AddForumMembership operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcUpdate5AddForumMembership operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert5);
-            return state.getQueryStore().getInsert5(operation);
+            return state.getQueryStore().getUpdate5(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters( LdbcInsert5AddForumMembership operation )
+        public Map<String, Object> getParameters( LdbcUpdate5AddForumMembership operation )
         {
             return ImmutableMap.<String, Object>builder()
-                               .put( LdbcInsert5AddForumMembership.FORUM_ID, operation.getForumId() )
-                               .put( LdbcInsert5AddForumMembership.PERSON_ID, operation.getPersonId() )
-                               .put( LdbcInsert5AddForumMembership.CREATION_DATE, operation.getCreationDate().getTime() )
+                               .put( LdbcUpdate5AddForumMembership.FORUM_ID, operation.getForumId() )
+                               .put( LdbcUpdate5AddForumMembership.PERSON_ID, operation.getPersonId() )
+                               .put( LdbcUpdate5AddForumMembership.JOIN_DATE, operation.getJoinDate().getTime() )
                                .build();
         }
     }
 
-    public static class Insert6AddPost extends NebulaMultipleUpdateOperationHandler<LdbcInsert6AddPost>
+    public static class Update6AddPost extends NebulaMultipleUpdateOperationHandler<LdbcUpdate6AddPost>
     {
         @Override
-        public List<String> getQueryString(NebulaDbConnectionState state, LdbcInsert6AddPost operation) {
+        public List<String> getQueryString(NebulaDbConnectionState state, LdbcUpdate6AddPost operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert6);
-            return state.getQueryStore().getInsert6Multiple(operation);
+            return state.getQueryStore().getUpdate6Multiple(operation);
         }
     }
 
-    public static class Insert7AddComment extends NebulaMultipleUpdateOperationHandler<LdbcInsert7AddComment>
+    public static class Update7AddComment extends NebulaMultipleUpdateOperationHandler<LdbcUpdate7AddComment>
     {
         @Override
-        public List<String> getQueryString(NebulaDbConnectionState state, LdbcInsert7AddComment operation) {
+        public List<String> getQueryString(NebulaDbConnectionState state, LdbcUpdate7AddComment operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert7);
-            return state.getQueryStore().getInsert7Multiple(operation);
+            return state.getQueryStore().getUpdate7Multiple(operation);
         }
     }
 
-    public static class Insert8AddFriendship extends NebulaUpdateOperationHandler<LdbcInsert8AddFriendship>
+    public static class Update8AddFriendship extends NebulaUpdateOperationHandler<LdbcUpdate8AddFriendship>
     {
         @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcInsert8AddFriendship operation) {
+        public String getQueryString(NebulaDbConnectionState state, LdbcUpdate8AddFriendship operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveInsert8);
-            return state.getQueryStore().getInsert8(operation);
+            return state.getQueryStore().getUpdate8(operation);
         }
 
         @Override
-        public Map<String, Object> getParameters( LdbcInsert8AddFriendship operation )
+        public Map<String, Object> getParameters( LdbcUpdate8AddFriendship operation )
         {
             return ImmutableMap.<String, Object>builder()
-                               .put( LdbcInsert8AddFriendship.PERSON1_ID, operation.getPerson1Id() )
-                               .put( LdbcInsert8AddFriendship.PERSON2_ID, operation.getPerson2Id() )
-                               .put( LdbcInsert8AddFriendship.CREATION_DATE, operation.getCreationDate().getTime() )
+                               .put( LdbcUpdate8AddFriendship.PERSON1_ID, operation.getPerson1Id() )
+                               .put( LdbcUpdate8AddFriendship.PERSON2_ID, operation.getPerson2Id() )
+                               .put( LdbcUpdate8AddFriendship.CREATION_DATE, operation.getCreationDate().getTime() )
                                .build();
         }
     }
-
-    // Deletions
-    public static class Delete1RemovePerson extends NebulaUpdateOperationHandler<LdbcDelete1RemovePerson> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete1RemovePerson operation) {
-            return state.getQueryStore().getDelete1(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete1RemovePerson operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete1RemovePerson.PERSON_ID, operation.getremovePersonIdD1() )
-                    .build();
-        }
-    }
-
-    public static class Delete2RemovePostLike extends NebulaUpdateOperationHandler<LdbcDelete2RemovePostLike> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete2RemovePostLike operation) {
-            return state.getQueryStore().getDelete2(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete2RemovePostLike operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete2RemovePostLike.PERSON_ID, operation.getremovePersonIdD2() )
-                    .put( LdbcDelete2RemovePostLike.POST_ID, operation.getremovePostIdD2() )
-                    .build();
-        }
-    }
-
-    public static class Delete3RemoveCommentLike extends NebulaUpdateOperationHandler<LdbcDelete3RemoveCommentLike> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete3RemoveCommentLike operation) {
-            return state.getQueryStore().getDelete3(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete3RemoveCommentLike operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete3RemoveCommentLike.PERSON_ID, operation.getremovePersonIdD3() )
-                    .put( LdbcDelete3RemoveCommentLike.COMMENT_ID, operation.getremoveCommentIdD3() )
-                    .build();
-        }
-    }
-
-    public static class Delete4RemoveForum extends NebulaUpdateOperationHandler<LdbcDelete4RemoveForum> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete4RemoveForum operation) {
-            return state.getQueryStore().getDelete4(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete4RemoveForum operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete4RemoveForum.FORUM_ID, operation.getremoveForumIdD4() )
-                    .build();
-        }
-    }
-
-    public static class Delete5RemoveForumMembership extends NebulaUpdateOperationHandler<LdbcDelete5RemoveForumMembership> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete5RemoveForumMembership operation) {
-            return state.getQueryStore().getDelete5(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete5RemoveForumMembership operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete5RemoveForumMembership.PERSON_ID, operation.getremovePersonIdD5() )
-                    .put( LdbcDelete5RemoveForumMembership.FORUM_ID, operation.getremoveForumIdD5() )
-                    .build();
-        }
-    }
-
-    public static class Delete6RemovePostThread extends NebulaUpdateOperationHandler<LdbcDelete6RemovePostThread> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete6RemovePostThread operation) {
-            return state.getQueryStore().getDelete6(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete6RemovePostThread operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete6RemovePostThread.POST_ID, operation.getremovePostIdD6() )
-                    .build();
-        }
-    }
-
-    public static class Delete7RemoveCommentSubthread extends NebulaUpdateOperationHandler<LdbcDelete7RemoveCommentSubthread> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete7RemoveCommentSubthread operation) {
-            return state.getQueryStore().getDelete7(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete7RemoveCommentSubthread operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete7RemoveCommentSubthread.COMMENT_ID, operation.getremoveCommentIdD7() )
-                    .build();
-        }
-    }
-
-    public static class Delete8RemoveFriendship extends NebulaUpdateOperationHandler<LdbcDelete8RemoveFriendship> {
-
-        @Override
-        public String getQueryString(NebulaDbConnectionState state, LdbcDelete8RemoveFriendship operation) {
-            return state.getQueryStore().getDelete8(operation);
-        }
-
-        @Override
-        public Map<String, Object> getParameters(LdbcDelete8RemoveFriendship operation) {
-            return ImmutableMap.<String, Object>builder()
-                    .put( LdbcDelete8RemoveFriendship.PERSON1_ID, operation.getremovePerson1Id() )
-                    .put( LdbcDelete8RemoveFriendship.PERSON2_ID, operation.getremovePerson2Id() )
-                    .build();
-        }
-    }
-
 }

@@ -8,4 +8,4 @@ cd ..
 
 VALIDATE_PROPERTIES_FILE=${1:-driver/validate.properties}
 
-java -cp target/nebula-2.0.0-SNAPSHOT.jar org.ldbcouncil.snb.driver.Client -P ${VALIDATE_PROPERTIES_FILE}
+java -cp target/nebula-1.0.0.jar org.ldbcouncil.snb.driver.Client -P ${VALIDATE_PROPERTIES_FILE}

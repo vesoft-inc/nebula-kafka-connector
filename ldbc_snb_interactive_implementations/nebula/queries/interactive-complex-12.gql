@@ -9,7 +9,7 @@ USE $graphName
 MATCH (tag:Tag)-[:HAS_TYPE|IS_SUBCLASS_OF]->{0,3}(baseTagClass:TagClass)
 WHERE tag.name = $tagClassName OR baseTagClass.name = $tagClassName
 AGGREGATE tags=collect(tag.id)
-MATCH (:Person {id: $personId })-[:KNOWS]-(friend:Person)<-[:HAS_CREATOR]-(comment:Comment)-[:REPLY_OF]->(:Post)-[:HAS_TAG]->(tag:Tag)
+MATCH (:Person {id: $personId })<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(comment:Comment)-[:REPLY_OF]->(:Post)-[:HAS_TAG]->(tag:Tag)
 FILTER WHERE tag.id IN tags
 AGGREGATE tagNames=collect(DISTINCT tag.name),replyCount=count(DISTINCT comment) GROUP BY friend
 LIMIT 20

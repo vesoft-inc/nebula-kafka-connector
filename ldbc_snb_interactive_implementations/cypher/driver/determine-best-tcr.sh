@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Script to determine the best TCR (total_compression_ratio) value.
 

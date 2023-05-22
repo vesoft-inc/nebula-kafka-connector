@@ -4,12 +4,13 @@ import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
+import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import com.vesoft.nebula.client.graph.net.Session;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.LdbcNoResult;
+import org.ldbcouncil.snb.driver.workloads.interactive.*;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.UpdateOperationHandler;
 
@@ -32,17 +33,16 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
                                   ResultReporter resultReporter ) throws DbException {
 
         try {
-            Session session = state.getSession();
+            NebulaClient client = state.getClient();
             String query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
             // final Map<String, Object> parameters = getParameters( operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
-            final ResultSet resultSet = session.execute(query);
+            final ResultSet resultSet = client.execute(query);
             resultReporter.report( 0, LdbcNoResult.INSTANCE, operation );
 
-        } catch (AuthFailedException | ClientServerIncompatibleException | NotValidConnectionException |
-                 IOErrorException e) {
+        } catch (NoValidSessionException | IOErrorException e) {
             throw new RuntimeException(e);
         }
     }

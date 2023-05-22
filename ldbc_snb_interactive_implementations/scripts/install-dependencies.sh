@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 set -eu
 set -o pipefail
@@ -8,3 +8,4 @@ cd ..
 
 cypher/scripts/install-dependencies.sh
 postgres/scripts/install-dependencies.sh
+umbra/scripts/install-dependencies.sh

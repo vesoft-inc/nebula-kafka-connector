@@ -2,9 +2,6 @@
 # LDBC SNB Interactive Nebula5.0 implementation
 ## User's guide
 
-
-1. Grab the `stable` driver source code from:
-
 ## Setup
 * Bash
 * Java 11
@@ -29,16 +26,7 @@ some problems encountered when generating cypher data:
    pip install duckdb
    pip install networkit
 
-1. Install the driver artifact to the local Maven repository:
 
-* Docker 19+
-* enough free space in the directory `${NEO4J_CONTAINER_ROOT}` (its default value is specified in `scripts/vars.sh`)
-
-2. Navigate to the root of this repository and build it to generate the JAR files for the implementations:
-
-   ```bash
-   ./build.sh
-   ```
 3. Load data into nebula graph
 
 ```

@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE PERSON_WORK_AT_ORGANISATION ({id: $personId})-[{workFrom: $worksFromYear}]->({id: $organizationId});
+INSERT EDGE PERSON_WORK_AT_COMPANY ({id: $personId})-[{workFrom: $worksFromYear}]->({id: $organizationId});

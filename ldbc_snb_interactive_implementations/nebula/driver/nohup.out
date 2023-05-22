@@ -1,0 +1,49 @@
+Client  Error parsing parameters: Error loading properties file 1
+1 (No such file or directory)
+usage: java -cp driver-VERSION.jar org.ldbcouncil.snb.driver.Client [-db <classname>] [-flush_log] [-help]
+       [-ignore_scheduled_start_times] [-log_delayed] [-nm <name>] [-oc <count>] [-om <mode>] [-P
+       <file1|file2>] [-p <key|value>] [-rd <path>] [-s <seconds>] [-sk <count>] [-sw <duration>] [-tc
+       <count>] [-tcr <ratio>] [-tu <unit>] [-vdb <path>] [-vps <count>] [-vsc] [-w <classname>] [-wu <count>]
+   -db,--database <classname>                           class name of the DB to use (e.g.
+                                                        org.ldbcouncil.snb.driver.workloads.simple.db.SimpleDb
+                                                        )
+   -flush_log                                           flush log to disk after each operation
+   -help                                                print usage instruction
+   -ignore_scheduled_start_times                        executes operations as fast as possible, ignoring
+                                                        their scheduled start times
+   -log_delayed                                         print usage instruction
+   -nm,--name <name>                                    name of the benchmark run. default = LDBC
+   -oc,--operation_count <count>                        number of operations to execute
+   -om,--mode <mode>                                    mode the driver should execute (e.g.
+                                                        create_validation, validate_database,
+                                                        create_statistics, execute_benchmark)
+   -P <file1|file2>                                     load properties from file(s) - files will be loaded in
+                                                        the order provided
+                                                        first files are highest priority; later values will
+                                                        not override earlier values
+   -p <key|value>                                       properties to be passed to DB and Workload - these
+                                                        will override properties loaded from files
+   -rd,--results_dir <path>                             directory where benchmark results will be written.
+                                                        default = results
+   -s,--status <seconds>                                interval between status printouts during benchmark
+                                                        execution (0 = disable)
+   -sk,--skip <count>                                   number of operations to skip over before beginning
+                                                        execution (default: 0)
+   -sw,--spinner_wait_duration <duration>               sleep duration (ms) injected into busy wait loops (to
+                                                        reduce CPU consumption)
+   -tc,--thread_count <count>                           number of worker threads to execute with (default: 1)
+   -tcr,--time_compression_ratio <ratio>                change duration between operations of workload
+   -tu,--time_unit <unit>                               time unit to use when gathering metrics.
+                                                        default:MILLISECONDS, valid:[NANOSECONDS,
+                                                        MICROSECONDS, MILLISECONDS, SECONDS, MINUTES]
+   -vdb,--validate_database <path>                      path to validation parameters file, if provided
+                                                        database connector will be validated
+   -vps,--validation_parameters_size <count>            The size of validation set to create.
+   -vsc,--validation_parameters_serialization_check     Check serialized queries and results by deserializing
+                                                        them and compare.
+   -w,--workload <classname>                            class name of the Workload to use (e.g.
+                                                        org.ldbcouncil.snb.driver.workloads.simple.SimpleWorkl
+                                                        oad)
+   -wu,--warmup <count>                                 number of operations to execute during warmup phase
+                                                        (default: 0)
+

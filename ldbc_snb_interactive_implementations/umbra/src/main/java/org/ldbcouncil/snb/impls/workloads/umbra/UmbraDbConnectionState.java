@@ -22,12 +22,14 @@ public class UmbraDbConnectionState<TDbQueryStore extends QueryStore> extends Ba
 
         Class.forName(properties.get("jdbcDriver"));
 
+        endPoint = properties.get("endpoint");
         Properties props = new Properties();
         endPoint = properties.get("endpoint");
         props.setProperty("jdbcUrl", endPoint);
         props.setProperty("dataSource.databaseName", properties.get("databaseName"));
         props.setProperty("dataSource.assumeMinServerVersion", "9.0");
         props.setProperty("dataSource.ssl", "false");
+
         HikariConfig config = new HikariConfig(props);
         config.setPassword(properties.get("password"));
         config.setUsername(properties.get("user"));

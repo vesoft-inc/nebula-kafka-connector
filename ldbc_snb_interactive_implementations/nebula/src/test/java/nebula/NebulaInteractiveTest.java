@@ -1,12 +1,14 @@
 package nebula;
 
+import com.vesoft.nebula.LocalDatetime;
 import org.ldbcouncil.snb.driver.workloads.interactive.db.DummyLdbcSnbInteractiveDb;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.*;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.LdbcShortQuery2PersonPosts;
+import org.ldbcouncil.snb.driver.workloads.interactive.*;
 import org.ldbcouncil.snb.impls.workloads.interactive.InteractiveTest;
 import org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb;
+import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,9 +31,15 @@ public class NebulaInteractiveTest extends InteractiveTest {
         properties.put("printQueryNames", "true");
         properties.put("printQueryStrings", "true");
         properties.put("printQueryResults", "true");
-        properties.put("graphName", "sf10");
+        properties.put("graphName", "sf01");
         properties.put("queryDir", queryDir);
         return properties;
+    }
+
+
+    @Test
+    public void testConvertTime() throws ParseException {
+        System.out.println(NebulaConverter.convertDateTimesToEpoch("2012-09-13T02:40:59.360000"));
     }
 
     @Test
@@ -48,12 +56,12 @@ public class NebulaInteractiveTest extends InteractiveTest {
     public void testQuery3() throws Exception {
         long diff = 1277812800000L - 1275393600000L;
         long diffInDays = TimeUnit.DAYS.toDays(diff);
-        run(db, new LdbcQuery3a(6597069766734L, "Angola", "Colombia", new Date(1275393600000L), (int) diffInDays, LIMIT));
+        run(db, new LdbcQuery3(6597069766734L, "Angola", "Colombia", new Date(1275393600000L), (int) diffInDays, LIMIT));
     }
 
     @Test
     public void testQuery4() throws Exception {
-        long diff = 1277856000000L - 1275350400000L;
+        long diff = 1275350500000L - 1275350400000L;
         long diffInDays = TimeUnit.DAYS.toDays(diff);
         run(db, new LdbcQuery4(4398046511333L, new Date(1275350400000L), (int) diffInDays, LIMIT));
     }
@@ -101,12 +109,12 @@ public class NebulaInteractiveTest extends InteractiveTest {
 
     @Test
     public void testQuery13() throws Exception {
-        run(db, new LdbcQuery13a(8796093022390L, 8796093022357L));
+        run(db, new LdbcQuery13(8796093022390L, 8796093022357L));
     }
 
     @Test
     public void testQuery14() throws Exception {
-        run(db, new LdbcQuery14a(14L, 27L));
+        run(db, new LdbcQuery14(14L, 27L));
     }
 
     @Test
@@ -146,6 +154,6 @@ public class NebulaInteractiveTest extends InteractiveTest {
 
     @Test
     public void testUpdateQuery2() throws Exception {
-        run(db, new LdbcInsert2AddPostLike(8796093022239L, 206158430617L, new Date( 1290749436322L ) ) );
+        run(db, new LdbcUpdate2AddPostLike(8796093022239L, 206158430617L, new Date( 1290749436322L ) ) );
     }
 }

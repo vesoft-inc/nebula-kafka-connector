@@ -1,17 +1,17 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 # Script to determine the best TCR (total_compression_ratio) value.
 # This script should be invoked by a concrete implementation's driver/determine-best-tcr.sh script.
 #
 # Note that a lower TCR is better as it indicates better compression / higher throughput.
-#
-# Before running, make sure that:
-# - you have invoked scripts/backup-database.sh
 
 set -eu
 set -o pipefail
 
 BENCHMARK_PROPERTIES_FILE=${1:-driver/benchmark.properties}
+
+# make sure that:
+# - you have invoked scripts/backup-database.sh
 
 TCR_MIN=${2:-0.05}
 TCR_MAX=${3:-0.30}

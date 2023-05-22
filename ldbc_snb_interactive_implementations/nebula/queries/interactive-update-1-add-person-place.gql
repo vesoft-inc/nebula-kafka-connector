@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE PERSON_IS_LOCATED_IN_PLACE ({id:$personId})-[{}]->({id:$cityId});
+INSERT EDGE PERSON_IS_LOCATED_IN_CITY ({id:$personId})-[{}]->({id:$cityId});

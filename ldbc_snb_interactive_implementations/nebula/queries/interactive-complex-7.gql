@@ -20,4 +20,4 @@ RETURN
   latestLike.msg.id AS commentOrPostId,
   coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS commentOrPostContent,
   toInteger(floor(toFloat(latestLike.likeTime - latestLike.msg.creationDate)/1000.0)/60.0) AS minutesLatency,
-  size( VALUE{USE $graphName MATCH p0 = (liker)-[:KNOWS]-(person) RETURN p0} ) == 0 AS isNew
+  size( VALUE{USE $graphName MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: $personId}) RETURN p0} ) == 0 AS isNew

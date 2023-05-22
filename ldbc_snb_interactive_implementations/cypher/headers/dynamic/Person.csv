@@ -1,1 +1,0 @@
-creationDate:LONG|id:ID(Person)|firstName:STRING|lastName:STRING|gender:STRING|birthday:LONG|locationIP:STRING|browserUsed:STRING|speaks:STRING[]|email:STRING[]

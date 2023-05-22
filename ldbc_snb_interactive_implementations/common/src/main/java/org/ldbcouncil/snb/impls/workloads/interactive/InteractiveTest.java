@@ -2,8 +2,36 @@ package org.ldbcouncil.snb.impls.workloads.interactive;
 
 import com.google.common.collect.ImmutableList;
 import org.ldbcouncil.snb.driver.Db;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery1;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery10;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery11;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery12;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery13;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery14;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery2;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery3;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery4;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery5;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery6;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery7;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery8;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcQuery9;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery1PersonProfile;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery2PersonPosts;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery3PersonFriends;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery4MessageContent;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery5MessageCreator;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery6MessageForum;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcShortQuery7MessageReplies;
 import org.ldbcouncil.snb.driver.workloads.interactive.LdbcSnbInteractiveWorkload;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.*;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate1AddPerson;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate2AddPostLike;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate3AddCommentLike;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate4AddForum;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate5AddForumMembership;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate6AddPost;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate7AddComment;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate8AddFriendship;
 import org.ldbcouncil.snb.impls.workloads.SnbTest;
 import org.junit.Test;
 
@@ -32,7 +60,7 @@ public abstract class InteractiveTest<D extends Db> extends SnbTest<D>
     @Test
     public void testQuery3() throws Exception
     {
-        run( db, new LdbcQuery3a( 15393162790207L, "Puerto_Rico", "Republic_of_Macedonia", new Date( 1291161600000L ), 30, LIMIT ) );
+        run( db, new LdbcQuery3( 15393162790207L, "Puerto_Rico", "Republic_of_Macedonia", new Date( 1291161600000L ), 30, LIMIT ) );
     }
 
     @Test
@@ -92,13 +120,13 @@ public abstract class InteractiveTest<D extends Db> extends SnbTest<D>
     @Test
     public void testQuery13() throws Exception
     {
-        run( db, new LdbcQuery13a( 32985348833679L, 26388279067108L ) );
+        run( db, new LdbcQuery13( 32985348833679L, 26388279067108L ) );
     }
 
     @Test
     public void testQuery14() throws Exception
     {
-        run( db, new LdbcQuery14a( 32985348833679L, 2199023256862L ) );
+        run( db, new LdbcQuery14( 32985348833679L, 2199023256862L ) );
     }
 
     @Test
@@ -146,8 +174,8 @@ public abstract class InteractiveTest<D extends Db> extends SnbTest<D>
     @Test
     public void testUpdateQuery1() throws Exception
     {
-        final LdbcInsert1AddPerson.Organization university1 = new LdbcInsert1AddPerson.Organization( 5142L, 2004 );
-        run( db, new LdbcInsert1AddPerson(
+        final LdbcUpdate1AddPerson.Organization university1 = new LdbcUpdate1AddPerson.Organization( 5142L, 2004 );
+        run( db, new LdbcUpdate1AddPerson(
                      10995116277777L,
                      "Almira",
                      "Patras",
@@ -169,31 +197,31 @@ public abstract class InteractiveTest<D extends Db> extends SnbTest<D>
     @Test
     public void testUpdateQuery2() throws Exception
     {
-        run( db, new LdbcInsert2AddPostLike( 8796093022239L, 206158430617L, new Date( 1290749436322L ) ) );
+        run( db, new LdbcUpdate2AddPostLike( 8796093022239L, 206158430617L, new Date( 1290749436322L ) ) );
     }
 
     @Test
     public void testUpdateQuery3() throws Exception
     {
-        run( db, new LdbcInsert3AddCommentLike( 4398046511123L, 343597384736L, new Date( 1290725729770L ) ) );
+        run( db, new LdbcUpdate3AddCommentLike( 4398046511123L, 343597384736L, new Date( 1290725729770L ) ) );
     }
 
     @Test
     public void testUpdateQuery4() throws Exception
     {
-        run( db, new LdbcInsert4AddForum( 343597383803L, "Album 1 of Wolfgang Bauer", new Date( 1290883501867L ), 10, ImmutableList.of( 4844L ) ) );
+        run( db, new LdbcUpdate4AddForum( 343597383803L, "Album 1 of Wolfgang Bauer", new Date( 1290883501867L ), 10, ImmutableList.of( 4844L ) ) );
     }
 
     @Test
     public void testUpdateQuery5() throws Exception
     {
-        run( db, new LdbcInsert5AddForumMembership( 343597383798L, 8796093022252L, new Date( 1290748277090L ) ) );
+        run( db, new LdbcUpdate5AddForumMembership( 343597383798L, 8796093022252L, new Date( 1290748277090L ) ) );
     }
 
     @Test
     public void testUpdateQuery6() throws Exception
     {
-        run( db, new LdbcInsert6AddPost(
+        run( db, new LdbcUpdate6AddPost(
                 343597384592L,
                 "photo343597384592.jpg",
                 new Date( 1290883512867L ),
@@ -212,7 +240,7 @@ public abstract class InteractiveTest<D extends Db> extends SnbTest<D>
     @Test
     public void testUpdateQuery7() throws Exception
     {
-        run( db, new LdbcInsert7AddComment(
+        run( db, new LdbcUpdate7AddComment(
                 343597384747L,
                 new Date( 1290689294243L ),
                 "49.206.89.61",
@@ -229,7 +257,7 @@ public abstract class InteractiveTest<D extends Db> extends SnbTest<D>
     @Test
     public void testUpdateQuery8() throws Exception
     {
-        run( db, new LdbcInsert8AddFriendship( 4398046511147L, 10995116277809L, new Date( 1290907550597L ) ) );
+        run( db, new LdbcUpdate8AddFriendship( 4398046511147L, 10995116277809L, new Date( 1290907550597L ) ) );
     }
 }
 

@@ -1,10 +1,9 @@
-INSERT INTO Message_hasTag_Tag (
-    creationDate
-  , id
-  , TagId
+insert into message_tag (
+    mt_messageid
+  , mt_tagid
 )
-SELECT
-    :creationDate
-  , :commentId
-  , unnest(:tagIds::bigint[])
-;
+values
+(
+    :commentId
+  , :tagId
+);

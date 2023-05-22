@@ -3,7 +3,7 @@ package org.ldbcouncil.snb.impls.workloads.cypher.operationhandlers;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.LdbcNoResult;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcNoResult;
 import org.ldbcouncil.snb.impls.workloads.cypher.CypherDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.UpdateOperationHandler;
 
@@ -34,8 +34,6 @@ public abstract class CypherUpdateOperationHandler<TOperation extends Operation<
         final Map<String, Object> parameters = getParameters( operation );
 
         final SessionConfig config = SessionConfig.builder().withDefaultAccessMode( AccessMode.WRITE ).build();
-
-        state.logQuery(operation.getClass().getSimpleName(), query);
         try ( final Session session = state.getSession( config ) )
         {
             final Result result = session.run( query, parameters );

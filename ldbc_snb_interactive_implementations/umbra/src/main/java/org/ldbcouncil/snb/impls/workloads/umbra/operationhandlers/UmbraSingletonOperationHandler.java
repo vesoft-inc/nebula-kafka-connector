@@ -6,10 +6,12 @@ import org.ldbcouncil.snb.driver.ResultReporter;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.SingletonOperationHandler;
 import org.ldbcouncil.snb.impls.workloads.umbra.UmbraDbConnectionState;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public abstract class UmbraSingletonOperationHandler<TOperation extends Operation<TOperationResult>, TOperationResult>
-        extends UmbraOperationHandler
         implements SingletonOperationHandler<TOperationResult, TOperation, UmbraDbConnectionState> {
 
     @Override
@@ -19,18 +21,15 @@ public abstract class UmbraSingletonOperationHandler<TOperation extends Operatio
             TOperationResult tuple = null;
             Connection conn = state.getConnection();
             int resultCount = 0;
-
             String queryString = getQueryString(state, operation);
-            replaceParameterNamesWithQuestionMarks(operation, queryString);
-            final PreparedStatement stmt = prepareAndSetParametersInPreparedStatement(operation, queryString, conn);
-            state.logQuery(operation.getClass().getSimpleName(), queryString);
 
-            try {
-                ResultSet result = stmt.executeQuery();
-
+            try (final Statement stmt = conn.createStatement()) {
+                state.logQuery(operation.getClass().getSimpleName(), queryString);
+    
+                ResultSet result = stmt.executeQuery(queryString);
                 if (result.next()) {
                     resultCount++;
-
+    
                     tuple = convertSingleResult(result);
                     if (state.isPrintResults())
                         System.out.println(tuple.toString());
@@ -40,7 +39,6 @@ public abstract class UmbraSingletonOperationHandler<TOperation extends Operatio
                 throw new DbException(e);
             }
             finally {
-                stmt.close();
                 conn.close();
             }
             resultReporter.report(resultCount, tuple, operation);

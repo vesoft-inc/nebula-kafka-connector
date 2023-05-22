@@ -1,11 +1,11 @@
-INSERT INTO Person_likes_Message (
-    creationDate
-  , PersonId
-  , id
+insert into likes (
+    l_personid
+  , l_messageid
+  , l_creationdate
 )
-VALUES
+values
 (
-    :creationDate
-  , :personId
+    :personId
   , :postId
+  , :creationDate
 );

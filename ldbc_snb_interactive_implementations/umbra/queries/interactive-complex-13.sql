@@ -1,46 +1,31 @@
-/* Q13. Single shortest path
-\set person1Id 17592186044461
-\set person2Id 15393162788877
- */
 WITH RECURSIVE
--- Bidirectional breadth first search
-bfs(dir, node, depth) AS (
-    SELECT dd,nn,ll FROM (VALUES (false, :person1Id::bigint, 0), (true, :person2Id::bigint, 0)) t(dd,nn,ll)
-    UNION ALL
-    (
-        with
-        rec AS (SELECT dir, node, depth FROM bfs),
-        md AS (SELECT max(depth) AS d FROM rec),
-        last AS (SELECT dir, node, depth FROM rec WHERE depth = (SELECT d FROM md)),
-        new AS (
-            SELECT dir, pkp.person2id AS dst, min(depth) + 1 AS md
-            FROM last, person_knows_person pkp
-            WHERE last.node = pkp.person1id AND pkp.person2id not in (SELECT node FROM rec WHERE last.dir = rec.dir)
-            group by dir, pkp.person2id
-        )
-        SELECT dir, dst, md
-        FROM
-            (SELECT dir, dst, md FROM new
-            union all
-            SELECT dir, node, depth
-            FROM rec) t
-        WHERE true 
-            AND EXISTS (SELECT * FROM new)
-            AND NOT EXISTS (
-                    SELECT *
-                    FROM last r1, rec r2
-                    WHERE r1.dir = true AND r2.dir = false AND r1.node = r2.node
-                )
-
-    )
-),
-md AS (SELECT max(depth) AS d FROM bfs),
-found(depth) AS (
-    SELECT min(r1.depth + r2.depth)
-    FROM bfs r1, bfs r2
-    WHERE r1.depth = (SELECT d FROM md) and
-          r1.dir = true AND r2.dir = false AND r1.node = r2.node
-
+    search_graph(endNode, level, path, endReached) AS (
+            SELECT
+                :person1Id::bigint AS endNode,
+                0 AS level,
+                array[:person1Id::bigint] AS path,
+                0 as endReached
+        UNION ALL
+            SELECT
+                k_person2id AS endNode,
+                sgx.level + 1 AS level,
+                array_append(path, k_person2id) AS path,
+                max(CASE WHEN k_person2id = :person2Id::bigint THEN 1 ELSE 0 END) OVER (ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING) AS endReached
+            FROM knows
+            JOIN search_graph sgx
+            ON sgx.endNode = k_person1id
+            -- stop if we have reached person2 in the previous iteration
+            WHERE sgx.endReached = 0
+            -- skip reaching persons reached in the previous iteration
+              AND NOT EXISTS (select * from search_graph sgy where sgy.endNode = k_person2id)
+            -- an alternative solution would be something like:
+            -- NOT EXISTS (SELECT * FROM search_graph sgy WHERE k_person2id = ANY(sgy.path))
+            -- but this results in the error "quantified expressions over arrays not implemented yet"
 )
-SELECT coalesce((SELECT depth FROM found), -1)
-;
+select max(depth) AS shortestPathLength from (
+    select level as depth
+    from search_graph
+    where endNode = :person2Id::bigint
+    union all
+    select -1 as depth
+);

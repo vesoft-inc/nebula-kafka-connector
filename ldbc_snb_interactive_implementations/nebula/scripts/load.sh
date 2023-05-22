@@ -22,13 +22,13 @@ data_dir=${LDBC_HOME}/test_data
 # replace nebula, space and data path
 # {{graph_addresses}}
 # {{graph_name}}
-sed "s/{{graph_name}}/${NEBULA_SPACE}/g" importer_template_node.yaml > importer_${NEBULA_SPACE}_node.yaml
-sed -i "s/{{graph_addresses}}/${NEBULA_ADDRESS}/g" importer_${NEBULA_SPACE}_node.yaml
-sed -i "s#{{data_folder}}#${data_dir}#g" importer_${NEBULA_SPACE}_node.yaml
+sed "s/{{graph_name}}/${GRAPH_NAME}/g" importer_template_node.yaml > importer_${GRAPH_NAME}_node.yaml
+sed -i "s/{{graph_addresses}}/${NEBULA_ADDRESS}/g" importer_${GRAPH_NAME}_node.yaml
+sed -i "s#{{data_folder}}#${data_dir}#g" importer_${GRAPH_NAME}_node.yaml
 
-sed "s/{{graph_name}}/${NEBULA_SPACE}/g" importer_template_edge.yaml > importer_${NEBULA_SPACE}_edge.yaml
-sed -i "s/{{graph_addresses}}/${NEBULA_ADDRESS}/g" importer_${NEBULA_SPACE}_edge.yaml
-sed -i "s#{{data_folder}}#${data_dir}#g" importer_${NEBULA_SPACE}_edge.yaml
+sed "s/{{graph_name}}/${GRAPH_NAME}/g" importer_template_edge.yaml > importer_${GRAPH_NAME}_edge.yaml
+sed -i "s/{{graph_addresses}}/${NEBULA_ADDRESS}/g" importer_${GRAPH_NAME}_edge.yaml
+sed -i "s#{{data_folder}}#${data_dir}#g" importer_${GRAPH_NAME}_edge.yaml
 
 if [ -x ${SCRIPT_DIR}/nebula-importer ];then
   echo "nebula-importer: ${SCRIPT_DIR}/nebula-importer is existed, ignore download"
@@ -39,6 +39,6 @@ fi
 
 # import data
 echo "import node"
-${SCRIPT_DIR}/nebula-importer --config importer_${NEBULA_SPACE}_node.yaml
+${SCRIPT_DIR}/nebula-importer --config importer_${GRAPH_NAME}_node.yaml
 echo "import edge"
-${SCRIPT_DIR}/nebula-importer --config importer_${NEBULA_SPACE}_edge.yaml
+${SCRIPT_DIR}/nebula-importer --config importer_${GRAPH_NAME}_edge.yaml

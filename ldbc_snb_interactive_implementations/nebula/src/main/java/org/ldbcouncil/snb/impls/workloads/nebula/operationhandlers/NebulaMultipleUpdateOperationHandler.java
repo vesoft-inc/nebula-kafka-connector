@@ -1,9 +1,10 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.*;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.LdbcNoResult;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.MultipleUpdateOperationHandler;
+import org.ldbcouncil.snb.driver.workloads.interactive.LdbcNoResult;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.net.Session;
 import java.util.List;
@@ -16,13 +17,13 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
     @Override
     public void executeOperation(TOperation operation, NebulaDbConnectionState state, ResultReporter resultReporter) throws DbException {
         try {
-            Session session = state.getSession();
+            NebulaClient client = state.getClient();
             List<String> queryStrings = getQueryString(state, operation);
             String graphName = state.getGraphName();
             for (String queryString : queryStrings) {
                 queryString = queryString.replace("$graphName", graphName);
                 state.logQuery(operation.getClass().getSimpleName(), queryString);
-                ResultSet result = session.execute(queryString);
+                ResultSet result = client.execute(queryString);
                 if (!result.isSucceeded()) {
                     System.out.println(result.getGqlStatus());
                 }

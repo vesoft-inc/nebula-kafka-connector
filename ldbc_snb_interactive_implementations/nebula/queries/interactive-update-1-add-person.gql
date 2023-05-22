@@ -6,4 +6,6 @@ INSERT NODE Person ({id: $personId,
                      birthday: $birthday,
                      creationDate: $creationDate,
                      locationIP: $locationIP,
-                     browserUsed: $browserUsed});
+                     browserUsed: $browserUsed,
+                     email: $emails,
+                     speaks: $languages});

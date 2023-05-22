@@ -1,0 +1,550 @@
+client:
+  version: v5
+  address: 127.0.0.1:3713
+  user: root
+  password: nebula
+  concurrencyPerAddress: 1
+  reconnectInitialInterval: 1s
+  retry: 3
+  retryInitialInterval: 1s
+
+manager:
+  graphName: sf01
+  batch: 128
+  readerConcurrency: 50
+  importerConcurrency: 512
+  statsInterval: 10s
+  hooks:
+    before:
+      - statements:
+          # TODO: add `` and rename extent -> length
+          - |
+            CREATE GRAPH TYPE ldbc_type2 IF NOT EXISTS AS GRAPH TYPE {
+                (City(id) LABELS City&Place {id INT64, name STRING, url STRING}),
+                (Country(id) LABELS Country&Place {id INT64, name STRING, url STRING}),
+                (Continent(id) LABELS Continent&Place {id INT64, name STRING, url STRING}),
+                (University(id) LABELS University&Organisation {id INT64, name STRING, url STRING}),
+                (Company(id) LABELS Company&Organisation {id INT64, name STRING, url STRING}),
+                (Person(id) LABEL Person {id INT64, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, email STRING, speaks STRING }),
+                (Forum(id) LABEL Forum {id INT64, title STRING, creationDate LOCALDATETIME}),
+                (Post(id) LABELS Post&Message {id INT64, imageFile STRING, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, language STRING, content STRING, extent INT}),
+                (Comment(id) LABELS Comment&Message {id INT64, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT32}),
+                (Tag(id) LABEL Tag {id INT64, name STRING, url STRING}),
+                (TagClass(id) LABEL TagClass {id INT64, name STRING, url STRING}),
+                (City)-[CITY_IS_PART_OF_COUNTRY:IS_PART_OF]->(Country),
+                (Country)-[COUNTRY_IS_PART_OF_CONTINENT:IS_PART_OF]->(Continent),
+                (University)-[UNIVERSITY_IS_LOCATED_IN_CITY:IS_LOCATED_IN]->(City),
+                (Company)-[COMPANY_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
+                (Person)-[PERSON_IS_LOCATED_IN_CITY:IS_LOCATED_IN]->(City),
+                (Person)-[PERSON_STUDY_AT_UNIVERSITY:STUDY_AT{classYear INT32}]->(University),
+                (Person)-[PERSON_WORK_AT_COMPANY:WORK_AT{workFrom INT32}]->(Company),
+                (Person)-[PERSON_LIKES_POST:LIKES{creationDate LOCALDATETIME}]->(Post),
+                (Person)-[PERSON_LIKES_COMMENT:LIKES{creationDate LOCALDATETIME}]->(Comment),
+                (Person)-[PERSON_HAS_INTEREST_TAG:HAS_INTEREST]->(Tag),
+                (Person)-[PERSON_KNOWS_PERSON:KNOWS{creationDate LOCALDATETIME}]->(Person),
+                (Post)-[POST_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
+                (Post)-[POST_HAS_CREATOR_PERSON:HAS_CREATOR]->(Person),
+                (Post)-[POST_HAS_TAG_TAG:HAS_TAG]->(Tag),
+                (Comment)-[COMMENT_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
+                (Comment)-[COMMENT_HAS_CREATOR_PERSON:HAS_CREATOR]->(Person),
+                (Comment)-[COMMENT_HAS_TAG_TAG:HAS_TAG]->(Tag),
+                (Comment)-[COMMENT_REPLY_OF_POST:REPLY_OF]->(Post),
+                (Comment)-[COMMENT_REPLY_OF_COMMENT:REPLY_OF]->(Comment),
+                (Forum)-[FORUM_CONTAINER_OF_POST:CONTAINER_OF]->(Post),
+                (Forum)-[FORUM_HAS_MEMBER_PERSON:HAS_MEMBER{joinDate LOCALDATETIME}]->(Person),
+                (Forum)-[FORUM_HAS_MODERATOR_PERSON:HAS_MODERATOR]->(Person),
+                (Forum)-[FORUM_HAS_TAG_TAG:HAS_TAG]->(Tag),
+                (Tag)-[TAG_HAS_TYPE_TAGCLASS:HAS_TYPE]->(TagClass),
+                (TagClass)-[TAGCLASS_IS_SUBCLASS_OF_TAGCLASS:IS_SUBCLASS_OF]->(TagClass)
+              }
+        wait: 10s
+      - statements:
+          - CREATE GRAPH sf01 IF NOT EXISTS OF ldbc_type2
+        wait: 5s
+
+sources:
+ 
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/static/city_isPartOf_country.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: CITY_IS_PART_OF_COUNTRY
+        src:
+          name: City
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Country
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/static/country_isPartOf_continent.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COUNTRY_IS_PART_OF_CONTINENT
+        src:
+          name: Country
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Continent
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/static/university_isLocatedIn_city.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: UNIVERSITY_IS_LOCATED_IN_CITY
+        src:
+          name: University
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: City
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/static/company_isLocatedIn_country.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COMPANY_IS_LOCATED_IN_COUNTRY
+        src:
+          name: Company
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Country
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_isLocatedIn_place.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_IS_LOCATED_IN_CITY
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: City
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_studyAt_organisation.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_STUDY_AT_UNIVERSITY
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: University
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+        props:
+          - name: 'classYear'
+            type: 'INT'
+            index: 2
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_workAt_organisation.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_WORK_AT_COMPANY
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Company
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+        props:
+          - name: 'workFrom'
+            type: 'INT'
+            index: 2
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_knows_person.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_KNOWS_PERSON
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+        props:
+          - name: 'creationDate'
+            type: 'LOCALDATETIME'
+            index: 2
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_likes_post.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_LIKES_POST
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Post
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+        props:
+          - name: 'creationDate'
+            type: 'LOCALDATETIME'
+            index: 2
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_likes_comment.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_LIKES_COMMENT
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+        props:
+          - name: 'creationDate'
+            type: 'LOCALDATETIME'
+            index: 2
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_hasInterest_tag.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: PERSON_HAS_INTEREST_TAG
+        src:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Tag
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/forum_hasMember_person.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: FORUM_HAS_MEMBER_PERSON
+        src:
+          name: Forum
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+        props:
+          - name: 'joinDate'
+            type: 'LOCALDATETIME'
+            index: 2
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/forum_hasModerator_person.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: FORUM_HAS_MODERATOR_PERSON
+        src:
+          name: Forum
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/forum_containerOf_post.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: FORUM_CONTAINER_OF_POST
+        src:
+          name: Forum
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/forum_hasTag_tag.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: FORUM_HAS_TAG_TAG
+        src:
+          name: Forum
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Tag
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/post_isLocatedIn_place.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: POST_IS_LOCATED_IN_COUNTRY
+        src:
+          name: Post
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Country
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/post_hasCreator_person.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: POST_HAS_CREATOR_PERSON
+        src:
+          name: Post
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/post_hasTag_tag.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: POST_HAS_TAG_TAG
+        src:
+          name: Post
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/comment_isLocatedIn_place.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COMMENT_IS_LOCATED_IN_COUNTRY
+        src:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Country
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/comment_hasCreator_person.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COMMENT_HAS_CREATOR_PERSON
+        src:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Person
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/comment_replyOf_post.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COMMENT_REPLY_OF_POST
+        src:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Post
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/comment_replyOf_comment.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COMMENT_REPLY_OF_COMMENT
+        src:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/comment_hasTag_tag.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: COMMENT_HAS_TAG_TAG
+        src:
+          name: Comment
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: Tag
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/static/tag_hasType_tagclass.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: TAG_HAS_TYPE_TAGCLASS
+        src:
+          name: Tag
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: TagClass
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+  - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/static/tagclass_isSubclassOf_tagclass.csv
+    csv:
+      delimiter: '|'
+    edges:
+      - name: TAGCLASS_IS_SUBCLASS_OF_TAGCLASS
+        src:
+          name: TagClass
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 0
+        dst:
+          name: TagClass
+          id:
+            name: 'id'
+            type: 'INT'
+            index: 1
+
+log:
+  level: INFO
+  console: true
+  files:
+    - nebula-importer.log
+  fields:
+    - key: app
+      value: nebula-importer
+
+
+

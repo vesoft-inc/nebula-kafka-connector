@@ -31,24 +31,25 @@ public abstract class CypherSingletonOperationHandler<TOperation extends Operati
         final Map<String, Object> parameters = getParameters(state, operation );
 
         final SessionConfig config = SessionConfig.builder().withDefaultAccessMode( AccessMode.READ ).build();
-
-        state.logQuery(operation.getClass().getSimpleName(), query);
         try ( final Session session = state.getSession( config ) )
         {
             final Result result = session.run( query, parameters );
             if ( result.hasNext() )
             {
-                resultReporter.report( 1, toResult( result.next() ), operation );
-                final ResultSummary summary = result.consume();
+                try
+                {
+                    resultReporter.report( 1, toResult( result.next() ), operation );
+                    final ResultSummary summary = result.consume();
+                }
+                catch ( ParseException e )
+                {
+                    throw new DbException( e );
+                }
             }
             else
             {
-                resultReporter.report( 0, toResult(null), operation );
+                resultReporter.report( 0, null, operation );
             }
-        }
-        catch ( ParseException e )
-        {
-            throw new DbException( e );
         }
     }
 }

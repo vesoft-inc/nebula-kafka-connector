@@ -6,8 +6,8 @@
 }
 */
 USE $graphName
-MATCH (person:Person)-[:KNOWS]-{2}(friend),(friend)-[:IS_LOCATED_IN]->(city:City)
-    WHERE friend <> person AND size( VALUE{ USE $graphName MATCH p0 = (friend)-[:KNOWS]-(person) RETURN p0} ) <> 0
+MATCH (person:Person {id : $personId})<-[:KNOWS]->{2}(friend:Person),(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+    WHERE friend <> person AND size( VALUE{ USE $graphName MATCH p0 = (friend:Person)<-[:KNOWS]->(person:Person{id : $personId}) RETURN p0} ) <> 0
     LET person = person,
         city = city,
         friend = friend,
@@ -16,12 +16,12 @@ MATCH (person:Person)-[:KNOWS]-{2}(friend),(friend)-[:IS_LOCATED_IN]->(city:City
 RETURN DISTINCT friend, city, person
 NEXT
 USE $graphName
-OPTIONAL MATCH (friend)<-[:HAS_CREATOR]-(post:Post)
+OPTIONAL MATCH (friend:Person)<-[:HAS_CREATOR]-(post:Post)
 AGGREGATE posts = collect(post) GROUP BY friend, city, person
 LET friend = friend,
     city = city,
     postCount = size(posts),
-    commonPostCount = size(List[p IN posts WHERE size(VALUE{ USE $graphName MATCH innerPath = (p)-[:HAS_TAG]->()<-[:HAS_INTEREST]-(person) RETURN innerPath}) <> 0]),
+    commonPostCount = size(List[p IN posts WHERE size(VALUE{ USE $graphName MATCH innerPath = (p:Post)-[:HAS_TAG]->(:Tag)<-[:HAS_INTEREST]-(person:Person {id : $personId}) RETURN innerPath}) <> 0]),
     personId = friend.id
 ORDER BY commonInterestScore DESC, personId ASC
 LIMIT 10

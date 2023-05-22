@@ -1,0 +1,1222 @@
+nohup: ignoring input
+ValidateDatabaseMode  Loaded Workload: org.ldbcouncil.snb.driver.workloads.interactive.LdbcSnbInteractiveWorkload
+Unable to load query from file: queries/interactive-complex-3-duration-as-function.gqlUnable to load query from file: queries/interactive-complex-4-duration-as-function.gqlUnable to load query from file: queries/interactive-complex-7-with-second.gqlUnable to load query from file: queries/interactive-update-1-add-person-emails.gqlUnable to load query from file: queries/interactive-update-1-add-person-languages.gqlUnable to load query from file: queries/interactive-update-6-add-post-content.gqlUnable to load query from file: queries/interactive-update-6-add-post-imagefile.gqlSLF4J: Failed to load class "org.slf4j.impl.StaticLoggerBinder".
+SLF4J: Defaulting to no-operation (NOP) logger implementation
+SLF4J: See http://www.slf4j.org/codes.html#StaticLoggerBinder for further details.
+ValidateDatabaseMode  Loaded DB: org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb
+ValidateDatabaseMode  Driver Configuration
+ValidateDatabaseMode  Workload Start Time:	2023-05-19 - 08:55:24.866
+Parameters:
+	Mode:                           validate_database
+	Name:                           LDBC-SNB
+	DB:                             org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb
+	Workload:                       org.ldbcouncil.snb.driver.workloads.interactive.LdbcSnbInteractiveWorkload
+	Operation Count:                500
+	Warmup Count:                   0
+	Skip Count:                     0
+	Worker Threads:                 1
+	Status Display Interval:        00:01.000 (m:s.ms)
+	Time Unit:                      MILLISECONDS
+	Results Directory:              /home/vesoft/ldbc_test_5.0/ldbc_snb_interactive_impls/nebula/results
+	Time Compression Ratio:         1.0000000
+	Validation Parameter Size:      0
+	Validation Serialization Check: true
+	Validation Database File:       /home/vesoft/ldbc_test_5.0/sf01/sf0_1_validation_params.csv
+	Spinner Sleep Duration:         00:00.000 (m:s.ms) / 0 (ms)
+	Print Help:                     false
+	Ignore Scheduled Start Times:   true
+	User-defined parameters:
+		endpoint = 127.0.0.1:3713
+		flush_log = false
+		graphName = sf01
+		ldbc.snb.interactive.LdbcQuery10_enable = true
+		ldbc.snb.interactive.LdbcQuery10_freq = 30
+		ldbc.snb.interactive.LdbcQuery10_interleave = 134310
+		ldbc.snb.interactive.LdbcQuery11_enable = true
+		ldbc.snb.interactive.LdbcQuery11_freq = 16
+		ldbc.snb.interactive.LdbcQuery11_interleave = 71632
+		ldbc.snb.interactive.LdbcQuery12_enable = true
+		ldbc.snb.interactive.LdbcQuery12_freq = 44
+		ldbc.snb.interactive.LdbcQuery12_interleave = 196988
+		ldbc.snb.interactive.LdbcQuery13_enable = false
+		ldbc.snb.interactive.LdbcQuery13_freq = 19
+		ldbc.snb.interactive.LdbcQuery13_interleave = 85063
+		ldbc.snb.interactive.LdbcQuery14_enable = false
+		ldbc.snb.interactive.LdbcQuery14_freq = 49
+		ldbc.snb.interactive.LdbcQuery14_interleave = 219373
+		ldbc.snb.interactive.LdbcQuery1_enable = false
+		ldbc.snb.interactive.LdbcQuery1_freq = 26
+		ldbc.snb.interactive.LdbcQuery1_interleave = 116402
+		ldbc.snb.interactive.LdbcQuery2_enable = true
+		ldbc.snb.interactive.LdbcQuery2_freq = 37
+		ldbc.snb.interactive.LdbcQuery2_interleave = 165649
+		ldbc.snb.interactive.LdbcQuery3_enable = true
+		ldbc.snb.interactive.LdbcQuery3_freq = 69
+		ldbc.snb.interactive.LdbcQuery3_interleave = 308913
+		ldbc.snb.interactive.LdbcQuery4_enable = true
+		ldbc.snb.interactive.LdbcQuery4_freq = 36
+		ldbc.snb.interactive.LdbcQuery4_interleave = 161172
+		ldbc.snb.interactive.LdbcQuery5_enable = true
+		ldbc.snb.interactive.LdbcQuery5_freq = 57
+		ldbc.snb.interactive.LdbcQuery5_interleave = 255189
+		ldbc.snb.interactive.LdbcQuery6_enable = true
+		ldbc.snb.interactive.LdbcQuery6_freq = 129
+		ldbc.snb.interactive.LdbcQuery6_interleave = 577533
+		ldbc.snb.interactive.LdbcQuery7_enable = true
+		ldbc.snb.interactive.LdbcQuery7_freq = 87
+		ldbc.snb.interactive.LdbcQuery7_interleave = 389499
+		ldbc.snb.interactive.LdbcQuery8_enable = true
+		ldbc.snb.interactive.LdbcQuery8_freq = 45
+		ldbc.snb.interactive.LdbcQuery8_interleave = 201465
+		ldbc.snb.interactive.LdbcQuery9_enable = true
+		ldbc.snb.interactive.LdbcQuery9_freq = 157
+		ldbc.snb.interactive.LdbcQuery9_interleave = 702889
+		ldbc.snb.interactive.LdbcShortQuery1PersonProfile_enable = true
+		ldbc.snb.interactive.LdbcShortQuery2PersonPosts_enable = true
+		ldbc.snb.interactive.LdbcShortQuery3PersonFriends_enable = true
+		ldbc.snb.interactive.LdbcShortQuery4MessageContent_enable = true
+		ldbc.snb.interactive.LdbcShortQuery5MessageCreator_enable = true
+		ldbc.snb.interactive.LdbcShortQuery6MessageForum_enable = true
+		ldbc.snb.interactive.LdbcShortQuery7MessageReplies_enable = true
+		ldbc.snb.interactive.LdbcUpdate1AddPerson_enable = true
+		ldbc.snb.interactive.LdbcUpdate2AddPostLike_enable = true
+		ldbc.snb.interactive.LdbcUpdate3AddCommentLike_enable = true
+		ldbc.snb.interactive.LdbcUpdate4AddForum_enable = true
+		ldbc.snb.interactive.LdbcUpdate5AddForumMembership_enable = true
+		ldbc.snb.interactive.LdbcUpdate6AddPost_enable = true
+		ldbc.snb.interactive.LdbcUpdate7AddComment_enable = true
+		ldbc.snb.interactive.LdbcUpdate8AddFriendship_enable = true
+		ldbc.snb.interactive.parameters_dir = /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/substitution_parameters/
+		ldbc.snb.interactive.scale_factor = 1
+		ldbc.snb.interactive.short_read_dissipation = 0.2
+		ldbc.snb.interactive.update_interleave = 4477
+		log_delayed = true
+		password = vesoft
+		peer_identifiers = 
+		printQueryNames = true
+		printQueryResults = false
+		printQueryStrings = true
+		queryDir = queries
+		results_log = false
+		user = nebula
+		workload_statistics = false
+
+ValidateDatabaseMode  Validating database against expected results
+ * Db: org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb
+ * Validation Params File: /home/vesoft/ldbc_test_5.0/sf01/sf0_1_validation_params.csv
+----
+########### LdbcUpdate7AddComment
+USE sf01
+INSERT NODE Comment ({id: 1099511997932,
+                      creationDate: '2012-09-13T09:38:10.363+0000',
+                      locationIP: '1.12.242.179',
+                      browserUsed: 'Opera',
+                      content: 'roflol',
+                      length: 6});
+
+ERROR: syntax error near `      '
+Processed 1 / 43 -- Crashed 0 -- Incorrect 0 -- Currently processing LdbcUpdate7AddComment...########### LdbcShortQuery2PersonPosts
+// IS2. Recent messages of a person
+/*
+:param personId: 10995116277795
+ */
+USE sf01
+MATCH (message:Message)-[:HAS_CREATOR]->(p:Person WHERE p.id = 26388279068220 )
+LET message=message, messageId=message.id, messageCreationDate=message.creationDate
+ORDER BY messageCreationDate DESC, messageId ASC
+LIMIT 10
+MATCH (message:Message)-[:REPLY_OF]->{0,3}(post:Post),
+  (post:Post)-[:HAS_CREATOR]->(person:Person)
+ORDER BY messageCreationDate DESC, messageId ASC
+RETURN
+  messageId,
+  coalesce(message.imageFile,message.content) AS messageContent,
+  messageCreationDate,
+  post.id AS postId,
+  person.id AS personId,
+  person.firstName AS personFirstName,
+  person.lastName AS personLastName
+
+java.lang.IllegalArgumentException: Unknown field id 16
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.descType(ValueWrapper.java:84)
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.asLong(ValueWrapper.java:245)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery2PersonPosts.toResult(NebulaDb.java:541)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery2PersonPosts.toResult(NebulaDb.java:523)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:48)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 2 / 43 -- Crashed 1 -- Incorrect 0 -- Currently processing LdbcShortQuery2PersonPosts...########### LdbcShortQuery3PersonFriends
+// IS3. Friends of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = 26388279068220)<-[r:KNOWS]->(friend:Person)
+ORDER BY
+  r.creationDate DESC,
+  friend.id ASC
+RETURN
+  friend.id AS personId,
+  friend.firstName AS firstName,
+  friend.lastName AS lastName,
+  r.creationDate AS friendshipCreationDate
+java.lang.IllegalArgumentException: Unknown field id 16
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.descType(ValueWrapper.java:84)
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.asLong(ValueWrapper.java:245)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery3PersonFriends.toResult(NebulaDb.java:580)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery3PersonFriends.toResult(NebulaDb.java:562)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:48)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 3 / 43 -- Crashed 2 -- Incorrect 0 -- Currently processing LdbcShortQuery3PersonFriends...########### LdbcShortQuery4MessageContent
+// IS4. Content of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 1099511997932)
+RETURN
+   m.creationDate as messageCreationDate,
+   coalesce(m.content, m.imageFile) as messageContent
+
+org.ldbcouncil.snb.driver.DbException: Db returned null result for: LdbcShortQuery4MessageContent
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:97)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 4 / 43 -- Crashed 3 -- Incorrect 0 -- Currently processing LdbcShortQuery4MessageContent...########### LdbcShortQuery5MessageCreator
+// IS5. Creator of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 1099511997932)-[:HAS_CREATOR]->(p:Person)
+RETURN
+  p.id AS personId,
+  p.firstName AS firstName,
+  p.lastName AS lastName
+org.ldbcouncil.snb.driver.DbException: Db returned null result for: LdbcShortQuery5MessageCreator
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:97)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 5 / 43 -- Crashed 4 -- Incorrect 0 -- Currently processing LdbcShortQuery5MessageCreator...########### LdbcShortQuery6MessageForum
+// IS6. Forum of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 1099511997932)-[:REPLY_OF]->{0,3}(p:Post)<-[:CONTAINER_OF]-(f:Forum)-[:HAS_MODERATOR]->(moderator:Person)
+RETURN
+  f.id AS forumId,
+  f.title AS forumTitle,
+  moderator.id AS moderatorId,
+  moderator.firstName AS moderatorFirstName,
+  moderator.lastName AS moderatorLastName
+org.ldbcouncil.snb.driver.DbException: Db returned null result for: LdbcShortQuery6MessageForum
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:97)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 6 / 43 -- Crashed 5 -- Incorrect 0 -- Currently processing LdbcShortQuery6MessageForum...########### LdbcShortQuery7MessageReplies
+// IS7. Replies of a message
+/*
+:param messageId: 206158432794
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 1099511997932)<-[:REPLY_OF]-(c:Comment)-[:HAS_CREATOR]->(p:Person)
+    OPTIONAL MATCH (m:Message WHERE m.id = 1099511997932)-[:HAS_CREATOR]->(a:Person)<-[r:KNOWS]->(p:Person)
+    ORDER BY c.creationDate DESC, p.id
+    RETURN c.id AS commentId,
+        c.content AS commentContent,
+        c.creationDate AS commentCreationDate,
+        p.id AS replyAuthorId,
+        p.firstName AS replyAuthorFirstName,
+        p.lastName AS replyAuthorLastName,
+        CASE r
+            WHEN is null THEN false
+            ELSE true
+        END AS replyAuthorKnowsOriginalMessageAuthor
+Processed 7 / 43 -- Crashed 5 -- Incorrect 0 -- Currently processing LdbcShortQuery7MessageReplies...########### LdbcQuery2
+// Q2. Recent messages by your friends
+/*
+:param [{ personId, maxDate }] => { RETURN
+  10995116278009 AS personId,
+  1287230400000 AS maxDate
+}
+*/
+USE sf01
+MATCH (person:Person {id: 19791209300143})<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < 1354060800000)
+ORDER BY message.creationDate DESC, message.id ASC
+LIMIT 20
+RETURN
+    friend.id AS personId,
+    friend.firstName AS personFirstName,
+    friend.lastName AS personLastName,
+    message.id AS postOrCommentId,
+    coalesce(message.content, message.imageFile) AS postOrCommentContent,
+    message.creationDate AS postOrCommentCreationDate
+Processed 8 / 43 -- Crashed 5 -- Incorrect 1 -- Currently processing LdbcQuery2...########### LdbcQuery4
+// Q4. New topics
+/*
+:param [{ personId, startDate, endDate }] => { RETURN
+  4398046511333 AS personId,
+  1275350400000 AS startDate,
+  1277856000000 AS endDate
+}
+*/
+USE sf01
+MATCH
+  (person:Person {id : 10995116278874})<-[:KNOWS]->(friend:Person),
+  (friend:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(tag:Tag)
+RETURN DISTINCT tag, post
+NEXT
+USE sf01
+LET valid = CASE
+        WHEN 1340928000000 > post.creationDate AND post.creationDate >= 1338508800000 THEN 1
+        ELSE 0
+    END,
+    invalid = CASE
+        WHEN 1338508800000 > post.creationDate THEN 1
+        ELSE 0
+    END
+AGGREGATE postCount=sum(valid), inValidPostCount=sum(inValid) GROUP BY tag
+FILTER WHERE postCount>0 AND inValidPostCount=0
+ORDER BY postCount DESC, tag.name ASC
+LIMIT 10
+RETURN tag.name AS tagName, postCount
+Processed 9 / 43 -- Crashed 5 -- Incorrect 2 -- Currently processing LdbcQuery4...########### LdbcQuery8
+// Q8. Recent replies
+/*
+:param personId: 143
+*/
+USE sf01
+MATCH (start:Person {id: 2199023256816})<-[:HAS_CREATOR]-(:Message)<-[:REPLY_OF]-(comment:Comment)-[:HAS_CREATOR]->(person:Person)
+ORDER BY
+  comment.creationDate DESC,
+  comment.id ASC
+LIMIT 20
+RETURN
+  person.id AS personId,
+  person.firstName AS personFirstName,
+  person.lastName AS personLastName,
+  comment.creationDate AS commentCreationDate,
+  comment.id AS commentId,
+  comment.content AS commentContent
+Processed 10 / 43 -- Crashed 5 -- Incorrect 3 -- Currently processing LdbcQuery8...########### LdbcQuery9
+// Q9. Recent messages by friends or friends of friends
+/*
+:param [{ personId, maxDate }] => { RETURN
+  4398046511268 AS personId,
+  1289908800000 AS maxDate
+}
+*/
+USE sf01
+MATCH (root:Person {id: 32985348834013 })<-[:KNOWS]->{1,2}(friend:Person)
+WHERE friend <> root
+AGGREGATE friends=collect(friend)
+FOR friend IN friends
+    MATCH (message:Message WHERE message.creationDate < 1346112000000)-[:HAS_CREATOR]->(friend:Person)
+ORDER BY
+  friend.id DESC,
+  message.id ASC
+LIMIT 20
+RETURN
+  friend.id AS personId,
+  friend.firstName AS personFirstName,
+  friend.lastName AS personLastName,
+  message.id AS commentOrPostId,
+  coalesce(message.content,message.imageFile) AS commentOrPostContent,
+  message.creationDate AS commentOrPostCreationDate
+
+Processed 11 / 43 -- Crashed 5 -- Incorrect 4 -- Currently processing LdbcQuery9...########### LdbcQuery5
+// Q5. New groups
+/*
+:param [{ personId, minDate }] => { RETURN
+  6597069766734 AS personId,
+  1288612800000 AS minDate
+}
+*/
+USE sf01
+MATCH (person:Person {id : 15393162790207})<-[:KNOWS]->{1,2}(otherPerson:Person)
+    WHERE person <> otherPerson
+RETURN DISTINCT otherPerson
+NEXT
+USE sf01
+MATCH (forum:Forum)-[membership:HAS_MEMBER WHERE membership.joinDate > 1344643200000]->(otherPerson:Person)
+    AGGREGATE otherPersons=collect(otherPerson) GROUP BY forum
+    OPTIONAL MATCH (otherPerson2:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
+        FILTER WHERE otherPerson2 IN otherPersons
+        AGGREGATE postCount=count(post) GROUP BY forum
+        ORDER BY
+        postCount DESC,
+        forum.id ASC
+LIMIT 20
+RETURN
+  forum.title AS forumName,
+  postCount
+
+Processed 12 / 43 -- Crashed 5 -- Incorrect 5 -- Currently processing LdbcQuery5...########### LdbcQuery10
+// Q10. Friend recommendation
+/*
+:param [{ personId, month }] => { RETURN
+  4398046511333 AS personId,
+  5 AS month
+}
+*/
+USE sf01
+MATCH (person:Person {id : 30786325579101})<-[:KNOWS]->{2}(friend:Person),(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+    WHERE friend <> person AND size( VALUE{ USE sf01 MATCH p0 = (friend:Person)<-[:KNOWS]->(person:Person{id : 30786325579101}) RETURN p0} ) <> 0
+    LET person = person,
+        city = city,
+        friend = friend,
+        birthday = datetime({epochMillis: friend.birthday})
+        WHERE (birthday.month=7 AND birthday.day>=21) OR (birthday.month=(7%12)+1 AND birthday.day<22)
+RETURN DISTINCT friend, city, person
+NEXT
+USE sf01
+OPTIONAL MATCH (friend:Person)<-[:HAS_CREATOR]-(post:Post)
+AGGREGATE posts = collect(post) GROUP BY friend, city, person
+LET friend = friend,
+    city = city,
+    postCount = size(posts),
+    commonPostCount = size(List[p IN posts WHERE size(VALUE{ USE sf01 MATCH innerPath = (p:Post)-[:HAS_TAG]->(:Tag)<-[:HAS_INTEREST]-(person:Person {id : 30786325579101}) RETURN innerPath}) <> 0]),
+    personId = friend.id
+ORDER BY commonInterestScore DESC, personId ASC
+LIMIT 10
+RETURN
+    personId,
+    friend.firstName AS personFirstName,
+    friend.lastName AS personLastName,
+    friend.birthday AS personBirthday,
+    commonPostCount - (postCount - commonPostCount) AS commonInterestScore,
+    friend.gender AS personGender,
+    city.name AS personCityName
+
+Processed 13 / 43 -- Crashed 5 -- Incorrect 6 -- Currently processing LdbcQuery10...########### LdbcQuery11
+// Q11. Job referral
+/*
+:param [{ personId, countryName, workFromYear }] => { RETURN
+  10995116277918 AS personId,
+  "Hungary" AS countryName,
+  2011 AS workFromYear
+}
+*/
+USE sf01
+MATCH (person:Person {id: 30786325579101 })<-[:KNOWS]->{1,2}(friend:Person)
+WHERE person <> friend
+RETURN DISTINCT friend
+NEXT
+USE sf01
+MATCH (friend:Person)-[workAt:WORK_AT WHERE workAt.workFrom < 2004]->(company:Company)-[:IS_LOCATED_IN]->(:Country {name : Puerto_Rico})
+ORDER BY
+  workAt.workFrom ASC,
+  friend.id ASC,
+  company.name DESC
+LIMIT 10
+RETURN
+  friend.id AS personId,
+  friend.firstName AS personFirstName,
+  friend.lastName AS personLastName,
+  company.name AS organizationName,
+  workAt.workFrom AS organizationWorkFromYear
+Processed 14 / 43 -- Crashed 5 -- Incorrect 6 -- Currently processing LdbcQuery11...########### LdbcQuery3
+// Q3. Friends and friends of friends that have been to given countries
+/*
+:param [{ personId, countryXName, countryYName, startDate, endDate }] => { RETURN
+  6597069766734 AS personId,
+  "Angola" AS countryXName,
+  "Colombia" AS countryYName,
+  1275393600000 AS startDate,
+  1277812800000 AS endDate
+}
+*/
+USE sf01
+MATCH (countryX:Country {name : Puerto_Rico}),
+      (countryY:Country {name : Republic_of_Macedonia}),
+      (person:Person {id : 15393162790207})
+LET person=person, countryX=countryX, countryY=countryY
+LIMIT 1
+MATCH (city:City)-[:IS_PART_OF]->(country:Country)
+WHERE country IN [countryX, countryY]
+AGGREGATE cities=collect(city) GROUP BY person, countryX, countryY
+MATCH (person:Person{id : 15393162790207})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+WHERE person <> friend AND city NOT IN cities
+RETURN DISTINCT friend, countryX, countryY
+NEXT
+USE sf01
+MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
+WHERE 1293753600000 > message.creationDate AND message.creationDate >= 1291161600000 AND country IN [countryX, countryY]
+LET
+  friend=friend,
+  messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
+  messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
+AGGREGATE xCount=sum(messageX), yCount=sum(messageY) GROUP BY friend
+WHERE xCount > 0 AND yCount > 0
+ORDER BY xCount+yCount DESC, friend.id ASC
+LIMIT 20
+RETURN friend.id AS friendId,
+  friend.firstName AS friendFirstName,
+  friend.lastName AS friendLastName,
+  xCount,
+  yCount,
+  xCount + yCount AS xyCount
+Processed 15 / 43 -- Crashed 5 -- Incorrect 6 -- Currently processing LdbcQuery3...########### LdbcQuery6
+// Q6. Tag co-occurrence
+/*
+:param [{ personId, tagName }] => { RETURN
+  4398046511333 AS personId,
+  "Carl_Gustaf_Emil_Mannerheim" AS tagName
+}
+*/
+USE sf01
+MATCH (knownTag:Tag {name : Shakira})
+LET knownTagId=knownTag.id
+MATCH (person:Person {id : 30786325579101})<-[:KNOWS]->{1,2}(friend:Person)
+WHERE person <> friend
+AGGREGATE friends=collect(distinct friend) GROUP BY knownTagId
+FOR f in friends
+    MATCH (post:Post)-[:HAS_CREATOR]->(f:Person),
+          (post:Post)-[:HAS_TAG]->(t:Tag {id: knownTagId}),
+          (post:Post)-[:HAS_TAG]->(tag:Tag)
+    WHERE t <> tag
+    AGGREGATE postCount=count(post) GROUP BY tag
+ORDER BY
+  postCount DESC,
+  tag.name ASC
+LIMIT 10
+RETURN
+  tag.name AS tagName,
+  postCount
+Processed 16 / 43 -- Crashed 5 -- Incorrect 7 -- Currently processing LdbcQuery6...########### LdbcQuery12
+// Q12. Expert search
+/*
+:param [{ personId, tagClassName }] => { RETURN
+  10995116278009 AS personId,
+  "Monarch" AS tagClassName
+}
+*/
+USE sf01
+MATCH (tag:Tag)-[:HAS_TYPE|IS_SUBCLASS_OF]->{0,3}(baseTagClass:TagClass)
+WHERE tag.name = BasketballPlayer OR baseTagClass.name = BasketballPlayer
+AGGREGATE tags=collect(tag.id)
+MATCH (:Person {id: 19791209300143 })<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(comment:Comment)-[:REPLY_OF]->(:Post)-[:HAS_TAG]->(tag:Tag)
+FILTER WHERE tag.id IN tags
+AGGREGATE tagNames=collect(DISTINCT tag.name),replyCount=count(DISTINCT comment) GROUP BY friend
+LIMIT 20
+RETURN friend.id AS personId,
+       friend.firstName AS personFirstName,
+       friend.lastName AS personLastName,
+       tagNames,
+       replyCount
+Processed 17 / 43 -- Crashed 5 -- Incorrect 8 -- Currently processing LdbcQuery12...########### LdbcQuery7
+// Q7. Recent likers
+/*
+:param personId: 4398046511268
+*/
+USE sf01
+MATCH (person:Person {id: 26388279067534})<-[:HAS_CREATOR]-(message:Message)<-[like:LIKES]-(liker:Person)
+  LET liker=liker, message=message, likeTime=likes.creationDate, person=person
+  ORDER BY likeTime DESC, message.id ASC
+  AGGREGATE latestLikes=collect(RECORD{msg: message, likeTime: likeTime}) GROUP BY liker, person
+  LET latestLike=head(latestLikes), liker=liker, person=person
+ORDER BY
+  latestLike.likeTime DESC,
+  liker.id ASC
+LIMIT 20
+RETURN
+  liker.id AS personId,
+  liker.firstName AS personFirstName,
+  liker.lastName AS personLastName,
+  latestLike.likeTime AS likeCreationDate,
+  latestLike.msg.id AS commentOrPostId,
+  coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS commentOrPostContent,
+  toInteger(floor(toFloat(latestLike.likeTime - latestLike.msg.creationDate)/1000.0)/60.0) AS minutesLatency,
+  size( VALUE{USE sf01 MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: 26388279067534}) RETURN p0} ) == 0 AS isNew
+Processed 18 / 43 -- Crashed 5 -- Incorrect 9 -- Currently processing LdbcQuery7...########### LdbcUpdate5AddForumMembership
+USE sf01
+INSERT EDGE FORUM_HAS_MEMBER_PERSON ({id:forumId})-[{joinDate: $creationDate}]->({id:17592186044532});
+Processed 19 / 43 -- Crashed 5 -- Incorrect 9 -- Currently processing LdbcUpdate5AddForumMembership...########### LdbcShortQuery1PersonProfile
+// IS1. Profile of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = 17592186044532)-[:IS_LOCATED_IN]->(p:City)
+RETURN
+    n.firstName AS firstName,
+    n.lastName AS lastName,
+    n.birthday AS birthday,
+    n.locationIP AS locationIP,
+    n.browserUsed AS browserUsed,
+    p.id AS cityId,
+    n.gender AS gender,
+    n.creationDate AS creationDate
+
+java.lang.IllegalArgumentException: Unknown field id 15
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.descType(ValueWrapper.java:84)
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.asLong(ValueWrapper.java:245)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery1PersonProfile.toResult(NebulaDb.java:499)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery1PersonProfile.toResult(NebulaDb.java:481)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:43)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:20)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 20 / 43 -- Crashed 6 -- Incorrect 9 -- Currently processing LdbcShortQuery1PersonProfile...########### LdbcShortQuery2PersonPosts
+// IS2. Recent messages of a person
+/*
+:param personId: 10995116277795
+ */
+USE sf01
+MATCH (message:Message)-[:HAS_CREATOR]->(p:Person WHERE p.id = 17592186044532 )
+LET message=message, messageId=message.id, messageCreationDate=message.creationDate
+ORDER BY messageCreationDate DESC, messageId ASC
+LIMIT 10
+MATCH (message:Message)-[:REPLY_OF]->{0,3}(post:Post),
+  (post:Post)-[:HAS_CREATOR]->(person:Person)
+ORDER BY messageCreationDate DESC, messageId ASC
+RETURN
+  messageId,
+  coalesce(message.imageFile,message.content) AS messageContent,
+  messageCreationDate,
+  post.id AS postId,
+  person.id AS personId,
+  person.firstName AS personFirstName,
+  person.lastName AS personLastName
+
+java.lang.IllegalArgumentException: Unknown field id 16
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.descType(ValueWrapper.java:84)
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.asLong(ValueWrapper.java:245)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery2PersonPosts.toResult(NebulaDb.java:541)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery2PersonPosts.toResult(NebulaDb.java:523)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:48)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 21 / 43 -- Crashed 7 -- Incorrect 9 -- Currently processing LdbcShortQuery2PersonPosts...########### LdbcShortQuery3PersonFriends
+// IS3. Friends of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = 17592186044532)<-[r:KNOWS]->(friend:Person)
+ORDER BY
+  r.creationDate DESC,
+  friend.id ASC
+RETURN
+  friend.id AS personId,
+  friend.firstName AS firstName,
+  friend.lastName AS lastName,
+  r.creationDate AS friendshipCreationDate
+java.lang.IllegalArgumentException: Unknown field id 16
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.descType(ValueWrapper.java:84)
+	at com.vesoft.nebula.client.graph.data.ValueWrapper.asLong(ValueWrapper.java:245)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery3PersonFriends.toResult(NebulaDb.java:580)
+	at org.ldbcouncil.snb.impls.workloads.nebula.NebulaDb$ShortQuery3PersonFriends.toResult(NebulaDb.java:562)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:48)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Processed 22 / 43 -- Crashed 8 -- Incorrect 9 -- Currently processing LdbcShortQuery3PersonFriends...########### LdbcQuery7
+// Q7. Recent likers
+/*
+:param personId: 4398046511268
+*/
+USE sf01
+MATCH (person:Person {id: 24189255811566})<-[:HAS_CREATOR]-(message:Message)<-[like:LIKES]-(liker:Person)
+  LET liker=liker, message=message, likeTime=likes.creationDate, person=person
+  ORDER BY likeTime DESC, message.id ASC
+  AGGREGATE latestLikes=collect(RECORD{msg: message, likeTime: likeTime}) GROUP BY liker, person
+  LET latestLike=head(latestLikes), liker=liker, person=person
+ORDER BY
+  latestLike.likeTime DESC,
+  liker.id ASC
+LIMIT 20
+RETURN
+  liker.id AS personId,
+  liker.firstName AS personFirstName,
+  liker.lastName AS personLastName,
+  latestLike.likeTime AS likeCreationDate,
+  latestLike.msg.id AS commentOrPostId,
+  coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS commentOrPostContent,
+  toInteger(floor(toFloat(latestLike.likeTime - latestLike.msg.creationDate)/1000.0)/60.0) AS minutesLatency,
+  size( VALUE{USE sf01 MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: 24189255811566}) RETURN p0} ) == 0 AS isNew
+Processed 23 / 43 -- Crashed 8 -- Incorrect 10 -- Currently processing LdbcQuery7...########### LdbcQuery5
+// Q5. New groups
+/*
+:param [{ personId, minDate }] => { RETURN
+  6597069766734 AS personId,
+  1288612800000 AS minDate
+}
+*/
+USE sf01
+MATCH (person:Person {id : 32985348833679})<-[:KNOWS]->{1,2}(otherPerson:Person)
+    WHERE person <> otherPerson
+RETURN DISTINCT otherPerson
+NEXT
+USE sf01
+MATCH (forum:Forum)-[membership:HAS_MEMBER WHERE membership.joinDate > 1347408000000]->(otherPerson:Person)
+    AGGREGATE otherPersons=collect(otherPerson) GROUP BY forum
+    OPTIONAL MATCH (otherPerson2:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
+        FILTER WHERE otherPerson2 IN otherPersons
+        AGGREGATE postCount=count(post) GROUP BY forum
+        ORDER BY
+        postCount DESC,
+        forum.id ASC
+LIMIT 20
+RETURN
+  forum.title AS forumName,
+  postCount
+
+Processed 24 / 43 -- Crashed 8 -- Incorrect 11 -- Currently processing LdbcQuery5...########### LdbcQuery2
+// Q2. Recent messages by your friends
+/*
+:param [{ personId, maxDate }] => { RETURN
+  10995116278009 AS personId,
+  1287230400000 AS maxDate
+}
+*/
+USE sf01
+MATCH (person:Person {id: 10995116278647})<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < 1346112000000)
+ORDER BY message.creationDate DESC, message.id ASC
+LIMIT 20
+RETURN
+    friend.id AS personId,
+    friend.firstName AS personFirstName,
+    friend.lastName AS personLastName,
+    message.id AS postOrCommentId,
+    coalesce(message.content, message.imageFile) AS postOrCommentContent,
+    message.creationDate AS postOrCommentCreationDate
+Processed 25 / 43 -- Crashed 8 -- Incorrect 12 -- Currently processing LdbcQuery2...########### LdbcQuery9
+// Q9. Recent messages by friends or friends of friends
+/*
+:param [{ personId, maxDate }] => { RETURN
+  4398046511268 AS personId,
+  1289908800000 AS maxDate
+}
+*/
+USE sf01
+MATCH (root:Person {id: 17592186044737 })<-[:KNOWS]->{1,2}(friend:Person)
+WHERE friend <> root
+AGGREGATE friends=collect(friend)
+FOR friend IN friends
+    MATCH (message:Message WHERE message.creationDate < 1343433600000)-[:HAS_CREATOR]->(friend:Person)
+ORDER BY
+  friend.id DESC,
+  message.id ASC
+LIMIT 20
+RETURN
+  friend.id AS personId,
+  friend.firstName AS personFirstName,
+  friend.lastName AS personLastName,
+  message.id AS commentOrPostId,
+  coalesce(message.content,message.imageFile) AS commentOrPostContent,
+  message.creationDate AS commentOrPostCreationDate
+
+Processed 26 / 43 -- Crashed 8 -- Incorrect 13 -- Currently processing LdbcQuery9...########### LdbcQuery4
+// Q4. New topics
+/*
+:param [{ personId, startDate, endDate }] => { RETURN
+  4398046511333 AS personId,
+  1275350400000 AS startDate,
+  1277856000000 AS endDate
+}
+*/
+USE sf01
+MATCH
+  (person:Person {id : 6597069766964})<-[:KNOWS]->(friend:Person),
+  (friend:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(tag:Tag)
+RETURN DISTINCT tag, post
+NEXT
+USE sf01
+LET valid = CASE
+        WHEN 1349913600000 > post.creationDate AND post.creationDate >= 1343779200000 THEN 1
+        ELSE 0
+    END,
+    invalid = CASE
+        WHEN 1343779200000 > post.creationDate THEN 1
+        ELSE 0
+    END
+AGGREGATE postCount=sum(valid), inValidPostCount=sum(inValid) GROUP BY tag
+FILTER WHERE postCount>0 AND inValidPostCount=0
+ORDER BY postCount DESC, tag.name ASC
+LIMIT 10
+RETURN tag.name AS tagName, postCount
+Processed 27 / 43 -- Crashed 8 -- Incorrect 14 -- Currently processing LdbcQuery4...########### LdbcQuery8
+// Q8. Recent replies
+/*
+:param personId: 143
+*/
+USE sf01
+MATCH (start:Person {id: 6597069767242})<-[:HAS_CREATOR]-(:Message)<-[:REPLY_OF]-(comment:Comment)-[:HAS_CREATOR]->(person:Person)
+ORDER BY
+  comment.creationDate DESC,
+  comment.id ASC
+LIMIT 20
+RETURN
+  person.id AS personId,
+  person.firstName AS personFirstName,
+  person.lastName AS personLastName,
+  comment.creationDate AS commentCreationDate,
+  comment.id AS commentId,
+  comment.content AS commentContent
+Processed 28 / 43 -- Crashed 8 -- Incorrect 15 -- Currently processing LdbcQuery8...########### LdbcQuery12
+// Q12. Expert search
+/*
+:param [{ personId, tagClassName }] => { RETURN
+  10995116278009 AS personId,
+  "Monarch" AS tagClassName
+}
+*/
+USE sf01
+MATCH (tag:Tag)-[:HAS_TYPE|IS_SUBCLASS_OF]->{0,3}(baseTagClass:TagClass)
+WHERE tag.name = Chancellor OR baseTagClass.name = Chancellor
+AGGREGATE tags=collect(tag.id)
+MATCH (:Person {id: 10995116278647 })<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(comment:Comment)-[:REPLY_OF]->(:Post)-[:HAS_TAG]->(tag:Tag)
+FILTER WHERE tag.id IN tags
+AGGREGATE tagNames=collect(DISTINCT tag.name),replyCount=count(DISTINCT comment) GROUP BY friend
+LIMIT 20
+RETURN friend.id AS personId,
+       friend.firstName AS personFirstName,
+       friend.lastName AS personLastName,
+       tagNames,
+       replyCount
+Processed 29 / 43 -- Crashed 8 -- Incorrect 16 -- Currently processing LdbcQuery12...########### LdbcQuery3
+// Q3. Friends and friends of friends that have been to given countries
+/*
+:param [{ personId, countryXName, countryYName, startDate, endDate }] => { RETURN
+  6597069766734 AS personId,
+  "Angola" AS countryXName,
+  "Colombia" AS countryYName,
+  1275393600000 AS startDate,
+  1277812800000 AS endDate
+}
+*/
+USE sf01
+MATCH (countryX:Country {name : Switzerland}),
+      (countryY:Country {name : Uruguay}),
+      (person:Person {id : 32985348833679})
+LET person=person, countryX=countryX, countryY=countryY
+LIMIT 1
+MATCH (city:City)-[:IS_PART_OF]->(country:Country)
+WHERE country IN [countryX, countryY]
+AGGREGATE cities=collect(city) GROUP BY person, countryX, countryY
+MATCH (person:Person{id : 32985348833679})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+WHERE person <> friend AND city NOT IN cities
+RETURN DISTINCT friend, countryX, countryY
+NEXT
+USE sf01
+MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
+WHERE 1302220800000 > message.creationDate AND message.creationDate >= 1298937600000 AND country IN [countryX, countryY]
+LET
+  friend=friend,
+  messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
+  messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
+AGGREGATE xCount=sum(messageX), yCount=sum(messageY) GROUP BY friend
+WHERE xCount > 0 AND yCount > 0
+ORDER BY xCount+yCount DESC, friend.id ASC
+LIMIT 20
+RETURN friend.id AS friendId,
+  friend.firstName AS friendFirstName,
+  friend.lastName AS friendLastName,
+  xCount,
+  yCount,
+  xCount + yCount AS xyCount
+Processed 30 / 43 -- Crashed 8 -- Incorrect 16 -- Currently processing LdbcQuery3...########### LdbcQuery10
+// Q10. Friend recommendation
+/*
+:param [{ personId, month }] => { RETURN
+  4398046511333 AS personId,
+  5 AS month
+}
+*/
+USE sf01
+MATCH (person:Person {id : 24189255811707})<-[:KNOWS]->{2}(friend:Person),(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+    WHERE friend <> person AND size( VALUE{ USE sf01 MATCH p0 = (friend:Person)<-[:KNOWS]->(person:Person{id : 24189255811707}) RETURN p0} ) <> 0
+    LET person = person,
+        city = city,
+        friend = friend,
+        birthday = datetime({epochMillis: friend.birthday})
+        WHERE (birthday.month=12 AND birthday.day>=21) OR (birthday.month=(12%12)+1 AND birthday.day<22)
+RETURN DISTINCT friend, city, person
+NEXT
+USE sf01
+OPTIONAL MATCH (friend:Person)<-[:HAS_CREATOR]-(post:Post)
+AGGREGATE posts = collect(post) GROUP BY friend, city, person
+LET friend = friend,
+    city = city,
+    postCount = size(posts),
+    commonPostCount = size(List[p IN posts WHERE size(VALUE{ USE sf01 MATCH innerPath = (p:Post)-[:HAS_TAG]->(:Tag)<-[:HAS_INTEREST]-(person:Person {id : 24189255811707}) RETURN innerPath}) <> 0]),
+    personId = friend.id
+ORDER BY commonInterestScore DESC, personId ASC
+LIMIT 10
+RETURN
+    personId,
+    friend.firstName AS personFirstName,
+    friend.lastName AS personLastName,
+    friend.birthday AS personBirthday,
+    commonPostCount - (postCount - commonPostCount) AS commonInterestScore,
+    friend.gender AS personGender,
+    city.name AS personCityName
+
+Processed 31 / 43 -- Crashed 8 -- Incorrect 17 -- Currently processing LdbcQuery10...########### LdbcQuery11
+// Q11. Job referral
+/*
+:param [{ personId, countryName, workFromYear }] => { RETURN
+  10995116277918 AS personId,
+  "Hungary" AS countryName,
+  2011 AS workFromYear
+}
+*/
+USE sf01
+MATCH (person:Person {id: 24189255811707 })<-[:KNOWS]->{1,2}(friend:Person)
+WHERE person <> friend
+RETURN DISTINCT friend
+NEXT
+USE sf01
+MATCH (friend:Person)-[workAt:WORK_AT WHERE workAt.workFrom < 2006]->(company:Company)-[:IS_LOCATED_IN]->(:Country {name : Switzerland})
+ORDER BY
+  workAt.workFrom ASC,
+  friend.id ASC,
+  company.name DESC
+LIMIT 10
+RETURN
+  friend.id AS personId,
+  friend.firstName AS personFirstName,
+  friend.lastName AS personLastName,
+  company.name AS organizationName,
+  workAt.workFrom AS organizationWorkFromYear
+Processed 32 / 43 -- Crashed 8 -- Incorrect 18 -- Currently processing LdbcQuery11...########### LdbcQuery6
+// Q6. Tag co-occurrence
+/*
+:param [{ personId, tagName }] => { RETURN
+  4398046511333 AS personId,
+  "Carl_Gustaf_Emil_Mannerheim" AS tagName
+}
+*/
+USE sf01
+MATCH (knownTag:Tag {name : Alberto_Fujimori})
+LET knownTagId=knownTag.id
+MATCH (person:Person {id : 24189255811707})<-[:KNOWS]->{1,2}(friend:Person)
+WHERE person <> friend
+AGGREGATE friends=collect(distinct friend) GROUP BY knownTagId
+FOR f in friends
+    MATCH (post:Post)-[:HAS_CREATOR]->(f:Person),
+          (post:Post)-[:HAS_TAG]->(t:Tag {id: knownTagId}),
+          (post:Post)-[:HAS_TAG]->(tag:Tag)
+    WHERE t <> tag
+    AGGREGATE postCount=count(post) GROUP BY tag
+ORDER BY
+  postCount DESC,
+  tag.name ASC
+LIMIT 10
+RETURN
+  tag.name AS tagName,
+  postCount
+Processed 33 / 43 -- Crashed 8 -- Incorrect 19 -- Currently processing LdbcQuery6...########### LdbcUpdate2AddPostLike
+USE sf01
+INSERT EDGE PERSON_LIKES_POST ({id: 35184372090183})-[{creationDate:'2012-09-13T09:40:09.074+0000'}]->({id:481036434045});
+Processed 34 / 43 -- Crashed 8 -- Incorrect 19 -- Currently processing LdbcUpdate2AddPostLike...########### LdbcShortQuery1PersonProfile
+// IS1. Profile of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = 35184372090183)-[:IS_LOCATED_IN]->(p:City)
+RETURN
+    n.firstName AS firstName,
+    n.lastName AS lastName,
+    n.birthday AS birthday,
+    n.locationIP AS locationIP,
+    n.browserUsed AS browserUsed,
+    p.id AS cityId,
+    n.gender AS gender,
+    n.creationDate AS creationDate
+
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:49)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:20)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:150)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:40)
+	... 5 more
+Processed 35 / 43 -- Crashed 9 -- Incorrect 19 -- Currently processing LdbcShortQuery1PersonProfile...########### LdbcShortQuery2PersonPosts
+// IS2. Recent messages of a person
+/*
+:param personId: 10995116277795
+ */
+USE sf01
+MATCH (message:Message)-[:HAS_CREATOR]->(p:Person WHERE p.id = 35184372090183 )
+LET message=message, messageId=message.id, messageCreationDate=message.creationDate
+ORDER BY messageCreationDate DESC, messageId ASC
+LIMIT 10
+MATCH (message:Message)-[:REPLY_OF]->{0,3}(post:Post),
+  (post:Post)-[:HAS_CREATOR]->(person:Person)
+ORDER BY messageCreationDate DESC, messageId ASC
+RETURN
+  messageId,
+  coalesce(message.imageFile,message.content) AS messageContent,
+  messageCreationDate,
+  post.id AS postId,
+  person.id AS personId,
+  person.firstName AS personFirstName,
+  person.lastName AS personLastName
+
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:53)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:150)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:44)
+	... 5 more
+Processed 36 / 43 -- Crashed 10 -- Incorrect 19 -- Currently processing LdbcShortQuery2PersonPosts...########### LdbcShortQuery3PersonFriends
+// IS3. Friends of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = 35184372090183)<-[r:KNOWS]->(friend:Person)
+ORDER BY
+  r.creationDate DESC,
+  friend.id ASC
+RETURN
+  friend.id AS personId,
+  friend.firstName AS firstName,
+  friend.lastName AS lastName,
+  r.creationDate AS friendshipCreationDate
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:53)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:44)
+	... 5 more
+Processed 37 / 43 -- Crashed 11 -- Incorrect 19 -- Currently processing LdbcShortQuery3PersonFriends...########### LdbcShortQuery4MessageContent
+// IS4. Content of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 481036434045)
+RETURN
+   m.creationDate as messageCreationDate,
+   coalesce(m.content, m.imageFile) as messageContent
+
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:49)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:20)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:40)
+	... 5 more
+Processed 38 / 43 -- Crashed 12 -- Incorrect 19 -- Currently processing LdbcShortQuery4MessageContent...########### LdbcShortQuery5MessageCreator
+// IS5. Creator of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 481036434045)-[:HAS_CREATOR]->(p:Person)
+RETURN
+  p.id AS personId,
+  p.firstName AS firstName,
+  p.lastName AS lastName
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:49)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:20)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:40)
+	... 5 more
+Processed 39 / 43 -- Crashed 13 -- Incorrect 19 -- Currently processing LdbcShortQuery5MessageCreator...########### LdbcShortQuery6MessageForum
+// IS6. Forum of a message
+/*
+:param messageId: 206158431836
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 481036434045)-[:REPLY_OF]->{0,3}(p:Post)<-[:CONTAINER_OF]-(f:Forum)-[:HAS_MODERATOR]->(moderator:Person)
+RETURN
+  f.id AS forumId,
+  f.title AS forumTitle,
+  moderator.id AS moderatorId,
+  moderator.firstName AS moderatorFirstName,
+  moderator.lastName AS moderatorLastName
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:49)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:20)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:40)
+	... 5 more
+Processed 40 / 43 -- Crashed 14 -- Incorrect 19 -- Currently processing LdbcShortQuery6MessageForum...########### LdbcShortQuery7MessageReplies
+// IS7. Replies of a message
+/*
+:param messageId: 206158432794
+ */
+USE sf01
+MATCH (m:Message WHERE m.id = 481036434045)<-[:REPLY_OF]-(c:Comment)-[:HAS_CREATOR]->(p:Person)
+    OPTIONAL MATCH (m:Message WHERE m.id = 481036434045)-[:HAS_CREATOR]->(a:Person)<-[r:KNOWS]->(p:Person)
+    ORDER BY c.creationDate DESC, p.id
+    RETURN c.id AS commentId,
+        c.content AS commentContent,
+        c.creationDate AS commentCreationDate,
+        p.id AS replyAuthorId,
+        p.firstName AS replyAuthorFirstName,
+        p.lastName AS replyAuthorLastName,
+        CASE r
+            WHEN is null THEN false
+            ELSE true
+        END AS replyAuthorKnowsOriginalMessageAuthor
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:53)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:22)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler.executeOperation(NebulaListOperationHandler.java:44)
+	... 5 more
+Processed 41 / 43 -- Crashed 15 -- Incorrect 19 -- Currently processing LdbcShortQuery7MessageReplies...########### LdbcUpdate2AddPostLike
+USE sf01
+INSERT EDGE PERSON_LIKES_POST ({id: 6597069766720})-[{creationDate:'2012-09-13T09:40:17.881+0000'}]->({id:1030792332314});
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaUpdateOperationHandler.executeOperation(NebulaUpdateOperationHandler.java:46)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaUpdateOperationHandler.executeOperation(NebulaUpdateOperationHandler.java:18)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaUpdateOperationHandler.executeOperation(NebulaUpdateOperationHandler.java:41)
+	... 5 more
+Processed 42 / 43 -- Crashed 16 -- Incorrect 19 -- Currently processing LdbcUpdate2AddPostLike...########### LdbcShortQuery1PersonProfile
+// IS1. Profile of a person
+/*
+:param personId: 10995116277794
+ */
+USE sf01
+MATCH (n:Person WHERE n.id = 6597069766720)-[:IS_LOCATED_IN]->(p:City)
+RETURN
+    n.firstName AS firstName,
+    n.lastName AS lastName,
+    n.birthday AS birthday,
+    n.locationIP AS locationIP,
+    n.browserUsed AS browserUsed,
+    p.id AS cityId,
+    n.gender AS gender,
+    n.creationDate AS creationDate
+
+java.lang.RuntimeException: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:49)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:20)
+	at org.ldbcouncil.snb.driver.validation.DbValidator.validate(DbValidator.java:93)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:111)
+	at org.ldbcouncil.snb.driver.client.ValidateDatabaseMode.startExecutionAndAwaitCompletion(ValidateDatabaseMode.java:29)
+	at org.ldbcouncil.snb.driver.Client.main(Client.java:65)
+Caused by: com.vesoft.nebula.client.graph.exception.IOErrorException: java.net.SocketException: Broken pipe (Write failed)
+	at com.vesoft.nebula.client.graph.net.SyncConnection.execute(SyncConnection.java:163)
+	at com.vesoft.nebula.client.graph.net.Session.execute(Session.java:90)
+	at org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler.executeOperation(NebulaSingletonOperationHandler.java:40)
+	... 5 more
+Processed 43 / 43 -- Crashed 17 -- Incorrect 19 -- Currently processing LdbcShortQuery1PersonProfile...
+----
+ValidateDatabaseMode  Validation Result: FAIL
+Database: org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb
+  ***
+  Successfully executed 6 operation types
+    0 / 2              LdbcQuery10
+    1 / 2              LdbcQuery11
+    0 / 2              LdbcQuery12
+    0 / 2              LdbcQuery2
+    2 / 2              LdbcQuery3
+    0 / 2              LdbcQuery4
+    0 / 2              LdbcQuery5
+    0 / 2              LdbcQuery6
+    0 / 2              LdbcQuery7
+    0 / 2              LdbcQuery8
+    0 / 2              LdbcQuery9
+    0 / 3              LdbcShortQuery1PersonProfile
+    0 / 3              LdbcShortQuery2PersonPosts
+    0 / 3              LdbcShortQuery3PersonFriends
+    0 / 2              LdbcShortQuery4MessageContent
+    0 / 2              LdbcShortQuery5MessageCreator
+    0 / 2              LdbcShortQuery6MessageForum
+    1 / 2              LdbcShortQuery7MessageReplies
+    1 / 2              LdbcUpdate2AddPostLike
+    1 / 1              LdbcUpdate5AddForumMembership
+    1 / 1              LdbcUpdate7AddComment
+  ***
+  Missing handler implementations for 0 operation types
+  ***
+  Unable to execute 17 operations
+LdbcShortQuery1PersonProfile               3
+LdbcShortQuery2PersonPosts               3
+LdbcShortQuery3PersonFriends               3
+LdbcShortQuery4MessageContent               2
+LdbcShortQuery5MessageCreator               2
+LdbcShortQuery6MessageForum               2
+LdbcShortQuery7MessageReplies               1
+LdbcUpdate2AddPostLike               1
+  ***
+  Incorrect results for 19 operations
+LdbcQuery10               2
+LdbcQuery11               1
+LdbcQuery12               2
+LdbcQuery2               2
+LdbcQuery4               2
+LdbcQuery5               2
+LdbcQuery6               2
+LdbcQuery7               2
+LdbcQuery8               2
+LdbcQuery9               2
+  ***
+
+ValidateDatabaseMode  For details see the following files:
+ * /home/vesoft/ldbc_test_5.0/sf01/sf0_1_validation_params-failed-actual.json
+ * /home/vesoft/ldbc_test_5.0/sf01/sf0_1_validation_params-failed-expected.json

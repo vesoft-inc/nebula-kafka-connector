@@ -1,34 +1,24 @@
-INSERT INTO Message (
-    creationDate
-  , id
-  , RootPostId
-  , RootPostLanguage
-  , content
-  , imageFile
-  , locationIP
-  , browserUsed
-  , length
-  , CreatorPersonId
-  , ContainerForumId
-  , LocationCountryId
-  , ParentMessageId
+insert into message (
+    -- only comment-related fields are filled explicitly
+    m_messageid
+  , m_creationdate
+  , m_locationip
+  , m_browserused
+  , m_content
+  , m_length
+  , m_creatorid
+  , m_locationid
+  , m_c_replyof
 )
-SELECT
-    :creationDate
-  , :commentId::bigint
-  , parent.RootPostId
-  , parent.RootPostLanguage
-  , :content::text
-  , NULL
-  , :locationIP::text
-  , :browserUsed::text
+values
+(
+    :commentId
+  , :creationDate
+  , :locationIP
+  , :browserUsed
+  , :content
   , :length
-  , :authorPersonId -- CreatorPersonId
-  , NULL
-  , :countryId -- LocationCountryId
-  , :replyToCommentId + :replyToPostId
-FROM
-  Message parent
-WHERE
-  parent.id = (:replyToCommentId + :replyToPostId)
-;
+  , :authorPersonId
+  , :countryId
+  , :replyToCommentId + :replyToPostId + 1 -- replyToCommentId is -1 if the message is a reply to a post and vica versa (see spec)
+);

@@ -1,27 +1,23 @@
-INSERT INTO person (
-    creationDate
-  , id
-  , firstName
-  , lastName
-  , gender
-  , birthday
-  , locationIP
-  , browserUsed
-  , LocationCityId
-  , speaks
-  , email
+insert into person (
+    p_personid
+  , p_firstname
+  , p_lastname
+  , p_gender
+  , p_birthday
+  , p_creationdate
+  , p_locationip
+  , p_browserused
+  , p_placeid
 )
-VALUES
+values
 (
-    :creationDate
-  , :personId
-  , :personFirstName::varchar
-  , :personLastName::varchar
-  , :gender::varchar
+    :personId
+  , :personFirstName
+  , :personLastName
+  , :gender
   , :birthday
-  , :locationIP::varchar
-  , :browserUsed::varchar
+  , :creationDate
+  , :locationIP
+  , :browserUsed
   , :cityId
-  , :languages::varchar
-  , :emails::varchar
 );

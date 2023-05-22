@@ -14,7 +14,7 @@ package org.ldbcouncil.snb.impls.workloads;
  */
 import com.google.common.collect.ImmutableMap;
 import org.ldbcouncil.snb.driver.DbException;
-import org.ldbcouncil.snb.driver.workloads.interactive.queries.*;
+import org.ldbcouncil.snb.driver.workloads.interactive.*;
 import org.ldbcouncil.snb.impls.workloads.converter.Converter;
 
 import java.io.File;
@@ -154,16 +154,7 @@ public abstract class QueryStore {
      * @param operation LdbcQuery3 operation containing parameter values
      * @return Prepared Query3 string
      */
-    public String getQuery3(LdbcQuery3a operation) {
-        return prepare(QueryType.InteractiveComplexQuery3, getQuery3Map(operation));
-    }
-
-    /**
-     * Get prepared Query3 string
-     * @param operation LdbcQuery3 operation containing parameter values
-     * @return Prepared Query3 string
-     */
-    public String getQuery3(LdbcQuery3b operation) {
+    public String getQuery3(LdbcQuery3 operation) {
         return prepare(QueryType.InteractiveComplexQuery3, getQuery3Map(operation));
     }
 
@@ -172,23 +163,13 @@ public abstract class QueryStore {
      * @param operation LdbcQuery3 operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getQuery3Map(LdbcQuery3a operation) {
+    public Map<String, Object> getQuery3Map(LdbcQuery3 operation) {
         return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcQuery3a.PERSON_ID, getConverter().convertId(operation.getPersonIdQ3()))
-        .put(LdbcQuery3a.COUNTRY_X_NAME, getConverter().convertString(operation.getCountryXName()))
-        .put(LdbcQuery3a.COUNTRY_Y_NAME, getConverter().convertString(operation.getCountryYName()))
-        .put(LdbcQuery3a.START_DATE, getConverter().convertDate(operation.getStartDate()))
-        .put(LdbcQuery3a.DURATION_DAYS, getConverter().convertInteger(operation.getDurationDays()))
-        .build();
-    }
-
-    public Map<String, Object> getQuery3Map(LdbcQuery3b operation) {
-        return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcQuery3b.PERSON_ID, getConverter().convertId(operation.getPersonIdQ3()))
-        .put(LdbcQuery3b.COUNTRY_X_NAME, getConverter().convertString(operation.getCountryXName()))
-        .put(LdbcQuery3b.COUNTRY_Y_NAME, getConverter().convertString(operation.getCountryYName()))
-        .put(LdbcQuery3b.START_DATE, getConverter().convertDate(operation.getStartDate()))
-        .put(LdbcQuery3b.DURATION_DAYS, getConverter().convertInteger(operation.getDurationDays()))
+        .put(LdbcQuery3.PERSON_ID, getConverter().convertId(operation.getPersonIdQ3()))
+        .put(LdbcQuery3.COUNTRY_X_NAME, getConverter().convertString(operation.getCountryXName()))
+        .put(LdbcQuery3.COUNTRY_Y_NAME, getConverter().convertString(operation.getCountryYName()))
+        .put(LdbcQuery3.START_DATE, getConverter().convertDate(operation.getStartDate()))
+        .put(LdbcQuery3.DURATION_DAYS, getConverter().convertInteger(operation.getDurationDays()))
         .build();
     }
 
@@ -386,11 +367,7 @@ public abstract class QueryStore {
      * @param operation LdbcQuery13 operation containing parameter values
      * @return Prepared Query13 string
      */
-    public String getQuery13(LdbcQuery13a operation) {
-        return prepare(QueryType.InteractiveComplexQuery13, getQuery13Map(operation));
-    }
-
-    public String getQuery13(LdbcQuery13b operation) {
+    public String getQuery13(LdbcQuery13 operation) {
         return prepare(QueryType.InteractiveComplexQuery13, getQuery13Map(operation));
     }
 
@@ -399,17 +376,10 @@ public abstract class QueryStore {
      * @param operation LdbcQuery13 operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getQuery13Map (LdbcQuery13a operation) {
+    public Map<String, Object> getQuery13Map (LdbcQuery13 operation) {
         return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcQuery13a.PERSON1_ID, getConverter().convertId(operation.getPerson1IdQ13StartNode()))
-        .put(LdbcQuery13a.PERSON2_ID, getConverter().convertId(operation.getPerson2IdQ13EndNode()))
-        .build();
-    }
-
-    public Map<String, Object> getQuery13Map (LdbcQuery13b operation) {
-        return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcQuery13b.PERSON1_ID, getConverter().convertId(operation.getPerson1IdQ13StartNode()))
-        .put(LdbcQuery13b.PERSON2_ID, getConverter().convertId(operation.getPerson2IdQ13EndNode()))
+        .put(LdbcQuery13.PERSON1_ID, getConverter().convertId(operation.getPerson1IdQ13StartNode()))
+        .put(LdbcQuery13.PERSON2_ID, getConverter().convertId(operation.getPerson2IdQ13EndNode()))
         .build();
     }
 
@@ -418,11 +388,7 @@ public abstract class QueryStore {
      * @param operation LdbcQuery14 operation containing parameter values
      * @return Prepared Query14 string
      */
-    public String getQuery14(LdbcQuery14a operation) {
-        return prepare(QueryType.InteractiveComplexQuery14, getQuery14Map(operation));
-    }
-
-    public String getQuery14(LdbcQuery14b operation) {
+    public String getQuery14(LdbcQuery14 operation) {
         return prepare(QueryType.InteractiveComplexQuery14, getQuery14Map(operation));
     }
 
@@ -431,17 +397,10 @@ public abstract class QueryStore {
      * @param operation LdbcQuery14 operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getQuery14Map (LdbcQuery14a operation) {
+    public Map<String, Object> getQuery14Map (LdbcQuery14 operation) {
         return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcQuery14a.PERSON1_ID, getConverter().convertId(operation.getPerson1IdQ14StartNode()))
-        .put(LdbcQuery14a.PERSON2_ID, getConverter().convertId(operation.getPerson2IdQ14EndNode()))
-        .build();
-    }
-
-    public Map<String, Object> getQuery14Map (LdbcQuery14b operation) {
-        return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcQuery14b.PERSON1_ID, getConverter().convertId(operation.getPerson1IdQ14StartNode()))
-        .put(LdbcQuery14b.PERSON2_ID, getConverter().convertId(operation.getPerson2IdQ14EndNode()))
+        .put(LdbcQuery14.PERSON1_ID, getConverter().convertId(operation.getPerson1IdQ14StartNode()))
+        .put(LdbcQuery14.PERSON2_ID, getConverter().convertId(operation.getPerson2IdQ14EndNode()))
         .build();
     }
 
@@ -592,223 +551,223 @@ public abstract class QueryStore {
      * @param operation UpdateQuery1 operation containing parameter values
      * @return Prepared UpdateQuery1 string
      */
-    public String getInsert1Single(LdbcInsert1AddPerson operation) {
+    public String getUpdate1Single(LdbcUpdate1AddPerson operation) {
         return prepare(
-                QueryType.InteractiveInsert1, getInsert1SingleMap(operation)
+                QueryType.InteractiveUpdate1, getUpdate1SingleMap(operation)
         );
     }
 
     /**
      * Get UpdateQuery1 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert1AddPerson operation containing parameter values
+     * @param operation LdbcUpdate1AddPerson operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert1SingleMap(LdbcInsert1AddPerson operation) {
+    public Map<String, Object> getUpdate1SingleMap(LdbcUpdate1AddPerson operation) {
         return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcInsert1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
-        .put(LdbcInsert1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()))
-        .put(LdbcInsert1AddPerson.PERSON_FIRST_NAME, getConverter().convertString(operation.getPersonFirstName()))
-        .put(LdbcInsert1AddPerson.PERSON_LAST_NAME, getConverter().convertString(operation.getPersonLastName()))
-        .put(LdbcInsert1AddPerson.GENDER, getConverter().convertString(operation.getGender()))
-        .put(LdbcInsert1AddPerson.BIRTHDAY, getConverter().convertDate(operation.getBirthday()))
-        .put(LdbcInsert1AddPerson.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
-        .put(LdbcInsert1AddPerson.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
-        .put(LdbcInsert1AddPerson.CITY_ID, getConverter().convertId(operation.getCityId()))
-        .put(LdbcInsert1AddPerson.WORK_AT, getConverter().convertOrganisations(operation.getWorkAt()))
-        .put(LdbcInsert1AddPerson.STUDY_AT, getConverter().convertOrganisations(operation.getStudyAt()))
-        .put(LdbcInsert1AddPerson.EMAILS, getConverter().convertStringList(operation.getEmails()))
-        .put(LdbcInsert1AddPerson.LANGUAGES, getConverter().convertStringList(operation.getLanguages()))
-        .put(LdbcInsert1AddPerson.TAG_IDS, getConverter().convertLongList(operation.getTagIds()))
+        .put(LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()))
+        .put(LdbcUpdate1AddPerson.PERSON_FIRST_NAME, getConverter().convertString(operation.getPersonFirstName()))
+        .put(LdbcUpdate1AddPerson.PERSON_LAST_NAME, getConverter().convertString(operation.getPersonLastName()))
+        .put(LdbcUpdate1AddPerson.GENDER, getConverter().convertString(operation.getGender()))
+        .put(LdbcUpdate1AddPerson.BIRTHDAY, getConverter().convertDate(operation.getBirthday()))
+        .put(LdbcUpdate1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
+        .put(LdbcUpdate1AddPerson.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
+        .put(LdbcUpdate1AddPerson.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
+        .put(LdbcUpdate1AddPerson.CITY_ID, getConverter().convertId(operation.getCityId()))
+        .put(LdbcUpdate1AddPerson.WORK_AT, getConverter().convertOrganisations(operation.getWorkAt()))
+        .put(LdbcUpdate1AddPerson.STUDY_AT, getConverter().convertOrganisations(operation.getStudyAt()))
+        .put(LdbcUpdate1AddPerson.EMAILS, getConverter().convertStringList(operation.getEmails()))
+        .put(LdbcUpdate1AddPerson.LANGUAGES, getConverter().convertStringList(operation.getLanguages()))
+        .put(LdbcUpdate1AddPerson.TAG_IDS, getConverter().convertLongList(operation.getTagIds()))
         .build();
     }
 
     /**
      * Get prepared UpdateQuery2 string
-     * @param operation LdbcInsert2AddPostLike operation containing parameter values
+     * @param operation LdbcUpdate2AddPostLike operation containing parameter values
      * @return Prepared UpdateQuery2 string
      */
-    public String getInsert2(LdbcInsert2AddPostLike operation) {
+    public String getUpdate2(LdbcUpdate2AddPostLike operation) {
         return prepare(
-                QueryType.InteractiveInsert2, getInsert2Map(operation)
+                QueryType.InteractiveUpdate2, getUpdate2Map(operation)
         );
     }
 
     /**
      * Get UpdateQuery2 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert2AddPostLike operation containing parameter values
+     * @param operation LdbcUpdate2AddPostLike operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert2Map(LdbcInsert2AddPostLike operation) {
+    public Map<String, Object> getUpdate2Map(LdbcUpdate2AddPostLike operation) {
         return ImmutableMap.of(
-            LdbcInsert2AddPostLike.PERSON_ID, getConverter().convertId(operation.getPersonId()),
-            LdbcInsert2AddPostLike.POST_ID, getConverter().convertId(operation.getPostId()),
-            LdbcInsert2AddPostLike.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
+            LdbcUpdate2AddPostLike.PERSON_ID, getConverter().convertId(operation.getPersonId()),
+            LdbcUpdate2AddPostLike.POST_ID, getConverter().convertId(operation.getPostId()),
+            LdbcUpdate2AddPostLike.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
         );
     }
 
     /**
      * Get prepared UpdateQuery3 string
-     * @param operation LdbcInsert3AddCommentLike operation containing parameter values
+     * @param operation LdbcUpdate3AddCommentLike operation containing parameter values
      * @return Prepared UpdateQuery3 string
      */
-    public String getInsert3(LdbcInsert3AddCommentLike operation) {
+    public String getUpdate3(LdbcUpdate3AddCommentLike operation) {
         return prepare(
-                QueryType.InteractiveInsert3, getInsert3Map(operation)
+                QueryType.InteractiveUpdate3, getUpdate3Map(operation)
         );
     }
 
     /**
      * Get UpdateQuery3 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert3AddCommentLike operation containing parameter values
+     * @param operation LdbcUpdate3AddCommentLike operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert3Map(LdbcInsert3AddCommentLike operation) {
+    public Map<String, Object> getUpdate3Map(LdbcUpdate3AddCommentLike operation) {
         return ImmutableMap.of(
-            LdbcInsert3AddCommentLike.PERSON_ID, getConverter().convertId(operation.getPersonId()),
-            LdbcInsert3AddCommentLike.COMMENT_ID, getConverter().convertId(operation.getCommentId()),
-            LdbcInsert3AddCommentLike.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
+            LdbcUpdate3AddCommentLike.PERSON_ID, getConverter().convertId(operation.getPersonId()),
+            LdbcUpdate3AddCommentLike.COMMENT_ID, getConverter().convertId(operation.getCommentId()),
+            LdbcUpdate3AddCommentLike.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
         );
     }
 
     /**
      * Get prepared UpdateQuery4 string
      * This is used for single query updates.
-     * @param operation LdbcInsert4AddForum operation containing parameter values
+     * @param operation LdbcUpdate4AddForum operation containing parameter values
      * @return Prepared UpdateQuery4 string
      */
-    public String getInsert4Single(LdbcInsert4AddForum operation) {
+    public String getUpdate4Single(LdbcUpdate4AddForum operation) {
         return prepare(
-                QueryType.InteractiveInsert4, getInsert4SingleMap(operation)
+                QueryType.InteractiveUpdate4, getUpdate4SingleMap(operation)
         );
     }
 
     /**
      * Get UpdateQuery4 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert4AddForum operation containing parameter values
+     * @param operation LdbcUpdate4AddForum operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert4SingleMap(LdbcInsert4AddForum operation) {
+    public Map<String, Object> getUpdate4SingleMap(LdbcUpdate4AddForum operation) {
         return ImmutableMap.of(
-            LdbcInsert4AddForum.FORUM_ID, getConverter().convertIdForInsertion(operation.getForumId()),
-            LdbcInsert4AddForum.FORUM_TITLE, getConverter().convertString(operation.getForumTitle()),
-            LdbcInsert4AddForum.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-            LdbcInsert4AddForum.MODERATOR_PERSON_ID, getConverter().convertId(operation.getModeratorPersonId()),
-            LdbcInsert4AddForum.TAG_IDS, getConverter().convertLongList(operation.getTagIds())
+            LdbcUpdate4AddForum.FORUM_ID, getConverter().convertIdForInsertion(operation.getForumId()),
+            LdbcUpdate4AddForum.FORUM_TITLE, getConverter().convertString(operation.getForumTitle()),
+            LdbcUpdate4AddForum.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
+            LdbcUpdate4AddForum.MODERATOR_PERSON_ID, getConverter().convertId(operation.getModeratorPersonId()),
+            LdbcUpdate4AddForum.TAG_IDS, getConverter().convertLongList(operation.getTagIds())
         );
     }
 
     /**
      * Get prepared UpdateQuery5 string
-     * @param operation LdbcInsert5AddForumMembership operation containing parameter values
+     * @param operation LdbcUpdate5AddForumMembership operation containing parameter values
      * @return Prepared UpdateQuery5 string
      */
-    public String getInsert5(LdbcInsert5AddForumMembership operation) {
+    public String getUpdate5(LdbcUpdate5AddForumMembership operation) {
         return prepare(
-                QueryType.InteractiveInsert5, getInsert5Map(operation)
+                QueryType.InteractiveUpdate5, getUpdate5Map(operation)
         );
     }
 
     /**
      * Get UpdateQuery5 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert5AddForumMembership operation containing parameter values
+     * @param operation LdbcUpdate5AddForumMembership operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert5Map(LdbcInsert5AddForumMembership operation) {
+    public Map<String, Object> getUpdate5Map(LdbcUpdate5AddForumMembership operation) {
         return ImmutableMap.of(
-            LdbcInsert5AddForumMembership.FORUM_ID, getConverter().convertId(operation.getForumId()),
-            LdbcInsert5AddForumMembership.PERSON_ID, getConverter().convertId(operation.getPersonId()),
-            LdbcInsert5AddForumMembership.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
+            LdbcUpdate5AddForumMembership.FORUM_ID, getConverter().convertId(operation.getForumId()),
+            LdbcUpdate5AddForumMembership.PERSON_ID, getConverter().convertId(operation.getPersonId()),
+            LdbcUpdate5AddForumMembership.JOIN_DATE, getConverter().convertDateTime(operation.getJoinDate())
         );
     }
     
     /**
      * Get prepared UpdateQuery6 string
      * This is used for single query updates.
-     * @param operation LdbcInsert6AddPost operation containing parameter values
+     * @param operation LdbcUpdate6AddPost operation containing parameter values
      * @return Prepared UpdateQuery6 string
      */
-    public String getInsert6Single(LdbcInsert6AddPost operation) {
+    public String getUpdate6Single(LdbcUpdate6AddPost operation) {
         return prepare(
-                QueryType.InteractiveInsert6, getInsert6SingleMap(operation)
+                QueryType.InteractiveUpdate6, getUpdate6SingleMap(operation)
         );
     }
 
     /**
      * Get UpdateQuery6 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert6AddPost operation containing parameter values
+     * @param operation LdbcUpdate6AddPost operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert6SingleMap(LdbcInsert6AddPost operation) {
+    public Map<String, Object> getUpdate6SingleMap(LdbcUpdate6AddPost operation) {
         return new ImmutableMap.Builder<String, Object>()
-            .put(LdbcInsert6AddPost.POST_ID, getConverter().convertIdForInsertion(operation.getPostId()))
-            .put(LdbcInsert6AddPost.IMAGE_FILE, getConverter().convertString(operation.getImageFile()))
-            .put(LdbcInsert6AddPost.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
-            .put(LdbcInsert6AddPost.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
-            .put(LdbcInsert6AddPost.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
-            .put(LdbcInsert6AddPost.LANGUAGE, getConverter().convertString(operation.getLanguage()))
-            .put(LdbcInsert6AddPost.CONTENT, getConverter().convertString(operation.getContent()))
-            .put(LdbcInsert6AddPost.LENGTH, getConverter().convertInteger(operation.getLength()))
-            .put(LdbcInsert6AddPost.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
-            .put(LdbcInsert6AddPost.FORUM_ID, getConverter().convertId(operation.getForumId()))
-            .put(LdbcInsert6AddPost.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
-            .put(LdbcInsert6AddPost.TAG_IDS, getConverter().convertLongList(operation.getTagIds()))
+            .put(LdbcUpdate6AddPost.POST_ID, getConverter().convertIdForInsertion(operation.getPostId()))
+            .put(LdbcUpdate6AddPost.IMAGE_FILE, getConverter().convertString(operation.getImageFile()))
+            .put(LdbcUpdate6AddPost.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
+            .put(LdbcUpdate6AddPost.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
+            .put(LdbcUpdate6AddPost.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
+            .put(LdbcUpdate6AddPost.LANGUAGE, getConverter().convertString(operation.getLanguage()))
+            .put(LdbcUpdate6AddPost.CONTENT, getConverter().convertString(operation.getContent()))
+            .put(LdbcUpdate6AddPost.LENGTH, getConverter().convertInteger(operation.getLength()))
+            .put(LdbcUpdate6AddPost.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
+            .put(LdbcUpdate6AddPost.FORUM_ID, getConverter().convertId(operation.getForumId()))
+            .put(LdbcUpdate6AddPost.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
+            .put(LdbcUpdate6AddPost.TAG_IDS, getConverter().convertLongList(operation.getTagIds()))
             .build();
     }
 
     /**
      * Get prepared UpdateQuery7 string
      * This is used for single query updates.
-     * @param operation LdbcInsert7AddComment operation containing parameter values
+     * @param operation LdbcUpdate7AddComment operation containing parameter values
      * @return Prepared UpdateQuery7 string
      */
-    public String getInsert7Single(LdbcInsert7AddComment operation) {
+    public String getUpdate7Single(LdbcUpdate7AddComment operation) {
         return prepare(
-                QueryType.InteractiveInsert7, getInsert7SingleMap(operation)
+                QueryType.InteractiveUpdate7, getUpdate7SingleMap(operation)
         );
     }
 
     /**
      * Get UpdateQuery7 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert7AddComment operation containing parameter values
+     * @param operation LdbcUpdate7AddComment operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert7SingleMap(LdbcInsert7AddComment operation) {
+    public Map<String, Object> getUpdate7SingleMap(LdbcUpdate7AddComment operation) {
         return new ImmutableMap.Builder<String, Object>()
-        .put(LdbcInsert7AddComment.COMMENT_ID, getConverter().convertIdForInsertion(operation.getCommentId()))
-        .put(LdbcInsert7AddComment.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
-        .put(LdbcInsert7AddComment.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
-        .put(LdbcInsert7AddComment.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
-        .put(LdbcInsert7AddComment.CONTENT, getConverter().convertString(operation.getContent()))
-        .put(LdbcInsert7AddComment.LENGTH, getConverter().convertInteger(operation.getLength()))
-        .put(LdbcInsert7AddComment.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
-        .put(LdbcInsert7AddComment.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
-        .put(LdbcInsert7AddComment.REPLY_TO_POST_ID, getConverter().convertId(operation.getReplyToPostId()))
-        .put(LdbcInsert7AddComment.REPLY_TO_COMMENT_ID, getConverter().convertId(operation.getReplyToCommentId()))
-        .put(LdbcInsert7AddComment.TAG_IDS, getConverter().convertLongList(operation.getTagIds()))
+        .put(LdbcUpdate7AddComment.COMMENT_ID, getConverter().convertIdForInsertion(operation.getCommentId()))
+        .put(LdbcUpdate7AddComment.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
+        .put(LdbcUpdate7AddComment.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
+        .put(LdbcUpdate7AddComment.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
+        .put(LdbcUpdate7AddComment.CONTENT, getConverter().convertString(operation.getContent()))
+        .put(LdbcUpdate7AddComment.LENGTH, getConverter().convertInteger(operation.getLength()))
+        .put(LdbcUpdate7AddComment.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
+        .put(LdbcUpdate7AddComment.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
+        .put(LdbcUpdate7AddComment.REPLY_TO_POST_ID, getConverter().convertId(operation.getReplyToPostId()))
+        .put(LdbcUpdate7AddComment.REPLY_TO_COMMENT_ID, getConverter().convertId(operation.getReplyToCommentId()))
+        .put(LdbcUpdate7AddComment.TAG_IDS, getConverter().convertLongList(operation.getTagIds()))
         .build();
     }
 
     /**
      * Get prepared UpdateQuery8 string
-     * @param operation LdbcInsert8AddFriendship operation containing parameter values
+     * @param operation LdbcUpdate8AddFriendship operation containing parameter values
      * @return Prepared UpdateQuery8 string
      */
-    public String getInsert8(LdbcInsert8AddFriendship operation) {
+    public String getUpdate8(LdbcUpdate8AddFriendship operation) {
         return prepare(
-                QueryType.InteractiveInsert8, getInsert8Map(operation)
+                QueryType.InteractiveUpdate8, getUpdate8Map(operation)
         );
     }
 
     /**
      * Get UpdateQuery8 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcInsert8AddFriendship operation containing parameter values
+     * @param operation LdbcUpdate8AddFriendship operation containing parameter values
      * @return Map with parameters and values as string.
      */
-    public Map<String, Object> getInsert8Map(LdbcInsert8AddFriendship operation) {
+    public Map<String, Object> getUpdate8Map(LdbcUpdate8AddFriendship operation) {
         return ImmutableMap.of(
-            LdbcInsert8AddFriendship.PERSON1_ID, getConverter().convertId(operation.getPerson1Id()),
-            LdbcInsert8AddFriendship.PERSON2_ID, getConverter().convertId(operation.getPerson2Id()),
-            LdbcInsert8AddFriendship.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
+            LdbcUpdate8AddFriendship.PERSON1_ID, getConverter().convertId(operation.getPerson1Id()),
+            LdbcUpdate8AddFriendship.PERSON2_ID, getConverter().convertId(operation.getPerson2Id()),
+            LdbcUpdate8AddFriendship.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate())
         );
     }
 
@@ -818,53 +777,68 @@ public abstract class QueryStore {
      * @param operation UpdateQuery1 operation containing parameter values
      * @return List of prepared UpdateQuery1 strings
      */
-    public List<String> getInsert1Multiple(LdbcInsert1AddPerson operation) {
+    public List<String> getUpdate1Multiple(LdbcUpdate1AddPerson operation) {
         List<String> list = new ArrayList<>();
         list.add(prepare(
-                QueryType.InteractiveInsert1AddPerson,
+                QueryType.InteractiveUpdate1AddPerson,
                 new ImmutableMap.Builder<String, Object>()
-                        .put(LdbcInsert1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
-                        .put(LdbcInsert1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()))
-                        .put(LdbcInsert1AddPerson.PERSON_FIRST_NAME, getConverter().convertString(operation.getPersonFirstName()))
-                        .put(LdbcInsert1AddPerson.PERSON_LAST_NAME, getConverter().convertString(operation.getPersonLastName()))
-                        .put(LdbcInsert1AddPerson.GENDER, getConverter().convertString(operation.getGender()))
-                        .put(LdbcInsert1AddPerson.BIRTHDAY, getConverter().convertDate(operation.getBirthday()))
-                        .put(LdbcInsert1AddPerson.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
-                        .put(LdbcInsert1AddPerson.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
-                        .put(LdbcInsert1AddPerson.CITY_ID, getConverter().convertId(operation.getCityId()))
-                        .put(LdbcInsert1AddPerson.LANGUAGES, getConverter().convertStringList(operation.getLanguages()))
-                        .put(LdbcInsert1AddPerson.EMAILS, getConverter().convertStringList(operation.getEmails()))
+                        .put(LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()))
+                        .put(LdbcUpdate1AddPerson.PERSON_FIRST_NAME, getConverter().convertString(operation.getPersonFirstName()))
+                        .put(LdbcUpdate1AddPerson.PERSON_LAST_NAME, getConverter().convertString(operation.getPersonLastName()))
+                        .put(LdbcUpdate1AddPerson.GENDER, getConverter().convertString(operation.getGender()))
+                        .put(LdbcUpdate1AddPerson.BIRTHDAY, getConverter().convertDate(operation.getBirthday()))
+                        .put(LdbcUpdate1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
+                        .put(LdbcUpdate1AddPerson.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
+                        .put(LdbcUpdate1AddPerson.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
+                        .put(LdbcUpdate1AddPerson.CITY_ID, getConverter().convertId(operation.getCityId()))
                         .build()
         ));
-        for (LdbcInsert1AddPerson.Organization organization : operation.getWorkAt()) {
+
+        for (LdbcUpdate1AddPerson.Organization organization : operation.getWorkAt()) {
             list.add(prepare(
-                    QueryType.InteractiveInsert1AddPersonCompanies,
+                    QueryType.InteractiveUpdate1AddPersonCompanies,
                     ImmutableMap.of(
-                        LdbcInsert1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
-                    "organizationId", getConverter().convertId(organization.getOrganizationId()),
-                    "worksFromYear", getConverter().convertInteger(organization.getYear())
+                            LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
+                            "organizationId", getConverter().convertId(organization.getOrganizationId()),
+                            "worksFromYear", getConverter().convertInteger(organization.getYear())
                     )
             ));
         }
+        for (String email : operation.getEmails()) {
+            list.add(prepare(
+                    QueryType.InteractiveUpdate1AddPersonEmails,
+                    ImmutableMap.of(
+                            LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
+                            "email", getConverter().convertString(email)
+                    )
+            ));
+        }
+        for (String language : operation.getLanguages()) {
+            list.add(prepare(
+                    QueryType.InteractiveUpdate1AddPersonLanguages,
+                    ImmutableMap.of(
+                            LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
+                            "language", getConverter().convertString(language)
+                    )
+            ));
+        }
+
         for (long tagId : operation.getTagIds()) {
             list.add(prepare(
-                    QueryType.InteractiveInsert1AddPersonTags,
+                    QueryType.InteractiveUpdate1AddPersonTags,
                     ImmutableMap.of(
-                        LdbcInsert1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
-                        "tagId", getConverter().convertId(tagId))
+                            LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
+                            "tagId", getConverter().convertId(tagId))
                     )
             );
         }
-        for (LdbcInsert1AddPerson.Organization organization : operation.getStudyAt()) {
+        for (LdbcUpdate1AddPerson.Organization organization : operation.getStudyAt()) {
             list.add(prepare(
-                    QueryType.InteractiveInsert1AddPersonUniversities,
+                    QueryType.InteractiveUpdate1AddPersonUniversities,
                     ImmutableMap.of(
-                        LdbcInsert1AddPerson.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
-                        "organizationId", getConverter().convertId(organization.getOrganizationId()),
-                        "studiesFromYear", getConverter().convertInteger(organization.getYear())
+                            LdbcUpdate1AddPerson.PERSON_ID, getConverter().convertIdForInsertion(operation.getPersonId()),
+                            "organizationId", getConverter().convertId(organization.getOrganizationId()),
+                            "studiesFromYear", getConverter().convertInteger(organization.getYear())
                     )
             ));
         }
@@ -877,24 +851,23 @@ public abstract class QueryStore {
      * @param operation UpdateQuery4 operation containing parameter values
      * @return List of prepared UpdateQuery4 strings
      */
-    public List<String> getInsert4Multiple(LdbcInsert4AddForum operation) {
+    public List<String> getUpdate4Multiple(LdbcUpdate4AddForum operation) {
         List<String> list = new ArrayList<>();
         list.add(prepare(
-                QueryType.InteractiveInsert4AddForum,
+                QueryType.InteractiveUpdate4AddForum,
                 ImmutableMap.of(
-                        LdbcInsert4AddForum.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert4AddForum.FORUM_ID, getConverter().convertIdForInsertion(operation.getForumId()),
-                        LdbcInsert4AddForum.FORUM_TITLE, getConverter().convertString(operation.getForumTitle()),
-                        LdbcInsert4AddForum.MODERATOR_PERSON_ID, getConverter().convertId(operation.getModeratorPersonId())
+                        LdbcUpdate4AddForum.FORUM_ID, getConverter().convertIdForInsertion(operation.getForumId()),
+                        LdbcUpdate4AddForum.FORUM_TITLE, getConverter().convertString(operation.getForumTitle()),
+                        LdbcUpdate4AddForum.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
+                        LdbcUpdate4AddForum.MODERATOR_PERSON_ID, getConverter().convertId(operation.getModeratorPersonId())
                 )
         ));
 
         for (long tagId : operation.getTagIds()) {
             list.add(prepare(
-                    QueryType.InteractiveInsert4AddForumTags,
+                    QueryType.InteractiveUpdate4AddForumTags,
                     ImmutableMap.of(
-                        LdbcInsert4AddForum.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert4AddForum.FORUM_ID, getConverter().convertIdForInsertion(operation.getForumId()),
+                            LdbcUpdate4AddForum.FORUM_ID, getConverter().convertIdForInsertion(operation.getForumId()),
                             "tagId", getConverter().convertId(tagId))
                     )
             );
@@ -908,31 +881,30 @@ public abstract class QueryStore {
      * @param operation UpdateQuery6 operation containing parameter values
      * @return List of prepared UpdateQuery6 strings
      */
-    public List<String> getInsert6Multiple(LdbcInsert6AddPost operation) {
+    public List<String> getUpdate6Multiple(LdbcUpdate6AddPost operation) {
         List<String> list = new ArrayList<>();
         list.add(prepare(
-                QueryType.InteractiveInsert6AddPost,
+                QueryType.InteractiveUpdate6AddPost,
                 new ImmutableMap.Builder<String, Object>()
-                        .put(LdbcInsert6AddPost.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
-                        .put(LdbcInsert6AddPost.POST_ID, getConverter().convertIdForInsertion(operation.getPostId()))
-                        .put(LdbcInsert6AddPost.IMAGE_FILE, getConverter().convertString(operation.getImageFile()))
-                        .put(LdbcInsert6AddPost.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
-                        .put(LdbcInsert6AddPost.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
-                        .put(LdbcInsert6AddPost.LANGUAGE, getConverter().convertString(operation.getLanguage()))
-                        .put(LdbcInsert6AddPost.CONTENT, getConverter().convertString(operation.getContent()))
-                        .put(LdbcInsert6AddPost.LENGTH, getConverter().convertInteger(operation.getLength()))
-                        .put(LdbcInsert6AddPost.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
-                        .put(LdbcInsert6AddPost.FORUM_ID, getConverter().convertId(operation.getForumId()))
-                        .put(LdbcInsert6AddPost.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
+                        .put(LdbcUpdate6AddPost.POST_ID, getConverter().convertIdForInsertion(operation.getPostId()))
+                        .put(LdbcUpdate6AddPost.IMAGE_FILE, getConverter().convertString(operation.getImageFile()))
+                        .put(LdbcUpdate6AddPost.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
+                        .put(LdbcUpdate6AddPost.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
+                        .put(LdbcUpdate6AddPost.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
+                        .put(LdbcUpdate6AddPost.LANGUAGE, getConverter().convertString(operation.getLanguage()))
+                        .put(LdbcUpdate6AddPost.CONTENT, getConverter().convertString(operation.getContent()))
+                        .put(LdbcUpdate6AddPost.LENGTH, getConverter().convertInteger(operation.getLength()))
+                        .put(LdbcUpdate6AddPost.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
+                        .put(LdbcUpdate6AddPost.FORUM_ID, getConverter().convertId(operation.getForumId()))
+                        .put(LdbcUpdate6AddPost.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
                         .build()
                 )
         );
         for (long tagId : operation.getTagIds()) {
             list.add(prepare(
-                    QueryType.InteractiveInsert6AddPostTags,
+                    QueryType.InteractiveUpdate6AddPostTags,
                     ImmutableMap.of(
-                        LdbcInsert6AddPost.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert6AddPost.POST_ID, getConverter().convertIdForInsertion(operation.getPostId()),
+                            LdbcUpdate6AddPost.POST_ID, getConverter().convertIdForInsertion(operation.getPostId()),
                             "tagId", getConverter().convertId(tagId))
                     )
             );
@@ -946,215 +918,32 @@ public abstract class QueryStore {
      * @param operation UpdateQuery7 operation containing parameter values
      * @return List of prepared UpdateQuery7 strings
      */
-    public List<String> getInsert7Multiple(LdbcInsert7AddComment operation) {
+    public List<String> getUpdate7Multiple(LdbcUpdate7AddComment operation) {
         List<String> list = new ArrayList<>();
         list.add(prepare(
-                QueryType.InteractiveInsert7AddComment,
+                QueryType.InteractiveUpdate7AddComment,
                 new ImmutableMap.Builder<String, Object>()
-                        .put(LdbcInsert7AddComment.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
-                        .put(LdbcInsert7AddComment.COMMENT_ID, getConverter().convertIdForInsertion(operation.getCommentId()))
-                        .put(LdbcInsert7AddComment.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
-                        .put(LdbcInsert7AddComment.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
-                        .put(LdbcInsert7AddComment.CONTENT, getConverter().convertString(operation.getContent()))
-                        .put(LdbcInsert7AddComment.LENGTH, getConverter().convertInteger(operation.getLength()))
-                        .put(LdbcInsert7AddComment.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
-                        .put(LdbcInsert7AddComment.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
-                        .put(LdbcInsert7AddComment.REPLY_TO_POST_ID, getConverter().convertId(operation.getReplyToPostId()))
-                        .put(LdbcInsert7AddComment.REPLY_TO_COMMENT_ID, getConverter().convertId(operation.getReplyToCommentId()))
+                        .put(LdbcUpdate7AddComment.COMMENT_ID, getConverter().convertIdForInsertion(operation.getCommentId()))
+                        .put(LdbcUpdate7AddComment.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()))
+                        .put(LdbcUpdate7AddComment.LOCATION_IP, getConverter().convertString(operation.getLocationIp()))
+                        .put(LdbcUpdate7AddComment.BROWSER_USED, getConverter().convertString(operation.getBrowserUsed()))
+                        .put(LdbcUpdate7AddComment.CONTENT, getConverter().convertString(operation.getContent()))
+                        .put(LdbcUpdate7AddComment.LENGTH, getConverter().convertInteger(operation.getLength()))
+                        .put(LdbcUpdate7AddComment.AUTHOR_PERSON_ID, getConverter().convertId(operation.getAuthorPersonId()))
+                        .put(LdbcUpdate7AddComment.COUNTRY_ID, getConverter().convertId(operation.getCountryId()))
+                        .put(LdbcUpdate7AddComment.REPLY_TO_POST_ID, getConverter().convertId(operation.getReplyToPostId()))
+                        .put(LdbcUpdate7AddComment.REPLY_TO_COMMENT_ID, getConverter().convertId(operation.getReplyToCommentId()))
                         .build()
         ));
         for (long tagId : operation.getTagIds()) {
             list.add(prepare(
-                    QueryType.InteractiveInsert7AddCommentTags,
+                    QueryType.InteractiveUpdate7AddCommentTags,
                     ImmutableMap.of(
-                        LdbcInsert7AddComment.CREATION_DATE, getConverter().convertDateTime(operation.getCreationDate()),
-                        LdbcInsert7AddComment.COMMENT_ID, getConverter().convertIdForInsertion(operation.getCommentId()),
+                            LdbcUpdate7AddComment.COMMENT_ID, getConverter().convertIdForInsertion(operation.getCommentId()),
                             "tagId", getConverter().convertId(tagId))
                     )
             );
         }
         return list;
     }
-
-    // Deletions
-    /**
-     * Get prepared DeleteQuery1 string
-     * @param operation LdbcDelete1RemovePerson operation containing parameter values
-     * @return Prepared DeleteQuery1 string
-     */
-    public String getDelete1(LdbcDelete1RemovePerson operation) {
-        return prepare(
-                QueryType.InteractiveDelete1, getDelete1Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery1 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete1RemovePerson operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete1Map(LdbcDelete1RemovePerson operation) {
-        return ImmutableMap.of(
-            LdbcDelete1RemovePerson.PERSON_ID, getConverter().convertId(operation.getremovePersonIdD1())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery2 string
-     * @param operation LdbcDelete2RemovePostLike operation containing parameter values
-     * @return Prepared DeleteQuery2 string
-     */
-    public String getDelete2(LdbcDelete2RemovePostLike operation) {
-        return prepare(
-                QueryType.InteractiveDelete2, getDelete2Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery2 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete2RemovePostLike operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete2Map(LdbcDelete2RemovePostLike operation) {
-        return ImmutableMap.of(
-            LdbcDelete2RemovePostLike.PERSON_ID, getConverter().convertId(operation.getremovePersonIdD2()),
-            LdbcDelete2RemovePostLike.POST_ID, getConverter().convertId(operation.getremovePostIdD2())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery3 string
-     * @param operation LdbcDelete3RemoveCommentLike operation containing parameter values
-     * @return Prepared DeleteQuery3 string
-     */
-    public String getDelete3(LdbcDelete3RemoveCommentLike operation) {
-        return prepare(
-                QueryType.InteractiveDelete3, getDelete3Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery3 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete3RemoveCommentLike operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete3Map(LdbcDelete3RemoveCommentLike operation) {
-        return ImmutableMap.of(
-            LdbcDelete3RemoveCommentLike.PERSON_ID, getConverter().convertId(operation.getremovePersonIdD3()),
-            LdbcDelete3RemoveCommentLike.COMMENT_ID, getConverter().convertId(operation.getremoveCommentIdD3())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery4 string
-     * @param operation LdbcDelete4RemoveForum operation containing parameter values
-     * @return Prepared DeleteQuery4 string
-     */
-    public String getDelete4(LdbcDelete4RemoveForum operation) {
-        return prepare(
-                QueryType.InteractiveDelete4, getDelete4Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery4 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete4RemoveForum operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete4Map(LdbcDelete4RemoveForum operation) {
-        return ImmutableMap.of(
-            LdbcDelete4RemoveForum.FORUM_ID, getConverter().convertId(operation.getremoveForumIdD4())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery5 string
-     * @param operation LdbcDelete5RemoveForumMembership operation containing parameter values
-     * @return Prepared DeleteQuery5 string
-     */
-    public String getDelete5(LdbcDelete5RemoveForumMembership operation) {
-        return prepare(
-                QueryType.InteractiveDelete5, getDelete5Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery5 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete5RemoveForumMembership operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete5Map(LdbcDelete5RemoveForumMembership operation) {
-        return ImmutableMap.of(
-            LdbcDelete5RemoveForumMembership.FORUM_ID, getConverter().convertId(operation.getremoveForumIdD5()),
-            LdbcDelete5RemoveForumMembership.PERSON_ID, getConverter().convertId(operation.getremovePersonIdD5())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery6 string
-     * @param operation LdbcDelete6RemovePostThread operation containing parameter values
-     * @return Prepared DeleteQuery6 string
-     */
-    public String getDelete6(LdbcDelete6RemovePostThread operation) {
-        return prepare(
-                QueryType.InteractiveDelete6, getDelete6Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery6 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete6RemovePostThread operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete6Map(LdbcDelete6RemovePostThread operation) {
-        return ImmutableMap.of(
-            LdbcDelete6RemovePostThread.POST_ID, getConverter().convertId(operation.getremovePostIdD6())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery7 string
-     * @param operation LdbcDelete7RemoveCommentSubthread operation containing parameter values
-     * @return Prepared DeleteQuery7 string
-     */
-    public String getDelete7(LdbcDelete7RemoveCommentSubthread operation) {
-        return prepare(
-                QueryType.InteractiveDelete7, getDelete7Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery7 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete7RemoveCommentSubthread operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete7Map(LdbcDelete7RemoveCommentSubthread operation) {
-        return ImmutableMap.of(
-            LdbcDelete7RemoveCommentSubthread.COMMENT_ID, getConverter().convertId(operation.getremoveCommentIdD7())
-        );
-    }
-
-    /**
-     * Get prepared DeleteQuery8 string
-     * @param operation LdbcDelete8RemoveFriendship operation containing parameter values
-     * @return Prepared DeleteQuery8 string
-     */
-    public String getDelete8(LdbcDelete8RemoveFriendship operation) {
-        return prepare(
-                QueryType.InteractiveDelete8, getDelete8Map(operation)
-        );
-    }
-
-    /**
-     * Get DeleteQuery8 Map. This map contain the name of the parameter and the value as string.
-     * @param operation LdbcDelete8RemoveFriendship operation containing parameter values
-     * @return Map with parameters and values as string.
-     */
-    public Map<String, Object> getDelete8Map(LdbcDelete8RemoveFriendship operation) {
-        return ImmutableMap.of(
-            LdbcDelete8RemoveFriendship.PERSON1_ID, getConverter().convertId(operation.getremovePerson1Id()),
-            LdbcDelete8RemoveFriendship.PERSON2_ID, getConverter().convertId(operation.getremovePerson2Id())
-        );
-    }
-
 }

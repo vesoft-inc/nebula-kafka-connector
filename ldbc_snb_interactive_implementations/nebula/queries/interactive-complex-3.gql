@@ -17,12 +17,12 @@ LIMIT 1
 MATCH (city:City)-[:IS_PART_OF]->(country:Country)
 WHERE country IN [countryX, countryY]
 AGGREGATE cities=collect(city) GROUP BY person, countryX, countryY
-MATCH (person)-[:KNOWS]-{1,2}(friend)-[:IS_LOCATED_IN]->(city)
+MATCH (person:Person{id : $personId})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
 WHERE person <> friend AND city NOT IN cities
 RETURN DISTINCT friend, countryX, countryY
 NEXT
 USE $graphName
-MATCH (message)-[:HAS_CREATOR]->(friend), (message)-[:IS_LOCATED_IN]->(country)
+MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
 WHERE $endDate > message.creationDate AND message.creationDate >= $startDate AND country IN [countryX, countryY]
 LET
   friend=friend,

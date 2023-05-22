@@ -19,6 +19,7 @@ public class PostgresDbConnectionState<TDbQueryStore extends QueryStore> extends
 
     public PostgresDbConnectionState(Map<String, String> properties, TDbQueryStore store) throws ClassNotFoundException {
         super(properties, store);
+        endPoint = properties.get("endpoint");
 
         Class.forName(properties.get("jdbcDriver"));
 

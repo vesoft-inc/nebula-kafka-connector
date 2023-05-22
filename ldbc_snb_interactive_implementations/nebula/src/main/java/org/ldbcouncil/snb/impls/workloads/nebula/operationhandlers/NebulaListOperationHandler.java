@@ -3,7 +3,8 @@ package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
+import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -31,7 +32,7 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
     public void executeOperation( TOperation operation, NebulaDbConnectionState state,
                                   ResultReporter resultReporter ) throws DbException {
         try {
-            Session session = state.getSession();
+            NebulaClient client = state.getClient();
             String query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
@@ -41,15 +42,14 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
 
             final List<TOperationResult> results = new ArrayList<>();
 
-            final ResultSet resultSet = session.execute(query);
+            final ResultSet resultSet = client.execute(query);
             long recordSize = resultSet.rowsSize();
             for (int i = 0; i < recordSize; ++i) {
                 final ResultSet.Record record = resultSet.rowValues(i);
                 results.add(toResult(record));
             }
             resultReporter.report( results.size(), results, operation );
-        } catch (AuthFailedException | NotValidConnectionException | ClientServerIncompatibleException |
-                 IOErrorException | ParseException | UnsupportedEncodingException e) {
+        } catch (NoValidSessionException  | IOErrorException | ParseException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
     }

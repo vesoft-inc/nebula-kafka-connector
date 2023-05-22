@@ -3,7 +3,8 @@ package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NotValidConnectionException;
+import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -29,7 +30,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
                                   ResultReporter resultReporter ) throws DbException
     {
         try {
-            Session session = state.getSession();
+            NebulaClient client = state.getClient();
             String query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
@@ -37,14 +38,14 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
             // final Map<String, Object> parameters = getParameters(state, operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
 
-            final ResultSet resultSet = session.execute(query);
+            final ResultSet resultSet = client.execute(query);
 
             if (resultSet.rowsSize() > 0) {
                 resultReporter.report(1, toResult(resultSet.rowValues(0)), operation);
             } else {
                 resultReporter.report(0, null, operation);
             }
-        } catch (AuthFailedException | ClientServerIncompatibleException | NotValidConnectionException |
+        } catch (NoValidSessionException |
                  IOErrorException | ParseException | UnsupportedEncodingException e) {
             throw new RuntimeException(e);
         }
