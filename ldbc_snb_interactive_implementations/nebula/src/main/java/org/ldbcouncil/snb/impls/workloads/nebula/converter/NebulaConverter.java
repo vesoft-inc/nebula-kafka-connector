@@ -37,9 +37,23 @@ public class NebulaConverter extends Converter {
     }
 
     @Override
+    public  String convertStringList(List<String> values) {
+        String str = String.join(",", values);
+        return "'" + str.replace("'", "\\'") + "'";
+    }
+
+    @Override
     public String convertDateTime(Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat(DATETIME_FORMAT);
-        sdf.setTimeZone(TimeZone.getTimeZone("Etc/GMT+0"));
+        // sdf.setTimeZone(TimeZone.getTimeZone("Etc/GMT+0"));
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        return "'" + sdf.format(date) + "'";
+    }
+
+    @Override
+    public String convertDate(Date date) {
+        final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
         return "'" + sdf.format(date) + "'";
     }
 

@@ -122,5 +122,4 @@ public class Converter {
     public String convertIdForInsertion(long value) {
         return convertId(value);
     }
-
 }

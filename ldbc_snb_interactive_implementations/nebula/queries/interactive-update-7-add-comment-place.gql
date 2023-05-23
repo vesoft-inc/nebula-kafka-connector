@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE COMMENT_IS_LOCATED_IN_PLACE ({id: $commentId})-[{}]->({id:$countryId})
+INSERT EDGE COMMENT_IS_LOCATED_IN_COUNTRY ({id: $commentId})-[{}]->({id:$countryId})

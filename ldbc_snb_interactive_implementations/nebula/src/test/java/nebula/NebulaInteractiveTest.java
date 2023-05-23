@@ -7,9 +7,7 @@ import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.junit.Test;
 
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 public class NebulaInteractiveTest extends InteractiveTest {
@@ -153,7 +151,77 @@ public class NebulaInteractiveTest extends InteractiveTest {
     }
 
     @Test
+    public void testUqdateQuery1() throws Exception {
+        long personId = 8796093022239L;
+        String personFirstName = "wang";
+        String personLastName = "jian";
+        String gender = "male";
+        Date birthDay = new Date(1290749436322L);
+        Date creationDate = new Date(1347529090363L);
+        String locationIp = "1.12.242.179";
+        String browserUsed = "Opera";
+        long cityId = 8796093022239L;
+        List<String> languages = new ArrayList<>();
+        languages.add("chinese");
+        languages.add("english");
+        List<String> emails = new ArrayList<>();
+        emails.add("hello@qq.com");
+        emails.add("world@qq.com");
+        List<Long> tagIds = new ArrayList<>();
+        tagIds.add(123L);
+        tagIds.add(234L);
+        List<LdbcUpdate1AddPerson.Organization> studyAt = new ArrayList<>();
+        LdbcUpdate1AddPerson.Organization university1 = new LdbcUpdate1AddPerson.Organization(2796093022239L, 2001);
+        LdbcUpdate1AddPerson.Organization university2 = new LdbcUpdate1AddPerson.Organization(5796093022239L, 2005);
+        studyAt.add(university1);
+        studyAt.add(university2);
+        List<LdbcUpdate1AddPerson.Organization> workAt = new ArrayList<>();
+        LdbcUpdate1AddPerson.Organization company1 = new LdbcUpdate1AddPerson.Organization(8796093022239L, 2003);
+        LdbcUpdate1AddPerson.Organization company2 = new LdbcUpdate1AddPerson.Organization(1796093022249L, 2004);
+        workAt.add(company1);
+        workAt.add(company2);
+        run(db, new LdbcUpdate1AddPerson(personId, personFirstName, personLastName, gender, birthDay, creationDate, locationIp, browserUsed, cityId, languages, emails, tagIds, studyAt, workAt));
+    }
+
+    @Test
     public void testUpdateQuery2() throws Exception {
         run(db, new LdbcUpdate2AddPostLike(8796093022239L, 206158430617L, new Date( 1290749436322L ) ) );
+    }
+
+    @Test
+    public void testUpdateQuery3() throws Exception {
+        run(db, new LdbcUpdate3AddCommentLike(8796093022239L, 206158430617L, new Date( 1290749436322L ) ));
+    }
+
+    @Test
+    public void testUpdateQuery4() throws Exception {
+        List<Long> tagIds = new ArrayList<>();
+        run(db, new LdbcUpdate4AddForum(1099511997932L, "tile", new Date(1347529090363L), 206158430617L, tagIds));
+    }
+
+    @Test
+    public void testUpdateQuery5() throws Exception {
+        run(db, new LdbcUpdate5AddForumMembership(8796093022239L, 206158430617L, new Date( 1290749436322L )));
+    }
+
+    @Test
+    public void testUpdateQuery6() throws Exception {
+        List<Long> tagIds = new ArrayList<>();
+        tagIds.add(123L);
+        tagIds.add(234L);
+        run(db, new LdbcUpdate6AddPost(8796093022239L, "image", new Date(1290749436322L), "1.12.242.179", "Opera", "chinese", "roflol", 6, 206158430617L, 8796093022239L, 206158432794L, tagIds));
+    }
+
+    @Test
+    public void testUpdateQuery7() throws Exception {
+        List<Long> tagIds = new ArrayList<>();
+        tagIds.add(123L);
+        tagIds.add(234L);
+        run(db, new LdbcUpdate7AddComment(1099511997932L, new Date(1347529090363L),"1.12.242.179","Opera","roflol", 6, 1L, -1L, 26388279068220L, 1099511997926L, tagIds));
+    }
+
+    @Test
+    public void testUpdateQuery8() throws Exception {
+        run(db, new LdbcUpdate8AddFriendship(8796093022239L, 206158430617L, new Date( 1290749436322L )));
     }
 }

@@ -49,15 +49,24 @@ public enum QueryType {
        InteractiveUpdate1AddPersonLanguages   ("interactive-update-1-add-person-languages"),
        InteractiveUpdate1AddPersonTags        ("interactive-update-1-add-person-tags"),
        InteractiveUpdate1AddPersonUniversities("interactive-update-1-add-person-universities"),
+       InteractiveUpdate1AddPersonPlace       ("interactive-update-1-add-person-place"),
 
        InteractiveUpdate4AddForum             ("interactive-update-4-add-forum"),
        InteractiveUpdate4AddForumTags         ("interactive-update-4-add-forum-tags"),
+       InteractiveUpdate4AddForumPerson       ("interactive-update-4-add-forum-person"),
 
+       InteractiveUpdate6AddPostPlace         ("interactive-update-6-add-post-place"),
+       InteractiveUpdate6AddPostPerson        ("interactive-update-6-add-post-person"),
+       InteractiveUpdate6AddPostForum         ("interactive-update-6-add-post-forum"),
        InteractiveUpdate6AddPost              ("interactive-update-6-add-post"),
        InteractiveUpdate6AddPostTags          ("interactive-update-6-add-post-tags"),
 
        InteractiveUpdate7AddComment           ("interactive-update-7-add-comment"),
        InteractiveUpdate7AddCommentTags       ("interactive-update-7-add-comment-tags"),
+       InteractiveUpdate7AddCommentComment    ("interactive-update-7-add-comment-comment"),
+       InteractiveUpdate7AddCommentPost       ("interactive-update-7-add-comment-post"),
+       InteractiveUpdate7AddCommentPlace      ("interactive-update-7-add-comment-place"),
+       InteractiveUpdate7AddCommentPerson     ("interactive-update-7-add-comment-person"),
 
        // interactive updates (additional queries for system that insert content/imageFile using separate operations)
        InteractiveUpdate6AddPostContent       ("interactive-update-6-add-post-content"),
