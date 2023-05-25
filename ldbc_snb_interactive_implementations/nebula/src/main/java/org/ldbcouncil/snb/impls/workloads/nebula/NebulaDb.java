@@ -58,13 +58,13 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         public LdbcQuery1Result toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
 
             List<String> emails = new ArrayList<>();
-            if ( !record.get( 8 ).isNull() ) {
-                Collections.addAll(emails, record.get( 8 ).asString().split(","));
-            }
+//            if ( !record.get( 8 ).isNull() ) {
+//                Collections.addAll(emails, record.get( 8 ).asString().split(","));
+//            }
             List<String> languages = new ArrayList<>();
-            if ( !record.get( 9 ).isNull() ) {
-                Collections.addAll(languages, record.get( 9 ).asString().split(","));
-            }
+//            if ( !record.get( 9 ).isNull() ) {
+//                Collections.addAll(languages, record.get( 9 ).asString().split(","));
+//            }
             List<LdbcQuery1Result.Organization> universities = new ArrayList<>();
             if ( !record.get( 11 ).isNull() ) {
                 List<ValueWrapper> valueList = record.get( 11 ).asList();
