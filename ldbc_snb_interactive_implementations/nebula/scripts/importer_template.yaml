@@ -216,6 +216,7 @@ sources:
           - name: 'imageFile'
             type: 'STRING'
             index: 1
+            nullable: true
           - name: 'creationDate'
             type: 'LOCALDATETIME'
             index: 2
@@ -231,6 +232,7 @@ sources:
           - name: 'content'
             type: 'STRING'
             index: 6
+            nullable: true
           - name: 'extent'
             type: 'INT'
             index: 7
@@ -257,6 +259,7 @@ sources:
           - name: 'content'
             type: 'STRING'
             index: 4
+            nullable: true
           - name: 'extent'
             type: 'INT'
             index: 5

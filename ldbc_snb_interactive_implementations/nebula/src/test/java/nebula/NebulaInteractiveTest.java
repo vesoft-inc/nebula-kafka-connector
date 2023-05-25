@@ -1,6 +1,7 @@
 package nebula;
 
 import org.ldbcouncil.snb.driver.workloads.interactive.*;
+import org.ldbcouncil.snb.impls.workloads.converter.Converter;
 import org.ldbcouncil.snb.impls.workloads.interactive.InteractiveTest;
 import org.ldbcouncil.snb.impls.workloads.nebula.interactive.NebulaInteractiveDb;
 import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
@@ -12,6 +13,9 @@ import java.util.concurrent.TimeUnit;
 
 public class NebulaInteractiveTest extends InteractiveTest {
     public NebulaInteractiveTest()  { super(new NebulaInteractiveDb()); }
+    protected Converter getConverter() {
+        return new NebulaConverter();
+    }
 
     String endpoint = "127.0.0.1:3713";
     String user = "nebula";
@@ -38,6 +42,18 @@ public class NebulaInteractiveTest extends InteractiveTest {
     @Test
     public void testConvertTime() throws ParseException {
         System.out.println(NebulaConverter.convertDateTimesToEpoch("2012-09-13T02:40:59.360000"));
+    }
+
+    @Test
+    public void testLongToDateTime() throws ParseException {
+        String str = getConverter().convertDateTime(new Date(1331569323280L));
+        System.out.println(str);
+        Long origin = NebulaConverter.convertDateTimesToEpoch(str);
+        System.out.println(origin);
+
+        System.out.println(getConverter().convertDateTime(new Date(1331569323028L)));
+        System.out.println(getConverter().convertDateTime(new Date(1347532512905L)));
+
     }
 
     @Test

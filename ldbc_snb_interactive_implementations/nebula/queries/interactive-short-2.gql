@@ -7,7 +7,7 @@ MATCH (message:Message)-[:HAS_CREATOR]->(p:Person WHERE p.id = $personId )
 LET message=message, messageId=message.id, messageCreationDate=message.creationDate
 ORDER BY messageCreationDate DESC, messageId ASC
 LIMIT 10
-MATCH (message:Message)-[:REPLY_OF]->{0,3}(post:Post),
+MATCH (message:Message)-[:REPLY_OF]->{0,5}(post:Post),
   (post:Post)-[:HAS_CREATOR]->(person:Person)
 ORDER BY messageCreationDate DESC, messageId ASC
 RETURN
