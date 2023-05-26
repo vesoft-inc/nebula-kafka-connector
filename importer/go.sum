@@ -70,8 +70,9 @@ github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1m
 github.com/envoyproxy/go-control-plane v0.9.7/go.mod h1:cwu0lG7PUMfa9snN8LXBig5ynNVH9qI8YYLbd1fK2po=
 github.com/envoyproxy/go-control-plane v0.9.9-0.20201210154907-fd9021fe5dad/go.mod h1:cXg6YxExXjJnVBQHBLXeUAgxn2UodCpnH306RInaBQk=
 github.com/envoyproxy/protoc-gen-validate v0.1.0/go.mod h1:iSmxcyjqTsJpI2R4NaDN7+kN2VEUnK/pcBlmesArF7c=
-github.com/facebook/fbthrift v0.31.1-0.20211129061412-801ed7f9f295 h1:ZA+qQ3d2In0RNzVpk+D/nq1sjDSv+s1Wy2zrAPQAmsg=
 github.com/facebook/fbthrift v0.31.1-0.20211129061412-801ed7f9f295/go.mod h1:2tncLx5rmw69e5kMBv/yJneERbzrr1yr5fdlnTbu8lU=
+github.com/facebook/fbthrift v0.31.1-0.20221225090033-b7c4ecdd9179 h1:6WgicifTcSZGINxnsVdgKR8m7+aeXfAEzFyXrJxNniA=
+github.com/facebook/fbthrift v0.31.1-0.20221225090033-b7c4ecdd9179/go.mod h1:2tncLx5rmw69e5kMBv/yJneERbzrr1yr5fdlnTbu8lU=
 github.com/fclairamb/ftpserverlib v0.21.0 h1:QO4ex827FU6Y7FNi1cj4dmAs6bcmy+UtWcX5yzVzFAw=
 github.com/fclairamb/ftpserverlib v0.21.0/go.mod h1:03sR5yGPYyUH/8hFKML02SVNLY7A//3qIy0q0ZJGhTw=
 github.com/fclairamb/go-log v0.4.1 h1:rLtdSG9x2pK41AIAnE8WYpl05xBJfw1ZyYxZaXFcBsM=

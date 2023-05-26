@@ -28,7 +28,7 @@ require (
 )
 
 require (
-	github.com/facebook/fbthrift v0.31.1-0.20211129061412-801ed7f9f295 // indirect
+	github.com/facebook/fbthrift v0.31.1-0.20221225090033-b7c4ecdd9179 // indirect
 	github.com/fclairamb/go-log v0.4.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
 	github.com/google/go-cmp v0.5.9 // indirect

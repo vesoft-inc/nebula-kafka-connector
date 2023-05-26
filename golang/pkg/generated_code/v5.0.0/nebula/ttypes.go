@@ -29,11 +29,11 @@ const (
   XType__kInt16 XType_ = 3
   XType__kInt32 XType_ = 4
   XType__kInt64 XType_ = 5
-  XType__kFloat XType_ = 6
-  XType__kDouble XType_ = 7
+  XType__kFloat32 XType_ = 6
+  XType__kFloat64 XType_ = 7
   XType__kString XType_ = 8
   XType__kList XType_ = 9
-  XType__kRecord XType_ = 10
+  XType__kMap XType_ = 10
   XType__kNode XType_ = 11
   XType__kEdge XType_ = 12
   XType__kDuration XType_ = 13
@@ -49,11 +49,11 @@ var XType_ToName = map[XType_]string {
   XType__kInt16: "kInt16",
   XType__kInt32: "kInt32",
   XType__kInt64: "kInt64",
-  XType__kFloat: "kFloat",
-  XType__kDouble: "kDouble",
+  XType__kFloat32: "kFloat32",
+  XType__kFloat64: "kFloat64",
   XType__kString: "kString",
   XType__kList: "kList",
-  XType__kRecord: "kMap",
+  XType__kMap: "kMap",
   XType__kNode: "kNode",
   XType__kEdge: "kEdge",
   XType__kDuration: "kDuration",
@@ -69,11 +69,11 @@ var XType_ToValue = map[string]XType_ {
   "kInt16": XType__kInt16,
   "kInt32": XType__kInt32,
   "kInt64": XType__kInt64,
-  "kFloat": XType__kFloat,
-  "kDouble": XType__kDouble,
+  "kFloat32": XType__kFloat32,
+  "kFloat64": XType__kFloat64,
   "kString": XType__kString,
   "kList": XType__kList,
-  "kRecord": XType__kRecord,
+  "kMap": XType__kMap,
   "kNode": XType__kNode,
   "kEdge": XType__kEdge,
   "kDuration": XType__kDuration,
@@ -89,11 +89,11 @@ var XType_Names = []string {
   "kInt16",
   "kInt32",
   "kInt64",
-  "kFloat",
-  "kDouble",
+  "kFloat32",
+  "kFloat64",
   "kString",
   "kList",
-  "kRecord",
+  "kMap",
   "kNode",
   "kEdge",
   "kDuration",
@@ -109,11 +109,11 @@ var XType_Values = []XType_ {
   XType__kInt16,
   XType__kInt32,
   XType__kInt64,
-  XType__kFloat,
-  XType__kDouble,
+  XType__kFloat32,
+  XType__kFloat64,
   XType__kString,
   XType__kList,
-  XType__kRecord,
+  XType__kMap,
   XType__kNode,
   XType__kEdge,
   XType__kDuration,
@@ -1064,7 +1064,7 @@ type Value = *XValue_
 
 func ValuePtr(v Value) *Value { return &v }
 
-func NewValue() *XValue_ { return NewXValue_() }
+func NewValue() Value { return NewXValue_() }
 
 type NList = *XNList_
 
@@ -3137,7 +3137,7 @@ func (p *XValue_) String() string {
 // Attributes:
 //  - Values
 type XNList_ struct {
-  Values []Value `thrift:"values,1" db:"values" json:"values"`
+  Values []*XValue_ `thrift:"values,1" db:"values" json:"values"`
 }
 
 func NewXNList_() *XNList_ {
@@ -3145,7 +3145,7 @@ func NewXNList_() *XNList_ {
 }
 
 
-func (p *XNList_) GetValues() []Value {
+func (p *XNList_) GetValues() []*XValue_ {
   return p.Values
 }
 type XNList_Builder struct {
@@ -3164,12 +3164,12 @@ func (p XNList_Builder) Emit() *XNList_{
   }
 }
 
-func (x *XNList_Builder) Values(values []Value) *XNList_Builder {
+func (x *XNList_Builder) Values(values []*XValue_) *XNList_Builder {
   x.obj.Values = values
   return x
 }
 
-func (x *XNList_) SetValues(values []Value) *XNList_ {
+func (x *XNList_) SetValues(values []*XValue_) *XNList_ {
   x.Values = values
   return x
 }
@@ -3211,7 +3211,7 @@ func (p *XNList_)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]Value, 0, size)
+  tSlice := make([]*XValue_, 0, size)
   p.Values =  tSlice
   for i := 0; i < size; i ++ {
     _elem0 := NewValue()
@@ -3268,7 +3268,7 @@ func (p *XNList_) String() string {
 // Attributes:
 //  - Values
 type XNRecord_ struct {
-  Values map[string]Value `thrift:"values,1" db:"values" json:"values"`
+  Values map[string]*XValue_ `thrift:"values,1" db:"values" json:"values"`
 }
 
 func NewXNRecord_() *XNRecord_ {
@@ -3276,7 +3276,7 @@ func NewXNRecord_() *XNRecord_ {
 }
 
 
-func (p *XNRecord_) GetValues() map[string]Value {
+func (p *XNRecord_) GetValues() map[string]*XValue_ {
   return p.Values
 }
 type XNRecord_Builder struct {
@@ -3295,12 +3295,12 @@ func (p XNRecord_Builder) Emit() *XNRecord_{
   }
 }
 
-func (x *XNRecord_Builder) Values(values map[string]Value) *XNRecord_Builder {
+func (x *XNRecord_Builder) Values(values map[string]*XValue_) *XNRecord_Builder {
   x.obj.Values = values
   return x
 }
 
-func (x *XNRecord_) SetValues(values map[string]Value) *XNRecord_ {
+func (x *XNRecord_) SetValues(values map[string]*XValue_) *XNRecord_ {
   x.Values = values
   return x
 }
@@ -3342,7 +3342,7 @@ func (p *XNRecord_)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[string]Value, size)
+  tMap := make(map[string]*XValue_, size)
   p.Values =  tMap
   for i := 0; i < size; i ++ {
     var _key1 string
@@ -3411,7 +3411,7 @@ func (p *XNRecord_) String() string {
 type XNode_ struct {
   NodeID InternalID `thrift:"nodeID,1" db:"nodeID" json:"nodeID"`
   NodeTypeID NodeTypeID `thrift:"nodeTypeID,2" db:"nodeTypeID" json:"nodeTypeID"`
-  Properties map[string]Value `thrift:"properties,3" db:"properties" json:"properties"`
+  Properties map[string]*XValue_ `thrift:"properties,3" db:"properties" json:"properties"`
 }
 
 func NewXNode_() *XNode_ {
@@ -3427,7 +3427,7 @@ func (p *XNode_) GetNodeTypeID() NodeTypeID {
   return p.NodeTypeID
 }
 
-func (p *XNode_) GetProperties() map[string]Value {
+func (p *XNode_) GetProperties() map[string]*XValue_ {
   return p.Properties
 }
 type XNode_Builder struct {
@@ -3458,7 +3458,7 @@ func (x *XNode_Builder) NodeTypeID(nodeTypeID NodeTypeID) *XNode_Builder {
   return x
 }
 
-func (x *XNode_Builder) Properties(properties map[string]Value) *XNode_Builder {
+func (x *XNode_Builder) Properties(properties map[string]*XValue_) *XNode_Builder {
   x.obj.Properties = properties
   return x
 }
@@ -3473,7 +3473,7 @@ func (x *XNode_) SetNodeTypeID(nodeTypeID NodeTypeID) *XNode_ {
   return x
 }
 
-func (x *XNode_) SetProperties(properties map[string]Value) *XNode_ {
+func (x *XNode_) SetProperties(properties map[string]*XValue_) *XNode_ {
   x.Properties = properties
   return x
 }
@@ -3543,7 +3543,7 @@ func (p *XNode_)  ReadField3(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[string]Value, size)
+  tMap := make(map[string]*XValue_, size)
   p.Properties =  tMap
   for i := 0; i < size; i ++ {
     var _key3 string
@@ -3640,7 +3640,7 @@ type XEdge_ struct {
   DstID InternalID `thrift:"dstID,2" db:"dstID" json:"dstID"`
   EdgeTypeID EdgeTypeID `thrift:"edgeTypeID,3" db:"edgeTypeID" json:"edgeTypeID"`
   Rank EdgeRank `thrift:"rank,4" db:"rank" json:"rank"`
-  Properties map[string]Value `thrift:"properties,5" db:"properties" json:"properties"`
+  Properties map[string]*XValue_ `thrift:"properties,5" db:"properties" json:"properties"`
 }
 
 func NewXEdge_() *XEdge_ {
@@ -3664,7 +3664,7 @@ func (p *XEdge_) GetRank() EdgeRank {
   return p.Rank
 }
 
-func (p *XEdge_) GetProperties() map[string]Value {
+func (p *XEdge_) GetProperties() map[string]*XValue_ {
   return p.Properties
 }
 type XEdge_Builder struct {
@@ -3707,7 +3707,7 @@ func (x *XEdge_Builder) Rank(rank EdgeRank) *XEdge_Builder {
   return x
 }
 
-func (x *XEdge_Builder) Properties(properties map[string]Value) *XEdge_Builder {
+func (x *XEdge_Builder) Properties(properties map[string]*XValue_) *XEdge_Builder {
   x.obj.Properties = properties
   return x
 }
@@ -3732,7 +3732,7 @@ func (x *XEdge_) SetRank(rank EdgeRank) *XEdge_ {
   return x
 }
 
-func (x *XEdge_) SetProperties(properties map[string]Value) *XEdge_ {
+func (x *XEdge_) SetProperties(properties map[string]*XValue_) *XEdge_ {
   x.Properties = properties
   return x
 }
@@ -3830,7 +3830,7 @@ func (p *XEdge_)  ReadField5(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading map begin: ", err)
   }
-  tMap := make(map[string]Value, size)
+  tMap := make(map[string]*XValue_, size)
   p.Properties =  tMap
   for i := 0; i < size; i ++ {
     var _key5 string
@@ -3942,10 +3942,10 @@ func (p *XEdge_) String() string {
 
 // Attributes:
 //  - FiledName
-//  - ValueType
+//  - TypeKind
 type XFieldType_ struct {
   FiledName []byte `thrift:"filedName,1" db:"filedName" json:"filedName"`
-  ValueType Type `thrift:"valueType,2" db:"valueType" json:"valueType"`
+  TypeKind XType_ `thrift:"typeKind,2" db:"typeKind" json:"typeKind"`
 }
 
 func NewXFieldType_() *XFieldType_ {
@@ -3957,8 +3957,8 @@ func (p *XFieldType_) GetFiledName() []byte {
   return p.FiledName
 }
 
-func (p *XFieldType_) GetValueType() Type {
-  return p.ValueType
+func (p *XFieldType_) GetTypeKind() XType_ {
+  return p.TypeKind
 }
 type XFieldType_Builder struct {
   obj *XFieldType_
@@ -3973,7 +3973,7 @@ func NewXFieldType_Builder() *XFieldType_Builder{
 func (p XFieldType_Builder) Emit() *XFieldType_{
   return &XFieldType_{
     FiledName: p.obj.FiledName,
-    ValueType: p.obj.ValueType,
+    TypeKind: p.obj.TypeKind,
   }
 }
 
@@ -3982,8 +3982,8 @@ func (x *XFieldType_Builder) FiledName(filedName []byte) *XFieldType_Builder {
   return x
 }
 
-func (x *XFieldType_Builder) ValueType(valueType Type) *XFieldType_Builder {
-  x.obj.ValueType = valueType
+func (x *XFieldType_Builder) TypeKind(typeKind XType_) *XFieldType_Builder {
+  x.obj.TypeKind = typeKind
   return x
 }
 
@@ -3992,8 +3992,8 @@ func (x *XFieldType_) SetFiledName(filedName []byte) *XFieldType_ {
   return x
 }
 
-func (x *XFieldType_) SetValueType(valueType Type) *XFieldType_ {
-  x.ValueType = valueType
+func (x *XFieldType_) SetTypeKind(typeKind XType_) *XFieldType_ {
+  x.TypeKind = typeKind
   return x
 }
 
@@ -4047,7 +4047,7 @@ func (p *XFieldType_)  ReadField2(iprot thrift.Protocol) error {
     return thrift.PrependError("error reading field 2: ", err)
   } else {
     temp := Type(v)
-    p.ValueType = temp
+    p.TypeKind = temp
   }
   return nil
 }
@@ -4075,12 +4075,12 @@ func (p *XFieldType_) writeField1(oprot thrift.Protocol) (err error) {
 }
 
 func (p *XFieldType_) writeField2(oprot thrift.Protocol) (err error) {
-  if err := oprot.WriteFieldBegin("valueType", thrift.I32, 2); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:valueType: ", p), err) }
-  if err := oprot.WriteI32(int32(p.ValueType)); err != nil {
-  return thrift.PrependError(fmt.Sprintf("%T.valueType (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldBegin("typeKind", thrift.I32, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:typeKind: ", p), err) }
+  if err := oprot.WriteI32(int32(p.TypeKind)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.typeKind (2) field write error: ", p), err) }
   if err := oprot.WriteFieldEnd(); err != nil {
-    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:valueType: ", p), err) }
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:typeKind: ", p), err) }
   return err
 }
 
@@ -4090,15 +4090,15 @@ func (p *XFieldType_) String() string {
   }
 
   filedNameVal := fmt.Sprintf("%v", p.FiledName)
-  valueTypeVal := fmt.Sprintf("%v", p.ValueType)
-  return fmt.Sprintf("XFieldType_({FiledName:%s ValueType:%s})", filedNameVal, valueTypeVal)
+  typeKindVal := fmt.Sprintf("%v", p.TypeKind)
+  return fmt.Sprintf("XFieldType_({FiledName:%s TypeKind:%s})", filedNameVal, typeKindVal)
 }
 
 // Attributes:
 //  - FieldType
 //  - FieldNameIndexMap
 type XRowType_ struct {
-  FieldType []FieldType `thrift:"fieldType,1" db:"fieldType" json:"fieldType"`
+  FieldType []*XFieldType_ `thrift:"fieldType,1" db:"fieldType" json:"fieldType"`
   FieldNameIndexMap map[string]int32 `thrift:"fieldNameIndexMap,2" db:"fieldNameIndexMap" json:"fieldNameIndexMap"`
 }
 
@@ -4107,7 +4107,7 @@ func NewXRowType_() *XRowType_ {
 }
 
 
-func (p *XRowType_) GetFieldType() []FieldType {
+func (p *XRowType_) GetFieldType() []*XFieldType_ {
   return p.FieldType
 }
 
@@ -4131,7 +4131,7 @@ func (p XRowType_Builder) Emit() *XRowType_{
   }
 }
 
-func (x *XRowType_Builder) FieldType(fieldType []FieldType) *XRowType_Builder {
+func (x *XRowType_Builder) FieldType(fieldType []*XFieldType_) *XRowType_Builder {
   x.obj.FieldType = fieldType
   return x
 }
@@ -4141,7 +4141,7 @@ func (x *XRowType_Builder) FieldNameIndexMap(fieldNameIndexMap map[string]int32)
   return x
 }
 
-func (x *XRowType_) SetFieldType(fieldType []FieldType) *XRowType_ {
+func (x *XRowType_) SetFieldType(fieldType []*XFieldType_) *XRowType_ {
   x.FieldType = fieldType
   return x
 }
@@ -4192,7 +4192,7 @@ func (p *XRowType_)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]FieldType, 0, size)
+  tSlice := make([]*XFieldType_, 0, size)
   p.FieldType =  tSlice
   for i := 0; i < size; i ++ {
     _elem7 := NewFieldType()
@@ -4299,7 +4299,7 @@ func (p *XRowType_) String() string {
 // Attributes:
 //  - Values
 type XRow_ struct {
-  Values []Value `thrift:"values,1" db:"values" json:"values"`
+  Values []*XValue_ `thrift:"values,1" db:"values" json:"values"`
 }
 
 func NewXRow_() *XRow_ {
@@ -4307,7 +4307,7 @@ func NewXRow_() *XRow_ {
 }
 
 
-func (p *XRow_) GetValues() []Value {
+func (p *XRow_) GetValues() []*XValue_ {
   return p.Values
 }
 type XRow_Builder struct {
@@ -4326,12 +4326,12 @@ func (p XRow_Builder) Emit() *XRow_{
   }
 }
 
-func (x *XRow_Builder) Values(values []Value) *XRow_Builder {
+func (x *XRow_Builder) Values(values []*XValue_) *XRow_Builder {
   x.obj.Values = values
   return x
 }
 
-func (x *XRow_) SetValues(values []Value) *XRow_ {
+func (x *XRow_) SetValues(values []*XValue_) *XRow_ {
   x.Values = values
   return x
 }
@@ -4373,7 +4373,7 @@ func (p *XRow_)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]Value, 0, size)
+  tSlice := make([]*XValue_, 0, size)
   p.Values =  tSlice
   for i := 0; i < size; i ++ {
     _elem10 := NewValue()
@@ -4432,7 +4432,7 @@ func (p *XRow_) String() string {
 //  - Records
 type XResultTable_ struct {
   ColumnNames [][]byte `thrift:"columnNames,1" db:"columnNames" json:"columnNames"`
-  Records []Row `thrift:"records,2" db:"records" json:"records"`
+  Records []*XRow_ `thrift:"records,2" db:"records" json:"records"`
 }
 
 func NewXResultTable_() *XResultTable_ {
@@ -4444,7 +4444,7 @@ func (p *XResultTable_) GetColumnNames() [][]byte {
   return p.ColumnNames
 }
 
-func (p *XResultTable_) GetRecords() []Row {
+func (p *XResultTable_) GetRecords() []*XRow_ {
   return p.Records
 }
 type XResultTable_Builder struct {
@@ -4469,7 +4469,7 @@ func (x *XResultTable_Builder) ColumnNames(columnNames [][]byte) *XResultTable_B
   return x
 }
 
-func (x *XResultTable_Builder) Records(records []Row) *XResultTable_Builder {
+func (x *XResultTable_Builder) Records(records []*XRow_) *XResultTable_Builder {
   x.obj.Records = records
   return x
 }
@@ -4479,7 +4479,7 @@ func (x *XResultTable_) SetColumnNames(columnNames [][]byte) *XResultTable_ {
   return x
 }
 
-func (x *XResultTable_) SetRecords(records []Row) *XResultTable_ {
+func (x *XResultTable_) SetRecords(records []*XRow_) *XResultTable_ {
   x.Records = records
   return x
 }
@@ -4547,7 +4547,7 @@ func (p *XResultTable_)  ReadField2(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]Row, 0, size)
+  tSlice := make([]*XRow_, 0, size)
   p.Records =  tSlice
   for i := 0; i < size; i ++ {
     _elem12 := NewRow()

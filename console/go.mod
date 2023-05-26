@@ -10,7 +10,7 @@ require (
 )
 
 require (
-	github.com/facebook/fbthrift v0.31.1-0.20211129061412-801ed7f9f295 // indirect
+	github.com/facebook/fbthrift v0.31.1-0.20221225090033-b7c4ecdd9179 // indirect
 	github.com/mattn/go-colorable v0.1.7 // indirect
 	github.com/mattn/go-isatty v0.0.12 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect

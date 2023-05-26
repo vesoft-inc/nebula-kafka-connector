@@ -10,7 +10,7 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-  nebula0 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
+	nebula0 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
 
 )
 
@@ -71,6 +71,12 @@ type AuthResponse = *XAuthResponse_
 func AuthResponsePtr(v AuthResponse) *AuthResponse { return &v }
 
 func NewAuthResponse() AuthResponse { return NewXAuthResponse_() }
+
+type ResultTable = *nebula0.XResultTable_
+
+func ResultTablePtr(v ResultTable) *ResultTable { return &v }
+
+func NewResultTable() ResultTable { return nebula0.NewXResultTable_() }
 
 // Attributes:
 //  - Rows
@@ -509,8 +515,8 @@ type XPlanNodeDescription_ struct {
   Name []byte `thrift:"name,1" db:"name" json:"name"`
   Id int64 `thrift:"id,2" db:"id" json:"id"`
   OutputVar []byte `thrift:"output_var,3" db:"output_var" json:"output_var"`
-  Description []Pair `thrift:"description,4,optional" db:"description" json:"description,omitempty"`
-  Profiles []ProfilingStats `thrift:"profiles,5,optional" db:"profiles" json:"profiles,omitempty"`
+  Description []*XPair_ `thrift:"description,4,optional" db:"description" json:"description,omitempty"`
+  Profiles []*XProfilingStats_ `thrift:"profiles,5,optional" db:"profiles" json:"profiles,omitempty"`
   Dependencies []int64 `thrift:"dependencies,6,optional" db:"dependencies" json:"dependencies,omitempty"`
 }
 
@@ -530,14 +536,14 @@ func (p *XPlanNodeDescription_) GetId() int64 {
 func (p *XPlanNodeDescription_) GetOutputVar() []byte {
   return p.OutputVar
 }
-var XPlanNodeDescription__Description_DEFAULT []*Pair
+var XPlanNodeDescription__Description_DEFAULT []*XPair_
 
-func (p *XPlanNodeDescription_) GetDescription() []Pair {
+func (p *XPlanNodeDescription_) GetDescription() []*XPair_ {
   return p.Description
 }
-var XPlanNodeDescription__Profiles_DEFAULT []*ProfilingStats
+var XPlanNodeDescription__Profiles_DEFAULT []*XProfilingStats_
 
-func (p *XPlanNodeDescription_) GetProfiles() []ProfilingStats {
+func (p *XPlanNodeDescription_) GetProfiles() []*XProfilingStats_ {
   return p.Profiles
 }
 var XPlanNodeDescription__Dependencies_DEFAULT []int64
@@ -593,12 +599,12 @@ func (x *XPlanNodeDescription_Builder) OutputVar(outputVar []byte) *XPlanNodeDes
   return x
 }
 
-func (x *XPlanNodeDescription_Builder) Description(description []Pair) *XPlanNodeDescription_Builder {
+func (x *XPlanNodeDescription_Builder) Description(description []*XPair_) *XPlanNodeDescription_Builder {
   x.obj.Description = description
   return x
 }
 
-func (x *XPlanNodeDescription_Builder) Profiles(profiles []ProfilingStats) *XPlanNodeDescription_Builder {
+func (x *XPlanNodeDescription_Builder) Profiles(profiles []*XProfilingStats_) *XPlanNodeDescription_Builder {
   x.obj.Profiles = profiles
   return x
 }
@@ -623,12 +629,12 @@ func (x *XPlanNodeDescription_) SetOutputVar(outputVar []byte) *XPlanNodeDescrip
   return x
 }
 
-func (x *XPlanNodeDescription_) SetDescription(description []Pair) *XPlanNodeDescription_ {
+func (x *XPlanNodeDescription_) SetDescription(description []*XPair_) *XPlanNodeDescription_ {
   x.Description = description
   return x
 }
 
-func (x *XPlanNodeDescription_) SetProfiles(profiles []ProfilingStats) *XPlanNodeDescription_ {
+func (x *XPlanNodeDescription_) SetProfiles(profiles []*XProfilingStats_) *XPlanNodeDescription_ {
   x.Profiles = profiles
   return x
 }
@@ -722,7 +728,7 @@ func (p *XPlanNodeDescription_)  ReadField4(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]Pair, 0, size)
+  tSlice := make([]*XPair_, 0, size)
   p.Description =  tSlice
   for i := 0; i < size; i ++ {
     _elem3 := NewPair()
@@ -742,7 +748,7 @@ func (p *XPlanNodeDescription_)  ReadField5(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]ProfilingStats, 0, size)
+  tSlice := make([]*XProfilingStats_, 0, size)
   p.Profiles =  tSlice
   for i := 0; i < size; i ++ {
     _elem4 := NewProfilingStats()
@@ -907,7 +913,7 @@ func (p *XPlanNodeDescription_) String() string {
 //  - Format
 //  - OptimizeTimeInUs
 type XPlanDescription_ struct {
-  PlanNodeDescs []PlanNodeDescription `thrift:"plan_node_descs,1" db:"plan_node_descs" json:"plan_node_descs"`
+  PlanNodeDescs []*XPlanNodeDescription_ `thrift:"plan_node_descs,1" db:"plan_node_descs" json:"plan_node_descs"`
   NodeIndexMap map[int64]int64 `thrift:"node_index_map,2" db:"node_index_map" json:"node_index_map"`
   Format []byte `thrift:"format,3" db:"format" json:"format"`
   OptimizeTimeInUs int32 `thrift:"optimize_time_in_us,4" db:"optimize_time_in_us" json:"optimize_time_in_us"`
@@ -918,7 +924,7 @@ func NewXPlanDescription_() *XPlanDescription_ {
 }
 
 
-func (p *XPlanDescription_) GetPlanNodeDescs() []PlanNodeDescription {
+func (p *XPlanDescription_) GetPlanNodeDescs() []*XPlanNodeDescription_ {
   return p.PlanNodeDescs
 }
 
@@ -952,7 +958,7 @@ func (p XPlanDescription_Builder) Emit() *XPlanDescription_{
   }
 }
 
-func (x *XPlanDescription_Builder) PlanNodeDescs(planNodeDescs []PlanNodeDescription) *XPlanDescription_Builder {
+func (x *XPlanDescription_Builder) PlanNodeDescs(planNodeDescs []*XPlanNodeDescription_) *XPlanDescription_Builder {
   x.obj.PlanNodeDescs = planNodeDescs
   return x
 }
@@ -972,7 +978,7 @@ func (x *XPlanDescription_Builder) OptimizeTimeInUs(optimizeTimeInUs int32) *XPl
   return x
 }
 
-func (x *XPlanDescription_) SetPlanNodeDescs(planNodeDescs []PlanNodeDescription) *XPlanDescription_ {
+func (x *XPlanDescription_) SetPlanNodeDescs(planNodeDescs []*XPlanNodeDescription_) *XPlanDescription_ {
   x.PlanNodeDescs = planNodeDescs
   return x
 }
@@ -1041,7 +1047,7 @@ func (p *XPlanDescription_)  ReadField1(iprot thrift.Protocol) error {
   if err != nil {
     return thrift.PrependError("error reading list begin: ", err)
   }
-  tSlice := make([]PlanNodeDescription, 0, size)
+  tSlice := make([]*XPlanNodeDescription_, 0, size)
   p.PlanNodeDescs =  tSlice
   for i := 0; i < size; i ++ {
     _elem6 := NewPlanNodeDescription()
@@ -1303,9 +1309,9 @@ func (p *XGQLStatus_) String() string {
 //  - Result_
 //  - PlanDesc
 type XExecutionOutcome_ struct {
-  GqlStatus GQLStatus `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
-  Result_ nebula0.ResultTable `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
-  PlanDesc PlanDescription `thrift:"plan_desc,3,optional" db:"plan_desc" json:"plan_desc,omitempty"`
+  GqlStatus *XGQLStatus_ `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
+  Result_ *nebula0.XResultTable_ `thrift:"result,2,optional" db:"result" json:"result,omitempty"`
+  PlanDesc *XPlanDescription_ `thrift:"plan_desc,3,optional" db:"plan_desc" json:"plan_desc,omitempty"`
 }
 
 func NewXExecutionOutcome_() *XExecutionOutcome_ {
@@ -1314,22 +1320,22 @@ func NewXExecutionOutcome_() *XExecutionOutcome_ {
   }
 }
 
-var XExecutionOutcome__GqlStatus_DEFAULT GQLStatus
-func (p *XExecutionOutcome_) GetGqlStatus() GQLStatus {
+var XExecutionOutcome__GqlStatus_DEFAULT *XGQLStatus_
+func (p *XExecutionOutcome_) GetGqlStatus() *XGQLStatus_ {
   if !p.IsSetGqlStatus() {
     return XExecutionOutcome__GqlStatus_DEFAULT
   }
   return p.GqlStatus
 }
-var XExecutionOutcome__Result__DEFAULT nebula0.ResultTable
-func (p *XExecutionOutcome_) GetResult_() nebula0.ResultTable {
+var XExecutionOutcome__Result__DEFAULT *nebula0.XResultTable_
+func (p *XExecutionOutcome_) GetResult_() *nebula0.XResultTable_ {
   if !p.IsSetResult_() {
     return XExecutionOutcome__Result__DEFAULT
   }
   return p.Result_
 }
-var XExecutionOutcome__PlanDesc_DEFAULT PlanDescription
-func (p *XExecutionOutcome_) GetPlanDesc() PlanDescription {
+var XExecutionOutcome__PlanDesc_DEFAULT *XPlanDescription_
+func (p *XExecutionOutcome_) GetPlanDesc() *XPlanDescription_ {
   if !p.IsSetPlanDesc() {
     return XExecutionOutcome__PlanDesc_DEFAULT
   }
@@ -1365,32 +1371,32 @@ func (p XExecutionOutcome_Builder) Emit() *XExecutionOutcome_{
   }
 }
 
-func (x *XExecutionOutcome_Builder) GqlStatus(gqlStatus GQLStatus) *XExecutionOutcome_Builder {
+func (x *XExecutionOutcome_Builder) GqlStatus(gqlStatus *XGQLStatus_) *XExecutionOutcome_Builder {
   x.obj.GqlStatus = gqlStatus
   return x
 }
 
-func (x *XExecutionOutcome_Builder) Result_(result nebula0.ResultTable) *XExecutionOutcome_Builder {
+func (x *XExecutionOutcome_Builder) Result_(result *nebula0.XResultTable_) *XExecutionOutcome_Builder {
   x.obj.Result_ = result
   return x
 }
 
-func (x *XExecutionOutcome_Builder) PlanDesc(planDesc PlanDescription) *XExecutionOutcome_Builder {
+func (x *XExecutionOutcome_Builder) PlanDesc(planDesc *XPlanDescription_) *XExecutionOutcome_Builder {
   x.obj.PlanDesc = planDesc
   return x
 }
 
-func (x *XExecutionOutcome_) SetGqlStatus(gqlStatus GQLStatus) *XExecutionOutcome_ {
+func (x *XExecutionOutcome_) SetGqlStatus(gqlStatus *XGQLStatus_) *XExecutionOutcome_ {
   x.GqlStatus = gqlStatus
   return x
 }
 
-func (x *XExecutionOutcome_) SetResult_(result nebula0.ResultTable) *XExecutionOutcome_ {
+func (x *XExecutionOutcome_) SetResult_(result *nebula0.XResultTable_) *XExecutionOutcome_ {
   x.Result_ = result
   return x
 }
 
-func (x *XExecutionOutcome_) SetPlanDesc(planDesc PlanDescription) *XExecutionOutcome_ {
+func (x *XExecutionOutcome_) SetPlanDesc(planDesc *XPlanDescription_) *XExecutionOutcome_ {
   x.PlanDesc = planDesc
   return x
 }
@@ -1444,7 +1450,7 @@ func (p *XExecutionOutcome_)  ReadField1(iprot thrift.Protocol) error {
 }
 
 func (p *XExecutionOutcome_)  ReadField2(iprot thrift.Protocol) error {
-  p.Result_ = nebula0.NewResultTable()
+  p.Result_ = NewResultTable()
   if err := p.Result_.Read(iprot); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.Result_), err)
   }
@@ -1539,7 +1545,7 @@ func (p *XExecutionOutcome_) String() string {
 //  - ExecutionOutcome
 //  - LatencyInUs
 type XExecutionResponse_ struct {
-  ExecutionOutcome ExecutionOutcome `thrift:"executionOutcome,1" db:"executionOutcome" json:"executionOutcome"`
+  ExecutionOutcome *XExecutionOutcome_ `thrift:"executionOutcome,1" db:"executionOutcome" json:"executionOutcome"`
   LatencyInUs int64 `thrift:"latencyInUs,2" db:"latencyInUs" json:"latencyInUs"`
 }
 
@@ -1549,8 +1555,8 @@ func NewXExecutionResponse_() *XExecutionResponse_ {
   }
 }
 
-var XExecutionResponse__ExecutionOutcome_DEFAULT ExecutionOutcome
-func (p *XExecutionResponse_) GetExecutionOutcome() ExecutionOutcome {
+var XExecutionResponse__ExecutionOutcome_DEFAULT *XExecutionOutcome_
+func (p *XExecutionResponse_) GetExecutionOutcome() *XExecutionOutcome_ {
   if !p.IsSetExecutionOutcome() {
     return XExecutionResponse__ExecutionOutcome_DEFAULT
   }
@@ -1581,7 +1587,7 @@ func (p XExecutionResponse_Builder) Emit() *XExecutionResponse_{
   }
 }
 
-func (x *XExecutionResponse_Builder) ExecutionOutcome(executionOutcome ExecutionOutcome) *XExecutionResponse_Builder {
+func (x *XExecutionResponse_Builder) ExecutionOutcome(executionOutcome *XExecutionOutcome_) *XExecutionResponse_Builder {
   x.obj.ExecutionOutcome = executionOutcome
   return x
 }
@@ -1591,7 +1597,7 @@ func (x *XExecutionResponse_Builder) LatencyInUs(latencyInUs int64) *XExecutionR
   return x
 }
 
-func (x *XExecutionResponse_) SetExecutionOutcome(executionOutcome ExecutionOutcome) *XExecutionResponse_ {
+func (x *XExecutionResponse_) SetExecutionOutcome(executionOutcome *XExecutionOutcome_) *XExecutionResponse_ {
   x.ExecutionOutcome = executionOutcome
   return x
 }
@@ -1943,7 +1949,7 @@ func (p *AuthReq) String() string {
 //  - GqlStatus
 //  - Identifier
 type XAuthResponse_ struct {
-  GqlStatus GQLStatus `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
+  GqlStatus *XGQLStatus_ `thrift:"gqlStatus,1" db:"gqlStatus" json:"gqlStatus"`
   Identifier *int64 `thrift:"identifier,2,optional" db:"identifier" json:"identifier,omitempty"`
 }
 
@@ -1953,8 +1959,8 @@ func NewXAuthResponse_() *XAuthResponse_ {
   }
 }
 
-var XAuthResponse__GqlStatus_DEFAULT GQLStatus
-func (p *XAuthResponse_) GetGqlStatus() GQLStatus {
+var XAuthResponse__GqlStatus_DEFAULT *XGQLStatus_
+func (p *XAuthResponse_) GetGqlStatus() *XGQLStatus_ {
   if !p.IsSetGqlStatus() {
     return XAuthResponse__GqlStatus_DEFAULT
   }
@@ -1992,7 +1998,7 @@ func (p XAuthResponse_Builder) Emit() *XAuthResponse_{
   }
 }
 
-func (x *XAuthResponse_Builder) GqlStatus(gqlStatus GQLStatus) *XAuthResponse_Builder {
+func (x *XAuthResponse_Builder) GqlStatus(gqlStatus *XGQLStatus_) *XAuthResponse_Builder {
   x.obj.GqlStatus = gqlStatus
   return x
 }
@@ -2002,7 +2008,7 @@ func (x *XAuthResponse_Builder) Identifier(identifier *int64) *XAuthResponse_Bui
   return x
 }
 
-func (x *XAuthResponse_) SetGqlStatus(gqlStatus GQLStatus) *XAuthResponse_ {
+func (x *XAuthResponse_) SetGqlStatus(gqlStatus *XGQLStatus_) *XAuthResponse_ {
   x.GqlStatus = gqlStatus
   return x
 }
