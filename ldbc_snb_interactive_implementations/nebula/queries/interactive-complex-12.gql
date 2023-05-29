@@ -12,6 +12,7 @@ AGGREGATE tags=collect(tag.id)
 MATCH (:Person {id: $personId })<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(comment:Comment)-[:REPLY_OF]->(:Post)-[:HAS_TAG]->(tag:Tag)
 FILTER WHERE tag.id IN tags
 AGGREGATE tagNames=collect(DISTINCT tag.name),replyCount=count(DISTINCT comment) GROUP BY friend
+ORDER BY replyCount DESC, friend.id ASC
 LIMIT 20
 RETURN friend.id AS personId,
        friend.firstName AS personFirstName,
