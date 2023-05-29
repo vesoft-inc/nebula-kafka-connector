@@ -3,7 +3,7 @@
 :param personId: 143
 */
 USE $graphName
-MATCH (start:Person {id: $personId})<-[:HAS_CREATOR]-(:Message)<-[:REPLY_OF]-(comment:Comment)-[:HAS_CREATOR]->(person:Person)
+MATCH (startPerson:Person {id: $personId})<-[:HAS_CREATOR]-(:Message)<-[:REPLY_OF]-(comment:Comment)-[:HAS_CREATOR]->(person:Person)
 ORDER BY
   comment.creationDate DESC,
   comment.id ASC

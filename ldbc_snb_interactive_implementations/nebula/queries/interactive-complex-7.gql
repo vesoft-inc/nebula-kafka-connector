@@ -3,7 +3,7 @@
 :param personId: 4398046511268
 */
 USE $graphName
-MATCH (person:Person {id: $personId})<-[:HAS_CREATOR]-(message:Message)<-[like:LIKES]-(liker:Person)
+MATCH (person:Person {id: $personId})<-[:HAS_CREATOR]-(message:Message)<-[likes:LIKES]-(liker:Person)
   LET liker=liker, message=message, likeTime=likes.creationDate, person=person
   ORDER BY likeTime DESC, message.id ASC
   AGGREGATE latestLikes=collect(RECORD{msg: message, likeTime: likeTime}) GROUP BY liker, person
@@ -17,7 +17,7 @@ RETURN
   liker.firstName AS personFirstName,
   liker.lastName AS personLastName,
   latestLike.likeTime AS likeCreationDate,
-  latestLike.msg.id AS commentOrPostId,
-  coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS commentOrPostContent,
-  toInteger(floor(toFloat(latestLike.likeTime - latestLike.msg.creationDate)/1000.0)/60.0) AS minutesLatency,
-  size( VALUE{USE $graphName MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: $personId}) RETURN p0} ) == 0 AS isNew
+  latestLike.msg.id AS messageId,
+  coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS messageContent,
+latestLike.msg.creationDate AS minutesLatency,
+  size( VALUE{USE $graphName MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: $personId}) RETURN p0} ) = 0 AS isNew
