@@ -8,11 +8,12 @@
 USE $graphName
 MATCH (root:Person {id: $personId })<-[:KNOWS]->{1,2}(friend:Person)
 WHERE friend <> root
-AGGREGATE friends=collect(friend)
-FOR friend IN friends
+RETURN DISTINCT friend
+NEXT
+USE $graphName
     MATCH (message:Message WHERE message.creationDate < localdatetime($maxDate))-[:HAS_CREATOR]->(friend:Person)
 ORDER BY
-  friend.id DESC,
+  message.creationDate DESC,
   message.id ASC
 LIMIT 20
 RETURN
@@ -22,3 +23,4 @@ RETURN
   message.id AS commentOrPostId,
   coalesce(message.content,message.imageFile) AS commentOrPostContent,
   message.creationDate AS commentOrPostCreationDate
+
