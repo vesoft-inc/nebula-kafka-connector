@@ -14,5 +14,5 @@ RETURN
     friend.firstName AS personFirstName,
     friend.lastName AS personLastName,
     message.id AS postOrCommentId,
-    coalesce(message.content, message.imageFile) AS postOrCommentContent,
+    CASE WHEN message.content <>"" THEN message.content  ELSE message.imageFile END AS messageContent,
     message.creationDate AS postOrCommentCreationDate

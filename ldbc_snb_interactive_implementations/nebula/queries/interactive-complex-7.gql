@@ -18,6 +18,6 @@ RETURN
   liker.lastName AS personLastName,
   latestLike.likeTime AS likeCreationDate,
   latestLike.msg.id AS messageId,
-  coalesce(latestLike.msg.content, latestLike.msg.imageFile) AS messageContent,
-latestLike.msg.creationDate AS minutesLatency,
+  CASE WHEN latestLike.msg.content <>"" THEN latestLike.msg.content  ELSE latestLike.msg.imageFile END AS messageContent,
+  latestLike.msg.creationDate AS minutesLatency,
   size( VALUE{USE $graphName MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: $personId}) RETURN p0} ) = 0 AS isNew
