@@ -9,27 +9,25 @@
 }
 */
 USE $graphName
-MATCH (countryX:Country {name : $countryXName}),
-      (countryY:Country {name : $countryYName}),
+MATCH (countryX:Country {name : "$countryXName"}),
+      (countryY:Country {name : "$countryYName"}),
       (person:Person {id : $personId})
-LET person=person, countryX=countryX, countryY=countryY
-LIMIT 1
 MATCH (city:City)-[:IS_PART_OF]->(country:Country)
-WHERE country IN [countryX, countryY]
+Filter country IN List [countryX, countryY]
 AGGREGATE cities=collect(city) GROUP BY person, countryX, countryY
 MATCH (person:Person{id : $personId})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
-WHERE person <> friend AND city NOT IN cities
+Filter person <> friend AND NOT city IN cities
 RETURN DISTINCT friend, countryX, countryY
 NEXT
 USE $graphName
 MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
-WHERE localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate) AND country IN [countryX, countryY]
+Filter localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate) AND country IN List [countryX, countryY]
 LET
   friend=friend,
   messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
   messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
 AGGREGATE xCount=sum(messageX), yCount=sum(messageY) GROUP BY friend
-WHERE xCount > 0 AND yCount > 0
+Filter xCount > 0 AND yCount > 0
 ORDER BY xCount+yCount DESC, friend.id ASC
 LIMIT 20
 RETURN friend.id AS friendId,

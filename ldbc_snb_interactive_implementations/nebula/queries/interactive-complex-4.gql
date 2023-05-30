@@ -21,7 +21,7 @@ LET valid = CASE
         WHEN localdatetime($startDate) > post.creationDate THEN 1
         ELSE 0
     END
-AGGREGATE postCount=sum(valid), inValidPostCount=sum(inValid) GROUP BY tag
+AGGREGATE postCount=sum(valid), inValidPostCount=sum(invalid) GROUP BY tag
 FILTER WHERE postCount>0 AND inValidPostCount=0
 ORDER BY postCount DESC, tag.name ASC
 LIMIT 10

@@ -12,9 +12,7 @@ RETURN DISTINCT otherPerson
 NEXT
 USE $graphName
 MATCH (forum:Forum)-[membership:HAS_MEMBER WHERE membership.joinDate > localdatetime($minDate)]->(otherPerson:Person)
-    AGGREGATE otherPersons=collect(otherPerson) GROUP BY forum
-    OPTIONAL MATCH (otherPerson2:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
-        FILTER WHERE otherPerson2 IN otherPersons
+    OPTIONAL MATCH (otherPerson:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
         AGGREGATE postCount=count(post) GROUP BY forum
         ORDER BY
         postCount DESC,
