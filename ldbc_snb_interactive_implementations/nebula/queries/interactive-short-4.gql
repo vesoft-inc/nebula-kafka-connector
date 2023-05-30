@@ -6,4 +6,7 @@ USE $graphName
 MATCH (m:Message WHERE m.id = $messageId)
 RETURN
    m.creationDate as messageCreationDate,
-   coalesce(m.content, m.imageFile) as messageContent
+   CASE WHEN m.content <> ""
+        THEN m.content
+        ELSE m.imageFile
+   END AS messageContent

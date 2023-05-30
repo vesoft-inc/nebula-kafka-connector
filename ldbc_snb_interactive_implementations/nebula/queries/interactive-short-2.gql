@@ -4,7 +4,7 @@
  */
 USE $graphName
 MATCH (message:Message)-[:HAS_CREATOR]->(p:Person WHERE p.id = $personId )
-LET message=message, messageId=message.id, messageCreationDate=message.creationDate
+LET messageId=message.id, messageCreationDate=message.creationDate
 ORDER BY messageCreationDate DESC, messageId ASC
 LIMIT 10
 MATCH (message:Message)-[:REPLY_OF]->{0,5}(post:Post),
@@ -12,7 +12,10 @@ MATCH (message:Message)-[:REPLY_OF]->{0,5}(post:Post),
 ORDER BY messageCreationDate DESC, messageId ASC
 RETURN
   messageId,
-  coalesce(message.imageFile,message.content) AS messageContent,
+  CASE WHEN message.content <> ""
+        THEN message.content
+        ELSE message.imageFile
+  END AS messageContent,
   messageCreationDate,
   post.id AS postId,
   person.id AS personId,

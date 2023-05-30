@@ -498,7 +498,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
 
         @Override
         public LdbcShortQuery1PersonProfileResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
-            if (record != null){
+            if (record != null) {
                 String firstName = record.get( 0 ).asString();
                 String lastName = record.get( 1 ).asString();
                 long birthday = NebulaConverter.convertDateToEpoch(record.get(2).asDate().toString());
@@ -516,9 +516,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                         cityId,
                         gender,
                         creationDate );
-            }
-            else
-            {
+            } else {
                 return null;
             }
 
@@ -556,9 +554,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                         originalPostAuthorId,
                         originalPostAuthorFirstName,
                         originalPostAuthorLastName );
-            }
-            else
-            {
+            } else {
                 return null;
             }
         }
@@ -607,17 +603,13 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         @Override
         public LdbcShortQuery4MessageContentResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
             if (record != null){
-            // Pay attention, the spec's and the implementation's parameter orders are different.
-            long messageCreationDate = convertDateTimesToEpoch(record.get(0).asLocalDateTime().toString());
-            String messageContent = record.get( 1 ).asString();
-            return new LdbcShortQuery4MessageContentResult(
-                    messageContent,
-                    messageCreationDate );
-            }
-            else{
+                // Pay attention, the spec's and the implementation's parameter orders are different.
+                long messageCreationDate = convertDateTimesToEpoch(record.get(0).asLocalDateTime().toString());
+                String messageContent = record.get( 1 ).asString();
+                return new LdbcShortQuery4MessageContentResult(messageContent, messageCreationDate);
+            } else {
                 return null;
             }
-
         }
     }
 
@@ -644,12 +636,9 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                         personId,
                         firstName,
                         lastName );
-            }
-            else
-            {
+            } else {
                 return null;
             }
-
         }
     }
 
@@ -668,8 +657,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
 
         @Override
         public LdbcShortQuery6MessageForumResult toResult(ResultSet.Record record ) throws UnsupportedEncodingException {
-            if (record != null)
-            {
+            if (record != null) {
                 long forumId = record.get( 0 ).asLong();
                 String forumTitle = record.get( 1 ).asString();
                 long moderatorId = record.get( 2 ).asLong();
@@ -681,9 +669,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                         moderatorId,
                         moderatorFirstName,
                         moderatorLastName );
-            }
-            else
-            {
+            } else {
                 return null;
             }
         }
