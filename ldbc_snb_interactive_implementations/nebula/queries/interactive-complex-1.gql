@@ -31,9 +31,9 @@ AGGREGATE companies=collect(
       ELSE LIST [company.name, workAt.workFrom, companyCountry.name]
   END ) GROUP BY friend, unis, friendCity, distance
 ORDER BY
-  distanceFromPerson ASC,
-  friendLastName ASC,
-  toInteger(friendId) ASC
+  distance ASC,
+  friend.lastName ASC,
+  toInteger(friend.id) ASC
 LIMIT 20
 RETURN
   friend.id AS friendId,
