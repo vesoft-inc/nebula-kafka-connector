@@ -1,6 +1,6 @@
 // Copyright (c) 2022 vesoft inc. All rights reserved.
 
-package nebula_ng_go
+package nebula_ng
 
 import (
 	"bytes"
@@ -18,6 +18,7 @@ type ResultSet struct {
 	columnNames     []string
 	colNameIndexMap map[string]int
 	timezoneInfo    timezoneInfo
+	planDesc        map[string]interface{}
 }
 
 // Returns a 2D array of strings representing the query result
@@ -108,11 +109,41 @@ func (res ResultSet) GetRowValuesByIndex(index int) (*Record, error) {
 }
 
 func (res ResultSet) IsSetPlanDesc() bool {
-	return res.resp.ExecutionOutcome.PlanDesc != nil
+	return len(res.planDesc) != 0
 }
 
-func (res ResultSet) GetPlanDesc() graph.PlanDescription {
-	return res.resp.ExecutionOutcome.PlanDesc
+func (res ResultSet) GetPlanDesc() map[string]interface{} {
+	return res.planDesc
+}
+
+func (res ResultSet) GetOptimizeTimeInUs() int64 {
+	if !res.IsSetPlanDesc() {
+		return 0
+	}
+	return parseInt(res.planDesc, "optimizeTimeInUs")
+}
+
+func (res ResultSet) GetPreamble() string {
+	if !res.IsSetPlanDesc() {
+		return ""
+	}
+	return parseString(res.planDesc, "preamble")
+}
+
+func (res ResultSet) GetHeader() []string {
+	if !res.IsSetPlanDesc() {
+		return nil
+	}
+	var header []string
+	for _, col := range res.planDesc["header"].([]interface{}) {
+		header = append(header, col.(string))
+	}
+	return header
+}
+
+func (res ResultSet) GetPlanPrintFormat() string {
+	// TODO(yee): support more formats
+	return "row"
 }
 
 type Record struct {
@@ -340,12 +371,18 @@ func (dt LocalDatetimeWrapper) getRawDateTime() nebula.LocalDatetime {
 func genResultSet(resp graph.ExecutionResponse, timezoneInfo timezoneInfo) (*ResultSet, error) {
 	var colNames []string
 	var colNameIndexMap = make(map[string]int)
+	var planDesc = make(map[string]interface{})
+
+	if resp.ExecutionOutcome.PlanDesc != nil {
+		json.Unmarshal(resp.ExecutionOutcome.PlanDesc, &planDesc)
+	}
 
 	if resp.ExecutionOutcome.Result_ == nil { // if resp.Data != nil then resp.Data.row and resp.Data.colNames wont be nil
 		return &ResultSet{
 			resp:            resp,
 			columnNames:     colNames,
 			colNameIndexMap: colNameIndexMap,
+			planDesc:        planDesc,
 		}, nil
 	}
 
@@ -360,6 +397,7 @@ func genResultSet(resp graph.ExecutionResponse, timezoneInfo timezoneInfo) (*Res
 		columnNames:     colNames,
 		colNameIndexMap: colNameIndexMap,
 		timezoneInfo:    timezoneInfo,
+		planDesc:        planDesc,
 	}, nil
 }
 
@@ -421,41 +459,41 @@ func prettyFormatJsonString(value []byte) string {
 	return prettyJson.String()
 }
 
-func name(planNodeDesc graph.PlanNodeDescription) string {
-	return fmt.Sprintf("%s_%d", planNodeDesc.GetName(), planNodeDesc.GetId())
-}
+// func name(planNodeDesc graph.PlanNodeDescription) string {
+// 	return fmt.Sprintf("%s_%d", planNodeDesc.GetName(), planNodeDesc.GetId())
+// }
 
-func condEdgeLabel(condNode graph.PlanNodeDescription, doBranch bool) string {
-	name := strings.ToLower(string(condNode.GetName()))
-	if strings.HasPrefix(name, "select") {
-		if doBranch {
-			return "Y"
-		}
-		return "N"
-	}
-	if strings.HasPrefix(name, "loop") {
-		if doBranch {
-			return "Do"
-		}
-	}
-	return ""
-}
+// func condEdgeLabel(condNode graph.PlanNodeDescription, doBranch bool) string {
+// 	name := strings.ToLower(string(condNode.GetName()))
+// 	if strings.HasPrefix(name, "select") {
+// 		if doBranch {
+// 			return "Y"
+// 		}
+// 		return "N"
+// 	}
+// 	if strings.HasPrefix(name, "loop") {
+// 		if doBranch {
+// 			return "Do"
+// 		}
+// 	}
+// 	return ""
+// }
 
-func nodeString(planNodeDesc graph.PlanNodeDescription, planNodeName string) string {
-	var outputVar = graphvizString(string(planNodeDesc.GetOutputVar()))
-	var inputVar string
-	if planNodeDesc.IsSetDescription() {
-		desc := planNodeDesc.GetDescription()
-		for _, pair := range desc {
-			key := string(pair.GetKey())
-			if key == "inputVar" {
-				inputVar = graphvizString(string(pair.GetValue()))
-			}
-		}
-	}
-	return fmt.Sprintf("\t\"%s\"[label=\"{%s|outputVar: %s|inputVar: %s}\", shape=Mrecord];\n",
-		planNodeName, planNodeName, outputVar, inputVar)
-}
+// func nodeString(planNodeDesc graph.PlanNodeDescription, planNodeName string) string {
+// 	var outputVar = graphvizString(string(planNodeDesc.GetOutputVar()))
+// 	var inputVar string
+// 	if planNodeDesc.IsSetDescription() {
+// 		desc := planNodeDesc.GetDescription()
+// 		for _, pair := range desc {
+// 			key := string(pair.GetKey())
+// 			if key == "inputVar" {
+// 				inputVar = graphvizString(string(pair.GetValue()))
+// 			}
+// 		}
+// 	}
+// 	return fmt.Sprintf("\t\"%s\"[label=\"{%s|outputVar: %s|inputVar: %s}\", shape=Mrecord];\n",
+// 		planNodeName, planNodeName, outputVar, inputVar)
+// }
 
 func edgeString(start, end string) string {
 	return fmt.Sprintf("\t\"%s\"->\"%s\";\n", start, end)
@@ -469,10 +507,10 @@ func conditionalNodeString(name string) string {
 	return fmt.Sprintf("\t\"%s\"[shape=diamond];\n", name)
 }
 
-func nodeById(p graph.PlanDescription, nodeId int64) graph.PlanNodeDescription {
-	line := p.GetNodeIndexMap()[nodeId]
-	return p.GetPlanNodeDescs()[line]
-}
+// func nodeById(p graph.PlanDescription, nodeId int64) graph.PlanNodeDescription {
+// 	line := p.GetNodeIndexMap()[nodeId]
+// 	return p.GetPlanNodeDescs()[line]
+// }
 
 // func findBranchEndNode(p *graph.PlanDescription, condNodeId int64, isDoBranch bool) int64 {
 // 	for _, node := range p.GetPlanNodeDescs() {
@@ -502,112 +540,290 @@ func nodeById(p graph.PlanDescription, nodeId int64) graph.PlanNodeDescription {
 
 // explain/profile format="dot"
 func (res ResultSet) MakeDotGraph() string {
-	p := res.GetPlanDesc()
-	planNodeDescs := p.GetPlanNodeDescs()
-	var builder strings.Builder
-	builder.WriteString("digraph exec_plan {\n")
-	builder.WriteString("\trankdir=BT;\n")
-	for _, planNodeDesc := range planNodeDescs {
-		planNodeName := name(planNodeDesc)
-		switch strings.ToLower(string(planNodeDesc.GetName())) {
-		default:
-			builder.WriteString(nodeString(planNodeDesc, planNodeName))
-			if planNodeDesc.IsSetDependencies() {
-				for _, depId := range planNodeDesc.GetDependencies() {
-					builder.WriteString(edgeString(name(nodeById(p, depId)), planNodeName))
-				}
-			}
-		}
-	}
-	builder.WriteString("}")
-	return builder.String()
+	// p := res.GetPlanDesc()
+	// planNodeDescs := p.GetPlanNodeDescs()
+	// var builder strings.Builder
+	// builder.WriteString("digraph exec_plan {\n")
+	// builder.WriteString("\trankdir=BT;\n")
+	// for _, planNodeDesc := range planNodeDescs {
+	// 	planNodeName := name(planNodeDesc)
+	// 	switch strings.ToLower(string(planNodeDesc.GetName())) {
+	// 	default:
+	// 		builder.WriteString(nodeString(planNodeDesc, planNodeName))
+	// 		if planNodeDesc.IsSetDependencies() {
+	// 			for _, depId := range planNodeDesc.GetDependencies() {
+	// 				builder.WriteString(edgeString(name(nodeById(p, depId)), planNodeName))
+	// 			}
+	// 		}
+	// 	}
+	// }
+	// builder.WriteString("}")
+	// return builder.String()
+
+	return ""
 }
 
 // // explain/profile format="dot:struct"
 func (res ResultSet) MakeDotGraphByStruct() string {
-	p := res.GetPlanDesc()
-	planNodeDescs := p.GetPlanNodeDescs()
-	var builder strings.Builder
-	builder.WriteString("digraph exec_plan {\n")
-	builder.WriteString("\trankdir=BT;\n")
-	for _, planNodeDesc := range planNodeDescs {
-		planNodeName := name(planNodeDesc)
-		switch strings.ToLower(string(planNodeDesc.GetName())) {
-		case "select":
-			builder.WriteString(conditionalNodeString(planNodeName))
-		case "loop":
-			builder.WriteString(conditionalNodeString(planNodeName))
-		default:
-			builder.WriteString(nodeString(planNodeDesc, planNodeName))
-		}
+	// p := res.GetPlanDesc()
+	// planNodeDescs := p.GetPlanNodeDescs()
+	// var builder strings.Builder
+	// builder.WriteString("digraph exec_plan {\n")
+	// builder.WriteString("\trankdir=BT;\n")
+	// for _, planNodeDesc := range planNodeDescs {
+	// 	planNodeName := name(planNodeDesc)
+	// 	switch strings.ToLower(string(planNodeDesc.GetName())) {
+	// 	case "select":
+	// 		builder.WriteString(conditionalNodeString(planNodeName))
+	// 	case "loop":
+	// 		builder.WriteString(conditionalNodeString(planNodeName))
+	// 	default:
+	// 		builder.WriteString(nodeString(planNodeDesc, planNodeName))
+	// 	}
 
-		if planNodeDesc.IsSetDependencies() {
-			for _, depId := range planNodeDesc.GetDependencies() {
-				dep := nodeById(p, depId)
-				builder.WriteString(edgeString(name(dep), planNodeName))
-			}
+	// 	if planNodeDesc.IsSetDependencies() {
+	// 		for _, depId := range planNodeDesc.GetDependencies() {
+	// 			dep := nodeById(p, depId)
+	// 			builder.WriteString(edgeString(name(dep), planNodeName))
+	// 		}
+	// 	}
+	// }
+	// builder.WriteString("}")
+	// return builder.String()
+
+	return ""
+}
+
+type pipeOpIdPair struct {
+	pipelineId int64
+	operatorId int64
+}
+
+type KeyType interface {
+	int64 | pipeOpIdPair
+}
+
+type GetKey[T KeyType] func(val interface{}) T
+
+func parseFloat(m interface{}, name string) float64 {
+	return m.(map[string]interface{})[name].(float64)
+}
+
+func parseInt(m interface{}, name string) int64 {
+	return int64(parseFloat(m, name))
+}
+
+func parseString(m interface{}, name string) string {
+	if tmp, ok := m.(map[string]interface{}); ok {
+		if v, ok := tmp[name]; ok {
+			return v.(string)
 		}
 	}
-	builder.WriteString("}")
-	return builder.String()
+	return ""
+}
+
+func parseBool(m interface{}, name string) bool {
+	return m.(map[string]interface{})[name].(bool)
 }
 
 // explain/profile format="row"
 func (res ResultSet) MakePlanByRow() [][]interface{} {
-	p := res.GetPlanDesc()
-	planNodeDescs := p.GetPlanNodeDescs()
 	var rows [][]interface{}
-	for _, planNodeDesc := range planNodeDescs {
-		var row []interface{}
-		row = append(row, planNodeDesc.GetId(), string(planNodeDesc.GetName()))
-
-		if planNodeDesc.IsSetDependencies() {
-			var deps []string
-			for _, dep := range planNodeDesc.GetDependencies() {
-				deps = append(deps, fmt.Sprintf("%d", dep))
-			}
-			row = append(row, strings.Join(deps, ","))
-		} else {
-			row = append(row, "")
-		}
-
-		if planNodeDesc.IsSetProfiles() {
-			var strArr []string
-			for i, profile := range planNodeDesc.GetProfiles() {
-				otherStats := profile.GetOtherStats()
-				if otherStats != nil {
-					strArr = append(strArr, "{")
-				}
-				s := fmt.Sprintf("ver: %d, rows: %d, execTime: %dus, totalTime: %dus",
-					i, profile.GetRows(), profile.GetExecDurationInUs(), profile.GetTotalDurationInUs())
-				strArr = append(strArr, s)
-
-				for k, v := range otherStats {
-					strArr = append(strArr, fmt.Sprintf("%s: %s", k, v))
-				}
-				if otherStats != nil {
-					strArr = append(strArr, "}")
-				}
-			}
-			row = append(row, strings.Join(strArr, "\n"))
-		} else {
-			row = append(row, "")
-		}
-
-		var columnInfo []string
-
-		outputVar := fmt.Sprintf("outputVar: %s", prettyFormatJsonString(planNodeDesc.GetOutputVar()))
-		columnInfo = append(columnInfo, outputVar)
-
-		if planNodeDesc.IsSetDescription() {
-			desc := planNodeDesc.GetDescription()
-			for _, pair := range desc {
-				value := prettyFormatJsonString(pair.GetValue())
-				columnInfo = append(columnInfo, fmt.Sprintf("%s: %s", string(pair.GetKey()), value))
-			}
-		}
-		row = append(row, strings.Join(columnInfo, "\n"))
-		rows = append(rows, row)
+	if !res.IsSetPlanDesc() {
+		return rows
 	}
+
+	header := res.GetHeader()
+	if len(header) == 0 {
+		return rows
+	}
+
+	switch res.GetPreamble() {
+	case "explain":
+		var idToPlanNodeMap = make(map[int64]map[string]interface{})
+		var planNodeDescs []interface{}
+		if header0, ok := res.planDesc[header[0]]; ok {
+			planNodeDescs = header0.([]interface{})
+		} else {
+			return rows
+		}
+
+		for _, planNodeDesc := range planNodeDescs {
+			planNode := planNodeDesc.(map[string]interface{})
+			id := parseInt(planNode, "id")
+			idToPlanNodeMap[id] = planNode
+		}
+
+		rootNode := planNodeDescs[0].(map[string]interface{})
+		makeAsciiPlanTreeText(
+			res,
+			idToPlanNodeMap,
+			header,
+			[]map[string]interface{}{rootNode},
+			true,
+			"",
+			func(val interface{}) int64 { return int64(val.(float64)) },
+			&rows,
+		)
+	case "profile":
+		var idToOperatorMap = make(map[pipeOpIdPair]map[string]interface{})
+		var operatorObject map[string]interface{}
+		if header0, ok := res.planDesc[header[0]]; ok {
+			operatorObject = header0.(map[string]interface{})
+		} else {
+			return rows
+		}
+
+		var pipelines []interface{}
+		if pipelinesObj, ok := operatorObject["pipelines"]; ok {
+			pipelines = pipelinesObj.([]interface{})
+		} else {
+			return rows
+		}
+
+		var rootOperator map[string]interface{}
+
+		addChild := func(parent pipeOpIdPair, child pipeOpIdPair) {
+			if childrenObj, ok := idToOperatorMap[parent]["children"]; ok {
+				children := childrenObj.([]interface{})
+				children = append(children, child)
+				idToOperatorMap[parent]["children"] = children
+			} else {
+				idToOperatorMap[parent]["children"] = []interface{}{child}
+			}
+		}
+
+		getPipeId := func(val interface{}) pipeOpIdPair {
+			obj := val.(map[string]interface{})
+			return pipeOpIdPair{
+				pipelineId: parseInt(obj, "pipelineId"),
+				operatorId: parseInt(obj, "operatorId"),
+			}
+		}
+
+		for _, pipeline := range pipelines {
+			firstTime := false
+			var prevOperatorId pipeOpIdPair
+
+			pipeObj := pipeline.(map[string]interface{})
+			var operatorArray []interface{}
+			if operatorArrayObj, ok := pipeObj["operators"]; ok {
+				operatorArray = operatorArrayObj.([]interface{})
+			} else {
+				continue
+			}
+
+			for i := len(operatorArray) - 1; i >= 0; i-- {
+				opObj := operatorArray[i].(map[string]interface{})
+				id := getPipeId(opObj)
+				idToOperatorMap[id] = opObj
+				if !firstTime {
+					if len(rootOperator) == 0 {
+						rootOperator = opObj
+					}
+					firstTime = true
+				} else {
+					addChild(prevOperatorId, id)
+				}
+				prevOperatorId = id
+			}
+		}
+		var pipeDepArray []interface{}
+		if pipeDepArrayObj, ok := operatorObject["pipelineDeps"]; ok {
+			pipeDepArray = pipeDepArrayObj.([]interface{})
+		}
+		for _, pipeDep := range pipeDepArray {
+			obj := pipeDep.(map[string]interface{})
+			var dependencies []interface{}
+			if dependenciesObj, ok := obj["dependencies"]; ok {
+				dependencies = dependenciesObj.([]interface{})
+			}
+			id := getPipeId(obj)
+			for _, dep := range dependencies {
+				addChild(id, getPipeId(dep))
+			}
+		}
+
+		makeAsciiPlanTreeText(
+			res,
+			idToOperatorMap,
+			header,
+			[]map[string]interface{}{rootOperator},
+			true,
+			"",
+			func(val interface{}) pipeOpIdPair { return val.(pipeOpIdPair) },
+			&rows,
+		)
+	}
+
 	return rows
+}
+
+const (
+	dash       string = `├─`
+	spacer     string = `│ `
+	dashLast   string = `└─`
+	spacerLast string = `  `
+)
+
+func makeAsciiPlanTreeText[T KeyType](
+	res ResultSet,
+	idToPlanNodeDescMap map[T]map[string]interface{},
+	header []string,
+	planNodes []map[string]interface{},
+	isRoot bool,
+	prefix string,
+	getKey GetKey[T],
+	rows *[][]interface{}) {
+	for i, planNode := range planNodes {
+		lineBuffer := prefix
+		childPrefix := prefix
+		if !isRoot {
+			if children, ok := planNode["children"]; ok && len(children.([]interface{})) > 0 {
+				if i == len(planNodes)-1 {
+					lineBuffer += dashLast
+					childPrefix += spacerLast
+				} else {
+					lineBuffer += dash
+					childPrefix += spacer
+				}
+			} else {
+				if i == len(planNodes)-1 {
+					lineBuffer += dashLast
+				} else {
+					lineBuffer += dash
+				}
+				childPrefix += spacerLast
+			}
+		}
+		lineBuffer += parseString(planNode, "name")
+		row := []interface{}{lineBuffer}
+		for i := 1; i < len(header); i++ {
+			if col, ok := planNode[header[i]]; ok {
+				row = append(row, col)
+			} else {
+				row = append(row, "")
+			}
+		}
+		*rows = append(*rows, row)
+
+		var childPlanNodes []map[string]interface{}
+		if children, ok := planNode["children"]; ok {
+			for _, child := range children.([]interface{}) {
+				key := getKey(child)
+				childPlanNodes = append(childPlanNodes, idToPlanNodeDescMap[key])
+			}
+		}
+
+		makeAsciiPlanTreeText(
+			res,
+			idToPlanNodeDescMap,
+			header,
+			childPlanNodes,
+			false,
+			childPrefix,
+			getKey,
+			rows,
+		)
+	}
 }

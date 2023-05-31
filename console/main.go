@@ -319,8 +319,6 @@ func printResultSet(res *nebulago.ResultSet, startTime time.Time) (duration time
 
 	if res.IsSetPlanDesc() {
 		fmt.Println()
-		fmt.Printf("Execution Plan (optimize time %d us)\n", res.GetPlanDesc().GetOptimizeTimeInUs())
-		fmt.Println()
 		planDescPrinter.PrintPlanDesc(res)
 	}
 	fmt.Println()
@@ -370,7 +368,14 @@ func loop(c cli.Cli) error {
 			}
 		}
 		if g_repeats > 1 {
-			fmt.Printf("Executed %v times, (total time spent %d/%d us), (average time spent %d/%d us)\n", g_repeats, t1, t2, t1/int64(g_repeats), t2/int64(g_repeats))
+			fmt.Printf(
+				"Executed %v times, (total time spent %d/%d us), (average time spent %d/%d us)\n",
+				g_repeats,
+				t1,
+				t2,
+				t1/int64(g_repeats),
+				t2/int64(g_repeats),
+			)
 			fmt.Println()
 		}
 		g_repeats = 1

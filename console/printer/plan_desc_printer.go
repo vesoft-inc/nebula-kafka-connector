@@ -31,7 +31,7 @@ type PlanDescPrinter struct {
 
 func NewPlanDescPrinter() PlanDescPrinter {
 	writer := table.NewWriter()
-	configTableWriter(&writer, true)
+	configTableWriter(&writer, false)
 	return PlanDescPrinter{
 		writer: writer,
 	}
@@ -81,19 +81,17 @@ func (p PlanDescPrinter) renderDotGraphByStruct(s string) string {
 	return p.writer.Render()
 }
 
-func (p PlanDescPrinter) renderByRow(rows [][]interface{}) string {
+func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	p.configWriterDotRenderStyle(false)
-	p.writer.AppendHeader(table.Row{
-		"id",
-		"name",
-		"dependencies",
-		"profiling data",
-		"operator info",
-	})
+	header := table.Row{}
+	for _, col := range rs.GetHeader() {
+		header = append(header, col)
+	}
+	p.writer.AppendHeader(header)
 
-	for _, row := range rows {
+	for _, row := range rs.MakePlanByRow() {
 		p.writer.AppendRow(table.Row(row))
 	}
 	return p.writer.Render()
@@ -101,11 +99,10 @@ func (p PlanDescPrinter) renderByRow(rows [][]interface{}) string {
 
 func (p *PlanDescPrinter) PrintPlanDesc(res *nebula.ResultSet) {
 	var s string
-	format := strings.ToLower(string(res.GetPlanDesc().GetFormat()))
+	format := strings.ToLower(res.GetPlanPrintFormat())
 	switch format {
 	case "row":
-		rows := res.MakePlanByRow()
-		s = p.renderByRow(rows)
+		s = p.renderByRow(res)
 		fmt.Println(s)
 	case "dot":
 		s = res.MakeDotGraph()
@@ -114,6 +111,7 @@ func (p *PlanDescPrinter) PrintPlanDesc(res *nebula.ResultSet) {
 		s = res.MakeDotGraphByStruct()
 		fmt.Println(p.renderDotGraphByStruct(s))
 	}
+	fmt.Printf("Execution Plan (optimize time %d us), [PX] means pipeline-X and [S] means storage side plan node.\n", res.GetOptimizeTimeInUs())
 
 	if p.fd != nil {
 		go func() {

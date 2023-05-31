@@ -1,6 +1,6 @@
 // Copyright (c) 2022 vesoft inc. All rights reserved.
 
-package nebula_ng_go
+package nebula_ng
 
 import (
 	"crypto/tls"

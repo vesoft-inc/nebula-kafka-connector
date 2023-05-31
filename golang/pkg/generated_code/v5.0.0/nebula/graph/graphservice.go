@@ -319,14 +319,14 @@ func (p *GraphServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewGraphServiceProcessor(handler GraphService) *GraphServiceProcessor {
-  self9 := &GraphServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunctionContext), functionServiceMap:make(map[string]string)}
-  self9.processorMap["authenticate"] = &graphServiceProcessorAuthenticate{handler:handler}
-  self9.processorMap["signout"] = &graphServiceProcessorSignout{handler:handler}
-  self9.processorMap["execute"] = &graphServiceProcessorExecute{handler:handler}
-  self9.functionServiceMap["authenticate"] = "GraphService"
-  self9.functionServiceMap["signout"] = "GraphService"
-  self9.functionServiceMap["execute"] = "GraphService"
-  return self9
+  self1 := &GraphServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunctionContext), functionServiceMap:make(map[string]string)}
+  self1.processorMap["authenticate"] = &graphServiceProcessorAuthenticate{handler:handler}
+  self1.processorMap["signout"] = &graphServiceProcessorSignout{handler:handler}
+  self1.processorMap["execute"] = &graphServiceProcessorExecute{handler:handler}
+  self1.functionServiceMap["authenticate"] = "GraphService"
+  self1.functionServiceMap["signout"] = "GraphService"
+  self1.functionServiceMap["execute"] = "GraphService"
+  return self1
 }
 
 type graphServiceProcessorAuthenticate struct {

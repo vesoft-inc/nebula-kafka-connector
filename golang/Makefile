@@ -1,4 +1,4 @@
-.PHONY: build unit test fmt up up-ssl down ssl-test run-examples
+.PHONY: build unit test fmt run-examples
 
 default: build
 

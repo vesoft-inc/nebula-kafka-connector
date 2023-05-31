@@ -1,6 +1,6 @@
 module github.com/vesoft-inc/nebula-ng-tools/console
 
-go 1.17
+go 1.18
 
 require (
 	github.com/c-bata/go-prompt v0.2.6
@@ -17,7 +17,7 @@ require (
 	github.com/mattn/go-tty v0.0.3 // indirect
 	github.com/pkg/term v1.2.0-beta.2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
-	golang.org/x/sys v0.0.0-20201119102817-f84b799fce68 // indirect
+	golang.org/x/sys v0.6.0 // indirect
 )
 
 replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang

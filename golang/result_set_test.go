@@ -6,7 +6,7 @@
  *
  */
 
-package nebula_ng_go
+package nebula_ng
 
 import (
 	"testing"
