@@ -24,7 +24,6 @@ RETURN
     personId,
     friend.firstName AS personFirstName,
     friend.lastName AS personLastName,
-    friend.birthday AS personBirthday,
     commonPostCount - (postCount - commonPostCount) AS commonInterestScore,
     friend.gender AS personGender,
     city.name AS personCityName
