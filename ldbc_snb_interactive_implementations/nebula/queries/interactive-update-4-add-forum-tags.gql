@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE FORUM_HAS_TAG_TAG ({$forumId})-[{}]->({id: $tagId})
+INSERT EDGE FORUM_HAS_TAG_TAG ({id: $forumId})-[{}]->({id: $tagId})
