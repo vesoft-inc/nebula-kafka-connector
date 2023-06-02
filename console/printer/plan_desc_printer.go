@@ -7,10 +7,12 @@ package printer
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 
@@ -85,13 +87,60 @@ func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	p.configWriterDotRenderStyle(false)
-	header := table.Row{}
-	for _, col := range rs.GetHeader() {
-		header = append(header, col)
-	}
-	p.writer.AppendHeader(header)
+	var columnConfigs []table.ColumnConfig
+	headerRow := table.Row{}
+	rightSepToTailWidth, rows := rs.MakePlanByRow()
+	header := rs.GetHeader()
 
-	for _, row := range rs.MakePlanByRow() {
+	if len(rightSepToTailWidth) != len(header) {
+		log.Fatalf("rightSepToTailWidth and header length not equal: %d vs %d", len(rightSepToTailWidth), len(header))
+	}
+
+	for i, col := range header {
+		headerRow = append(headerRow, col)
+		if strings.Contains(col, "/") {
+			width := rightSepToTailWidth[i]
+			columnConfigs = append(columnConfigs, table.ColumnConfig{
+				Name:  col,
+				Align: text.AlignRight,
+				Transformer: func(s interface{}) string {
+					if v, ok := s.(string); ok && width > 0 && strings.Contains(v, "/") {
+						l := len(v) - strings.LastIndex(v, "/")
+						if width < l {
+							return v
+						}
+						return fmt.Sprintf("%s%s", v, strings.Repeat(" ", width-l))
+					}
+					return fmt.Sprint(s)
+				},
+			})
+		} else if i != 0 {
+			columnConfigs = append(columnConfigs, table.ColumnConfig{
+				Name:     col,
+				WidthMax: 100,
+				// WidthMaxEnforcer: func(s string, wrapLen int) string {
+				// 	if len(s) > wrapLen {
+				// 		s = s[:wrapLen-3] + "..."
+				// 	}
+				// 	return s
+				// },
+				Transformer: func(val interface{}) string {
+					if v, ok := val.(string); ok {
+						if len(v) > 100 {
+							return v[:100-3] + "..."
+						}
+					}
+					return fmt.Sprint(val)
+				},
+			})
+		}
+	}
+	p.writer.AppendHeader(headerRow)
+	if len(columnConfigs) > 0 {
+		p.writer.SetColumnConfigs(columnConfigs)
+	}
+
+	for _, row := range rows {
 		p.writer.AppendRow(table.Row(row))
 	}
 	return p.writer.Render()

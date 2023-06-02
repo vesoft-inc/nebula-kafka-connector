@@ -627,15 +627,18 @@ func parseBool(m interface{}, name string) bool {
 }
 
 // explain/profile format="row"
-func (res ResultSet) MakePlanByRow() [][]interface{} {
-	var rows [][]interface{}
+func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interface{}) {
 	if !res.IsSetPlanDesc() {
-		return rows
+		return
 	}
 
 	header := res.GetHeader()
 	if len(header) == 0 {
-		return rows
+		return
+	}
+
+	for i := 0; i < len(header); i++ {
+		rightSepToTailWidth = append(rightSepToTailWidth, 0)
 	}
 
 	switch res.GetPreamble() {
@@ -645,7 +648,7 @@ func (res ResultSet) MakePlanByRow() [][]interface{} {
 		if header0, ok := res.planDesc[header[0]]; ok {
 			planNodeDescs = header0.([]interface{})
 		} else {
-			return rows
+			return
 		}
 
 		for _, planNodeDesc := range planNodeDescs {
@@ -663,6 +666,7 @@ func (res ResultSet) MakePlanByRow() [][]interface{} {
 			true,
 			"",
 			func(val interface{}) int64 { return int64(val.(float64)) },
+			&rightSepToTailWidth,
 			&rows,
 		)
 	case "profile":
@@ -671,14 +675,14 @@ func (res ResultSet) MakePlanByRow() [][]interface{} {
 		if header0, ok := res.planDesc[header[0]]; ok {
 			operatorObject = header0.(map[string]interface{})
 		} else {
-			return rows
+			return
 		}
 
 		var pipelines []interface{}
 		if pipelinesObj, ok := operatorObject["pipelines"]; ok {
 			pipelines = pipelinesObj.([]interface{})
 		} else {
-			return rows
+			return
 		}
 
 		var rootOperator map[string]interface{}
@@ -752,11 +756,12 @@ func (res ResultSet) MakePlanByRow() [][]interface{} {
 			true,
 			"",
 			func(val interface{}) pipeOpIdPair { return val.(pipeOpIdPair) },
+			&rightSepToTailWidth,
 			&rows,
 		)
 	}
 
-	return rows
+	return
 }
 
 const (
@@ -774,6 +779,7 @@ func makeAsciiPlanTreeText[T KeyType](
 	isRoot bool,
 	prefix string,
 	getKey GetKey[T],
+	rightSepToTailWidth *[]int,
 	rows *[][]interface{}) {
 	for i, planNode := range planNodes {
 		lineBuffer := prefix
@@ -799,10 +805,19 @@ func makeAsciiPlanTreeText[T KeyType](
 		lineBuffer += parseString(planNode, "name")
 		row := []interface{}{lineBuffer}
 		for i := 1; i < len(header); i++ {
+			width := 0
 			if col, ok := planNode[header[i]]; ok {
+				if str, ok := col.(string); ok && strings.Contains(header[i], "/") {
+					if pos := strings.LastIndex(str, "/"); pos > 0 {
+						width = len(str) - pos
+					}
+				}
 				row = append(row, col)
 			} else {
 				row = append(row, "")
+			}
+			if width > (*rightSepToTailWidth)[i] {
+				(*rightSepToTailWidth)[i] = width
 			}
 		}
 		*rows = append(*rows, row)
@@ -823,6 +838,7 @@ func makeAsciiPlanTreeText[T KeyType](
 			false,
 			childPrefix,
 			getKey,
+			rightSepToTailWidth,
 			rows,
 		)
 	}
