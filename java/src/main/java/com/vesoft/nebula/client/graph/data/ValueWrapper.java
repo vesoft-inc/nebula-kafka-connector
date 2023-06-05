@@ -9,7 +9,9 @@ import com.vesoft.nebula.Value;
 import com.vesoft.nebula.client.graph.exception.InvalidValueException;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 public class ValueWrapper {
@@ -60,14 +62,22 @@ public class ValueWrapper {
     private final Value value;
     private String decodeType = "utf-8";
 
-    private String descType() {
+    public String getDataType() {
         switch (value.getSetField()) {
             case Value.BOOLVAL:
                 return "BOOLEAN";
-            case Value.INT8VAL | Value.INT16VAL | Value.INT32VAL | Value.INT64VAL:
+            case Value.INT8VAL:
+                return "BYTE";
+            case Value.INT16VAL:
+                return "SHORT";
+            case Value.INT32VAL:
                 return "INT";
+            case Value.INT64VAL:
+                return "LONG";
             case Value.FLOATVAL:
                 return "FLOAT";
+            case Value.DOUBLEVAL:
+                return "DOUBLE";
             case Value.STRINGVAL:
                 return "STRING";
             case Value.NODEVAL:
@@ -76,8 +86,16 @@ public class ValueWrapper {
                 return "EDGE";
             case Value.LISTVAL:
                 return "LIST";
-            // case Value.MAPVAL:
-            //     return "MAP";
+            case Value.DURATIONVAL:
+                return "DURATION";
+            case Value.LOCALTIMEVAL:
+                return "LOCALTIME";
+            case Value.LOCALDATETIMEVAL:
+                return "LOCALDATETIME";
+            case Value.DATEVAL:
+                return "DATE";
+            case Value.RECORDVAL:
+                return "Map";
             default:
                 throw new IllegalArgumentException("Unknown field id " + value.getSetField());
         }
@@ -208,6 +226,23 @@ public class ValueWrapper {
         return value.getSetField() == Value.DATEVAL;
     }
 
+    public boolean isMap() {
+        return value.getSetField() == Value.RECORDVAL;
+    }
+
+    public boolean isDuration() {
+        return value.getSetField() == Value.DURATIONVAL;
+    }
+
+    /**
+     * Convert the original data type Value to Object
+     *
+     * @return Object
+     */
+    public Object asObject() {
+        return value.getFieldValue();
+    }
+
     /**
      * Convert the original data type Value to boolean
      *
@@ -219,7 +254,52 @@ public class ValueWrapper {
             return (boolean) (value.getFieldValue());
         }
         throw new InvalidValueException(
-                "Cannot get field boolean because value's type is " + descType());
+                "Cannot get field `boolean` because value's type is " + getDataType());
+    }
+
+    /**
+     * Convert the original data type Value to byte
+     *
+     * @return byte
+     * @throws InvalidValueException if the value type is not byte
+     */
+    public byte asByte() throws InvalidValueException {
+        if (value.getSetField() == Value.INT8VAL) {
+            return (value.getInt8Val());
+        } else {
+            throw new InvalidValueException(
+                    "Cannot get field `byte` because value's type is " + getDataType());
+        }
+    }
+
+    /**
+     * Convert the original data type Value to short
+     *
+     * @return short
+     * @throws InvalidValueException if the value type is not short
+     */
+    public short asShort() throws InvalidValueException {
+        if (value.getSetField() == Value.INT16VAL) {
+            return value.getInt16Val();
+        } else {
+            throw new InvalidValueException(
+                    "Cannot get field `short` because value's type is " + getDataType());
+        }
+    }
+
+    /**
+     * Convert the original data type Value to int
+     *
+     * @return int
+     * @throws InvalidValueException if the value type is not int32
+     */
+    public int asInt() throws InvalidValueException {
+        if (value.getSetField() == Value.INT32VAL) {
+            return value.getInt32Val();
+        } else {
+            throw new InvalidValueException(
+                    "Cannot get field `int` because value's type is " + getDataType());
+        }
     }
 
     /**
@@ -231,15 +311,9 @@ public class ValueWrapper {
     public long asLong() throws InvalidValueException {
         if (value.getSetField() == Value.INT64VAL) {
             return value.getInt64Val();
-        } else if (value.getSetField() == Value.INT32VAL) {
-            return ((Integer) value.getInt32Val()).longValue();
-        } else if (value.getSetField() == Value.INT16VAL) {
-            return ((Short) value.getInt16Val()).longValue();
-        } else if (value.getSetField() == Value.INT8VAL) {
-            return ((Byte) value.getInt8Val()).longValue();
         } else {
             throw new InvalidValueException(
-                    "Cannot get field long because value's type is " + descType());
+                    "Cannot get field `long` because value's type is " + getDataType());
         }
     }
 
@@ -249,14 +323,14 @@ public class ValueWrapper {
      *
      * @return String
      * @throws InvalidValueException        if the value type is not string
-     * @throws UnsupportedEncodingException if decode bianry failed
+     * @throws UnsupportedEncodingException if decode failed
      */
-    public String asString() throws InvalidValueException, UnsupportedEncodingException {
+    public String asString() throws InvalidValueException {
         if (value.getSetField() == Value.STRINGVAL) {
-            return new String((byte[]) value.getFieldValue(), decodeType);
+            return new String((byte[]) value.getFieldValue());
         }
         throw new InvalidValueException(
-                "Cannot get field string because value's type is " + descType());
+                "Cannot get field `string` because value's type is " + getDataType());
     }
 
     /**
@@ -270,9 +344,15 @@ public class ValueWrapper {
             return (double) value.getFieldValue();
         }
         throw new InvalidValueException(
-                "Cannot get field double because value's type is " + descType());
+                "Cannot get field `double` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to {@link List}
+     *
+     * @return list
+     * @throws InvalidValueException if the value type is not list
+     */
     public List<ValueWrapper> asList() throws InvalidValueException {
         if (value.getSetField() == Value.LISTVAL) {
             List<ValueWrapper> values = new ArrayList<>();
@@ -282,47 +362,104 @@ public class ValueWrapper {
             return values;
         }
         throw new InvalidValueException(
-                "Cannot get field `list` because value's type is " + descType());
+                "Cannot get field `list` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to {@link Vertex}
+     *
+     * @return Vertex
+     * @throws InvalidValueException if the value type is not node
+     */
     public Vertex asNode() throws InvalidValueException {
         if (value.getSetField() == Value.NODEVAL) {
             return new Vertex(value.getNodeVal());
         }
         throw new InvalidValueException(
-                "cannot get field node because value's type is " + descType());
+                "cannot get field `node` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to {@link Relationship}
+     *
+     * @return Relationship
+     * @throws InvalidValueException if the value type is not edge
+     */
     public Relationship asEdge() throws InvalidValueException {
         if (value.getSetField() == Value.EDGEVAL) {
             return new Relationship(value.getEdgeVal());
         }
         throw new InvalidValueException(
-                "cannot get field node because value's type is " + descType());
+                "cannot get field `edge` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to {@link NTime}
+     *
+     * @return NTime
+     * @throws InvalidValueException if the value type is not localtime
+     */
     public NTime asLocalTime() throws InvalidValueException {
         if (value.getSetField() == Value.LOCALTIMEVAL) {
             return new NTime(value.getLocalTimeVal());
         }
         throw new InvalidValueException(
-                "cannot get field LocalTime because value's type is " + descType());
+                "cannot get field `LocalTime` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to {@link NDate}
+     *
+     * @return NDate
+     * @throws InvalidValueException if the value type is not localtime
+     */
     public NDate asDate() throws InvalidValueException {
         if (value.getSetField() == Value.DATEVAL) {
             return new NDate(value.getDateVal());
         }
         throw new InvalidValueException(
-                "cannot get field Date because value's type is " + descType());
+                "cannot get field `Date` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to {@link NDateTime}
+     *
+     * @return NDateTime
+     * @throws InvalidValueException if the value type is not localDatetime
+     */
     public NDateTime asLocalDateTime() throws InvalidValueException {
         if (value.getSetField() == Value.LOCALDATETIMEVAL) {
             return new NDateTime(value.getLocalDatetimeVal());
         }
         throw new InvalidValueException(
-                "cannot get field LocalTime because value's type is " + descType());
+                "cannot get field `LocalDatetime` because value's type is " + getDataType());
+    }
+
+    /**
+     * Convert the original data type Value to {@link NDuration}
+     *
+     * @return NDuration
+     * @throws InvalidValueException if the value type is not duration
+     */
+    public NDuration asDuration() throws InvalidValueException {
+        if (value.getSetField() == Value.DURATIONVAL) {
+            return new NDuration(value.getDurationVal());
+        }
+        throw new InvalidValueException(
+                "cannot get field `LocalDatetime` because value's type is " + getDataType());
+    }
+
+    public Map<String, ValueWrapper> asMap() throws InvalidValueException {
+        if (value.getSetField() == Value.RECORDVAL) {
+            Map<byte[], Value> values = value.getRecordVal().getValues();
+            Map<String, ValueWrapper> recordValues = new HashMap<>(values.size());
+            for (Map.Entry<byte[], Value> kv : values.entrySet()) {
+                recordValues.put(new String(kv.getKey()), new ValueWrapper(kv.getValue(), "utf-8"));
+            }
+            return recordValues;
+        }
+        throw new InvalidValueException(
+                "cannot get field `map` because value's type is " + getDataType());
     }
 
 
@@ -351,21 +488,42 @@ public class ValueWrapper {
      */
     @Override
     public String toString() {
-        try {
-            if (isEmpty()) {
-                return "__EMPTY__";
-            } else if (isBoolean()) {
-                return String.valueOf(asBoolean());
-            } else if (isLong() || isInt() || isShort() || isByte()) {
-                return String.valueOf(asLong());
-            } else if (isDouble()) {
-                return String.valueOf(asDouble());
-            } else if (isString()) {
-                return "\"" + asString() + "\"";
-            }
-            return "Unknown type: " + descType();
-        } catch (UnsupportedEncodingException e) {
-            return e.getMessage();
+        if (isEmpty()) {
+            return "";
+        } else if (isNull()) {
+            return null;
+        } else if (isBoolean()) {
+            return String.valueOf(asBoolean());
+        } else if (isByte()) {
+            return String.valueOf(asByte());
+        } else if (isShort()) {
+            return String.valueOf(asShort());
+        } else if (isInt()) {
+            return String.valueOf(asInt());
+        } else if (isLong()) {
+            return String.valueOf(asLong());
+        } else if (isDouble()) {
+            return String.valueOf(asDouble());
+        } else if (isString()) {
+            return asString();
+        } else if (isList()) {
+            return asList().toString();
+        } else if (isMap()) {
+            return asMap().toString();
+        } else if (isNode()) {
+            return asNode().toString();
+        } else if (isEdge()) {
+            return asEdge().toString();
+        } else if (isLocalTime()) {
+            return asLocalTime().toString();
+        } else if (isLocalDateTime()) {
+            return asLocalDateTime().toString();
+        } else if (isDate()) {
+            return asDate().toString();
+        } else if (isDuration()) {
+            return asDuration().toString();
         }
+        return "Unknown type: " + getDataType();
+
     }
 }

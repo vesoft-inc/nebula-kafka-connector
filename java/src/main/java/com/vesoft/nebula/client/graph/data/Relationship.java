@@ -31,11 +31,30 @@ public class Relationship extends BaseDataObject {
     }
 
     /**
-     * get the src id from the relationship
+     * get edge name, TODO  core server should return the edge name
+     *
+     * @return String
+     */
+
+    public String getEdgeName() {
+        return label;
+    }
+
+    /**
+     * get edge type id
+     *
+     * @return int
+     */
+    public int getEdgeId() {
+        return edge.getEdgeTypeID();
+    }
+
+    /**
+     * get the src id
      *
      * @return long
      */
-    public long srcId() {
+    public long getSrcId() {
         return edge.edgeTypeID > 0 ? edge.srcID : edge.dstID;
     }
 
@@ -44,66 +63,55 @@ public class Relationship extends BaseDataObject {
      *
      * @return long
      */
-    public long dstId() {
+    public long getDstId() {
         return edge.edgeTypeID > 0 ? edge.dstID : edge.srcID;
     }
 
     /**
-     * get edge name from the relationship
-     *
-     * @return String
-     */
-    // todo convert the edge type id to edge name
-    public String edgeName() {
-        return label;
-    }
-
-    /**
-     * get ranking from the relationship
+     * get rank from the relationship
      *
      * @return long
      */
-    public long ranking() {
+    public long getRank() {
         return edge.rank;
     }
 
     /**
-     * get all property name from the relationship
+     * get all property name
      *
-     * @return the List of String
-     * @throws UnsupportedEncodingException if decode binary failed
+     * @return the List of property names
      */
-    public List<String> keys() throws UnsupportedEncodingException {
+    public List<String> getColumnNames() {
         List<String> propNames = new ArrayList<>();
         for (byte[] name : edge.properties.keySet()) {
-            propNames.add(new String(name, getDecodeType()));
+            propNames.add(new String(name));
         }
         return propNames;
     }
 
     /**
-     * get property values from the relationship
+     * get all property values
      *
-     * @return the List of ValueWrapper
+     * @return the List of property values
      */
-    public List<ValueWrapper> values() {
-        List<ValueWrapper> propVals = new ArrayList<>();
-        for (Value val : edge.properties.values()) {
-            propVals.add(new ValueWrapper(val, getDecodeType()));
+    public List<ValueWrapper> getValues() {
+        List<ValueWrapper> values = new ArrayList<>();
+        for (Map.Entry<byte[], Value> kv : edge.properties.entrySet()) {
+            values.add(new ValueWrapper(kv.getValue(), getDecodeType()));
         }
-        return propVals;
+        return values;
     }
 
     /**
      * get property names and values from the relationship
      *
-     * @return the HashMap, key is String, value is ValueWrapper>
+     * @return HashMap, property name -> property value
      */
-    public HashMap<String, ValueWrapper> properties() throws UnsupportedEncodingException {
+    public HashMap<String, ValueWrapper> getProperties() {
         HashMap<String, ValueWrapper> properties = new HashMap<>();
         for (byte[] key : edge.properties.keySet()) {
-            properties.put(new String(key, getDecodeType()),
-                    new ValueWrapper(edge.properties.get(key), getDecodeType()));
+            properties.put(new String(key), new ValueWrapper(edge.properties.get(key),
+                    getDecodeType()));
         }
         return properties;
     }
@@ -117,10 +125,10 @@ public class Relationship extends BaseDataObject {
             return false;
         }
         Relationship that = (Relationship) o;
-        return ranking() == that.ranking()
-                && srcId() == that.srcId()
-                && dstId() == that.dstId()
-                && Objects.equals(edgeName(), that.edgeName());
+        return getRank() == that.getRank()
+                && getSrcId() == that.getSrcId()
+                && getDstId() == that.getDstId()
+                && Objects.equals(getEdgeName(), that.getEdgeName());
     }
 
     @Override
@@ -130,17 +138,13 @@ public class Relationship extends BaseDataObject {
 
     @Override
     public String toString() {
-        try {
-            List<String> propStrs = new ArrayList<>();
-            Map<String, ValueWrapper> props = properties();
-            for (String key : props.keySet()) {
-                propStrs.add(key + ": " + props.get(key).toString());
-            }
-            // TODO change the edgeTypeID to edge name
-            return String.format("(%d)-[:%d@%d{%s}]->(%d)",
-                    srcId(), edge.edgeTypeID, ranking(), String.join(", ", propStrs), dstId());
-        } catch (UnsupportedEncodingException e) {
-            return e.getMessage();
+        List<String> propStrs = new ArrayList<>();
+        Map<String, ValueWrapper> props = getProperties();
+        for (String key : props.keySet()) {
+            propStrs.add(key + ": " + props.get(key).toString());
         }
+        return String.format("(%d)-[:%s@%d{%s}]->(%d)",
+                getSrcId(), getEdgeName(), getRank(), String.join(", ", propStrs),
+                getDstId());
     }
 }

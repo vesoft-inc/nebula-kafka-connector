@@ -6,7 +6,6 @@
 package com.vesoft.nebula.client.graph.data;
 
 import com.vesoft.nebula.BindingTable;
-import com.vesoft.nebula.RawRecord;
 import com.vesoft.nebula.Row;
 import com.vesoft.nebula.Value;
 import com.vesoft.nebula.graph.ExecutionResponse;
@@ -163,9 +162,9 @@ public class ResultSet {
     }
 
     /**
-     * get errorCode of execute result
+     * get status of execute result
      *
-     * @return int
+     * @return String
      */
     public String getGqlStatus() {
         return new String(response.executionOutcome.gqlStatus.status);
@@ -191,18 +190,9 @@ public class ResultSet {
     }
 
     /**
-     * get keys of the dataset
-     *
-     * @return the list of String
-     */
-    public List<String> keys() {
-        return columnNames;
-    }
-
-    /**
      * get column names of the dataset
      *
-     * @return the
+     * @return the list of result columns
      */
     public List<String> getColumnNames() {
         return columnNames;
@@ -261,22 +251,33 @@ public class ResultSet {
     }
 
     /**
-     * get all rows, the value is the origin value, the string is binary
+     * get all rows, see {@link Record}
      *
      * @return the list of Row
      */
-    public List<Row> getRows() {
+    public List<Record> getRows() {
         if (response.executionOutcome.result == null) {
-            throw new RuntimeException("Empty data");
+            return null;
         }
-        return response.executionOutcome.result.records;
+        List<Record> rows = new ArrayList<>();
+        if (response.getExecutionOutcome().getResult().getRecords() == null
+                || response.getExecutionOutcome().getResult().getRecords().size() == 0) {
+            return rows;
+        }
+        for (Row row : response.getExecutionOutcome().getResult().getRecords()) {
+            rows.add(new Record(columnNames, row, "utf-8"));
+        }
+        return rows;
     }
 
     @Override
     public String toString() {
         // When error, print the raw data directly
         if (!isSucceeded()) {
-            return response.toString();
+            if (response.getExecutionOutcome().getGqlStatus() == null) {
+                return null;
+            }
+            return new String(response.getExecutionOutcome().getGqlStatus().status);
         }
         int i = 0;
         List<String> rowStrs = new ArrayList<>();
@@ -288,7 +289,7 @@ public class ResultSet {
             rowStrs.add(String.join(",", valueStrs));
             i++;
         }
-        return String.format("ColumnName: %s, Rows: %s",
+        return String.format("ColumnName: %s,\n Rows: %s",
                 columnNames.toString(), rowStrs.toString());
     }
 }

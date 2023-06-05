@@ -5,13 +5,15 @@
 
 package com.vesoft.nebula;
 
+import com.vesoft.nebula.client.graph.data.Relationship;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
+import com.vesoft.nebula.client.graph.data.Vertex;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
-import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -109,7 +111,7 @@ public class GraphClientExample {
     }
 
     private static void query(NebulaClient client) throws IOErrorException,
-            UnsupportedEncodingException, NoValidSessionException {
+            NoValidSessionException {
         String queryNode = "USE nba MATCH (v:player) RETURN v.id, v.name, v.score, v.gender, "
                 + "v.rate";
         ResultSet resp = client.execute(queryNode);
@@ -117,7 +119,7 @@ public class GraphClientExample {
             log.error(String.format("Execute: `%s', failed: %s",
                     queryNode, resp.getGqlStatus()));
         }
-        printResult(resp);
+        resolve(resp);
 
         System.out.println("\n\n");
 
@@ -127,35 +129,77 @@ public class GraphClientExample {
             log.error(String.format("Execute: `%s', failed: %s",
                     queryNode, resp.getGqlStatus()));
         }
-        printResult(resp);
+        resolve(resp);
     }
 
 
-    private static void printResult(ResultSet resultSet) throws UnsupportedEncodingException {
-        List<String> colNames = resultSet.keys();
-        System.out.print("| ");
-        for (String name : colNames) {
-            System.out.printf("%15s |", name);
+    private static void resolve(ResultSet resultSet) {
+        if (!resultSet.isSucceeded()) {
+            System.out.println("result is not succeed, status is : " + resultSet.getGqlStatus());
+            return;
         }
-        System.out.println();
-        for (int i = 0; i < resultSet.rowsSize(); i++) {
-            System.out.print("| ");
-            ResultSet.Record record = resultSet.rowValues(i);
-            for (ValueWrapper value : record.values()) {
-                if (value.isLong()) {
-                    System.out.printf("%15s |", value.asLong());
-                }
-                if (value.isBoolean()) {
-                    System.out.printf("%15s |", value.asBoolean());
-                }
-                if (value.isDouble()) {
-                    System.out.printf("%15s |", value.asDouble());
-                }
-                if (value.isString()) {
-                    System.out.printf("%15s |", value.asString());
+
+        // resolve the resultSet content only when resultSet is succeed.
+        System.out.println("query result row size: " + resultSet.getRows().size());
+
+        System.out.println("query latency: " + resultSet.getLatency());
+
+        List<String> columns = resultSet.getColumnNames();
+        System.out.println("result columns: " + columns);
+
+        List<ResultSet.Record> records = resultSet.getRows();
+        for (ResultSet.Record record : records) {
+            // process each line
+            List<ValueWrapper> values = record.values();
+            for (ValueWrapper valueWrapper : values) {
+                // process each property for one line
+                if (valueWrapper.isNull()) {
+                    System.out.printf("%15s |", "");
+                } else if (valueWrapper.isEmpty()) {
+                    System.out.printf("%15s |", "_EMPTY_");
+                } else if (valueWrapper.isByte()) {
+                    System.out.printf("%15s |", valueWrapper.asByte());
+                } else if (valueWrapper.isShort()) {
+                    System.out.printf("%15s |", valueWrapper.asShort());
+                } else if (valueWrapper.isInt()) {
+                    System.out.printf("%15s |", valueWrapper.asInt());
+                } else if (valueWrapper.isLong()) {
+                    System.out.printf("%15s |", valueWrapper.asLong());
+                } else if (valueWrapper.isBoolean()) {
+                    System.out.printf("%15s |", valueWrapper.asBoolean());
+                } else if (valueWrapper.isDouble()) {
+                    System.out.printf("%15s |", valueWrapper.asDouble());
+                } else if (valueWrapper.isString()) {
+                    System.out.printf("%15s |", valueWrapper.asString());
+                } else if (valueWrapper.isDate()) {
+                    System.out.printf("%15s |", valueWrapper.asDate());
+                } else if (valueWrapper.isLocalTime()) {
+                    System.out.printf("%15s |", valueWrapper.asLocalTime());
+                } else if (valueWrapper.isLocalDateTime()) {
+                    System.out.printf("%15s |", valueWrapper.asLocalDateTime());
+                } else if (valueWrapper.isDuration()) {
+                    System.out.printf("%15s |", valueWrapper.asDuration());
+                } else if (valueWrapper.isList()) {
+                    System.out.printf("%15s |", valueWrapper.asList());
+                } else if (valueWrapper.isMap()) {
+                    System.out.printf("%15s |", valueWrapper.asMap());
+                } else if (valueWrapper.isNode()) {
+                    Vertex node = valueWrapper.asNode();
+                    long nodeId = node.getId();
+                    String nodeType = node.getNodeType();
+                    Map<String, ValueWrapper> properties = node.getProperties();
+                    System.out.printf("%15s |", valueWrapper.asNode());
+                } else if (valueWrapper.isEdge()) {
+                    Relationship relationship = valueWrapper.asEdge();
+                    long srcId = relationship.getSrcId();
+                    long dstId = relationship.getDstId();
+                    long rank = relationship.getRank();
+                    Map<String, ValueWrapper> properties = relationship.getProperties();
+                    System.out.printf("%15s |", valueWrapper.asEdge());
                 }
             }
-            System.out.println();
         }
+
+
     }
 }
