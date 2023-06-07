@@ -32,17 +32,19 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         final String username = properties.get( "user" );
         final String password = properties.get( "password" );
         final int requestTimeout = Integer.parseInt(properties.get("requestTimeout"));
+        final int maxSessionSize = Integer.parseInt(properties.get("maxSessionSize"));
+        final int maxSessionWaitTime = Integer.parseInt(properties.get("maxSessionWaitTime"));
         graphName = properties.get("graphName");
         try {
             client = NebulaClient.builder(endpointURI, username, password)
-                    .setRequestTimeoutMills(requestTimeout*1000)
-                    .setMaxSessionSize(10)
+                    .setRequestTimeoutMills(requestTimeout * 1000)
+                    .setMaxSessionSize(maxSessionSize)
                     .setMinSessionSize(1)
                     .setRetryTimes(3)
                     .setIntervalTimeMills(1000)
                     .setReconnect(true)
                     .setBlockWhenExhausted(true)
-                    .setMaxWaitMills(1000)
+                    .setMaxWaitMills(maxSessionWaitTime * 1000L)
                     .setStrictlyServerHealthy(true)
                     .build();
         } catch (UnknownHostException| IOErrorException e) {
