@@ -5,4 +5,10 @@
 
 package com.vesoft.nebula.common.configuration
 
-class SinkConfigs {}
+/**
+  * sink config
+  * */
+sealed trait DataSinkConfigEntry {
+  def category: SinkCategory.Value
+
+}

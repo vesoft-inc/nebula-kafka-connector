@@ -5,30 +5,71 @@
 
 package com.vesoft.nebula.common.connect
 
+import com.vesoft.nebula.Type
 import com.vesoft.nebula.client.graph.data.ResultSet
+import com.vesoft.nebula.client.graph.net.NebulaClient
 import org.apache.log4j.Logger
 
-class GraphProvider(addresses: String, connTimeout: Int, requestTimeout: Int)
+import scala.collection.mutable
+
+class GraphProvider(addresses: String,
+                    user: String,
+                    passwd: String,
+                    connTimeout: Int,
+                    requestTimeout: Int,
+                    retryIntervalTime: Int)
     extends AutoCloseable
     with Serializable {
   private[this] lazy val LOG = Logger.getLogger(this.getClass)
 
+  val graphClient = NebulaClient
+    .builder(addresses, user, passwd)
+    .setConnectTimeoutMills(connTimeout)
+    .setRequestTimeoutMills(requestTimeout)
+    .setMaxSessionSize(1)
+    .setMinSessionSize(1)
+    .setRetryTimes(3)
+    .setIntervalTimeMills(retryIntervalTime)
+    .setReconnect(true)
+    .setBlockWhenExhausted(true)
+    .setMaxWaitMills(1000)
+    .setStrictlyServerHealthy(true)
+    .build
+
   override def close(): Unit = {
-    null
+    graphClient.close()
   }
 
   /**
     * execute query
     */
   def query(statement: String): ResultSet = {
-    null
+    graphClient.execute(statement)
   }
 
   /**
-    *
+    * get NebulaGraph server's bucket number
     */
   def getBucketNum(): Int = {
     65535
+  }
+
+  /**
+    * get node schemas
+    */
+  def getNodeSchemas(graphName: String, nodetype: String): Map[String, Type] = {
+    val schema: mutable.HashMap[String, Type] = new mutable.HashMap[String, Type]()
+    // TODO query node schema
+    schema.toMap
+  }
+
+  /**
+    * get edge schemas
+    */
+  def getEdgeSchemas(graphName: String, edgetype: String): Map[String, Type] = {
+    val schema: mutable.HashMap[String, Type] = new mutable.HashMap[String, Type]()
+    // TODO query edge schema
+    schema.toMap
   }
 
 }

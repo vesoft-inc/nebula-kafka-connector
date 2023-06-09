@@ -11,13 +11,31 @@
 
     <artifactId>common</artifactId>
 
+    <properties>
+
+        <nebula.version>5.0.0</nebula.version>
+        <typesafe.version>1.4.0</typesafe.version>
+    </properties>
+
     <dependencies>
         <!--TODO change the version of client-->
         <dependency>
             <groupId>com.vesoft</groupId>
-            <artifactId>client</artifactId>
-            <version>3.4.0</version>
+            <artifactId>nebula-client</artifactId>
+            <version>${nebula.version}</version>
         </dependency>
+        <dependency>
+            <groupId>com.typesafe</groupId>
+            <artifactId>config</artifactId>
+            <version>${typesafe.version}</version>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.10.0</version>
+        </dependency>
+
     </dependencies>
 
 </project>

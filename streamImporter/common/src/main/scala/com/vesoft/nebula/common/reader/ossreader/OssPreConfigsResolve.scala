@@ -1,0 +1,53 @@
+/* Copyright (c) 2023 vesoft inc. All rights reserved.
+ *
+ * This source code is licensed under Apache 2.0 License.
+ */
+
+package com.vesoft.nebula.common.reader.ossreader
+
+import com.typesafe.config.Config
+import com.vesoft.nebula.common.configuration.ConfigConstant.{
+  DEFAULT_CSV_HEADER,
+  DEFAULT_CSV_SEPARATOR,
+  DEFAULT_READ_PARTITION
+}
+import com.vesoft.nebula.common.configuration.ConfigUtil.getOrElse
+import com.vesoft.nebula.common.configuration.preConfig.PreConfigResolve
+import com.vesoft.nebula.common.configuration.{
+  DataPreProcessConfig,
+  DataSourceConfigEntry,
+  FileFormatCategory,
+  SchemaConfig,
+  SourceCategory
+}
+
+class OssPreConfigsResolve {
+
+  def getSourceConfigEntry(category: SourceCategory.Value,
+                           fileFormat: Option[FileFormatCategory.Value],
+                           sourceConfig: Config,
+                           preProcessConfig: List[DataPreProcessConfig],
+                           schemaConfigs: List[SchemaConfig]): DataSourceConfigEntry = {
+
+    val path            = sourceConfig.getString("path")
+    val readPartition   = getOrElse(Option(sourceConfig), "readPartition", DEFAULT_READ_PARTITION)
+    val fileFormatValue = if (fileFormat.isDefined) fileFormat.get else FileFormatCategory.CSV
+    val header          = getOrElse(Option(sourceConfig), "header", DEFAULT_CSV_HEADER)
+    val separator       = getOrElse(Option(sourceConfig), "separator", DEFAULT_CSV_SEPARATOR)
+    val endpoint        = sourceConfig.getString("ossEndpoint")
+    val ossAccessKey    = sourceConfig.getString("ossAccessKey")
+    val ossSecretKey    = sourceConfig.getString("ossSecretKey")
+    OSSSourceConfigEntry(category,
+                         readPartition,
+                         fileFormatValue,
+                         path,
+                         endpoint,
+                         ossAccessKey,
+                         ossSecretKey,
+                         separator,
+                         header,
+                         schemaConfigs,
+                         preProcessConfig)
+  }
+
+}
