@@ -16,7 +16,7 @@ class ConfigsResolveSuite extends AnyFunSuite {
     val configs        = ConfigsResolve.parse(configFilePath)
 
     val nebulaGraphConfigEntry = configs.nebulaGraphConfigEntry
-    val mqClusterConfigEntry   = configs.MQClusterConfigEntry
+    val mqClusterConfigEntry   = configs.mqClusterConfigEntry
     val errorConfigEntry       = configs.errorConfigEntry
     val sourceConfigEntrys     = configs.sourceConfigEntrys
 
@@ -74,7 +74,7 @@ class ConfigsResolveSuite extends AnyFunSuite {
           assert(concatConfig.oldFields.size == 2)
         case separateConfig: SeparatorConfig =>
           assert("&".equalsIgnoreCase(separateConfig.sep))
-          assert("aaa".equalsIgnoreCase(separateConfig.oldFiled))
+          assert("aaa".equalsIgnoreCase(separateConfig.oldField))
           assert(separateConfig.newFields.size == 2)
         case filterConfig: FilterConfig =>
           assert(filterConfig.conditions.size == 1)

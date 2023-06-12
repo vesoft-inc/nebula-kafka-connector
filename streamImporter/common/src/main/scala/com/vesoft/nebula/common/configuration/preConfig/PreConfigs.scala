@@ -8,6 +8,7 @@ package com.vesoft.nebula.common.configuration.preConfig
 import com.typesafe.config.{Config, ConfigFactory}
 import com.vesoft.nebula.common.configuration.ConfigConstant.{
   DEFAULT_BATCH_SIZE,
+  DEFAULT_CONNECT_TIMEOUT,
   DEFAULT_ERROR_MAX_RECORDS,
   DEFAULT_ERROR_PATH,
   DEFAULT_GRAPH_ADDR,
@@ -17,6 +18,8 @@ import com.vesoft.nebula.common.configuration.ConfigConstant.{
   DEFAULT_GRAPH_USER,
   DEFAULT_REDPANDA_SERER,
   DEFAULT_REDPANDA_TOPIC,
+  DEFAULT_REQUEST_TIMEOUT,
+  DEFAULT_RETRY_INTERVAL_TIME,
   DEFAULT_WRITE_MODE,
   DEFAULT_WRITE_PARALLEL
 }
@@ -156,7 +159,10 @@ object PreConfigEntry {
             item match {
               case nodeRegexPattern(_*) =>
                 val elements = item.split(":")
-                node.setNodeType(elements(1)).setVidField(elements(3)).setVidType(elements(4))
+                node
+                  .setNodeTypeName(elements(1))
+                  .setVidField(elements(3))
+                  .setVidDataType(elements(4))
               case propRegexPattern(_*) =>
                 val elements = item.split(":")
                 node.addProperty(elements(1), elements(2))
@@ -168,10 +174,13 @@ object PreConfigEntry {
             item match {
               case edgeSrcRegexPattern(_*) =>
                 val elements = item.split(":")
-                edge.setEdgeType(elements(1)).setSrcField(elements(3)).setSrcNodeType(elements(4))
+                edge
+                  .setEdgeTypeName(elements(1))
+                  .setSrcField(elements(3))
+                  .setSrcNodeTypeName(elements(4))
               case edgeDstRegexPattern(_*) =>
                 val elements = item.split(":")
-                edge.setDstField(elements(3)).setDstNodeType(elements(4))
+                edge.setDstField(elements(3)).setDstNodeTypeName(elements(4))
               case propRegexPattern(_*) =>
                 val elements = item.split(":")
                 edge.addProperty(elements(1), elements(2))
@@ -194,11 +203,26 @@ object PreConfigEntry {
 
     val user   = ConfigUtil.getOrElse(nebulaConfig, "user", DEFAULT_GRAPH_USER)
     val passwd = ConfigUtil.getOrElse(nebulaConfig, "passwd", DEFAULT_GRAPH_PASSWD)
+    val connectTimeout =
+      ConfigUtil.getOrElse(nebulaConfig, "connectTimeout", DEFAULT_CONNECT_TIMEOUT)
+    val requestTimeout =
+      ConfigUtil.getOrElse(nebulaConfig, "requestTimeout", DEFAULT_REQUEST_TIMEOUT)
+
+    val retryInterval =
+      ConfigUtil.getOrElse(nebulaConfig, "retryInterval", DEFAULT_RETRY_INTERVAL_TIME)
     val mode =
       ConfigUtil.toSinkCategory(ConfigUtil.getOrElse(nebulaConfig, "mode", DEFAULT_WRITE_MODE))
     val generateDDL = ConfigUtil.getOrElse(nebulaConfig, "generateDDL", false)
     val nebulaGraphConfigEntry =
-      NebulaGraphConfigEntry(graphAddress, graphName, user, passwd, mode, generateDDL)
+      NebulaGraphConfigEntry(graphAddress,
+                             graphName,
+                             user,
+                             passwd,
+                             connectTimeout,
+                             requestTimeout,
+                             retryInterval,
+                             mode,
+                             generateDDL)
     nebulaGraphConfigEntry.check()
     LOG.info(nebulaGraphConfigEntry.toString)
     (graphType, nebulaGraphConfigEntry)
@@ -253,7 +277,7 @@ object PreConfigEntry {
             node.setNebulaProperties(node.getProperties)
             ddlStatements += node.getSchemaString
           } else {
-            node.setNebulaProperties(getNodePropertyFields(graphType, node.getNodeType).asJava)
+            node.setNebulaProperties(getNodePropertyFields(graphType, node.getNodeTypeName).asJava)
           }
           val sourceFields2NebulaFields        = node.getPropMapping.asScala
           val sourceFields: ListBuffer[String] = new ListBuffer[String]()
@@ -262,7 +286,7 @@ object PreConfigEntry {
             sourceFields += kv._1
             nebulaFields += kv._2
           }
-          val nodeConfig = NodeConfig(node.getNodeType,
+          val nodeConfig = NodeConfig(node.getNodeTypeName,
                                       sourceFields.toList,
                                       nebulaFields.toList,
                                       DEFAULT_BATCH_SIZE,
@@ -277,7 +301,7 @@ object PreConfigEntry {
             edge.setNebulaProperties(edge.getProperties)
             ddlStatements += edge.getSchemaString
           } else {
-            edge.setNebulaProperties(getEdgePropertyFields(graphType, edge.getEdgeType).asJava)
+            edge.setNebulaProperties(getEdgePropertyFields(graphType, edge.getEdgeTypeName).asJava)
           }
           val sourceFields2NebulaFields        = edge.getPropMapping.asScala
           val sourceFields: ListBuffer[String] = new ListBuffer[String]()
@@ -286,7 +310,7 @@ object PreConfigEntry {
             sourceFields += kv._1
             nebulaFields += kv._2
           }
-          val edgeConfig = EdgeConfig(edge.getEdgeType,
+          val edgeConfig = EdgeConfig(edge.getEdgeTypeName,
                                       sourceFields.toList,
                                       nebulaFields.toList,
                                       DEFAULT_BATCH_SIZE,

@@ -6,18 +6,18 @@
 package com.vesoft.nebula.common.schema;
 
 public class Edge extends Schema{
-    private String edgeType;
-    private String srcNodeType;
+    private String edgeTypeName;
+    private String srcNodeTypeName;
     private String srcField;
-    private String dstNodeType;
+    private String dstNodeTypeName;
     private String dstField;
 
-    public String getEdgeType() {
-        return edgeType;
+    public String getEdgeTypeName() {
+        return edgeTypeName;
     }
 
-    public Edge setEdgeType(String edgeType) {
-        this.edgeType = edgeType;
+    public Edge setEdgeTypeName(String edgeTypeName) {
+        this.edgeTypeName = edgeTypeName;
         return this;
     }
 
@@ -39,36 +39,36 @@ public class Edge extends Schema{
         return this;
     }
 
-    public String getSrcNodeType() {
-        return srcNodeType;
+    public String getSrcNodeTypeName() {
+        return srcNodeTypeName;
     }
 
-    public void setSrcNodeType(String srcNodeType) {
-        this.srcNodeType = srcNodeType;
+    public void setSrcNodeTypeName(String srcNodeTypeName) {
+        this.srcNodeTypeName = srcNodeTypeName;
     }
 
-    public String getDstNodeType() {
-        return dstNodeType;
+    public String getDstNodeTypeName() {
+        return dstNodeTypeName;
     }
 
-    public void setDstNodeType(String dstNodeType) {
-        this.dstNodeType = dstNodeType;
+    public void setDstNodeTypeName(String dstNodeTypeName) {
+        this.dstNodeTypeName = dstNodeTypeName;
     }
 
     public String getSchemaString() {
         String props = super.getSchemaString();
 
         return String.format("(%s)-[%s LABEL %s {%s}]->(%s)",
-                srcNodeType, edgeType, edgeType, props, dstNodeType);
+                srcNodeTypeName, edgeTypeName, edgeTypeName, props, dstNodeTypeName);
     }
 
     @Override
     public String toString() {
         return "Edge{" +
-                "edgeType='" + edgeType + '\'' +
-                ", srcNodeType='" + srcNodeType + '\'' +
+                "edgeTypeName='" + edgeTypeName + '\'' +
+                ", srcNodeTypeName='" + srcNodeTypeName + '\'' +
                 ", srcField='" + srcField + '\'' +
-                ", dstNodeType='" + dstNodeType + '\'' +
+                ", dstNodeTypeName='" + dstNodeTypeName + '\'' +
                 ", dstField='" + dstField + '\'' +
                 ", properties=" + super.properties +
                 '}';

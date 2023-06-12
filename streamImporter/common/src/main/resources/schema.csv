@@ -1,0 +1,3 @@
+edge:friend:srckey:a:player,edge:friend:dstkey:b:player,c:string,d:int,e:datetime,f:int
+node:player:key:a:string,c:string,g:int
+node:person:key:b:string,e:string,d:int

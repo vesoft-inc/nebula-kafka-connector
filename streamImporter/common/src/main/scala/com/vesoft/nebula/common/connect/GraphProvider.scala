@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.common.connect
 
-import com.vesoft.nebula.Type
 import com.vesoft.nebula.client.graph.data.ResultSet
 import com.vesoft.nebula.client.graph.net.NebulaClient
 import org.apache.log4j.Logger
@@ -57,8 +56,8 @@ class GraphProvider(addresses: String,
   /**
     * get node schemas
     */
-  def getNodeSchemas(graphName: String, nodetype: String): Map[String, Type] = {
-    val schema: mutable.HashMap[String, Type] = new mutable.HashMap[String, Type]()
+  def getNodeSchemas(graphName: String, nodetype: String): Map[String, String] = {
+    val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     // TODO query node schema
     schema.toMap
   }
@@ -66,8 +65,8 @@ class GraphProvider(addresses: String,
   /**
     * get edge schemas
     */
-  def getEdgeSchemas(graphName: String, edgetype: String): Map[String, Type] = {
-    val schema: mutable.HashMap[String, Type] = new mutable.HashMap[String, Type]()
+  def getEdgeSchemas(graphName: String, edgetype: String): Map[String, String] = {
+    val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     // TODO query edge schema
     schema.toMap
   }

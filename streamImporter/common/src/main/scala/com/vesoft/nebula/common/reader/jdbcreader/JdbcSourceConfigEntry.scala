@@ -5,7 +5,12 @@
 
 package com.vesoft.nebula.common.reader.jdbcreader
 
-import com.vesoft.nebula.common.configuration.{DataBaseServerSourceConfigEntry, DataPreProcessConfig, SchemaConfig, SourceCategory}
+import com.vesoft.nebula.common.configuration.{
+  DataBaseServerSourceConfigEntry,
+  DataPreProcessConfig,
+  SchemaConfig,
+  SourceCategory
+}
 import org.apache.log4j.Logger
 
 /**
@@ -83,6 +88,50 @@ case class JdbcSourceConfigEntry(override val category: SourceCategory.Value,
       s"upperBound:${if (upperBound.isDefined) upperBound.get}, " +
       s"fetchSize:${if (fetchSize.isDefined) fetchSize.get}, " +
       s"schemaConfigs:${schemaConfigs.map(_.toString)}" +
-      s"preProcessConfigs:${preProcessConfigs.map(_.toString())}"
-  s" }"
+      s"preProcessConfigs:${preProcessConfigs.map(_.toString())}" +
+      s" }"
+
+  def saveToFile: String = {
+    val space                    = "  "
+    val doubleSpace              = "    "
+    val tripleSpace              = "      "
+    val (nodeString, edgeString) = saveSchema(schemaConfigs)
+    val preProcessConfigString   = savePreProcessConfig(preProcessConfigs)
+
+    val optionalColumn =
+      if (partitionColumn.isDefined)
+        doubleSpace + "partitionColumn: \"" + partitionColumn + "\""
+      else
+        ""
+    val optionalLowerBound =
+      if (lowerBound.isDefined) doubleSpace + "lowerBound: " + lowerBound else ""
+    val optionalUpperBound =
+      if (upperBound.isDefined) doubleSpace + "upperBound: " + upperBound else ""
+    val optionalFetchSize = if (fetchSize.isDefined) doubleSpace + "fetchSize: " + fetchSize else ""
+
+    s"""
+       |$space{
+       |${doubleSpace}type: \"${category.toString}\"
+       |${doubleSpace}url: \"$url\"
+       |${doubleSpace}driver: \"$driver\"
+       |${doubleSpace}user: \"$user\"
+       |${doubleSpace}passwd: \"$passwd\"
+       |${doubleSpace}table: \"$table\"
+       |${doubleSpace}statement: \"$statement\"
+       |${doubleSpace}readParallel: $readParallel
+       |$optionalColumn
+       |$optionalLowerBound
+       |$optionalUpperBound
+       |$optionalFetchSize
+       |${doubleSpace}pre_processes:{
+       |${preProcessConfigString}
+       |$tripleSpace }
+       |${doubleSpace}nodetypes: [
+       |${nodeString}
+       |${doubleSpace}]
+       |${doubleSpace}edgetypes: [
+       |${edgeString}
+       |${doubleSpace}]
+       |$space}""".stripMargin
+  }
 }

@@ -12,6 +12,7 @@ import com.vesoft.nebula.common.configuration.{
   SchemaConfig,
   SourceCategory
 }
+import org.apache.log4j.Logger
 
 /* Copyright (c) 2023 vesoft inc. All rights reserved.
  *
@@ -19,6 +20,7 @@ import com.vesoft.nebula.common.configuration.{
  */
 
 object JdbcConfigsResolve {
+  private[this] val LOG = Logger.getLogger(this.getClass)
 
   def parse(configPath: String): Configs = {
     //super.parse(configPath)
@@ -52,7 +54,7 @@ object JdbcConfigsResolve {
       else None
     val fetchSize =
       if (sourceConfig.hasPath("fetchSize")) Option(sourceConfig.getLong("fetchSize")) else None
-    JdbcSourceConfigEntry(
+    val config = JdbcSourceConfigEntry(
       category,
       readPartition,
       statement,
@@ -69,6 +71,8 @@ object JdbcConfigsResolve {
       fetchSize,
       preProcessConfig
     )
+    LOG.info(config.toString)
+    config
   }
 
 }

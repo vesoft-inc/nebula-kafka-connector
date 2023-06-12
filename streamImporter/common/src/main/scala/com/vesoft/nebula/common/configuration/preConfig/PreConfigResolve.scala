@@ -29,7 +29,7 @@ import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.{FSDataInputStream, FileSystem, Path}
 import org.apache.log4j.Logger
 
-import java.io.{BufferedReader, File, InputStreamReader}
+import java.io.{BufferedReader, File, FileWriter, InputStreamReader}
 import java.nio.file.Files
 import scala.collection.JavaConverters.{
   asScalaBufferConverter,
@@ -83,6 +83,17 @@ object PreConfigResolve {
     val configs =
       Configs(nebulaGraphConfigEntry, mqClusterConfigEntry, errorConfigEntry, sourceConfigEntrys)
     (schemaDDL, configs)
+  }
+
+  /**
+    * save {@link Configs} info file
+    *
+    * */
+  def save(configs: Configs, path: String): Unit = {
+    val configString = configs.saveToFile
+    val out          = new FileWriter(path)
+    out.write(configString)
+    out.close()
   }
 
   /**
@@ -146,7 +157,10 @@ object PreConfigResolve {
             item match {
               case nodeRegexPattern(_*) =>
                 val elements = item.split(":")
-                node.setNodeType(elements(1)).setVidField(elements(3)).setVidType(elements(4))
+                node
+                  .setNodeTypeName(elements(1))
+                  .setVidField(elements(3))
+                  .setVidDataType(elements(4))
               case propRegexPattern(_*) =>
                 val elements = item.split(":")
                 node.addProperty(elements(0), elements(1))
@@ -158,10 +172,13 @@ object PreConfigResolve {
             item match {
               case edgeSrcRegexPattern(_*) =>
                 val elements = item.split(":")
-                edge.setEdgeType(elements(1)).setSrcField(elements(3)).setSrcNodeType(elements(4))
+                edge
+                  .setEdgeTypeName(elements(1))
+                  .setSrcField(elements(3))
+                  .setSrcNodeTypeName(elements(4))
               case edgeDstRegexPattern(_*) =>
                 val elements = item.split(":")
-                edge.setDstField(elements(3)).setDstNodeType(elements(4))
+                edge.setDstField(elements(3)).setDstNodeTypeName(elements(4))
               case propRegexPattern(_*) =>
                 val elements = item.split(":")
                 edge.addProperty(elements(0), elements(1))
@@ -203,7 +220,7 @@ object PreConfigResolve {
             node.setNebulaProperties(node.getProperties)
             ddlStatements += node.getSchemaString
           } else {
-            node.setNebulaProperties(getNodePropertyFields(graphType, node.getNodeType).asJava)
+            node.setNebulaProperties(getNodePropertyFields(graphType, node.getNodeTypeName).asJava)
           }
           val sourceFields2NebulaFields        = node.getPropMapping.asScala
           val sourceFields: ListBuffer[String] = new ListBuffer[String]()
@@ -212,7 +229,7 @@ object PreConfigResolve {
             sourceFields += kv._1
             nebulaFields += kv._2
           }
-          val nodeConfig = NodeConfig(node.getNodeType,
+          val nodeConfig = NodeConfig(node.getNodeTypeName,
                                       sourceFields.toList,
                                       nebulaFields.toList,
                                       DEFAULT_BATCH_SIZE,
@@ -227,7 +244,7 @@ object PreConfigResolve {
             edge.setNebulaProperties(edge.getProperties)
             ddlStatements += edge.getSchemaString
           } else {
-            edge.setNebulaProperties(getEdgePropertyFields(graphType, edge.getEdgeType).asJava)
+            edge.setNebulaProperties(getEdgePropertyFields(graphType, edge.getEdgeTypeName).asJava)
           }
           val sourceFields2NebulaFields        = edge.getPropMapping.asScala
           val sourceFields: ListBuffer[String] = new ListBuffer[String]()
@@ -236,7 +253,7 @@ object PreConfigResolve {
             sourceFields += kv._1
             nebulaFields += kv._2
           }
-          val edgeConfig = EdgeConfig(edge.getEdgeType,
+          val edgeConfig = EdgeConfig(edge.getEdgeTypeName,
                                       sourceFields.toList,
                                       nebulaFields.toList,
                                       DEFAULT_BATCH_SIZE,

@@ -16,7 +16,7 @@ class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
     val (ddl, configs) = PreConfigResolve.parse(configFilePath)
 
     val nebulaGraphConfigEntry = configs.nebulaGraphConfigEntry
-    val mqClusterConfigEntry   = configs.MQClusterConfigEntry
+    val mqClusterConfigEntry   = configs.mqClusterConfigEntry
     val errorConfigEntry       = configs.errorConfigEntry
     val sourceConfigEntrys     = configs.sourceConfigEntrys
 
@@ -44,20 +44,20 @@ class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
     assert(edges.size == 1)
 
     for (node <- nodes) {
-      node.getNodeType match {
+      node.getNodeTypeName match {
         case "player" =>
           assert(node.getVidField.equalsIgnoreCase("a"))
-          assert(node.getVidType.equalsIgnoreCase("string"))
+          assert(node.getVidDataType.equalsIgnoreCase("string"))
           assert(node.getProperties.size() == 2)
         case "person" =>
           assert(node.getVidField.equalsIgnoreCase("b"))
-          assert(node.getVidType.equalsIgnoreCase("string"))
+          assert(node.getVidDataType.equalsIgnoreCase("string"))
           assert(node.getProperties.size() == 2)
       }
     }
 
     val edge = edges.head
-    assert(edge.getEdgeType.equalsIgnoreCase("friend"))
+    assert(edge.getEdgeTypeName.equalsIgnoreCase("friend"))
     assert(edge.getSrcField.equalsIgnoreCase("a"))
     assert(edge.getDstField.equalsIgnoreCase("b"))
     assert(edge.getProperties.size() == 4)
@@ -96,6 +96,14 @@ class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
     assert("a:time".matches(propRegexPattern))
     assert("a:date".matches(propRegexPattern))
     assert("a:duration".matches(propRegexPattern))
+  }
+
+  test("test save configs into file"){
+    val configFilePath = "streamImporter/common/src/test/resources/pre-import.conf"
+    val (ddl, configs) = PreConfigResolve.parse(configFilePath)
+    val targetPath = "streamImporter/common/src/test/resources/generated_import.conf"
+    PreConfigResolve.save(configs, targetPath)
+    ConfigsResolve.parse(targetPath)
   }
 
 }

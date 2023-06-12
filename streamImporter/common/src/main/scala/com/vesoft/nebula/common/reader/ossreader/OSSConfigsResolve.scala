@@ -21,8 +21,10 @@ import com.vesoft.nebula.common.configuration.{
   SchemaConfig,
   SourceCategory
 }
+import org.apache.log4j.Logger
 
 object OSSConfigsResolve {
+  private[this] val LOG = Logger.getLogger(this.getClass)
   def parse(configPath: String): Configs = {
     //super.parse(configPath)
     null
@@ -41,16 +43,18 @@ object OSSConfigsResolve {
     val endpoint        = sourceConfig.getString("ossEndpoint")
     val ossAccessKey    = sourceConfig.getString("ossAccessKey")
     val ossSecretKey    = sourceConfig.getString("ossSecretKey")
-    OSSSourceConfigEntry(category,
-                         readPartition,
-                         fileFormatValue,
-                         path,
-                         endpoint,
-                         ossAccessKey,
-                         ossSecretKey,
-                         separator,
-                         header,
-                         schemaConfigs,
-                         preProcessConfig)
+    val config = OSSSourceConfigEntry(category,
+                                      readPartition,
+                                      fileFormatValue,
+                                      path,
+                                      endpoint,
+                                      ossAccessKey,
+                                      ossSecretKey,
+                                      separator,
+                                      header,
+                                      schemaConfigs,
+                                      preProcessConfig)
+    LOG.info(config.toString)
+    config
   }
 }

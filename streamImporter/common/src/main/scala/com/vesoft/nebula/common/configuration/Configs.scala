@@ -5,10 +5,53 @@
 
 package com.vesoft.nebula.common.configuration
 
+import com.vesoft.nebula.common.reader.hdfsreader.HdfsSourceConfigEntry
+import com.vesoft.nebula.common.reader.hivereader.HiveSourceConfigEntry
+import com.vesoft.nebula.common.reader.jdbcreader.JdbcSourceConfigEntry
+import com.vesoft.nebula.common.reader.ossreader.OSSSourceConfigEntry
+import com.vesoft.nebula.common.reader.s3reader.S3SourceConfigEntry
+
 case class Configs(nebulaGraphConfigEntry: NebulaGraphConfigEntry,
-                   MQClusterConfigEntry: MQClusterConfigEntry,
+                   mqClusterConfigEntry: MQClusterConfigEntry,
                    errorConfigEntry: ErrorConfigEntry,
-                   sourceConfigEntrys: List[DataSourceConfigEntry])
+                   sourceConfigEntrys: List[DataSourceConfigEntry]) {
+  override def toString: String = {
+    s"Configs{$nebulaGraphConfigEntry, " +
+      s"$mqClusterConfigEntry, " +
+      s"$errorConfigEntry, " +
+      s"${sourceConfigEntrys.map(_.toString)}}"
+  }
+
+  def saveToFile: String = {
+    val tabSpace = "  "
+    s"{\n ${tabSpace}${nebulaGraphConfigEntry.saveSchema} \n" +
+      s"\n${tabSpace}${mqClusterConfigEntry.saveSchema} \n" +
+      s"\n${tabSpace}${errorConfigEntry.saveSchema} \n" +
+      s"\n${tabSpace}sources:[" +
+      s"\n${saveSources(sourceConfigEntrys)}" +
+      s"\n${tabSpace}]" +
+      s"\n}"
+  }
+
+  private[this] def saveSources(sourceConfigs: List[DataSourceConfigEntry]): String = {
+    val sourceConfigsString: StringBuilder = new StringBuilder()
+    for (sourceConfig <- sourceConfigs) {
+      sourceConfig match {
+        case hdfsSourceConfigEntry: HdfsSourceConfigEntry =>
+          sourceConfigsString.append(hdfsSourceConfigEntry.saveToFile)
+        case s3SourceConfigEntry: S3SourceConfigEntry =>
+          sourceConfigsString.append(s3SourceConfigEntry.saveToFile)
+        case ossSourceConfigEntry: OSSSourceConfigEntry =>
+          sourceConfigsString.append(ossSourceConfigEntry.saveToFile)
+        case hiveSourceConfigEntry: HiveSourceConfigEntry =>
+          sourceConfigsString.append(hiveSourceConfigEntry.saveToFile)
+        case jdbcSourceConfigEntry: JdbcSourceConfigEntry =>
+          sourceConfigsString.append(jdbcSourceConfigEntry.saveToFile)
+      }
+    }
+    sourceConfigsString.toString()
+  }
+}
 
 /**
   * NebulaGraph config
@@ -18,9 +61,9 @@ case class NebulaGraphConfigEntry(graphAddress: String,
                                   graphName: String,
                                   user: String,
                                   passwd: String,
-                                  connectTimeout:Int,
-                                  requestTimeout:Int,
-                                  retryIntervalTime:Int,
+                                  connectTimeout: Int,
+                                  requestTimeout: Int,
+                                  retryIntervalTime: Int,
                                   mode: SinkCategory.Value,
                                   generateDDL: Boolean = false) {
   def check(): Unit = {
@@ -29,12 +72,29 @@ case class NebulaGraphConfigEntry(graphAddress: String,
     require(user != null && user.nonEmpty, "NebulaGraph user cannot be null")
     require(passwd != null && passwd.nonEmpty, "NebulaGraph passwd cannot be null")
     require((new ValidateUtil).validateServer(graphAddress), "graph address is not valid")
-    require(connectTimeout >=0, "graph connect timeout cannot be less than 0")
-    require(requestTimeout >=0, "graph request timeout cannot be less than 0")
-    require(retryIntervalTime >=0, "graph interval time between retrys cannot less than 0")
+    require(connectTimeout >= 0, "graph connect timeout cannot be less than 0")
+    require(requestTimeout >= 0, "graph request timeout cannot be less than 0")
+    require(retryIntervalTime >= 0, "graph interval time between retrys cannot less than 0")
   }
   override def toString: String =
     s"NebulaGraphConfigEntry{graphAddress:$graphAddress, graph:$graphName, user:$user, passwd:****}"
+
+  def saveSchema: String = {
+    val space       = "  "
+    val doubleSpace = "    "
+    s"""
+       |${space}nebula:{
+       |${doubleSpace}graphAddr: \"${graphAddress}\"
+       |${doubleSpace}graphName: \"${graphName}\"
+       |${doubleSpace}user: \"${user}\"
+       |${doubleSpace}passwd: \"${passwd}\"
+       |${doubleSpace}mode: \"${mode}\"
+       |${doubleSpace}connectTimeout: $connectTimeout
+       |${doubleSpace}requestTimeout: $requestTimeout
+       |${doubleSpace}retryIntervalTime: $retryIntervalTime
+       |$space}
+       |""".stripMargin
+  }
 }
 
 /**
@@ -47,11 +107,33 @@ case class MQClusterConfigEntry(server: String, topic: String) {
     require(topic != null && topic.nonEmpty, "mq topic cannot be null")
   }
   override def toString: String = s"MQClusterConfigEntry{server:$server, topic:$topic}"
+
+  def saveSchema: String = {
+    val space       = "  "
+    val doubleSpace = "    "
+    s"""
+       |${space}mq:{
+       |${doubleSpace}server: \"${server}\"
+       |${doubleSpace}topic: \"${topic}\"
+       |$space}
+       |""".stripMargin
+  }
 }
 
 case class ErrorConfigEntry(path: String, maxRecords: Int) {
   def check(): Unit = {
-    require(maxRecords >=0, "maxRecords can not be less than 0")
+    require(maxRecords >= 0, "maxRecords can not be less than 0")
   }
   override def toString: String = s"ErrorConfigEntry{path:$path, maxRecords:$maxRecords}"
+
+  def saveSchema: String = {
+    val space       = "  "
+    val doubleSpace = "    "
+    s"""
+       |${space}error:{
+       |${doubleSpace}path: \"${path}\"
+       |${doubleSpace}maxRecords: $maxRecords
+       |$space}
+       |""".stripMargin
+  }
 }

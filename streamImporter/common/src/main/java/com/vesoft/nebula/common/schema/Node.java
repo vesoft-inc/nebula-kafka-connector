@@ -6,25 +6,25 @@
 package com.vesoft.nebula.common.schema;
 
 public class Node extends Schema{
-    private String nodeType;
-    private String vidType;
+    private String nodeTypeName;
+    private String vidDataType;
     private String vidField;
 
-    public String getNodeType() {
-        return nodeType;
+    public String getNodeTypeName() {
+        return nodeTypeName;
     }
 
-    public Node setNodeType(String nodeType) {
-        this.nodeType = nodeType;
+    public Node setNodeTypeName(String nodeTypeName) {
+        this.nodeTypeName = nodeTypeName;
         return this;
     }
 
-    public String getVidType() {
-        return vidType;
+    public String getVidDataType() {
+        return vidDataType;
     }
 
-    public Node setVidType(String vidType) {
-        this.vidType = vidType;
+    public Node setVidDataType(String vidDataType) {
+        this.vidDataType = vidDataType;
         return this;
     }
 
@@ -39,14 +39,14 @@ public class Node extends Schema{
 
     public String getSchemaString() {
         String props = super.getSchemaString();
-        return String.format("(%s(%s) LABEL %s(%s))", nodeType, vidField, nodeType, props);
+        return String.format("(%s(%s) LABEL %s(%s))", nodeTypeName, vidField, nodeTypeName, props);
     }
 
     @Override
     public String toString() {
         return "Node{" +
-                "nodeType='" + nodeType + '\'' +
-                ", vidType='" + vidType + '\'' +
+                "nodeTypeName='" + nodeTypeName + '\'' +
+                ", vidDataType='" + vidDataType + '\'' +
                 ", vidField='" + vidField + '\'' +
                 ", properties=" + super.properties +
                 '}';

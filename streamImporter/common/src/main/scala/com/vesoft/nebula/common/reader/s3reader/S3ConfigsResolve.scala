@@ -21,8 +21,10 @@ import com.vesoft.nebula.common.configuration.{
   SchemaConfig,
   SourceCategory
 }
+import org.apache.log4j.Logger
 
 object S3ConfigsResolve {
+  private[this] val LOG = Logger.getLogger(this.getClass)
   def parse(configPath: String): Configs = {
     //super.parse(configPath)
     null
@@ -41,16 +43,18 @@ object S3ConfigsResolve {
     val endpoint        = sourceConfig.getString("s3Endpoint")
     val s3AccessKey     = sourceConfig.getString("s3AccessKey")
     val s3SecretKey     = sourceConfig.getString("s3SecretKey")
-    S3SourceConfigEntry(category,
-                        readPartition,
-                        fileFormatValue,
-                        path,
-                        endpoint,
-                        s3AccessKey,
-                        s3SecretKey,
-                        separator,
-                        header,
-                        schemaConfigs,
-                        preProcessConfig)
+    val config = S3SourceConfigEntry(category,
+                                     readPartition,
+                                     fileFormatValue,
+                                     path,
+                                     endpoint,
+                                     s3AccessKey,
+                                     s3SecretKey,
+                                     separator,
+                                     header,
+                                     schemaConfigs,
+                                     preProcessConfig)
+    LOG.info(config.toString)
+    config
   }
 }

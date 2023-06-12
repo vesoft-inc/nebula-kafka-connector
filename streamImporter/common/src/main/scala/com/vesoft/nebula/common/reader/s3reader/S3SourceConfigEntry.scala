@@ -45,8 +45,37 @@ case class S3SourceConfigEntry(override val category: SourceCategory.Value,
       s"endpoint:$endpoint, " +
       s"accessKey:$accessKey, " +
       s"secretKey:$secretKey" +
-      s"separator:$separator, " +
+      s"separator:'$separator', " +
       s"header:$header, " +
       s"schemaConfigs:${schemaConfigs.map(_.toString)}, " +
       s"preProcessConfigs:${preProcessConfigs.map(_.toString())}}"
+
+  def saveToFile: String = {
+    val space                    = "  "
+    val doubleSpace              = "    "
+    val tripleSpace              = "      "
+    val (nodeString, edgeString) = saveSchema(schemaConfigs)
+    val preProcessConfigString   = savePreProcessConfig(preProcessConfigs)
+
+    s"""$space{
+       |${doubleSpace}type: \"${category.toString}\"
+       |${doubleSpace}format: \"${fileFormat.toString}\"
+       |${doubleSpace}path: \"$path\"
+       |${doubleSpace}endpoint: \"$endpoint\"
+       |${doubleSpace}accessKey: \"$accessKey\"
+       |${doubleSpace}secretKey: \"$secretKey\"
+       |${doubleSpace}header: $header
+       |${doubleSpace}separator: \"$separator\"
+       |${doubleSpace}readParallel: $readParallel
+       |${doubleSpace}pre_processes:{
+       |${preProcessConfigString}
+       |$tripleSpace }
+       |${doubleSpace}nodetypes: [
+       |${nodeString}
+       |${doubleSpace}]
+       |${doubleSpace}edgetypes: [
+       |${edgeString}
+       |${doubleSpace}]
+       |$space}""".stripMargin
+  }
 }

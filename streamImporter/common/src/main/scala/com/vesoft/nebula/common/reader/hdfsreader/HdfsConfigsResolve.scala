@@ -6,23 +6,13 @@
 package com.vesoft.nebula.common.reader.hdfsreader
 
 import com.typesafe.config.Config
-import com.vesoft.nebula.common.configuration.ConfigConstant.{
-  DEFAULT_CSV_HEADER,
-  DEFAULT_CSV_SEPARATOR,
-  DEFAULT_READ_PARTITION
-}
+import com.vesoft.nebula.common.configuration.ConfigConstant.{DEFAULT_CSV_HEADER, DEFAULT_CSV_SEPARATOR, DEFAULT_READ_PARTITION}
 import com.vesoft.nebula.common.configuration.ConfigUtil.getOrElse
-import com.vesoft.nebula.common.configuration.{
-  Configs,
-  ConfigsResolve,
-  DataPreProcessConfig,
-  DataSourceConfigEntry,
-  FileFormatCategory,
-  SchemaConfig,
-  SourceCategory
-}
+import com.vesoft.nebula.common.configuration.{Configs, ConfigsResolve, DataPreProcessConfig, DataSourceConfigEntry, FileFormatCategory, SchemaConfig, SourceCategory}
+import org.apache.log4j.Logger
 
 object HdfsConfigsResolve {
+  private[this] val LOG = Logger.getLogger(this.getClass)
   def parse(configPath: String): Configs = {
     // super.parse(configPath)
     null
@@ -38,7 +28,7 @@ object HdfsConfigsResolve {
     val header          = getOrElse(Option(sourceConfig), "header", DEFAULT_CSV_HEADER)
     val separator       = getOrElse(Option(sourceConfig), "separator", DEFAULT_CSV_SEPARATOR)
     val readPartition   = getOrElse(Option(sourceConfig), "readParallel", DEFAULT_READ_PARTITION)
-    HdfsSourceConfigEntry(category,
+    val config = HdfsSourceConfigEntry(category,
                           readPartition,
                           fileFormatValue,
                           path,
@@ -46,5 +36,7 @@ object HdfsConfigsResolve {
                           header,
                           schemaConfigs,
                           preProcessConfig)
+    LOG.info(config.toString)
+    config
   }
 }
