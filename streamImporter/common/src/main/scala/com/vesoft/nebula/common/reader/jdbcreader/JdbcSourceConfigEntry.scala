@@ -39,7 +39,6 @@ case class JdbcSourceConfigEntry(override val category: SourceCategory.Value,
                                  user: String,
                                  passwd: String,
                                  table: String,
-                                 prepareQuery: Option[String] = None,
                                  partitionColumn: Option[String] = None,
                                  lowerBound: Option[Long] = None,
                                  upperBound: Option[Long] = None,
@@ -60,9 +59,6 @@ case class JdbcSourceConfigEntry(override val category: SourceCategory.Value,
 
     if (statement != null && partitionColumn.isDefined) {
       LOG.warn("statement is configured, partitionColumn will be ignored.")
-    }
-    if (statement == null && prepareQuery.isDefined) {
-      LOG.warn("statement is not configured, prepareQuery will be ignored.")
     }
 
     if (table != null && partitionColumn.isDefined) {

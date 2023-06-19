@@ -36,3 +36,20 @@ object SinkCategory extends Enumeration {
   val IMPORT   = Value("IMPORT")
   val BULKLOAD = Value("BULKLOAD")
 }
+
+object NebulaDataType extends Enumeration {
+  type Type = Value
+  val STRING = Value("string")
+  val INT8 = Value("int8")
+  val INT16 = Value("int16")
+  val INT32 = Value("int32")
+  val ITN64=Value("int64")
+  val BOOL = Value("bool")
+  val FLOAT = Value("float")
+  val DOUBLE = Value("double")
+  val DATE = Value("date")
+  val TIME = Value("localTime")
+  val DATETIME = Value("localDatetime")
+  val DURATION = Value("duration")
+
+}

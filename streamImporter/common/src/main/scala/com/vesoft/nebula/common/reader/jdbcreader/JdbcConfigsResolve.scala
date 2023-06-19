@@ -39,9 +39,6 @@ object JdbcConfigsResolve {
     val statement =
       if (sourceConfig.hasPath("statement")) sourceConfig.getString("statement") else null
     val table = if (sourceConfig.hasPath("table")) sourceConfig.getString("table") else null
-    val prepareQuery =
-      if (sourceConfig.hasPath("prepareQuery")) Option(sourceConfig.getString("prepareQuery"))
-      else None
     val partitionColumn =
       if (sourceConfig.hasPath("partitionColumn"))
         Option(sourceConfig.getString("partitionColumn"))
@@ -64,7 +61,6 @@ object JdbcConfigsResolve {
       user,
       passwd,
       table,
-      prepareQuery,
       partitionColumn,
       lowerBound,
       upperBound,
