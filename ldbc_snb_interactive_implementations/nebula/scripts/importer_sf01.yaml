@@ -565,7 +565,7 @@ sources:
             type: 'INT'
             index: 0
         dst:
-          name: Person
+          name: Post
           id:
             name: 'id'
             type: 'INT'
@@ -637,7 +637,7 @@ sources:
             type: 'INT'
             index: 0
         dst:
-          name: Person
+          name: Tag
           id:
             name: 'id'
             type: 'INT'
