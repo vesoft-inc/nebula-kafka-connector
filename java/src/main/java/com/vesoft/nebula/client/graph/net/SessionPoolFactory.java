@@ -77,7 +77,12 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
     @Override
     public void destroyObject(PooledObject<Session> sessionPooledObject) throws Exception {
         Session session = sessionPooledObject.getObject();
-        session.release();
+        try {
+            session.release();
+        } catch (Exception e) {
+            session.retryConnect();
+            session.release();
+        }
         super.destroyObject(sessionPooledObject);
     }
 

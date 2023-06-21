@@ -398,4 +398,43 @@ public class NebulaClientTest {
         // TODO start all graphd servers
     }
 
+    @Test
+    public void testBadSessionRelease() {
+        NebulaClient.Builder clientBuilder = null;
+        NebulaClient nebulaClient = null;
+        try {
+            nebulaClient = NebulaClient.builder(addresses, user, passwd)
+                    .setMinSessionSize(6)
+                    .setRetryTimes(50)
+                    .setIntervalTimeMills(2000)
+                    .build();
+        } catch (IOErrorException | UnknownHostException e) {
+            Assert.fail(e.getMessage());
+        }
+        // TODO close one graphd server
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        nebulaClient.close();
+
+        String goodAddresss = "127.0.0.1:9670";
+        NebulaClient client = null;
+        try {
+            client = NebulaClient.builder(goodAddresss, user, passwd).build();
+        } catch (IOErrorException | UnknownHostException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            // TODO depend on server's `show sessions` statement.
+            ResultSet resultSet = client.execute("show sessions");
+            assert (resultSet.isSucceeded());
+            assert (resultSet.getRows().size() == 1);
+        } catch (IOErrorException | NoValidSessionException e) {
+            Assert.fail(e.getMessage());
+        }
+    }
 }

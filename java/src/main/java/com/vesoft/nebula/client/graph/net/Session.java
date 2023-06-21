@@ -49,11 +49,11 @@ public class Session implements Serializable {
      * @param retryConnect whether to retry after the connection is disconnected
      */
     protected Session(SyncConnection connection,
-                   int connTimeout,
-                   int requestTimeout,
-                   AuthResult authResult,
-                   Boolean retryConnect,
-                   LoadBalancer loadBalancer) {
+                      int connTimeout,
+                      int requestTimeout,
+                      AuthResult authResult,
+                      Boolean retryConnect,
+                      LoadBalancer loadBalancer) {
         this.connection = connection;
         this.sessionID = authResult.getSessionId();
         this.loadBalancer = loadBalancer;
@@ -130,15 +130,16 @@ public class Session implements Serializable {
     /**
      * set current connection is invalid, and get a new connection from the pool,
      * if get connection failed, return false, else return true
-     *
      */
     protected void retryConnect() throws IOErrorException {
+        connection.close();
         List<HostAddress> goodHosts = loadBalancer.getGoodAddresses();
         int tryConnect = goodHosts.size();
         SyncConnection newConnection = new SyncConnection();
         while (tryConnect-- > 0) {
             try {
                 newConnection.open(loadBalancer.getAddress(), connTimeout, requestTimeout);
+                connection = newConnection;
                 break;
             } catch (IOErrorException e) {
                 if (tryConnect == 0 || !retryConnect) {
