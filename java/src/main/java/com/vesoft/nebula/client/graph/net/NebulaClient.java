@@ -64,6 +64,8 @@ public class NebulaClient implements Serializable {
                 .setHealthCheckTime(builder.healthCheckTime)
                 .setBlockWhenExhausted(builder.blockWhenExhausted)
                 .setMaxWaitMills(builder.maxWaitMills)
+                .setIdleEvictScheduleMills(builder.idleEvictScheduleMills)
+                .setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis)
                 .setStrictlyServerHealthy(builder.strictlyServerHealthy);
         // pool config
         GenericObjectPoolConfig objConfig = new GenericObjectPoolConfig();
@@ -72,6 +74,8 @@ public class NebulaClient implements Serializable {
         objConfig.setMaxTotal(builder.maxSessionSize);
         objConfig.setBlockWhenExhausted(builder.blockWhenExhausted);
         objConfig.setMaxWaitMillis(builder.maxWaitMills);
+        objConfig.setTimeBetweenEvictionRunsMillis(builder.idleEvictScheduleMills);
+        objConfig.setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis);
         // just test the validation when session is idle. When session execute failed,
         // there's retry mechanism to get new Session, so no need to test when borrow or return.
         if (builder.healthCheckTime > 0) {
@@ -242,6 +246,13 @@ public class NebulaClient implements Serializable {
         // unit: millisecond
         private long maxWaitMills = -1;
 
+        // the schedule time for test the idle session and evict it. if value is less than 0,
+        // never evict the idle sessions.
+        private long idleEvictScheduleMills = -1;
+
+        // the min idle time for idle session
+        private long minEvictableIdleTimeMillis = 1000L * 60L * 30L;
+
         // if need all servers are strictly healthy.
         // if true, all addresses must be available, if false, at least one address is available.
         private boolean strictlyServerHealthy = false;
@@ -322,6 +333,16 @@ public class NebulaClient implements Serializable {
 
         public Builder setMaxWaitMills(long maxWaitMills) {
             this.maxWaitMills = maxWaitMills;
+            return this;
+        }
+
+        public Builder setIdleEvictScheduleMills(long idleEvictScheduleMills) {
+            this.idleEvictScheduleMills = idleEvictScheduleMills;
+            return this;
+        }
+
+        public Builder setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+            this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
             return this;
         }
 

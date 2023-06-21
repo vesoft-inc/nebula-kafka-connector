@@ -48,6 +48,13 @@ public class SessionPoolConfig implements Serializable {
     // unit: millisecond
     private long maxWaitMills = -1;
 
+    // the schedule time for test the idle session and evict it. if value is less than 0,
+    // never evict the idle sessions.
+    private long idleEvictScheduleMills = -1;
+
+    // the min idle time for idle session, default is 30 minutes.
+    private long minEvictableIdleTimeMillis = 1000L * 60L * 30L;
+
     // if need all servers are strictly healthy.
     // if true, all addresses must be available, if false, at least one address is available.
     private boolean strictlyServerHealthy = false;
@@ -184,6 +191,16 @@ public class SessionPoolConfig implements Serializable {
         return this;
     }
 
+    public SessionPoolConfig setIdleEvictScheduleMills(long idleEvictScheduleMills) {
+        this.idleEvictScheduleMills = idleEvictScheduleMills;
+        return this;
+    }
+
+    public SessionPoolConfig setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+        this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
+        return this;
+    }
+
     public boolean isStrictlyServerHealthy() {
         return strictlyServerHealthy;
     }
@@ -209,6 +226,8 @@ public class SessionPoolConfig implements Serializable {
                 + ", reconnect=" + reconnect
                 + ", blockWhenExhausted=" + blockWhenExhausted
                 + ", maxWaitMills=" + maxWaitMills
+                + ", idleEvictScheduleMills=" + idleEvictScheduleMills
+                + ", minEvictableIdleTimeMillis=" + minEvictableIdleTimeMillis
                 + ", strictlyServerHealthy=" + strictlyServerHealthy
                 + '}';
     }
