@@ -172,6 +172,95 @@ nebula> exit
 Bye root!
 ```
 
+## Meta command
+
+Use `nebula-console meta` to execute meta command.
+
+
+```bash
+Usage: 
+Available Commands:
+  addservice    Add service into assigned cluster.
+  createcluster Create cluster in meta server.
+  createschema  Create schema in catalog tree.
+  initcluster   Init cluster storage part.
+  login         Login meta server.
+  showcluster   Show cluster, show all if no cluster name specified.
+  showservice   Show service in cluster.
+
+====Login meta====
+login meta server --addr [ip] --port [port] --user [user] --password [password]
+
+Usage:
+  nebula-console meta login [flags]
+
+Flags:
+  -a, --addr string       meta server address
+  -h, --help              help for login
+  -p, --password string   password
+      --port string       meta server port
+  -u, --user string       user name
+
+====Create cluster====
+nebula-console createcluster --cluster [clustername] --replica [replica] --zones [zone1,zone2,...] --if_not_exists
+
+Usage:
+  nebula-console meta createcluster [flags]
+
+Flags:
+  -c, --cluster string      cluster name
+  -h, --help                help for createcluster
+      --if_not_exists       if not exists
+  -r, --replica int         replica number
+  -z, --zones stringArray   zones
+
+
+====Init cluster====
+nebula-console meta initcluster --cluster [clustername]
+
+Usage:
+  nebula-console meta initcluster [flags]
+
+Flags:
+  -c, --cluster string   cluster name
+  -h, --help             help for initcluster
+
+====Add service====
+nebula-console meta addservice --type [graph|storage] --ip [ip] --port [port] --cluster [clustername]
+
+Usage:
+  nebula-console meta addservice [flags]
+
+Flags:
+  -c, --cluster string   cluster name
+  -h, --help             help for addservice
+  -i, --ip string        service ip
+  -p, --port uint32      service port
+  -t, --type string      service type
+
+
+====Show cluster====
+nebula-console meta showcluster --cluster [clustername]
+
+Usage:
+  nebula-console meta showcluster [flags]
+
+Flags:
+  -c, --cluster string   cluster name
+  -h, --help             help for showcluster
+
+====Show service====
+nebula-console meta showservice --cluster [clustername]
+
+Usage:
+  nebula-console meta showservice [flags]
+
+Flags:
+  -c, --cluster string   cluster name
+  -h, --help             help for showservice
+
+```
+
 ## Keyboard Shortcuts
 
 Key Binding                                     | Description
