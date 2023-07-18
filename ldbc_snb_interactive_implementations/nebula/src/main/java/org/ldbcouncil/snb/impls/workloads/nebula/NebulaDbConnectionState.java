@@ -39,7 +39,7 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
             client = NebulaClient.builder(endpointURI, username, password)
                     .setRequestTimeoutMills(requestTimeout * 1000)
                     .setMaxSessionSize(maxSessionSize)
-                    .setMinSessionSize(1)
+                    .setMinSessionSize(maxSessionSize)
                     .setRetryTimes(3)
                     .setIntervalTimeMills(1000)
                     .setReconnect(true)
