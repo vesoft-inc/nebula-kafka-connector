@@ -383,7 +383,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
             String organizationName = record.get( 3 ).asString();
-            int organizationWorkFromYear = (int) record.get( 4 ).asLong();
+            int organizationWorkFromYear = record.get( 4 ).asInt();
             return new LdbcQuery11Result(
                     personId,
                     personFirstName,
