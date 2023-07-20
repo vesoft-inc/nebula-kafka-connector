@@ -86,9 +86,8 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
         try {
             Connection connection = new SyncConnection();
             connection.open(addr, this.connTimeout, this.requestTimeout);
-            boolean pong = connection.ping();
             connection.close();
-            return pong;
+            return true;
         } catch (IOErrorException e) {
             LOGGER.error("ping failed, ", e);
             return false;

@@ -69,28 +69,17 @@ public class Session implements Serializable {
      *             such as insert ngql `INSERT VERTEX person(name) VALUES "Tom":("Tom");`
      * @return The ResultSet
      */
-    protected synchronized ResultSet execute(String stmt) throws IOErrorException {
+    protected ResultSet execute(String stmt) throws IOErrorException {
         return new ResultSet(connection.execute(sessionID, stmt));
     }
 
-    /**
-     * Check current connection is ok
-     *
-     * @return boolean
-     */
-    protected synchronized boolean ping() {
-        if (connection == null) {
-            return false;
-        }
-        return connection.ping();
-    }
 
     /**
      * check current session is ok
      *
      * @return boolean
      */
-    protected synchronized boolean pingSession() throws IOErrorException {
+    protected boolean pingSession() throws IOErrorException {
         if (connection == null) {
             return false;
         }
@@ -103,7 +92,7 @@ public class Session implements Serializable {
      * and the connection will be reuse.
      * This function is called if the user is no longer using the session.
      */
-    protected synchronized void release() {
+    protected void release() {
         if (connection == null) {
             return;
         }
@@ -120,7 +109,7 @@ public class Session implements Serializable {
      *
      * @return HostAddress the graph service address
      */
-    protected synchronized HostAddress getGraphHost() {
+    protected HostAddress getGraphHost() {
         if (connection == null) {
             return null;
         }

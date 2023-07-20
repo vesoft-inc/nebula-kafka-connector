@@ -124,18 +124,8 @@ public class SyncConnection extends Connection {
     }
 
     @Override
-    public boolean ping() {
-        try {
-            execute(0, "YIELD 1;");
-            return true;
-        } catch (IOErrorException e) {
-            return false;
-        }
-    }
-
-    @Override
     public boolean ping(long sessionID) throws IOErrorException {
-        ExecutionResponse response = execute(sessionID, "YIELD 1;");
+        ExecutionResponse response = execute(sessionID, "RETURN 1");
         return "SUCCESS".equals(new String(response.executionOutcome.gqlStatus.status));
     }
 
