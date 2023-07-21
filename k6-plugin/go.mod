@@ -7,3 +7,5 @@ require (
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20230208083639-ce39454d465a
 	go.k6.io/k6 v0.40.0
 )
+
+replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
