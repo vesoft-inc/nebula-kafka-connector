@@ -90,6 +90,15 @@ public class NebulaClient implements Serializable {
 
     /**
      * execute the graph statement
+     * There are four cases for execution result:
+     * 1. execution succeed or execution failed with the syntax and semantics error,
+     * then the session will be put back into the pool and the result will be returned.
+     * 2. execution failed with SESSION error, then the session will be invalidated
+     * and retried the execution.
+     * 3. execution failed with other type error, then the session will be put
+     * back into the pool and tried the execution.
+     * 4. execution exception for IOException, then the session will be invalidated
+     * and retried the execution.
      *
      * @param stmt graph statement
      * @return {@link ResultSet}
@@ -97,44 +106,48 @@ public class NebulaClient implements Serializable {
     public ResultSet execute(String stmt) throws IOErrorException, NoValidSessionException {
         checkClosed();
         int tryTimes = 0;
-        Session session = getSession();
+        boolean isBadSession = false;
         ResultSet resultSet = null;
 
         // execute times will be (retryTimes + 1)
         while (tryTimes++ < retryTimes + 1) {
+            if (tryTimes > 1) {
+                sleep();
+            }
+            Session session = getSession();
             try {
                 resultSet = session.execute(stmt);
                 if (resultSet.isSucceeded() || "E_SEMANTIC_ERROR".equals(resultSet.getGqlStatus())
                         || "E_SYNTAX_ERROR".equals(resultSet.getGqlStatus())) {
-                    pool.returnObject(session);
                     return resultSet;
                 }
-                log.debug(String.format("execute error,  message: %s, retry: %d",
-                        resultSet.getGqlStatus(), tryTimes));
-
-                // destory invalid session and re-execute
-                if ("E_SESSION_INVALID".equals(resultSet.getGqlStatus())
+                if ("E_SESSION_NOT_FOUND".equals(resultSet.getGqlStatus())
+                        || "E_SESSION_INVALID".equals(resultSet.getGqlStatus())
                         || "E_SESSION_TIMEOUT".equals(resultSet.getGqlStatus())) {
-                    invalidSession(session);
-                } else {
-                    pool.returnObject(session);
+                    isBadSession = true;
                 }
-                if (tryTimes <= retryTimes) {
-                    sleep();
-                    session = getSession();
-                }
+                log.warn(String.format("execute error,  message: %s, retry: %d",
+                        resultSet.getGqlStatus(), tryTimes));
             } catch (IOErrorException e) {
+                isBadSession = true;
                 loadBalancer.updateServersStatus();
-                // still has retry time. update the connection for session.
+                // still has retry time.
                 if (tryTimes <= retryTimes) {
                     log.warn(String.format("execute failed for IOErrorException, "
                             + "message: %s, tryTime: %d", e.getMessage(), tryTimes));
-                    sleep();
-                    session.retryConnect();
                 } else {
                     // retry time is exhausted
-                    pool.returnObject(session);
                     throw e;
+                }
+            } finally {
+                if (isBadSession) {
+                    try {
+                        pool.invalidateObject(session);
+                    } catch (Exception e) {
+                        log.warn("invalidate session failed", e);
+                    }
+                } else {
+                    pool.returnObject(session);
                 }
             }
         }

@@ -80,8 +80,7 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
         try {
             session.release();
         } catch (Exception e) {
-            session.retryConnect();
-            session.release();
+            log.warn("session release failed ", e);
         }
         super.destroyObject(sessionPooledObject);
     }
