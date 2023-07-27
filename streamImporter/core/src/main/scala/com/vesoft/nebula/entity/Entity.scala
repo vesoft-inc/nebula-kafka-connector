@@ -5,21 +5,35 @@
 
 package com.vesoft.nebula.entity
 
-//USE nba INSERT NODE node_type_player ({id:1, name:"Tim", score: 87.0, gender: true, rate: 7.32}),({id:2, name:"Jerry", score: 95.0, gender: false, rate: 4.01}),({id:3, name:"Kyle", score: 100, gender: true, rate: 9.99})
-case class Vertex(vertexID: String, values: Map[String, String]) {
-  def getVertexString: String = s"({id:$vertexID,$getMapValues})"
+case class Label(values:Map[String, String]){
+  def getMapValues(schema:Map[String,String]):String = {
+    values.map(kv => {
+      val keyDataType = schema(kv._1)
+      var value = kv._2
+      keyDataType match {
+        case "string" |"fixed_string" => value = s"`$value`"
+        case "date" => value = s"date(\"$value\")"
+        case "localtime" => value = s"localtime(\"$value\")"
+        case "localdatetime" => value = s"localdatetime(\"$value\")"
+        case "duration" => value = s"duration(\"$value\")"
+        case _ => value = value
+      }
+      s"`${kv._1}`:$value"
+    }).mkString(",")
+  }
+}
 
-  def getMapValues: String = values.map(kv => s"${kv._1}:${kv._2}").mkString(",")
+//USE nba INSERT NODE node_type_player ({id:1, name:"Tim", score: 87.0, gender: true, rate: 7.32}),({id:2, name:"Jerry", score: 95.0, gender: false, rate: 4.01}),({id:3, name:"Kyle", score: 100, gender: true, rate: 9.99})
+case class Vertex(vertexID: String, override val values: Map[String, String]) extends Label(values) {
+  def getVertexString(schema:Map[String,String]): String = s"({id:$vertexID,${getMapValues(schema)})"
 }
 
 // USE nba INSERT EDGE edge_type_follow ({id:1})-[{followness:90, likeness: 66.8}]->({id:2}),({id:2})-[{followness:100, likeness: 93.35}]->({id:3})
-case class Edge(sourceID: String, targetID: String, values: Map[String, String]) {
-  def getEdgeString: String = s"({id:$sourceID})-[{$getMapValues}]->({id:$targetID})"
-
-  def getMapValues: String = values.map(kv => s"${kv._1}:${kv._2}").mkString(",")
+case class Edge(sourceID: String, targetID: String, override val values: Map[String, String])extends Label(values){
+  def getEdgeString(schema:Map[String,String]): String = s"({id:$sourceID})-[{${getMapValues(schema)}}]->({id:$targetID})"
 }
 
-class GQLTemplate {
+object GQLTemplate {
   // USE graphName INSERT NODE/EDGE NODE_TYPE/EDGE_TYPE values
-  val BATCH_INSERT_TEMPLATE = "USE %s INSERT %s %s %s"
+  val BATCH_INSERT_TEMPLATE = "USE %s INSERT %s `%s` %s"
 }
