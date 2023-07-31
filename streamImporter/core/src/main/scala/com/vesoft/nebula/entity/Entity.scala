@@ -24,12 +24,12 @@ case class Label(values:Map[String, String]){
 }
 
 //USE nba INSERT NODE node_type_player ({id:1, name:"Tim", score: 87.0, gender: true, rate: 7.32}),({id:2, name:"Jerry", score: 95.0, gender: false, rate: 4.01}),({id:3, name:"Kyle", score: 100, gender: true, rate: 9.99})
-case class Vertex(vertexID: String, override val values: Map[String, String]) extends Label(values) {
+case class Vertex(var vertexID: String, override val values: Map[String, String]) extends Label(values) {
   def getVertexString(schema:Map[String,String]): String = s"({id:$vertexID,${getMapValues(schema)})"
 }
 
 // USE nba INSERT EDGE edge_type_follow ({id:1})-[{followness:90, likeness: 66.8}]->({id:2}),({id:2})-[{followness:100, likeness: 93.35}]->({id:3})
-case class Edge(sourceID: String, targetID: String, override val values: Map[String, String])extends Label(values){
+case class Edge(var sourceID: String, var targetID: String, override val values: Map[String, String])extends Label(values){
   def getEdgeString(schema:Map[String,String]): String = s"({id:$sourceID})-[{${getMapValues(schema)}}]->({id:$targetID})"
 }
 

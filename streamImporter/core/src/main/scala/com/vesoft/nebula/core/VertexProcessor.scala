@@ -8,7 +8,7 @@ package com.vesoft.nebula.core
 import com.vesoft.nebula.common.configuration.{Configs, IDType, NebulaGraphConfigEntry, NodeConfig}
 import com.vesoft.nebula.common.connect.GraphProvider
 import com.vesoft.nebula.entity.Vertex
-import com.vesoft.nebula.utils.NebulaUtils
+import com.vesoft.nebula.utils.{NebulaUtils, PartitionUtils}
 import org.apache.log4j.Logger
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row}
 import org.apache.spark.util.LongAccumulator
@@ -29,7 +29,7 @@ class VertexProcessor(data: DataFrame,
     * convert DataSet[Row] to DataSet[Vertex]
     *
     */
-  def process(): Dataset[Vertex] = {
+  def process(): Dataset[(Int, Vertex)] = {
     val graphProvider = new GraphProvider(
       nebulaGraphConfigEntry.graphAddress,
       nebulaGraphConfigEntry.user,
@@ -60,8 +60,8 @@ class VertexProcessor(data: DataFrame,
     * */
   def checkAndConvertVertex(iter: Iterator[Row],
                             idType: IDType.Value,
-                            propertyDataType: Map[String, String]): Iterator[Vertex] = {
-    val vertices = iter.map(row =>{
+                            propertyDataType: Map[String, String]): Iterator[(Int, Vertex)] = {
+    val vertices = iter.map(row => {
       val index = row.schema.fieldIndex(nodeConfig.vid)
       breakable({
         if (index < 0 || row.isNullAt(index)) {
@@ -92,7 +92,8 @@ class VertexProcessor(data: DataFrame,
       for (i <- 0 to nodeConfig.sourceFields.size) {
         properties.put(nodeConfig.nebulaFields(i), extraValue(row, nodeConfig.sourceFields(i)))
       }
-      Vertex(primaryKeyValue, properties.toMap)
+      val vertex = Vertex(primaryKeyValue, properties.toMap)
+      (PartitionUtils.getBucketIdForVertex(vertex), vertex)
     })
     vertices
   }

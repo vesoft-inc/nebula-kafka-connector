@@ -8,7 +8,7 @@ package com.vesoft.nebula.core
 import com.vesoft.nebula.common.configuration.{EdgeConfig, IDType, NebulaGraphConfigEntry}
 import com.vesoft.nebula.common.connect.GraphProvider
 import com.vesoft.nebula.entity.Edge
-import com.vesoft.nebula.utils.NebulaUtils
+import com.vesoft.nebula.utils.{NebulaUtils, PartitionUtils}
 import org.apache.log4j.Logger
 import org.apache.spark.sql.{DataFrame, Dataset, Encoders, Row}
 import org.apache.spark.util.LongAccumulator
@@ -29,7 +29,7 @@ class EdgeProcessor(data: DataFrame,
     * convert DataSet[Row] to DataSet[Edge]
     *
     */
-  def process(): Dataset[Edge] = {
+  def process(): Dataset[(Int, Edge)] = {
     val graphProvider = new GraphProvider(
       nebulaGraphConfigEntry.graphAddress,
       nebulaGraphConfigEntry.user,
@@ -62,7 +62,7 @@ class EdgeProcessor(data: DataFrame,
   def checkAndConvertEdge(iter: Iterator[Row],
                           sourceIdType: IDType.Value,
                           targetIdType: IDType.Value,
-                          propertyDataType: Map[String, String]): Iterator[Edge] = {
+                          propertyDataType: Map[String, String]): Iterator[(Int, Edge)] = {
     val edges = iter.map(row => {
       val sourceIndex = row.schema.fieldIndex(edgeConfig.src)
       val targetIndex = row.schema.fieldIndex(edgeConfig.dst)
@@ -107,7 +107,8 @@ class EdgeProcessor(data: DataFrame,
       for (i <- 0 to edgeConfig.sourceFields.size) {
         properties.put(edgeConfig.nebulaFields(i), extraValue(row, edgeConfig.sourceFields(i)))
       }
-      Edge(primarySrcKeyValue, primaryDstKeyValue, properties.toMap)
+      val edge = Edge(primarySrcKeyValue, primaryDstKeyValue, properties.toMap)
+      (PartitionUtils.getBucketIdForEdge(edge), edge)
     })
     edges
   }
