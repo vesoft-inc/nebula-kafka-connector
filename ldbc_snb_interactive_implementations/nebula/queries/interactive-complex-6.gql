@@ -6,17 +6,16 @@
 }
 */
 USE $graphName
-MATCH (knownTag:Tag {name : "$tagName"})
-LET knownTagId=knownTag.id
 MATCH (person:Person {id : $personId})<-[:KNOWS]->{1,2}(friend:Person)
 WHERE person <> friend
-AGGREGATE friends=collect(distinct friend) GROUP BY knownTagId
-FOR f in friends
-    MATCH (post:Post)-[:HAS_CREATOR]->(f:Person),
-          (post:Post)-[:HAS_TAG]->(t:Tag {name : "$tagName"}),
-          (post:Post)-[:HAS_TAG]->(tag:Tag)
-    WHERE t <> tag
-    AGGREGATE postCount=count(post) GROUP BY tag
+RETURN distinct friend AS f
+NEXT
+USE $graphName
+MATCH (post:Post)-[:HAS_CREATOR]->(f:Person),
+      (post:Post)-[:HAS_TAG]->(t:Tag {name : "$tagName"}),
+      (post:Post)-[:HAS_TAG]->(tag:Tag)
+WHERE t <> tag
+AGGREGATE postCount=count(post) GROUP BY tag
 ORDER BY
   postCount DESC,
   tag.name ASC

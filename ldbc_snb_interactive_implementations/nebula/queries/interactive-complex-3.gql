@@ -23,7 +23,6 @@ USE $graphName
 MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
 Filter localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate) AND country IN List [countryX, countryY]
 LET
-  friend=friend,
   messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
   messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
 AGGREGATE xCount=sum(messageX), yCount=sum(messageY) GROUP BY friend

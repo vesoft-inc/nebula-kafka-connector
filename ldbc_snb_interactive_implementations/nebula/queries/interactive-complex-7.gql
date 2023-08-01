@@ -4,20 +4,20 @@
 */
 USE $graphName
 MATCH (person:Person {id: $personId})<-[:HAS_CREATOR]-(message:Message)<-[likes:LIKES]-(liker:Person)
-  LET liker=liker, message=message, likeTime=likes.creationDate, person=person
+  LET likeTime=likes.creationDate
   ORDER BY likeTime DESC, message.id ASC
-  AGGREGATE latestLikes=collect(RECORD{msg: message, likeTime: likeTime}) GROUP BY liker, person
-  LET latestLike=head(latestLikes), liker=liker, person=person
+  AGGREGATE latestLikeMsgs=collect(message), latestLikeTimes=collect(likeTime) GROUP BY liker, person
+  let latestLikeMsg=head(latestLikeMsgs), latestLikeTime=head(latestLikeTimes)
 ORDER BY
-  latestLike.likeTime DESC,
+  latestLikeTime DESC,
   liker.id ASC
 LIMIT 20
 RETURN
   liker.id AS personId,
   liker.firstName AS personFirstName,
   liker.lastName AS personLastName,
-  latestLike.likeTime AS likeCreationDate,
-  latestLike.msg.id AS messageId,
-  CASE WHEN latestLike.msg.content <>"" THEN latestLike.msg.content  ELSE latestLike.msg.imageFile END AS messageContent,
-  latestLike.msg.creationDate AS minutesLatency,
-  size( VALUE{USE $graphName MATCH p0 = (liker:Person)<-[:KNOWS]->(person:Person{id: $personId}) RETURN p0} ) = 0 AS isNew
+  latestLikeTime AS likeCreationDate,
+  latestLikeMsg.id AS messageId,
+  CASE WHEN latestLikeMsg.content <>"" THEN latestLikeMsg.content  ELSE latestLikeMsg.imageFile END AS messageContent,
+  latestLikeMsg.creationDate AS minutesLatency,
+  NOT EXISTS ((liker:Person)<-[:KNOWS]->(person:Person{id: $personId}))  AS isNew
