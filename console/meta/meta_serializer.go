@@ -95,6 +95,14 @@ func (d *Deserializer) DeserializeINT8() (int8, error) {
 	return i, nil
 }
 
+func (d *Deserializer) DeserializeBOOL() (bool, error) {
+	var i int8
+	if err := binary.Read(d.reader, binary.LittleEndian, &i); err != nil {
+		return false, err
+	}
+	return i != 0, nil
+}
+
 func (d *Deserializer) DeserializeINT64() (int64, error) {
 	var i int64
 	if err := binary.Read(d.reader, binary.LittleEndian, &i); err != nil {

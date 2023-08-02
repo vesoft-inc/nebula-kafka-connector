@@ -45,8 +45,16 @@ func formatTable(headers []string, data [][]string) string {
 }
 
 func DeserializeHeader(deserializer *Deserializer) *ResponseHeader {
-	code, _ := deserializer.DeserializeUINT64()
-	msg, _ := deserializer.DeserializeString()
+	ok, _ := deserializer.DeserializeBOOL()
+	var code uint64
+	var msg string
+	if !ok {
+		code, _ = deserializer.DeserializeUINT64()
+		msg, _ = deserializer.DeserializeString()
+	} else {
+		code = 0 // since no one use it;
+	}
+
 	newHost, _ := deserializer.DeserializeString()
 	newPort, _ := deserializer.DeserializeUINT32()
 	return &ResponseHeader{
