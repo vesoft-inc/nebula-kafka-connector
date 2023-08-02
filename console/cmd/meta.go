@@ -309,7 +309,7 @@ func init() {
 
 	metaInitClusterCmd.Flags().StringVarP(&initClusterFlags.Cluster, "cluster", "c", "", "cluster name")
 
-	metaShowServiceCmd.Flags().StringVarP(&showClusterFlags.Cluster, "cluster", "c", "", "cluster name")
+	metaShowServiceCmd.Flags().StringVarP(&showServiceFlags.Cluster, "cluster", "c", "", "cluster name")
 
 	metaShowClusterCmd.Flags().StringVarP(&showClusterFlags.Cluster, "cluster", "c", "", "cluster name")
 
