@@ -1,6 +1,7 @@
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
 import com.google.common.collect.ImmutableMap;
+import com.vesoft.nebula.Value;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
@@ -159,9 +160,9 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = record.get( 0 ).asLong();
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
-            int xCount = (int) record.get( 3 ).asLong();
-            int yCount = (int) record.get( 4 ).asLong();
-            int count = (int) record.get( 5 ).asLong();
+            int xCount = getIntValue(record.get(3));
+            int yCount = getIntValue(record.get(4));
+            int count = getIntValue(record.get(5));
             return new LdbcQuery3Result(
                     personId,
                     personFirstName,
@@ -188,7 +189,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         @Override
         public LdbcQuery4Result toResult(ResultSet.Record record ) throws UnsupportedEncodingException {
             String tagName = record.get( 0 ).asString();
-            int postCount = (int) record.get( 1 ).asLong();
+            int postCount = getIntValue(record.get(1));
             return new LdbcQuery4Result( tagName, postCount );
         }
     }
@@ -209,7 +210,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         @Override
         public LdbcQuery5Result toResult(ResultSet.Record record ) throws UnsupportedEncodingException {
             String forumTitle = record.get( 0 ).asString();
-            int postCount = (int) record.get( 1 ).asLong();
+            int postCount = getIntValue(record.get(1));
             return new LdbcQuery5Result( forumTitle, postCount );
         }
     }
@@ -230,7 +231,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         @Override
         public LdbcQuery6Result toResult(ResultSet.Record record ) throws UnsupportedEncodingException {
             String tagName = record.get( 0 ).asString();
-            int postCount = (int) record.get( 1 ).asLong();
+            int postCount = getIntValue(record.get(1));
             return new LdbcQuery6Result( tagName, postCount );
         }
     }
@@ -351,7 +352,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = record.get( 0 ).asLong();
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
-            int commonInterestScore = (int) record.get( 3 ).asLong();
+            int commonInterestScore = getIntValue(record.get(3));
             String personGender = record.get( 4 ).asString();
             String personCityName = record.get( 5 ).asString();
             return new LdbcQuery10Result(
@@ -418,7 +419,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                     tagNames.add(val.asString());
                 }
             }
-            int replyCount = (int) record.get( 4 ).asLong();
+            int replyCount = getIntValue(record.get(4));
             return new LdbcQuery12Result(
                     personId,
                     personFirstName,
@@ -445,7 +446,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         public LdbcQuery13Result toResult(ResultSet.Record record )
         {
             if(record != null) {
-                return new LdbcQuery13Result( (int) record.get( 0 ).asLong() );
+                return new LdbcQuery13Result( getIntValue(record.get(0)) );
             } else {
                 return new LdbcQuery13Result(-1);
             }
@@ -821,5 +822,9 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                                .put( LdbcUpdate8AddFriendship.CREATION_DATE, operation.getCreationDate().getTime() )
                                .build();
         }
+    }
+
+    private static int getIntValue(ValueWrapper value) {
+        return value.isLong()?(int) value.asLong():value.asInt();
     }
 }
