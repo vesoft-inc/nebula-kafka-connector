@@ -84,7 +84,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
 
             long friendId = record.get( 0 ).asLong();
             String friendLastName = record.get( 1 ).asString();
-            int distanceFromPerson = (int) record.get( 2 ).asLong();
+            int distanceFromPerson = record.get( 2 ).asInt();
             long friendBirthday = NebulaConverter.convertDateToEpoch(record.get( 3 ).asDate().toString());
             long friendCreationDate = NebulaConverter.convertDateTimesToEpoch(record.get( 4 ).asLocalDateTime().toString());
             String friendGender = record.get( 5 ).asString();
