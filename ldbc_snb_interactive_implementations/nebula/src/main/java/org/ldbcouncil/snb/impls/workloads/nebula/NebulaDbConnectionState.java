@@ -34,14 +34,16 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         final int requestTimeout = Integer.parseInt(properties.get("requestTimeout"));
         final int maxSessionSize = Integer.parseInt(properties.get("maxSessionSize"));
         final int maxSessionWaitTime = Integer.parseInt(properties.get("maxSessionWaitTime"));
+        final int retryTimes = Integer.parseInt(properties.get("retryTimes"));
+        final int intervalTimeBetweenRetrys = Integer.parseInt(properties.get("intervalTimeBetweenRetrys"));
         graphName = properties.get("graphName");
         try {
             client = NebulaClient.builder(endpointURI, username, password)
                     .setRequestTimeoutMills(requestTimeout * 1000)
                     .setMaxSessionSize(maxSessionSize)
                     .setMinSessionSize(maxSessionSize)
-                    .setRetryTimes(3)
-                    .setIntervalTimeMills(1000)
+                    .setRetryTimes(retryTimes)
+                    .setIntervalTimeMills(intervalTimeBetweenRetrys * 1000)
                     .setReconnect(true)
                     .setBlockWhenExhausted(true)
                     .setMaxWaitMills(maxSessionWaitTime * 1000L)
