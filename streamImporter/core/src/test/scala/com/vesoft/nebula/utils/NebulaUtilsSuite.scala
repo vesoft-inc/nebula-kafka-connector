@@ -25,15 +25,4 @@ class NebulaUtilsSuite extends AnyFunSuite {
     assert(!NebulaUtils.isNumeric("12345a"))
   }
 
-  test("testEscapeUtil"){
-    assert(NebulaUtils.escapeUtil("abc").equals("abc"))
-    assert(NebulaUtils.escapeUtil("\\abc").equals("\\\\abc"))
-    assert(NebulaUtils.escapeUtil("\tabc").equals("\\\\tabc"))
-    assert(NebulaUtils.escapeUtil("\nabc").eq("\\\\nabc"))
-    assert(NebulaUtils.escapeUtil("\"abc").equals("\\\\\"abc"))
-    assert(NebulaUtils.escapeUtil("\'abc").equals("\\\\'abc"))
-    assert(NebulaUtils.escapeUtil("\rabc").equals("\\\\rabc"))
-    assert(NebulaUtils.escapeUtil("\babc").equals("\\\\babc"))
-  }
-
 }

@@ -2,7 +2,7 @@
  *
  * This source code is licensed under Apache 2.0 License.
  */
- 
-package com.vesoft.nebula.producer class BulkloadProducer {
 
-}
+package com.vesoft.nebula.producer
+
+class BulkloadProducer{}

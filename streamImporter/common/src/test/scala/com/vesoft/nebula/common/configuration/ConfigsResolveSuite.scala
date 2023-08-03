@@ -12,7 +12,7 @@ import org.scalatest.funsuite.AnyFunSuite
 class ConfigsResolveSuite extends AnyFunSuite {
 
   test("resolve config file") {
-    val configFilePath = "streamImporter/common/src/test/resources/import.conf"
+    val configFilePath = "src/test/resources/import.conf"
     val configs        = ConfigsResolve.parse(configFilePath)
 
     val nebulaGraphConfigEntry = configs.nebulaGraphConfigEntry

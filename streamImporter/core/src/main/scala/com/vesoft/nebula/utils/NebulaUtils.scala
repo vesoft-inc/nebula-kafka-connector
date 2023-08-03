@@ -18,11 +18,11 @@ object NebulaUtils {
   def escapeUtil(str:String): String = {
     str
       .replaceAll("\\\\", "\\\\\\\\")
-      .replaceAll("\t", "\\\\t")
-      .replaceAll("\n", "\\\\n")
-      .replaceAll("\"", "\\\\\"")
-      .replaceAll("\'", "\\\\'")
-      .replaceAll("\r", "\\\\r")
-      .replaceAll("\b", "\\\\b")
+      .replaceAll("\t", "\\\t")
+      .replaceAll("\n", "\\\n")
+      .replaceAll("\"", "\\\"")
+      .replaceAll("\'", "\\\'")
+      .replaceAll("\r", "\\\r")
+      .replaceAll("\b", "\\\b")
   }
 }

@@ -44,12 +44,14 @@ trait DataSourceReader {
 
     val options: mutable.Map[String, String] = new mutable.HashMap[String, String]()
     var nonValue: NonValueConfig             = null
-    datasourceConfig.preProcessConfigs.foreach(config =>
-      if (config.isInstanceOf[NonValueConfig]) nonValue = config.asInstanceOf[NonValueConfig])
-    if (nonValue != null) {
-      options += ("nullValue", nonValue.value)
+    datasourceConfig.preProcessConfigs.foreach {
+      case config1: NonValueConfig => nonValue = config1
+      case _                       =>
     }
-    options += ("inferSchema", "true")
+    if (nonValue != null) {
+      options += ("nullValue" -> nonValue.value)
+    }
+    options += ("inferSchema" -> "true")
 
     val fields = readData(spark, datasourceConfig, options.toMap).schema.fields
     val schema = fields.map(f => f.name -> convertDataType2NebulaType(f.dataType)).toMap
@@ -115,17 +117,15 @@ trait DataSourceReader {
 
   private[this] def convertDataType2NebulaType(dataType: DataType): String = {
     val nebulaType = dataType match {
-      case StringType        => NebulaDataType.STRING
-      case ByteType          => NebulaDataType.INT8
-      case ShortType         => NebulaDataType.INT16
-      case IntegerType       => NebulaDataType.INT32
-      case LongType          => NebulaDataType.ITN64
-      case FloatType         => NebulaDataType.FLOAT
-      case DoubleType        => NebulaDataType.DOUBLE
-      case BooleanType       => NebulaDataType.BOOL
-      case DateType          => NebulaDataType.DATE
-      case DateTimeFieldType => NebulaDataType.DATETIME
-      case TimeType          => NebulaDataType.TIME
+      case StringType  => NebulaDataType.STRING
+      case ByteType    => NebulaDataType.INT8
+      case ShortType   => NebulaDataType.INT16
+      case IntegerType => NebulaDataType.INT32
+      case LongType    => NebulaDataType.ITN64
+      case FloatType   => NebulaDataType.FLOAT
+      case DoubleType  => NebulaDataType.DOUBLE
+      case BooleanType => NebulaDataType.BOOL
+      case DateType    => NebulaDataType.DATE
     }
     nebulaType.toString
   }

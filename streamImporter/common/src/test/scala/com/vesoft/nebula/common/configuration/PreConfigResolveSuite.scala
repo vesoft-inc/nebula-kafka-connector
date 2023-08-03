@@ -12,7 +12,7 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
   test("test resolve pre config file and generate DDL from source schema file") {
-    val configFilePath = "streamImporter/common/src/test/resources/pre-import.conf"
+    val configFilePath = "src/test/resources/pre-import.conf"
     val (ddl, configs) = PreConfigResolve.parse(configFilePath)
 
     val nebulaGraphConfigEntry = configs.nebulaGraphConfigEntry
@@ -39,7 +39,7 @@ class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
   test("test resolve schema file, get list of node and edge schema") {
     val resolveSchema = PrivateMethod[(List[Node], List[Edge])](Symbol("resolveSchema"))
     val (nodes, edges) = PreConfigResolve invokePrivate resolveSchema(
-      "streamImporter/common/src/test/resources/schema.csv")
+      "src/test/resources/schema.csv")
     assert(nodes.size == 2)
     assert(edges.size == 1)
 
@@ -99,9 +99,9 @@ class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
   }
 
   test("test save configs into file"){
-    val configFilePath = "streamImporter/common/src/test/resources/pre-import.conf"
+    val configFilePath = "src/test/resources/pre-import.conf"
     val (ddl, configs) = PreConfigResolve.parse(configFilePath)
-    val targetPath = "streamImporter/common/src/test/resources/generated_import.conf"
+    val targetPath = "src/test/resources/generated_import.conf"
     PreConfigResolve.save(configs, targetPath)
     ConfigsResolve.parse(targetPath)
   }
