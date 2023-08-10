@@ -8,8 +8,7 @@
 */
 USE $graphName
 MATCH
-  (person:Person {id : $personId})<-[:KNOWS]->(friend:Person),
-  (friend:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(tag:Tag)
+  (person:Person {id : $personId})<-[:KNOWS]->(friend:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(tag:Tag)
 RETURN DISTINCT tag, post
 NEXT
 USE $graphName

@@ -11,7 +11,7 @@ MATCH (person:Person {id : $personId})<-[:KNOWS]->{1,2}(otherPerson:Person)
 RETURN DISTINCT otherPerson
 NEXT
 USE $graphName
-MATCH (forum:Forum)-[membership:HAS_MEMBER WHERE membership.joinDate > localdatetime($minDate)]->(otherPerson:Person)
+MATCH (otherPerson:Person)<-[membership:HAS_MEMBER WHERE membership.joinDate > localdatetime($minDate)]-(forum:Forum)
     OPTIONAL MATCH (otherPerson:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
         AGGREGATE postCount=count(post) GROUP BY forum
         ORDER BY

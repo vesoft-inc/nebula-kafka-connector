@@ -20,8 +20,8 @@ Filter person <> friend AND NOT city IN cities
 RETURN DISTINCT friend, countryX, countryY
 NEXT
 USE $graphName
-MATCH (message:Message)-[:HAS_CREATOR]->(friend:Person), (message:Message)-[:IS_LOCATED_IN]->(country:Country)
-Filter localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate) AND country IN List [countryX, countryY]
+MATCH (friend:Person)<-[:HAS_CREATOR]-(message:Message where localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate))-[:IS_LOCATED_IN]->(country:Country)
+FILTER country IN List [countryX, countryY]
 LET
   messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
   messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END

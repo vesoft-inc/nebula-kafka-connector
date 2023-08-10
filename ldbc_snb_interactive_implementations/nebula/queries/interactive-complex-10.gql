@@ -13,7 +13,7 @@ RETURN DISTINCT friend, city, person
 NEXT
 USE $graphName
 OPTIONAL MATCH (friend:Person)<-[:HAS_CREATOR]-(post:Post)
-OPTIONAL MATCH (person:Person {id : $personId})-[:HAS_INTEREST]->(m:Tag), (post:Post)-[:HAS_TAG]->(m:Tag)
+OPTIONAL MATCH (person:Person {id : $personId})-[:HAS_INTEREST]->(m:Tag)<-[:HAS_TAG]->(post:Post)
 AGGREGATE tmp = count(m)  GROUP BY friend, city, post
 LET cnt = CASE WHEN tmp > 0 THEN 1 ELSE 0 END
 AGGREGATE postCount = count(post), commonPostCount = sum(cnt) GROUP BY friend, city
