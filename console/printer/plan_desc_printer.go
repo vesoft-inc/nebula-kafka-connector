@@ -160,7 +160,8 @@ func (p *PlanDescPrinter) PrintPlanDesc(res *nebula.ResultSet) {
 		s = res.MakeDotGraphByStruct()
 		fmt.Println(p.renderDotGraphByStruct(s))
 	}
-	fmt.Printf("Execution Plan (optimize time %d us), [PX] means pipeline-X and [S] means storage side plan node.\n", res.GetOptimizeTimeInUs())
+	fmt.Printf("Execution Plan (optimize time %d us), [Px] means pipeline-x and [S] means storage side",
+		res.GetOptimizeTimeInUs())
 
 	if p.fd != nil {
 		go func() {

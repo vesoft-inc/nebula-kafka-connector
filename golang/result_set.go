@@ -120,7 +120,7 @@ func (res ResultSet) GetOptimizeTimeInUs() int64 {
 	if !res.IsSetPlanDesc() {
 		return 0
 	}
-	return parseInt(res.planDesc, "optimizeTimeInUs")
+	return parseInt64(res.planDesc, "optimizeTimeInUs")
 }
 
 func (res ResultSet) GetPreamble() string {
@@ -594,13 +594,29 @@ func (res ResultSet) MakeDotGraphByStruct() string {
 	return ""
 }
 
-type pipeOpIdPair struct {
-	pipelineId int64
-	operatorId int64
+type OperatorUniqueId struct {
+	pipelineId int32
+	operatorId int32
+	planNodeId int64
+	inStorage  bool
+}
+
+var InvalidOperatorUniqueId = OperatorUniqueId{
+	pipelineId: -1,
+	operatorId: -1,
+	planNodeId: -1,
+	inStorage:  false,
+}
+
+func (i OperatorUniqueId) Equals(other OperatorUniqueId) bool {
+	return i.pipelineId == other.pipelineId &&
+		i.operatorId == other.operatorId &&
+		i.planNodeId == other.planNodeId &&
+		i.inStorage == other.inStorage
 }
 
 type KeyType interface {
-	int64 | pipeOpIdPair
+	int64 | OperatorUniqueId
 }
 
 type GetKey[T KeyType] func(val interface{}) T
@@ -609,8 +625,12 @@ func parseFloat(m interface{}, name string) float64 {
 	return m.(map[string]interface{})[name].(float64)
 }
 
-func parseInt(m interface{}, name string) int64 {
+func parseInt64(m interface{}, name string) int64 {
 	return int64(parseFloat(m, name))
+}
+
+func parseInt32(m interface{}, name string) int32 {
+	return int32(parseFloat(m, name))
 }
 
 func parseString(m interface{}, name string) string {
@@ -653,7 +673,7 @@ func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interf
 
 		for _, planNodeDesc := range planNodeDescs {
 			planNode := planNodeDesc.(map[string]interface{})
-			id := parseInt(planNode, "id")
+			id := parseInt64(planNode, "id")
 			idToPlanNodeMap[id] = planNode
 		}
 
@@ -670,7 +690,8 @@ func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interf
 			&rows,
 		)
 	case "profile":
-		var idToOperatorMap = make(map[pipeOpIdPair]map[string]interface{})
+		var idToOperatorMap = make(map[OperatorUniqueId]map[string]interface{})
+
 		var operatorObject map[string]interface{}
 		if header0, ok := res.planDesc[header[0]]; ok {
 			operatorObject = header0.(map[string]interface{})
@@ -687,29 +708,39 @@ func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interf
 
 		var rootOperator map[string]interface{}
 
-		addChild := func(parent pipeOpIdPair, child pipeOpIdPair) {
-			if childrenObj, ok := idToOperatorMap[parent]["children"]; ok {
-				children := childrenObj.([]interface{})
-				children = append(children, child)
-				idToOperatorMap[parent]["children"] = children
-			} else {
-				idToOperatorMap[parent]["children"] = []interface{}{child}
+		addChild := func(parent OperatorUniqueId, child OperatorUniqueId) {
+			if idToOperatorMap[parent] != nil {
+				parentOp := idToOperatorMap[parent]
+				if childrenObj, ok := parentOp["children"]; ok {
+					children := childrenObj.([]interface{})
+					children = append(children, child)
+					parentOp["children"] = children
+				} else {
+					parentOp["children"] = []interface{}{child}
+				}
 			}
 		}
 
-		getPipeId := func(val interface{}) pipeOpIdPair {
+		getPipeId := func(val interface{}) OperatorUniqueId {
 			obj := val.(map[string]interface{})
-			return pipeOpIdPair{
-				pipelineId: parseInt(obj, "pipelineId"),
-				operatorId: parseInt(obj, "operatorId"),
+			return OperatorUniqueId{
+				pipelineId: parseInt32(obj, "pipelineId"),
+				operatorId: parseInt32(obj, "operatorId"),
+				planNodeId: parseInt64(obj, "planNodeId"),
+				inStorage:  parseBool(obj, "inStorage"),
 			}
 		}
 
 		for _, pipeline := range pipelines {
 			firstTime := false
-			var prevOperatorId pipeOpIdPair
+			var prevOperatorId OperatorUniqueId
 
 			pipeObj := pipeline.(map[string]interface{})
+			consumerOperatorId := InvalidOperatorUniqueId
+			if consumerOpIdObj, ok := pipeObj["consumerOperatorId"]; ok {
+				consumerOperatorId = getPipeId(consumerOpIdObj)
+			}
+
 			var operatorArray []interface{}
 			if operatorArrayObj, ok := pipeObj["operators"]; ok {
 				operatorArray = operatorArrayObj.([]interface{})
@@ -719,8 +750,13 @@ func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interf
 
 			for i := len(operatorArray) - 1; i >= 0; i-- {
 				opObj := operatorArray[i].(map[string]interface{})
-				id := getPipeId(opObj)
+				id := getPipeId(opObj["id"])
 				idToOperatorMap[id] = opObj
+
+				if i == len(operatorArray)-1 && consumerOperatorId != InvalidOperatorUniqueId {
+					addChild(consumerOperatorId, id)
+				}
+
 				if !firstTime {
 					if len(rootOperator) == 0 {
 						rootOperator = opObj
@@ -732,21 +768,6 @@ func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interf
 				prevOperatorId = id
 			}
 		}
-		var pipeDepArray []interface{}
-		if pipeDepArrayObj, ok := operatorObject["pipelineDeps"]; ok {
-			pipeDepArray = pipeDepArrayObj.([]interface{})
-		}
-		for _, pipeDep := range pipeDepArray {
-			obj := pipeDep.(map[string]interface{})
-			var dependencies []interface{}
-			if dependenciesObj, ok := obj["dependencies"]; ok {
-				dependencies = dependenciesObj.([]interface{})
-			}
-			id := getPipeId(obj)
-			for _, dep := range dependencies {
-				addChild(id, getPipeId(dep))
-			}
-		}
 
 		makeAsciiPlanTreeText(
 			res,
@@ -755,7 +776,7 @@ func (res ResultSet) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interf
 			[]map[string]interface{}{rootOperator},
 			true,
 			"",
-			func(val interface{}) pipeOpIdPair { return val.(pipeOpIdPair) },
+			func(val interface{}) OperatorUniqueId { return val.(OperatorUniqueId) },
 			&rightSepToTailWidth,
 			&rows,
 		)
