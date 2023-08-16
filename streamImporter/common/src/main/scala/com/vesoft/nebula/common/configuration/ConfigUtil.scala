@@ -14,6 +14,7 @@ import com.vesoft.nebula.common.configuration.ConfigConstant.{
   DEFAULT_GRAPH_NAME,
   DEFAULT_GRAPH_PASSWD,
   DEFAULT_GRAPH_USER,
+  DEFAULT_REDPANDA_REPLIC,
   DEFAULT_REDPANDA_SERER,
   DEFAULT_REDPANDA_TOPIC,
   DEFAULT_REQUEST_TIMEOUT,
@@ -43,8 +44,9 @@ object ConfigConstant {
   val DEFAULT_RETRY_INTERVAL_TIME = 0
 
   // redpanda default config
-  val DEFAULT_REDPANDA_SERER = "127.0.0.1:9092"
-  val DEFAULT_REDPANDA_TOPIC = "nebula"
+  val DEFAULT_REDPANDA_SERER  = "127.0.0.1:9092"
+  val DEFAULT_REDPANDA_TOPIC  = "nebula"
+  val DEFAULT_REDPANDA_REPLIC = 3
 
   // error default config
   val DEFAULT_ERROR_PATH             = "file:///tmp/errors/"
@@ -216,7 +218,8 @@ object ConfigUtil {
     val redPandaConfig       = ConfigUtil.getConfigOrNone(config, "mq")
     val mqServer             = ConfigUtil.getOrElse(redPandaConfig, "server", DEFAULT_REDPANDA_SERER)
     val topic                = ConfigUtil.getOrElse(redPandaConfig, "topic", DEFAULT_REDPANDA_TOPIC)
-    val mqClusterConfigEntry = MQClusterConfigEntry(mqServer, topic)
+    val replic               = ConfigUtil.getOrElse(redPandaConfig, "replic", DEFAULT_REDPANDA_REPLIC)
+    val mqClusterConfigEntry = MQClusterConfigEntry(mqServer, topic, replic)
     LOG.info(mqClusterConfigEntry.toString)
     mqClusterConfigEntry
   }

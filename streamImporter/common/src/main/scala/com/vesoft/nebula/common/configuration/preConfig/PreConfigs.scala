@@ -16,6 +16,7 @@ import com.vesoft.nebula.common.configuration.ConfigConstant.{
   DEFAULT_GRAPH_PASSWD,
   DEFAULT_GRAPH_TYPE,
   DEFAULT_GRAPH_USER,
+  DEFAULT_REDPANDA_REPLIC,
   DEFAULT_REDPANDA_SERER,
   DEFAULT_REDPANDA_TOPIC,
   DEFAULT_REQUEST_TIMEOUT,
@@ -233,7 +234,8 @@ object PreConfigEntry {
     val redPandaConfig       = ConfigUtil.getConfigOrNone(config, "mq")
     val mqServer             = ConfigUtil.getOrElse(redPandaConfig, "server", DEFAULT_REDPANDA_SERER)
     val topic                = ConfigUtil.getOrElse(redPandaConfig, "topic", DEFAULT_REDPANDA_TOPIC)
-    val mqClusterConfigEntry = MQClusterConfigEntry(mqServer, topic)
+    val replic               = ConfigUtil.getOrElse(redPandaConfig, "replic", DEFAULT_REDPANDA_REPLIC)
+    val mqClusterConfigEntry = MQClusterConfigEntry(mqServer, topic, replic)
     LOG.info(mqClusterConfigEntry.toString)
     mqClusterConfigEntry
   }

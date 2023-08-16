@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.producer
 
+import com.alibaba.fastjson.JSONObject
 import com.vesoft.nebula.common.configuration.{
   EdgeConfig,
   MQClusterConfigEntry,
@@ -14,16 +15,26 @@ import com.vesoft.nebula.common.configuration.{
 import com.vesoft.nebula.common.connect.GraphProvider
 import com.vesoft.nebula.entity.GQLTemplate.BATCH_INSERT_TEMPLATE
 import com.vesoft.nebula.entity.{Edge, Vertex}
+import com.vesoft.nebula.utils.RedpandaSink
+import org.apache.log4j.Logger
+import org.apache.spark.broadcast.Broadcast
 import org.apache.spark.sql.Dataset
 import org.apache.spark.util.LongAccumulator
 
+import java.util
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class ImportProducerForVertex(data: Dataset[(Int, Vertex)],
                               nebulaGraphConfigEntry: NebulaGraphConfigEntry,
                               mqClusterConfigEntry: MQClusterConfigEntry,
                               nodeConfig: NodeConfig,
-                              failureRecords: LongAccumulator) {
+                              failureRecords: LongAccumulator,
+                              kafkaProducer: Broadcast[RedpandaSink[String, String]]) {
+
+  @transient
+  private[this] lazy val LOG = Logger.getLogger(this.getClass)
+
   import data.sparkSession.implicits._
   def produceVertex(): Unit = {
     val graphProvider = new GraphProvider(
@@ -62,8 +73,17 @@ class ImportProducerForVertex(data: Dataset[(Int, Vertex)],
               val verticesValues = vertices._2.map(v => v.getVertexString(schema)).mkString(",")
               val statement = BATCH_INSERT_TEMPLATE
                 .format(nebulaGraphConfigEntry.graphName, "NODE", nodeConfig.name, verticesValues)
-              // TODO(Anqi) send the statement to MQ
-
+              // send the statement to MQ
+              val dataMap: util.HashMap[String, Object] = new util.HashMap[String, Object]()
+              dataMap.put("value", statement)
+              val messageJson = new JSONObject(dataMap)
+              val rm = kafkaProducer.value
+                .send(mqClusterConfigEntry.topic, vertices._1, "statement", messageJson.toString)
+              val meta = rm.get()
+              LOG.info("topic name={},partition={},offset={}",
+                       meta.topic(),
+                       meta.partition(),
+                       meta.offset())
             })
         }
         null
@@ -75,7 +95,11 @@ class ImportProducerForEdge(data: Dataset[(Int, Edge)],
                             nebulaGraphConfigEntry: NebulaGraphConfigEntry,
                             mqClusterConfigEntry: MQClusterConfigEntry,
                             edgeConfig: EdgeConfig,
-                            failureRecords: LongAccumulator) {
+                            failureRecords: LongAccumulator,
+                            kafkaProducer: Broadcast[RedpandaSink[String, String]]) {
+  @transient
+  private[this] lazy val LOG = Logger.getLogger(this.getClass)
+
   import data.sparkSession.implicits._
   def produceEdge(): Unit = {
     val graphProvider = new GraphProvider(
@@ -108,8 +132,10 @@ class ImportProducerForEdge(data: Dataset[(Int, Edge)],
 
               val validEdges: ListBuffer[Edge] = new ListBuffer()
               edges._2.foreach(e => {
-                if (srcPrimaryKey2Internal.contains(e.sourceID)) {
+                if (srcPrimaryKey2Internal.contains(e.sourceID) && dstPrimaryKeys2Internal.contains(
+                      e.targetID)) {
                   e.sourceID = srcPrimaryKey2Internal(e.sourceID)
+                  e.targetID = dstPrimaryKeys2Internal(e.targetID)
                   validEdges.append(e)
                 } else {
                   // TODO(Anqi) record the error edge record for lack of vertex internal id
@@ -120,7 +146,17 @@ class ImportProducerForEdge(data: Dataset[(Int, Edge)],
               val edgeValues = validEdges.map(e => e.getEdgeString(schema)).mkString(",")
               val statement = BATCH_INSERT_TEMPLATE
                 .format(nebulaGraphConfigEntry.graphName, "EDGE", edgeConfig.name, edgeValues)
-              // TODO(Anqi) send the statement to MQ
+              // send the statement to MQ
+              val dataMap: util.HashMap[String, Object] = new util.HashMap[String, Object]()
+              dataMap.put("value", statement)
+              val messageJson = new JSONObject(dataMap)
+              val rm = kafkaProducer.value
+                .send(mqClusterConfigEntry.topic, edges._1, "statement", messageJson.toString)
+              val meta = rm.get()
+              LOG.info("topic name={},partition={},offset={}",
+                       meta.topic(),
+                       meta.partition(),
+                       meta.offset())
             })
         }
         null

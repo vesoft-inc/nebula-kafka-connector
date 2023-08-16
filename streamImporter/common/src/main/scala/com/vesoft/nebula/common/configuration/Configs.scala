@@ -101,12 +101,13 @@ case class NebulaGraphConfigEntry(graphAddress: String,
   * RedPanda MQ config
   *
   */
-case class MQClusterConfigEntry(server: String, topic: String) {
+case class MQClusterConfigEntry(server: String, topic: String, replic: Int) {
   def check(): Unit = {
     require((new ValidateUtil).validateServer(server), "mq server address is not valid")
     require(topic != null && topic.nonEmpty, "mq topic cannot be null")
   }
-  override def toString: String = s"MQClusterConfigEntry{server:$server, topic:$topic}"
+  override def toString: String =
+    s"MQClusterConfigEntry{server:$server, topic:$topic, replic=$replic}"
 
   def saveSchema: String = {
     val space       = "  "
@@ -115,6 +116,7 @@ case class MQClusterConfigEntry(server: String, topic: String) {
        |${space}mq:{
        |${doubleSpace}server: \"${server}\"
        |${doubleSpace}topic: \"${topic}\"
+       |${doubleSpace}replic: $replic
        |$space}
        |""".stripMargin
   }
