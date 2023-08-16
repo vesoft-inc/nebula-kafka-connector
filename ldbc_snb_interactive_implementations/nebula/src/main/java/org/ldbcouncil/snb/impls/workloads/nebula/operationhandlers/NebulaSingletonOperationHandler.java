@@ -47,7 +47,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
             }
         } catch (NoValidSessionException |
                  IOErrorException | ParseException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new DbException(e);
         }
     }
 }

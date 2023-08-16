@@ -43,7 +43,7 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
             resultReporter.report( 0, LdbcNoResult.INSTANCE, operation );
 
         } catch (NoValidSessionException | IOErrorException e) {
-            throw new RuntimeException(e);
+            throw new DbException(e);
         }
     }
 }

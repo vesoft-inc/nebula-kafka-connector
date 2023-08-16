@@ -50,7 +50,7 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
             }
             resultReporter.report( results.size(), results, operation );
         } catch (NoValidSessionException  | IOErrorException | ParseException | UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
+            throw new DbException(e);
         }
     }
 }
