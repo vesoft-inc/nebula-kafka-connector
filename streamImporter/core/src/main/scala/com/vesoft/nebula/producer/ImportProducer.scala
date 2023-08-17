@@ -62,10 +62,7 @@ class ImportProducerForVertex(data: Dataset[(Int, Vertex)],
                 graphProvider.generateInternalIds(nodeType, primaryKeys)
               val validVertices: ListBuffer[Vertex] = new ListBuffer[Vertex]
               vertices._2.foreach(v => {
-                if (primaryKey2InternalId.contains(v.vertexID)) {
-                  v.vertexID = primaryKey2InternalId(v.vertexID)
-                  validVertices.append(v)
-                } else {
+                if (!primaryKey2InternalId.contains(v.vertexID)) {
                   // TODO(Anqi) record the error vertex record for not generated vertex internal id
                   failureRecords.add(1)
                 }
@@ -74,11 +71,8 @@ class ImportProducerForVertex(data: Dataset[(Int, Vertex)],
               val statement = BATCH_INSERT_TEMPLATE
                 .format(nebulaGraphConfigEntry.graphName, "NODE", nodeConfig.name, verticesValues)
               // send the statement to MQ
-              val dataMap: util.HashMap[String, Object] = new util.HashMap[String, Object]()
-              dataMap.put("value", statement)
-              val messageJson = new JSONObject(dataMap)
               val rm = kafkaProducer.value
-                .send(mqClusterConfigEntry.topic, vertices._1, "statement", messageJson.toString)
+                .send(mqClusterConfigEntry.topic, vertices._1, "statement", statement)
               val meta = rm.get()
               LOG.info("topic name={},partition={},offset={}",
                        meta.topic(),
@@ -147,11 +141,8 @@ class ImportProducerForEdge(data: Dataset[(Int, Edge)],
               val statement = BATCH_INSERT_TEMPLATE
                 .format(nebulaGraphConfigEntry.graphName, "EDGE", edgeConfig.name, edgeValues)
               // send the statement to MQ
-              val dataMap: util.HashMap[String, Object] = new util.HashMap[String, Object]()
-              dataMap.put("value", statement)
-              val messageJson = new JSONObject(dataMap)
               val rm = kafkaProducer.value
-                .send(mqClusterConfigEntry.topic, edges._1, "statement", messageJson.toString)
+                .send(mqClusterConfigEntry.topic, edges._1, "statement", statement)
               val meta = rm.get()
               LOG.info("topic name={},partition={},offset={}",
                        meta.topic(),

@@ -144,4 +144,12 @@ class GraphProvider(addresses: String,
     val primaryKey2InternalId = Map[String, String]()
     primaryKey2InternalId
   }
+
+  def getNodeTypeId(graphName:String, nodeName:String): Int = {
+    0
+  }
+
+  def getEdgeTypeId(graphName:String, edgeName:String):Int={
+    1
+  }
 }
