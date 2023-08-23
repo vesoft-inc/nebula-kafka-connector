@@ -2,7 +2,7 @@
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 // @generated
 
-package graph
+package nebula
 
 import (
 	"bytes"
@@ -10,8 +10,6 @@ import (
 	"sync"
 	"fmt"
 	thrift "github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	nebula0 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
-
 )
 
 // (needed to ensure safety because of naive import list construction.)
@@ -21,7 +19,6 @@ var _ = sync.Mutex{}
 var _ = bytes.Equal
 var _ = context.Background
 
-var _ = nebula0.GoUnusedProtection__
 type GraphService interface {
   // Parameters:
   //  - AuthReq
@@ -319,14 +316,14 @@ func (p *GraphServiceProcessor) FunctionServiceMap() map[string]string {
 }
 
 func NewGraphServiceProcessor(handler GraphService) *GraphServiceProcessor {
-  self1 := &GraphServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunctionContext), functionServiceMap:make(map[string]string)}
-  self1.processorMap["authenticate"] = &graphServiceProcessorAuthenticate{handler:handler}
-  self1.processorMap["signout"] = &graphServiceProcessorSignout{handler:handler}
-  self1.processorMap["execute"] = &graphServiceProcessorExecute{handler:handler}
-  self1.functionServiceMap["authenticate"] = "GraphService"
-  self1.functionServiceMap["signout"] = "GraphService"
-  self1.functionServiceMap["execute"] = "GraphService"
-  return self1
+  self10 := &GraphServiceProcessor{handler:handler, processorMap:make(map[string]thrift.ProcessorFunctionContext), functionServiceMap:make(map[string]string)}
+  self10.processorMap["authenticate"] = &graphServiceProcessorAuthenticate{handler:handler}
+  self10.processorMap["signout"] = &graphServiceProcessorSignout{handler:handler}
+  self10.processorMap["execute"] = &graphServiceProcessorExecute{handler:handler}
+  self10.functionServiceMap["authenticate"] = "GraphService"
+  self10.functionServiceMap["signout"] = "GraphService"
+  self10.functionServiceMap["execute"] = "GraphService"
+  return self10
 }
 
 type graphServiceProcessorAuthenticate struct {

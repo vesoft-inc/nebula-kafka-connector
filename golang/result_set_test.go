@@ -12,8 +12,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
 )
 
 var testTimezone timezoneInfo = timezoneInfo{0, []byte("UTC")}
@@ -126,9 +125,9 @@ func TestAsLocalDatetime(t *testing.T) {
 }
 
 func TestResultSet(t *testing.T) {
-	respWithNil := &graph.XExecutionResponse_{
-		&graph.XExecutionOutcome_{
-			&graph.XGQLStatus_{
+	respWithNil := &nebula.XExecutionResponse_{
+		&nebula.XExecutionOutcome_{
+			&nebula.XGQLStatus_{
 				[]byte("ERROR"),
 			}, nil, nil,
 		}, 1000,
@@ -145,9 +144,9 @@ func TestResultSet(t *testing.T) {
 	// Fill a binding table
 	var int64 = int64(100)
 	var str = []byte("test_string")
-	respWithData := &graph.XExecutionResponse_{
-		&graph.XExecutionOutcome_{
-			&graph.XGQLStatus_{
+	respWithData := &nebula.XExecutionResponse_{
+		&nebula.XExecutionOutcome_{
+			&nebula.XGQLStatus_{
 				[]byte("SUCCESS"),
 			}, nil, nil,
 		}, 1000,

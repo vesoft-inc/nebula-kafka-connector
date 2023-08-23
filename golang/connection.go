@@ -9,7 +9,7 @@ import (
 	"time"
 
 	"github.com/facebook/fbthrift/thrift/lib/go/thrift"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
 )
 
 // TODO(Aiee) add scheduler to release idle connection periodically
@@ -19,7 +19,7 @@ type connection struct {
 	timeout      time.Duration
 	returnedAt   time.Time // the connection was created or returned.
 	sslConfig    *tls.Config
-	graphService *graph.GraphServiceClient // raw connection provided by thrift
+	graphService *nebula.GraphServiceClient // raw connection provided by thrift
 	// service version that used to support backward compatibility
 }
 
@@ -60,7 +60,7 @@ func (cn *connection) Open(hostAddress HostAddress, timeout time.Duration, sslCo
 	bufferedTranFactory := thrift.NewBufferedTransportFactory(bufferSize)
 	transport := thrift.NewFramedTransportMaxLength(bufferedTranFactory.GetTransport(sock), frameMaxLength)
 	pf := thrift.NewBinaryProtocolFactoryDefault()
-	cn.graphService = graph.NewGraphServiceClientFactory(transport, pf)
+	cn.graphService = nebula.NewGraphServiceClientFactory(transport, pf)
 	if err = cn.graphService.Open(); err != nil {
 		return fmt.Errorf("failed to open transport, error: %s", err.Error())
 	}
@@ -80,9 +80,9 @@ func (cn *connection) reopen() error {
 }
 
 // authenticate authenticates a user with a password
-func (cn *connection) Authenticate(username, password string) (graph.AuthResponse, error) {
+func (cn *connection) Authenticate(username, password string) (nebula.AuthResponse, error) {
 	// Prepare the request
-	authReq := &graph.AuthReq{
+	authReq := &nebula.AuthReq{
 		Username:      []byte(username),
 		Password:      []byte(password),
 		ClientType:    []byte("golang"), // Add a enum in the server side
@@ -105,7 +105,7 @@ func (cn *connection) Authenticate(username, password string) (graph.AuthRespons
 }
 
 // execute executes a gql query
-func (cn *connection) execute(Identifier int64, stmt string) (graph.ExecutionResponse, error) {
+func (cn *connection) execute(Identifier int64, stmt string) (nebula.ExecutionResponse, error) {
 	resp, err := cn.graphService.Execute(Identifier, []byte(stmt))
 	if err != nil {
 		// reopen the connection if timeout

@@ -9,12 +9,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
 )
 
 type ResultSet struct {
-	resp            graph.ExecutionResponse
+	resp            nebula.ExecutionResponse
 	columnNames     []string
 	colNameIndexMap map[string]int
 	timezoneInfo    timezoneInfo
@@ -368,7 +367,7 @@ func (dt LocalDatetimeWrapper) getRawDateTime() nebula.LocalDatetime {
 	return dt.dateTime
 }
 
-func genResultSet(resp graph.ExecutionResponse, timezoneInfo timezoneInfo) (*ResultSet, error) {
+func genResultSet(resp nebula.ExecutionResponse, timezoneInfo timezoneInfo) (*ResultSet, error) {
 	var colNames []string
 	var colNameIndexMap = make(map[string]int)
 	var planDesc = make(map[string]interface{})
@@ -459,11 +458,11 @@ func prettyFormatJsonString(value []byte) string {
 	return prettyJson.String()
 }
 
-// func name(planNodeDesc graph.PlanNodeDescription) string {
+// func name(planNodeDesc PlanNodeDescription) string {
 // 	return fmt.Sprintf("%s_%d", planNodeDesc.GetName(), planNodeDesc.GetId())
 // }
 
-// func condEdgeLabel(condNode graph.PlanNodeDescription, doBranch bool) string {
+// func condEdgeLabel(condNode PlanNodeDescription, doBranch bool) string {
 // 	name := strings.ToLower(string(condNode.GetName()))
 // 	if strings.HasPrefix(name, "select") {
 // 		if doBranch {
@@ -479,7 +478,7 @@ func prettyFormatJsonString(value []byte) string {
 // 	return ""
 // }
 
-// func nodeString(planNodeDesc graph.PlanNodeDescription, planNodeName string) string {
+// func nodeString(planNodeDesc PlanNodeDescription, planNodeName string) string {
 // 	var outputVar = graphvizString(string(planNodeDesc.GetOutputVar()))
 // 	var inputVar string
 // 	if planNodeDesc.IsSetDescription() {
@@ -507,12 +506,12 @@ func conditionalNodeString(name string) string {
 	return fmt.Sprintf("\t\"%s\"[shape=diamond];\n", name)
 }
 
-// func nodeById(p graph.PlanDescription, nodeId int64) graph.PlanNodeDescription {
+// func nodeById(p PlanDescription, nodeId int64) PlanNodeDescription {
 // 	line := p.GetNodeIndexMap()[nodeId]
 // 	return p.GetPlanNodeDescs()[line]
 // }
 
-// func findBranchEndNode(p *graph.PlanDescription, condNodeId int64, isDoBranch bool) int64 {
+// func findBranchEndNode(p *PlanDescription, condNodeId int64, isDoBranch bool) int64 {
 // 	for _, node := range p.GetPlanNodeDescs() {
 // 		if node.IsSetBranchInfo() {
 // 			bInfo := node.GetBranchInfo()
@@ -524,7 +523,7 @@ func conditionalNodeString(name string) string {
 // 	return -1
 // }
 
-// func findFirstStartNodeFrom(p *graph.PlanDescription, nodeId int64) int64 {
+// func findFirstStartNodeFrom(p *PlanDescription, nodeId int64) int64 {
 // 	node := nodeById(p, nodeId)
 // 	for {
 // 		deps := node.GetDependencies()
