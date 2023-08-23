@@ -6,7 +6,7 @@ import (
 	stderrors "errors"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula/graph"
+	graph "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
 	"github.com/vesoft-inc/nebula-ng-tools/importer/pkg/logger"
 
 	"github.com/agiledragon/gomonkey/v2"
