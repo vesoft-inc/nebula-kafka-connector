@@ -72,12 +72,31 @@ const (
 	Search  = 3
 )
 
+type GetLeaderRequest struct {
+	header RequestHeader
+}
+
+func NewGetLeaderRequest() *GetLeaderRequest {
+	return &GetLeaderRequest{
+		header: RequestHeader{
+			requestType: "getLeader",
+		},
+	}
+}
+
 type CreateClusterRequest struct {
 	header      RequestHeader
 	Clustername string
 	Replica     int
 	Zones       []string
 	IfNotExists bool
+}
+
+func (g *GetLeaderRequest) Serialize() []byte {
+	serializer := NewSerializer()
+	serializer.SerializeString(g.header.requestType)
+	serializer.SerializeINT64(g.header.clusterId)
+	return serializer.GetBytes()
 }
 
 func NewCreateClusterRequest(clusterName string, replic int, zones []string, ifNotExists bool) *CreateClusterRequest {
@@ -279,6 +298,23 @@ func DeserializeListServiceResponse(deserializer *Deserializer) *ListServiceResp
 		})
 	}
 	return resp
+}
+
+type GetLeaderResponse struct {
+	serviceId int64
+	host      string
+	port      uint32
+}
+
+func DeserializeGetLeaderResponse(deserializer *Deserializer) *GetLeaderResponse {
+	serviceId, _ := deserializer.DeserializeINT64()
+	host, _ := deserializer.DeserializeString()
+	port, _ := deserializer.DeserializeUINT32()
+	return &GetLeaderResponse{
+		serviceId: serviceId,
+		host:      host,
+		port:      port,
+	}
 }
 
 type ClusterInfo struct {

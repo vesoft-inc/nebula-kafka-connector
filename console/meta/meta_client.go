@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	nrpc "github.com/vesoft-inc/nebula-ng-tools/golang/nrpc"
@@ -17,7 +18,13 @@ type MetaClient struct {
 }
 
 type MetaSession struct {
-	Address string
+	Address       string
+	LeaderAddress string
+}
+
+type LeaderAddress struct {
+	Host string
+	Port uint32
 }
 
 func cachePath() string {
@@ -33,8 +40,8 @@ func cachePath() string {
 	return cacheFile
 }
 
-func SaveMetaSession(addr string) error {
-	data, err := json.Marshal(MetaSession{Address: addr})
+func SaveMetaSession(addr string, leader string) error {
+	data, err := json.Marshal(MetaSession{Address: addr, LeaderAddress: leader})
 	if err != nil {
 		return err
 	}
@@ -44,6 +51,7 @@ func SaveMetaSession(addr string) error {
 		fmt.Println("Save meta session failed: ", err.Error())
 		return err
 	}
+	fmt.Println("Saving leader meta:", leader)
 	return nil
 }
 
@@ -62,7 +70,6 @@ func LoadMetaSession() (*MetaSession, error) {
 }
 
 func NewMetaClient(addr string) *MetaClient {
-	fmt.Println("Using meta:", addr)
 	metaclient := &MetaClient{
 		client: nrpc.NewClient(addr),
 	}
@@ -78,11 +85,57 @@ func LoadMetaClient() (*MetaClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	return NewMetaClient(session.Address), nil
+	meta := NewMetaClient(session.LeaderAddress)
+	leader, err := meta.GetLeader(NewGetLeaderRequest())
+	if err != nil {
+		metas := strings.Split(session.Address, ",")
+		if len(metas) == 0 {
+			return nil, fmt.Errorf("meta server address is empty")
+		}
+		for _, m := range metas {
+			fmt.Println("Try to connect to meta:", m)
+			metaclient := NewMetaClient(m)
+			leader, err = metaclient.GetLeader(NewGetLeaderRequest())
+			if err != nil {
+				fmt.Println("get leader failed: ", err)
+				continue
+			}
+			break
+		}
+		if err != nil {
+			return nil, fmt.Errorf("All get leader failed: %s", err.Error())
+		}
+	}
+	leaderStr := fmt.Sprintf("%s:%d", leader.Host, leader.Port)
+
+	if leaderStr != session.LeaderAddress {
+		fmt.Println("Leader changed, reconnecting...")
+		meta = NewMetaClient(fmt.Sprintf("%s:%d", leader.Host, leader.Port))
+		SaveMetaSession(session.Address, leaderStr)
+	}
+	fmt.Println("Using leader meta:", leaderStr)
+
+	return meta, nil
 }
 
 func (c *MetaClient) Login(user string, password string) error {
 	return nil
+}
+
+func (c *MetaClient) GetLeader(request *GetLeaderRequest) (LeaderAddress, error) {
+	bytes := request.Serialize()
+	resp, err := c.send(bytes)
+	if err != nil {
+		return LeaderAddress{"", 0}, err
+	}
+	deserializer := NewDeserializer(resp)
+	respHeader := DeserializeHeader(deserializer)
+	if respHeader.code != 0 {
+		return LeaderAddress{"", 0}, fmt.Errorf("Error: code: %d msg:%s", respHeader.code, respHeader.msg)
+	}
+	getLeaderResp := DeserializeGetLeaderResponse(deserializer)
+
+	return LeaderAddress{getLeaderResp.host, getLeaderResp.port}, nil
 }
 
 func (c *MetaClient) CreateCluster(request *CreateClusterRequest) (string, time.Duration, error) {

@@ -21,10 +21,11 @@ var metaCmd = &cobra.Command{
 }
 
 type LoginFlags struct {
-	Addr string
-	Port uint32
-	User string
-	Pass string
+	Metas string // meta server address list separated by comma like "xx:xx,xx:xx"
+	Addr  string
+	Port  uint32
+	User  string
+	Pass  string
 }
 
 var loginFlags LoginFlags
@@ -34,11 +35,37 @@ var metaLoginCmd = &cobra.Command{
 	Short: "Login meta server.",
 	Long:  `login meta server --addr [ip] --port [port] --user [user] --password [password]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		address := fmt.Sprintf("%s:%d", loginFlags.Addr, loginFlags.Port)
-		metaclient := meta.NewMetaClient(address)
-		metaclient.Login(loginFlags.User, loginFlags.Pass)
-		meta.SaveMetaSession(address)
-		return nil
+		if loginFlags.Metas == "" {
+			address := fmt.Sprintf("%s:%d", loginFlags.Addr, loginFlags.Port)
+			metaclient := meta.NewMetaClient(address)
+			leader, err := metaclient.GetLeader(meta.NewGetLeaderRequest())
+			if err != nil {
+				return fmt.Errorf("get leader failed: %s", err)
+			}
+			metaclient = meta.NewMetaClient(fmt.Sprintf("%s:%d", leader.Host, leader.Port))
+			metaclient.Login(loginFlags.User, loginFlags.Pass)
+			meta.SaveMetaSession(address, fmt.Sprintf("%s:%d", leader.Host, leader.Port))
+			return nil
+		} else {
+			metas := strings.Split(loginFlags.Metas, ",")
+			if len(metas) == 0 {
+				return fmt.Errorf("meta server address is empty")
+			}
+			for _, m := range metas {
+				metaclient := meta.NewMetaClient(m)
+				leader, err := metaclient.GetLeader(meta.NewGetLeaderRequest())
+				if err != nil {
+					fmt.Println("get leader failed: ", err)
+					continue
+				}
+				metaclient = meta.NewMetaClient(fmt.Sprintf("%s:%d", leader.Host, leader.Port))
+				metaclient.Login(loginFlags.User, loginFlags.Pass)
+				meta.SaveMetaSession(metas[0], fmt.Sprintf("%s:%d", leader.Host, leader.Port))
+				return nil
+			}
+
+		}
+		return fmt.Errorf("get leader failed.")
 	},
 }
 
@@ -296,6 +323,7 @@ func init() {
 	metaLoginCmd.Flags().Uint32VarP(&loginFlags.Port, "port", "", 0, "meta server port")
 	metaLoginCmd.Flags().StringVarP(&loginFlags.User, "user", "u", "", "user name")
 	metaLoginCmd.Flags().StringVarP(&loginFlags.Pass, "password", "p", "", "password")
+	metaLoginCmd.Flags().StringVarP(&loginFlags.Metas, "metas", "m", "", "meta server address list separated by comma like \"xx:xx,xx:xx\"")
 
 	metaCreateClusterCmd.Flags().StringVarP(&createClusterFlags.ClusterName, "cluster", "c", "", "cluster name")
 	metaCreateClusterCmd.Flags().IntVarP(&createClusterFlags.Replica, "replica", "r", 0, "replica number")
