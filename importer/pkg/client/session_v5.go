@@ -34,7 +34,7 @@ func newSessionV5(hostAddress HostAddress, user, password string, l logger.Logge
 func (s *defaultSessionV5) Open() error {
 	hostAddress := s.hostAddress
 	connection := nebula.NewConnection(hostAddress)
-	if err := connection.Open(hostAddress, 1000*time.Millisecond, nil); err != nil {
+	if err := connection.Open(hostAddress, 0, nil); err != nil {
 		return err
 	}
 	authResp, err := connection.Authenticate(s.user, s.password)
