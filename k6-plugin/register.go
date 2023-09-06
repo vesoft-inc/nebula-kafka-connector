@@ -1,8 +1,8 @@
-package k6plugin
+package k6plugin5
 
 import (
-	"github.com/vesoft-inc/nebula-ng-tools/k6-plugin/pkg/aggcsv"
-	"github.com/vesoft-inc/nebula-ng-tools/k6-plugin/pkg/nebulagraph"
+	"github.com/vesoft-inc/k6-plugin/pkg/aggcsv"
+	"github.com/vesoft-inc/k6-plugin/pkg/nebulagraph"
 	"github.com/vesoft-inc/nebula-ng-tools/k6-plugin/pkg/nebulagraph5"
 	"go.k6.io/k6/js/modules"
 	"go.k6.io/k6/output"

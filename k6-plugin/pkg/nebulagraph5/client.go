@@ -1,13 +1,14 @@
 package nebulagraph5
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/k6-plugin/pkg/common"
+	"github.com/vesoft-inc/k6-plugin/pkg/common"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
@@ -20,19 +21,20 @@ type (
 		Version           string
 		csvStrategy       csvReaderStrategy
 		initialized       bool
-		clients           []*nebula.Session
+		clients           []*GraphClient
 		channelBufferSize int
-		hosts             []string
+		Hosts             []string
 		mutex             sync.Mutex
 		clientGetter      graphClientGetter
 		csvReader         common.ICsvReader
+		graphOption       *common.GraphOption
 	}
 
 	graphClientGetter func(endpoint, username, password string) (*nebula.Session, error)
 
 	// GraphClient a wrapper for nebula client, could read data from DataCh
 	GraphClient struct {
-		Client   *nebula.Session
+		Session  *nebula.Session
 		Pool     *GraphPool
 		DataCh   chan common.Data
 		username string
@@ -125,81 +127,65 @@ func NewNebulaGraph() *GraphPool {
 	}
 }
 
-// Init initializes nebula pool with address and concurrent, by default the bufferSize is 20000
-func (gp *GraphPool) Init(address string, concurrent int) (common.IGraphClientPool, error) {
-	return gp.InitWithSize(address, concurrent, 20000)
+func (gp *GraphPool) SetOption(option *common.GraphOption) error {
+	if gp.graphOption != nil {
+		return nil
+	}
+	gp.graphOption = common.MakeDefaultOption(option)
+	if err := common.ValidateOption(gp.graphOption); err != nil {
+		return err
+	}
+	bs, _ := json.Marshal(gp.graphOption)
+	fmt.Printf("testing option: %s\n", bs)
+	return nil
 }
 
-// InitWithSize initializes nebula pool with channel buffer size
-func (gp *GraphPool) InitWithSize(address string, concurrent int, chanSize int) (common.IGraphClientPool, error) {
+// Init initializes nebula pool with address and concurrent, by default the bufferSize is 20000
+func (gp *GraphPool) Init() (common.IGraphClientPool, error) {
 	gp.mutex.Lock()
 	defer gp.mutex.Unlock()
 	if gp.initialized {
 		return gp, nil
 	}
-
-	err := gp.initAndVerifyPool(address, concurrent, chanSize)
-	if err != nil {
+	if err := gp.validate(gp.graphOption.Address); err != nil {
 		return nil, err
 	}
-	gp.DataCh = make(chan common.Data, chanSize)
+	gp.Hosts = strings.Split(gp.graphOption.Address, ",")
+	gp.clients = make([]*GraphClient, 0, gp.graphOption.MaxSize)
+	if gp.graphOption.Output != "" {
+		channelBufferSize := gp.graphOption.OutputChannelSize
+		gp.OutputCh = make(chan []string, channelBufferSize)
+		writer := common.NewCsvWriter(gp.graphOption.Output, ",", outputHeader, gp.OutputCh)
+		if err := writer.WriteForever(); err != nil {
+			return nil, err
+		}
+	}
+	if gp.graphOption.CsvPath != "" {
+		gp.csvReader = common.NewCsvReader(
+			gp.graphOption.CsvPath,
+			gp.graphOption.CsvDelimiter,
+			gp.graphOption.CsvWithHeader,
+			gp.graphOption.CsvDataLimit,
+		)
+		gp.DataCh = make(chan common.Data, gp.graphOption.CsvChannelSize)
+		if err := gp.csvReader.ReadForever(gp.DataCh); err != nil {
+			return nil, err
+		}
+	}
 	gp.initialized = true
-
 	return gp, nil
 }
 
-func (gp *GraphPool) initAndVerifyPool(address string, concurrent int, chanSize int) error {
+func (gp *GraphPool) validate(address string) error {
 	addrs := strings.Split(address, ",")
+	if len(addrs) == 0 {
+		return fmt.Errorf("Invalid address: %s", address)
+	}
 	for _, addr := range addrs {
-		hostPort := strings.Split(addr, ":")
-		if len(hostPort) != 2 {
+		hostAndPort := strings.Split(addr, ":")
+		if len(hostAndPort) != 2 {
 			return fmt.Errorf("Invalid address: %s", addr)
 		}
-		_, err := strconv.Atoi(hostPort[1])
-		if err != nil {
-			return err
-		}
-		gp.hosts = append(gp.hosts, addr)
-	}
-	gp.clients = make([]*nebula.Session, 0, concurrent)
-	gp.channelBufferSize = chanSize
-	gp.OutputCh = make(chan []string, gp.channelBufferSize)
-	return nil
-}
-
-// Deprecated ConfigCsvStrategy sets csv reader strategy
-func (gp *GraphPool) ConfigCsvStrategy(strategy int) {
-	return
-}
-
-// ConfigCSV makes the read csv file configuration
-func (gp *GraphPool) ConfigCSV(path, delimiter string, withHeader bool, opts ...interface{}) error {
-	var (
-		limit int = 500 * 10000
-	)
-	if gp.csvReader != nil {
-		return nil
-	}
-	if len(opts) > 0 {
-		l, ok := opts[0].(int)
-		if ok {
-			limit = l
-		}
-	}
-	gp.csvReader = common.NewCsvReader(path, delimiter, withHeader, limit)
-
-	if err := gp.csvReader.ReadForever(gp.DataCh); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-// ConfigOutput makes the output file configuration, would write the execution outputs
-func (gp *GraphPool) ConfigOutput(path string) error {
-	writer := common.NewCsvWriter(path, ",", outputHeader, gp.OutputCh)
-	if err := writer.WriteForever(); err != nil {
-		return err
 	}
 	return nil
 }
@@ -208,34 +194,34 @@ func (gp *GraphPool) ConfigOutput(path string) error {
 func (gp *GraphPool) Close() error {
 	gp.mutex.Lock()
 	defer gp.mutex.Unlock()
-	if !gp.initialized {
-		return nil
-	}
 	// gp.Log.Println("begin close the nebula pool")
 	for _, s := range gp.clients {
 		if s != nil {
-			s.Release()
+			if s.Session != nil {
+				s.Session.Release()
+			}
 		}
 	}
-	gp.initialized = false
 	return nil
 }
 
 // GetSession gets the session from pool
-func (gp *GraphPool) GetSession(username, password string) (common.IGraphClient, error) {
+func (gp *GraphPool) GetSession() (common.IGraphClient, error) {
 	gp.mutex.Lock()
 	defer gp.mutex.Unlock()
-	// balancer, ccore just use the first endpoint
-	index := len(gp.clients) % len(gp.hosts)
-	client, err := gp.clientGetter(gp.hosts[index], username, password)
+	index := len(gp.clients) % len(gp.Hosts)
+	client, err := gp.clientGetter(
+		gp.Hosts[index],
+		gp.graphOption.Username,
+		gp.graphOption.Password,
+	)
 
 	if err != nil {
 		return nil, err
 	}
 
-	gp.clients = append(gp.clients, client)
-	s := &GraphClient{Client: client, Pool: gp, DataCh: gp.DataCh}
-
+	s := &GraphClient{Session: client, Pool: gp, DataCh: gp.DataCh}
+	gp.clients = append(gp.clients, s)
 	return s, nil
 }
 
@@ -243,7 +229,7 @@ func (gc *GraphClient) Open() error {
 	return nil
 }
 func (gc *GraphClient) Close() error {
-	gc.Client.Release()
+	gc.Session.Release()
 	return nil
 }
 
@@ -268,7 +254,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		latency    int64
 	)
 	start := time.Now()
-	resp, err = gc.Client.Execute(stmt)
+	resp, err = gc.Session.Execute(stmt)
 
 	if err != nil {
 		isSucceed = false
@@ -287,6 +273,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 
 	responseTime := int32(time.Since(start) / 1000)
 	// output
+
 	if gc.Pool.OutputCh != nil {
 		var fr []string
 		cols := resp.GetColSize()
@@ -318,6 +305,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		case gc.Pool.OutputCh <- formatOutput(o):
 		// abandon if the output chan is full.
 		default:
+			fmt.Printf("output channel is full, abandon the output: %v\n", o)
 		}
 
 	}
