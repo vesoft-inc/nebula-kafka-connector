@@ -30,6 +30,10 @@ public class NebulaInteractiveTest extends InteractiveTest {
         properties.put("user", user);
         properties.put("password", password);
         properties.put("requestTimeout", requestTimeout);
+        properties.put("maxSessionSize", "20");
+        properties.put("maxSessionWaitTime", "20000");
+        properties.put("retryTimes", "3");
+        properties.put("intervalTimeBetweenRetrys", "2000");
         properties.put("printQueryNames", "true");
         properties.put("printQueryStrings", "true");
         properties.put("printQueryResults", "true");
@@ -63,26 +67,24 @@ public class NebulaInteractiveTest extends InteractiveTest {
 
     @Test
     public void testQuery2() throws Exception {
-        run(db, new LdbcQuery2(10995116278009L, new Date(1287230400000L), LIMIT));
+        run(db, new LdbcQuery2(10995116278009L, new Date(1333411200000L), LIMIT));
     }
 
     @Test
     public void testQuery3() throws Exception {
-        long diff = 1277812800000L - 1275393600000L;
-        long diffInDays = TimeUnit.DAYS.toDays(diff);
-        run(db, new LdbcQuery3(6597069766734L, "Angola", "Colombia", new Date(1275393600000L), (int) diffInDays, LIMIT));
+        long diffInDays = 34;
+        run(db, new LdbcQuery3(4398046512362L, "Uruguay", "Puerto_Rico", new Date(1325376000000L), (int) diffInDays, LIMIT));
     }
 
     @Test
     public void testQuery4() throws Exception {
-        long diff = 1275350500000L - 1275350400000L;
-        long diffInDays = TimeUnit.DAYS.toDays(diff);
-        run(db, new LdbcQuery4(4398046511333L, new Date(1275350400000L), (int) diffInDays, LIMIT));
+        long diffInDays = 28;
+        run(db, new LdbcQuery4(24189255811906L, new Date(1343779200000L), (int) diffInDays, LIMIT));
     }
 
     @Test
     public void testQuery5() throws Exception {
-        run(db, new LdbcQuery5(6597069766734L, new Date(1288612800000L), LIMIT));
+        run(db, new LdbcQuery5(6597069768287L, new Date(1342483200000L), LIMIT));
     }
 
 
@@ -103,7 +105,7 @@ public class NebulaInteractiveTest extends InteractiveTest {
 
     @Test
     public void testQuery9() throws Exception {
-        run(db, new LdbcQuery9(4398046511268L, new Date(1289908800000L), LIMIT));
+        run(db, new LdbcQuery9(454L, new Date(1354060800000L), LIMIT));
     }
 
     @Test

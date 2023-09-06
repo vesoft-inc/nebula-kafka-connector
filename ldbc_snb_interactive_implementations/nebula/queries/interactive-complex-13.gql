@@ -11,7 +11,7 @@ MATCH
   (person2:Person {id: $person2Id}),
   path1 = ANY SHORTEST PATH (person1:Person{id: $person1Id})<-[:KNOWS]->{1,10}(person2:Person{id: $person2Id})
 RETURN
-  CASE path1
-      WHEN IS NULL THEN -1
+  CASE
+      WHEN path1 IS NULL THEN -1
       ELSE length(path1)
   END AS shortestPathLength
