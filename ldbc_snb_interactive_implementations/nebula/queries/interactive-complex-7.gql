@@ -20,4 +20,4 @@ RETURN
   latestLikeMsg.id AS messageId,
   CASE WHEN latestLikeMsg.content <>"" THEN latestLikeMsg.content  ELSE latestLikeMsg.imageFile END AS messageContent,
   latestLikeMsg.creationDate AS minutesLatency,
-  NOT EXISTS ((liker:Person)<-[:KNOWS]->(person:Person{id: $personId}))  AS isNew
+  NOT EXISTS ((person:Person{id: $personId})<-[:KNOWS]->(liker:Person))  AS isNew
