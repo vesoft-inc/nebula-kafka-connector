@@ -180,13 +180,14 @@ Use `nebula-console meta` to execute meta command.
 ```bash
 Usage: 
 Available Commands:
-  addservice    Add service into assigned cluster.
-  createcluster Create cluster in meta server.
-  createschema  Create schema in catalog tree.
-  initcluster   Init cluster storage part.
-  login         Login meta server.
-  showcluster   Show cluster, show all if no cluster name specified.
-  showservice   Show service in cluster.
+  addservice       Add service into assigned cluster.
+  createcluster    Create cluster in meta server.
+  createschema     Create schema in catalog tree.
+  initcluster      Init cluster storage part.
+  login            Login meta server.
+  showcluster      Show cluster, show all if no cluster name specified.
+  showservice      Show service in cluster.
+  triggerstatstask Start the task of calculating graph statistics information.
 
 ====Login meta====
 login meta server --addr [ip] --port [port] --user [user] --password [password]
@@ -258,6 +259,16 @@ Usage:
 Flags:
   -c, --cluster string   cluster name
   -h, --help             help for showservice
+
+====Trigger Stats Task====
+nebula-console meta triggerstatstask --graph [graphname]
+
+Usage:
+  nebula-console meta triggerstatstask [flags]
+
+Flags:
+  -g, --graph string     graph name
+  -h, --help             help for triggerstatstask
 
 ```
 

@@ -359,3 +359,45 @@ func (r *ListClusterResponse) Format() string {
 
 	return formatTable([]string{"cluster id", "cluster name", "replica", "zones"}, data)
 }
+
+type TriggerStatsTaskRequest struct {
+	header    RequestHeader
+	graphName string
+}
+
+func NewTriggerStatsTaskRequest(graphName string) *TriggerStatsTaskRequest {
+	return &TriggerStatsTaskRequest{
+		header: RequestHeader{
+			requestType: "triggerStatsTask",
+		},
+		graphName: graphName,
+	}
+}
+
+func (l *TriggerStatsTaskRequest) Serialize() []byte {
+	serializer := NewSerializer()
+	serializer.SerializeString(l.header.requestType)
+	serializer.SerializeINT64(l.header.clusterId)
+	serializer.SerializeString(l.graphName)
+	return serializer.GetBytes()
+}
+
+type TriggerStatsTaskResponse struct {
+	alreadyRunning bool
+}
+
+func DeserializeTriggerStatsTaskResponse(deserializer *Deserializer) *TriggerStatsTaskResponse {
+	resp := &TriggerStatsTaskResponse{}
+	resp.alreadyRunning, _ = deserializer.DeserializeBOOL()
+	return resp
+}
+
+func (r *TriggerStatsTaskResponse) Format() string {
+	msg := ""
+	if r.alreadyRunning {
+		msg = "Stats task is already running."
+	} else {
+		msg = "Trigger stats task successfully."
+	}
+	return msg
+}

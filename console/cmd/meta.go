@@ -308,6 +308,35 @@ var metaCreateSchemaCmd = &cobra.Command{
 	},
 }
 
+type TriggerStatsTaskFlags struct {
+	GraphName string
+}
+
+var triggerStatsTaskFlags TriggerStatsTaskFlags
+
+var metaTriggerStatsTaskCmd = &cobra.Command{
+	Use:   "triggerstatstask",
+	Short: "Start the task of calculating graph statistics information.",
+	Long:  `nebula-console meta triggerstatstask --graph [graphname]`,
+	RunE: func(cmd *cobra.Command, args []string) error {
+		metaclient, err := meta.LoadMetaClient()
+		if err != nil {
+			return fmt.Errorf("load meta session failed: %s", err)
+		}
+		defer metaclient.Close()
+
+		graphName := triggerStatsTaskFlags.GraphName
+		req := meta.NewTriggerStatsTaskRequest(graphName)
+
+		msg, _, err := metaclient.TriggerStatsTask(req)
+		if err != nil {
+			return fmt.Errorf("trigger stats task failed: %s", err)
+		}
+		fmt.Println(msg)
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(metaCmd)
 
@@ -318,6 +347,7 @@ func init() {
 	metaCmd.AddCommand(metaShowServiceCmd)
 	metaCmd.AddCommand(metaShowClusterCmd)
 	metaCmd.AddCommand(metaCreateSchemaCmd)
+	metaCmd.AddCommand(metaTriggerStatsTaskCmd)
 
 	metaLoginCmd.Flags().StringVarP(&loginFlags.Addr, "addr", "a", "", "meta server address")
 	metaLoginCmd.Flags().Uint32VarP(&loginFlags.Port, "port", "", 0, "meta server port")
@@ -344,4 +374,6 @@ func init() {
 	metaCreateSchemaCmd.Flags().StringVarP(&createSchemaFlags.Name, "name", "n", "", "schema name")
 	metaCreateSchemaCmd.Flags().StringVarP(&createSchemaFlags.Path, "path", "p", "", "schema path")
 	metaCreateSchemaCmd.Flags().BoolVarP(&createClusterFlags.IfNotExists, "if_not_exists", "", false, "if not exists")
+
+	metaTriggerStatsTaskCmd.Flags().StringVarP(&triggerStatsTaskFlags.GraphName, "graph", "g", "", "graph name")
 }

@@ -245,6 +245,25 @@ func (c *MetaClient) ShowCluster(request *ListClusterRequest) (string, time.Dura
 	return respBody.Format(), duration, nil
 }
 
+func (c *MetaClient) TriggerStatsTask(request *TriggerStatsTaskRequest) (string, time.Duration, error) {
+	bytes := request.Serialize()
+	start := time.Now()
+	resp, err := c.send(bytes)
+	duration := time.Since(start)
+	if err != nil {
+		return "", 0, err
+	}
+	deserializer := NewDeserializer(resp)
+	respHeader := DeserializeHeader(deserializer)
+	if respHeader.code != 0 {
+		return fmt.Sprintf("Error: code: %d msg:%s", respHeader.code, respHeader.msg), duration, nil
+	}
+
+	respBody := DeserializeTriggerStatsTaskResponse(deserializer)
+
+	return respBody.Format(), duration, nil
+}
+
 func (c *MetaClient) send(request []byte) ([]byte, error) {
 	timeout := 200 * time.Millisecond
 	resp, err := c.client.Send(request, timeout)
