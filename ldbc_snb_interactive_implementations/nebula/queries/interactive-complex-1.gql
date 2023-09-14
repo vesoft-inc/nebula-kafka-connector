@@ -6,10 +6,8 @@
 }
 */
 USE $graphName
-MATCH (p:Person{id : $personId}), (friend:Person{firstName : "$firstName"})
-    WHERE p<>friend
-    MATCH path1 = ANY SHORTEST PATH (p:Person{id:$personId})<-[:KNOWS]->{1,3}(friend:Person)
-    AGGREGATE distance=min(length(path1)) GROUP BY friend
+MATCH path1 = ANY SHORTEST PATH (p:Person{id:$personId})<-[:KNOWS]->{1,3}(friend:Person{firstName : "$firstName"}) WHERE p<>friend
+AGGREGATE distance=min(length(path1)) GROUP BY friend
 ORDER BY
   distance ASC,
   friend.lastName ASC,
