@@ -40,6 +40,7 @@ const (
   XType__kLocalTime XType_ = 14
   XType__kDate XType_ = 15
   XType__kLocalDatetime XType_ = 16
+  XType__kPath XType_ = 17
 )
 
 var XType_ToName = map[XType_]string {
@@ -60,6 +61,7 @@ var XType_ToName = map[XType_]string {
   XType__kLocalTime: "kLocalTime",
   XType__kDate: "kDate",
   XType__kLocalDatetime: "kLocalDatetime",
+  XType__kPath: "kPath",
 }
 
 var XType_ToValue = map[string]XType_ {
@@ -80,6 +82,7 @@ var XType_ToValue = map[string]XType_ {
   "kLocalTime": XType__kLocalTime,
   "kDate": XType__kDate,
   "kLocalDatetime": XType__kLocalDatetime,
+  "kPath": XType__kPath,
 }
 
 var XType_Names = []string {
@@ -100,6 +103,7 @@ var XType_Names = []string {
   "kLocalTime",
   "kDate",
   "kLocalDatetime",
+  "kPath",
 }
 
 var XType_Values = []XType_ {
@@ -120,6 +124,7 @@ var XType_Values = []XType_ {
   XType__kLocalTime,
   XType__kDate,
   XType__kLocalDatetime,
+  XType__kPath,
 }
 
 func (p XType_) String() string {
@@ -1084,6 +1089,12 @@ type Edge = *XEdge_
 func EdgePtr(v Edge) *Edge { return &v }
 
 func NewEdge() Edge { return NewXEdge_() }
+
+type Path = *XPath_
+
+func PathPtr(v Path) *Path { return &v }
+
+func NewPath() Path { return NewXPath_() }
 
 type Type = XType_
 
@@ -2154,6 +2165,7 @@ func (p *XLocalDatetime_) String() string {
 //  - LocalTimeVal
 //  - DateVal
 //  - LocalDatetimeVal
+//  - PathVal
 type XValue_ struct {
   BoolVal *bool `thrift:"boolVal,1,optional" db:"boolVal" json:"boolVal,omitempty"`
   Int8Val *int8 `thrift:"int8Val,2,optional" db:"int8Val" json:"int8Val,omitempty"`
@@ -2171,6 +2183,7 @@ type XValue_ struct {
   LocalTimeVal *XLocalTime_ `thrift:"localTimeVal,14,optional" db:"localTimeVal" json:"localTimeVal,omitempty"`
   DateVal *XDate_ `thrift:"dateVal,15,optional" db:"dateVal" json:"dateVal,omitempty"`
   LocalDatetimeVal *XLocalDatetime_ `thrift:"localDatetimeVal,16,optional" db:"localDatetimeVal" json:"localDatetimeVal,omitempty"`
+  PathVal *XPath_ `thrift:"pathVal,17,optional" db:"pathVal" json:"pathVal,omitempty"`
 }
 
 func NewXValue_() *XValue_ {
@@ -2287,6 +2300,13 @@ func (p *XValue_) GetLocalDatetimeVal() *XLocalDatetime_ {
   }
   return p.LocalDatetimeVal
 }
+var XValue__PathVal_DEFAULT *XPath_
+func (p *XValue_) GetPathVal() *XPath_ {
+  if !p.IsSetPathVal() {
+    return XValue__PathVal_DEFAULT
+  }
+  return p.PathVal
+}
 func (p *XValue_) CountSetFieldsXValue_() int {
   count := 0
   if (p.IsSetBoolVal()) {
@@ -2335,6 +2355,9 @@ func (p *XValue_) CountSetFieldsXValue_() int {
     count++
   }
   if (p.IsSetLocalDatetimeVal()) {
+    count++
+  }
+  if (p.IsSetPathVal()) {
     count++
   }
   return count
@@ -2405,6 +2428,10 @@ func (p *XValue_) IsSetLocalDatetimeVal() bool {
   return p != nil && p.LocalDatetimeVal != nil
 }
 
+func (p *XValue_) IsSetPathVal() bool {
+  return p != nil && p.PathVal != nil
+}
+
 type XValue_Builder struct {
   obj *XValue_
 }
@@ -2433,6 +2460,7 @@ func (p XValue_Builder) Emit() *XValue_{
     LocalTimeVal: p.obj.LocalTimeVal,
     DateVal: p.obj.DateVal,
     LocalDatetimeVal: p.obj.LocalDatetimeVal,
+    PathVal: p.obj.PathVal,
   }
 }
 
@@ -2516,6 +2544,11 @@ func (x *XValue_Builder) LocalDatetimeVal(localDatetimeVal *XLocalDatetime_) *XV
   return x
 }
 
+func (x *XValue_Builder) PathVal(pathVal *XPath_) *XValue_Builder {
+  x.obj.PathVal = pathVal
+  return x
+}
+
 func (x *XValue_) SetBoolVal(boolVal *bool) *XValue_ {
   x.BoolVal = boolVal
   return x
@@ -2596,6 +2629,11 @@ func (x *XValue_) SetLocalDatetimeVal(localDatetimeVal *XLocalDatetime_) *XValue
   return x
 }
 
+func (x *XValue_) SetPathVal(pathVal *XPath_) *XValue_ {
+  x.PathVal = pathVal
+  return x
+}
+
 func (p *XValue_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
@@ -2671,6 +2709,10 @@ func (p *XValue_) Read(iprot thrift.Protocol) error {
       }
     case 16:
       if err := p.ReadField16(iprot); err != nil {
+        return err
+      }
+    case 17:
+      if err := p.ReadField17(iprot); err != nil {
         return err
       }
     default:
@@ -2825,6 +2867,14 @@ func (p *XValue_)  ReadField16(iprot thrift.Protocol) error {
   return nil
 }
 
+func (p *XValue_)  ReadField17(iprot thrift.Protocol) error {
+  p.PathVal = NewPath()
+  if err := p.PathVal.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.PathVal), err)
+  }
+  return nil
+}
+
 func (p *XValue_) Write(oprot thrift.Protocol) error {
   if c := p.CountSetFieldsXValue_(); c > 1 {
     return fmt.Errorf("%T write union: no more than one field must be set (%d set).", p, c)
@@ -2847,6 +2897,7 @@ func (p *XValue_) Write(oprot thrift.Protocol) error {
   if err := p.writeField14(oprot); err != nil { return err }
   if err := p.writeField15(oprot); err != nil { return err }
   if err := p.writeField16(oprot); err != nil { return err }
+  if err := p.writeField17(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -3054,6 +3105,19 @@ func (p *XValue_) writeField16(oprot thrift.Protocol) (err error) {
   return err
 }
 
+func (p *XValue_) writeField17(oprot thrift.Protocol) (err error) {
+  if p.IsSetPathVal() {
+    if err := oprot.WriteFieldBegin("pathVal", thrift.STRUCT, 17); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 17:pathVal: ", p), err) }
+    if err := p.PathVal.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.PathVal), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 17:pathVal: ", p), err) }
+  }
+  return err
+}
+
 func (p *XValue_) String() string {
   if p == nil {
     return "<nil>"
@@ -3150,7 +3214,13 @@ func (p *XValue_) String() string {
   } else {
     localDatetimeValVal = fmt.Sprintf("%v", p.LocalDatetimeVal)
   }
-  return fmt.Sprintf("XValue_({BoolVal:%s Int8Val:%s Int16Val:%s Int32Val:%s Int64Val:%s FloatVal:%s DoubleVal:%s StringVal:%s ListVal:%s RecordVal:%s NodeVal:%s EdgeVal:%s DurationVal:%s LocalTimeVal:%s DateVal:%s LocalDatetimeVal:%s})", boolValVal, int8ValVal, int16ValVal, int32ValVal, int64ValVal, floatValVal, doubleValVal, stringValVal, listValVal, recordValVal, nodeValVal, edgeValVal, durationValVal, localTimeValVal, dateValVal, localDatetimeValVal)
+  var pathValVal string
+  if p.PathVal == nil {
+    pathValVal = "<nil>"
+  } else {
+    pathValVal = fmt.Sprintf("%v", p.PathVal)
+  }
+  return fmt.Sprintf("XValue_({BoolVal:%s Int8Val:%s Int16Val:%s Int32Val:%s Int64Val:%s FloatVal:%s DoubleVal:%s StringVal:%s ListVal:%s RecordVal:%s NodeVal:%s EdgeVal:%s DurationVal:%s LocalTimeVal:%s DateVal:%s LocalDatetimeVal:%s PathVal:%s})", boolValVal, int8ValVal, int16ValVal, int32ValVal, int64ValVal, floatValVal, doubleValVal, stringValVal, listValVal, recordValVal, nodeValVal, edgeValVal, durationValVal, localTimeValVal, dateValVal, localDatetimeValVal, pathValVal)
 }
 
 // Attributes:
@@ -3961,6 +4031,137 @@ func (p *XEdge_) String() string {
 
 // Attributes:
 //  - Values
+type XPath_ struct {
+  Values []*XValue_ `thrift:"values,1" db:"values" json:"values"`
+}
+
+func NewXPath_() *XPath_ {
+  return &XPath_{}
+}
+
+
+func (p *XPath_) GetValues() []*XValue_ {
+  return p.Values
+}
+type XPath_Builder struct {
+  obj *XPath_
+}
+
+func NewXPath_Builder() *XPath_Builder{
+  return &XPath_Builder{
+    obj: NewXPath_(),
+  }
+}
+
+func (p XPath_Builder) Emit() *XPath_{
+  return &XPath_{
+    Values: p.obj.Values,
+  }
+}
+
+func (x *XPath_Builder) Values(values []*XValue_) *XPath_Builder {
+  x.obj.Values = values
+  return x
+}
+
+func (x *XPath_) SetValues(values []*XValue_) *XPath_ {
+  x.Values = values
+  return x
+}
+
+func (p *XPath_) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *XPath_)  ReadField1(iprot thrift.Protocol) error {
+  _, size, err := iprot.ReadListBegin()
+  if err != nil {
+    return thrift.PrependError("error reading list begin: ", err)
+  }
+  tSlice := make([]*XValue_, 0, size)
+  p.Values =  tSlice
+  for i := 0; i < size; i ++ {
+    _elem7 := NewValue()
+    if err := _elem7.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem7), err)
+    }
+    p.Values = append(p.Values, _elem7)
+  }
+  if err := iprot.ReadListEnd(); err != nil {
+    return thrift.PrependError("error reading list end: ", err)
+  }
+  return nil
+}
+
+func (p *XPath_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_Path_"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *XPath_) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("values", thrift.LIST, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:values: ", p), err) }
+  if err := oprot.WriteListBegin(thrift.STRUCT, len(p.Values)); err != nil {
+    return thrift.PrependError("error writing list begin: ", err)
+  }
+  for _, v := range p.Values {
+    if err := v.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", v), err)
+    }
+  }
+  if err := oprot.WriteListEnd(); err != nil {
+    return thrift.PrependError("error writing list end: ", err)
+  }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:values: ", p), err) }
+  return err
+}
+
+func (p *XPath_) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  valuesVal := fmt.Sprintf("%v", p.Values)
+  return fmt.Sprintf("XPath_({Values:%s})", valuesVal)
+}
+
+// Attributes:
+//  - Values
 type XRow_ struct {
   Values []*XValue_ `thrift:"values,1" db:"values" json:"values"`
 }
@@ -4039,11 +4240,11 @@ func (p *XRow_)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([]*XValue_, 0, size)
   p.Values =  tSlice
   for i := 0; i < size; i ++ {
-    _elem7 := NewValue()
-    if err := _elem7.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem7), err)
+    _elem8 := NewValue()
+    if err := _elem8.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem8), err)
     }
-    p.Values = append(p.Values, _elem7)
+    p.Values = append(p.Values, _elem8)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4191,13 +4392,13 @@ func (p *XResultTable_)  ReadField1(iprot thrift.Protocol) error {
   tSlice := make([][]byte, 0, size)
   p.ColumnNames =  tSlice
   for i := 0; i < size; i ++ {
-    var _elem8 []byte
+    var _elem9 []byte
     if v, err := iprot.ReadBinary(); err != nil {
       return thrift.PrependError("error reading field 0: ", err)
     } else {
-      _elem8 = v
+      _elem9 = v
     }
-    p.ColumnNames = append(p.ColumnNames, _elem8)
+    p.ColumnNames = append(p.ColumnNames, _elem9)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)
@@ -4213,11 +4414,11 @@ func (p *XResultTable_)  ReadField2(iprot thrift.Protocol) error {
   tSlice := make([]*XRow_, 0, size)
   p.Records =  tSlice
   for i := 0; i < size; i ++ {
-    _elem9 := NewRow()
-    if err := _elem9.Read(iprot); err != nil {
-      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem9), err)
+    _elem10 := NewRow()
+    if err := _elem10.Read(iprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", _elem10), err)
     }
-    p.Records = append(p.Records, _elem9)
+    p.Records = append(p.Records, _elem10)
   }
   if err := iprot.ReadListEnd(); err != nil {
     return thrift.PrependError("error reading list end: ", err)

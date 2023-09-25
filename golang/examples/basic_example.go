@@ -88,7 +88,7 @@ func main() {
 	runQuery(session, `USE nba INSERT EDGE edge_type ({id:1})-[{followness:90}]->({id:2}),({id:2})-[{followness:100}]->({id:3})`)
 
 	log.Info("Run a simple query...")
-	runQuery(session, `FROM nba FOR a in LIST [1,2,null,3] RETURN a`)
+	runQuery(session, `USE nba RETURN 1 + 1`)
 
 	log.Info("Run a MATCH query...")
 	runQuery(session, `FROM nba MATCH (v) RETURN v`)

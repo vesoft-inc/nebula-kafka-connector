@@ -79,6 +79,10 @@ func (valWrap ValueWrapper) IsDuration() bool {
 	return valWrap.value.IsSetDurationVal()
 }
 
+func (valWrap ValueWrapper) IsPath() bool {
+	return valWrap.value.IsSetPathVal()
+}
+
 // AsBool converts the ValueWrapper to a boolean value
 func (valWrap ValueWrapper) AsBool() (bool, error) {
 	if valWrap.value.IsSetBoolVal() {
@@ -221,6 +225,18 @@ func (valWrap ValueWrapper) AsEdge() (*Edge, error) {
 	return genEdge(edge, valWrap.timezoneInfo)
 }
 
+func (valWrap ValueWrapper) AsPath() ([]ValueWrapper, error) {
+	if valWrap.value.IsSetPathVal() {
+		var varList []ValueWrapper
+		vals := valWrap.value.GetPathVal().Values
+		for _, val := range vals {
+			varList = append(varList, ValueWrapper{val, valWrap.timezoneInfo})
+		}
+		return varList, nil
+	}
+	return nil, fmt.Errorf("failed to convert value %s to Path", valWrap.GetType())
+}
+
 // GetType returns the value type of value in the valWrap as a string
 func (valWrap ValueWrapper) GetType() string {
 	if valWrap.value.IsSetBoolVal() {
@@ -255,6 +271,8 @@ func (valWrap ValueWrapper) GetType() string {
 		return "localDatetime"
 	} else if valWrap.value.IsSetDurationVal() {
 		return "duration"
+	} else if valWrap.value.IsSetPathVal() {
+		return "path"
 	} else {
 		return "Null"
 	}
@@ -346,6 +364,14 @@ func (valWrap ValueWrapper) String() string {
 		// }
 		// return fmt.Sprintf("{%s}", strings.Join(output, ", "))
 		return "map type string unimplemented"
+	} else if value.IsSetPathVal() { // Path
+		// TODO(Aiee) the implementation of path is same as list for now
+		pval := value.GetPathVal()
+		var strs []string
+		for _, val := range pval.Values {
+			strs = append(strs, ValueWrapper{val, valWrap.timezoneInfo}.String())
+		}
+		return fmt.Sprintf("[%s]", strings.Join(strs, " "))
 	} else { // Null
 		return "__NULL__"
 	}

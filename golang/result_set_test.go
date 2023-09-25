@@ -124,6 +124,92 @@ func TestAsLocalDatetime(t *testing.T) {
 	assert.Equal(t, "2020-12-25T22:12:25.000029", valWrap.String())
 }
 
+func TestAsNode(t *testing.T) {
+	value := nebula.XValue_{NodeVal: &nebula.XNode_{
+		1111,
+		2222,
+		map[string]nebula.Value{
+			"key1": {StringVal: []byte("value1")},
+			"key2": {StringVal: []byte("value2")},
+		},
+	}}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, true, valWrap.IsNode())
+	node, _ := valWrap.AsNode()
+	assert.Equal(t, int64(1111), node.rawNode.NodeID)
+	assert.Equal(t, int16(2222), node.rawNode.NodeTypeID)
+	assert.Equal(t, 2, len(node.rawNode.Properties))
+	assert.Equal(t, "value1", string(node.rawNode.Properties["key1"].GetStringVal()))
+	assert.Equal(t, "value2", string(node.rawNode.Properties["key2"].GetStringVal()))
+}
+
+func TestAsEdge(t *testing.T) {
+	value := nebula.XValue_{EdgeVal: &nebula.XEdge_{
+		1111,
+		2222,
+		3333,
+		4444,
+		map[string]nebula.Value{
+			"key1": {StringVal: []byte("value1")},
+			"key2": {StringVal: []byte("value2")},
+		},
+	}}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, true, valWrap.IsEdge())
+	edge, _ := valWrap.AsEdge()
+
+	assert.Equal(t, int64(1111), edge.rawEdge.SrcID)
+	assert.Equal(t, int64(2222), edge.rawEdge.DstID)
+	assert.Equal(t, int32(3333), edge.rawEdge.EdgeTypeID)
+	assert.Equal(t, int64(4444), edge.rawEdge.Rank)
+	assert.Equal(t, 2, len(edge.rawEdge.Properties))
+	assert.Equal(t, "value1", string(edge.rawEdge.Properties["key1"].GetStringVal()))
+	assert.Equal(t, "value2", string(edge.rawEdge.Properties["key2"].GetStringVal()))
+}
+
+func TestAsPath(t *testing.T) {
+	// node1 -> edge1 -> node2 -> edge2 -> node3
+	var valPathElements = []*nebula.XValue_{
+		{
+			NodeVal: &nebula.XNode_{
+				NodeID:     1,
+				NodeTypeID: 1,
+				Properties: map[string]nebula.Value{
+					"key1": {StringVal: []byte("value1")},
+					"key2": {StringVal: []byte("value2")},
+				},
+			},
+		},
+		{
+			EdgeVal: &nebula.XEdge_{
+				SrcID:      1,
+				DstID:      2,
+				EdgeTypeID: 3333,
+				Rank:       4444,
+				Properties: map[string]nebula.Value{},
+			},
+		},
+		{
+			NodeVal: &nebula.XNode_{
+				NodeID:     2,
+				NodeTypeID: 1,
+				Properties: map[string]nebula.Value{
+					"key1": {StringVal: []byte("value1")},
+					"key2": {StringVal: []byte("value2")},
+				},
+			},
+		},
+	}
+
+	value := nebula.XValue_{
+		PathVal: &nebula.XPath_{valPathElements},
+	}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, true, valWrap.IsPath())
+	path, _ := valWrap.AsPath()
+	assert.Equal(t, 3, len(path))
+}
+
 func TestResultSet(t *testing.T) {
 	respWithNil := &nebula.XExecutionResponse_{
 		&nebula.XExecutionOutcome_{
