@@ -12,6 +12,7 @@ import com.vesoft.nebula.client.graph.data.Vertex;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -41,9 +42,9 @@ public class GraphClientExample {
                     .setStrictlyServerHealthy(true)
                     .build();
 
-            createGraphType(client);
-            createGraph(client);
-            insertData(client);
+            // createGraphType(client);
+            // createGraph(client);
+            // insertData(client);
             query(client);
         } catch (Exception e) {
             e.printStackTrace();

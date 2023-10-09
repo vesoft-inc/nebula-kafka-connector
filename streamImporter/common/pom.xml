@@ -21,7 +21,7 @@
         <!--TODO change the version of client-->
         <dependency>
             <groupId>com.vesoft</groupId>
-            <artifactId>nebula-client</artifactId>
+            <artifactId>client</artifactId>
             <version>5.0.0</version>
         </dependency>
         <dependency>
