@@ -115,6 +115,13 @@ func (res ResultSet) GetPlanDesc() map[string]interface{} {
 	return res.planDesc
 }
 
+func (res ResultSet) GetBuildTimeInUs() int64 {
+	if !res.IsSetPlanDesc() {
+		return 0
+	}
+	return parseInt64(res.planDesc, "buildTimeInUs")
+}
+
 func (res ResultSet) GetOptimizeTimeInUs() int64 {
 	if !res.IsSetPlanDesc() {
 		return 0
