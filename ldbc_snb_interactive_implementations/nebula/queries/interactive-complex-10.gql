@@ -6,14 +6,13 @@
 }
 */
 USE $graphName
-MATCH (person:Person {id : $personId})<-[:KNOWS]->{2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+MATCH (person:Person {id : $personId})<-[:KNOWS]->{2}(friend:Person WHERE (friend.birthday.month = $month AND friend.birthday.day >= 21) OR (friend.birthday.month = ($month % 12) + 1 AND friend.birthday.day < 22))-[:IS_LOCATED_IN]->(city:City)
     WHERE friend <> person AND NOT EXISTS((person:Person{id : $personId})<-[:KNOWS]->(friend:Person))
-    FILTER WHERE (friend.birthday.month = $month AND friend.birthday.day >= 21) OR (friend.birthday.month = ($month % 12) + 1 AND friend.birthday.day < 22)
 RETURN DISTINCT friend, city, person
 NEXT
 USE $graphName
 OPTIONAL MATCH (friend:Person)<-[:HAS_CREATOR]-(post:Post)
-OPTIONAL MATCH (person:Person {id : $personId})-[:HAS_INTEREST]->(m:Tag)<-[:HAS_TAG]->(post:Post)
+OPTIONAL MATCH (p:Person {id : $personId})-[:HAS_INTEREST]->(m:Tag)<-[:HAS_TAG]->(post:Post)
 AGGREGATE tmp = count(m)  GROUP BY friend, city, post
 LET cnt = CASE WHEN tmp > 0 THEN 1 ELSE 0 END
 AGGREGATE postCount = count(post), commonPostCount = sum(cnt) GROUP BY friend, city

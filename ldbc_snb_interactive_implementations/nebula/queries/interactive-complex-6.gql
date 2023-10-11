@@ -11,9 +11,9 @@ WHERE person <> friend
 RETURN distinct friend AS f
 NEXT
 USE $graphName
-MATCH (t:Tag {name : "$tagName"})<-[:HAS_TAG]-(post:Post)-[:HAS_CREATOR]->(f:Person),
-      (post:Post)-[:HAS_TAG]->(tag:Tag)
-WHERE t <> tag
+MATCH (f:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(t:Tag {name : "$tagName"})
+MATCH (post:Post)-[:HAS_TAG]->(tag:Tag)
+FILTER t <> tag
 AGGREGATE postCount=count(post) GROUP BY tag
 ORDER BY
   postCount DESC,

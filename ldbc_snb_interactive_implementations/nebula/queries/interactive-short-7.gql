@@ -13,4 +13,3 @@ MATCH (m:Message WHERE m.id = $messageId)<-[:REPLY_OF]-(c:Comment)-[:HAS_CREATOR
         p.firstName AS replyAuthorFirstName,
         p.lastName AS replyAuthorLastName,
         CASE WHEN r is null THEN false ELSE true END AS replyAuthorKnowsOriginalMessageAuthor
-
