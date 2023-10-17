@@ -34,6 +34,7 @@ var (
 	script                string
 	file                  string
 	version               bool
+	widthMax              int
 	enableSsl             bool
 	sslRootCAPath         string
 	sslCertPath           string
@@ -464,6 +465,10 @@ func validateFlags() {
 		log.Panicf("Error: argument password is empty!")
 	}
 
+	if widthMax < 0 || (widthMax > 0 && widthMax <= 3) {
+		log.Panicf("Error: argument width_max should be equal to 0 or greater than 3")
+	}
+
 	if enableSsl {
 		if sslRootCAPath == "" {
 			log.Panicf("Error: argument ssl_root_ca_path should be specified when enable_ssl is true")
@@ -489,6 +494,7 @@ func handleGraphCmd() {
 
 	// Check if flags are valid
 	validateFlags()
+	planDescPrinter.WidthMax = widthMax
 
 	interactive := script == "" && file == ""
 
@@ -603,4 +609,5 @@ func init() {
 	rootCmd.Flags().IntVarP(&timeout, "timeout", "t", 0, "The Nebula Graph client connection timeout in seconds, 0 means never timeout")
 	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The nGQL directly")
 	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The nGQL script file name")
+	rootCmd.Flags().IntVarP(&widthMax, "width_max", "", 100, "The max width of the column of the execution plan")
 }

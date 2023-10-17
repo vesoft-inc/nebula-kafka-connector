@@ -14,9 +14,9 @@ MATCH (countryX:Country {name : "$countryXName"}),
       (person:Person {id : $personId})
 MATCH (city:City)-[:IS_PART_OF]->(country:Country)
 Filter country IN List [countryX, countryY]
-AGGREGATE cities=collect(city) GROUP BY person, countryX, countryY
-MATCH (person:Person{id : $personId})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
-Filter person <> friend AND NOT city IN cities
+AGGREGATE cities=collect(element_id(city)) GROUP BY person, countryX, countryY
+MATCH WALK (person:Person{id : $personId})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
+Filter person <> friend AND NOT element_id(city) IN cities
 RETURN DISTINCT friend, countryX, countryY
 NEXT
 USE $graphName

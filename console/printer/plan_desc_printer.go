@@ -29,6 +29,7 @@ type PlanDescPrinter struct {
 	writer   table.Writer
 	fd       *os.File
 	filename string
+	WidthMax int
 }
 
 func NewPlanDescPrinter() PlanDescPrinter {
@@ -117,7 +118,7 @@ func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
 		} else if i != 0 {
 			columnConfigs = append(columnConfigs, table.ColumnConfig{
 				Name:     col,
-				WidthMax: 100,
+				WidthMax: p.WidthMax,
 				// WidthMaxEnforcer: func(s string, wrapLen int) string {
 				// 	if len(s) > wrapLen {
 				// 		s = s[:wrapLen-3] + "..."
@@ -126,8 +127,8 @@ func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
 				// },
 				Transformer: func(val interface{}) string {
 					if v, ok := val.(string); ok {
-						if len(v) > 100 {
-							return v[:100-3] + "..."
+						if p.WidthMax != 0 && len(v) > p.WidthMax {
+							return v[:p.WidthMax-3] + "..."
 						}
 					}
 					return fmt.Sprint(val)
