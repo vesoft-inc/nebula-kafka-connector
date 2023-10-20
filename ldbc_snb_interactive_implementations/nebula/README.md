@@ -6,18 +6,8 @@
    ``git clone  https://github.com/vesoft-inc/nebula-ng-tools.git
      cd nebula-ng-tools/java
      mvn clean install -Dmaven.javadoc.skip=true -Dmaven.test.skip=true -Dgpg.skip``
-2. Java environment requirements<br>
-    ``**requried java11** Download Address https://www.oracle.com/java/technologies/javase/jdk11-archive-downloads.html
-      Install JDK. under the ubuntu system. sudo dpkg -i jdk-11.0.13_linux-x64_bin.deb
-      Configure environment variables
-      export JAVA_HOME=/usr/lib/jvm/jdk-11.0.13
-      export PATH=$PATH:$JAVA_HOME/bin
-      Check whether the JDK is configured successfully: Enter java -version in the terminal, if the output version number is the installed JDK version number, it means the installation is successful``
-3. LDBC driver (Tag v1.2.0)<br>
-    `` git clone --b v1.2.0 https://github.com/ldbc/ldbc_snb_interactive_driver
-       cd ldbc_snb_driver
-       mvn clean package -DskipTests (Need to modify java version in pom.xml to 11)``
-4. execute scripts/build.sh  to build nebula implementation's jar package<br>
+
+2. execute scripts/build.sh  to build nebula implementation's jar package<br>
 
 ~some problems encountered when generating cypher data:~
    ~pip install backports.zoneinfo (ldbc_snb_driver/scripts/create_update_stream.py and ldbc_snb_driver/paramgen/paramgen.py  from zoneinfo import ZoneInfo -> from backports.zoneinfo import ZoneInfo)~
