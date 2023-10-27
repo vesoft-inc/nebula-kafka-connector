@@ -348,7 +348,10 @@ func (valWrap ValueWrapper) String() string {
 			localDateTime.getSecond(),
 			localDateTime.getMicrosec())
 	} else if value.IsSetDurationVal() { // Duration PnYnMnDTnHnMnS
-		return "duration type string unimplemented"
+		duval := value.GetDurationVal()
+		totalSeconds := duval.GetSeconds() + int64(duval.GetMicroseconds())/1000000
+		remainMicroSeconds := duval.GetMicroseconds() % 1000000
+		return fmt.Sprintf("P%vMT%v.%06d000S", duval.GetMonths(), totalSeconds, remainMicroSeconds)
 	} else if value.IsSetRecordVal() { // Map TODO(Aiee) Unimplemented
 		// // {k0: v0, k1: v1}
 		// mval := value.GetMapVal()
