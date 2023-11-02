@@ -20,7 +20,7 @@ Filter person <> friend AND NOT element_id(city) IN cities
 RETURN DISTINCT friend, countryX, countryY
 NEXT
 USE $graphName
-MATCH (country:Country where country.name = "$countryXName" or contry.name = "$countryYName")<-[:IS_LOCATED_IN]-(message:Message where localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate))-[:HAS_CREATOR]->(friend:Person)
+MATCH (country:Country where country.name = "$countryXName" or country.name = "$countryYName")<-[:IS_LOCATED_IN]-(message:Message where localdatetime($endDate) > message.creationDate AND message.creationDate >= localdatetime($startDate))-[:HAS_CREATOR]->(friend:Person)
 LET
   messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
   messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
