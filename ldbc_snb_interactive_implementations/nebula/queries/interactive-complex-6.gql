@@ -9,12 +9,12 @@ USE $graphName
 MATCH WALK (person:Person {id : $personId})<-[:KNOWS]->{1,2}(friend:Person)
 WHERE person <> friend
 RETURN distinct friend AS f
-NEXT
-USE $graphName
+NEXT USE $graphName
 MATCH (f:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(t:Tag {name : "$tagName"})
 MATCH (post:Post)-[:HAS_TAG]->(tag:Tag)
 FILTER t <> tag
-AGGREGATE postCount=count(post) GROUP BY tag
+RETURN count(post) AS postCount, tag
+NEXT USE $graphName
 ORDER BY
   postCount DESC,
   tag.name ASC

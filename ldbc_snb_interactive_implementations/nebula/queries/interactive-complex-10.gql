@@ -13,9 +13,11 @@ NEXT
 USE $graphName
 OPTIONAL MATCH (friend:Person)<-[:HAS_CREATOR]-(post:Post)
 OPTIONAL MATCH (p:Person {id : $personId})-[:HAS_INTEREST]->(m:Tag)<-[:HAS_TAG]->(post:Post)
-AGGREGATE tmp = count(m)  GROUP BY friend, city, post
+RETURN count(m) AS tmp, friend, city, post
+NEXT USE $graphName
 LET cnt = CASE WHEN tmp > 0 THEN 1 ELSE 0 END
-AGGREGATE postCount = count(post), commonPostCount = sum(cnt) GROUP BY friend, city
+RETURN count(post) AS postCount, sum(cnt) AS commonPostCount, friend, city
+NEXT USE $graphName
 LET commonInterestScore = commonPostCount - (postCount - commonPostCount), personId = friend.id
 ORDER BY commonInterestScore DESC, personId ASC
 LIMIT 10

@@ -9,14 +9,12 @@ USE $graphName
 MATCH (person:Person {id : $personId})<-[:KNOWS]->{1,2}(otherPerson:Person)
     WHERE person <> otherPerson
 RETURN DISTINCT otherPerson
-NEXT
-USE $graphName
+NEXT USE $graphName
 MATCH (otherPerson:Person)<-[membership:HAS_MEMBER WHERE membership.joinDate > localdatetime($minDate)]-(forum:Forum)
-    OPTIONAL MATCH (otherPerson:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
-        AGGREGATE postCount=count(post) GROUP BY forum
-        ORDER BY
-        postCount DESC,
-        forum.id ASC
+OPTIONAL MATCH (otherPerson:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
+RETURN count(post) AS postCount, forum
+NEXT USE $graphName
+ORDER BY postCount DESC, forum.id ASC
 LIMIT 20
 RETURN
   forum.title AS forumName,
