@@ -19,7 +19,7 @@ manager:
       - statements:
           # TODO: add `` and rename extent -> length
           - |
-            CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS GRAPH TYPE {
+            CREATE GRAPH TYPE IF NOT EXISTS ldbc_type AS GRAPH TYPE {
                 (City(id) LABELS City&Place {id INT64, name STRING, url STRING}),
                 (Country(id) LABELS Country&Place {id INT64, name STRING, url STRING}),
                 (Continent(id) LABELS Continent&Place {id INT64, name STRING, url STRING}),
@@ -59,7 +59,7 @@ manager:
               }
         wait: 10s
       - statements:
-          - CREATE GRAPH ldbc IF NOT EXISTS OF ldbc_type
+          - CREATE GRAPH IF NOT EXISTS ldbc OF ldbc_type
         wait: 5s
 
 sources:
