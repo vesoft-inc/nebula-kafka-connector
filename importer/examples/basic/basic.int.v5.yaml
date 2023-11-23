@@ -23,7 +23,7 @@ manager:
           }
         wait: 10s
       - statements:
-        - CREATE GRAPH IF NOT EXISTS basic_int_examples OF basic_int_examples_type
+        - CREATE GRAPH IF NOT EXISTS basic_int_examples TYPED basic_int_examples_type
         wait: 5s
 
 sources:

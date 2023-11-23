@@ -34,7 +34,7 @@ CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS GRAPH TYPE {
 """
 :sleep 10
 
-CREATE GRAPH ldbc IF NOT EXISTS OF ldbc_type
+CREATE GRAPH IF NOT EXISTS ldbc TYPED ldbc_type
 
 :sleep 10
 

@@ -74,7 +74,7 @@ public class GraphClientExample {
 
     private static void createGraph(NebulaClient client) throws IOErrorException,
             InterruptedException, NoValidSessionException {
-        String createGraph = "CREATE GRAPH nba IF NOT EXISTS OF graph_type_nba";
+        String createGraph = "CREATE GRAPH IF NOT EXISTS nba TYPED graph_type_nba";
         ResultSet resp = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,

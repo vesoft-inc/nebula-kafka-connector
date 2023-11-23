@@ -78,7 +78,7 @@ func main() {
 	time.Sleep(3 * time.Second)
 
 	log.Info("Create graph nba...")
-	runQuery(session, `CREATE GRAPH nba IF NOT EXISTS OF graph_type`)
+	runQuery(session, `CREATE GRAPH IF NOT EXISTS nba TYPED graph_type`)
 	time.Sleep(5 * time.Second)
 
 	log.Info("Insert a node...")

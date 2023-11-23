@@ -24,7 +24,7 @@ manager:
           }
         wait: 10s
       - statements:
-        - CREATE GRAPH IF NOT EXISTS basic_string_examples OF basic_string_examples_type
+        - CREATE GRAPH IF NOT EXISTS basic_string_examples TYPED basic_string_examples_type
         wait: 5s
 
 sources:

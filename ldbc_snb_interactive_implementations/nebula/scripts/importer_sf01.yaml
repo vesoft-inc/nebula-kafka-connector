@@ -59,7 +59,7 @@ manager:
               }
         wait: 10s
       - statements:
-          - CREATE GRAPH IF NOT EXISTS sf01 OF ldbc_type2
+          - CREATE GRAPH IF NOT EXISTS sf01 TYPED ldbc_type2
         wait: 5s
 
 sources:

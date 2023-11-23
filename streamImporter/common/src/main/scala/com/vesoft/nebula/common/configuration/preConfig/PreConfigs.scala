@@ -392,7 +392,7 @@ object PreConfigEntry {
     }
 
     val ddl = s"CREATE GRAPH TYPE $graphType IF NOT EXISTS AS GRAPH TYPE {${nodeSchemas.mkString(
-      ",")},${edgeSchemas.mkString(",")}}; \nCREATE GRAPH $graphName IF NOT EXISTS OF $graphType"
+      ",")},${edgeSchemas.mkString(",")}}; \nCREATE GRAPH IF NOT EXISTS $graphName TYPED $graphType"
     ddl
   }
 

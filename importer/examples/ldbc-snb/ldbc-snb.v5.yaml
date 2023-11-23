@@ -54,7 +54,7 @@ manager:
           }
         wait: 10s
       - statements:
-        - CREATE GRAPH IF NOT EXISTS ldbc_snb_examples OF ldbc_snb_examples_type
+        - CREATE GRAPH IF NOT EXISTS ldbc_snb_examples TYPED ldbc_snb_examples_type
         wait: 5s
 
 sources:
