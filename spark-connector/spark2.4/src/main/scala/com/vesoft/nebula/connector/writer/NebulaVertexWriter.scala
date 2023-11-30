@@ -23,7 +23,7 @@ class NebulaVertexWriter(nebulaOptions: NebulaOptions, vertexIndex: Int, schema:
   private val LOG = LoggerFactory.getLogger(this.getClass)
 
   val fieldTypeMap: Map[String, String] =
-    graphProvider.getTagSchema(nebulaOptions.graphName, nebulaOptions.label)
+    graphProvider.getNodeSchema(nebulaOptions.graphName, nebulaOptions.label)
 
   /** buffer to save batch vertices */
   var vertices: ListBuffer[NebulaVertex] = new ListBuffer()

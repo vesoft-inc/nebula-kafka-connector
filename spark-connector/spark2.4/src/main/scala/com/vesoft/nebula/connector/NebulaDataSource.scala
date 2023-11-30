@@ -56,7 +56,9 @@ class NebulaDataSource
     }
 
     LOG.info("create writer")
-    LOG.info(s"options ${options.asMap()}")
+    val parameters = options.asMap()
+    parameters.remove(NebulaOptions.PASSWD)
+    LOG.info(s"options ${parameters}")
 
     if (DataTypeEnum.VERTEX == DataTypeEnum.withName(dataType)) {
       val vertexFiled = nebulaOptions.vertexField

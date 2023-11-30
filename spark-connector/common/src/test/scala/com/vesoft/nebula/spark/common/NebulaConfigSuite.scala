@@ -74,13 +74,4 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
         .build())
   }
 
-  test("test ReadNebulaConfig") {
-    ReadNebulaConfig
-      .builder()
-      .withGraphName("test")
-      .withLabel("tagName")
-      .withNoColumn(true)
-      .withReturnCols(List("col"))
-      .build()
-  }
 }

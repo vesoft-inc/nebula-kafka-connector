@@ -38,14 +38,14 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
   /**
     * execute the statement
     *
-    * @param statement insert tag/edge statement
+    * @param statement insert node/edge statement
     * @return execute result
     */
   def submit(statement: String): ResultSet =
     client.execute(statement)
 
   def getIdType(graphName: String, nodeType: String): VidType.Value = {
-    val schema = getTagSchema(graphName, nodeType)
+    val schema = getNodeSchema(graphName, nodeType)
     for (entry <- schema) {
       if (entry._1.equals("id")) {
         return VidType.withName(entry._2)
@@ -92,13 +92,13 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
   }
 
   /**
-    * get tag's schema info
+    * get node's schema info
     *
     * @param graphName
     * @param nodeType
     * @return Map, property name -> data type {@link PropertyType}
     */
-  def getTagSchema(graphName: String, nodeType: String): Map[String, String] = {
+  def getNodeSchema(graphName: String, nodeType: String): Map[String, String] = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     val resultSet                               = getGraphDesc(graphName)
 

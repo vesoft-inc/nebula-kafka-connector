@@ -49,7 +49,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   }
 
   test("getVertexSchema") {
-    val schema = graphProvider.getTagSchema("nba", "node_type_player")
+    val schema = graphProvider.getNodeSchema("nba", "node_type_player")
     assert(schema.size == 5)
     assert(schema.keySet.contains("id"))
     assert(schema.keySet.contains("name"))
