@@ -58,7 +58,7 @@ public class GraphClientExample {
 
     private static void createGraphType(NebulaClient client) throws IOErrorException,
             InterruptedException, NoValidSessionException {
-        String createSchema = "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS GRAPH TYPE {"
+        String createSchema = "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS {"
                 + "(node_type_player(id) LABEL player {id INT, name STRING, score FLOAT, gender"
                 + " bool, rate DOUBLE}),(node_type_player)-[edge_type_follow LABEL follow "
                 + "{followness INT, likeness FLOAT64}]->(node_type_player)}";

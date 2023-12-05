@@ -1,5 +1,5 @@
 """
-CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS GRAPH TYPE {
+CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS {
 (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, kind STRING}),
 (Forum(id) LABEL Forum {id INT, title STRING, creationDate INT}),
 (Comment(id) LABELS Comment&Message {id INT, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT}),

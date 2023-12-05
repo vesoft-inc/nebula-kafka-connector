@@ -91,7 +91,7 @@ object PreConfigEntry {
 
     if (nebulaGraphConfigEntry.generateDDL) {
       val schemaDDL =
-        s"CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS GRAPH TYPE { ${ddlStatements.mkString(",")} }"
+        s"CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS { ${ddlStatements.mkString(",")} }"
       LOG.info("********************* schema DDL ********************* \n")
       LOG.info(schemaDDL)
     }
@@ -391,7 +391,7 @@ object PreConfigEntry {
       edgeSchemas.append(edge.getSchemaString)
     }
 
-    val ddl = s"CREATE GRAPH TYPE $graphType IF NOT EXISTS AS GRAPH TYPE {${nodeSchemas.mkString(
+    val ddl = s"CREATE GRAPH TYPE $graphType IF NOT EXISTS AS {${nodeSchemas.mkString(
       ",")},${edgeSchemas.mkString(",")}}; \nCREATE GRAPH IF NOT EXISTS $graphName TYPED $graphType"
     ddl
   }
@@ -408,7 +408,7 @@ object PreConfigEntry {
   private[this] def getGraphDDL(graphType: String,
                                 nebulaGraphConfig: NebulaGraphConfigEntry): String = {
     // TODO remove the MOCK DDL
-    "CREATE GRAPH TYPE graph_type IF NOT EXISTS AS GRAPH TYPE {" +
+    "CREATE GRAPH TYPE graph_type IF NOT EXISTS AS {" +
       "(node_type(id) LABEL player {id INT, name STRING})," +
       "(node_type)-[edge_type LABEL follow {followness INT}]->(node_type)}"
   }

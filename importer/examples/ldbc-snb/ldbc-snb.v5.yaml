@@ -19,7 +19,7 @@ manager:
       - statements:
         # TODO: add `` and rename ttype->type, llength -> length
         - |
-          CREATE GRAPH TYPE IF NOT EXISTS ldbc_snb_examples_type AS GRAPH TYPE {
+          CREATE GRAPH TYPE IF NOT EXISTS ldbc_snb_examples_type AS {
               (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, ttype STRING}),
               (Organisation(id) LABELS University&Company {id INT, ttype STRING, name STRING, url STRING}),
               (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),

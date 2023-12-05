@@ -76,7 +76,7 @@ object PreConfigResolve {
     var schemaDDL: String = null
     if (nebulaGraphConfigEntry.generateDDL) {
       schemaDDL =
-        s"CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS GRAPH TYPE { ${ddlStatements.mkString(",")} }"
+        s"CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS { ${ddlStatements.mkString(",")} }"
       LOG.info("********************* schema DDL ********************* ")
       LOG.info(schemaDDL)
     }

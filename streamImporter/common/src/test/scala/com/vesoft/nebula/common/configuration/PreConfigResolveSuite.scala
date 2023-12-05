@@ -30,7 +30,7 @@ class PreConfigResolveSuite extends AnyFunSuite with PrivateMethodTester {
 
     assert(
       ddl.equals(
-        "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS GRAPH TYPE { " +
+        "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS { " +
           "(player(a) LABEL player(c string,g int))," +
           "(person(b) LABEL person(d int,e string))," +
           "(player)-[friend LABEL friend {c string,d int,e datetime,f int}]->(player) }"))
