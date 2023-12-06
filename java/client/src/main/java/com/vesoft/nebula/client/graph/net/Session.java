@@ -69,7 +69,7 @@ public class Session implements Serializable {
      *             such as insert ngql `INSERT VERTEX person(name) VALUES "Tom":("Tom");`
      * @return The ResultSet
      */
-    protected ResultSet execute(String stmt) throws IOErrorException {
+    public ResultSet execute(String stmt) throws IOErrorException {
         return new ResultSet(connection.execute(sessionID, stmt));
     }
 

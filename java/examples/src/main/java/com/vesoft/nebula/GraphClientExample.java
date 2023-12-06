@@ -12,7 +12,11 @@ import com.vesoft.nebula.client.graph.data.Vertex;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
-import java.util.ArrayList;
+import com.vesoft.nebula.client.graph.scan.ScanEdgeResult;
+import com.vesoft.nebula.client.graph.scan.ScanEdgeResultIterator;
+import com.vesoft.nebula.client.graph.scan.ScanNodeResult;
+import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
+import com.vesoft.nebula.client.graph.scan.TableRow;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -21,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class GraphClientExample {
     private static final Logger log = LoggerFactory.getLogger(GraphClientExample.class);
-    static String host = "192.168.8.6:3713";
+    static String host = "192.168.8.211:3999";
     static String user = "root";
     static String passwd = "nebula";
 
@@ -42,10 +46,13 @@ public class GraphClientExample {
                     .setStrictlyServerHealthy(true)
                     .build();
 
-            // createGraphType(client);
-            // createGraph(client);
-            // insertData(client);
+            createGraphType(client);
+            createGraph(client);
+            insertData(client);
             query(client);
+            scanNode(client);
+            scanEdge(client);
+
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);
@@ -58,7 +65,7 @@ public class GraphClientExample {
 
     private static void createGraphType(NebulaClient client) throws IOErrorException,
             InterruptedException, NoValidSessionException {
-        String createSchema = "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS {"
+        String createSchema = "CREATE GRAPH TYPE graph_type_nba AS {"
                 + "(node_type_player(id) LABEL player {id INT, name STRING, score FLOAT, gender"
                 + " bool, rate DOUBLE}),(node_type_player)-[edge_type_follow LABEL follow "
                 + "{followness INT, likeness FLOAT64}]->(node_type_player)}";
@@ -74,7 +81,7 @@ public class GraphClientExample {
 
     private static void createGraph(NebulaClient client) throws IOErrorException,
             InterruptedException, NoValidSessionException {
-        String createGraph = "CREATE GRAPH IF NOT EXISTS nba TYPED graph_type_nba";
+        String createGraph = "CREATE GRAPH nba OF graph_type_nba";
         ResultSet resp = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,
@@ -200,7 +207,45 @@ public class GraphClientExample {
                 }
             }
         }
+    }
 
 
+    private static void scanNode(NebulaClient client) {
+        String graphName = "nba";
+        String nodeType = "node_type_player";
+
+        ScanNodeResultIterator iterator = client.scanNode(graphName, nodeType, 3, 10);
+        while (iterator.hasNext()) {
+            ScanNodeResult result = iterator.next();
+            if (result.isEmpty()) {
+                continue;
+            }
+            System.out.println(result.getPropNames());
+            List<TableRow> tableRows = result.getTableRows();
+            for (TableRow row : tableRows) {
+                System.out.println(row.getValues());
+            }
+            System.out.println("\n");
+        }
+    }
+
+
+    private static void scanEdge(NebulaClient client) {
+        String graphName = "nba";
+        String edgeType = "edge_type_follow";
+
+        ScanEdgeResultIterator iterator = client.scanEdge(graphName, edgeType, 3, 10);
+        while (iterator.hasNext()) {
+            ScanEdgeResult result = iterator.next();
+            if (result.isEmpty()) {
+                continue;
+            }
+            System.out.println(result.getPropNames());
+            List<TableRow> tableRows = result.getTableRows();
+            for (TableRow row : tableRows) {
+                System.out.println(row.getValues());
+            }
+            System.out.println("\n");
+        }
     }
 }

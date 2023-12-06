@@ -11,12 +11,23 @@ import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.client.graph.scan.ScanEdgeResultIterator;
+import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -36,6 +47,14 @@ public class NebulaClient implements Serializable {
     private int intervalTime;
     private long maxWaitMills;
 
+    // the default batch size for scan data, config for scan
+    private final int defaultBatchSize = 10;
+
+    // the default parallel for scan data, config for scan
+    private int scanParallel;
+
+    private ExecutorService threadPool = null;
+
     private NebulaClient(Builder builder) throws IOErrorException {
         if (hasInit.get()) {
             return;
@@ -43,6 +62,7 @@ public class NebulaClient implements Serializable {
         this.retryTimes = builder.retryTimes;
         this.intervalTime = builder.intervalTime;
         this.maxWaitMills = builder.maxWaitMills;
+        this.scanParallel = builder.maxSessionSize;
 
         this.loadBalancer = new RoundRobinLoadBalancer(builder.address, builder.connectTimeout,
                 builder.requestTimeout, builder.strictlyServerHealthy, builder.healthCheckTime);
@@ -154,6 +174,307 @@ public class NebulaClient implements Serializable {
         return resultSet;
     }
 
+    // not implemented.
+    public ScanNodeResultIterator scanNode(String graphName,
+                                           String nodeType) {
+        Map<String, String> schema = null;
+        try {
+            schema = getNodeProperties(graphName, nodeType);
+        } catch (IOErrorException | NoValidSessionException e) {
+            log.error("get node schema failed.", e);
+            throw new RuntimeException(e);
+        }
+        List<String> propertyList = new ArrayList<>(schema.keySet());
+        // TODO get all parts
+        List<Integer> parts = new ArrayList<>();
+        return scanNode(graphName, nodeType, propertyList, parts, defaultBatchSize);
+    }
+
+    /**
+     * scan the data of specific nodeType.
+     * the result will contain all property of nodeType.
+     *
+     * @param graphName NebulaGraph name
+     * @param nodeType  node type name
+     * @param part      graph part id
+     * @param batchSize the data size for one request for one part,
+     *                  the ScanNodeResultIterator.next() will return at most batchSize
+     *                  node records
+     * @return ScanNodeResultIterator
+     */
+    public ScanNodeResultIterator scanNode(String graphName,
+                                           String nodeType,
+                                           int part,
+                                           int batchSize) {
+        Map<String, String> schema = null;
+        try {
+            schema = getNodeProperties(graphName, nodeType);
+        } catch (IOErrorException | NoValidSessionException e) {
+            log.error("get node schema failed.", e);
+            throw new RuntimeException(e);
+        }
+        List<String> propertyList = new ArrayList<>(schema.keySet());
+        return scanNode(graphName, nodeType, propertyList, part, batchSize);
+    }
+
+    /**
+     * scan the data of specific nodeType
+     * the result will contain primary key and specific return properties.
+     *
+     * @param graphName        NebulaGraph name
+     * @param nodeType         node type name
+     * @param returnProperties the property list to scan, if list is empty,
+     *                         then the result just contain primary key.
+     * @param part             graph part id
+     * @param batchSize        the data size for one request for one part,
+     *                         the ScanNodeResultIterator.next() will return at most batchSize
+     *                         node records
+     * @return ScanNodeResultIterator
+     */
+    public ScanNodeResultIterator scanNode(String graphName,
+                                           String nodeType,
+                                           List<String> returnProperties,
+                                           int part,
+                                           int batchSize) {
+        List<String> propertyList = new ArrayList<>();
+        // TODO return primarykey by default, need a gql to get node type's primary key
+        String primaryKey = null;
+        // if returnProperties is empty, just return the value of primary key.
+        // propertyList.add(primaryKey);
+
+        // remove the primaryKey in parameter returnProperties
+        // to keep the primary key in the first column of propertyList
+        returnProperties.remove(primaryKey);
+        propertyList.addAll(returnProperties);
+        return scanNode(graphName, nodeType, propertyList,
+                Collections.singletonList(part), batchSize);
+    }
+
+
+    /**
+     * scan the data of specific nodeType
+     * the result will contain primary key and specific return properties.
+     *
+     * @param graphName        NebulaGraph name
+     * @param nodeType         node type name
+     * @param returnProperties the property list to scan, if list is empty,
+     *                         then the result just contain primary key.
+     * @param parts            part list to scan
+     * @param batchSize        the data size for one request for one part,
+     *                         the ScanNodeResultIterator.next() will return at most batchSize
+     *                         node records
+     * @return ScanNodeResultIterator
+     */
+    private ScanNodeResultIterator scanNode(String graphName, String nodeType,
+                                            List<String> returnProperties,
+                                            List<Integer> parts, int batchSize) {
+        initScanThreadPool();
+        return new ScanNodeResultIterator(pool, graphName, nodeType, returnProperties,
+                parts, batchSize, threadPool, retryTimes, intervalTime);
+    }
+
+
+    // not implemented.
+    public ScanEdgeResultIterator scanEdge(String graphName, String edgeType) {
+        // get all property of edge
+        Map<String, String> schema = null;
+        try {
+            schema = getEdgeProperties(graphName, edgeType);
+        } catch (IOErrorException | NoValidSessionException e) {
+            log.error("get node schema failed.", e);
+            throw new RuntimeException(e);
+        }
+        List<String> propertyList = new ArrayList<>(schema.keySet());
+        // TODO get all parts
+        List<Integer> parts = new ArrayList<>();
+        return scanEdge(graphName, edgeType, propertyList, parts, defaultBatchSize);
+    }
+
+
+    /**
+     * scan the data of specific edgeType
+     * the result will contain src node's primary key, dst node's primary key, edge's all property.
+     *
+     * @param graphName NebulaGraph name
+     * @param edgeType  edge type name
+     * @param part      graph part id
+     * @param batchSize the data size for one request for one part,
+     *                  the ScanEdgeResultIterator.next() will return at most batchSize
+     *                  edge records
+     * @return ScanEdgeResultIterator
+     */
+    public ScanEdgeResultIterator scanEdge(String graphName,
+                                           String edgeType,
+                                           int part,
+                                           int batchSize) {
+        Map<String, String> schema = null;
+        try {
+            schema = getEdgeProperties(graphName, edgeType);
+        } catch (IOErrorException | NoValidSessionException e) {
+            log.error("get node schema failed.", e);
+            throw new RuntimeException(e);
+        }
+        List<String> propertyList = new ArrayList<>(schema.keySet());
+        return scanEdge(graphName, edgeType, propertyList, part, batchSize);
+    }
+
+
+    /**
+     * scan the data of specific edgeType
+     *
+     * @param graphName        NebulaGraph name
+     * @param edgeType         edge type name
+     * @param returnProperties the property list to scan, if list is empty, then the result will
+     *                         just contain src node's primary key and dst node's primary key
+     * @param part             graph part id
+     * @param batchSize        the data size for one request for one part,
+     *                         the ScanEdgeResultIterator.next() will return at most batchSize
+     *                         edge records
+     * @return ScanEdgeResultIterator
+     */
+    public ScanEdgeResultIterator scanEdge(String graphName,
+                                           String edgeType,
+                                           List<String> returnProperties,
+                                           int part,
+                                           int batchSize) {
+        return scanEdge(graphName, edgeType, returnProperties, Collections.singletonList(part),
+                batchSize);
+    }
+
+
+    /**
+     * scan the data of specific edgeType
+     *
+     * @param graphName        NebulaGraph name
+     * @param edgeType         edge type name
+     * @param returnProperties the property list to scan, if list is empty, then the result will
+     *                         just contain src node's primary key and dst node's primary key
+     * @param parts            part list to scan
+     * @param batchSize        the data size for one request for one part,
+     *                         the ScanEdgeResultIterator.next() will return at most batchSize
+     *                         edge records
+     * @return ScanEdgeResultIterator
+     */
+    private ScanEdgeResultIterator scanEdge(String graphName,
+                                            String edgeType,
+                                            List<String> returnProperties,
+                                            List<Integer> parts,
+                                            int batchSize) {
+        initScanThreadPool();
+        return new ScanEdgeResultIterator(pool, graphName, edgeType, returnProperties,
+                parts, batchSize, threadPool, retryTimes, intervalTime);
+    }
+
+    /**
+     * get node type's properties
+     *
+     * @param graphName NebulaGraph name
+     * @param nodeType  node type name
+     * @return Map for property name and property data type
+     */
+    private Map<String, String> getNodeProperties(String graphName, String nodeType)
+            throws IOErrorException, NoValidSessionException {
+        Map<String, String> schema = new HashMap<>();
+        ResultSet result = getGraphDesc(graphName);
+        List<ResultSet.Record> records = result.getRows();
+
+        for (ResultSet.Record record : records) {
+            if (record.get("Field").asString().equalsIgnoreCase(nodeType)) {
+                String propertyString = record.get("Properties").asString();
+                String[] proeprties =
+                        propertyString.substring(1, propertyString.length() - 1).split(",");
+                for (String prop : proeprties) {
+                    String[] nameAndType = prop.trim().split(" ");
+                    schema.put(nameAndType[0], nameAndType[1]);
+                }
+                return schema;
+            }
+        }
+        throw new IllegalArgumentException("node type " + nodeType + " does not exist!");
+    }
+
+
+    /**
+     * get edge type's properties
+     *
+     * @param graphName NebulaGraph name
+     * @param edgeType  edge type name
+     * @return Map of property name and property data type
+     */
+    private Map<String, String> getEdgeProperties(String graphName, String edgeType)
+            throws IOErrorException, NoValidSessionException {
+        Map<String, String> schema = new HashMap<>();
+        ResultSet result = getGraphDesc(graphName);
+        List<ResultSet.Record> records = result.getRows();
+
+        for (ResultSet.Record record : records) {
+            if (record.get("Kind").asString().equals("Edge")) {
+                String fullEdgeType = record.get("Field").asString();
+                String regex = "\\((.*)\\)-\\[(.*)\\]->\\((.*)\\)";
+                Pattern r = Pattern.compile(regex);
+                Matcher m = r.matcher(fullEdgeType);
+                if (m.find()) {
+                    if (edgeType.equalsIgnoreCase(m.group(2))) {
+                        String propertiesString = record.get("Properties").asString();
+                        String[] properties = propertiesString.substring(1,
+                                propertiesString.length() - 1).split(",");
+                        for (String prop : properties) {
+                            String[] nameAndType = prop.trim().split(" ");
+                            schema.put(nameAndType[0], nameAndType[1]);
+                        }
+                        return schema;
+                    }
+                }
+            }
+        }
+        throw new IllegalArgumentException("edgeType " + edgeType + " does not exist.");
+    }
+
+
+    /**
+     * get the graph's schema info
+     * TODO add `` for graph type and graph name
+     *
+     * @param graphName NebulaGraph name
+     * @return ResultSet
+     */
+    private ResultSet getGraphDesc(String graphName) throws IOErrorException,
+            NoValidSessionException {
+        ResultSet resultSet = execute(String.format("DESCRIBE GRAPH %s", graphName));
+        String graphType;
+        if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
+            graphType = resultSet.getRows().get(0).values().get(1).asString();
+        } else {
+            throw new IllegalArgumentException("graphName " + graphName + " does not exist.");
+        }
+
+        String queryStatement = String.format("DESCRIBE GRAPH TYPE %s", graphType);
+        resultSet = execute(queryStatement);
+        if (!resultSet.isSucceeded()) {
+            throw new RuntimeException("query error with " + queryStatement
+                    + " for " + resultSet.getGqlStatus());
+        }
+        return resultSet;
+    }
+
+    /**
+     * init the thread pool for scan.
+     * The max thread size is the value of maxSessionSize for pool
+     * When the number of parts to be scanned is greater than maxSessionSize, the maximum
+     * concurrency will be the maximum number of sessions that can be executed concurrently.
+     * When the number of parts is less than maxSessionSize, the upper limit of the thread pool is
+     * maxSessionSize. Threads will only be created when a task is submitted, so in the pool,
+     * Only parts number of threads will be created.
+     */
+    private void initScanThreadPool() {
+        if (threadPool == null) {
+            synchronized (this) {
+                if (threadPool == null) {
+                    threadPool = Executors.newFixedThreadPool(scanParallel);
+                }
+            }
+        }
+    }
 
     /**
      * close the client
