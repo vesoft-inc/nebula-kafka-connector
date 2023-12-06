@@ -4,6 +4,7 @@ package nebula_ng
 
 import (
 	"fmt"
+	"sort"
 	"strconv"
 	"strings"
 
@@ -51,7 +52,7 @@ func (valWrap ValueWrapper) IsList() bool {
 	return valWrap.value.IsSetListVal()
 }
 
-func (valWrap ValueWrapper) IsRecord() bool {
+func (valWrap ValueWrapper) IsMap() bool {
 	return valWrap.value.IsSetRecordVal()
 }
 
@@ -189,19 +190,19 @@ func (valWrap ValueWrapper) AsDuration() (nebula.Duration, error) {
 	return nil, fmt.Errorf("failed to convert value %s to Duration", valWrap.GetType())
 }
 
-// // AsMap converts the ValueWrapper to a map of string and ValueWrapper
-// func (valWrap ValueWrapper) AsMap() (map[string]ValueWrapper, error) {
-// 	if valWrap.value.IsSetMapVal() {
-// 		newMap := make(map[string]ValueWrapper)
+// AsMap converts the ValueWrapper to a map of string and ValueWrapper
+func (valWrap ValueWrapper) AsMap() (map[string]ValueWrapper, error) {
+	if valWrap.value.IsSetRecordVal() {
+		newMap := make(map[string]ValueWrapper)
 
-// 		kvs := valWrap.value.GetMapVal().values
-// 		for key, val := range kvs {
-// 			newMap[key] = ValueWrapper{val, valWrap.timezoneInfo}
-// 		}
-// 		return newMap, nil
-// 	}
-// 	return nil, fmt.Errorf("failed to convert value %s to Map", valWrap.GetType())
-// }
+		kvs := valWrap.value.GetRecordVal().Values
+		for key, val := range kvs {
+			newMap[key] = ValueWrapper{val, valWrap.timezoneInfo}
+		}
+		return newMap, nil
+	}
+	return nil, fmt.Errorf("failed to convert value %s to Map", valWrap.GetType())
+}
 
 // AsNode converts the ValueWrapper to a Node
 func (valWrap ValueWrapper) AsNode() (*Node, error) {
@@ -352,21 +353,19 @@ func (valWrap ValueWrapper) String() string {
 		totalSeconds := duval.GetSeconds() + int64(duval.GetMicroseconds())/1000000
 		remainMicroSeconds := duval.GetMicroseconds() % 1000000
 		return fmt.Sprintf("P%vMT%v.%06d000S", duval.GetMonths(), totalSeconds, remainMicroSeconds)
-	} else if value.IsSetRecordVal() { // Map TODO(Aiee) Unimplemented
-		// // {k0: v0, k1: v1}
-		// mval := value.GetMapVal()
-		// var keyList []string
-		// var output []string
-		// kvs := mval.Kvs
-		// for k := range kvs {
-		// 	keyList = append(keyList, k)
-		// }
-		// sort.Strings(keyList)
-		// for _, k := range keyList {
-		// 	output = append(output, fmt.Sprintf("%s: %s", k, ValueWrapper{kvs[k], valWrap.timezoneInfo}.String()))
-		// }
-		// return fmt.Sprintf("{%s}", strings.Join(output, ", "))
-		return "map type string unimplemented"
+	} else if value.IsSetRecordVal() {
+		mval := value.GetRecordVal()
+		var keyList []string
+		var output []string
+		kvs := mval.Values
+		for k := range kvs {
+			keyList = append(keyList, k)
+		}
+		sort.Strings(keyList)
+		for _, k := range keyList {
+			output = append(output, fmt.Sprintf("%s: %s", k, ValueWrapper{kvs[k], valWrap.timezoneInfo}.String()))
+		}
+		return fmt.Sprintf("{%s}", strings.Join(output, ", "))
 	} else if value.IsSetPathVal() { // Path
 		// TODO(Aiee) the implementation of path is same as list for now
 		pval := value.GetPathVal()

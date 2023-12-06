@@ -10,6 +10,7 @@ package nebula_ng
 
 import (
 	"testing"
+	"fmt"
 
 	"github.com/stretchr/testify/assert"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
@@ -93,6 +94,30 @@ func TestAsList(t *testing.T) {
 			t.Error(err.Error())
 		}
 		assert.Equal(t, string(valList[i].GetStringVal()), strTemp)
+	}
+}
+
+func TestAsMap(t *testing.T) {
+	valueMap := make(map[string]*nebula.XValue_)
+	for i := 0; i < 3; i++ {
+		key := fmt.Sprintf("key%d", i)
+		val := fmt.Sprintf("val%d", i)
+		valueMap[key] = &nebula.XValue_{StringVal: []byte(val)}
+	}
+	mval := nebula.XNRecord_{Values: valueMap}
+	value := nebula.XValue_{RecordVal: &mval}
+	valWrap := ValueWrapper{&value, testTimezone}
+	assert.Equal(t, "{key0: \"val0\", key1: \"val1\", key2: \"val2\"}", valWrap.String())
+	assert.Equal(t, true, valWrap.IsMap())
+	vMap := value.GetRecordVal().Values
+	valWrapMap, err := valWrap.AsMap()
+	if err != nil {
+		t.Error(err.Error())
+	}
+	for i := 0; i < len(vMap); i++ {
+		key := fmt.Sprintf("key%d", i)
+		str, _ := valWrapMap[key].AsString()
+		assert.Equal(t, string(vMap[key].GetStringVal()), str)
 	}
 }
 
