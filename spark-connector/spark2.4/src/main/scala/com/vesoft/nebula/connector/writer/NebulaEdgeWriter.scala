@@ -13,7 +13,6 @@ import org.apache.spark.sql.sources.v2.writer.{DataWriter, WriterCommitMessage}
 import org.apache.spark.sql.types.StructType
 import org.slf4j.LoggerFactory
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
@@ -67,15 +66,69 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     * submit buffer edges to nebula
     */
   def execute(): Unit = {
-    val nebulaEdges = NebulaEdges(nebulaOptions.label, edges.toList)
+    writeEdges(edges)
+    edges.clear()
+  }
+
+  def writeEdges(edges: ListBuffer[NebulaEdge]): Unit = {
+    val exec   = getGql(edges.toList)
+    val result = submit(exec)
+    if (result.isSucceeded) {
+      if (!nebulaOptions.disableWriteLog) {
+        LOG.info(
+          s"batch write for ${nebulaOptions.label} succeed. batch size(${edges.size}), latency(${result.getLatency})")
+      }
+    } else {
+      // re-execute the vertices one by one
+      LOG.warn(
+        s"write edge ${nebulaOptions.label} failed error message: ${result.getGqlStatus}, " +
+          s"mow retry writing one by one.\n ${exec}")
+      edges.par.foreach { edge =>
+        writeEdge(edge)
+      }
+    }
+  }
+
+  def writeEdge(edge: NebulaEdge): Unit = {
+    val exec   = getGql(List(edge))
+    val result = submit(exec)
+    if (result.isSucceeded) {
+      if (!nebulaOptions.disableWriteLog) {
+        LOG.info(s"write ${nebulaOptions.label}, batch size(1), latency(${result.getLatency}ms)")
+      }
+      return
+    }
+    // retry the write execution for RAFT_RPC_FAILURE(6029), RAFT_LEADER_CHANGED(6026), RAFT_BUFFER_OVERFLOW(6019)
+    var executeResult = result
+    var retry         = 0
+    while (retry < nebulaOptions.executionRetry &&
+           (executeResult.getGqlStatus.contains("6029")
+           || executeResult.getGqlStatus.contains("6026")
+           || executeResult.getGqlStatus.contains("6019"))) {
+      retry += 1
+      Thread.sleep(nebulaOptions.executionRetryInterval)
+      executeResult = submit(exec)
+      if (executeResult.isSucceeded) {
+        if (!nebulaOptions.disableWriteLog) {
+          LOG.info(
+            s"write ${nebulaOptions.label}, batch size(1), latency(${executeResult.getLatency}ms)")
+        }
+        return
+      }
+    }
+    LOG.error(s"write edge failed for ${executeResult.getGqlStatus}, statement:\n ${exec}")
+    failedExecs.append(exec)
+  }
+
+  private def getGql(edges: List[NebulaEdge]): String = {
+    val nebulaEdges = NebulaEdges(nebulaOptions.label, edges)
     val exec = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
         NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
       case _ =>
         throw new IllegalArgumentException(s"write mode ${nebulaOptions.writeMode} not supported.")
     }
-    edges.clear()
-    submit(exec)
+    exec
   }
 
   override def commit(): WriterCommitMessage = {

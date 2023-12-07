@@ -7,17 +7,17 @@ package com.vesoft.nebula.spark.common
 
 import org.slf4j.{Logger, LoggerFactory}
 
-import scala.collection.mutable.ListBuffer
-
 class NebulaConnectionConfig(graphAddress: String,
                              timeout: Int,
                              connectionRetry: Int,
-                             executeRetry: Int)
+                             executeRetry: Int,
+                             executeRetryIntervalMs: Int)
     extends Serializable {
-  def getGraphAddress    = graphAddress
-  def getTimeout         = timeout
-  def getConnectionRetry = connectionRetry
-  def getExecRetry       = executeRetry
+  def getGraphAddress        = graphAddress
+  def getTimeout             = timeout
+  def getConnectionRetry     = connectionRetry
+  def getExecRetry           = executeRetry
+  def getExecRetryIntervalMs = executeRetryIntervalMs
 
 }
 
@@ -25,10 +25,11 @@ object NebulaConnectionConfig {
   class ConfigBuilder {
     private val LOG = LoggerFactory.getLogger(this.getClass)
 
-    protected var graphAddress: String = _
-    protected var timeout: Int         = 6000
-    protected var connectionRetry: Int = 1
-    protected var executeRetry: Int    = 1
+    protected var graphAddress: String        = _
+    protected var timeout: Int                = 6000
+    protected var connectionRetry: Int        = 3
+    protected var executeRetry: Int           = 3
+    protected var executeRetryIntervalMs: Int = 0
 
     /**
       * set nebula graph server address, multi addresses is split by English comma
@@ -63,6 +64,14 @@ object NebulaConnectionConfig {
     }
 
     /**
+      * set executeRetryIntervalMs, executeRetryIntervalMs is optional
+      */
+    def withExecuteRetryIntervalMs(executeRetryIntervalMs: Int): ConfigBuilder = {
+      this.executeRetryIntervalMs = executeRetryIntervalMs
+      this
+    }
+
+    /**
       * check if the connection config is valid
       */
     def check(): Unit = {
@@ -75,7 +84,11 @@ object NebulaConnectionConfig {
       */
     def build(): NebulaConnectionConfig = {
       check()
-      new NebulaConnectionConfig(graphAddress, timeout, connectionRetry, executeRetry)
+      new NebulaConnectionConfig(graphAddress,
+                                 timeout,
+                                 connectionRetry,
+                                 executeRetry,
+                                 executeRetryIntervalMs)
     }
   }
 
@@ -92,13 +105,16 @@ class WriteNebulaConfig(graphName: String,
                         user: String,
                         passwd: String,
                         batch: Int,
-                        writeMode: String)
+                        writeMode: String,
+                        disableWriteLog: Boolean)
     extends Serializable {
   def getGraphName = graphName
   def getBatch     = batch
   def getUser      = user
   def getPasswd    = passwd
   def getWriteMode = writeMode
+
+  def isDisableWriteLog = disableWriteLog
 }
 
 /**
@@ -116,8 +132,9 @@ class WriteNebulaVertexConfig(graphName: String,
                               vidAsProp: Boolean,
                               user: String,
                               passwd: String,
-                              writeMode: String)
-    extends WriteNebulaConfig(graphName, user, passwd, batch, writeMode) {
+                              writeMode: String,
+                              disableWriteLog: Boolean)
+    extends WriteNebulaConfig(graphName, user, passwd, batch, writeMode, disableWriteLog) {
   def getNodeType  = nodeType
   def getVidField  = vidField
   def getVidAsProp = vidAsProp
@@ -133,13 +150,14 @@ object WriteNebulaVertexConfig {
 
   class WriteVertexConfigBuilder {
 
-    var graphName: String = _
-    var nodeType: String  = _
-    var vidField: String  = _
-    var batchSize: Int    = 512
-    var user: String      = "root"
-    var passwd: String    = "nebula"
-    var writeMode: String = "insert"
+    var graphName: String        = _
+    var nodeType: String         = _
+    var vidField: String         = _
+    var batchSize: Int           = 512
+    var user: String             = "root"
+    var passwd: String           = "nebula"
+    var writeMode: String        = "insert"
+    var disableWriteLog: Boolean = false
 
     /** whether set vid as property */
     var vidAsProp: Boolean = false
@@ -209,6 +227,14 @@ object WriteNebulaVertexConfig {
     }
 
     /**
+      * set disableWriteLog, default is false
+      */
+    def withDisableWriteLog(disableWriteLog: Boolean): WriteVertexConfigBuilder = {
+      this.disableWriteLog = disableWriteLog
+      this
+    }
+
+    /**
       * check and get WriteNebulaVertexConfig
       */
     def build(): WriteNebulaVertexConfig = {
@@ -220,7 +246,8 @@ object WriteNebulaVertexConfig {
                                   vidAsProp,
                                   user,
                                   passwd,
-                                  writeMode)
+                                  writeMode,
+                                  disableWriteLog)
     }
 
     private def check(): Unit = {
@@ -270,8 +297,9 @@ class WriteNebulaEdgeConfig(graphName: String,
                             dstAsProp: Boolean,
                             user: String,
                             passwd: String,
-                            writeMode: String)
-    extends WriteNebulaConfig(graphName, user, passwd, batch, writeMode) {
+                            writeMode: String,
+                            disableWriteLog: Boolean)
+    extends WriteNebulaConfig(graphName, user, passwd, batch, writeMode, disableWriteLog) {
   def getEdgeName = edgeName
   def getSrcFiled = srcFiled
   def getDstField = dstField
@@ -309,6 +337,8 @@ object WriteNebulaEdgeConfig {
 
     /** write mode for nebula, insert or update */
     var writeMode: String = WriteMode.INSERT.toString
+
+    var disableWriteLog: Boolean = false
 
     /**
       * set graph name
@@ -391,6 +421,14 @@ object WriteNebulaEdgeConfig {
     }
 
     /**
+      * set disableWriteLog, default is false
+      */
+    def withDisableWriteLog(disableWriteLog: Boolean): WriteEdgeConfigBuilder = {
+      this.disableWriteLog = disableWriteLog
+      this
+    }
+
+    /**
       * check configs and get WriteNebulaEdgeConfig
       */
     def build(): WriteNebulaEdgeConfig = {
@@ -404,7 +442,8 @@ object WriteNebulaEdgeConfig {
                                 dstAsProp,
                                 user,
                                 passwd,
-                                writeMode)
+                                writeMode,
+                                disableWriteLog)
     }
 
     private def check(): Unit = {

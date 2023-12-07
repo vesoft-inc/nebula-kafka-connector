@@ -48,9 +48,11 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
     parameters.getOrElse(CONNECTION_RETRY, DEFAULT_CONNECTION_RETRY).toString.toInt
   val executionRetry: Int =
     parameters.getOrElse(EXECUTION_RETRY, DEFAULT_EXECUTION_RETRY).toString.toInt
-  val user: String      = parameters.getOrElse(USER_NAME, DEFAULT_USER_NAME)
-  val passwd: String    = parameters.getOrElse(PASSWD, DEFAULT_PASSWD)
-  val rateLimit: Long   = parameters.getOrElse(RATE_LIMIT, DEFAULT_RATE_LIMIT).toString.toLong
+  val executionRetryInterval: Int =
+    parameters.getOrElse(EXECUTION_RETRY_INTERVAL, DEFAULT_EXECUTION_RETRY_INTERVAL).toString.toInt
+  val user: String    = parameters.getOrElse(USER_NAME, DEFAULT_USER_NAME)
+  val passwd: String  = parameters.getOrElse(PASSWD, DEFAULT_PASSWD)
+  val rateLimit: Long = parameters.getOrElse(RATE_LIMIT, DEFAULT_RATE_LIMIT).toString.toLong
 
   require(parameters.isDefinedAt(TYPE), s"Option '$TYPE' is required")
   val dataType: String = parameters(TYPE)
@@ -77,6 +79,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   var srcAsProp: Boolean         = _
   var dstAsProp: Boolean         = _
   var writeMode: WriteMode.Value = _
+  var disableWriteLog: Boolean   = _
 
   if (operaType == OperaType.WRITE) {
     require(parameters.isDefinedAt(GRAPH_ADDRESS),
@@ -92,6 +95,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
     dstAsProp = parameters.getOrElse(DST_AS_PROP, false).toString.toBoolean
     writeMode =
       WriteMode.withName(parameters.getOrElse(WRITE_MODE, DEFAULT_WRITE_MODE).toString.toLowerCase)
+    disableWriteLog = parameters.getOrElse(DISABLE_WRITE_LOG, false).toString.toBoolean
   }
 
   def getGraphAddress: String = graphAddress
@@ -107,29 +111,32 @@ object NebulaOptions {
   val LABEL: String         = "label"
 
   /** connection config */
-  val TIMEOUT: String          = "timeout"
-  val CONNECTION_RETRY: String = "connectionRetry"
-  val EXECUTION_RETRY: String  = "executionRetry"
-  val USER_NAME: String        = "user"
-  val PASSWD: String           = "passwd"
+  val TIMEOUT: String                  = "timeout"
+  val CONNECTION_RETRY: String         = "connectionRetry"
+  val EXECUTION_RETRY: String          = "executionRetry"
+  val EXECUTION_RETRY_INTERVAL: String = "executionRetryInterval"
+  val USER_NAME: String                = "user"
+  val PASSWD: String                   = "passwd"
 
   val OPERATE_TYPE: String = "operateType"
 
   /** write config */
-  val RATE_LIMIT: String  = "rateLimit"
-  val VERTEX_FIELD        = "vertexField"
-  val SRC_VERTEX_FIELD    = "srcVertexField"
-  val DST_VERTEX_FIELD    = "dstVertexField"
-  val BATCH: String       = "batch"
-  val VID_AS_PROP: String = "vidAsProp"
-  val SRC_AS_PROP: String = "srcAsProp"
-  val DST_AS_PROP: String = "dstAsProp"
-  val WRITE_MODE: String  = "writeMode"
+  val RATE_LIMIT: String        = "rateLimit"
+  val VERTEX_FIELD              = "vertexField"
+  val SRC_VERTEX_FIELD          = "srcVertexField"
+  val DST_VERTEX_FIELD          = "dstVertexField"
+  val BATCH: String             = "batch"
+  val VID_AS_PROP: String       = "vidAsProp"
+  val SRC_AS_PROP: String       = "srcAsProp"
+  val DST_AS_PROP: String       = "dstAsProp"
+  val WRITE_MODE: String        = "writeMode"
+  val DISABLE_WRITE_LOG: String = "disableWriteLog"
 
   val DEFAULT_TIMEOUT_SECONDS: Int            = 10
   val DEFAULT_CONNECTION_TIMEOUT_SECONDS: Int = 3
   val DEFAULT_CONNECTION_RETRY: Int           = 3
   val DEFAULT_EXECUTION_RETRY: Int            = 3
+  val DEFAULT_EXECUTION_RETRY_INTERVAL: Int   = 0
   val DEFAULT_USER_NAME: String               = "root"
   val DEFAULT_PASSWD: String                  = "nebula"
 

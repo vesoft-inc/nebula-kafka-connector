@@ -6,8 +6,16 @@
 package com.vesoft.nebula
 
 import com.vesoft.nebula.spark.common.utils.SparkValidate
-import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaConnectionConfig, NebulaOptions, OperaType, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaVertexConfig}
-import org.apache.spark.sql.{ DataFrameWriter, Row, SaveMode}
+import com.vesoft.nebula.spark.common.{
+  DataTypeEnum,
+  NebulaConnectionConfig,
+  NebulaOptions,
+  OperaType,
+  WriteNebulaConfig,
+  WriteNebulaEdgeConfig,
+  WriteNebulaVertexConfig
+}
+import org.apache.spark.sql.{DataFrameWriter, Row, SaveMode}
 
 package object connector {
 
@@ -56,7 +64,8 @@ package object connector {
         .option(NebulaOptions.TIMEOUT, connectionConfig.getTimeout)
         .option(NebulaOptions.CONNECTION_RETRY, connectionConfig.getConnectionRetry)
         .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
-
+        .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
+        .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
       dfWriter.save()
     }
 
@@ -87,6 +96,8 @@ package object connector {
         .option(NebulaOptions.TIMEOUT, connectionConfig.getTimeout)
         .option(NebulaOptions.CONNECTION_RETRY, connectionConfig.getConnectionRetry)
         .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
+        .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
+        .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
 
       dfWriter.save()
     }
