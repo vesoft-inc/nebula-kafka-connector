@@ -531,6 +531,9 @@ public class NebulaClient implements Serializable {
         if (pool != null && !pool.isClosed()) {
             pool.close();
         }
+        if (threadPool != null && !threadPool.isShutdown()) {
+            threadPool.shutdown();
+        }
     }
 
 

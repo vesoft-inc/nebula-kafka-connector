@@ -74,7 +74,6 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
 
         try {
             countDownLatch.await();
-            threadPool.shutdown();
         } catch (InterruptedException interruptedException) {
             LOGGER.error("scan interrupted:", interruptedException);
             throw new RuntimeException("scan interrupted", interruptedException);
