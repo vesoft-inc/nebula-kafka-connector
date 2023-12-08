@@ -5,12 +5,12 @@
 
 package com.vesoft.nebula.spark.common.nebula
 
-import com.vesoft.nebula.client.graph.data.ResultSet
+import com.vesoft.nebula.client.graph.data.{ResultSet, ValueWrapper}
 import com.vesoft.nebula.client.graph.net.NebulaClient
 import org.slf4j.LoggerFactory
 
-import scala.collection.JavaConverters.asScalaBufferConverter
-import scala.collection.mutable
+import scala.collection.JavaConverters.{asScalaBufferConverter, mapAsScalaMapConverter}
+import scala.collection.{breakOut, mutable}
 
 /**
   * GraphProvider for Nebula Graph Service
@@ -45,50 +45,8 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     client.execute(statement)
 
   def getIdType(graphName: String, nodeType: String): VidType.Value = {
-    val schema = getNodeSchema(graphName, nodeType)
-    for (entry <- schema) {
-      if (entry._1.equals("id")) {
-        return VidType.withName(entry._2)
-      }
-    }
-    throw new IllegalArgumentException(s"graphName $graphName does not have NodeType $nodeType.")
-  }
-
-  def getIdsType(graphName: String, edgeType: String): (VidType.Value, VidType.Value) = {
-    val (sourceNodeType, targetNodeType) = getNodesType(graphName, edgeType)
-    (getIdType(graphName, sourceNodeType), getIdType(graphName, targetNodeType))
-  }
-
-  def getNodesType(graphName: String, edgeType: String): (String, String) = {
-    var resultSet = client.execute(s"DESCRIBE GRAPH $graphName")
-    val graphType = if (resultSet.isSucceeded && !resultSet.isEmpty) {
-      resultSet.getRows.get(0).values().get(1).asString
-    } else {
-      throw new IllegalArgumentException(s"graphName $graphName does not exist.")
-    }
-
-    resultSet = client.execute(s"DESCRIBE GRAPH TYPE $graphType")
-    var sourceNodeType: String = null
-    var targetNodeType: String = null
-
-    if (resultSet.isSucceeded) {
-      val records = resultSet.getRows
-      for (record: ResultSet.Record <- records.asScala) {
-        if (record.get("Field").asString.toUpperCase.contains(edgeType.toUpperCase)) {
-          val propertyString = record.get("Field").asString()
-          val pattern        = """\((.*?)\)-\[.*?\]->\((.*?)\)""".r
-          propertyString match {
-            case pattern(start, end) =>
-              sourceNodeType = start
-              targetNodeType = end
-
-            case _ => throw new IllegalArgumentException(s"edge type pattern parse failed.")
-          }
-          return (sourceNodeType, targetNodeType)
-        }
-      }
-    }
-    throw new IllegalArgumentException(s"graphName $graphName does not have EdgeType $edgeType.")
+    val nodeDesc = getNodeDesc(graphName, nodeType)
+    nodeDesc.nodePkDataType
   }
 
   /**
@@ -96,88 +54,88 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     *
     * @param graphName
     * @param nodeType
-    * @return Map, property name -> data type {@link PropertyType}
+    * @return {@link NodeDesc}
     */
-  def getNodeSchema(graphName: String, nodeType: String): Map[String, String] = {
+  def getNodeDesc(graphName: String, nodeType: String): NodeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val resultSet                               = getGraphDesc(graphName)
+    val graphType                               = getGraphType(graphName)
 
-    val records             = resultSet.getRows
-    var existLabel: Boolean = false
-    for (record: ResultSet.Record <- records.asScala) {
-      if (record.get("Field").asString.equalsIgnoreCase(nodeType)) {
-        existLabel = true
-        val propertyString = record.get("Properties").asString()
-        val properties     = propertyString.substring(1, propertyString.length - 1).split(",")
-        for (prop <- properties) {
-          val nameAndType = prop.trim.split(" ")
-          schema += (nameAndType(0) -> nameAndType(1))
-        }
+    val descNodeType = s"DESCRIBE NODE TYPE $nodeType OF $graphType"
+    val result       = client.execute(descNodeType)
+    if (!result.isSucceeded || result.isEmpty) {
+      LOG.error(s"get 'describe' of $nodeType failed for ${result.getGqlStatus}")
+      throw new IllegalArgumentException(s"node type $nodeType does not exist in $graphName.")
+    }
+    val properties = result.getRows.get(0).get("properties").asMap()
+    for ((k, v) <- properties.asScala) schema += (k -> v.asString())
+
+    // for now, the pk is one property, composite pk is not support yet.
+    val pks: List[ValueWrapper] = result.getRows.get(0).get("primary_keys").asList().asScala.toList
+    if (pks.isEmpty) {
+      LOG.error(s"node type $nodeType has no primary key.")
+      throw new RuntimeException(s"node type $nodeType has no primary key")
+    }
+    val pk: String = pks.head.asString()
+
+    var flag                      = true
+    var idDataType: VidType.Value = null
+    for (entry <- schema if flag) {
+      if (entry._1.equals(pk)) {
+        idDataType = VidType.withName(entry._2)
+        flag = false
       }
     }
-    if (!existLabel) {
-      throw new IllegalArgumentException(s"graphName $graphName does not have nodeType $nodeType")
+    if (idDataType == null) {
+      throw new RuntimeException(s"can not get the pk $pk for $nodeType")
     }
-    schema.toMap
+    NodeDesc(nodeType, idDataType, schema.toMap)
   }
 
   /**
-    * get edge's schema info
+    * get edge description info
     *
     * @param graphName
     * @param edgeType
-    * @return Map, property name -> data type {@link PropertyType}
+    * @return {@link EdgeDesc}
     */
-  def getEdgeSchema(graphName: String, edgeType: String): Map[String, String] = {
+  def getEdgeDesc(graphName: String, edgeType: String): EdgeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val resultSet                               = getGraphDesc(graphName)
+    val graphType                               = getGraphType(graphName)
 
-    val records             = resultSet.getRows
-    var existLabel: Boolean = false
-    for (record: ResultSet.Record <- records.asScala) {
-      if (record.get("Kind").asString().equals("Edge")) {
-        val fullEdgeType         = record.get("Field").asString
-        val pattern              = """\((.*?)\)-\[(.*?)\]->\((.*?)\)""".r
-        var edgeTypeName: String = null
-        fullEdgeType match {
-          case pattern(start, edgeType, end) =>
-            edgeTypeName = edgeType
-          case _ => throw new IllegalArgumentException(s"edge type pattern parse failed.")
-        }
-        if (edgeTypeName.equalsIgnoreCase(edgeType)) {
-          existLabel = true
-          val propertyString = record.get("Properties").asString()
-          val properties     = propertyString.substring(1, propertyString.length - 1).split(",")
-          for (prop <- properties) {
-            val nameAndType = prop.trim.split(" ")
-            schema += (nameAndType(0) -> nameAndType(1))
-          }
-        }
-      }
+    val descEdgeType = s"DESCRIBE EDGE TYPE $edgeType OF $graphType"
+    val result       = client.execute(descEdgeType)
+    if (!result.isSucceeded || result.isEmpty) {
+      LOG.error(s"get 'describe' of $edgeType failed for ${result.getGqlStatus}")
+      throw new IllegalArgumentException(s"edge type $edgeType does not exist in $graphName.")
     }
-    if (!existLabel) {
-      throw new IllegalArgumentException(s"graphName $graphName does not have edgeType $edgeType")
+
+    val types = result.getRows.get(0).get("types").asList()
+    // the 'Types' in result for DESCRIBE EDGE TYPE should contain 'src node type', 'edge type', 'dst node type'
+    if (types.size() < 3) {
+      LOG.error(s"types size is less than 3 for edge type $edgeType")
+      throw new RuntimeException(
+        s"edge type $edgeType has unexpected 'Types', the types size is less than 3.")
     }
-    schema.toMap
+    val srcNodeType = types.get(0).asString()
+    val dstNodeType = types.get(2).asString()
+
+    val srcNodeIdDataType = getIdType(graphName, srcNodeType)
+    val dstNodeIdDataType = getIdType(graphName, dstNodeType)
+
+    val properties = result.getRows.get(0).get("properties").asMap()
+    for ((k, v) <- properties.asScala) schema += (k -> v.asString())
+
+    EdgeDesc(edgeType, srcNodeType, srcNodeIdDataType, dstNodeType, dstNodeIdDataType, schema.toMap)
   }
 
-  private def getGraphDesc(graphName: String): ResultSet = {
+  private def getGraphType(graphName: String): String = {
     var resultSet = client.execute(s"DESCRIBE GRAPH $graphName")
     val graphType = if (resultSet.isSucceeded && !resultSet.isEmpty) {
       resultSet.getRows.get(0).values().get(1).asString
     } else {
       throw new IllegalArgumentException(s"graphName $graphName does not exist.")
     }
-
-    val queryStatement = s"DESCRIBE GRAPH TYPE $graphType"
-    resultSet = client.execute(queryStatement)
-    if (!resultSet.isSucceeded) {
-      throw new RuntimeException(
-        s"query error with `$queryStatement` for ${resultSet.getGqlStatus}")
-    }
-
-    resultSet
-
+    graphType
   }
 }
 

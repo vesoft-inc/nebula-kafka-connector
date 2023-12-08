@@ -15,10 +15,10 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   var graphProvider: GraphProvider = null
 
   override def beforeAll(): Unit = {
-    val address = "192.168.8.6:3713"
+    val address = "192.168.8.6:3820"
     graphProvider = new GraphProvider(address, "root", "nebula", 3000, 1)
 
-    val createSchema = "CREATE GRAPH TYPE graph_type_nba IF NOT EXISTS AS {" +
+    val createSchema = "CREATE GRAPH TYPE graph_type_nba AS GRAPH TYPE{" +
       "(node_type_player(id) LABEL player {id INT, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
       "(node_type_player)-[edge_type_follow LABEL follow {followness INT, likeness FLOAT64}]->(node_type_player)}"
     val resp = graphProvider.submit(createSchema)
@@ -36,33 +36,28 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     assert(idType == VidType.INT)
   }
 
-  test("getIdsType for edge") {
-    val (sourceIdType, targetIdType) = graphProvider.getIdsType("nba", "edge_type_follow")
-    assert(sourceIdType == VidType.INT)
-    assert(targetIdType == VidType.INT)
+  test("getNodeDesc") {
+    val nodeDesc = graphProvider.getNodeDesc("nba", "node_type_player")
+    assert(nodeDesc.nodeTypeName.equals("node_type_player"))
+    assert(nodeDesc.nodePkDataType == VidType.INT)
+    assert(nodeDesc.properties.size == 5)
+    assert(nodeDesc.properties.keySet.contains("id"))
+    assert(nodeDesc.properties.keySet.contains("name"))
+    assert(nodeDesc.properties.keySet.contains("score"))
+    assert(nodeDesc.properties.keySet.contains("gender"))
+    assert(nodeDesc.properties.keySet.contains("rate"))
   }
 
-  test("getNodesType for edge") {
-    val (sourceType, targetType) = graphProvider.getNodesType("nba", "edge_type_follow")
-    assert(sourceType.equals("node_type_player"))
-    assert(targetType.equals("node_type_player"))
-  }
-
-  test("getVertexSchema") {
-    val schema = graphProvider.getNodeSchema("nba", "node_type_player")
-    assert(schema.size == 5)
-    assert(schema.keySet.contains("id"))
-    assert(schema.keySet.contains("name"))
-    assert(schema.keySet.contains("score"))
-    assert(schema.keySet.contains("gender"))
-    assert(schema.keySet.contains("rate"))
-  }
-
-  test("getEdgeSchema") {
-    val schema = graphProvider.getEdgeSchema("nba", "edge_type_follow")
-    assert(schema.size == 2)
-    assert(schema.keySet.contains("followness"))
-    assert(schema.keySet.contains("likeness"))
+  test("getEdgeDesc") {
+    val edgeDesc = graphProvider.getEdgeDesc("nba", "edge_type_follow")
+    assert(edgeDesc.edgeTypeName.equals("edge_type_follow"))
+    assert(edgeDesc.srcNodeTypeName.equals("node_type_player"))
+    assert(edgeDesc.dstNodeTypeName.equals("node_type_player"))
+    assert(edgeDesc.srcNodePkDataType == VidType.INT)
+    assert(edgeDesc.dstNodePkDataType == VidType.INT)
+    assert(edgeDesc.properties.size == 2)
+    assert(edgeDesc.properties.keySet.contains("followness"))
+    assert(edgeDesc.properties.keySet.contains("likeness"))
   }
 
 }

@@ -20,16 +20,14 @@ class NebulaVertexWriter(nebulaOptions: NebulaOptions, vertexIndex: Int, schema:
     with DataWriter[InternalRow] {
 
   private val LOG = LoggerFactory.getLogger(this.getClass)
+  private val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
 
-  val fieldTypeMap: Map[String, String] =
-    graphProvider.getNodeSchema(nebulaOptions.graphName, nebulaOptions.label)
+  val fieldTypeMap: Map[String, String] = nodeDesc.properties
 
   /** buffer to save batch vertices */
   var vertices: ListBuffer[NebulaVertex] = new ListBuffer()
 
-  private val isIdStringType: Boolean = graphProvider.getIdType(
-    nebulaOptions.graphName,
-    nebulaOptions.label) == VidType.STRING
+  private val isIdStringType: Boolean = nodeDesc.nodePkDataType == VidType.STRING
 
   /**
     * write one vertex row to buffer

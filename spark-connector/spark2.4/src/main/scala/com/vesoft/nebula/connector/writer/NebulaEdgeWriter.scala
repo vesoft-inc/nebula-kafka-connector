@@ -22,18 +22,16 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     extends NebulaWriter(nebulaOptions)
     with DataWriter[InternalRow] {
 
-  private val LOG = LoggerFactory.getLogger(this.getClass)
+  private val LOG      = LoggerFactory.getLogger(this.getClass)
+  private val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
 
-  val fieldTypeMap: Map[String, String] =
-    graphProvider.getEdgeSchema(nebulaOptions.graphName, nebulaOptions.label)
+  val fieldTypeMap: Map[String, String] = edgeDesc.properties
 
   /** buffer to save batch edges */
   var edges: ListBuffer[NebulaEdge] = new ListBuffer()
 
-  val (sourceIdType, targetIdType) =
-    graphProvider.getIdsType(nebulaOptions.graphName, nebulaOptions.label)
-  private val isSourceIdStringType = sourceIdType == VidType.STRING
-  private val isTargetIdStringType = targetIdType == VidType.STRING
+  private val isSourceIdStringType = edgeDesc.srcNodePkDataType == VidType.STRING
+  private val isTargetIdStringType = edgeDesc.dstNodePkDataType == VidType.STRING
 
   /**
     * write one edge record to buffer
