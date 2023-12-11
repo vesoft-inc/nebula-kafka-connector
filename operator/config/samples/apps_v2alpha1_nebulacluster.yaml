@@ -1,0 +1,12 @@
+apiVersion: apps.nebula-graph.io/v2alpha1
+kind: NebulaCluster
+metadata:
+  labels:
+    app.kubernetes.io/name: nebulacluster
+    app.kubernetes.io/instance: nebulacluster-sample
+    app.kubernetes.io/part-of: operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: operator
+  name: nebulacluster-sample
+spec:
+  # TODO(user): Add fields here
