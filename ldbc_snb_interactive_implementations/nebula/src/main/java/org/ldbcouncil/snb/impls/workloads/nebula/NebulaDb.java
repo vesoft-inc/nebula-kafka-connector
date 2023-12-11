@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.vesoft.nebula.Value;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.exception.InvalidValueException;
 import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.control.LoggingService;
@@ -56,7 +57,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         }
 
         @Override
-        public LdbcQuery1Result toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
+        public LdbcQuery1Result toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException, InvalidValueException {
 
             List<String> emails = new ArrayList<>();
             if ( !record.get( 8 ).isNull() ) {
@@ -68,18 +69,26 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             }
             List<LdbcQuery1Result.Organization> universities = new ArrayList<>();
             if ( !record.get( 11 ).isNull() ) {
-                List<ValueWrapper> valueList = record.get( 11 ).asList();
-                for (ValueWrapper list : valueList) {
-                    List<ValueWrapper> res = list.asList();
-                    universities.add (new LdbcQuery1Result.Organization(res.get( 0 ).asString(), getIntValue(res.get(1)), res.get( 2 ).asString()));
+                List<ValueWrapper> valueList = record.get(11).asList();
+                for (ValueWrapper nebulaRecordVal : valueList) {
+                    Map<String, ValueWrapper> nebulaRecord = nebulaRecordVal.asMap();
+                    if (nebulaRecord.containsKey("uniName") && nebulaRecord.containsKey("studyAtClassYear") && nebulaRecord.containsKey("uniCityName")) {
+                        universities.add(new LdbcQuery1Result.Organization(nebulaRecord.get("uniName").asString(), getIntValue(nebulaRecord.get("studyAtClassYear")), nebulaRecord.get("uniCityName").asString()));
+                    } else {
+                        throw new InvalidValueException("IC1' result : column `universities` miss field uniName or studyAtClassYear or uniCityName");
+                    }
                 }
             }
             List<LdbcQuery1Result.Organization> companies = new ArrayList<>();
             if ( !record.get( 12 ).isNull() ) {
                 List<ValueWrapper> valueList = record.get(12).asList();
-                for (ValueWrapper list : valueList) {
-                    List<ValueWrapper> res = list.asList();
-                    companies.add(new LdbcQuery1Result.Organization(res.get(0).asString(), getIntValue(res.get(1)), res.get(2).asString()));
+                for (ValueWrapper nebulaRecordVal : valueList) {
+                    Map<String, ValueWrapper> nebulaRecord = nebulaRecordVal.asMap();
+                    if (nebulaRecord.containsKey("companyName") && nebulaRecord.containsKey("workAtWorkFrom") && nebulaRecord.containsKey("companyCountryName")) {
+                        companies.add(new LdbcQuery1Result.Organization(nebulaRecord.get("companyName").asString(), getIntValue(nebulaRecord.get("workAtWorkFrom")), nebulaRecord.get("companyCountryName").asString()));
+                    } else {
+                        throw new InvalidValueException("IC1' result : column `companies` miss field companyName or workAtWorkFrom or companyCountryName");
+                    }
                 }
             }
 

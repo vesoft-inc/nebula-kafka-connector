@@ -18,14 +18,14 @@ MATCH (friend:Person)-[:IS_LOCATED_IN]->(friendCity:City)
 OPTIONAL MATCH (friend:Person)-[studyAt:STUDY_AT]->(uni:University)-[:IS_LOCATED_IN]->(uniCity:City)
 RETURN collect(
   CASE 
-    WHEN NOT uni.name IS NULL THEN LIST [uni.name, studyAt.classYear, uniCity.name]
-  END 
+    WHEN NOT uni.name IS NULL THEN RECORD {uniName:uni.name, studyAtClassYear:studyAt.classYear, uniCityName:uniCity.name}
+  END
   ) AS unis,friend, friendCity, distance
 NEXT USE $graphName
 OPTIONAL MATCH (friend:Person)-[workAt:WORK_AT]->(company:Company)-[:IS_LOCATED_IN]->(companyCountry:Country)
 RETURN collect(
-  CASE WHEN NOT company.name is null 
-    THEN LIST [company.name, workAt.workFrom, companyCountry.name] 
+  CASE
+    WHEN NOT company.name is null THEN RECORD {companyName:company.name, workAtWorkFrom:workAt.workFrom, companyCountryName:companyCountry.name}
   END 
   ) AS companies, friend, unis, friendCity, distance
 ORDER BY
@@ -33,6 +33,7 @@ ORDER BY
   friend.lastName ASC,
   toInteger(friend.id) ASC
 LIMIT 20
+NEXT USE $graphName
 RETURN
   friend.id AS friendId,
   friend.lastName AS friendLastName,
