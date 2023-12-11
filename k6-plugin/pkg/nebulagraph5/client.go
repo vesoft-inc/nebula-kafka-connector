@@ -276,9 +276,10 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 
 	if gc.Pool.OutputCh != nil {
 		var fr []string
-		cols := resp.GetColSize()
-		// print the first row of the result
 		if rows != 0 {
+			// print the first row of the result
+			cols := resp.GetColSize()
+
 			r, err := resp.GetRowValuesByIndex(0)
 			if err != nil {
 				return nil, err
