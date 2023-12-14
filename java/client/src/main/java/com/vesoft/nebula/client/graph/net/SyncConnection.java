@@ -11,6 +11,7 @@ import com.facebook.thrift.protocol.TProtocol;
 import com.facebook.thrift.transport.TSocket;
 import com.facebook.thrift.transport.TTransport;
 import com.facebook.thrift.transport.TTransportException;
+import com.google.common.base.Charsets;
 import com.vesoft.nebula.AuthReq;
 import com.vesoft.nebula.AuthResponse;
 import com.vesoft.nebula.ExecutionResponse;
@@ -18,6 +19,7 @@ import com.vesoft.nebula.GraphService;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import java.nio.charset.Charset;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,6 +33,8 @@ public class SyncConnection extends Connection {
     private GraphService.Client client = null;
     private int connTimeout = 0;
     private int requestTimeout = 0;
+
+    private Charset charset = Charsets.UTF_8;
 
     @Override
     public void open(HostAddress address, int connTimeout, int requestTimeout)
@@ -68,8 +72,11 @@ public class SyncConnection extends Connection {
     public AuthResult authenticate(String user, String password)
             throws AuthFailedException, IOErrorException {
         try {
-            AuthReq authReq = new AuthReq(user.getBytes(), password.getBytes(), "java".getBytes(),
-                    "v5.0.0".getBytes());
+            AuthReq authReq = new AuthReq(
+                    user.getBytes(charset),
+                    password.getBytes(charset),
+                    "java".getBytes(charset),
+                    "v5.0.0".getBytes(charset));
             AuthResponse resp = client.authenticate(authReq);
             if (!"SUCCESS".equals(new String(resp.getGqlStatus().status))) {
                 if (resp.getGqlStatus().status != null) {
@@ -101,7 +108,7 @@ public class SyncConnection extends Connection {
     public ExecutionResponse execute(long sessionID, String stmt)
             throws IOErrorException {
         try {
-            return client.execute(sessionID, stmt.getBytes());
+            return client.execute(sessionID, stmt.getBytes(charset));
         } catch (TException e) {
             if (e instanceof TTransportException) {
                 TTransportException te = (TTransportException) e;
