@@ -13,7 +13,7 @@ NEXT USE $graphName
 MATCH (f:Person)<-[:HAS_CREATOR]-(post:Post)-[:HAS_TAG]->(t:Tag {name : "$tagName"})
 MATCH (post:Post)-[:HAS_TAG]->(tag:Tag)
 FILTER t <> tag
-RETURN count(post) AS postCount, tag
+RETURN count(post) AS postCount, tag GROUP BY tag
 NEXT USE $graphName
 ORDER BY
   postCount DESC,

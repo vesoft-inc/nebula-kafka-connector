@@ -7,7 +7,7 @@
 */
 USE $graphName
 MATCH path1 = ANY SHORTEST PATH (p:Person{id:$personId})<-[:KNOWS]->{1,3}(friend:Person{firstName : "$firstName"}) WHERE p<>friend
-RETURN min(length(path1)) AS distance, friend
+RETURN min(length(path1)) AS distance, friend GROUP BY friend
 NEXT USE $graphName
 ORDER BY
   distance ASC,
@@ -20,14 +20,14 @@ RETURN collect(
   CASE 
     WHEN NOT uni.name IS NULL THEN RECORD {uniName:uni.name, studyAtClassYear:studyAt.classYear, uniCityName:uniCity.name}
   END
-  ) AS unis,friend, friendCity, distance
+  ) AS unis,friend, friendCity, distance GROUP BY friend, friendCity, distance
 NEXT USE $graphName
 OPTIONAL MATCH (friend:Person)-[workAt:WORK_AT]->(company:Company)-[:IS_LOCATED_IN]->(companyCountry:Country)
 RETURN collect(
   CASE
     WHEN NOT company.name is null THEN RECORD {companyName:company.name, workAtWorkFrom:workAt.workFrom, companyCountryName:companyCountry.name}
   END 
-  ) AS companies, friend, unis, friendCity, distance
+  ) AS companies, friend, unis, friendCity, distance GROUP BY friend, unis, friendCity, distance
 ORDER BY
   distance ASC,
   friend.lastName ASC,

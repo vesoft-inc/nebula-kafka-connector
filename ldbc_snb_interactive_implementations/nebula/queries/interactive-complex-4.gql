@@ -20,7 +20,7 @@ LET valid = CASE
         WHEN localdatetime($startDate) > post.creationDate THEN 1
         ELSE 0
     END
-RETURN sum(valid) AS postCount, sum(invalid) AS inValidPostCount, tag
+RETURN sum(valid) AS postCount, sum(invalid) AS inValidPostCount, tag GROUP BY tag
 NEXT USE $graphName
 FILTER WHERE postCount>0 AND inValidPostCount=0
 ORDER BY postCount DESC, tag.name ASC

@@ -14,7 +14,7 @@ MATCH (countryX:Country {name : "$countryXName"}),
       (person:Person {id : $personId})
 MATCH (city:City)-[:IS_PART_OF]->(country:Country)
 Filter country IN List [countryX, countryY]
-RETURN collect(element_id(city)) AS cities, person, countryX, countryY
+RETURN collect(element_id(city)) AS cities, person, countryX, countryY GROUP BY person, countryX, countryY
 NEXT USE $graphName
 MATCH WALK (person:Person{id : $personId})<-[:KNOWS]->{1,2}(friend:Person)-[:IS_LOCATED_IN]->(city:City)
 Filter person <> friend AND NOT element_id(city) IN cities
@@ -24,7 +24,7 @@ MATCH (country:Country where country.name = "$countryXName" or country.name = "$
 LET
   messageX=CASE WHEN country=countryX THEN 1 ELSE 0 END,
   messageY=CASE WHEN country=countryY THEN 1 ELSE 0 END
-RETURN sum(messageX) AS xCount, sum(messageY) AS yCount, friend
+RETURN sum(messageX) AS xCount, sum(messageY) AS yCount, friend GROUP BY friend
 NEXT USE $graphName
 Filter xCount > 0 AND yCount > 0
 ORDER BY xCount+yCount DESC, friend.id ASC

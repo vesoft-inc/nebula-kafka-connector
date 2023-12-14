@@ -12,7 +12,7 @@ RETURN DISTINCT otherPerson
 NEXT USE $graphName
 MATCH (otherPerson:Person)<-[membership:HAS_MEMBER WHERE membership.joinDate > localdatetime($minDate)]-(forum:Forum)
 OPTIONAL MATCH (otherPerson:Person)<-[:HAS_CREATOR]-(post:Post)<-[:CONTAINER_OF]-(forum:Forum)
-RETURN count(post) AS postCount, forum
+RETURN count(post) AS postCount, forum GROUP BY forum
 NEXT USE $graphName
 ORDER BY postCount DESC, forum.id ASC
 LIMIT 20
