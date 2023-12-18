@@ -23,13 +23,15 @@ jobs:
         goVer: ['1.19']
     steps:
       - uses: actions/checkout@v3
-      - name: Setup go ${{ matrix.goVer }}
-        uses: actions/setup-go@v4
-        with:
-          go-version: ${{ matrix.goVer }}
-          cache-dependency-path: golang/go.sum
+#      - name: Setup go ${{ matrix.goVer }}
+#        uses: actions/setup-go@v4
+#        with:
+#          go-version: ${{ matrix.goVer }}
+#          cache-dependency-path: golang/go.sum
       - name: NebulaGo Unit tests
-        run: go test
+        run: |
+          export PATH=$PATH:/usr/local/go/bin
+          go test
         working-directory: golang
 
   java-client:
