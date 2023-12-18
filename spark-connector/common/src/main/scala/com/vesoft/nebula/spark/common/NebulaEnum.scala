@@ -8,7 +8,7 @@ package com.vesoft.nebula.spark.common
 object DataTypeEnum extends Enumeration {
 
   type DataType = Value
-  val VERTEX = Value("vertex")
+  val NODE = Value("node")
   val EDGE   = Value("edge")
 
   def validDataType(dataType: String): Boolean =

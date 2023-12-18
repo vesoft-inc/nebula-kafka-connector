@@ -16,7 +16,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     val address = "192.168.8.6:3820"
-    graphProvider = new GraphProvider(address, "root", "nebula", 3000, 1)
+    graphProvider = new GraphProvider(address, "root", "nebula", 3000)
 
     val createSchema = "CREATE GRAPH TYPE graph_type_nba AS GRAPH TYPE{" +
       "(node_type_player(id) LABEL player {id INT, name STRING, score FLOAT, gender bool, rate DOUBLE})," +

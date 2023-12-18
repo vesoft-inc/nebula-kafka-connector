@@ -44,8 +44,6 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 
   val timeout: Int =
     parameters.getOrElse(TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_SECONDS).toString.toInt
-  val connectionRetry: Int =
-    parameters.getOrElse(CONNECTION_RETRY, DEFAULT_CONNECTION_RETRY).toString.toInt
   val executionRetry: Int =
     parameters.getOrElse(EXECUTION_RETRY, DEFAULT_EXECUTION_RETRY).toString.toInt
   val executionRetryInterval: Int =
@@ -58,7 +56,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   val dataType: String = parameters(TYPE)
   require(
     DataTypeEnum.validDataType(dataType),
-    s"Option '$TYPE' is illegal, it should be '${DataTypeEnum.VERTEX}' or '${DataTypeEnum.EDGE}'")
+    s"Option '$TYPE' is illegal, it should be '${DataTypeEnum.NODE}' or '${DataTypeEnum.EDGE}'")
 
   /** nebula common parameters */
   require(parameters.isDefinedAt(GRAPH_NAME) && StringUtils.isNotBlank(parameters(GRAPH_NAME)),
@@ -71,13 +69,12 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 
   /** write parameters */
   var graphAddress: String       = _
-  var vertexField: String        = _
-  var srcVertexField: String     = _
-  var dstVertexField: String     = _
-  var batch: Int                 = _
-  var vidAsProp: Boolean         = _
-  var srcAsProp: Boolean         = _
-  var dstAsProp: Boolean         = _
+  var pkField: String            = _
+  var srcPkField: String         = _
+  var dstPkField: String         = _
+  var batchSize: Int                 = _
+  var srcPkAsProp: Boolean       = _
+  var dstPkAsProp: Boolean       = _
   var writeMode: WriteMode.Value = _
   var disableWriteLog: Boolean   = _
 
@@ -86,13 +83,12 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
             s"option $GRAPH_ADDRESS is required and can not be blank")
     graphAddress = parameters(GRAPH_ADDRESS)
 
-    vertexField = parameters.getOrElse(VERTEX_FIELD, null)
-    srcVertexField = parameters.getOrElse(SRC_VERTEX_FIELD, null)
-    dstVertexField = parameters.getOrElse(DST_VERTEX_FIELD, null)
-    batch = parameters.getOrElse(BATCH, DEFAULT_BATCH_SIZE).toString.toInt
-    vidAsProp = parameters.getOrElse(VID_AS_PROP, false).toString.toBoolean
-    srcAsProp = parameters.getOrElse(SRC_AS_PROP, false).toString.toBoolean
-    dstAsProp = parameters.getOrElse(DST_AS_PROP, false).toString.toBoolean
+    pkField = parameters.getOrElse(PK_FIELD, null)
+    srcPkField = parameters.getOrElse(SRC_PK_FIELD, null)
+    dstPkField = parameters.getOrElse(DST_PK_FIELD, null)
+    batchSize = parameters.getOrElse(BATCH_SIZE, DEFAULT_BATCH_SIZE).toString.toInt
+    srcPkAsProp = parameters.getOrElse(SRC_PK_AS_PROP, false).toString.toBoolean
+    dstPkAsProp = parameters.getOrElse(DST_PK_AS_PROP, false).toString.toBoolean
     writeMode =
       WriteMode.withName(parameters.getOrElse(WRITE_MODE, DEFAULT_WRITE_MODE).toString.toLowerCase)
     disableWriteLog = parameters.getOrElse(DISABLE_WRITE_LOG, false).toString.toBoolean
@@ -112,7 +108,6 @@ object NebulaOptions {
 
   /** connection config */
   val TIMEOUT: String                  = "timeout"
-  val CONNECTION_RETRY: String         = "connectionRetry"
   val EXECUTION_RETRY: String          = "executionRetry"
   val EXECUTION_RETRY_INTERVAL: String = "executionRetryInterval"
   val USER_NAME: String                = "user"
@@ -122,13 +117,12 @@ object NebulaOptions {
 
   /** write config */
   val RATE_LIMIT: String        = "rateLimit"
-  val VERTEX_FIELD              = "vertexField"
-  val SRC_VERTEX_FIELD          = "srcVertexField"
-  val DST_VERTEX_FIELD          = "dstVertexField"
-  val BATCH: String             = "batch"
-  val VID_AS_PROP: String       = "vidAsProp"
-  val SRC_AS_PROP: String       = "srcAsProp"
-  val DST_AS_PROP: String       = "dstAsProp"
+  val PK_FIELD                  = "pkField"
+  val SRC_PK_FIELD              = "srcPkField"
+  val DST_PK_FIELD              = "dstPkField"
+  val BATCH_SIZE: String        = "batchSize"
+  val SRC_PK_AS_PROP: String    = "srcPkAsProp"
+  val DST_PK_AS_PROP: String    = "dstPkAsProp"
   val WRITE_MODE: String        = "writeMode"
   val DISABLE_WRITE_LOG: String = "disableWriteLog"
 

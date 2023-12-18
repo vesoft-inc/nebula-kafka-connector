@@ -49,13 +49,13 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
                                         row,
                                         srcIndex,
                                         dstIndex,
-                                        nebulaOptions.srcAsProp,
-                                        nebulaOptions.dstAsProp,
+                                        nebulaOptions.srcPkAsProp,
+                                        nebulaOptions.dstPkAsProp,
                                         fieldTypeMap)
       }
     val nebulaEdge = NebulaEdge(srcId, dstId, values)
     edges.append(nebulaEdge)
-    if (edges.size >= nebulaOptions.batch) {
+    if (edges.size >= nebulaOptions.batchSize) {
       execute()
     }
   }

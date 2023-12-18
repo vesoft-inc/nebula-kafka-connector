@@ -15,7 +15,7 @@ import scala.collection.{breakOut, mutable}
 /**
   * GraphProvider for Nebula Graph Service
   */
-class GraphProvider(addresses: String, user: String, password: String, timeout: Int, retryTime: Int)
+class GraphProvider(addresses: String, user: String, password: String, timeout: Int)
     extends AutoCloseable
     with Serializable {
   @transient private[this] lazy val LOG = LoggerFactory.getLogger(this.getClass)
@@ -23,9 +23,10 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     .builder(addresses, user, password)
     .setConnectTimeoutMills(timeout * 1000)
     .setRequestTimeoutMills(timeout * 1000)
-    .setRetryTimes(retryTime)
-    .setMaxSessionSize(20)
-    .setMinSessionSize(20)
+    .setRetryTimes(0)
+    .setMaxSessionSize(1)
+    .setMinSessionSize(1)
+    .setReconnect(true)
     .build()
 
   /**

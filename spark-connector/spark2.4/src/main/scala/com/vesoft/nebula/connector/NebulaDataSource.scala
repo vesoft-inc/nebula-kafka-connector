@@ -60,8 +60,8 @@ class NebulaDataSource
     parameters.remove(NebulaOptions.PASSWD)
     LOG.info(s"options ${parameters}")
 
-    if (DataTypeEnum.VERTEX == DataTypeEnum.withName(dataType)) {
-      val vertexFiled = nebulaOptions.vertexField
+    if (DataTypeEnum.NODE == DataTypeEnum.withName(dataType)) {
+      val vertexFiled = nebulaOptions.pkField
       val vertexIndex: Int = {
         var index: Int = -1
         for (i <- schema.fields.indices) {
@@ -77,8 +77,8 @@ class NebulaDataSource
       }
       Optional.of(new NebulaDataSourceVertexWriter(nebulaOptions, vertexIndex, schema))
     } else {
-      val srcVertexFiled = nebulaOptions.srcVertexField
-      val dstVertexField = nebulaOptions.dstVertexField
+      val srcVertexFiled = nebulaOptions.srcPkField
+      val dstVertexField = nebulaOptions.dstPkField
       val edgeFieldsIndex = {
         var srcIndex: Int = -1
         var dstIndex: Int = -1

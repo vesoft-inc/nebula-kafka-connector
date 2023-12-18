@@ -63,19 +63,11 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
     val fieldTypeMap: Map[String, String] =
       Map("col1" -> "STRING", "col2" -> "STRING", "col3" -> "STRING")
     // test vid as prop
-    val props = NebulaExecutor.assignVertexPropValues(schema, row, 0, true, fieldTypeMap)
+    val props = NebulaExecutor.assignVertexPropValues(schema, row, 0, fieldTypeMap)
     assert(props.size == 3)
     assert(props.values.toList.contains("\"aaa\""))
   }
 
-  test("test vid not as prop for assignVertexPropValues ") {
-    val fieldTypeMap: Map[String, String] =
-      Map("col1" -> "STRING", "col2" -> "STRING", "col3" -> "STRING")
-    // test vid not as prop
-    val props = NebulaExecutor.assignVertexPropValues(schema, row, 0, false, fieldTypeMap)
-    assert(props.size == 2)
-    assert(!props.contains("\"aaa\""))
-  }
 
   test("test src & dst all as prop for assignEdgeValues") {
     val fieldTypeMap: Map[String, String] =

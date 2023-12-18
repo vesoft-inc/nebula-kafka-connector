@@ -43,12 +43,11 @@ class NebulaVertexWriter(nebulaOptions: NebulaOptions, vertexIndex: Int, schema:
         NebulaExecutor.assignVertexPropValues(schema,
                                               row,
                                               vertexIndex,
-                                              nebulaOptions.vidAsProp,
                                               fieldTypeMap)
       }
     val nebulaVertex = NebulaVertex(vertex, values)
     vertices.append(nebulaVertex)
-    if (vertices.size >= nebulaOptions.batch) {
+    if (vertices.size >= nebulaOptions.batchSize) {
       execute()
     }
   }

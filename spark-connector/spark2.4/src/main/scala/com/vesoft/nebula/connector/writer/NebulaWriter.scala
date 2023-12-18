@@ -23,8 +23,7 @@ class NebulaWriter(nebulaOptions: NebulaOptions) extends Serializable {
     nebulaOptions.getGraphAddress,
     nebulaOptions.user,
     nebulaOptions.passwd,
-    nebulaOptions.timeout,
-    nebulaOptions.executionRetry
+    nebulaOptions.timeout
   )
 
   def submit(exec: String): ResultSet = {

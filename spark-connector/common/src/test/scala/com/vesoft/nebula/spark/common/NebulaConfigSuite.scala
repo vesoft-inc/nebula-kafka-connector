@@ -10,12 +10,47 @@ import org.scalatest.funsuite.AnyFunSuite
 
 class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
   test("test NebulaConnectionConfig") {
+    val config = NebulaConnectionConfig
+      .builder()
+      .withGraphAddress("127.0.0.1:9669")
+      .withUser("root")
+      .withPasswd("nebula")
+      .withTimeoutSec(1)
+      .withExecuteRetry(2)
+      .withExecuteRetryIntervalMs(1000)
+      .build()
+    assert(config.getGraphAddress.equals("127.0.0.1:9669"))
+    assert(config.getUser.equals("root"))
+    assert(config.getPasswd.equals("nebula"))
+    assert(config.getExecRetry == 2)
+    assert(config.getExecRetryIntervalMs == 1000)
+    assert(config.getTimeout == 1)
+  }
+
+  test("test wrong connection config") {
     assertThrows[AssertionError](NebulaConnectionConfig.builder().withTimeoutSec(1).build())
     assertThrows[AssertionError](NebulaConnectionConfig.builder().withTimeoutSec(-1).build())
-    NebulaConnectionConfig
-      .builder()
-      .withTimeoutSec(1)
-      .build()
+    assertThrows[AssertionError](
+      NebulaConnectionConfig
+        .builder()
+        .withGraphAddress("127.0.0.1:9669")
+        .withUser("")
+        .withPasswd("nebula")
+        .build())
+    assertThrows[AssertionError](
+      NebulaConnectionConfig
+        .builder()
+        .withGraphAddress("127.0.0.1:9669")
+        .withUser("root")
+        .withPasswd("")
+        .build())
+    assertThrows[AssertionError](
+      NebulaConnectionConfig
+        .builder()
+        .withGraphAddress("")
+        .withUser("root")
+        .withPasswd("nebula")
+        .build())
   }
 
   test("test WriteNebulaConfig") {
@@ -24,43 +59,10 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
       .builder()
       .withGraphName("test")
       .withNodeType("tag")
-      .withVidField("vid")
+      .withPrimaryKeyField("vid")
       .build()
 
-    assert(!writeNebulaConfig.getVidAsProp)
     assert(writeNebulaConfig.getGraphName.equals("test"))
-  }
-
-  test("wrong batch size for update") {
-    assertThrows[AssertionError](
-      WriteNebulaVertexConfig
-        .builder()
-        .withGraphName("test")
-        .withNodeType("tag")
-        .withVidField("vId")
-        .withWriteMode(WriteMode.UPDATE)
-        .withBatchSize(513)
-        .build())
-    assertThrows[AssertionError](
-      WriteNebulaEdgeConfig
-        .builder()
-        .withGraphName("test")
-        .withEdge("edge")
-        .withSrcIdField("src")
-        .withDstIdField("dst")
-        .withWriteMode(WriteMode.UPDATE)
-        .withBatchSize(513)
-        .build())
-  }
-
-  test("test wrong policy") {
-    assertThrows[AssertionError](
-      WriteNebulaVertexConfig
-        .builder()
-        .withGraphName("test")
-        .withNodeType("tag")
-        .withVidField("vId")
-        .build())
   }
 
   test("test wrong batch") {
@@ -69,7 +71,7 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
         .builder()
         .withGraphName("test")
         .withNodeType("tag")
-        .withVidField("vId")
+        .withPrimaryKeyField("vId")
         .withBatchSize(-1)
         .build())
   }

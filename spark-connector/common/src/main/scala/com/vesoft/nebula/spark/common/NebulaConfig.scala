@@ -5,17 +5,22 @@
 
 package com.vesoft.nebula.spark.common
 
+import com.vesoft.nebula.spark.common.WriteNebulaVertexConfig.WriteVertexConfigBuilder
 import org.slf4j.{Logger, LoggerFactory}
 
 class NebulaConnectionConfig(graphAddress: String,
+                             user: String,
+                             passwd: String,
                              timeout: Int,
-                             connectionRetry: Int,
                              executeRetry: Int,
                              executeRetryIntervalMs: Int)
     extends Serializable {
-  def getGraphAddress        = graphAddress
+  def getGraphAddress = graphAddress
+
+  def getUser = user
+
+  def getPasswd              = passwd
   def getTimeout             = timeout
-  def getConnectionRetry     = connectionRetry
   def getExecRetry           = executeRetry
   def getExecRetryIntervalMs = executeRetryIntervalMs
 
@@ -26,8 +31,9 @@ object NebulaConnectionConfig {
     private val LOG = LoggerFactory.getLogger(this.getClass)
 
     protected var graphAddress: String        = _
+    protected var user: String                = _
+    protected var passwd: String              = _
     protected var timeout: Int                = 6000
-    protected var connectionRetry: Int        = 3
     protected var executeRetry: Int           = 3
     protected var executeRetryIntervalMs: Int = 0
 
@@ -40,18 +46,26 @@ object NebulaConnectionConfig {
     }
 
     /**
-      * set timeout, timeout is optional， unit: second
+      * set user name for nebula graph
       */
-    def withTimeoutSec(timeout: Int): ConfigBuilder = {
-      this.timeout = timeout
+    def withUser(user: String): ConfigBuilder = {
+      this.user = user
       this
     }
 
     /**
-      * set connectionRetry, connectionRetry is optional
+      * set password for nebula graph's user
       */
-    def withConnectionRetry(connectionRetry: Int): ConfigBuilder = {
-      this.connectionRetry = connectionRetry
+    def withPasswd(passwd: String): ConfigBuilder = {
+      this.passwd = passwd
+      this
+    }
+
+    /**
+      * set timeout, timeout is optional， unit: second
+      */
+    def withTimeoutSec(timeout: Int): ConfigBuilder = {
+      this.timeout = timeout
       this
     }
 
@@ -75,8 +89,11 @@ object NebulaConnectionConfig {
       * check if the connection config is valid
       */
     def check(): Unit = {
-      assert(timeout > 0, "timeout must be larger than 0")
-      assert(connectionRetry > 0 && executeRetry > 0, "retry must be larger than 0.")
+      assert(graphAddress != null && graphAddress.nonEmpty, "graph address cannot be blank.")
+      assert(user != null && user.nonEmpty, "user cannot be blank.")
+      assert(passwd != null && passwd.nonEmpty, "password cannot be blank.")
+      assert(timeout > 0, "timeout must be larger than 0.")
+      assert(executeRetry >= 0, "retry must be equal or larger than 0.")
     }
 
     /**
@@ -85,8 +102,9 @@ object NebulaConnectionConfig {
     def build(): NebulaConnectionConfig = {
       check()
       new NebulaConnectionConfig(graphAddress,
+                                 user,
+                                 passwd,
                                  timeout,
-                                 connectionRetry,
                                  executeRetry,
                                  executeRetryIntervalMs)
     }
@@ -102,19 +120,14 @@ object NebulaConnectionConfig {
   * Base config needed when write dataframe into nebula graph
   */
 class WriteNebulaConfig(graphName: String,
-                        user: String,
-                        passwd: String,
-                        batch: Int,
+                        batchSize: Int,
                         writeMode: String,
                         disableWriteLog: Boolean)
     extends Serializable {
-  def getGraphName = graphName
-  def getBatch     = batch
-  def getUser      = user
-  def getPasswd    = passwd
-  def getWriteMode = writeMode
-
-  def isDisableWriteLog = disableWriteLog
+  def getGraphName: String       = graphName
+  def getBatchSize: Int          = batchSize
+  def getWriteMode: String       = writeMode
+  def isDisableWriteLog: Boolean = disableWriteLog
 }
 
 /**
@@ -122,23 +135,20 @@ class WriteNebulaConfig(graphName: String,
   *
   * @param graphName: nebula graph name
   * @param nodeType: node type name
-  * @param vidField: field in dataframe to indicate vertexId
-  * @param batch: amount of one batch when write into nebula graph
+  * @param pkField: field in dataframe to indicate vertexId
+  * @param batchSize: amount of one batch when write into nebula graph
+  * @param writeMode: write mode, insert / update / delete
+  *  @param disableWriteLog: disable the log print for write result, such as batch size and latency
   */
 class WriteNebulaVertexConfig(graphName: String,
                               nodeType: String,
-                              vidField: String,
-                              batch: Int,
-                              vidAsProp: Boolean,
-                              user: String,
-                              passwd: String,
+                              pkField: String,
+                              batchSize: Int,
                               writeMode: String,
                               disableWriteLog: Boolean)
-    extends WriteNebulaConfig(graphName, user, passwd, batch, writeMode, disableWriteLog) {
-  def getNodeType  = nodeType
-  def getVidField  = vidField
-  def getVidAsProp = vidAsProp
-
+    extends WriteNebulaConfig(graphName, batchSize, writeMode, disableWriteLog) {
+  def getNodeType = nodeType
+  def getPkField  = pkField
 }
 
 /**
@@ -149,18 +159,12 @@ object WriteNebulaVertexConfig {
   private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
 
   class WriteVertexConfigBuilder {
-
-    var graphName: String        = _
-    var nodeType: String         = _
-    var vidField: String         = _
-    var batchSize: Int           = 512
-    var user: String             = "root"
-    var passwd: String           = "nebula"
-    var writeMode: String        = "insert"
-    var disableWriteLog: Boolean = false
-
-    /** whether set vid as property */
-    var vidAsProp: Boolean = false
+    private var graphName: String        = _
+    private var nodeType: String         = _
+    private var writeMode: String        = "insert"
+    private var disableWriteLog: Boolean = false
+    private var pkField: String          = _
+    private var batchSize: Int           = 512
 
     /**
       * set graph name
@@ -181,8 +185,8 @@ object WriteNebulaVertexConfig {
     /**
       * set which field in dataframe as nebula tag's id
       */
-    def withVidField(vidField: String): WriteVertexConfigBuilder = {
-      this.vidField = vidField
+    def withPrimaryKeyField(pkField: String): WriteVertexConfigBuilder = {
+      this.pkField = pkField
       this
     }
 
@@ -191,30 +195,6 @@ object WriteNebulaVertexConfig {
       */
     def withBatchSize(batchSize: Int): WriteVertexConfigBuilder = {
       this.batchSize = batchSize
-      this
-    }
-
-    /**
-      * set whether vid as prop, default is false
-      */
-    def withVidAsProp(vidAsProp: Boolean): WriteVertexConfigBuilder = {
-      this.vidAsProp = vidAsProp
-      this
-    }
-
-    /**
-      * set user name for nebula graph
-      */
-    def withUser(user: String): WriteVertexConfigBuilder = {
-      this.user = user
-      this
-    }
-
-    /**
-      * set password for nebula graph's user
-      */
-    def withPasswd(passwd: String): WriteVertexConfigBuilder = {
-      this.passwd = passwd
       this
     }
 
@@ -241,36 +221,34 @@ object WriteNebulaVertexConfig {
       check()
       new WriteNebulaVertexConfig(graphName,
                                   nodeType,
-                                  vidField,
+                                  pkField,
                                   batchSize,
-                                  vidAsProp,
-                                  user,
-                                  passwd,
                                   writeMode,
                                   disableWriteLog)
     }
 
+    /**
+      * check the validation for {@link WriteNebulaVertexConfig}
+      */
     private def check(): Unit = {
-      assert(graphName != null && graphName.nonEmpty, s"config graphName is empty.")
+      assert(graphName != null && graphName.nonEmpty, s"config graphName can not be empty.")
+      assert(nodeType != null && nodeType.nonEmpty, "config nodeType can not be empty")
+      assert(pkField != null && pkField.nonEmpty, "config primaryKeyField can not be empty.")
+      assert(batchSize > 0, s"config batchSize must be positive, your batchSize is $batchSize.")
 
-      assert(vidField != null && vidField.nonEmpty, "config vidField is empty.")
-      assert(batchSize > 0, s"config batch must be positive, your batch is $batchSize.")
-
-      assert(user != null && user.nonEmpty, "user is empty")
-      assert(passwd != null && passwd.nonEmpty, "passwd is empty")
       try {
         WriteMode.withName(writeMode.toLowerCase())
       } catch {
         case e: Throwable =>
           assert(false, s"optional write mode: insert or update, your write mode is $writeMode")
       }
-      if (writeMode.equalsIgnoreCase(WriteMode.UPDATE.toString)) {
-        assert(batchSize <= 512, "the maximum number of statements for Nebula is 512")
+      if (!writeMode.equalsIgnoreCase(WriteMode.INSERT.toString)) {
+        assert(false, s"the writeMode is ${writeMode}, for now just INSERT is supported.")
       }
 
       LOG.info(
-        s"NebulaWriteVertexConfig={graphName=$graphName,nodeType=$nodeType,vidField=$vidField," +
-          s"batch=$batchSize,writeMode=$writeMode}")
+        s"NebulaWriteVertexConfig={graphName=$graphName,nodeType=$nodeType,pkField=$pkField," +
+          s"batchSize=$batchSize,writeMode=$writeMode,disableWriteLog=$disableWriteLog}")
     }
   }
 
@@ -283,30 +261,30 @@ object WriteNebulaVertexConfig {
   * subclass of WriteNebulaConfig to config edge when write dataframe into nebula graph
   *
   * @param graphName: nebula graph name
-  * @param edgeName: edge name
-  * @param srcFiled: field in dataframe to indicate src vertex id
-  * @param dstField: field in dataframe to indicate dst vertex id
-  * @param batch: amount of one batch when write into nebula graph
+  * @param edgeType: edge name
+  * @param srcPkFiled: field in dataframe to indicate src vertex primary key
+  * @param dstPkField: field in dataframe to indicate dst vertex primary key
+  * @param batchSize: amount of one batch when write into nebula graph
+  * @param srcPkAsProp: whether use src node primary key as edge's property
+  * @param dstPkAsProp: whether use dst node primary key as edge's property
+  * @param writeMode: write mode, insert / update / delete
+  * @param disableWriteLog: disable the log print for write result, such as batch size and latency
   */
 class WriteNebulaEdgeConfig(graphName: String,
-                            edgeName: String,
-                            srcFiled: String,
-                            dstField: String,
-                            batch: Int,
-                            srcAsProp: Boolean,
-                            dstAsProp: Boolean,
-                            user: String,
-                            passwd: String,
+                            edgeType: String,
+                            srcPkFiled: String,
+                            dstPkField: String,
+                            batchSize: Int,
+                            srcPkAsProp: Boolean,
+                            dstPkAsProp: Boolean,
                             writeMode: String,
                             disableWriteLog: Boolean)
-    extends WriteNebulaConfig(graphName, user, passwd, batch, writeMode, disableWriteLog) {
-  def getEdgeName = edgeName
-  def getSrcFiled = srcFiled
-  def getDstField = dstField
-
-  def getSrcAsProp = srcAsProp
-  def getDstAsProp = dstAsProp
-
+    extends WriteNebulaConfig(graphName, batchSize, writeMode, disableWriteLog) {
+  def getEdgeType: String   = edgeType
+  def getSrcPkFiled: String = srcPkFiled
+  def getDstPkField: String = dstPkField
+  def getSrcAsProp: Boolean = srcPkAsProp
+  def getDstAsProp: Boolean = dstPkAsProp
 }
 
 /**
@@ -320,25 +298,16 @@ object WriteNebulaEdgeConfig {
     * a builder to create {@link WriteNebulaEdgeConfig}
     */
   class WriteEdgeConfigBuilder {
-
-    var graphName: String  = _
-    var edgeName: String   = _
-    var srcIdField: String = _
-    var dstIdField: String = _
-    var batchSize: Int     = 512
-    var user: String       = "root"
-    var passwd: String     = "nebula"
-
-    /** whether srcId as property */
-    var srcAsProp: Boolean = false
-
-    /** whether dstId as property */
-    var dstAsProp: Boolean = false
-
-    /** write mode for nebula, insert or update */
-    var writeMode: String = WriteMode.INSERT.toString
-
+    var graphName: String        = _
+    var writeMode: String        = WriteMode.INSERT.toString
     var disableWriteLog: Boolean = false
+
+    private var edgeType: String     = _
+    private var srcPkField: String   = _
+    private var dstPkField: String   = _
+    private var srcPkAsProp: Boolean = false
+    private var dstPkAsProp: Boolean = false
+    private var batchSize: Int       = 512
 
     /**
       * set graph name
@@ -351,24 +320,24 @@ object WriteNebulaEdgeConfig {
     /**
       * set edge type name
       */
-    def withEdge(edgeName: String): WriteEdgeConfigBuilder = {
-      this.edgeName = edgeName
+    def withEdge(edgeType: String): WriteEdgeConfigBuilder = {
+      this.edgeType = edgeType
       this
     }
 
     /**
       * set which field in dataframe as nebula edge's src id
       */
-    def withSrcIdField(srcIdField: String): WriteEdgeConfigBuilder = {
-      this.srcIdField = srcIdField
+    def withSrcPkField(srcPkField: String): WriteEdgeConfigBuilder = {
+      this.srcPkField = srcPkField
       this
     }
 
     /**
       * set which field in dataframe as nebula edge's dst id
       */
-    def withDstIdField(dstIdField: String): WriteEdgeConfigBuilder = {
-      this.dstIdField = dstIdField
+    def withDstPkField(dstIdField: String): WriteEdgeConfigBuilder = {
+      this.dstPkField = dstIdField
       this
     }
 
@@ -383,32 +352,16 @@ object WriteNebulaEdgeConfig {
     /**
       * set whether src id as property
       */
-    def withSrcAsProperty(srcAsProp: Boolean): WriteEdgeConfigBuilder = {
-      this.srcAsProp = srcAsProp
+    def withSrcPkAsProperty(srcPkAsProp: Boolean): WriteEdgeConfigBuilder = {
+      this.srcPkAsProp = srcPkAsProp
       this
     }
 
     /**
       * set whether dst id as property
       */
-    def withDstAsProperty(dstAsProp: Boolean): WriteEdgeConfigBuilder = {
-      this.dstAsProp = dstAsProp
-      this
-    }
-
-    /**
-      * set user name for nebula graph
-      */
-    def withUser(user: String): WriteEdgeConfigBuilder = {
-      this.user = user
-      this
-    }
-
-    /**
-      * set password for nebula graph's user
-      */
-    def withPasswd(passwd: String): WriteEdgeConfigBuilder = {
-      this.passwd = passwd
+    def withDstPkAsProperty(dstPkAsProp: Boolean): WriteEdgeConfigBuilder = {
+      this.dstPkAsProp = dstPkAsProp
       this
     }
 
@@ -434,40 +387,36 @@ object WriteNebulaEdgeConfig {
     def build(): WriteNebulaEdgeConfig = {
       check()
       new WriteNebulaEdgeConfig(graphName,
-                                edgeName,
-                                srcIdField,
-                                dstIdField,
+                                edgeType,
+                                srcPkField,
+                                dstPkField,
                                 batchSize,
-                                srcAsProp,
-                                dstAsProp,
-                                user,
-                                passwd,
+                                srcPkAsProp,
+                                dstPkAsProp,
                                 writeMode,
                                 disableWriteLog)
     }
 
     private def check(): Unit = {
-      assert(graphName != null && !graphName.isEmpty, s"config graphName is empty.")
+      assert(graphName != null && graphName.nonEmpty, s"config graphName can not be empty.")
+      assert(edgeType != null && edgeType.nonEmpty, "config edgeType can not be empty")
+      assert(srcPkField != null && srcPkField.nonEmpty, "config srcPkField can not be empty.")
+      assert(dstPkField != null && dstPkField.nonEmpty, "config dstPkField can not be empty.")
+      assert(batchSize > 0, s"config batchSize must be positive, your batchSize is $batchSize.")
 
-      assert(srcIdField != null && !srcIdField.isEmpty, "config srcIdField is empty.")
-      assert(dstIdField != null && !dstIdField.isEmpty, "config dstIdField is empty.")
-
-      assert(batchSize > 0, s"config batch must be positive, your batch is $batchSize.")
-      assert(user != null && user.nonEmpty, "user is empty")
-      assert(passwd != null && passwd.nonEmpty, "passwd is empty")
       try {
         WriteMode.withName(writeMode.toLowerCase)
       } catch {
         case e: Throwable =>
           assert(false, s"optional write mode: insert or update, your write mode is $writeMode")
       }
-      if (writeMode.equalsIgnoreCase(WriteMode.UPDATE.toString)) {
-        assert(batchSize <= 512, "the maximum number of statements for Nebula is 512")
+      if (!writeMode.equalsIgnoreCase(WriteMode.INSERT.toString)) {
+        assert(false, s"the writeMode is ${writeMode}, for now just INSERT is supported.")
       }
-      assert(edgeName != null && edgeName.nonEmpty, s"config edgeName is empty.")
       LOG.info(
-        s"NebulaWriteEdgeConfig={graphName=$graphName,edgeName=$edgeName,srcField=$srcIdField," +
-          s"dstField=$dstIdField,writeMode=$writeMode}")
+        s"NebulaWriteEdgeConfig={graphName=$graphName,edgeType=$edgeType,srcPkField=$srcPkField," +
+          s"dstPkField=$dstPkField,batchSize=$batchSize,srcPkAsProp=$srcPkField," +
+          s"dstPkAsProp=$dstPkField,writeMode=$writeMode,disableWriteLog=$disableWriteLog}")
     }
   }
 

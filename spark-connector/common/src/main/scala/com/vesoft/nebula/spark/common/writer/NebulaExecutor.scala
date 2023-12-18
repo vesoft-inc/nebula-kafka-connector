@@ -56,12 +56,10 @@ object NebulaExecutor {
   def assignVertexPropValues(schema: StructType,
                              record: InternalRow,
                              vertexIndex: Int,
-                             vidAsProp: Boolean,
                              fieldTypeMap: Map[String, String]): Map[String, String] = {
     val properties: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     for {
       index <- schema.fields.indices
-      if vidAsProp || index != vertexIndex
     } yield {
       properties += (schema.fields(index).name -> extraValue(record, schema, index, fieldTypeMap))
     }
