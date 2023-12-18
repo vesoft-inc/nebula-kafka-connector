@@ -21,71 +21,74 @@ var _ = context.Background
 
 var GoUnusedProtection__ int;
 
-type XType_ int64
+type XValueTypeKind_ int64
 const (
-  XType__kNull XType_ = 0
-  XType__kBool XType_ = 1
-  XType__kInt8 XType_ = 2
-  XType__kInt16 XType_ = 3
-  XType__kInt32 XType_ = 4
-  XType__kInt64 XType_ = 5
-  XType__kFloat32 XType_ = 6
-  XType__kFloat64 XType_ = 7
-  XType__kString XType_ = 8
-  XType__kList XType_ = 9
-  XType__kMap XType_ = 10
-  XType__kNode XType_ = 11
-  XType__kEdge XType_ = 12
-  XType__kDuration XType_ = 13
-  XType__kLocalTime XType_ = 14
-  XType__kDate XType_ = 15
-  XType__kLocalDatetime XType_ = 16
-  XType__kPath XType_ = 17
+  XValueTypeKind__kNull XValueTypeKind_ = 0
+  XValueTypeKind__kBool XValueTypeKind_ = 1
+  XValueTypeKind__kInt8 XValueTypeKind_ = 2
+  XValueTypeKind__kInt16 XValueTypeKind_ = 3
+  XValueTypeKind__kInt32 XValueTypeKind_ = 4
+  XValueTypeKind__kInt64 XValueTypeKind_ = 5
+  XValueTypeKind__kFloat32 XValueTypeKind_ = 6
+  XValueTypeKind__kFloat64 XValueTypeKind_ = 7
+  XValueTypeKind__kString XValueTypeKind_ = 8
+  XValueTypeKind__kList XValueTypeKind_ = 9
+  XValueTypeKind__kMap XValueTypeKind_ = 10
+  XValueTypeKind__kNode XValueTypeKind_ = 11
+  XValueTypeKind__kEdge XValueTypeKind_ = 12
+  XValueTypeKind__kDuration XValueTypeKind_ = 13
+  XValueTypeKind__kLocalTime XValueTypeKind_ = 14
+  XValueTypeKind__kDate XValueTypeKind_ = 15
+  XValueTypeKind__kLocalDatetime XValueTypeKind_ = 16
+  XValueTypeKind__kPath XValueTypeKind_ = 17
+  XValueTypeKind__kRef XValueTypeKind_ = 18
 )
 
-var XType_ToName = map[XType_]string {
-  XType__kNull: "kNull",
-  XType__kBool: "kBool",
-  XType__kInt8: "kInt8",
-  XType__kInt16: "kInt16",
-  XType__kInt32: "kInt32",
-  XType__kInt64: "kInt64",
-  XType__kFloat32: "kFloat32",
-  XType__kFloat64: "kFloat64",
-  XType__kString: "kString",
-  XType__kList: "kList",
-  XType__kMap: "kMap",
-  XType__kNode: "kNode",
-  XType__kEdge: "kEdge",
-  XType__kDuration: "kDuration",
-  XType__kLocalTime: "kLocalTime",
-  XType__kDate: "kDate",
-  XType__kLocalDatetime: "kLocalDatetime",
-  XType__kPath: "kPath",
+var XValueTypeKind_ToName = map[XValueTypeKind_]string {
+  XValueTypeKind__kNull: "kNull",
+  XValueTypeKind__kBool: "kBool",
+  XValueTypeKind__kInt8: "kInt8",
+  XValueTypeKind__kInt16: "kInt16",
+  XValueTypeKind__kInt32: "kInt32",
+  XValueTypeKind__kInt64: "kInt64",
+  XValueTypeKind__kFloat32: "kFloat32",
+  XValueTypeKind__kFloat64: "kFloat64",
+  XValueTypeKind__kString: "kString",
+  XValueTypeKind__kList: "kList",
+  XValueTypeKind__kMap: "kMap",
+  XValueTypeKind__kNode: "kNode",
+  XValueTypeKind__kEdge: "kEdge",
+  XValueTypeKind__kDuration: "kDuration",
+  XValueTypeKind__kLocalTime: "kLocalTime",
+  XValueTypeKind__kDate: "kDate",
+  XValueTypeKind__kLocalDatetime: "kLocalDatetime",
+  XValueTypeKind__kPath: "kPath",
+  XValueTypeKind__kRef: "kRef",
 }
 
-var XType_ToValue = map[string]XType_ {
-  "kNull": XType__kNull,
-  "kBool": XType__kBool,
-  "kInt8": XType__kInt8,
-  "kInt16": XType__kInt16,
-  "kInt32": XType__kInt32,
-  "kInt64": XType__kInt64,
-  "kFloat32": XType__kFloat32,
-  "kFloat64": XType__kFloat64,
-  "kString": XType__kString,
-  "kList": XType__kList,
-  "kMap": XType__kMap,
-  "kNode": XType__kNode,
-  "kEdge": XType__kEdge,
-  "kDuration": XType__kDuration,
-  "kLocalTime": XType__kLocalTime,
-  "kDate": XType__kDate,
-  "kLocalDatetime": XType__kLocalDatetime,
-  "kPath": XType__kPath,
+var XValueTypeKind_ToValue = map[string]XValueTypeKind_ {
+  "kNull": XValueTypeKind__kNull,
+  "kBool": XValueTypeKind__kBool,
+  "kInt8": XValueTypeKind__kInt8,
+  "kInt16": XValueTypeKind__kInt16,
+  "kInt32": XValueTypeKind__kInt32,
+  "kInt64": XValueTypeKind__kInt64,
+  "kFloat32": XValueTypeKind__kFloat32,
+  "kFloat64": XValueTypeKind__kFloat64,
+  "kString": XValueTypeKind__kString,
+  "kList": XValueTypeKind__kList,
+  "kMap": XValueTypeKind__kMap,
+  "kNode": XValueTypeKind__kNode,
+  "kEdge": XValueTypeKind__kEdge,
+  "kDuration": XValueTypeKind__kDuration,
+  "kLocalTime": XValueTypeKind__kLocalTime,
+  "kDate": XValueTypeKind__kDate,
+  "kLocalDatetime": XValueTypeKind__kLocalDatetime,
+  "kPath": XValueTypeKind__kPath,
+  "kRef": XValueTypeKind__kRef,
 }
 
-var XType_Names = []string {
+var XValueTypeKind_Names = []string {
   "kNull",
   "kBool",
   "kInt8",
@@ -104,44 +107,46 @@ var XType_Names = []string {
   "kDate",
   "kLocalDatetime",
   "kPath",
+  "kRef",
 }
 
-var XType_Values = []XType_ {
-  XType__kNull,
-  XType__kBool,
-  XType__kInt8,
-  XType__kInt16,
-  XType__kInt32,
-  XType__kInt64,
-  XType__kFloat32,
-  XType__kFloat64,
-  XType__kString,
-  XType__kList,
-  XType__kMap,
-  XType__kNode,
-  XType__kEdge,
-  XType__kDuration,
-  XType__kLocalTime,
-  XType__kDate,
-  XType__kLocalDatetime,
-  XType__kPath,
+var XValueTypeKind_Values = []XValueTypeKind_ {
+  XValueTypeKind__kNull,
+  XValueTypeKind__kBool,
+  XValueTypeKind__kInt8,
+  XValueTypeKind__kInt16,
+  XValueTypeKind__kInt32,
+  XValueTypeKind__kInt64,
+  XValueTypeKind__kFloat32,
+  XValueTypeKind__kFloat64,
+  XValueTypeKind__kString,
+  XValueTypeKind__kList,
+  XValueTypeKind__kMap,
+  XValueTypeKind__kNode,
+  XValueTypeKind__kEdge,
+  XValueTypeKind__kDuration,
+  XValueTypeKind__kLocalTime,
+  XValueTypeKind__kDate,
+  XValueTypeKind__kLocalDatetime,
+  XValueTypeKind__kPath,
+  XValueTypeKind__kRef,
 }
 
-func (p XType_) String() string {
-  if v, ok := XType_ToName[p]; ok {
+func (p XValueTypeKind_) String() string {
+  if v, ok := XValueTypeKind_ToName[p]; ok {
     return v
   }
   return "<UNSET>"
 }
 
-func XType_FromString(s string) (XType_, error) {
-  if v, ok := XType_ToValue[s]; ok {
+func XValueTypeKind_FromString(s string) (XValueTypeKind_, error) {
+  if v, ok := XValueTypeKind_ToValue[s]; ok {
     return v, nil
   }
-  return XType_(0), fmt.Errorf("not a valid XType_ string")
+  return XValueTypeKind_(0), fmt.Errorf("not a valid XValueTypeKind_ string")
 }
 
-func XType_Ptr(v XType_) *XType_ { return &v }
+func XValueTypeKind_Ptr(v XValueTypeKind_) *XValueTypeKind_ { return &v }
 
 type ErrorCode int64
 const (
@@ -1096,15 +1101,21 @@ func PathPtr(v Path) *Path { return &v }
 
 func NewPath() Path { return NewXPath_() }
 
-type Type = XType_
+type ValueTypeKind = XValueTypeKind_
 
-func TypePtr(v Type) *Type { return &v }
+func ValueTypeKindPtr(v ValueTypeKind) *ValueTypeKind { return &v }
 
 type Row = *XRow_
 
 func RowPtr(v Row) *Row { return &v }
 
 func NewRow() Row { return NewXRow_() }
+
+type Ref = *XRef_
+
+func RefPtr(v Ref) *Ref { return &v }
+
+func NewRef() Ref { return NewXRef_() }
 
 type EmptyResult_ = *XEmptyResult_
 
@@ -2149,6 +2160,159 @@ func (p *XLocalDatetime_) String() string {
 }
 
 // Attributes:
+//  - Code
+//  - Offset
+type XRef_ struct {
+  Code int32 `thrift:"code,1" db:"code" json:"code"`
+  Offset int32 `thrift:"offset,2" db:"offset" json:"offset"`
+}
+
+func NewXRef_() *XRef_ {
+  return &XRef_{}
+}
+
+
+func (p *XRef_) GetCode() int32 {
+  return p.Code
+}
+
+func (p *XRef_) GetOffset() int32 {
+  return p.Offset
+}
+type XRef_Builder struct {
+  obj *XRef_
+}
+
+func NewXRef_Builder() *XRef_Builder{
+  return &XRef_Builder{
+    obj: NewXRef_(),
+  }
+}
+
+func (p XRef_Builder) Emit() *XRef_{
+  return &XRef_{
+    Code: p.obj.Code,
+    Offset: p.obj.Offset,
+  }
+}
+
+func (x *XRef_Builder) Code(code int32) *XRef_Builder {
+  x.obj.Code = code
+  return x
+}
+
+func (x *XRef_Builder) Offset(offset int32) *XRef_Builder {
+  x.obj.Offset = offset
+  return x
+}
+
+func (x *XRef_) SetCode(code int32) *XRef_ {
+  x.Code = code
+  return x
+}
+
+func (x *XRef_) SetOffset(offset int32) *XRef_ {
+  x.Offset = offset
+  return x
+}
+
+func (p *XRef_) Read(iprot thrift.Protocol) error {
+  if _, err := iprot.ReadStructBegin(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
+  }
+
+
+  for {
+    _, fieldTypeId, fieldId, err := iprot.ReadFieldBegin()
+    if err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T field %d read error: ", p, fieldId), err)
+    }
+    if fieldTypeId == thrift.STOP { break; }
+    switch fieldId {
+    case 1:
+      if err := p.ReadField1(iprot); err != nil {
+        return err
+      }
+    case 2:
+      if err := p.ReadField2(iprot); err != nil {
+        return err
+      }
+    default:
+      if err := iprot.Skip(fieldTypeId); err != nil {
+        return err
+      }
+    }
+    if err := iprot.ReadFieldEnd(); err != nil {
+      return err
+    }
+  }
+  if err := iprot.ReadStructEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T read struct end error: ", p), err)
+  }
+  return nil
+}
+
+func (p *XRef_)  ReadField1(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 1: ", err)
+  } else {
+    p.Code = v
+  }
+  return nil
+}
+
+func (p *XRef_)  ReadField2(iprot thrift.Protocol) error {
+  if v, err := iprot.ReadI32(); err != nil {
+    return thrift.PrependError("error reading field 2: ", err)
+  } else {
+    p.Offset = v
+  }
+  return nil
+}
+
+func (p *XRef_) Write(oprot thrift.Protocol) error {
+  if err := oprot.WriteStructBegin("_Ref_"); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write struct begin error: ", p), err) }
+  if err := p.writeField1(oprot); err != nil { return err }
+  if err := p.writeField2(oprot); err != nil { return err }
+  if err := oprot.WriteFieldStop(); err != nil {
+    return thrift.PrependError("write field stop error: ", err) }
+  if err := oprot.WriteStructEnd(); err != nil {
+    return thrift.PrependError("write struct stop error: ", err) }
+  return nil
+}
+
+func (p *XRef_) writeField1(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("code", thrift.I32, 1); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 1:code: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Code)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.code (1) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 1:code: ", p), err) }
+  return err
+}
+
+func (p *XRef_) writeField2(oprot thrift.Protocol) (err error) {
+  if err := oprot.WriteFieldBegin("offset", thrift.I32, 2); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field begin error 2:offset: ", p), err) }
+  if err := oprot.WriteI32(int32(p.Offset)); err != nil {
+  return thrift.PrependError(fmt.Sprintf("%T.offset (2) field write error: ", p), err) }
+  if err := oprot.WriteFieldEnd(); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T write field end error 2:offset: ", p), err) }
+  return err
+}
+
+func (p *XRef_) String() string {
+  if p == nil {
+    return "<nil>"
+  }
+
+  codeVal := fmt.Sprintf("%v", p.Code)
+  offsetVal := fmt.Sprintf("%v", p.Offset)
+  return fmt.Sprintf("XRef_({Code:%s Offset:%s})", codeVal, offsetVal)
+}
+
+// Attributes:
 //  - BoolVal
 //  - Int8Val
 //  - Int16Val
@@ -2166,6 +2330,7 @@ func (p *XLocalDatetime_) String() string {
 //  - DateVal
 //  - LocalDatetimeVal
 //  - PathVal
+//  - RefVal
 type XValue_ struct {
   BoolVal *bool `thrift:"boolVal,1,optional" db:"boolVal" json:"boolVal,omitempty"`
   Int8Val *int8 `thrift:"int8Val,2,optional" db:"int8Val" json:"int8Val,omitempty"`
@@ -2184,6 +2349,7 @@ type XValue_ struct {
   DateVal *XDate_ `thrift:"dateVal,15,optional" db:"dateVal" json:"dateVal,omitempty"`
   LocalDatetimeVal *XLocalDatetime_ `thrift:"localDatetimeVal,16,optional" db:"localDatetimeVal" json:"localDatetimeVal,omitempty"`
   PathVal *XPath_ `thrift:"pathVal,17,optional" db:"pathVal" json:"pathVal,omitempty"`
+  RefVal *XRef_ `thrift:"refVal,18,optional" db:"refVal" json:"refVal,omitempty"`
 }
 
 func NewXValue_() *XValue_ {
@@ -2307,6 +2473,13 @@ func (p *XValue_) GetPathVal() *XPath_ {
   }
   return p.PathVal
 }
+var XValue__RefVal_DEFAULT *XRef_
+func (p *XValue_) GetRefVal() *XRef_ {
+  if !p.IsSetRefVal() {
+    return XValue__RefVal_DEFAULT
+  }
+  return p.RefVal
+}
 func (p *XValue_) CountSetFieldsXValue_() int {
   count := 0
   if (p.IsSetBoolVal()) {
@@ -2358,6 +2531,9 @@ func (p *XValue_) CountSetFieldsXValue_() int {
     count++
   }
   if (p.IsSetPathVal()) {
+    count++
+  }
+  if (p.IsSetRefVal()) {
     count++
   }
   return count
@@ -2432,6 +2608,10 @@ func (p *XValue_) IsSetPathVal() bool {
   return p != nil && p.PathVal != nil
 }
 
+func (p *XValue_) IsSetRefVal() bool {
+  return p != nil && p.RefVal != nil
+}
+
 type XValue_Builder struct {
   obj *XValue_
 }
@@ -2461,6 +2641,7 @@ func (p XValue_Builder) Emit() *XValue_{
     DateVal: p.obj.DateVal,
     LocalDatetimeVal: p.obj.LocalDatetimeVal,
     PathVal: p.obj.PathVal,
+    RefVal: p.obj.RefVal,
   }
 }
 
@@ -2549,6 +2730,11 @@ func (x *XValue_Builder) PathVal(pathVal *XPath_) *XValue_Builder {
   return x
 }
 
+func (x *XValue_Builder) RefVal(refVal *XRef_) *XValue_Builder {
+  x.obj.RefVal = refVal
+  return x
+}
+
 func (x *XValue_) SetBoolVal(boolVal *bool) *XValue_ {
   x.BoolVal = boolVal
   return x
@@ -2634,6 +2820,11 @@ func (x *XValue_) SetPathVal(pathVal *XPath_) *XValue_ {
   return x
 }
 
+func (x *XValue_) SetRefVal(refVal *XRef_) *XValue_ {
+  x.RefVal = refVal
+  return x
+}
+
 func (p *XValue_) Read(iprot thrift.Protocol) error {
   if _, err := iprot.ReadStructBegin(); err != nil {
     return thrift.PrependError(fmt.Sprintf("%T read error: ", p), err)
@@ -2713,6 +2904,10 @@ func (p *XValue_) Read(iprot thrift.Protocol) error {
       }
     case 17:
       if err := p.ReadField17(iprot); err != nil {
+        return err
+      }
+    case 18:
+      if err := p.ReadField18(iprot); err != nil {
         return err
       }
     default:
@@ -2875,6 +3070,14 @@ func (p *XValue_)  ReadField17(iprot thrift.Protocol) error {
   return nil
 }
 
+func (p *XValue_)  ReadField18(iprot thrift.Protocol) error {
+  p.RefVal = NewRef()
+  if err := p.RefVal.Read(iprot); err != nil {
+    return thrift.PrependError(fmt.Sprintf("%T error reading struct: ", p.RefVal), err)
+  }
+  return nil
+}
+
 func (p *XValue_) Write(oprot thrift.Protocol) error {
   if c := p.CountSetFieldsXValue_(); c > 1 {
     return fmt.Errorf("%T write union: no more than one field must be set (%d set).", p, c)
@@ -2898,6 +3101,7 @@ func (p *XValue_) Write(oprot thrift.Protocol) error {
   if err := p.writeField15(oprot); err != nil { return err }
   if err := p.writeField16(oprot); err != nil { return err }
   if err := p.writeField17(oprot); err != nil { return err }
+  if err := p.writeField18(oprot); err != nil { return err }
   if err := oprot.WriteFieldStop(); err != nil {
     return thrift.PrependError("write field stop error: ", err) }
   if err := oprot.WriteStructEnd(); err != nil {
@@ -3118,6 +3322,19 @@ func (p *XValue_) writeField17(oprot thrift.Protocol) (err error) {
   return err
 }
 
+func (p *XValue_) writeField18(oprot thrift.Protocol) (err error) {
+  if p.IsSetRefVal() {
+    if err := oprot.WriteFieldBegin("refVal", thrift.STRUCT, 18); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field begin error 18:refVal: ", p), err) }
+    if err := p.RefVal.Write(oprot); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T error writing struct: ", p.RefVal), err)
+    }
+    if err := oprot.WriteFieldEnd(); err != nil {
+      return thrift.PrependError(fmt.Sprintf("%T write field end error 18:refVal: ", p), err) }
+  }
+  return err
+}
+
 func (p *XValue_) String() string {
   if p == nil {
     return "<nil>"
@@ -3220,7 +3437,13 @@ func (p *XValue_) String() string {
   } else {
     pathValVal = fmt.Sprintf("%v", p.PathVal)
   }
-  return fmt.Sprintf("XValue_({BoolVal:%s Int8Val:%s Int16Val:%s Int32Val:%s Int64Val:%s FloatVal:%s DoubleVal:%s StringVal:%s ListVal:%s RecordVal:%s NodeVal:%s EdgeVal:%s DurationVal:%s LocalTimeVal:%s DateVal:%s LocalDatetimeVal:%s PathVal:%s})", boolValVal, int8ValVal, int16ValVal, int32ValVal, int64ValVal, floatValVal, doubleValVal, stringValVal, listValVal, recordValVal, nodeValVal, edgeValVal, durationValVal, localTimeValVal, dateValVal, localDatetimeValVal, pathValVal)
+  var refValVal string
+  if p.RefVal == nil {
+    refValVal = "<nil>"
+  } else {
+    refValVal = fmt.Sprintf("%v", p.RefVal)
+  }
+  return fmt.Sprintf("XValue_({BoolVal:%s Int8Val:%s Int16Val:%s Int32Val:%s Int64Val:%s FloatVal:%s DoubleVal:%s StringVal:%s ListVal:%s RecordVal:%s NodeVal:%s EdgeVal:%s DurationVal:%s LocalTimeVal:%s DateVal:%s LocalDatetimeVal:%s PathVal:%s RefVal:%s})", boolValVal, int8ValVal, int16ValVal, int32ValVal, int64ValVal, floatValVal, doubleValVal, stringValVal, listValVal, recordValVal, nodeValVal, edgeValVal, durationValVal, localTimeValVal, dateValVal, localDatetimeValVal, pathValVal, refValVal)
 }
 
 // Attributes:

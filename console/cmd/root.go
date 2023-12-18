@@ -61,6 +61,7 @@ type ParameterMap map[string]interface{}
 var parameterMap ParameterMap
 
 var dataSetPrinter = printer.NewDataSetPrinter()
+var dataSetVerticalPrinter = printer.NewDataSetVerticalPrinter()
 
 var planDescPrinter = printer.NewPlanDescPrinter()
 
@@ -260,6 +261,7 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 	switch cmd {
 	case ExportCsv:
 		dataSetPrinter.ExportCsv(args[0])
+		dataSetVerticalPrinter.ExportCsv(args[0])
 	case ExportDot:
 		planDescPrinter.ExportDot(args[0])
 	case PlayData:
@@ -300,7 +302,7 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 }
 
 // TODO(Aiee) We don't have a complete gql status yet
-func printResultSet(res *nebulago.ResultSet, startTime time.Time) (duration time.Duration) {
+func printResultSet(res *nebulago.ResultSet, startTime time.Time, isVertical bool) (duration time.Duration) {
 	if !res.IsSucceed() {
 		// fmt.Printf("[ERROR (%d)]: %s", res.GetErrorCode(), res.GetErrorMsg())
 		fmt.Printf("[ERROR]: %s", res.GetStatus())
@@ -310,7 +312,11 @@ func printResultSet(res *nebulago.ResultSet, startTime time.Time) (duration time
 	}
 	// Show table
 	if res.IsSetData() {
-		dataSetPrinter.PrintDataSet(res)
+		if isVertical {
+			dataSetVerticalPrinter.PrintDataSet(res)
+		} else {
+			dataSetPrinter.PrintDataSet(res)
+		}
 		numRows := res.GetRowSize()
 		duration = time.Since(startTime)
 		if numRows > 0 {
@@ -358,6 +364,7 @@ func loop(c cli.Cli) error {
 		if len(line) == 0 { // 1). The line input is empty, or 2). user presses ctrlC so the input is truncated
 			continue
 		}
+		line = strings.TrimSpace(line)
 		// Console side command
 		if isLocal, cmd, args := isConsoleCmd(line); isLocal {
 			if cmd == Quit {
@@ -366,6 +373,12 @@ func loop(c cli.Cli) error {
 			executeConsoleCmd(c, cmd, args)
 			continue
 		}
+
+		isVertical := strings.HasSuffix(line, "\\G")
+		if isVertical {
+			line = strings.TrimSuffix(line, "\\G")
+		}
+
 		// Server side command
 		var t1 int64 = 0
 		var t2 int64 = 0
@@ -377,7 +390,7 @@ func loop(c cli.Cli) error {
 			}
 
 			if c.Output() {
-				duration := printResultSet(res, start)
+				duration := printResultSet(res, start, isVertical)
 				t2 += int64(duration / 1000)
 				fmt.Println(time.Now().In(time.Local).Format(time.RFC1123))
 				fmt.Println()
