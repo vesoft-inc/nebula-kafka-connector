@@ -110,6 +110,31 @@ To connect to your Nebula Graph services, run the follow command in the containe
 docker> nebula-console -u <user> -p <password> --address=<graphd> --port=9669
 ```
 
+## Print result vertically
+
+Under regular operation, the console displays the results in a tabular format.
+For instance, when executing the command `show create graph ldbc`, the output is shown as follows:
+
+```gql
+nebula> show create graph ldbc
++------------+-------------------------------------------------------+
+| graph_name | create_graph_statement                                |
++------------+-------------------------------------------------------+
+| "ldbc"     | "CREATE GRAPH IF NOT EXISTS `ldbc` TYPED `ldbc_type`" |
++------------+-------------------------------------------------------+
+```
+
+However, when dealing with a large number of columns or when the contents of a column are too long,
+it may be more convenient to display the data vertically. This can be achieved by appending the `\G` command at the end of your query.
+
+For example, the output of above query is displayed vertically as shown below:
+
+```gql
+nebula> show create graph ldbc \G
+*************************** 1. row ***************************
+            graph_name: "ldbc"
+create_graph_statement: "CREATE GRAPH IF NOT EXISTS `ldbc` TYPED `ldbc_type`"
+```
 
 ## Console side commands:
 
@@ -178,7 +203,7 @@ Use `nebula-console meta` to execute meta command.
 
 
 ```bash
-Usage: 
+Usage:
 Available Commands:
   addservice       Add service into assigned cluster.
   createcluster    Create cluster in meta server.
