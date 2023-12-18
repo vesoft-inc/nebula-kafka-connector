@@ -862,6 +862,8 @@ spec:
                         type: array
                     type: object
                 type: object
+              alpineImage:
+                type: string
               auth:
                 description: Auth defines details of user login info
                 properties:
@@ -5193,7 +5195,7 @@ spec:
                     type: array
                   version:
                     default: latest
-                    description: Version tag for container image.
+                    description: Version is tag for container image.
                     type: string
                   volumeMounts:
                     items:
@@ -11274,7 +11276,7 @@ spec:
                     type: array
                   version:
                     default: latest
-                    description: Version tag for container image.
+                    description: Version is tag for container image.
                     type: string
                   volumeMounts:
                     items:

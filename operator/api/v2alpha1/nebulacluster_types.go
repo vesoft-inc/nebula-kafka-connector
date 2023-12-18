@@ -1,5 +1,5 @@
 /*
-Copyright 2023.
+Copyright 2023 Vesoft Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,11 +21,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// NebulaClusterReady indicates that the nebula cluster is ready or not.
+	// This is defined as:
+	// - All workloads are up to date (currentRevision == updateRevision).
+	// - All nebula component pods are healthy.
+	NebulaClusterReady = "Ready"
+)
+
 // NebulaClusterSpec defines the desired state of NebulaCluster
 type NebulaClusterSpec struct {
 	Graphd *GraphdSpec `json:"graphd"`
 
-	Storage *StoragedSpec `json:"storaged"`
+	Storaged *StoragedSpec `json:"storaged"`
 
 	MetadHost *NebulaHost `json:"metadHost"`
 
@@ -61,6 +69,9 @@ type NebulaClusterSpec struct {
 
 	// +optional
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
+
+	// +optional
+	AlpineImage *string `json:"alpineImage,omitempty"`
 }
 
 type GraphdSpec struct {

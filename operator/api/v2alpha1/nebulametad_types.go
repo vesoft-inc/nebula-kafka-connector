@@ -53,11 +53,9 @@ type NebulaMetadSpec struct {
 
 // NebulaMetadStatus defines the observed state of NebulaMetad
 type NebulaMetadStatus struct {
+	ComponentStatus    `json:",inline"`
 	ObservedGeneration int64              `json:"observedGeneration,omitempty"`
 	ManagedClusters    int32              `json:"managedClusters,omitempty"`
-	Version            string             `json:"version,omitempty"`
-	Phase              ComponentPhase     `json:"phase,omitempty"`
-	Workload           *WorkloadStatus    `json:"workload,omitempty"`
 	Conditions         []metav1.Condition `json:"conditions,omitempty"`
 }
 
