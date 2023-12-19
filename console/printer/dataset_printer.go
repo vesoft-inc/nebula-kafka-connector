@@ -29,6 +29,11 @@ func NewDataSetPrinter() DataSetPrinter {
 }
 
 func (p *DataSetPrinter) ExportCsv(filename string) {
+	if filename == "" {
+		p.closeFile()
+		return
+	}
+
 	fd, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 	if err != nil {
 		fmt.Printf("Open or Create file %s failed, %s", filename, err.Error())
@@ -36,6 +41,19 @@ func (p *DataSetPrinter) ExportCsv(filename string) {
 	}
 	p.fd = fd
 	p.filename = filename
+}
+
+func (p *DataSetPrinter) closeFile() {
+	if p.fd != nil {
+		s := strings.Replace(p.writer.RenderCSV(), "\\\"", "", -1)
+		fmt.Fprintln(p.fd, s)
+
+		if err := p.fd.Close(); err != nil {
+			fmt.Printf("Close file %s failed, %s", p.filename, err.Error())
+		}
+		p.fd = nil
+		p.filename = ""
+	}
 }
 
 // TODO(Aiee) Result set is unimplemented yet
@@ -70,14 +88,5 @@ func (p *DataSetPrinter) PrintDataSet(res *nebula.ResultSet) {
 	}
 
 	fmt.Println(p.writer.Render())
-	if p.fd != nil {
-		s := strings.Replace(p.writer.RenderCSV(), "\\\"", "", -1)
-		fmt.Fprintln(p.fd, s)
-
-		if err := p.fd.Close(); err != nil {
-			fmt.Printf("Close file %s failed, %s", p.filename, err.Error())
-		}
-		p.fd = nil
-		p.filename = ""
-	}
+	p.closeFile()
 }

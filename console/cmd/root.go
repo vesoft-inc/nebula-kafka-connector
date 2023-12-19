@@ -221,27 +221,51 @@ func isConsoleCmd(cmd string) (isLocal bool, localCmd int, args []string) {
 	case "sleep":
 		{
 			localCmd = Sleep
-			args = []string{words[1]}
+			if len(words) > 1 {
+				args = []string{words[1]}
+			} else {
+				defaultSleep := "0"
+				fmt.Printf("No sleep time specified, use default sleep time '%s'\n", defaultSleep)
+				args = []string{defaultSleep}
+			}
 		}
 	case "play":
 		{
 			localCmd = PlayData
-			args = []string{words[1]}
+			if len(words) > 1 {
+				args = []string{words[1]}
+			} else {
+				defaultData := "ldbc"
+				fmt.Printf("No dataset specified, use default dataset '%s'\n", defaultData)
+				args = []string{defaultData}
+			}
 		}
 	case "repeat":
 		{
 			localCmd = Repeat
-			args = []string{words[1]}
+			if len(words) > 1 {
+				args = []string{words[1]}
+			} else {
+				args = []string{"0"}
+			}
 		}
 	case "csv":
 		{
 			localCmd = ExportCsv
-			args = []string{words[1]}
+			if len(words) > 1 {
+				args = []string{words[1]}
+			} else {
+				args = []string{""}
+			}
 		}
 	case "dot":
 		{
 			localCmd = ExportDot
-			args = []string{words[1]}
+			if len(words) > 1 {
+				args = []string{words[1]}
+			} else {
+				args = []string{""}
+			}
 		}
 	case "param":
 		{

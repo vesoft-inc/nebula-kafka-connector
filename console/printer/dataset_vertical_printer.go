@@ -22,6 +22,10 @@ func NewDataSetVerticalPrinter() DataSetVerticalPrinter {
 }
 
 func (p *DataSetVerticalPrinter) ExportCsv(filename string) {
+	if filename == "" {
+		p.closeFile()
+		return
+	}
 	fd, err := os.OpenFile(filename, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0600)
 	if err != nil {
 		fmt.Printf("Open or Create file %s failed, %s", filename, err.Error())
@@ -29,6 +33,16 @@ func (p *DataSetVerticalPrinter) ExportCsv(filename string) {
 	}
 	p.fd = fd
 	p.filename = filename
+}
+
+func (p *DataSetVerticalPrinter) closeFile() {
+	if p.fd != nil {
+		if err := p.fd.Close(); err != nil {
+			fmt.Printf("Close file %s failed, %s", p.filename, err.Error())
+		}
+		p.fd = nil
+		p.filename = ""
+	}
 }
 
 func (p *DataSetVerticalPrinter) PrintDataSet(res *nebula.ResultSet) {
@@ -66,11 +80,5 @@ func (p *DataSetVerticalPrinter) PrintDataSet(res *nebula.ResultSet) {
 		}
 	}
 
-	if p.fd != nil {
-		if err := p.fd.Close(); err != nil {
-			fmt.Printf("Close file %s failed, %s", p.filename, err.Error())
-		}
-		p.fd = nil
-		p.filename = ""
-	}
+	p.closeFile()
 }
