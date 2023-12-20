@@ -18,8 +18,8 @@ package v2alpha1
 
 import (
 	"fmt"
-	appsv1 "k8s.io/api/apps/v1"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
@@ -228,31 +228,43 @@ type KObjectAccessor interface {
 	UpdateComponentStatus(status *ComponentStatus)
 }
 
-// NebulaClusterComponent is the interface for cluster component
+// NebulaComponent is the interface for nebula component
 // +k8s:deepcopy-gen=false
-type NebulaClusterComponent interface {
-	BaseComponent
-
+type NebulaComponent interface {
 	KObjectAccessor
-}
 
-// +k8s:deepcopy-gen=false
-type BaseComponent interface {
-	GraphdComponent() NebulaClusterComponent
-	StoragedComponent() NebulaClusterComponent
 	ComponentSpec() ComponentAccessor
 	ComponentType() ComponentType
-	GetNebulaCluster() *NebulaCluster
-	GetClusterName() string
+
+	GetCluster() *NebulaCluster
 	GetNamespace() string
 	GetName() string
 	GetPodName(ordinal int32) string
 	GenerateOwnerReferences() []metav1.OwnerReference
+
+	ImagePullSecrets() []corev1.LocalObjectReference
+	ImagePullPolicy() *corev1.PullPolicy
 }
 
-var _ BaseComponent = &baseComponent{}
+// ClusterComponent is the interface for NebulaCluster component
+// +k8s:deepcopy-gen=false
+type ClusterComponent interface {
+	Cluster
 
-// ComponentType is the type of NebulaCluster Component: graphd, storaged
+	NebulaComponent
+}
+
+// Cluster is the interface for NebulaCluster
+// +k8s:deepcopy-gen=false
+type Cluster interface {
+	GraphdComponent() ClusterComponent
+	StoragedComponent() ClusterComponent
+	GetClusterName() string
+}
+
+var _ Cluster = &cluster{}
+
+// ComponentType is the type of component: metad, graphd, storaged
 // +k8s:deepcopy-gen=false
 type ComponentType string
 
@@ -261,12 +273,12 @@ func (typ ComponentType) String() string {
 }
 
 // +k8s:deepcopy-gen=false
-type baseComponent struct {
+type cluster struct {
 	nc  *NebulaCluster
 	typ ComponentType
 }
 
-func (c *baseComponent) ComponentSpec() ComponentAccessor {
+func (c *cluster) ComponentSpec() ComponentAccessor {
 	var spec *ComponentSpec
 	if c.typ == GraphdComponentType && c.nc.Spec.Graphd != nil {
 		spec = &c.nc.Spec.Graphd.ComponentSpec
@@ -277,40 +289,48 @@ func (c *baseComponent) ComponentSpec() ComponentAccessor {
 	return buildComponentAccessor(c.nc, spec)
 }
 
-func (c *baseComponent) GraphdComponent() NebulaClusterComponent {
+func (c *cluster) GraphdComponent() ClusterComponent {
 	return newGraphdComponent(c.nc)
 }
 
-func (c *baseComponent) StoragedComponent() NebulaClusterComponent {
+func (c *cluster) StoragedComponent() ClusterComponent {
 	return newStoragedComponent(c.nc)
 }
 
-func (c *baseComponent) ComponentType() ComponentType {
+func (c *cluster) ComponentType() ComponentType {
 	return c.typ
 }
 
-func (c *baseComponent) GetNebulaCluster() *NebulaCluster {
+func (c *cluster) GetCluster() *NebulaCluster {
 	return c.nc
 }
 
-func (c *baseComponent) GetClusterName() string {
+func (c *cluster) GetClusterName() string {
 	return c.nc.GetClusterName()
 }
 
-func (c *baseComponent) GetNamespace() string {
+func (c *cluster) GetNamespace() string {
 	return c.nc.GetNamespace()
 }
 
-func (c *baseComponent) GetName() string {
+func (c *cluster) GetName() string {
 	return getComponentName(c.GetClusterName(), c.ComponentType())
 }
 
-func (c *baseComponent) GetPodName(ordinal int32) string {
+func (c *cluster) GetPodName(ordinal int32) string {
 	return getPodName(c.GetName(), ordinal)
 }
 
-func (c *baseComponent) GenerateOwnerReferences() []metav1.OwnerReference {
+func (c *cluster) GenerateOwnerReferences() []metav1.OwnerReference {
 	return c.nc.GenerateOwnerReferences()
+}
+
+func (c *cluster) ImagePullSecrets() []corev1.LocalObjectReference {
+	return c.nc.Spec.ImagePullSecrets
+}
+
+func (c *cluster) ImagePullPolicy() *corev1.PullPolicy {
+	return c.nc.Spec.ImagePullPolicy
 }
 
 func buildComponentAccessor(nc *NebulaCluster, componentSpec *ComponentSpec) ComponentAccessor {

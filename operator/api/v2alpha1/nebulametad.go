@@ -18,8 +18,12 @@ package v2alpha1
 
 import "k8s.io/utils/pointer"
 
-func (nm *NebulaMetad) MetadComponent() NebulaMetadComponent {
+func (nm *NebulaMetad) MetadComponent() NebulaComponent {
 	return newMetadComponent(nm)
+}
+
+func (nm *NebulaMetad) GetMetadEndpoints(portName string) []string {
+	return nm.MetadComponent().GetEndpoints(portName)
 }
 
 func (nm *NebulaMetad) IsPVReclaimEnabled() bool {

@@ -23,15 +23,15 @@ import (
 	"k8s.io/utils/pointer"
 )
 
-func (nc *NebulaCluster) GraphdComponent() NebulaClusterComponent {
+func (nc *NebulaCluster) GraphdComponent() ClusterComponent {
 	return newGraphdComponent(nc)
 }
 
-func (nc *NebulaCluster) StoragedComponent() NebulaClusterComponent {
+func (nc *NebulaCluster) StoragedComponent() ClusterComponent {
 	return newStoragedComponent(nc)
 }
 
-func (nc *NebulaCluster) ComponentByType(typ ComponentType) (NebulaClusterComponent, error) {
+func (nc *NebulaCluster) ComponentByType(typ ComponentType) (ClusterComponent, error) {
 	switch typ {
 	case GraphdComponentType:
 		return nc.GraphdComponent(), nil

@@ -27,20 +27,20 @@ import (
 )
 
 const (
-	GraphdComponentType     = ComponentType("graphd")
-	GraphdPortNameThrift    = "thrift"
-	defaultGraphdPortThrift = 9669
-	GraphdPortNameHTTP      = "http"
-	defaultGraphdPortHTTP   = 19669
-	defaultGraphdImage      = "vesoft/nebula-graphd"
+	GraphdComponentType     ComponentType = "graphd"
+	GraphdPortNameThrift                  = "thrift"
+	defaultGraphdPortThrift               = 9669
+	GraphdPortNameHTTP                    = "http"
+	defaultGraphdPortHTTP                 = 19669
+	defaultGraphdImage                    = "vesoft/nebula-graphd"
 )
 
-var _ NebulaClusterComponent = &graphdComponent{}
+var _ NebulaComponent = &graphdComponent{}
 
 // +k8s:deepcopy-gen=false
 func newGraphdComponent(nc *NebulaCluster) *graphdComponent {
 	return &graphdComponent{
-		baseComponent: baseComponent{
+		cluster: cluster{
 			nc:  nc,
 			typ: GraphdComponentType,
 		},
@@ -48,7 +48,7 @@ func newGraphdComponent(nc *NebulaCluster) *graphdComponent {
 }
 
 type graphdComponent struct {
-	baseComponent
+	cluster
 }
 
 func (c *graphdComponent) GetUpdateRevision() string {
@@ -232,7 +232,7 @@ func (c *graphdComponent) GenerateHeadlessService() *corev1.Service {
 func (c *graphdComponent) GenerateConfigMap() *corev1.ConfigMap {
 	cm := generateConfigMap(c)
 	configKey := getCmKey(c.ComponentType().String())
-	cm.Data[configKey] = ""
+	cm.Data[configKey] = GraphdConfigTemplate
 	return cm
 }
 

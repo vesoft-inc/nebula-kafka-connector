@@ -27,20 +27,20 @@ import (
 )
 
 const (
-	StoragedComponentType     = ComponentType("storaged")
-	StoragedPortNameThrift    = "thrift"
-	defaultStoragedPortThrift = 9779
-	StoragedPortNameHTTP      = "http"
-	defaultStoragedPortHTTP   = 19779
-	defaultStoragedImage      = "vesoft/nebula-storaged"
+	StoragedComponentType     ComponentType = "storaged"
+	StoragedPortNameThrift                  = "thrift"
+	defaultStoragedPortThrift               = 9779
+	StoragedPortNameHTTP                    = "http"
+	defaultStoragedPortHTTP                 = 19779
+	defaultStoragedImage                    = "vesoft/nebula-storaged"
 )
 
-var _ NebulaClusterComponent = &storagedComponent{}
+var _ NebulaComponent = &storagedComponent{}
 
 // +k8s:deepcopy-gen=false
 func newStoragedComponent(nc *NebulaCluster) *storagedComponent {
 	return &storagedComponent{
-		baseComponent: baseComponent{
+		cluster: cluster{
 			nc:  nc,
 			typ: StoragedComponentType,
 		},
@@ -48,7 +48,7 @@ func newStoragedComponent(nc *NebulaCluster) *storagedComponent {
 }
 
 type storagedComponent struct {
-	baseComponent
+	cluster
 }
 
 func (c *storagedComponent) GetUpdateRevision() string {
@@ -281,7 +281,7 @@ func (c *storagedComponent) GenerateHeadlessService() *corev1.Service {
 func (c *storagedComponent) GenerateConfigMap() *corev1.ConfigMap {
 	cm := generateConfigMap(c)
 	configKey := getCmKey(c.ComponentType().String())
-	cm.Data[configKey] = ""
+	cm.Data[configKey] = StoragedConfigTemplate
 	return cm
 }
 

@@ -28,37 +28,35 @@ import (
 )
 
 const (
-	MetadComponentType     = ComponentType("metad")
-	MetadPortNameThrift    = "thrift"
-	defaultMetadPortThrift = 9559
-	MetadPortNameHTTP      = "http"
-	defaultMetadPortHTTP   = 19559
-	defaultMetadImage      = "vesoft/nebula-metad"
+	MetadComponentType     ComponentType = "metad"
+	MetadPortNameThrift                  = "thrift"
+	defaultMetadPortThrift               = 9559
+	MetadPortNameHTTP                    = "http"
+	defaultMetadPortHTTP                 = 19559
+	defaultMetadImage                    = "vesoft/nebula-metad"
 )
 
-// +k8s:deepcopy-gen=false
-type NebulaMetadComponent interface {
-	ComponentSpec() ComponentAccessor
+var _ NebulaComponent = &metadComponent{}
 
-	KObjectAccessor
-
-	GetName() string
-	GetPodName(ordinal int32) string
-	GenerateOwnerReferences() []metav1.OwnerReference
-}
-
-var _ NebulaMetadComponent = &metadComponent{}
-
-func newMetadComponent(metad *NebulaMetad) NebulaMetadComponent {
-	return &metadComponent{nm: metad}
+func newMetadComponent(metad *NebulaMetad) NebulaComponent {
+	return &metadComponent{nm: metad, typ: MetadComponentType}
 }
 
 type metadComponent struct {
-	nm *NebulaMetad
+	nm  *NebulaMetad
+	typ ComponentType
+}
+
+func (m *metadComponent) GetCluster() *NebulaCluster {
+	return nil
+}
+
+func (m *metadComponent) GetNamespace() string {
+	return m.nm.Namespace
 }
 
 func (m *metadComponent) GetName() string {
-	return getComponentName(m.nm.Name, MetadComponentType)
+	return getComponentName(m.nm.Name, m.ComponentType())
 }
 
 func (m *metadComponent) GetPodName(ordinal int32) string {
@@ -76,6 +74,18 @@ func (m *metadComponent) GenerateOwnerReferences() []metav1.OwnerReference {
 			BlockOwnerDeletion: pointer.Bool(true),
 		},
 	}
+}
+
+func (m *metadComponent) ImagePullSecrets() []corev1.LocalObjectReference {
+	return m.nm.Spec.ImagePullSecrets
+}
+
+func (m *metadComponent) ImagePullPolicy() *corev1.PullPolicy {
+	return m.nm.Spec.ImagePullPolicy
+}
+
+func (m *metadComponent) ComponentType() ComponentType {
+	return m.typ
 }
 
 func (m *metadComponent) ComponentSpec() ComponentAccessor {
@@ -123,7 +133,7 @@ func (m *metadComponent) GetConfig() map[string]string {
 }
 
 func (m *metadComponent) GetConfigMapKey() string {
-	return getCmKey(MetadComponentType.String())
+	return getCmKey(m.ComponentType().String())
 }
 
 func (m *metadComponent) GetServiceSpec() *ServiceSpec {
@@ -188,7 +198,7 @@ func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {
 }
 
 func (m *metadComponent) GenerateVolumeMounts() []corev1.VolumeMount {
-	componentType := MetadComponentType.String()
+	componentType := m.ComponentType().String()
 	mounts := []corev1.VolumeMount{
 		{
 			Name:      dataVolume(componentType),
@@ -209,7 +219,7 @@ func (m *metadComponent) GenerateVolumeMounts() []corev1.VolumeMount {
 }
 
 func (m *metadComponent) GenerateVolumes() []corev1.Volume {
-	componentType := MetadComponentType.String()
+	componentType := m.ComponentType().String()
 	volumes := []corev1.Volume{
 		{
 			Name: dataVolume(componentType),
@@ -236,7 +246,7 @@ func (m *metadComponent) GenerateVolumes() []corev1.Volume {
 }
 
 func (m *metadComponent) GenerateVolumeClaim() ([]corev1.PersistentVolumeClaim, error) {
-	componentType := MetadComponentType.String()
+	componentType := m.ComponentType().String()
 	claims := make([]corev1.PersistentVolumeClaim, 0)
 
 	dataRes, err := m.GetDataStorageResources()
@@ -283,8 +293,7 @@ func (m *metadComponent) GenerateVolumeClaim() ([]corev1.PersistentVolumeClaim, 
 }
 
 func (m *metadComponent) GenerateWorkload(cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
-	//TODO implement me
-	panic("implement me")
+	return generateWorkload(m, cm)
 }
 
 func (m *metadComponent) GenerateService() *corev1.Service {
@@ -292,13 +301,14 @@ func (m *metadComponent) GenerateService() *corev1.Service {
 }
 
 func (m *metadComponent) GenerateHeadlessService() *corev1.Service {
-	//TODO implement me
-	panic("implement me")
+	return generateService(m, true)
 }
 
 func (m *metadComponent) GenerateConfigMap() *corev1.ConfigMap {
-	//TODO implement me
-	panic("implement me")
+	cm := generateConfigMap(m)
+	configKey := getCmKey(m.ComponentType().String())
+	cm.Data[configKey] = MetadhConfigTemplate
+	return cm
 }
 
 func (m *metadComponent) IsReady() bool {

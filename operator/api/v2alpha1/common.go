@@ -250,24 +250,27 @@ echo "export NODE_ZONE=${NODE_ZONE}" > /node/zone
 	return container
 }
 
-func generateInitContainers(c NebulaClusterComponent) []corev1.Container {
+func generateInitContainers(c NebulaComponent) []corev1.Container {
 	containers := c.ComponentSpec().InitContainers()
-	nc := c.GetNebulaCluster()
-	if c.ComponentType() == GraphdComponentType && nc.IsZoneEnabled() {
+	nc := c.GetCluster()
+	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
 		nodeLabelsContainer := genNodeLabelsContainer(nc)
 		containers = append(containers, nodeLabelsContainer)
 	}
 	return containers
 }
 
-func generateContainers(c NebulaClusterComponent, cm *corev1.ConfigMap) []corev1.Container {
+func generateContainers(c NebulaComponent, cm *corev1.ConfigMap) []corev1.Container {
 	componentType := c.ComponentType().String()
-	nc := c.GetNebulaCluster()
+	nc := c.GetCluster()
 
 	containers := make([]corev1.Container, 0, 1)
 
 	var dataPath string
-	volumes := len(nc.Spec.Storaged.DataVolumeClaims)
+	var volumes int
+	if nc != nil {
+		volumes = len(nc.Spec.Storaged.DataVolumeClaims)
+	}
 	if c.ComponentType() == StoragedComponentType && volumes > 1 {
 		dataPath = " --data_path=data/storage"
 		for i := 1; i < volumes; i++ {
@@ -275,16 +278,17 @@ func generateContainers(c NebulaClusterComponent, cm *corev1.ConfigMap) []corev1
 		}
 	}
 
+	// TODO: support metad component
 	metadAddress := getMetadAddress(nc.Spec.MetadHost)
 	flags := " --meta_server_addrs=" + metadAddress +
 		" --local_ip=$(hostname)." + c.GetServiceFQDN() +
 		" --daemonize=false" + dataPath
-	if c.ComponentType() == GraphdComponentType && nc.IsZoneEnabled() {
+	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
 		flags += " --assigned_zone=$NODE_ZONE"
 	}
 
 	cmd := []string{"/bin/sh", "-ecx"}
-	if c.ComponentType() == GraphdComponentType && nc.IsZoneEnabled() {
+	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
 		cmd = append(cmd, fmt.Sprintf(". /node/zone; echo $NODE_ZONE; exec /usr/local/nebula/bin/nebula-%s", componentType)+
 			fmt.Sprintf(" --flagfile=/usr/local/nebula/etc/nebula-%s.conf", componentType)+flags)
 	} else {
@@ -302,7 +306,7 @@ func generateContainers(c NebulaClusterComponent, cm *corev1.ConfigMap) []corev1
 		})
 		mounts = append(mounts, c.ComponentSpec().VolumeMounts()...)
 	}
-	if c.ComponentType() == GraphdComponentType && nc.IsZoneEnabled() {
+	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
 		mounts = append(mounts, corev1.VolumeMount{
 			Name:      "node-info",
 			MountPath: "/node",
@@ -345,7 +349,7 @@ func generateContainers(c NebulaClusterComponent, cm *corev1.ConfigMap) []corev1
 		baseContainer.Resources = *resources
 	}
 
-	imagePullPolicy := nc.Spec.ImagePullPolicy
+	imagePullPolicy := c.ImagePullPolicy()
 	if imagePullPolicy != nil {
 		baseContainer.ImagePullPolicy = *imagePullPolicy
 	}
@@ -356,13 +360,13 @@ func generateContainers(c NebulaClusterComponent, cm *corev1.ConfigMap) []corev1
 	return containers
 }
 
-func generateStatefulSet(c NebulaClusterComponent, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
+func generateStatefulSet(c NebulaComponent, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
 	namespace := c.GetNamespace()
 	svcName := c.GetHeadlessServiceName()
 	componentType := c.ComponentType().String()
 	componentLabel := c.GenerateLabels()
 
-	nc := c.GetNebulaCluster()
+	nc := c.GetCluster()
 
 	cmKey := getCmKey(componentType)
 	initContainers := generateInitContainers(c)
@@ -385,7 +389,7 @@ func generateStatefulSet(c NebulaClusterComponent, cm *corev1.ConfigMap) (*appsv
 		})
 	}
 
-	if c.ComponentType() == GraphdComponentType && nc.IsZoneEnabled() {
+	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
 		volumes = append(volumes, corev1.Volume{
 			Name: "node-info",
 			VolumeSource: corev1.VolumeSource{
@@ -404,7 +408,7 @@ func generateStatefulSet(c NebulaClusterComponent, cm *corev1.ConfigMap) (*appsv
 		InitContainers:     initContainers,
 		Containers:         containers,
 		Volumes:            volumes,
-		ImagePullSecrets:   nc.Spec.ImagePullSecrets,
+		ImagePullSecrets:   c.ImagePullSecrets(),
 		Affinity:           c.ComponentSpec().Affinity(),
 		Tolerations:        c.ComponentSpec().Tolerations(),
 		ServiceAccountName: NebulaServiceAccountName,
@@ -451,7 +455,11 @@ func generateStatefulSet(c NebulaClusterComponent, cm *corev1.ConfigMap) (*appsv
 	return sts, nil
 }
 
-func generateWorkload(c NebulaClusterComponent, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
+func isZoneEnabled(nc *NebulaCluster) bool {
+	return nc != nil && nc.IsZoneEnabled()
+}
+
+func generateWorkload(c NebulaComponent, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
 	w, err := generateStatefulSet(c, cm)
 	if err != nil {
 		return nil, err
@@ -459,7 +467,7 @@ func generateWorkload(c NebulaClusterComponent, cm *corev1.ConfigMap) (*appsv1.S
 	return w, err
 }
 
-func generateService(c NebulaClusterComponent, isHeadless bool) *corev1.Service {
+func generateService(c NebulaComponent, isHeadless bool) *corev1.Service {
 	namespace := c.GetNamespace()
 	svcName := getServiceName(c.GetName(), isHeadless)
 
@@ -509,7 +517,7 @@ func generateService(c NebulaClusterComponent, isHeadless bool) *corev1.Service 
 	return service
 }
 
-func generateConfigMap(c NebulaClusterComponent) *corev1.ConfigMap {
+func generateConfigMap(c NebulaComponent) *corev1.ConfigMap {
 	namespace := c.GetNamespace()
 	labels := c.GenerateLabels()
 	cmName := c.GetName()
