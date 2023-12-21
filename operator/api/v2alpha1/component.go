@@ -218,7 +218,7 @@ type KObjectAccessor interface {
 	GenerateVolumeMounts() []corev1.VolumeMount
 	GenerateVolumes() []corev1.Volume
 	GenerateVolumeClaim() ([]corev1.PersistentVolumeClaim, error)
-	GenerateWorkload(cm *corev1.ConfigMap) (*appsv1.StatefulSet, error)
+	GenerateWorkload(cm *corev1.ConfigMap, metadEndpoints []string) (*appsv1.StatefulSet, error)
 	GenerateService() *corev1.Service
 	GenerateHeadlessService() *corev1.Service
 	GenerateConfigMap() *corev1.ConfigMap

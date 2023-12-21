@@ -266,8 +266,8 @@ func (c *storagedComponent) GenerateVolumeClaim() ([]corev1.PersistentVolumeClai
 	return claims, nil
 }
 
-func (c *storagedComponent) GenerateWorkload(cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
-	return generateWorkload(c, cm)
+func (c *storagedComponent) GenerateWorkload(cm *corev1.ConfigMap, metadEndpoints []string) (*appsv1.StatefulSet, error) {
+	return generateWorkload(c, metadEndpoints, cm)
 }
 
 func (c *storagedComponent) GenerateService() *corev1.Service {

@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -47,8 +48,8 @@ func getMetadAddress(host *NebulaHost) string {
 	return fmt.Sprintf("%s:%d", host.Host, host.Port)
 }
 
-func getComponentName(clusterName string, typ ComponentType) string {
-	return fmt.Sprintf("%s-%s", clusterName, typ)
+func getComponentName(objectName string, typ ComponentType) string {
+	return fmt.Sprintf("%s-%s", objectName, typ)
 }
 
 func getPodName(componentName string, ordinal int32) string {
@@ -260,7 +261,7 @@ func generateInitContainers(c NebulaComponent) []corev1.Container {
 	return containers
 }
 
-func generateContainers(c NebulaComponent, cm *corev1.ConfigMap) []corev1.Container {
+func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *corev1.ConfigMap) []corev1.Container {
 	componentType := c.ComponentType().String()
 	nc := c.GetCluster()
 
@@ -278,8 +279,7 @@ func generateContainers(c NebulaComponent, cm *corev1.ConfigMap) []corev1.Contai
 		}
 	}
 
-	// TODO: support metad component
-	metadAddress := getMetadAddress(nc.Spec.MetadHost)
+	metadAddress := strings.Join(metadEndpoints, ",")
 	flags := " --meta_server_addrs=" + metadAddress +
 		" --local_ip=$(hostname)." + c.GetServiceFQDN() +
 		" --daemonize=false" + dataPath
@@ -360,7 +360,7 @@ func generateContainers(c NebulaComponent, cm *corev1.ConfigMap) []corev1.Contai
 	return containers
 }
 
-func generateStatefulSet(c NebulaComponent, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
+func generateStatefulSet(c NebulaComponent, metadEndpoints []string, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
 	namespace := c.GetNamespace()
 	svcName := c.GetHeadlessServiceName()
 	componentType := c.ComponentType().String()
@@ -370,7 +370,7 @@ func generateStatefulSet(c NebulaComponent, cm *corev1.ConfigMap) (*appsv1.State
 
 	cmKey := getCmKey(componentType)
 	initContainers := generateInitContainers(c)
-	containers := generateContainers(c, cm)
+	containers := generateNebulaContainers(c, metadEndpoints, cm)
 	volumes := c.GenerateVolumes()
 	if cm != nil {
 		volumes = append(volumes, corev1.Volume{
@@ -459,8 +459,8 @@ func isZoneEnabled(nc *NebulaCluster) bool {
 	return nc != nil && nc.IsZoneEnabled()
 }
 
-func generateWorkload(c NebulaComponent, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
-	w, err := generateStatefulSet(c, cm)
+func generateWorkload(c NebulaComponent, metadEndpoints []string, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
+	w, err := generateStatefulSet(c, metadEndpoints, cm)
 	if err != nil {
 		return nil, err
 	}

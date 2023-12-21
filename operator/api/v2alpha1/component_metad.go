@@ -292,8 +292,9 @@ func (m *metadComponent) GenerateVolumeClaim() ([]corev1.PersistentVolumeClaim, 
 	return claims, nil
 }
 
-func (m *metadComponent) GenerateWorkload(cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
-	return generateWorkload(m, cm)
+func (m *metadComponent) GenerateWorkload(cm *corev1.ConfigMap, _ []string) (*appsv1.StatefulSet, error) {
+	metadEndpoints := m.GetEndpoints(MetadPortNameThrift)
+	return generateWorkload(m, metadEndpoints, cm)
 }
 
 func (m *metadComponent) GenerateService() *corev1.Service {

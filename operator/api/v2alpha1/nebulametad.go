@@ -26,6 +26,10 @@ func (nm *NebulaMetad) GetMetadEndpoints(portName string) []string {
 	return nm.MetadComponent().GetEndpoints(portName)
 }
 
+func (nm *NebulaMetad) GetMetadThriftConnAddress() string {
+	return nm.MetadComponent().GetConnAddress(MetadPortNameThrift)
+}
+
 func (nm *NebulaMetad) IsPVReclaimEnabled() bool {
 	return pointer.BoolDeref(nm.Spec.EnablePVReclaim, false)
 }

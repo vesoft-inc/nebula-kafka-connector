@@ -217,8 +217,8 @@ func (c *graphdComponent) GenerateVolumeClaim() ([]corev1.PersistentVolumeClaim,
 	return claims, nil
 }
 
-func (c *graphdComponent) GenerateWorkload(cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {
-	return generateWorkload(c, cm)
+func (c *graphdComponent) GenerateWorkload(cm *corev1.ConfigMap, metadEndpoints []string) (*appsv1.StatefulSet, error) {
+	return generateWorkload(c, metadEndpoints, cm)
 }
 
 func (c *graphdComponent) GenerateService() *corev1.Service {

@@ -35,7 +35,7 @@ type NebulaClusterSpec struct {
 
 	Storaged *StoragedSpec `json:"storaged"`
 
-	MetadHost *NebulaHost `json:"metadHost"`
+	MetadRef *NamespacedObjectReference `json:"metadRef"`
 
 	// +kubebuilder:default=1
 	Replica int32 `json:"replica,omitempty"`

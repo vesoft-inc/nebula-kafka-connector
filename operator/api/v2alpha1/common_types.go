@@ -167,3 +167,15 @@ type WorkloadStatus struct {
 	// +optional
 	AvailableReplicas int32 `json:"availableReplicas"`
 }
+
+// NamespacedObjectReference contains enough information to let you locate
+// the referenced object in any namespace
+type NamespacedObjectReference struct {
+	// Name of the referent
+	// +required
+	Name string `json:"name"`
+
+	// Namespace of the referent
+	// +optional
+	Namespace string `json:"namespace,omitempty"`
+}
