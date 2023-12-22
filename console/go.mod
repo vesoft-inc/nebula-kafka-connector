@@ -24,5 +24,3 @@ require (
 )
 
 replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
-
-replace github.com/jedib0t/go-pretty/v6 => /home/jie.wang/go-pretty
