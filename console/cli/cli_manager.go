@@ -82,7 +82,7 @@ func (stat *status) nebulaPrompt() string {
 	//prompt += fmt.Sprintf("\033[%v;1m", ttyColor)
 	if stat.joinedByTripleQuotes || stat.joinedByBackSlash {
 		prompt += strings.Repeat(" ", stat.promptLen-3)
-		prompt += "-> "
+		prompt += "   "
 	} else {
 		promptString := fmt.Sprintf("(%s@nebula) [%s]> ", stat.user, stat.space)
 		stat.promptLen = len(promptString)
