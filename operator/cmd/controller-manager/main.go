@@ -33,7 +33,8 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	appsv2alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/api/v2alpha1"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulacluster"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulametad"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -89,14 +90,14 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controller.NebulaMetadReconciler{
+	if err = (&nebulametad.NebulaMetadReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "NebulaMetad")
 		os.Exit(1)
 	}
-	if err = (&controller.NebulaClusterReconciler{
+	if err = (&nebulacluster.NebulaClusterReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
