@@ -102,21 +102,22 @@ func getErrorAsStatus(err error) *framework.Status {
 }
 
 // PreFilter invoked at the prefilter extension point.
-// TODO: upgrade to v1.28.0+
 func (pl *NodeZone) PreFilter(ctx context.Context, cycleState *framework.CycleState, pod *corev1.Pod) (*framework.PreFilterResult, *framework.Status) {
 	// Skip if a pod has no topology spread constraints.
 	if len(pod.Spec.TopologySpreadConstraints) == 0 {
-		return nil, nil
+		return nil, framework.NewStatus(framework.Skip)
 	}
+	// Skip if a pod name not contains 'graphd' or 'storagd'.
 	if !needSchedule(pod.Name) {
-		return nil, nil
+		return nil, framework.NewStatus(framework.Skip)
 	}
 	data, status := pl.getZoneMappingData(pod)
 	if !status.IsSuccess() {
 		return nil, status
 	}
+	// Skip if data not found.
 	if len(data) == 0 {
-		return nil, nil
+		return nil, framework.NewStatus(framework.Skip)
 	}
 	cycleState.Write(preFilterStateKey, preFilterState(data))
 	return nil, nil
@@ -211,13 +212,6 @@ func (pl *NodeZone) activateSiblings(pod *corev1.Pod, state *framework.CycleStat
 
 // Filter invoked at the filter extension point.
 func (pl *NodeZone) Filter(ctx context.Context, cycleState *framework.CycleState, pod *corev1.Pod, nodeInfo *framework.NodeInfo) *framework.Status {
-	if len(pod.Spec.TopologySpreadConstraints) == 0 {
-		return nil
-	}
-	if !needSchedule(pod.Name) {
-		return nil
-	}
-
 	state, err := getPreFilterState(cycleState)
 	if err != nil {
 		return framework.AsStatus(err)

@@ -16,7 +16,7 @@
 
 set -euo pipefail
 
-VERSION_PKG=${VERSION_PKG:-github.com/vesoft-inc/nebula-operator/pkg/version}
+VERSION_PKG=${VERSION_PKG:-github.com/vesoft-inc/nebula-ng-tools/operator/internal/version}
 
 function ldflag() {
   local key=${1}
