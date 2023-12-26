@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	appsv2alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/api/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 )
 
 // NebulaClusterReconciler reconciles a NebulaCluster object
@@ -57,6 +57,6 @@ func (r *NebulaClusterReconciler) Reconcile(ctx context.Context, req ctrl.Reques
 // SetupWithManager sets up the controller with the Manager.
 func (r *NebulaClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&appsv2alpha1.NebulaCluster{}).
+		For(&v2alpha1.NebulaCluster{}).
 		Complete(r)
 }

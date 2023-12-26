@@ -23,7 +23,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/api/pkg/label"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 )
 
 const (

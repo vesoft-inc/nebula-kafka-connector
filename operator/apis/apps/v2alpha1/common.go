@@ -29,7 +29,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/utils/pointer"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/api/pkg/label"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 )
 
 const (

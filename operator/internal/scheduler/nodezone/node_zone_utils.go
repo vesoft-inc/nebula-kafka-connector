@@ -25,7 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/api/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 )
 
 var statefulPodRegex = regexp.MustCompile("(.*)-([0-9]+)$")

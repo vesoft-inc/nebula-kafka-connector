@@ -24,7 +24,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/utils/pointer"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/api/pkg/label"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 )
 
 const (

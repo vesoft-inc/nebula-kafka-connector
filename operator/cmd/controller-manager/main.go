@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
-	appsv2alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/api/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulacluster"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulametad"
 	//+kubebuilder:scaffold:imports
@@ -46,7 +46,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(appsv2alpha1.AddToScheme(scheme))
+	utilruntime.Must(v2alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

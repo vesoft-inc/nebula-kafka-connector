@@ -24,7 +24,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 
-	appsv2alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/api/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 )
 
 // NebulaMetadReconciler reconciles a NebulaMetad object
@@ -57,6 +57,6 @@ func (r *NebulaMetadReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 // SetupWithManager sets up the controller with the Manager.
 func (r *NebulaMetadReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&appsv2alpha1.NebulaMetad{}).
+		For(&v2alpha1.NebulaMetad{}).
 		Complete(r)
 }

@@ -31,8 +31,8 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/api/pkg/annotation"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/api/pkg/label"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 )
 
 type PersistentVolume interface {
