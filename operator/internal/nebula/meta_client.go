@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"time"
 
+	"k8s.io/klog/v2"
+
 	"github.com/vesoft-inc/nebula-ng-tools/golang/nrpc"
 )
 
@@ -30,14 +32,25 @@ const (
 	defaultReconnectDelay    = time.Second
 )
 
+// ErrorCode reference https://github.com/vesoft-inc/nebula-ng/blob/master/src/common/base/ErrorCode.h
+type ErrorCode uint64
+
+const (
+	ErrorCodeSucceeded            ErrorCode = 0
+	ErrorCodeLeaderChanged        ErrorCode = 21474836486
+	ErrorCodeClusterAlreadyExists ErrorCode = 17609365913604
+	ErrorCodeServiceAlreadyExists ErrorCode = 18047452577796
+	ErrorCodeClusterNotFound      ErrorCode = 17613660880900
+	ErrorCodeServiceNotAdded      ErrorCode = 18051747545093
+)
+
 var (
 	ErrNoAvailableEndpoints = errors.New("metadclient: no available hosts")
 	ErrRPCTimeout           = errors.New("metadclient: rpc timeout")
 	ErrReconnectFailed      = errors.New("metadclient: reconnect failed")
 	ErrClusterNotFound      = errors.New("metadclient: cluster not found")
+	ErrLeaderHostNotFound   = errors.New("metadclient: leader host not found")
 )
-
-type Fn func(resp []byte) (any, error)
 
 type MetaInterface interface {
 	CreateCluster(clusterName string, replica int, zones []string) error
@@ -135,11 +148,11 @@ func (m *metaClient) CreateCluster(clusterName string, replica int, zones []stri
 	if err != nil {
 		return err
 	}
-	_, err = m.send(bytes)
+	_, err = m.retryOnError(bytes)
 	return err
 }
 
-func (m *metaClient) RemoveCluster(clusterName string) error {
+func (m *metaClient) RemoveCluster(_ string) error {
 	//TODO implement me
 	panic("implement me")
 }
@@ -150,7 +163,11 @@ func (m *metaClient) GetCluster(clusterName string) (*ClusterInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	clusterResp, err := m.listClusters(bytes)
+	deserializer, err := m.retryOnError(bytes)
+	if err != nil {
+		return nil, err
+	}
+	clusterResp, err := DeserializeListClusterResponse(deserializer)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +183,11 @@ func (m *metaClient) ListClusters() ([]ClusterInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	clusterResp, err := m.listClusters(bytes)
+	deserializer, err := m.retryOnError(bytes)
+	if err != nil {
+		return nil, err
+	}
+	clusterResp, err := DeserializeListClusterResponse(deserializer)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +200,7 @@ func (m *metaClient) InitCluster(clusterName string) error {
 	if err != nil {
 		return err
 	}
-	_, err = m.send(bytes)
+	_, err = m.retryOnError(bytes)
 	return err
 }
 
@@ -189,7 +210,7 @@ func (m *metaClient) AddService(host string, port uint32, serviceType ServiceTyp
 	if err != nil {
 		return err
 	}
-	_, err = m.send(bytes)
+	_, err = m.retryOnError(bytes)
 	return err
 }
 
@@ -199,7 +220,7 @@ func (m *metaClient) DropService(clusterName string, serviceType ServiceType, ho
 	if err != nil {
 		return err
 	}
-	_, err = m.send(bytes)
+	_, err = m.retryOnError(bytes)
 	return err
 }
 
@@ -209,18 +230,9 @@ func (m *metaClient) ListServices(clusterName string) ([]ServiceInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	resp, err := m.send(bytes)
+	deserializer, err := m.retryOnError(bytes)
 	if err != nil {
 		return nil, err
-	}
-	// TODO extract a public function
-	deserializer := NewDeserializer(resp)
-	header, err := DeserializeHeader(deserializer)
-	if err != nil {
-		return nil, err
-	}
-	if header.Code != 0 {
-		return nil, fmt.Errorf("code: %d, msg: %s", header.Code, header.Msg)
 	}
 	serviceResp, err := DeserializeListServiceResponse(deserializer)
 	if err != nil {
@@ -234,22 +246,59 @@ func (m *metaClient) Disconnect() error {
 	return nil
 }
 
-func (m *metaClient) listClusters(data []byte) (*ListClusterResponse, error) {
-	resp, err := m.send(data)
+func (m *metaClient) retryOnError(request []byte) (*Deserializer, error) {
+	fn := func(req []byte, leaderChanged bool) (*ResponseHeader, *Deserializer, error) {
+		resp, err := m.send(request)
+		if err != nil {
+			return nil, nil, err
+		}
+		deserializer := NewDeserializer(resp)
+		respHeader, err := DeserializeHeader(deserializer, leaderChanged)
+		if err != nil {
+			return nil, nil, err
+		}
+		return respHeader, deserializer, nil
+	}
+
+	respHeader, deserializer, err := fn(request, true)
 	if err != nil {
 		return nil, err
 	}
-	deserializer := NewDeserializer(resp)
-	header, err := DeserializeHeader(deserializer)
-	if err != nil {
-		return nil, err
+	code := ErrorCode(respHeader.Code)
+	if code != ErrorCodeSucceeded {
+		if code == ErrorCodeLeaderChanged {
+			leaderHost := fmt.Sprintf("%s:%d", respHeader.Host, respHeader.Port)
+			if leaderHost == "" {
+				return nil, ErrLeaderHostNotFound
+			}
+			klog.Infof("leader changed, reconnect to host: %s", leaderHost)
+			// update leader info
+			err = m.reconnect(leaderHost)
+			if err != nil {
+				return nil, err
+			}
+			respHeader, deserializer, err = fn(request, false)
+			if err != nil {
+				return nil, err
+			}
+			code = ErrorCode(respHeader.Code)
+			if code != ErrorCodeSucceeded {
+				if code == ErrorCodeClusterAlreadyExists ||
+					code == ErrorCodeServiceAlreadyExists ||
+					code == ErrorCodeClusterNotFound ||
+					code == ErrorCodeServiceNotAdded {
+					return deserializer, nil
+				}
+				return nil, fmt.Errorf("metad client retry response code %d, msg: %s", respHeader.Code, respHeader.Msg)
+			}
+			return deserializer, nil
+		} else if code == ErrorCodeClusterAlreadyExists ||
+			code == ErrorCodeServiceAlreadyExists ||
+			code == ErrorCodeClusterNotFound ||
+			code == ErrorCodeServiceNotAdded {
+			return deserializer, nil
+		}
+		return nil, fmt.Errorf("response code: %d, msg: %s", respHeader.Code, respHeader.Msg)
 	}
-	if header.Code != 0 {
-		return nil, fmt.Errorf("code: %d, msg: %s", header.Code, header.Msg)
-	}
-	clusterResp, err := DeserializeListClusterResponse(deserializer)
-	if err != nil {
-		return nil, err
-	}
-	return clusterResp, nil
+	return deserializer, nil
 }

@@ -30,14 +30,18 @@ type RequestHeader struct {
 	ClusterId   int64 // meta admin don't need clusterId
 }
 
+type LeaderHost struct {
+	Host string
+	Port uint32
+}
+
 type ResponseHeader struct {
 	Code uint64
 	Msg  string
-	Host string // only if code is leader changed
-	Port uint32 // only if code is leader changed
+	LeaderHost
 }
 
-func DeserializeHeader(deserializer *Deserializer) (*ResponseHeader, error) {
+func DeserializeHeader(deserializer *Deserializer, leaderChanged bool) (*ResponseHeader, error) {
 	v, err := deserializer.DeserializeBool()
 	if err != nil {
 		return nil, err
@@ -53,48 +57,25 @@ func DeserializeHeader(deserializer *Deserializer) (*ResponseHeader, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else {
-		// FIXME leader change or other codes
-		code = 0 // since no one use it;
 	}
-
-	leaderHost, err := deserializer.DeserializeString()
-	if err != nil {
-		return nil, err
-	}
-	leaderPort, err := deserializer.DeserializeUint32()
-	if err != nil {
-		return nil, err
-	}
-	return &ResponseHeader{
+	respHeader := &ResponseHeader{
 		Code: code,
 		Msg:  msg,
-		Host: leaderHost,
-		Port: leaderPort,
-	}, nil
-}
-
-type GetLeaderRequest struct {
-	Header RequestHeader
-}
-
-func NewGetLeaderRequest() *GetLeaderRequest {
-	return &GetLeaderRequest{
-		Header: RequestHeader{
-			RequestType: "getLeader",
-		},
 	}
-}
+	if leaderChanged {
+		host, err := deserializer.DeserializeString()
+		if err != nil {
+			return nil, err
+		}
+		port, err := deserializer.DeserializeUint32()
+		if err != nil {
+			return nil, err
+		}
+		respHeader.Host = host
+		respHeader.Port = port
+	}
 
-func (g *GetLeaderRequest) Serialize() ([]byte, error) {
-	serializer := NewSerializer()
-	if err := serializer.SerializeString(g.Header.RequestType); err != nil {
-		return nil, err
-	}
-	if err := serializer.SerializeInt64(g.Header.ClusterId); err != nil {
-		return nil, err
-	}
-	return serializer.GetBytes(), nil
+	return respHeader, nil
 }
 
 type CreateClusterRequest struct {
@@ -347,32 +328,6 @@ func DeserializeListServiceResponse(deserializer *Deserializer) (*ListServiceRes
 		})
 	}
 	return resp, nil
-}
-
-type GetLeaderResponse struct {
-	ServiceId int64
-	Host      string
-	Port      uint32
-}
-
-func DeserializeGetLeaderResponse(deserializer *Deserializer) (*GetLeaderResponse, error) {
-	serviceId, err := deserializer.DeserializeInt64()
-	if err != nil {
-		return nil, err
-	}
-	host, err := deserializer.DeserializeString()
-	if err != nil {
-		return nil, err
-	}
-	port, err := deserializer.DeserializeUint32()
-	if err != nil {
-		return nil, err
-	}
-	return &GetLeaderResponse{
-		ServiceId: serviceId,
-		Host:      host,
-		Port:      port,
-	}, nil
 }
 
 type ClusterInfo struct {
