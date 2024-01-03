@@ -1,5 +1,5 @@
 /*
-Copyright 2023 Vesoft Inc.
+Copyright 2021 Vesoft Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,17 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package nebula
+package codec
 
-import (
-	"k8s.io/klog/v2"
+import "encoding/json"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/nrpc"
-)
-
-func buildNRpcClient(endpoint string, options ...Option) (*nrpc.Client, error) {
-	opts := loadOptions(options...)
-	klog.V(4).Infof("client opts: %+v", opts)
-	rpcClient := nrpc.NewClient(endpoint)
-	return rpcClient, nil
+func Encode(obj interface{}) (string, error) {
+	b, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return string(b), nil
 }

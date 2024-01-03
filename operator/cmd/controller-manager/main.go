@@ -90,6 +90,16 @@ func main() {
 		os.Exit(1)
 	}
 
+	metadReconciler, err := nebulametad.NewMetadReconciler(mgr)
+	if err != nil {
+		setupLog.Error(err, "new metad reconciler failed", "controller", "NebulaMetad")
+		os.Exit(1)
+	}
+	if err = metadReconciler.SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "NebulaMetad")
+		os.Exit(1)
+	}
+
 	if err = (&nebulametad.NebulaMetadReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),

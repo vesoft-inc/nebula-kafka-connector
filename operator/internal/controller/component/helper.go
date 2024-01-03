@@ -1,19 +1,3 @@
-/*
-Copyright 2023 Vesoft Inc.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package component
 
 import (
@@ -34,11 +18,38 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/codec"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/config"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/hash"
+	httputil "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/http"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/maputil"
 )
+
+func updateDynamicFlags(endpoints []string, newAnnotations map[string]string) error {
+	newFlags := make(map[string]string)
+	newFlagsVal, ok := newAnnotations[annotation.AnnLastAppliedDynamicFlagsKey]
+	if ok {
+		if err := json.Unmarshal([]byte(newFlagsVal), &newFlags); err != nil {
+			return err
+		}
+	}
+	if len(newFlags) == 0 {
+		return nil
+	}
+	klog.V(1).Infof("dynamic flags: %v", newFlags)
+	str, err := codec.Encode(newFlags)
+	if err != nil {
+		return err
+	}
+	for _, endpoint := range endpoints {
+		url := fmt.Sprintf("http://%s/flags", endpoint)
+		if _, err := httputil.PutRequest(url, []byte(str)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 func syncComponentStatus(
 	component v2alpha1.NebulaComponent,
@@ -328,6 +339,17 @@ func setTemplateAnnotations(sts *appsv1.StatefulSet, ann map[string]string) erro
 		annotations[k] = v
 	}
 	sts.Spec.Template.SetAnnotations(annotations)
+	return nil
+}
+
+func setRestartTimestamp(sts *appsv1.StatefulSet) error {
+	annotations := make(map[string]string)
+	for k, v := range sts.GetAnnotations() {
+		annotations[k] = v
+	}
+	annotations[annotation.AnnRestartTimestamp] = ""
+	sts.SetAnnotations(annotations)
+
 	return nil
 }
 
