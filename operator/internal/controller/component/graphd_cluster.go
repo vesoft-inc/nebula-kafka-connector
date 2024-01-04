@@ -1,9 +1,12 @@
 /*
-Copyright 2023 Vesoft Inc.
+Copyright 2023.
+
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
+
     http://www.apache.org/licenses/LICENSE-2.0
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -32,12 +35,17 @@ import (
 
 type graphdCluster struct {
 	clientSet     kube.ClientSet
+	scaleManager  ScaleManager
 	updateManager UpdateManager
 	eventRecorder record.EventRecorder
 }
 
-func NewGraphdCluster(clientSet kube.ClientSet, um UpdateManager, recorder record.EventRecorder) ReconcileManager {
-	return &graphdCluster{clientSet: clientSet, updateManager: um, eventRecorder: recorder}
+func NewGraphdCluster(clientSet kube.ClientSet, sm ScaleManager, um UpdateManager, recorder record.EventRecorder) ReconcileManager {
+	return &graphdCluster{
+		clientSet:     clientSet,
+		scaleManager:  sm,
+		updateManager: um,
+		eventRecorder: recorder}
 }
 
 func (g *graphdCluster) Reconcile(nc *v2alpha1.NebulaCluster) error {
@@ -113,6 +121,11 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 		}
 		nc.Status.Graphd.Workload = &v2alpha1.WorkloadStatus{}
 		return utilerrors.ReconcileErrorf("waiting for graphd cluster %s running", newSts.GetName())
+	}
+
+	if err := g.scaleManager.Scale(nc, oldSts, newSts); err != nil {
+		klog.Errorf("scale graphd cluster [%s/%s] failed: %v", namespace, componentName, err)
+		return err
 	}
 
 	equal := podTemplateEqual(newSts, oldSts)

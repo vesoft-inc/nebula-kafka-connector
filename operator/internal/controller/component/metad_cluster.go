@@ -6,8 +6,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
-	"k8s.io/kubernetes/tools/record"
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
@@ -32,13 +32,13 @@ type metadCluster struct {
 
 func NewMetadManager(
 	clientSet kube.ClientSet,
-	recorder record.EventRecorder,
 	updateManager MetadUpdateManager,
+	recorder record.EventRecorder,
 ) MetadReconcileManager {
 	return &metadCluster{
 		clientSet:     clientSet,
-		eventRecorder: recorder,
 		updateManager: updateManager,
+		eventRecorder: recorder,
 	}
 }
 
@@ -87,16 +87,6 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 	notExist := apierrors.IsNotFound(err)
 	oldWorkload := oldWorkloadTemp.DeepCopy()
 
-	// TODO: suspend metad cluster
-	//needSuspend, err := suspendComponent(c.clientSet.Workload(), nm.MetadComponent(), oldWorkload)
-	//if err != nil {
-	//	return fmt.Errorf("suspend metad cluster %s failed: %v", componentName, err)
-	//}
-	//if needSuspend {
-	//	klog.Infof("metad cluster %s is suspended, skip reconciling", componentName)
-	//	return nil
-	//}
-
 	cm, cmHash, err := c.syncMetadConfigMap(nm.DeepCopy())
 	if err != nil {
 		return err
@@ -114,25 +104,11 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 		return err
 	}
 
-	if !notExist {
-		timestamp, ok := oldWorkload.GetAnnotations()[annotation.AnnRestartTimestamp]
-		if ok && timestamp != "" {
-			if err := setTemplateAnnotations(newWorkload,
-				map[string]string{annotation.AnnRestartTimestamp: timestamp}); err != nil {
-				return err
-			}
-		}
-	}
-
 	if err = c.syncNebulaMetadStatus(nm, oldWorkload); err != nil {
 		return fmt.Errorf("sync metad cluster status failed: %v", err)
 	}
 
 	if notExist {
-		if err := setRestartTimestamp(newWorkload); err != nil {
-			return err
-		}
-
 		if err := setLastAppliedConfigAnnotation(newWorkload); err != nil {
 			return err
 		}
@@ -157,11 +133,6 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 	if equal && nm.MetadComponent().IsReady() {
 		if err := c.setVersion(nm); err != nil {
 			return err
-		}
-
-		endpoints := nm.GetMetadEndpoints(v2alpha1.MetadPortNameHTTP)
-		if err := updateDynamicFlags(endpoints, newWorkload.GetAnnotations()); err != nil {
-			return fmt.Errorf("update metad cluster %s dynamic flags failed: %v", newWorkload.GetName(), err)
 		}
 	}
 

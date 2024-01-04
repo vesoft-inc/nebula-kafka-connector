@@ -1,5 +1,5 @@
 /*
-Copyright 2021 Vesoft Inc.
+Copyright 2023.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,35 +25,37 @@ import (
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
-type MetadUpdateManager interface {
-	// Update updates the nebula metad
-	Update(nc *v2alpha1.NebulaMetad, oldSts, newSts *appsv1.StatefulSet) error
-}
-
-type metadUpdater struct {
+type storageUpdater struct {
 	podClient kube.Pod
 }
 
-func NewMetadUpdater(podClient kube.Pod) MetadUpdateManager {
-	return &metadUpdater{podClient: podClient}
+func NewStorageUpdater(podClient kube.Pod) UpdateManager {
+	return &storageUpdater{podClient: podClient}
 }
 
-func (m *metadUpdater) Update(nm *v2alpha1.NebulaMetad, oldSts, newSts *appsv1.StatefulSet) error {
-	if *nm.Spec.Replicas == int32(0) {
+func (g *storageUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
+	if *nc.Spec.Storaged.Replicas == int32(0) {
 		return nil
 	}
 
+	// TODO metad phase
+	if nc.Status.Storaged.Phase == v2alpha1.ScaleInPhase ||
+		nc.Status.Storaged.Phase == v2alpha1.ScaleOutPhase {
+		return setLastConfig(oldSts, newSts)
+	}
+
+	// template had been changed
 	if !podTemplateEqual(newSts, oldSts) {
 		return nil
 	}
 
-	if nm.Status.Workload.UpdateRevision == nm.Status.Workload.CurrentRevision &&
-		nm.Status.Phase == v2alpha1.RunningPhase {
+	if nc.Status.Storaged.Workload.UpdateRevision == nc.Status.Storaged.Workload.CurrentRevision &&
+		nc.Status.Storaged.Phase == v2alpha1.RunningPhase {
 		return nil
 	}
 
 	setPartition(newSts, *oldSts.Spec.UpdateStrategy.RollingUpdate.Partition)
-	index, err := getNextUpdatePod(nm.MetadComponent(), *oldSts.Spec.Replicas, m.podClient)
+	index, err := getNextUpdatePod(nc.StoragedComponent(), *oldSts.Spec.Replicas, g.podClient)
 	if err != nil {
 		if apierrors.IsNotFound(err) {
 			return utilerrors.ReconcileErrorf("%v", err)
@@ -61,14 +63,17 @@ func (m *metadUpdater) Update(nm *v2alpha1.NebulaMetad, oldSts, newSts *appsv1.S
 		return err
 	}
 	if index >= 0 {
-		return m.updateMetadPod(index, newSts)
+		return g.updateStoragedPod(index, newSts)
 	}
 
 	return nil
 }
 
-func (m *metadUpdater) updateMetadPod(ordinal int32, newSts *appsv1.StatefulSet) error {
-	setPartition(newSts, ordinal)
+func (g *storageUpdater) RestartPod(nc *v2alpha1.NebulaCluster, ordinal int32) error {
+	return nil
+}
 
+func (g *storageUpdater) updateStoragedPod(ordinal int32, newSts *appsv1.StatefulSet) error {
+	setPartition(newSts, ordinal)
 	return nil
 }

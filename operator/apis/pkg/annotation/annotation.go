@@ -41,9 +41,6 @@ const (
 
 	// AnnHaModeVal is annotation value to indicate whether in HA mode
 	AnnHaModeVal = "true"
-
-	// AnnRestartTimestamp is annotation key to indicate the timestamp that operator restart the workload
-	AnnRestartTimestamp = "nebula-graph.io/restart-timestamp"
 )
 
 // IsInHaMode check whether in HA mode

@@ -1,3 +1,19 @@
+/*
+Copyright 2023.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package component
 
 import (
@@ -18,38 +34,11 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/codec"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/config"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/hash"
-	httputil "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/http"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/maputil"
 )
-
-func updateDynamicFlags(endpoints []string, newAnnotations map[string]string) error {
-	newFlags := make(map[string]string)
-	newFlagsVal, ok := newAnnotations[annotation.AnnLastAppliedDynamicFlagsKey]
-	if ok {
-		if err := json.Unmarshal([]byte(newFlagsVal), &newFlags); err != nil {
-			return err
-		}
-	}
-	if len(newFlags) == 0 {
-		return nil
-	}
-	klog.V(1).Infof("dynamic flags: %v", newFlags)
-	str, err := codec.Encode(newFlags)
-	if err != nil {
-		return err
-	}
-	for _, endpoint := range endpoints {
-		url := fmt.Sprintf("http://%s/flags", endpoint)
-		if _, err := httputil.PutRequest(url, []byte(str)); err != nil {
-			return err
-		}
-	}
-	return nil
-}
 
 func syncComponentStatus(
 	component v2alpha1.NebulaComponent,
@@ -166,6 +155,7 @@ func serviceEqual(newSvc, oldSvc *corev1.Service) (bool, error) {
 	if lastAppliedConfig, ok := oldSvc.Annotations[annotation.AnnLastAppliedConfigKey]; ok {
 		err := json.Unmarshal([]byte(lastAppliedConfig), &oldSpec)
 		if err != nil {
+			klog.Errorf("unmarshal [%s/%s] applied config failed: %v", oldSvc.GetNamespace(), oldSvc.GetName(), err)
 			return false, err
 		}
 		return apiequality.Semantic.DeepEqual(oldSpec, newSvc.Spec), nil
@@ -177,6 +167,7 @@ func setLastConfig(oldSts, newSts *appsv1.StatefulSet) error {
 	spec := &appsv1.StatefulSetSpec{}
 	if lastAppliedConfig, ok := oldSts.GetAnnotations()[annotation.AnnLastAppliedConfigKey]; ok {
 		if err := json.Unmarshal([]byte(lastAppliedConfig), &spec); err != nil {
+			klog.Errorf("unmarshal [%s/%s] applied config failed: %v", oldSts.GetNamespace(), oldSts.GetName(), err)
 			return err
 		}
 	}
@@ -190,7 +181,7 @@ func podTemplateEqual(newSts *appsv1.StatefulSet, oldSts *appsv1.StatefulSet) bo
 	if ok {
 		err := json.Unmarshal([]byte(lastAppliedConfig), &oldStsSpec)
 		if err != nil {
-			klog.Errorf("unmarshal PodTemplate: [%s/%s]'s applied config failed,error: %v", oldSts.GetNamespace(), oldSts.GetName(), err)
+			klog.Errorf("unmarshal [%s/%s] applied config failed: %v", oldSts.GetNamespace(), oldSts.GetName(), err)
 			return false
 		}
 		return apiequality.Semantic.DeepEqual(oldStsSpec.Template.Spec, newSts.Spec.Template.Spec)
@@ -342,17 +333,6 @@ func setTemplateAnnotations(sts *appsv1.StatefulSet, ann map[string]string) erro
 	return nil
 }
 
-func setRestartTimestamp(sts *appsv1.StatefulSet) error {
-	annotations := make(map[string]string)
-	for k, v := range sts.GetAnnotations() {
-		annotations[k] = v
-	}
-	annotations[annotation.AnnRestartTimestamp] = ""
-	sts.SetAnnotations(annotations)
-
-	return nil
-}
-
 func setLastReplicasAnnotation(sts *appsv1.StatefulSet) error {
 	var lastReplicas int32
 	val, ok := sts.GetAnnotations()[annotation.AnnLastReplicas]
@@ -410,7 +390,7 @@ func updateWorkload(workloadClient kube.Workload, newSts, oldSts *appsv1.Statefu
 		sts.OwnerReferences = newSts.OwnerReferences
 	}
 
-	if err := setLastReplicasAnnotation(sts); err != nil {
+	if err := setLastAppliedConfigAnnotation(sts); err != nil {
 		return err
 	}
 
@@ -443,7 +423,7 @@ func statefulSetEqual(newSts appsv1.StatefulSet, oldSts appsv1.StatefulSet) bool
 	if lastAppliedConfig, ok := oldSts.Annotations[annotation.AnnLastAppliedConfigKey]; ok {
 		err := json.Unmarshal([]byte(lastAppliedConfig), &oldSpec)
 		if err != nil {
-			klog.Errorf("unmarshal failed: %v", oldSts.GetNamespace(), oldSts.GetName(), err)
+			klog.Errorf("unmarshal [%s/%s] applied config failed: %v", oldSts.GetNamespace(), oldSts.GetName(), err)
 			return false
 		}
 		tmpTemplate := oldSpec.Template.DeepCopy()
