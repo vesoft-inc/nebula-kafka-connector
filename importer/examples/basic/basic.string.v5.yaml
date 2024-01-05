@@ -19,7 +19,7 @@ manager:
       - statements:
         - |
           CREATE GRAPH TYPE IF NOT EXISTS basic_string_examples_type AS {
-              (Person(id) LABEL Person {id STRING, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
+              (Person LABEL Person {id STRING PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
               (Person)-[KNOWS:KNOWS{creationDate STRING}]->(Person)
           }
         wait: 10s

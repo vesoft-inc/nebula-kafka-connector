@@ -1,13 +1,13 @@
 """
 CREATE GRAPH TYPE ldbc_type IF NOT EXISTS AS {
-(Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, kind STRING}),
-(Forum(id) LABEL Forum {id INT, title STRING, creationDate INT}),
-(Comment(id) LABELS Comment&Message {id INT, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT}),
-(Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate INT, locationIP STRING, browserUsed STRING}),
-(Tag(id) LABEL Tag {id INT, name STRING, url STRING}),
-(Post(id) LABELS Post&Message {id INT, imageFile STRING, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT, language STRING}),
-(TagClass(id) LABEL TagClass {id INT, name STRING, url STRING}),
-(Organisation(id) LABELS University&Company {id INT, kind STRING, name STRING, url STRING}),
+(Place LABELS City&Country&Continent {id INT, name STRING, url STRING, kind STRING, PRIMARY KEY (id)}),
+(Forum LABEL Forum {id INT, title STRING, creationDate INT, PRIMARY KEY (id)}),
+(Comment LABELS Comment&Message {id INT, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT, PRIMARY KEY (id)}),
+(Person LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate INT, locationIP STRING, browserUsed STRING, PRIMARY KEY (id)}),
+(Tag LABEL Tag {id INT, name STRING, url STRING, PRIMARY KEY (id)}),
+(Post LABELS Post&Message {id INT, imageFile STRING, creationDate INT, locationIP STRING, browserUsed STRING, content STRING, extent INT, language STRING, PRIMARY KEY (id)}),
+(TagClass LABEL TagClass {id INT, name STRING, url STRING, PRIMARY KEY (id)}),
+(Organisation LABELS University&Company {id INT, kind STRING, name STRING, url STRING, PRIMARY KEY (id)}),
 (Person)-[HAS_INTEREST:HAS_INTEREST]->(Tag),
 (Person)-[WORK_AT:WORK_AT{workFrom INT}]->(Organisation),
 (Person)-[IS_LOCATED_IN_1:IS_LOCATED_IN]->(Place),
@@ -38,8 +38,8 @@ CREATE GRAPH IF NOT EXISTS ldbc TYPED ldbc_type
 
 :sleep 10
 
-// (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, kind
-// STRING})
+// (Place LABELS City&Country&Continent {id INT, name STRING, url STRING, kind
+// STRING, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Place
 ({id:1, name:"Beijing", url:"https://beijing.com", kind:"city"}),
@@ -49,7 +49,7 @@ USE ldbc INSERT NODE Place
 ({id:5, name:"Chengdu", url:"https://chengdu.com", kind:"city"}),
 ({id:6, name:"Shenzhen", url:"https://shenzhen.com", kind:"city"})
 """
-// (Forum(id) LABEL Forum {id INT, title STRING, creationDate INT})
+// (Forum LABEL Forum {id INT, title STRING, creationDate INT, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Forum
 ({id:1, title:"forum1", creationDate:1}),
@@ -57,8 +57,8 @@ USE ldbc INSERT NODE Forum
 ({id:3, title:"forum3", creationDate:3}),
 ({id:4, title:"forum4", creationDate:4})
 """
-// (Comment(id) LABELS Comment&Message {id INT, creationDate INT, locationIP STRING,
-// browserUsed STRING, content STRING, extent INT})
+// (Comment LABELS Comment&Message {id INT, creationDate INT, locationIP STRING,
+// browserUsed STRING, content STRING, extent INT, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Comment
 ({id:1, creationDate:1, locationIP:"192.168.1", browserUsed:"Chrome", content:"comment1", extent:8}),
@@ -67,8 +67,8 @@ USE ldbc INSERT NODE Comment
 ({id:4, creationDate:4, locationIP:"192.168.4", browserUsed:"Chrome", content:"comment4", extent:8})
 """
 
-// (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING,
-// birthday STRING, creationDate INT, locationIP STRING, browserUsed STRING})
+// (Person LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING,
+// birthday STRING, creationDate INT, locationIP STRING, browserUsed STRING}, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Person
 ({id:1, firstName:"Kyle", lastName:"cao", gender:"male", birthday:"10-26", creationDate:1, locationIP:"192.168.1", browserUsed:"Chrome"}),
@@ -77,7 +77,7 @@ USE ldbc INSERT NODE Person
 ({id:4, firstName:"Sophie", lastName:"Marceau", gender:"female", birthday:"10-20", creationDate:4, locationIP:"192.168.4", browserUsed:"Chrome"})
 """
 
-// (Tag(id) LABEL Tag {id INT, name STRING, url STRING})
+// (Tag LABEL Tag {id INT, name STRING, url STRING, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Tag
 ({id:1, name:"tag1", url:"https://tag1.com"}),
@@ -86,8 +86,8 @@ USE ldbc INSERT NODE Tag
 ({id:4, name:"tag4", url:"https://tag4.com"})
 """
 
-// (Post(id) LABELS Post&Message {id INT, imageFile STRING, creationDate INT, locationIP
-// STRING, browserUsed STRING, content STRING, extent INT, language STRING})
+// (Post LABELS Post&Message {id INT, imageFile STRING, creationDate INT, locationIP
+// STRING, browserUsed STRING, content STRING, extent INT, language STRING, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Post
 ({id:1, imageFile:"post1.png", creationDate:1, locationIP:"192.168.1", browserUsed:"Chrome", content:"post1", extent:8, language:"Chinese"}),
@@ -96,7 +96,7 @@ USE ldbc INSERT NODE Post
 ({id:4, imageFile:"post4.png", creationDate:4, locationIP:"192.168.4", browserUsed:"Chrome", content:"post4", extent:8, language:"French"})
 """
 
-// (TagClass(id) LABEL TagClass {id INT, name STRING, url STRING})
+// (TagClass LABEL TagClass {id INT, name STRING, url STRING, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE TagClass
 ({id:1, name:"tagClass1", url:"https://tagClass1.com"}),
@@ -105,8 +105,8 @@ USE ldbc INSERT NODE TagClass
 ({id:4, name:"tagClass4", url:"https://tagClass4.com"})
 """
 
-// (Organisation(id) LABELS University&Company {id INT, kind STRING, name STRING,
-// url STRING})
+// (Organisation LABELS University&Company {id INT, kind STRING, name STRING,
+// url STRING, PRIMARY KEY (id)})
 """
 USE ldbc INSERT NODE Organisation
 ({id:1, kind:"1", name:"org1", url:"https://org1.com"}),

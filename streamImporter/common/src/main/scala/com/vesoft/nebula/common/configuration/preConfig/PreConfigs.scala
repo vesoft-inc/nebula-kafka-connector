@@ -409,7 +409,7 @@ object PreConfigEntry {
                                 nebulaGraphConfig: NebulaGraphConfigEntry): String = {
     // TODO remove the MOCK DDL
     "CREATE GRAPH TYPE graph_type IF NOT EXISTS AS {" +
-      "(node_type(id) LABEL player {id INT, name STRING})," +
+      "(node_type LABEL player {id INT PRIMARY KEY, name STRING})," +
       "(node_type)-[edge_type LABEL follow {followness INT}]->(node_type)}"
   }
 

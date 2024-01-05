@@ -19,7 +19,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     graphProvider = new GraphProvider(address, "root", "nebula", 3000)
 
     val createSchema = "CREATE GRAPH TYPE graph_type_nba AS GRAPH TYPE{" +
-      "(node_type_player(id) LABEL player {id INT, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
+      "(node_type_player LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
       "(node_type_player)-[edge_type_follow LABEL follow {followness INT, likeness FLOAT64}]->(node_type_player)}"
     val resp = graphProvider.submit(createSchema)
     if (!resp.isSucceeded) {

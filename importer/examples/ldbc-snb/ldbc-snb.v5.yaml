@@ -20,14 +20,14 @@ manager:
         # TODO: add `` and rename ttype->type, llength -> length
         - |
           CREATE GRAPH TYPE IF NOT EXISTS ldbc_snb_examples_type AS {
-              (Place(id) LABELS City&Country&Continent {id INT, name STRING, url STRING, ttype STRING}),
-              (Organisation(id) LABELS University&Company {id INT, ttype STRING, name STRING, url STRING}),
-              (Person(id) LABEL Person {id INT, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
-              (Forum(id) LABEL Forum {id INT, title STRING, creationDate STRING}),
-              (Post(id) LABELS Post&Message {id INT, imageFile STRING, creationDate STRING, locationIP STRING, browserUsed STRING, language STRING, content STRING, llength INT}),
-              (Comment(id) LABELS Comment&Message {id INT, creationDate STRING, locationIP STRING, browserUsed STRING, content STRING, llength INT}),
-              (Tag(id) LABEL Tag {id INT, name STRING, url STRING}),
-              (TagClass(id) LABEL TagClass {id INT, name STRING, url STRING}),
+              (Place LABELS City&Country&Continent {id INT PRIMARY KEY, name STRING, url STRING, ttype STRING}),
+              (Organisation LABELS University&Company {id INT PRIMARY KEY, ttype STRING, name STRING, url STRING}),
+              (Person LABEL Person {id INT PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday STRING, creationDate STRING, locationIP STRING, browserUsed STRING}),
+              (Forum LABEL Forum {id INT PRIMARY KEY, title STRING, creationDate STRING}),
+              (Post LABELS Post&Message {id INT PRIMARY KEY, imageFile STRING, creationDate STRING, locationIP STRING, browserUsed STRING, language STRING, content STRING, llength INT}),
+              (Comment LABELS Comment&Message {id INT PRIMARY KEY, creationDate STRING, locationIP STRING, browserUsed STRING, content STRING, llength INT}),
+              (Tag LABEL Tag {id INT PRIMARY KEY, name STRING, url STRING}),
+              (TagClass LABEL TagClass {id INT PRIMARY KEY, name STRING, url STRING}),
               (Place)-[PLACE_IS_PART_OF_PLACE:IS_PART_OF]->(Place),
               (Organisation)-[ORGANISATION_IS_LOCATED_IN_PLACE:IS_LOCATED_IN]->(Place),
               (Person)-[PERSON_IS_LOCATED_IN_PLACE:IS_LOCATED_IN]->(Place),
