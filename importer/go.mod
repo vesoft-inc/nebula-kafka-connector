@@ -1,6 +1,6 @@
 module github.com/vesoft-inc/nebula-ng-tools/importer
 
-go 1.18
+go 1.19
 
 require (
 	github.com/agiledragon/gomonkey/v2 v2.9.0

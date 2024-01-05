@@ -34,7 +34,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v4
         with:
-          go-version: 1.18
+          go-version: 1.19
           cache: true
           cache-dependency-path: importer/go.sum
       - run: |
