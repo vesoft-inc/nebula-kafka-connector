@@ -14,21 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package klogflag
 
 import (
+	"flag"
 	"os"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
-	"k8s.io/component-base/cli"
-	ctrl "sigs.k8s.io/controller-runtime"
-
-	"github.com/vesoft-inc/nebula-ng-tools/operator/cmd/controller-manager/app"
+	"github.com/spf13/pflag"
+	"k8s.io/klog/v2"
 )
 
-func main() {
-	ctx := ctrl.SetupSignalHandler()
-	cmd := app.NewControllerManagerCommand(ctx)
-	code := cli.Run(cmd)
-	os.Exit(code)
+func Add(fs *pflag.FlagSet) {
+	flagSet := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+	klog.InitFlags(flagSet)
+	fs.AddGoFlagSet(flagSet)
 }
