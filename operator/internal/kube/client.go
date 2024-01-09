@@ -32,6 +32,7 @@ type ClientSet interface {
 	Service() Service
 	Workload() Workload
 	NebulaCluster() NebulaCluster
+	NebulaMetad() NebulaMetad
 }
 
 type clientSet struct {
@@ -44,6 +45,7 @@ type clientSet struct {
 	svcClient      Service
 	workloadClient Workload
 	nebulaClient   NebulaCluster
+	metadClient    NebulaMetad
 }
 
 func NewClientSet(config *rest.Config) (ClientSet, error) {
@@ -61,6 +63,7 @@ func NewClientSet(config *rest.Config) (ClientSet, error) {
 		svcClient:      NewService(cli),
 		workloadClient: NewWorkload(cli),
 		nebulaClient:   NewNebulaCluster(cli),
+		metadClient:    NewNebulaMetad(cli),
 	}, nil
 }
 
@@ -98,4 +101,8 @@ func (c *clientSet) Workload() Workload {
 
 func (c *clientSet) NebulaCluster() NebulaCluster {
 	return c.nebulaClient
+}
+
+func (c *clientSet) NebulaMetad() NebulaMetad {
+	return c.metadClient
 }

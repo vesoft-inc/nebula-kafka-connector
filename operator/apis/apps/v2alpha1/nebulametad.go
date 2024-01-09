@@ -16,7 +16,10 @@ limitations under the License.
 
 package v2alpha1
 
-import "k8s.io/utils/pointer"
+import (
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/utils/pointer"
+)
 
 func (nm *NebulaMetad) MetadComponent() NebulaComponent {
 	return newMetadComponent(nm)
@@ -32,4 +35,17 @@ func (nm *NebulaMetad) GetMetadThriftConnAddress() string {
 
 func (nm *NebulaMetad) IsPVReclaimEnabled() bool {
 	return pointer.BoolDeref(nm.Spec.EnablePVReclaim, false)
+}
+
+func (nm *NebulaMetad) IsReady() bool {
+	return nm.Status.ObservedGeneration == nm.Generation && nm.IsConditionReady()
+}
+
+func (nm *NebulaMetad) IsConditionReady() bool {
+	for _, condition := range nm.Status.Conditions {
+		if condition.Type == NebulaMetadReady {
+			return condition.Status == metav1.ConditionTrue
+		}
+	}
+	return false
 }

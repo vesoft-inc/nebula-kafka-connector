@@ -21,6 +21,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
+const (
+	// NebulaMetadReady indicates that the nebula metad is ready or not.
+	// This is defined as:
+	// - All nebula metad pods are up-to-date (currentRevision == updateRevision).
+	// - All nebula metad pods are healthy.
+	NebulaMetadReady = "Ready"
+)
+
 // NebulaMetadSpec defines the desired state of NebulaMetad
 type NebulaMetadSpec struct {
 	ComponentSpec `json:",inline"`

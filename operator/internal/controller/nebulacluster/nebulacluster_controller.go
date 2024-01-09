@@ -37,7 +37,6 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/discovery"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -62,23 +61,6 @@ func NewClusterReconciler(mgr ctrl.Manager) (*ClusterReconciler, error) {
 	graphScaler := component.NewGraphScaler(clientSet)
 	graphdUpdater := component.NewGraphdUpdater(clientSet.Pod())
 	storagedUpdater := component.NewStorageUpdater(clientSet.Pod())
-
-	dm, err := discovery.New(mgr.GetConfig())
-	if err != nil {
-		return nil, fmt.Errorf("create discovery client failed: %v", err)
-	}
-	info, err := dm.GetServerVersion()
-	if err != nil {
-		return nil, fmt.Errorf("create apiserver info failed: %v", err)
-	}
-
-	valid, err := kube.ValidVersion(info)
-	if err != nil {
-		return nil, fmt.Errorf("get server version failed: %v", err)
-	}
-	if !valid {
-		return nil, fmt.Errorf("server version not supported")
-	}
 
 	kubeClient, err := kubernetes.NewForConfig(mgr.GetConfig())
 	if err != nil {

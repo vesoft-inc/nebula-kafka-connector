@@ -54,10 +54,6 @@ func (nc *NebulaCluster) GetGraphdServiceName() string {
 	return getServiceName(nc.GraphdComponent().GetName(), false)
 }
 
-func (nc *NebulaCluster) GetClusterName() string {
-	return nc.Name
-}
-
 func (nc *NebulaCluster) GenerateOwnerReferences() []metav1.OwnerReference {
 	return []metav1.OwnerReference{
 		{

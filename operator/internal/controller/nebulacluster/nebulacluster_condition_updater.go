@@ -72,7 +72,7 @@ func (u *nebulaClusterConditionUpdater) updateReadyCondition(nc *v2alpha1.Nebula
 	case !allWorkloadsAreUpToDate(nc):
 		reason = WorkloadNotUpToDate
 		message = "Workload is in progress"
-	case !nc.IsReady():
+	case !nc.StoragedComponent().IsReady():
 		reason = StoragedUnhealthy
 		message = "Storaged is not healthy"
 	case !nc.GraphdComponent().IsReady():

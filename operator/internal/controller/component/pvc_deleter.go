@@ -30,31 +30,6 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 )
 
-func MetadPVCDeleter(cli client.Client, namespace, name string) error {
-	selector, err := label.New().Metad().Selector()
-	if err != nil {
-		return fmt.Errorf("get metad [%s/%s] label selector failed: %v", namespace, name, err)
-	}
-
-	pvcClient := kube.NewPVC(cli)
-	pvcs, err := pvcClient.ListPVCs(namespace, selector)
-	if err != nil {
-		return fmt.Errorf("metad [%s/%s] list PVC failed: %v", namespace, name, err)
-	}
-
-	for i := range pvcs {
-		pvc := pvcs[i]
-		if pvc.Annotations[annotation.AnnPvReclaimKey] == "false" {
-			continue
-		}
-		if err := pvcClient.DeletePVC(pvc.Namespace, pvc.Name); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func PVCDeleter(cli client.Client, namespace, clusterName string) error {
 	selector, err := label.New().Cluster(clusterName).Selector()
 	if err != nil {

@@ -18,6 +18,7 @@ package component
 
 import (
 	appsv1 "k8s.io/api/apps/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 )
@@ -45,4 +46,9 @@ type UpdateManager interface {
 
 	// RestartPod restart the specified Pod
 	RestartPod(nc *v2alpha1.NebulaCluster, ordinal int32) error
+}
+
+type MetaReconcileManager interface {
+	// Reconcile reconciles the PV object meta to desired state
+	Reconcile(object runtime.Object, enablePVReclaim bool) error
 }

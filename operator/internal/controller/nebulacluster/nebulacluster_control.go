@@ -48,7 +48,7 @@ func NewDefaultNebulaClusterControl(
 	nebulaClient kube.NebulaCluster,
 	graphdCluster component.ReconcileManager,
 	storagedCluster component.ReconcileManager,
-	metaReconciler component.ReconcileManager,
+	metaReconciler component.MetaReconcileManager,
 	pvcReclaimer reclaimer.PVCReclaimer,
 	conditionUpdater ClusterConditionUpdater,
 ) ControlInterface {
@@ -68,7 +68,7 @@ type defaultNebulaClusterControl struct {
 	nebulaClient     kube.NebulaCluster
 	graphdCluster    component.ReconcileManager
 	storagedCluster  component.ReconcileManager
-	metaReconciler   component.ReconcileManager
+	metaReconciler   component.MetaReconcileManager
 	pvcReclaimer     reclaimer.PVCReclaimer
 	conditionUpdater ClusterConditionUpdater
 }
@@ -132,8 +132,8 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 		return err
 	}
 
-	if err := c.metaReconciler.Reconcile(nc); err != nil {
-		klog.Errorf("reconcile pv and pvc metadata cluster failed: %v", err)
+	if err := c.metaReconciler.Reconcile(nc, nc.IsPVReclaimEnabled()); err != nil {
+		klog.Errorf("reconcile pv and pvc metadata failed: %v", err)
 		return err
 	}
 

@@ -24,7 +24,6 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/kubernetes/scheme"
 	typedv1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -35,6 +34,7 @@ import (
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	errorsutil "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
@@ -50,7 +50,6 @@ const (
 type MetadReconciler struct {
 	control ControlInterface
 	client.Client
-	Scheme *runtime.Scheme
 }
 
 func NewMetadReconciler(mgr ctrl.Manager) (*MetadReconciler, error) {
@@ -71,9 +70,15 @@ func NewMetadReconciler(mgr ctrl.Manager) (*MetadReconciler, error) {
 	recorder := eventBroadcaster.NewRecorder(scheme.Scheme, corev1.EventSource{Component: "nebula-metad-controller"})
 
 	return &MetadReconciler{
-		control: NewMetadControl(mgr.GetClient(), component.NewMetadManager(clientSet, metadUpdater, recorder)),
-		Client:  mgr.GetClient(),
-		Scheme:  mgr.GetScheme(),
+		control: NewMetadControl(
+			mgr.GetClient(),
+			clientSet.NebulaMetad(),
+			component.NewMetadManager(clientSet, metadUpdater, recorder),
+			reclaimer.NewMetaReconciler(clientSet),
+			reclaimer.NewPVCReclaimer(clientSet),
+			NewClusterConditionUpdater(),
+		),
+		Client: mgr.GetClient(),
 	}, nil
 }
 
@@ -129,6 +134,13 @@ func (r *MetadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *MetadReconciler) syncNebulaMetad(_ context.Context, nm *v2alpha1.NebulaMetad) error {
+	if nm.DeletionTimestamp != nil {
+		return r.control.DeleteNebulaMetad(nm)
+	}
+	return r.control.UpdateNebulaMetad(nm)
 }
 
 // SetupWithManager sets up the controller with the Manager.

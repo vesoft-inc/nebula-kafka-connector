@@ -306,7 +306,7 @@ func (c *cluster) GetCluster() *NebulaCluster {
 }
 
 func (c *cluster) GetClusterName() string {
-	return c.nc.GetClusterName()
+	return c.nc.Name
 }
 
 func (c *cluster) GetNamespace() string {

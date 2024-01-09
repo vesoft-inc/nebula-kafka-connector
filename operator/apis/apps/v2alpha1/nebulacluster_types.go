@@ -24,7 +24,7 @@ import (
 const (
 	// NebulaClusterReady indicates that the nebula cluster is ready or not.
 	// This is defined as:
-	// - All workloads are up to date (currentRevision == updateRevision).
+	// - All workloads are up-to-date (currentRevision == updateRevision).
 	// - All nebula component pods are healthy.
 	NebulaClusterReady = "Ready"
 )

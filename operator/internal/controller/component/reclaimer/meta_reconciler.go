@@ -22,9 +22,10 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -39,20 +40,24 @@ type meta struct {
 	clientSet kube.ClientSet
 }
 
-func NewMetaReconciler(clientSet kube.ClientSet) component.ReconcileManager {
+func NewMetaReconciler(clientSet kube.ClientSet) component.MetaReconcileManager {
 	return &meta{clientSet}
 }
 
-func (m *meta) Reconcile(nc *v2alpha1.NebulaCluster) error {
-	namespace := nc.GetNamespace()
-	clusterName := nc.GetClusterName()
-	selector, err := label.New().Cluster(clusterName).Selector()
+func (m *meta) Reconcile(obj runtime.Object, enablePVReclaim bool) error {
+	metaObj, ok := obj.(metav1.Object)
+	if !ok {
+		return fmt.Errorf("%+v is not a runtime.Object", obj)
+	}
+	namespace := metaObj.GetNamespace()
+	objName := metaObj.GetName()
+	selector, err := label.New().Cluster(objName).Selector()
 	if err != nil {
 		return err
 	}
 	pods, err := m.clientSet.Pod().ListPods(namespace, selector)
 	if err != nil {
-		return fmt.Errorf("list pods for cluster %s/%s failed: %v", namespace, clusterName, err)
+		return fmt.Errorf("list pods for cluster %s/%s failed: %v", namespace, objName, err)
 	}
 
 	group := async.NewGroup(context.TODO(), metaReconcileConcurrency)
@@ -77,7 +82,7 @@ func (m *meta) Reconcile(nc *v2alpha1.NebulaCluster) error {
 			}
 			for i := range pvcs {
 				pvc := pvcs[i]
-				if err := m.clientSet.PVC().UpdateMetaInfo(pvc, &pod, nc.IsPVReclaimEnabled()); err != nil {
+				if err := m.clientSet.PVC().UpdateMetaInfo(pvc, &pod, enablePVReclaim); err != nil {
 					return err
 				}
 				if pvc.Spec.VolumeName == "" {
@@ -85,10 +90,10 @@ func (m *meta) Reconcile(nc *v2alpha1.NebulaCluster) error {
 				}
 				pv, err := m.clientSet.PV().GetPersistentVolume(pvc.Spec.VolumeName)
 				if err != nil {
-					klog.Errorf("cluster [%s/%s] get PV %s failed: %v", namespace, clusterName, pvc.Spec.VolumeName, err)
+					klog.Errorf("cluster [%s/%s] get PV %s failed: %v", namespace, objName, pvc.Spec.VolumeName, err)
 					return err
 				}
-				if err := m.clientSet.PV().UpdateMetaInfo(nc, pv); err != nil {
+				if err := m.clientSet.PV().UpdateMetaInfo(obj, pv); err != nil {
 					return err
 				}
 			}
@@ -128,8 +133,4 @@ func (m *meta) resolvePVCFromPod(pod *corev1.Pod) ([]*corev1.PersistentVolumeCla
 		return nil, err
 	}
 	return pvcs, nil
-}
-
-func (m *meta) Delete(_ *v2alpha1.NebulaCluster) error {
-	return nil
 }

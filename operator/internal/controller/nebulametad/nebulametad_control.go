@@ -19,12 +19,16 @@ package nebulametad
 import (
 	"context"
 
+	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	errorutils "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
+	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
 type ControlInterface interface {
@@ -37,21 +41,54 @@ var _ ControlInterface = &defaultNebulaMetadControl{}
 
 func NewMetadControl(
 	client client.Client,
+	metadClient kube.NebulaMetad,
 	metadCluster component.MetadReconcileManager,
+	metaReconciler component.MetaReconcileManager,
+	pvcReclaimer reclaimer.PVCReclaimer,
+	conditionUpdater MetadConditionUpdater,
 ) ControlInterface {
 	return &defaultNebulaMetadControl{
-		client:       client,
-		metadCluster: metadCluster,
+		client:           client,
+		metadClient:      metadClient,
+		metadCluster:     metadCluster,
+		metaReconciler:   metaReconciler,
+		pvcReclaimer:     pvcReclaimer,
+		conditionUpdater: conditionUpdater,
 	}
 }
 
 type defaultNebulaMetadControl struct {
-	client       client.Client
-	metadCluster component.MetadReconcileManager
+	client           client.Client
+	metadClient      kube.NebulaMetad
+	metadCluster     component.MetadReconcileManager
+	metaReconciler   component.MetaReconcileManager
+	pvcReclaimer     reclaimer.PVCReclaimer
+	conditionUpdater MetadConditionUpdater
 }
 
 func (c *defaultNebulaMetadControl) UpdateNebulaMetad(nm *v2alpha1.NebulaMetad) error {
-	return nil
+	var errs []error
+	oldStatus := nm.Status.DeepCopy()
+
+	if err := c.updateNebulaMetad(nm); err != nil {
+		errs = append(errs, err)
+	}
+
+	c.conditionUpdater.Update(nm)
+	nm.Status.ObservedGeneration = nm.Generation
+	if err := c.metadClient.UpdateNebulaMetadStatus(nm.DeepCopy()); err != nil {
+		errs = append(errs, err)
+	}
+
+	if apiequality.Semantic.DeepEqual(&nm.Status, oldStatus) && nm.IsReady() {
+		return errorutils.NewAggregate(errs)
+	}
+
+	if !nm.IsConditionReady() {
+		errs = append(errs, utilerrors.ReconcileErrorf("waiting for nebulametad ready"))
+	}
+
+	return errorutils.NewAggregate(errs)
 }
 
 func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v2alpha1.NebulaMetad) error {
@@ -61,12 +98,18 @@ func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v2alpha1.NebulaMetad) 
 		}
 	}
 
-	if err := kube.CheckRBAC(context.TODO(), c.client, nm.Namespace); err != nil {
+	if err := c.metadCluster.Reconcile(nm); err != nil {
+		klog.Errorf("reconcile metad cluster failed: %v", err)
 		return err
 	}
 
-	if err := c.metadCluster.Reconcile(nm); err != nil {
-		klog.Errorf("reconcile metad cluster failed: %v", err)
+	if err := c.metaReconciler.Reconcile(nm, nm.IsPVReclaimEnabled()); err != nil {
+		klog.Errorf("reconcile metad cluster pv and pvc metadata failed: %v", err)
+		return err
+	}
+
+	if err := c.pvcReclaimer.Reclaim(nm); err != nil {
+		klog.Errorf("reclaim metad cluster pvc failed: %v", err)
 		return err
 	}
 
@@ -77,17 +120,8 @@ func (c *defaultNebulaMetadControl) DeleteNebulaMetad(nm *v2alpha1.NebulaMetad) 
 	if err := c.metadCluster.Delete(nm); err != nil {
 		return err
 	}
-
-	if err := component.MetadPVCDeleter(c.client, nm.Namespace, nm.Name); err != nil {
+	if err := component.PVCDeleter(c.client, nm.Namespace, nm.Name); err != nil {
 		return err
 	}
-
 	return kube.UpdateFinalizer(context.TODO(), c.client, nm, kube.RemoveFinalizerOpType, finalizerKey)
-}
-
-func (r *MetadReconciler) syncNebulaMetad(ctx context.Context, nm *v2alpha1.NebulaMetad) error {
-	if nm.DeletionTimestamp != nil {
-		return r.control.DeleteNebulaMetad(nm)
-	}
-	return r.control.UpdateNebulaMetad(nm)
 }

@@ -21,16 +21,17 @@ import (
 
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/klog/v2"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 )
 
 type PVCReclaimer interface {
-	Reclaim(cluster *v2alpha1.NebulaCluster) error
+	Reclaim(obj runtime.Object) error
 }
 
 type pvcReclaimer struct {
@@ -41,15 +42,19 @@ func NewPVCReclaimer(clientSet kube.ClientSet) PVCReclaimer {
 	return &pvcReclaimer{clientSet: clientSet}
 }
 
-func (p *pvcReclaimer) Reclaim(nc *v2alpha1.NebulaCluster) error {
-	return p.reclaimPV(nc)
+func (p *pvcReclaimer) Reclaim(obj runtime.Object) error {
+	return p.reclaimPV(obj)
 }
 
-func (p *pvcReclaimer) reclaimPV(nc *v2alpha1.NebulaCluster) error {
-	namespace := nc.GetNamespace()
-	ncName := nc.GetName()
+func (p *pvcReclaimer) reclaimPV(obj runtime.Object) error {
+	metaObj, ok := obj.(metav1.Object)
+	if !ok {
+		return fmt.Errorf("%+v is not a runtime.Object", obj)
+	}
+	namespace := metaObj.GetNamespace()
+	objName := metaObj.GetName()
 
-	pvcs, err := p.listPVCs(nc)
+	pvcs, err := p.listPVCs(namespace, objName)
 	if err != nil {
 		return err
 	}
@@ -89,7 +94,7 @@ func (p *pvcReclaimer) reclaimPV(nc *v2alpha1.NebulaCluster) error {
 			continue
 		}
 		if !apierrors.IsNotFound(err) {
-			return fmt.Errorf("cluster [%s/%s] get PVC %s pod %s from cache failed: %v", namespace, ncName, pvcName, podName, err)
+			return fmt.Errorf("cluster [%s/%s] get PVC %s pod %s from cache failed: %v", namespace, objName, pvcName, podName, err)
 		}
 
 		pvName := pvc.Spec.VolumeName
@@ -98,12 +103,12 @@ func (p *pvcReclaimer) reclaimPV(nc *v2alpha1.NebulaCluster) error {
 			if apierrors.IsNotFound(err) {
 				continue
 			}
-			return fmt.Errorf("cluster [%s/%s] get PVC %s PV %s failed: %v", namespace, ncName, pvcName, pvName, err)
+			return fmt.Errorf("cluster [%s/%s] get PVC %s PV %s failed: %v", namespace, objName, pvcName, pvName, err)
 		}
 
 		if pv.Spec.PersistentVolumeReclaimPolicy != corev1.PersistentVolumeReclaimDelete {
 			if err := p.clientSet.PV().PatchPVReclaimPolicy(pv, corev1.PersistentVolumeReclaimDelete); err != nil {
-				return fmt.Errorf("cluster [%s/%s] patch PV %s to %s failed: %v", namespace, ncName, pvName,
+				return fmt.Errorf("cluster [%s/%s] patch PV %s to %s failed: %v", namespace, objName, pvName,
 					corev1.PersistentVolumeReclaimDelete, err)
 			}
 			klog.Infof("patch PV %s policy to Delete successfully", pvName)
@@ -111,27 +116,24 @@ func (p *pvcReclaimer) reclaimPV(nc *v2alpha1.NebulaCluster) error {
 
 		if err := p.clientSet.PVC().DeletePVC(pvc.Namespace, pvcName); err != nil {
 			if !apierrors.IsNotFound(err) {
-				klog.Errorf("cluster [%s/%s] delete PVC %s failed: %v", namespace, ncName, pvcName, err)
+				klog.Errorf("cluster [%s/%s] delete PVC %s failed: %v", namespace, objName, pvcName, err)
 				return err
 			}
 		}
-		klog.Infof("cluster [%s/%s] reclaim PV %s successfully", namespace, ncName, pvName)
+		klog.Infof("cluster [%s/%s] reclaim PV %s successfully", namespace, objName, pvName)
 	}
 	return nil
 }
 
-func (p *pvcReclaimer) listPVCs(nc *v2alpha1.NebulaCluster) ([]corev1.PersistentVolumeClaim, error) {
-	namespace := nc.GetNamespace()
-	ncName := nc.GetName()
-
-	selector, err := label.New().Cluster(nc.GetClusterName()).Selector()
+func (p *pvcReclaimer) listPVCs(namespace, objName string) ([]corev1.PersistentVolumeClaim, error) {
+	selector, err := label.New().Cluster(objName).Selector()
 	if err != nil {
-		return nil, fmt.Errorf("get cluster [%s/%s] label selector failed: %v", namespace, ncName, err)
+		return nil, fmt.Errorf("get cluster [%s/%s] label selector failed: %v", namespace, objName, err)
 	}
 
 	pvcs, err := p.clientSet.PVC().ListPVCs(namespace, selector)
 	if err != nil {
-		return nil, fmt.Errorf("cluster [%s/%s] list PVC failed: %v", namespace, ncName, err)
+		return nil, fmt.Errorf("cluster [%s/%s] list PVC failed: %v", namespace, objName, err)
 	}
 	return pvcs, nil
 }

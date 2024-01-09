@@ -171,7 +171,7 @@ func (m *metadComponent) GetEndpoints(portName string) []string {
 }
 
 func (m *metadComponent) GenerateLabels() map[string]string {
-	return label.New().Metad()
+	return label.New().Cluster(m.nm.Name).Metad()
 }
 
 func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {

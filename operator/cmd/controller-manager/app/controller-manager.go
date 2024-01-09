@@ -41,6 +41,8 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulametad"
 	klogflag "github.com/vesoft-inc/nebula-ng-tools/operator/internal/flag/klog"
 	profileflag "github.com/vesoft-inc/nebula-ng-tools/operator/internal/flag/profile"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/discovery"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/version"
 )
 
@@ -84,6 +86,30 @@ func NewControllerManagerCommand(ctx context.Context) *cobra.Command {
 func Run(ctx context.Context, opts *options.Options) error {
 	klog.Infof("nebula-controller-manager version: %s", version.Version())
 
+	cfg, err := ctrlruntime.GetConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	dm, err := discovery.New(cfg)
+	if err != nil {
+		klog.Errorf("create discovery client failed: %v", err)
+		return err
+	}
+	info, err := dm.GetServerVersion()
+	if err != nil {
+		klog.Errorf("create apiserver info failed: %v", err)
+		return err
+	}
+	valid, err := kube.ValidVersion(info)
+	if err != nil {
+		klog.Errorf("get apiserver version failed: %v", err)
+		return err
+	}
+	if !valid {
+		panic("apiserver version not supported")
+	}
+
 	logf.SetLogger(klog.Background())
 
 	profileflag.ListenAndServe(opts.ProfileOpts)
@@ -92,11 +118,6 @@ func Run(ctx context.Context, opts *options.Options) error {
 		klog.Info("nebula-controller-manager watches all namespaces")
 	} else {
 		klog.Infof("nebula-controller-manager watches namespaces %v", opts.Namespaces)
-	}
-
-	cfg, err := ctrlruntime.GetConfig()
-	if err != nil {
-		panic(err)
 	}
 
 	defaultNamespaces := make(map[string]cache.Config)
