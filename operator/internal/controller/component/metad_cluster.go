@@ -92,7 +92,7 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 		return err
 	}
 
-	newWorkload, err := nm.MetadComponent().GenerateWorkload(cm, []string{})
+	newWorkload, err := nm.MetadComponent().GenerateWorkload(cm, nil)
 	if err != nil {
 		klog.Errorf("generate metad cluster template failed: %v", err)
 		return err

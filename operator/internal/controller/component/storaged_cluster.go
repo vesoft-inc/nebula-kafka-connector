@@ -28,6 +28,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -84,8 +85,12 @@ func (s *storagedCluster) syncStoragedWorkload(nc *v2alpha1.NebulaCluster) error
 		return err
 	}
 
-	// TODO metad endpoints
-	newSts, err := nc.StoragedComponent().GenerateWorkload(cm, nil)
+	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	if err != nil {
+		return err
+	}
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	newSts, err := nc.StoragedComponent().GenerateWorkload(cm, metadEndpoints)
 	if err != nil {
 		klog.Errorf("generate storaged cluster template failed: %v", err)
 		return err
@@ -108,6 +113,21 @@ func (s *storagedCluster) syncStoragedWorkload(nc *v2alpha1.NebulaCluster) error
 		}
 		nc.Status.Storaged.Workload = &v2alpha1.WorkloadStatus{}
 		return utilerrors.ReconcileErrorf("waiting for storaged cluster %s running", newSts.GetName())
+	}
+
+	if !nc.Status.Storaged.ServicesAdded {
+		if err := s.addStorageServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
+			return err
+		}
+		klog.Infof("storaged cluster [%s/%s] add services succeed", namespace, componentName)
+		nc.Status.Storaged.ServicesAdded = true
+	}
+	if !nc.Status.Storaged.InitPartitionDone {
+		if err := s.initCluster(nc.Name, metadEndpoints); err != nil {
+			return err
+		}
+		klog.Infof("init storaged cluster [%s/%s] partitions succeed", namespace, componentName)
+		nc.Status.Storaged.InitPartitionDone = true
 	}
 
 	if err := s.scaleManager.Scale(nc, oldSts, newSts); err != nil {
@@ -167,6 +187,43 @@ func (s *storagedCluster) syncStoragedConfigMap(nc *v2alpha1.NebulaCluster) (*co
 
 func (s *storagedCluster) syncStoragedPVC(nc *v2alpha1.NebulaCluster) error {
 	return syncPVC(nc.StoragedComponent(), s.clientSet.PVC())
+}
+
+func (s *storagedCluster) addStorageServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
+	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = metaClient.Disconnect()
+	}()
+
+	var start int32
+	if newReplicas > oldReplicas {
+		start = oldReplicas
+	}
+
+	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameThrift)
+	for i := start; i < newReplicas; i++ {
+		host := nc.StoragedComponent().GetPodFQDN(i)
+		if err := metaClient.AddService(host, uint32(port), nebula.StorageService, nc.Name); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *storagedCluster) initCluster(clusterName string, metadEndpoints []string) error {
+	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = metaClient.Disconnect()
+	}()
+
+	return metaClient.InitCluster(clusterName)
 }
 
 func (s *storagedCluster) Delete(nc *v2alpha1.NebulaCluster) error {

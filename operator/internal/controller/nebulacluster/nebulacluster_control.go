@@ -18,6 +18,7 @@ package nebulacluster
 
 import (
 	"context"
+	"fmt"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"
@@ -28,6 +29,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -46,6 +48,7 @@ var _ ControlInterface = &defaultNebulaClusterControl{}
 func NewDefaultNebulaClusterControl(
 	client client.Client,
 	nebulaClient kube.NebulaCluster,
+	metadClient kube.NebulaMetad,
 	graphdCluster component.ReconcileManager,
 	storagedCluster component.ReconcileManager,
 	metaReconciler component.MetaReconcileManager,
@@ -55,6 +58,7 @@ func NewDefaultNebulaClusterControl(
 	return &defaultNebulaClusterControl{
 		client:           client,
 		nebulaClient:     nebulaClient,
+		metadClient:      metadClient,
 		graphdCluster:    graphdCluster,
 		storagedCluster:  storagedCluster,
 		metaReconciler:   metaReconciler,
@@ -66,6 +70,7 @@ func NewDefaultNebulaClusterControl(
 type defaultNebulaClusterControl struct {
 	client           client.Client
 	nebulaClient     kube.NebulaCluster
+	metadClient      kube.NebulaMetad
 	graphdCluster    component.ReconcileManager
 	storagedCluster  component.ReconcileManager
 	metaReconciler   component.MetaReconcileManager
@@ -120,6 +125,27 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 
 	if err := kube.CheckRBAC(context.TODO(), c.client, nc.Namespace); err != nil {
 		return err
+	}
+
+	if nc.Spec.MetadRef == nil {
+		return component.ErrorMetadReferenceIsNil
+	}
+	metad, err := c.metadClient.GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	if err != nil {
+		return err
+	}
+	if !metad.MetadComponent().IsReady() {
+		return fmt.Errorf("metad [%s/%s] is not ready", metad.Namespace, metad.Name)
+	}
+	if !nc.Status.CreatedDone {
+		metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+		mc, err := nebula.NewMetaClient(metadEndpoints)
+		if err != nil {
+			return err
+		}
+		if err := mc.CreateCluster(nc.Name, int(nc.Spec.Replica), nc.Spec.Zones); err != nil {
+			return err
+		}
 	}
 
 	if err := c.storagedCluster.Reconcile(nc); err != nil {

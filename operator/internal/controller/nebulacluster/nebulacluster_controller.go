@@ -75,6 +75,7 @@ func NewClusterReconciler(mgr ctrl.Manager) (*ClusterReconciler, error) {
 		control: NewDefaultNebulaClusterControl(
 			mgr.GetClient(),
 			clientSet.NebulaCluster(),
+			clientSet.NebulaMetad(),
 			component.NewGraphdCluster(
 				clientSet,
 				graphScaler,

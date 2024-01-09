@@ -76,7 +76,7 @@ func NewMetadReconciler(mgr ctrl.Manager) (*MetadReconciler, error) {
 			component.NewMetadManager(clientSet, metadUpdater, recorder),
 			reclaimer.NewMetaReconciler(clientSet),
 			reclaimer.NewPVCReclaimer(clientSet),
-			NewClusterConditionUpdater(),
+			NewMetadConditionUpdater(),
 		),
 		Client: mgr.GetClient(),
 	}, nil

@@ -159,6 +159,7 @@ type NebulaClusterStatus struct {
 	ObservedGeneration int64              `json:"observedGeneration,omitempty"`
 	Graphd             GraphdStatus       `json:"graphd,omitempty"`
 	Storaged           StoragedStatus     `json:"storaged,omitempty"`
+	CreatedDone        bool               `json:"createdDone,omitempty"`
 	Conditions         []metav1.Condition `json:"conditions,omitempty"`
 	Version            string             `json:"version,omitempty"`
 }

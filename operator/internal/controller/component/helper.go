@@ -18,6 +18,7 @@ package component
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -38,6 +39,10 @@ import (
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/hash"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/maputil"
+)
+
+var (
+	ErrorMetadReferenceIsNil = errors.New("metad reference is nil")
 )
 
 func syncComponentStatus(

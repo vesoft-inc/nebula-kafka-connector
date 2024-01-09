@@ -30,6 +30,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -97,8 +98,15 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 		return err
 	}
 
-	// TODO metad endpoints
-	newSts, err := nc.GraphdComponent().GenerateWorkload(cm, nil)
+	if nc.Spec.MetadRef == nil {
+		return ErrorMetadReferenceIsNil
+	}
+	metad, err := g.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	if err != nil {
+		return err
+	}
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	newSts, err := nc.GraphdComponent().GenerateWorkload(cm, metadEndpoints)
 	if err != nil {
 		klog.Errorf("generate graphd cluster template failed: %v", err)
 		return err
@@ -121,6 +129,14 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 		}
 		nc.Status.Graphd.Workload = &v2alpha1.WorkloadStatus{}
 		return utilerrors.ReconcileErrorf("waiting for graphd cluster %s running", newSts.GetName())
+	}
+
+	if !nc.Status.Graphd.ServicesAdded {
+		if err := g.addGraphdServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
+			return err
+		}
+		klog.Infof("graphd cluster [%s/%s] add services succeed", namespace, componentName)
+		nc.Status.Graphd.ServicesAdded = true
 	}
 
 	if err := g.scaleManager.Scale(nc, oldSts, newSts); err != nil {
@@ -199,6 +215,31 @@ func (g *graphdCluster) syncGraphdConfigMap(nc *v2alpha1.NebulaCluster) (*corev1
 
 func (g *graphdCluster) syncGraphdPVC(nc *v2alpha1.NebulaCluster) error {
 	return syncPVC(nc.GraphdComponent(), g.clientSet.PVC())
+}
+
+func (g *graphdCluster) addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
+	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = metaClient.Disconnect()
+	}()
+
+	var start int32
+	if newReplicas > oldReplicas {
+		start = oldReplicas
+	}
+
+	port := nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameThrift)
+	for i := start; i < newReplicas; i++ {
+		host := nc.GraphdComponent().GetPodFQDN(i)
+		if err := metaClient.AddService(host, uint32(port), nebula.GraphService, nc.Name); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (g *graphdCluster) Delete(nc *v2alpha1.NebulaCluster) error {

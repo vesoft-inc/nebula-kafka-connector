@@ -37,7 +37,7 @@ type MetadConditionUpdater interface {
 
 var _ MetadConditionUpdater = &nebulaMetadConditionUpdater{}
 
-func NewClusterConditionUpdater() MetadConditionUpdater {
+func NewMetadConditionUpdater() MetadConditionUpdater {
 	return &nebulaMetadConditionUpdater{}
 }
 
