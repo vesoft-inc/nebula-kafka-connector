@@ -116,7 +116,7 @@ func (s *storagedCluster) syncStoragedWorkload(nc *v2alpha1.NebulaCluster) error
 	}
 
 	if !nc.Status.Storaged.ServicesAdded {
-		if err := s.addStorageServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
+		if err := addStorageServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
 			return err
 		}
 		klog.Infof("storaged cluster [%s/%s] add services succeed", namespace, componentName)
@@ -189,31 +189,6 @@ func (s *storagedCluster) syncStoragedPVC(nc *v2alpha1.NebulaCluster) error {
 	return syncPVC(nc.StoragedComponent(), s.clientSet.PVC())
 }
 
-func (s *storagedCluster) addStorageServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
-	metaClient, err := nebula.NewMetaClient(metadEndpoints)
-	if err != nil {
-		return err
-	}
-	defer func() {
-		_ = metaClient.Disconnect()
-	}()
-
-	var start int32
-	if newReplicas > oldReplicas {
-		start = oldReplicas
-	}
-
-	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameThrift)
-	for i := start; i < newReplicas; i++ {
-		host := nc.StoragedComponent().GetPodFQDN(i)
-		if err := metaClient.AddService(host, uint32(port), nebula.StorageService, nc.Name); err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
 func (s *storagedCluster) initCluster(clusterName string, metadEndpoints []string) error {
 	metaClient, err := nebula.NewMetaClient(metadEndpoints)
 	if err != nil {
@@ -241,4 +216,29 @@ func (s *storagedCluster) Delete(nc *v2alpha1.NebulaCluster) error {
 		return err
 	}
 	return s.clientSet.Workload().DeleteWorkload(workload)
+}
+
+func addStorageServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
+	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = metaClient.Disconnect()
+	}()
+
+	var start int32
+	if newReplicas > oldReplicas {
+		start = oldReplicas
+	}
+
+	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameThrift)
+	for i := start; i < newReplicas; i++ {
+		host := nc.StoragedComponent().GetPodFQDN(i)
+		if err := metaClient.AddService(host, uint32(port), nebula.StorageService, nc.Name); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

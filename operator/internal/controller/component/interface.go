@@ -37,7 +37,7 @@ type ScaleManager interface {
 	// ScaleIn scales in the cluster
 	ScaleIn(nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error
 	// ScaleOut scales out the cluster
-	ScaleOut(nc *v2alpha1.NebulaCluster) error
+	ScaleOut(nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error
 }
 
 type UpdateManager interface {

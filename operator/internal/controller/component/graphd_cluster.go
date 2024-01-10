@@ -98,9 +98,6 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 		return err
 	}
 
-	if nc.Spec.MetadRef == nil {
-		return ErrorMetadReferenceIsNil
-	}
 	metad, err := g.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
 	if err != nil {
 		return err
@@ -132,7 +129,7 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 	}
 
 	if !nc.Status.Graphd.ServicesAdded {
-		if err := g.addGraphdServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
+		if err := addGraphdServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
 			return err
 		}
 		klog.Infof("graphd cluster [%s/%s] add services succeed", namespace, componentName)
@@ -217,7 +214,24 @@ func (g *graphdCluster) syncGraphdPVC(nc *v2alpha1.NebulaCluster) error {
 	return syncPVC(nc.GraphdComponent(), g.clientSet.PVC())
 }
 
-func (g *graphdCluster) addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
+func (g *graphdCluster) Delete(nc *v2alpha1.NebulaCluster) error {
+	if nc.Spec.Graphd == nil {
+		return nil
+	}
+	namespace := nc.GetNamespace()
+	componentName := nc.GraphdComponent().GetName()
+	workload, err := g.clientSet.Workload().GetWorkload(namespace, componentName)
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil
+		}
+		klog.Errorf("get graphd cluster failed: %v", err)
+		return err
+	}
+	return g.clientSet.Workload().DeleteWorkload(workload)
+}
+
+func addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
 	metaClient, err := nebula.NewMetaClient(metadEndpoints)
 	if err != nil {
 		return err
@@ -240,21 +254,4 @@ func (g *graphdCluster) addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpo
 	}
 
 	return nil
-}
-
-func (g *graphdCluster) Delete(nc *v2alpha1.NebulaCluster) error {
-	if nc.Spec.Graphd == nil {
-		return nil
-	}
-	namespace := nc.GetNamespace()
-	componentName := nc.GraphdComponent().GetName()
-	workload, err := g.clientSet.Workload().GetWorkload(namespace, componentName)
-	if err != nil {
-		if apierrors.IsNotFound(err) {
-			return nil
-		}
-		klog.Errorf("get graphd cluster failed: %v", err)
-		return err
-	}
-	return g.clientSet.Workload().DeleteWorkload(workload)
 }
