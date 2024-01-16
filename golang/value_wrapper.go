@@ -306,7 +306,8 @@ func (valWrap ValueWrapper) String() string {
 		}
 		return fStr
 	} else if value.IsSetStringVal() {
-		return `"` + string(value.GetStringVal()) + `"`
+		fmt.Println(value.GetStringVal())
+		return `"` + ProcessCarriageReturn(string(value.GetStringVal())) + `"`
 	} else if value.IsSetNodeVal() { // Node
 		rawNode := value.GetNodeVal()
 		node, _ := genNode(rawNode, valWrap.timezoneInfo)
@@ -377,4 +378,30 @@ func (valWrap ValueWrapper) String() string {
 	} else { // Null
 		return "__NULL__"
 	}
+}
+
+// Process carriage return character('\r') when rendering a string
+func ProcessCarriageReturn(input string) string {
+	// Convert the input string to a byte slice
+	inputbytes := []byte(input)
+	// Create a byte slice to store the output, but don't specify the length!!!
+	outputBytes := []byte{}
+	// Initialize the index to track the current position
+	idx := 0
+	for _, ch := range inputbytes {
+		if ch == '\r' {
+			// Carriage return: move to the beginning of the line by setting idx to 0
+			idx = 0
+		} else {
+			// If the index is out of range, append the character to the output
+			if (idx >= len(outputBytes)) {
+				outputBytes = append(outputBytes, ch)
+			} else {
+				// Otherwise, overwrite the character at the index
+				outputBytes[idx] = ch
+			}
+			idx++
+		}
+	}
+	return string(outputBytes)
 }

@@ -66,7 +66,7 @@ func (p *DataSetPrinter) PrintDataSet(res *nebula.ResultSet) {
 	p.writer.ResetRows()
 	var header []interface{}
 	for _, columName := range res.GetColNames() {
-		header = append(header, string(columName))
+		header = append(header, nebula.ProcessCarriageReturn(columName))
 	}
 	p.writer.AppendHeader(table.Row(header))
 	numRows := res.GetRowSize()

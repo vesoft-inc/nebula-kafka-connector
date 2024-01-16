@@ -9,8 +9,8 @@
 package nebula_ng
 
 import (
-	"testing"
 	"fmt"
+	"testing"
 
 	"github.com/stretchr/testify/assert"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/generated_code/v5.0.0/nebula"
@@ -65,13 +65,24 @@ func TestAsFloat(t *testing.T) {
 }
 
 func TestAsString(t *testing.T) {
-	val := "test_string"
-	value := nebula.XValue_{StringVal: []byte(val)}
-	valWrap := ValueWrapper{&value, testTimezone}
-	assert.Equal(t, true, valWrap.IsString())
-	assert.Equal(t, "\"test_string\"", valWrap.String())
-	res, _ := valWrap.AsString()
-	assert.Equal(t, string(value.GetStringVal()), res)
+	{
+		val := "test_string"
+		value := nebula.XValue_{StringVal: []byte(val)}
+		valWrap := ValueWrapper{&value, testTimezone}
+		assert.Equal(t, true, valWrap.IsString())
+		assert.Equal(t, "\"test_string\"", valWrap.String())
+		res, _ := valWrap.AsString()
+		assert.Equal(t, string(value.GetStringVal()), res)
+	}
+	{
+		val := "abc\rde"
+		value := nebula.XValue_{StringVal: []byte(val)}
+		valWrap := ValueWrapper{&value, testTimezone}
+		assert.Equal(t, true, valWrap.IsString())
+		assert.Equal(t, "\"dec\"", valWrap.String())
+		res, _ := valWrap.AsString()
+		assert.Equal(t, "abc\rde", res)
+	}
 }
 
 func TestAsList(t *testing.T) {
