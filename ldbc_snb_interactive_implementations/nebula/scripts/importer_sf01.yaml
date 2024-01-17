@@ -25,10 +25,10 @@ manager:
                 (Continent LABELS Continent&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
                 (University LABELS University&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
                 (Company LABELS Company&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (Person LABEL Person {id INT64 PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, email STRING, speaks STRING }),
-                (Forum LABEL Forum {id INT64 PRIMARY KEY, title STRING, creationDate LOCALDATETIME}),
-                (Post LABELS Post&Message {id INT64 PRIMARY KEY, imageFile STRING, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, language STRING, content STRING, extent INT}),
-                (Comment LABELS Comment&Message {id INT64 PRIMARY KEY, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT32}),
+                (Person LABEL Person {id INT64 PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, email STRING, speaks STRING }),
+                (Forum LABEL Forum {id INT64 PRIMARY KEY, title STRING, creationDate LOCAL DATETIME}),
+                (Post LABELS Post&Message {id INT64 PRIMARY KEY, imageFile STRING, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, language STRING, content STRING, extent INT}),
+                (Comment LABELS Comment&Message {id INT64 PRIMARY KEY, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT32}),
                 (Tag LABEL Tag {id INT64 PRIMARY KEY, name STRING, url STRING}),
                 (TagClass LABEL TagClass {id INT64 PRIMARY KEY, name STRING, url STRING}),
                 (City)-[CITY_IS_PART_OF_COUNTRY:IS_PART_OF]->(Country),
@@ -38,10 +38,10 @@ manager:
                 (Person)-[PERSON_IS_LOCATED_IN_CITY:IS_LOCATED_IN]->(City),
                 (Person)-[PERSON_STUDY_AT_UNIVERSITY:STUDY_AT{classYear INT32}]->(University),
                 (Person)-[PERSON_WORK_AT_COMPANY:WORK_AT{workFrom INT32}]->(Company),
-                (Person)-[PERSON_LIKES_POST:LIKES{creationDate LOCALDATETIME}]->(Post),
-                (Person)-[PERSON_LIKES_COMMENT:LIKES{creationDate LOCALDATETIME}]->(Comment),
+                (Person)-[PERSON_LIKES_POST:LIKES{creationDate LOCAL DATETIME}]->(Post),
+                (Person)-[PERSON_LIKES_COMMENT:LIKES{creationDate LOCAL DATETIME}]->(Comment),
                 (Person)-[PERSON_HAS_INTEREST_TAG:HAS_INTEREST]->(Tag),
-                (Person)-[PERSON_KNOWS_PERSON:KNOWS{creationDate LOCALDATETIME}]->(Person),
+                (Person)-[PERSON_KNOWS_PERSON:KNOWS{creationDate LOCAL DATETIME}]->(Person),
                 (Post)-[POST_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
                 (Post)-[POST_HAS_CREATOR_PERSON:HAS_CREATOR]->(Person),
                 (Post)-[POST_HAS_TAG_TAG:HAS_TAG]->(Tag),
@@ -51,7 +51,7 @@ manager:
                 (Comment)-[COMMENT_REPLY_OF_POST:REPLY_OF]->(Post),
                 (Comment)-[COMMENT_REPLY_OF_COMMENT:REPLY_OF]->(Comment),
                 (Forum)-[FORUM_CONTAINER_OF_POST:CONTAINER_OF]->(Post),
-                (Forum)-[FORUM_HAS_MEMBER_PERSON:HAS_MEMBER{joinDate LOCALDATETIME}]->(Person),
+                (Forum)-[FORUM_HAS_MEMBER_PERSON:HAS_MEMBER{joinDate LOCAL DATETIME}]->(Person),
                 (Forum)-[FORUM_HAS_MODERATOR_PERSON:HAS_MODERATOR]->(Person),
                 (Forum)-[FORUM_HAS_TAG_TAG:HAS_TAG]->(Tag),
                 (Tag)-[TAG_HAS_TYPE_TAGCLASS:HAS_TYPE]->(TagClass),
@@ -171,7 +171,7 @@ sources:
             type: 'DATE'
             index: 4
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 5
           - name: 'locationIP'
             type: 'STRING'
@@ -200,7 +200,7 @@ sources:
             type: 'STRING'
             index: 1
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 2
 
   - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/post.csv
@@ -217,7 +217,7 @@ sources:
             type: 'STRING'
             index: 1
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 2
           - name: 'locationIP'
             type: 'STRING'
@@ -246,7 +246,7 @@ sources:
           index: 0
         props:
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 1
           - name: 'locationIP'
             type: 'STRING'
@@ -445,7 +445,7 @@ sources:
             index: 1
         props:
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 2
 
   - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_likes_post.csv
@@ -467,7 +467,7 @@ sources:
             index: 1
         props:
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 2
 
   - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_likes_comment.csv
@@ -489,7 +489,7 @@ sources:
             index: 1
         props:
           - name: 'creationDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 2
 
   - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/person_hasInterest_tag.csv
@@ -529,7 +529,7 @@ sources:
             index: 1
         props:
           - name: 'joinDate'
-            type: 'LOCALDATETIME'
+            type: 'LOCAL DATETIME'
             index: 2
 
   - path: /home/vesoft/ldbc_test_5.0/sf01/ldbc_snb_datagen/test_data/social_network/dynamic/forum_hasModerator_person.csv
