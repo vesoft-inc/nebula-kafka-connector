@@ -1,5 +1,5 @@
 // Copyright (c) 2023 vesoft inc. All rights reserved.
-package cmd
+package main
 
 import (
 	"crypto/tls"
@@ -647,4 +647,8 @@ func init() {
 	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The nGQL directly")
 	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The nGQL script file name")
 	rootCmd.Flags().IntVarP(&widthMax, "width_max", "", 100, "The max width of the column of the execution plan")
+}
+
+func main() {
+	rootCmd.Execute()
 }

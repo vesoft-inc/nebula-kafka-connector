@@ -26,6 +26,7 @@ vendor/
 
 # TODO(Aiee) Keep the binary in the git repository for simplicity
 nebula-console
+meta-console
 
 # Auto generated code by `go generate`
 box/blob.go

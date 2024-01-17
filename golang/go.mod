@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/facebook/fbthrift v0.31.1-0.20221225090033-b7c4ecdd9179
-	github.com/stretchr/testify v1.8.0
+	github.com/stretchr/testify v1.8.2
 )
 
 require (
