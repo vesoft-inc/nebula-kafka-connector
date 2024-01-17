@@ -1,0 +1,239 @@
+/**
+ * Copyright (c) 2024 vesoft inc. All rights reserved.
+ *
+ * This is the protocol file that defines the data exchanging contract
+ * between the client SDKs and the server of NebulaGraph
+ */
+
+ /**
+  *             === Some Key Notes About Protobuf ===
+  * 1. Field Presence
+  *     - `required' is removed from proto3 while `optional' kept.
+  *     - Without `optional', the user cannot distinguish the situation.
+  *       that a field was not set from being set to its default value.
+  *     - With `optional' specified the field will have the NULL semantic(via `has_xxx')
+  * 2. Compatibility
+  *     - Never change a field number.
+  *     - Reserve the field number of deleted fields with `reserved'.
+  *     - Some field types can be changed without breaking the compatibility.
+  *       Please refer to the official documents for details.
+  */
+
+// gRPC requires the proto3 syntax
+syntax = "proto3";
+
+/**
+ * Data structures defined in this file is mainly for data exchanging.
+ * On the server side, the compute engine has its own data representations,
+ * which is more performant and memory efficient.
+ * On the client side, for the sake of ease, we will provide wrappers over the
+ * data structures anyway.
+ * So we put the generated code into the a separate namespace or package, i.e. `proto'
+ */
+package nebula.proto;
+option go_package = "./proto";
+option java_package = "com.vesoft.nebula.proto";
+option java_multiple_files = true;
+
+// Interface definition
+service Graph {
+    rpc Authenticate(AuthRequest) returns(AuthResponse) {}
+    rpc Signout(SignoutRequest) returns(SignoutResponse) {}
+    rpc Execute(ExecuteRequest) returns(ExecuteResponse) {}
+    rpc StreamingExecute(ExecuteRequest) returns(stream ExecuteResponse) {}
+}
+
+/**
+ * Only 4 and 8 byte integers are supported by protobuf.
+ * These integers are encoded as varints on wire.
+ * If the memory footprint is a concern, we should implement our
+ * own codec scheme for some of messages like `Duration' and `Date'.
+ */
+message Duration {
+    uint64              seconds                 = 1;
+    uint32              microseconds            = 2;
+    uint32              months                  = 3;
+}
+
+message Date {
+    uint32              year                    = 1;
+    uint32              month                   = 2;
+    uint32              day                     = 3;
+}
+
+message LocalTime {
+    uint32              hour                    = 1;
+    uint32              minute                  = 2;
+    uint32              sec                     = 3;
+    uint32              microsec                = 4;
+}
+
+message ZonedTime {
+    uint32              hour                    = 1;
+    uint32              minute                  = 2;
+    uint32              sec                     = 3;
+    uint32              microsec                = 4;
+}
+
+message LocalDatetime {
+    uint32              year                    = 1;
+    uint32              month                   = 2;
+    uint32              day                     = 3;
+    uint32              hour                    = 4;
+    uint32              minute                  = 5;
+    uint32              sec                     = 6;
+    uint32              microsec                = 7;
+}
+
+message ZonedDatetime {
+    uint32              year                    = 1;
+    uint32              month                   = 2;
+    uint32              day                     = 3;
+    uint32              hour                    = 4;
+    uint32              minute                  = 5;
+    uint32              sec                     = 6;
+    uint32              microsec                = 7;
+}
+
+message List {
+    repeated Value      values                  = 1;
+}
+
+message Record {
+    map<string, Value>  values                  = 1;
+}
+
+message Node {
+    int64               node_id                 = 1;
+    int32               node_type_id            = 2;
+    map<string, Value>  properties              = 3;
+}
+
+message Edge {
+    int64               src_id                  = 1;
+    int64               dst_id                  = 2;
+    int32               edge_type_id            = 3;
+    int64               rank                    = 4;
+    map<string, Value>  properties              = 5;
+}
+
+message Path {
+    repeated Value      values                  = 1;
+}
+
+message Ref {
+    uint32              code                    = 1;
+    uint32              offset                  = 2;
+}
+
+/**
+ * NOTE
+ *  - There is no (u)int8 or (u)int16 in protobuf, we use (u)int32 instead.
+ *  - We use `bytes' for the `string' type, because the latter is subject to
+ *    the UTF8 checking in the protobuf's encoding.
+ *  -
+ */
+message Value {
+    oneof data {
+        bool            bool_value              = 1;
+        int32           int8_value              = 2;
+        uint32          uint8_value             = 3;
+        int32           int16_value             = 4;
+        uint32          uint16_value            = 5;
+        int32           int32_value             = 6;
+        uint32          uint32_value            = 7;
+        int64           int64_value             = 8;
+        uint64          uint64_value            = 9;
+        float           float_value             = 10;
+        double          double_value            = 11;
+        bytes           string_value            = 12;
+        List            list_value              = 13;
+        Record          record_value            = 14;
+        Node            node_value              = 15;
+        Edge            edge_value              = 16;
+        Path            path_value              = 17;
+        Duration        duration_value          = 18;
+        LocalTime       local_time_value        = 19;
+        ZonedTime       zoned_time_value        = 20;
+        Date            date_value              = 21;
+        LocalDatetime   local_datatime_value    = 22;
+        ZonedDatetime   zoned_datatime_value    = 23;
+        Ref             ref_value               = 24;
+    }
+}
+
+enum ValueTypeKind {
+    kNull               = 0;
+    kBool               = 1;
+    kInt8               = 2;
+    kUInt8              = 3;
+    kInt16              = 4;
+    kUInt16             = 5;
+    kInt32              = 6;
+    kUInt32             = 7;
+    kInt64              = 8;
+    kUInt64             = 9;
+    kFloat              = 10;
+    kDouble             = 11;
+    kString             = 12;
+    kList               = 13;
+    kRecord             = 14;
+    kNode               = 15;
+    kEdge               = 16;
+    kPath               = 17;
+    kDuration           = 18;
+    kLocalTime          = 19;
+    kZonedTime          = 20;
+    kDate               = 21;
+    kLocalDatetime      = 22;
+    kZonedDatetime      = 23;
+    kRef                = 24;
+}
+
+message Row {
+    repeated Value      values                  = 1;
+}
+
+message ResultTable {
+    repeated bytes      column_names            = 1;
+    repeated Row        records                 = 2;
+}
+
+message GQLStatus {
+    bytes               status                  = 1;
+}
+
+message ExecutionOutcome {
+    GQLStatus           gql_status              = 1;
+    ResultTable         result                  = 2;
+    bytes               plan_desc               = 3;
+}
+
+message ExecuteRequest {
+    int64               session_id              = 1;
+    bytes               stmt                    = 2;
+}
+
+message ExecuteResponse {
+    ExecutionOutcome    execution_outcome       = 1;
+    uint64              latency_in_us           = 2;
+}
+
+message AuthRequest {
+    bytes               username                = 1;
+    bytes               password                = 2;
+    bytes               client_type             = 3;
+    bytes               client_version          = 4;
+}
+
+message AuthResponse {
+    GQLStatus           gql_status              = 1;
+    int64               session_id              = 2;
+}
+
+message SignoutRequest {
+    int64               session_id              = 1;
+}
+
+message SignoutResponse {
+}
