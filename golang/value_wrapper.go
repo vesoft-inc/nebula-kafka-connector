@@ -322,11 +322,11 @@ func (valWrap ValueWrapper) String() string {
 		for _, val := range lval.Values {
 			strs = append(strs, ValueWrapper{val, valWrap.timezoneInfo}.String())
 		}
-		return fmt.Sprintf("[%s]", strings.Join(strs, ", "))
+		return fmt.Sprintf("LIST [%s]", strings.Join(strs, ", "))
 	} else if value.IsSetDateVal() { // Date yyyy-mm-dd
 		date := value.GetDateVal()
 		dateWrapper, _ := genDateWrapper(date)
-		return fmt.Sprintf("%04d-%02d-%02d",
+		return fmt.Sprintf("DATE \"%04d-%02d-%02d\"",
 			dateWrapper.getYear(),
 			dateWrapper.getMonth(),
 			dateWrapper.getDay())
@@ -341,7 +341,7 @@ func (valWrap ValueWrapper) String() string {
 	} else if value.IsSetLocalDatetimeVal() { // DateTime yyyy-mm-ddTHH:MM:SS.MSMSMS
 		rawLocalDateTime := value.GetLocalDatetimeVal()
 		localDateTime, _ := genLocalDatetimeWrapper(rawLocalDateTime, valWrap.timezoneInfo)
-		return fmt.Sprintf("%d-%02d-%02dT%02d:%02d:%02d.%06d",
+		return fmt.Sprintf("DATETIME \"%d-%02d-%02dT%02d:%02d:%02d.%06d\"",
 			localDateTime.getYear(),
 			localDateTime.getMonth(),
 			localDateTime.getDay(),
@@ -366,7 +366,7 @@ func (valWrap ValueWrapper) String() string {
 		for _, k := range keyList {
 			output = append(output, fmt.Sprintf("%s: %s", k, ValueWrapper{kvs[k], valWrap.timezoneInfo}.String()))
 		}
-		return fmt.Sprintf("{%s}", strings.Join(output, ", "))
+		return fmt.Sprintf("RECORD {%s}", strings.Join(output, ", "))
 	} else if value.IsSetPathVal() { // Path
 		// TODO(Aiee) the implementation of path is same as list for now
 		pval := value.GetPathVal()
@@ -374,7 +374,7 @@ func (valWrap ValueWrapper) String() string {
 		for _, val := range pval.Values {
 			strs = append(strs, ValueWrapper{val, valWrap.timezoneInfo}.String())
 		}
-		return fmt.Sprintf("[%s]", strings.Join(strs, " "))
+		return fmt.Sprintf("PATH [%s]", strings.Join(strs, " "))
 	} else { // Null
 		return "__NULL__"
 	}
@@ -394,7 +394,7 @@ func ProcessCarriageReturn(input string) string {
 			idx = 0
 		} else {
 			// If the index is out of range, append the character to the output
-			if (idx >= len(outputBytes)) {
+			if idx >= len(outputBytes) {
 				outputBytes = append(outputBytes, ch)
 			} else {
 				// Otherwise, overwrite the character at the index

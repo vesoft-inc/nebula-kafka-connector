@@ -12,9 +12,9 @@ const (
 	ValueTypeDouble        ValueType = "DOUBLE"
 	ValueTypeDate          ValueType = "DATE"
 	ValueTypeTime          ValueType = "TIME"
-	ValueTypeLocalTime     ValueType = "LOCALTIME"
+	ValueTypeLocalTime     ValueType = "LOCAL TIME"
 	ValueTypeDateTime      ValueType = "DATETIME"
-	ValueTypeLocalDateTime ValueType = "LOCALDATETIME"
+	ValueTypeLocalDateTime ValueType = "LOCAL DATETIME"
 
 	ValueTypeDefault = ValueTypeString
 )

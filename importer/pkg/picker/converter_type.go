@@ -81,7 +81,7 @@ func NewTypeConverter(t string) (Converter, error) {
 		return TypeTimeConverter{
 			Name: "TIME",
 		}, nil
-	case "LOCALTIME":
+	case "LOCAL TIME":
 		return TypeLocalTimeConverter{
 			Name: "LOCALTIME",
 		}, nil
@@ -89,7 +89,7 @@ func NewTypeConverter(t string) (Converter, error) {
 		return TypeDatetimeConverter{
 			Name: "DATETIME",
 		}, nil
-	case "LOCALDATETIME":
+	case "LOCAL DATETIME":
 		return TypeLocalDatetimeConverter{
 			Name: "LOCALDATETIME",
 		}, nil

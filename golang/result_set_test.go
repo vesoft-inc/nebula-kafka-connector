@@ -95,7 +95,7 @@ func TestAsList(t *testing.T) {
 		ListVal: &nebula.XNList_{Values: valList},
 	}
 	valWrap := ValueWrapper{&value, testTimezone}
-	assert.Equal(t, "[\"elem1\", \"elem2\", \"elem3\"]", valWrap.String())
+	assert.Equal(t, "LIST [\"elem1\", \"elem2\", \"elem3\"]", valWrap.String())
 	assert.Equal(t, true, valWrap.IsList())
 
 	res, _ := valWrap.AsList()
@@ -118,7 +118,7 @@ func TestAsMap(t *testing.T) {
 	mval := nebula.XNRecord_{Values: valueMap}
 	value := nebula.XValue_{RecordVal: &mval}
 	valWrap := ValueWrapper{&value, testTimezone}
-	assert.Equal(t, "{key0: \"val0\", key1: \"val1\", key2: \"val2\"}", valWrap.String())
+	assert.Equal(t, "RECORD {key0: \"val0\", key1: \"val1\", key2: \"val2\"}", valWrap.String())
 	assert.Equal(t, true, valWrap.IsMap())
 	vMap := value.GetRecordVal().Values
 	valWrapMap, err := valWrap.AsMap()
@@ -143,7 +143,7 @@ func TestAsDate(t *testing.T) {
 	value := nebula.XValue_{DateVal: &nebula.XDate_{2020, 12, 25}}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsDate())
-	assert.Equal(t, "2020-12-25", valWrap.String())
+	assert.Equal(t, "DATE \"2020-12-25\"", valWrap.String())
 }
 
 func TestAsLocalTime(t *testing.T) {
@@ -157,7 +157,7 @@ func TestAsLocalDatetime(t *testing.T) {
 	value := nebula.XValue_{LocalDatetimeVal: &nebula.XLocalDatetime_{2020, 12, 25, 22, 12, 25, 29}}
 	valWrap := ValueWrapper{&value, testTimezone}
 	assert.Equal(t, true, valWrap.IsLocalDatetime())
-	assert.Equal(t, "2020-12-25T22:12:25.000029", valWrap.String())
+	assert.Equal(t, "DATETIME \"2020-12-25T22:12:25.000029\"", valWrap.String())
 }
 
 func TestAsNode(t *testing.T) {
