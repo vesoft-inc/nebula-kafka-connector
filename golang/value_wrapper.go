@@ -306,7 +306,6 @@ func (valWrap ValueWrapper) String() string {
 		}
 		return fStr
 	} else if value.IsSetStringVal() {
-		fmt.Println(value.GetStringVal())
 		return `"` + ProcessCarriageReturn(string(value.GetStringVal())) + `"`
 	} else if value.IsSetNodeVal() { // Node
 		rawNode := value.GetNodeVal()
