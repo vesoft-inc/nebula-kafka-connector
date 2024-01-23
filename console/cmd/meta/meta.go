@@ -52,14 +52,6 @@ var rootCmd = &cobra.Command{
 }
 
 // ***************** to connect/disconnect command *****************
-var sessionCmd = &cobra.Command{
-	Use:   "session",
-	Short: "Process session command",
-	Long:  `Execute session command in cli mode like connect and disconnect.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
 
 type LoginFlags struct {
 	Metas string // meta server address list separated by comma like "xx:xx,xx:xx"
@@ -341,7 +333,7 @@ var metaShowServiceCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(sessionCmd)
+	rootCmd.AddCommand(loginCmd)
 
 	rootCmd.AddCommand(clusterCmd)
 	clusterCmd.AddCommand(metaCreateClusterCmd)
@@ -352,11 +344,11 @@ func init() {
 	serviceCmd.AddCommand(metaAddServiceCmd)
 	serviceCmd.AddCommand(metaShowServiceCmd)
 
-	sessionCmd.Flags().StringVarP(&loginFlags.Addr, "addr", "a", "", "meta server address")
-	sessionCmd.Flags().Uint32VarP(&loginFlags.Port, "port", "", 0, "meta server port")
-	sessionCmd.Flags().StringVarP(&loginFlags.User, "user", "u", "", "user name")
-	sessionCmd.Flags().StringVarP(&loginFlags.Pass, "password", "p", "", "password")
-	sessionCmd.Flags().StringVarP(&loginFlags.Metas, "metas", "m", "", "meta server address list separated by comma like \"xx:xx,xx:xx\"")
+	loginCmd.Flags().StringVarP(&loginFlags.Addr, "addr", "a", "", "meta server address")
+	loginCmd.Flags().Uint32VarP(&loginFlags.Port, "port", "", 0, "meta server port")
+	loginCmd.Flags().StringVarP(&loginFlags.User, "user", "u", "", "user name")
+	loginCmd.Flags().StringVarP(&loginFlags.Pass, "password", "p", "", "password")
+	loginCmd.Flags().StringVarP(&loginFlags.Metas, "metas", "m", "", "meta server address list separated by comma like \"xx:xx,xx:xx\"")
 
 	metaCreateClusterCmd.Flags().StringVarP(&createClusterFlags.ClusterName, "cluster", "c", "", "cluster name")
 	metaCreateClusterCmd.Flags().IntVarP(&createClusterFlags.Replica, "replica", "r", 0, "replica number")
