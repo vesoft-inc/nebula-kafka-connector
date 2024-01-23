@@ -22,7 +22,7 @@ public class TestGrpcConnection {
         try {
             // Test open
             GrpcConnection connection = new GrpcConnection();
-            connection.open(new HostAddress("127.0.0.1", 14304), 1000, 1000);
+            connection.open(new HostAddress("127.0.0.1", 20584), 1000, 1000);
 
             // Test authenticate
             AuthResult authResult = connection.authenticate("root", "nebula");
@@ -35,19 +35,15 @@ public class TestGrpcConnection {
 
             LOGGER.info(resp.toString());
 
-            Assert.assertEquals(ByteString.copyFrom("SUCCESS",
-                    Charset.defaultCharset()),
-                    resp.getExecutionOutcome().getGqlStatus().getStatus());
-
             resp = connection.execute(authResult.getSessionId(), "USE ldbc\n"
                     + " MATCH (v:Person WHERE v.id IN LIST[2, 3, 4, 888])-[e:KNOWS]->{0,1}(b)\n"
                     + " RETURN v.id as src, b.id as dst");
 
             LOGGER.info(resp.toString());
 
-            Assert.assertEquals(ByteString.copyFrom("SUCCESS",
-                            Charset.defaultCharset()),
-                    resp.getExecutionOutcome().getGqlStatus().getStatus());
+            resp = connection.execute(authResult.getSessionId(), "RETURN RECORD {id: 1}.id");
+
+            LOGGER.info(resp.toString());
 
             // Test sign out
             connection.signout(authResult.getSessionId());

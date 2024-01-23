@@ -2,6 +2,7 @@ package com.vesoft.nebula.client.graph.net;
 
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
+import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
@@ -66,14 +67,9 @@ public class GrpcConnection extends Connection {
                     .setClientVersion(ByteString.copyFrom("v5.0.0", charset))
                     .build();
             AuthResponse resp = stub.authenticate(authReq);
-            if (!"SUCCESS".equals(new String(resp.getGqlStatus().getStatus().toString(charset)))) {
-                if (resp.getGqlStatus().getStatus() != null) {
-                    throw new AuthFailedException(resp.getGqlStatus().getStatus().toString());
-                } else {
-                    throw new AuthFailedException(
-                            "The error_msg is null, "
-                                    + "maybe the service not set or the response is disorder.");
-                }
+            String s = resp.getGqlStatus().getCode().toString(charset);
+            if (!s.equals(ErrorCode.SUCCESSFUL_COMPLETION.code)) {
+                throw new AuthFailedException(resp.getGqlStatus().toString());
             }
             return new AuthResult(resp.getSessionId());
         } catch (Exception e) {

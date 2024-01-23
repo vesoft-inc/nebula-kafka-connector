@@ -200,7 +200,8 @@ message ResultTable {
 }
 
 message GQLStatus {
-    bytes               status                  = 1;
+    bytes               code                    = 1;
+    bytes               message                 = 2;
 }
 
 message ExecutionOutcome {
