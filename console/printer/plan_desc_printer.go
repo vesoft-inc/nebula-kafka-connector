@@ -130,8 +130,13 @@ func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
 				},
 			})
 		} else if i != 0 {
+			align := text.AlignLeft
+			if col == "time" || col == "memory" {
+				align = text.AlignRight
+			}
 			columnConfigs = append(columnConfigs, table.ColumnConfig{
 				Name:     col,
+				Align:    align,
 				WidthMax: p.WidthMax,
 				// WidthMaxEnforcer: func(s string, wrapLen int) string {
 				// 	if len(s) > wrapLen {
