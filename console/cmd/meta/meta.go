@@ -10,26 +10,6 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
 
-var metaCmd = &cobra.Command{
-	Use:   "meta",
-	Short: "Execute meta command in cli mode.",
-	Long: `Execute meta command in cli mode. Use 'meta-console -h' to see usage.
-	**Notice:** You should login meta server first.
-	`,
-	Run: func(cmd *cobra.Command, args []string) {
-		cmd.Help()
-	},
-}
-
-type LoginFlags struct {
-	Metas string // meta server address list separated by comma like "xx:xx,xx:xx"
-	Addr  string
-	Port  uint32
-	User  string
-	Pass  string
-}
-
-var loginFlags LoginFlags
 var metaClient meta.Client
 
 func metaClientInit() error {
@@ -61,7 +41,37 @@ func metaConsoleError(message string, err string) error {
 	}
 }
 
-var metaLoginCmd = &cobra.Command{
+var rootCmd = &cobra.Command{
+	Use:   "meta-console",
+	Short: "Execute meta command in cli mode.",
+	Long: `Execute meta command in cli mode. Use 'meta-console -h' to see usage.
+	**Notice:** You should login meta server first`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+// ***************** to connect/disconnect command *****************
+var sessionCmd = &cobra.Command{
+	Use:   "session",
+	Short: "Process session command",
+	Long:  `Execute session command in cli mode like connect and disconnect.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
+type LoginFlags struct {
+	Metas string // meta server address list separated by comma like "xx:xx,xx:xx"
+	Addr  string
+	Port  uint32
+	User  string
+	Pass  string
+}
+
+var loginFlags LoginFlags
+
+var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login meta server.",
 	Long:  `login meta server --addr [ip] --port [port] --user [user] --password [password]`,
@@ -90,6 +100,16 @@ var metaLoginCmd = &cobra.Command{
 	},
 }
 
+// ***************** to manage cluster *****************
+var clusterCmd = &cobra.Command{
+	Use:   "cluster",
+	Short: "Process cluster command",
+	Long:  `Execute cluster command in cli mode.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 type CreateClusterFlags struct {
 	ClusterName string
 	Replica     int
@@ -100,9 +120,9 @@ type CreateClusterFlags struct {
 var createClusterFlags CreateClusterFlags
 
 var metaCreateClusterCmd = &cobra.Command{
-	Use:   "createcluster",
+	Use:   "create",
 	Short: "Create cluster in meta server.",
-	Long:  `nebula-console createcluster --cluster [clustername] --replica [replica] --zones [zone1,zone2,...] --if_not_exists`,
+	Long:  `meta-console cluster create --cluster [clustername] --replica [replica] --zones [zone1,zone2,...] --if_not_exists`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -131,6 +151,95 @@ var metaCreateClusterCmd = &cobra.Command{
 	},
 }
 
+type InitClusterFlags struct {
+	Cluster string
+}
+
+var initClusterFlags InitClusterFlags
+
+var metaInitClusterCmd = &cobra.Command{
+	Use:   "init",
+	Short: "Init cluster storage part.",
+	Long:  `meta-console cluster init --cluster [clustername]`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return metaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		metaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cluster := initClusterFlags.Cluster
+		if cluster == "" {
+			return metaConsoleError("cluster name is empty", "")
+		}
+		req := meta.NewInitClusterReq(cluster)
+
+		resp, err := metaClient.InitCluster(req)
+		if err != nil {
+			return metaConsoleError("Init cluster failed", err.Error())
+		}
+		if resp.Code != 0 {
+			return metaConsoleError("Init cluster failed", resp.GetErrorMsg())
+		}
+		fmt.Println("Init cluster successfully.")
+		return nil
+	},
+}
+
+type ShowClusterFlags struct {
+	Cluster string
+}
+
+var showClusterFlags ShowClusterFlags
+
+var metaShowClusterCmd = &cobra.Command{
+	Use:   "show",
+	Short: "Show cluster, show all if no cluster name specified.",
+	Long:  `nebula-meta cluster show --cluster [clustername]`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return metaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		metaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cluster := showClusterFlags.Cluster
+		req := meta.NewShowClusterReq(cluster)
+		resp, err := metaClient.ShowCluster(req)
+		if err != nil {
+			return metaConsoleError("Show cluster failed", err.Error())
+		}
+		if resp.GetErrorCode() != 0 {
+			return metaConsoleError("Show cluster failed", resp.GetErrorMsg())
+		}
+		header := []string{"cluster id", "cluster name", "replica", "zones"}
+		data := make([][]string, 0)
+		for _, s := range resp.Clusters {
+			row := make([]string, 0)
+			row = append(row, fmt.Sprintf("%d", s.ClusterId))
+			row = append(row, fmt.Sprintf("%s", s.ClusterName))
+			row = append(row, fmt.Sprintf("%d", s.Replica))
+			row = append(row, fmt.Sprintf("%s", strings.Join(s.Zones, ",")))
+			data = append(data, row)
+		}
+		// printer.FormatTable(headers []string, data [][]string)
+		fmt.Println(printer.FormatTable(header, data))
+		return nil
+	},
+}
+
+// ***************** to manage service *****************
+var serviceCmd = &cobra.Command{
+	Use:   "service",
+	Short: "Process service command",
+	Long:  `Execute service command in cli mode.`,
+	Run: func(cmd *cobra.Command, args []string) {
+		cmd.Help()
+	},
+}
+
 type AddServiceFlags struct {
 	ServiceType string
 	IP          string
@@ -141,9 +250,9 @@ type AddServiceFlags struct {
 var addServiceFlags AddServiceFlags
 
 var metaAddServiceCmd = &cobra.Command{
-	Use:   "addservice",
+	Use:   "add",
 	Short: `Add service into assigned cluster.`,
-	Long:  `nebula-console meta addservice --type [graph|storage] --ip [ip] --port [port] --cluster [clustername]`,
+	Long:  `meta-console service add --type [graph|storage] --ip [ip] --port [port] --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -181,42 +290,6 @@ var metaAddServiceCmd = &cobra.Command{
 	},
 }
 
-type InitClusterFlags struct {
-	Cluster string
-}
-
-var initClusterFlags InitClusterFlags
-
-var metaInitClusterCmd = &cobra.Command{
-	Use:   "initcluster",
-	Short: "Init cluster storage part.",
-	Long:  `nebula-console meta initcluster --cluster [clustername]`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
-	},
-	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		cluster := initClusterFlags.Cluster
-		if cluster == "" {
-			return metaConsoleError("cluster name is empty", "")
-		}
-		req := meta.NewInitClusterReq(cluster)
-
-		resp, err := metaClient.InitCluster(req)
-		if err != nil {
-			return metaConsoleError("Init cluster failed", err.Error())
-		}
-		if resp.Code != 0 {
-			return metaConsoleError("Init cluster failed", resp.GetErrorMsg())
-		}
-		fmt.Println("Init cluster successfully.")
-		return nil
-	},
-}
-
 type ShowServiceFlags struct {
 	Cluster string
 }
@@ -224,9 +297,9 @@ type ShowServiceFlags struct {
 var showServiceFlags ShowServiceFlags
 
 var metaShowServiceCmd = &cobra.Command{
-	Use:   "showservice",
+	Use:   "show",
 	Short: "Show service in cluster.",
-	Long:  `nebula-console meta showservice --cluster [clustername]`,
+	Long:  `meta-console service show --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -267,78 +340,41 @@ var metaShowServiceCmd = &cobra.Command{
 	},
 }
 
-type ShowClusterFlags struct {
-	Cluster string
-}
-
-var showClusterFlags ShowClusterFlags
-
-var metaShowClusterCmd = &cobra.Command{
-	Use:   "showcluster",
-	Short: "Show cluster, show all if no cluster name specified.",
-	Long:  `nebula-console meta showcluster --cluster [clustername]`,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
-	},
-	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
-		return nil
-	},
-	RunE: func(cmd *cobra.Command, args []string) error {
-		cluster := showClusterFlags.Cluster
-		req := meta.NewShowClusterReq(cluster)
-		resp, err := metaClient.ShowCluster(req)
-		if err != nil {
-			return metaConsoleError("Show cluster failed", err.Error())
-		}
-		if resp.GetErrorCode() != 0 {
-			return metaConsoleError("Show cluster failed", resp.GetErrorMsg())
-		}
-		header := []string{"cluster id", "cluster name", "replica", "zones"}
-		data := make([][]string, 0)
-		for _, s := range resp.Clusters {
-			row := make([]string, 0)
-			row = append(row, fmt.Sprintf("%d", s.ClusterId))
-			row = append(row, fmt.Sprintf("%s", s.ClusterName))
-			row = append(row, fmt.Sprintf("%d", s.Replica))
-			row = append(row, fmt.Sprintf("%s", strings.Join(s.Zones, ",")))
-			data = append(data, row)
-		}
-		// printer.FormatTable(headers []string, data [][]string)
-		fmt.Println(printer.FormatTable(header, data))
-		return nil
-	},
-}
-
 func init() {
-	metaCmd.AddCommand(metaLoginCmd)
-	metaCmd.AddCommand(metaCreateClusterCmd)
-	metaCmd.AddCommand(metaAddServiceCmd)
-	metaCmd.AddCommand(metaInitClusterCmd)
-	metaCmd.AddCommand(metaShowServiceCmd)
-	metaCmd.AddCommand(metaShowClusterCmd)
+	rootCmd.AddCommand(sessionCmd)
 
-	metaLoginCmd.Flags().StringVarP(&loginFlags.Addr, "addr", "a", "", "meta server address")
-	metaLoginCmd.Flags().Uint32VarP(&loginFlags.Port, "port", "", 0, "meta server port")
-	metaLoginCmd.Flags().StringVarP(&loginFlags.User, "user", "u", "", "user name")
-	metaLoginCmd.Flags().StringVarP(&loginFlags.Pass, "password", "p", "", "password")
-	metaLoginCmd.Flags().StringVarP(&loginFlags.Metas, "metas", "m", "", "meta server address list separated by comma like \"xx:xx,xx:xx\"")
+	rootCmd.AddCommand(clusterCmd)
+	clusterCmd.AddCommand(metaCreateClusterCmd)
+	clusterCmd.AddCommand(metaInitClusterCmd)
+	clusterCmd.AddCommand(metaShowClusterCmd)
+
+	rootCmd.AddCommand(serviceCmd)
+	serviceCmd.AddCommand(metaAddServiceCmd)
+	serviceCmd.AddCommand(metaShowServiceCmd)
+
+	sessionCmd.Flags().StringVarP(&loginFlags.Addr, "addr", "a", "", "meta server address")
+	sessionCmd.Flags().Uint32VarP(&loginFlags.Port, "port", "", 0, "meta server port")
+	sessionCmd.Flags().StringVarP(&loginFlags.User, "user", "u", "", "user name")
+	sessionCmd.Flags().StringVarP(&loginFlags.Pass, "password", "p", "", "password")
+	sessionCmd.Flags().StringVarP(&loginFlags.Metas, "metas", "m", "", "meta server address list separated by comma like \"xx:xx,xx:xx\"")
 
 	metaCreateClusterCmd.Flags().StringVarP(&createClusterFlags.ClusterName, "cluster", "c", "", "cluster name")
 	metaCreateClusterCmd.Flags().IntVarP(&createClusterFlags.Replica, "replica", "r", 0, "replica number")
 	metaCreateClusterCmd.Flags().StringArrayVarP(&createClusterFlags.Zones, "zones", "z", []string{}, "zones")
 	metaCreateClusterCmd.Flags().BoolVarP(&createClusterFlags.IfNotExists, "if_not_exists", "", false, "if not exists")
 
+	metaInitClusterCmd.Flags().StringVarP(&initClusterFlags.Cluster, "cluster", "c", "", "cluster name")
+
+	metaShowClusterCmd.Flags().StringVarP(&showClusterFlags.Cluster, "cluster", "c", "", "cluster name")
+
 	metaAddServiceCmd.Flags().StringVarP(&addServiceFlags.ServiceType, "type", "t", "", "service type")
 	metaAddServiceCmd.Flags().StringVarP(&addServiceFlags.IP, "ip", "i", "", "service ip")
 	metaAddServiceCmd.Flags().Uint32VarP(&addServiceFlags.Port, "port", "p", 0, "service port")
 	metaAddServiceCmd.Flags().StringVarP(&addServiceFlags.Cluster, "cluster", "c", "", "cluster name")
 
-	metaInitClusterCmd.Flags().StringVarP(&initClusterFlags.Cluster, "cluster", "c", "", "cluster name")
 	metaShowServiceCmd.Flags().StringVarP(&showServiceFlags.Cluster, "cluster", "c", "", "cluster name")
-	metaShowClusterCmd.Flags().StringVarP(&showClusterFlags.Cluster, "cluster", "c", "", "cluster name")
 }
 
 func main() {
-	metaCmd.Execute()
+	rootCmd.Execute()
 }

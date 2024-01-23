@@ -51,21 +51,21 @@ Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="
         [-t 120] [-e "nGQL_statement" | -f filename.nGQL]
     ```
 
-    | Option          | Description         |
-    | ------------    | --------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `-h`            | Shows the help menu.      |
-    | `-addr/-address`| Sets the IP/HOST address of the graphd service.      |
-    | `-P/-port`      | Sets the port number of the graphd service.       |
-    | `-u/-user`      | Sets the username of your Nebula Graph account. See [authentication](https://docs.nebula-graph.io/2.0/7.data-security/1.authentication/1.authentication/).      |
-    | `-p/-password`  | Sets the password of your Nebula Graph account.   |
-    | `-t/-timeout`   | Sets an integer-type timeout threshold for the connection. The unit is second. The default value is 120.    |
-    | `-e/-eval`      | Sets a string-type nGQL statement. The nGQL statement is executed once the connection succeeds. The connection stops after the result is returned.   |
-    | `-f/-file`      | Sets the path of an nGQL file. The nGQL statements in the file are executed once the connection succeeds. You'll get the return messages and the connection stops then.      |
-    | `-enable_ssl`   | Enable SSL when connecting to Nebula Graph |
-    | `-ssl_root_ca_path` | Sets the path of the certification authority file |
-    | `-ssl_cert_path` | Sets the path of the certificate file |
-    | `-ssl_private_key_path` | Sets the path of the private key file |
-    | `-ssl_insecure_skip_verify` | Controls whether a client verifies the server's certificate chain and host name |
+    | Option                      | Description                                                                                                                                                             |
+    | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+    | `-h`                        | Shows the help menu.                                                                                                                                                    |
+    | `-addr/-address`            | Sets the IP/HOST address of the graphd service.                                                                                                                         |
+    | `-P/-port`                  | Sets the port number of the graphd service.                                                                                                                             |
+    | `-u/-user`                  | Sets the username of your Nebula Graph account. See [authentication](https://docs.nebula-graph.io/2.0/7.data-security/1.authentication/1.authentication/).              |
+    | `-p/-password`              | Sets the password of your Nebula Graph account.                                                                                                                         |
+    | `-t/-timeout`               | Sets an integer-type timeout threshold for the connection. The unit is second. The default value is 120.                                                                |
+    | `-e/-eval`                  | Sets a string-type nGQL statement. The nGQL statement is executed once the connection succeeds. The connection stops after the result is returned.                      |
+    | `-f/-file`                  | Sets the path of an nGQL file. The nGQL statements in the file are executed once the connection succeeds. You'll get the return messages and the connection stops then. |
+    | `-enable_ssl`               | Enable SSL when connecting to Nebula Graph                                                                                                                              |
+    | `-ssl_root_ca_path`         | Sets the path of the certification authority file                                                                                                                       |
+    | `-ssl_cert_path`            | Sets the path of the certificate file                                                                                                                                   |
+    | `-ssl_private_key_path`     | Sets the path of the private key file                                                                                                                                   |
+    | `-ssl_insecure_skip_verify` | Controls whether a client verifies the server's certificate chain and host name                                                                                         |
 
 
     E.g.,
@@ -197,132 +197,32 @@ nebula> exit
 Bye root!
 ```
 
-## Meta command
-
-Use `nebula-console meta` to execute meta command.
-
-
-```bash
-Usage:
-Available Commands:
-  addservice       Add service into assigned cluster.
-  createcluster    Create cluster in meta server.
-  createschema     Create schema in catalog tree.
-  initcluster      Init cluster storage part.
-  login            Login meta server.
-  showcluster      Show cluster, show all if no cluster name specified.
-  showservice      Show service in cluster.
-  triggerstatstask Start the task of calculating graph statistics information.
-
-====Login meta====
-login meta server --addr [ip] --port [port] --user [user] --password [password]
-
-Usage:
-  nebula-console meta login [flags]
-
-Flags:
-  -a, --addr string       meta server address
-  -h, --help              help for login
-  -p, --password string   password
-      --port string       meta server port
-  -u, --user string       user name
-
-====Create cluster====
-nebula-console createcluster --cluster [clustername] --replica [replica] --zones [zone1,zone2,...] --if_not_exists
-
-Usage:
-  nebula-console meta createcluster [flags]
-
-Flags:
-  -c, --cluster string      cluster name
-  -h, --help                help for createcluster
-      --if_not_exists       if not exists
-  -r, --replica int         replica number
-  -z, --zones stringArray   zones
-
-
-====Init cluster====
-nebula-console meta initcluster --cluster [clustername]
-
-Usage:
-  nebula-console meta initcluster [flags]
-
-Flags:
-  -c, --cluster string   cluster name
-  -h, --help             help for initcluster
-
-====Add service====
-nebula-console meta addservice --type [graph|storage] --ip [ip] --port [port] --cluster [clustername]
-
-Usage:
-  nebula-console meta addservice [flags]
-
-Flags:
-  -c, --cluster string   cluster name
-  -h, --help             help for addservice
-  -i, --ip string        service ip
-  -p, --port uint32      service port
-  -t, --type string      service type
-
-
-====Show cluster====
-nebula-console meta showcluster --cluster [clustername]
-
-Usage:
-  nebula-console meta showcluster [flags]
-
-Flags:
-  -c, --cluster string   cluster name
-  -h, --help             help for showcluster
-
-====Show service====
-nebula-console meta showservice --cluster [clustername]
-
-Usage:
-  nebula-console meta showservice [flags]
-
-Flags:
-  -c, --cluster string   cluster name
-  -h, --help             help for showservice
-
-====Trigger Stats Task====
-nebula-console meta triggerstatstask --graph [graphname]
-
-Usage:
-  nebula-console meta triggerstatstask [flags]
-
-Flags:
-  -g, --graph string     graph name
-  -h, --help             help for triggerstatstask
-
-```
-
 ## Keyboard Shortcuts
 
-Key Binding                                     | Description
-------------------------------------------------|-----------------------------------------------------------
-<kbd>Ctrl-A</kbd>, <kbd>Home</kbd>              | Move cursor to beginning of line
-<kbd>Ctrl-E</kbd>, <kbd>End</kbd>               | Move cursor to end of line
-<kbd>Ctrl-B</kbd>, <kbd>Left</kbd>              | Move cursor one character left
-<kbd>Ctrl-F</kbd>, <kbd>Right</kbd>             | Move cursor one character right
-<kbd>Ctrl-Left</kbd>, <kbd>Alt-B</kbd>          | Move cursor to previous word
-<kbd>Ctrl-Right</kbd>, <kbd>Alt-F</kbd>         | Move cursor to next word
-<kbd>Ctrl-D</kbd>, <kbd>Del</kbd>               | (if line is *not* empty) Delete character under cursor
-<kbd>Ctrl-D</kbd>                               | (if line *is* empty) End of File --- quit from the console
-<kbd>Ctrl-C</kbd>                               | Reset input (create new empty prompt)
-<kbd>Ctrl-L</kbd>                               | Clear screen (line is unmodified)
-<kbd>Ctrl-T</kbd>                               | Transpose previous character with current character
-<kbd>Ctrl-H</kbd>, <kbd>BackSpace</kbd>         | Delete character before cursor
-<kbd>Ctrl-W</kbd>, <kbd>Alt-BackSpace</kbd>     | Delete word leading up to cursor
-<kbd>Alt-D</kbd>                                | Delete word following cursor
-<kbd>Ctrl-K</kbd>                               | Delete from cursor to end of line
-<kbd>Ctrl-U</kbd>                               | Delete from start of line to cursor
-<kbd>Ctrl-P</kbd>, <kbd>Up</kbd>                | Previous match from history
-<kbd>Ctrl-N</kbd>, <kbd>Down</kbd>              | Next match from history
-<kbd>Ctrl-R</kbd>                               | Reverse Search history (Ctrl-S forward, Ctrl-G cancel)
-<kbd>Ctrl-Y</kbd>                               | Paste from Yank buffer (Alt-Y to paste next yank instead)
-<kbd>Tab</kbd>                                  | Next completion
-<kbd>Shift-Tab</kbd>                            | (after Tab) Previous completion
+| Key Binding                                 | Description                                                |
+| ------------------------------------------- | ---------------------------------------------------------- |
+| <kbd>Ctrl-A</kbd>, <kbd>Home</kbd>          | Move cursor to beginning of line                           |
+| <kbd>Ctrl-E</kbd>, <kbd>End</kbd>           | Move cursor to end of line                                 |
+| <kbd>Ctrl-B</kbd>, <kbd>Left</kbd>          | Move cursor one character left                             |
+| <kbd>Ctrl-F</kbd>, <kbd>Right</kbd>         | Move cursor one character right                            |
+| <kbd>Ctrl-Left</kbd>, <kbd>Alt-B</kbd>      | Move cursor to previous word                               |
+| <kbd>Ctrl-Right</kbd>, <kbd>Alt-F</kbd>     | Move cursor to next word                                   |
+| <kbd>Ctrl-D</kbd>, <kbd>Del</kbd>           | (if line is *not* empty) Delete character under cursor     |
+| <kbd>Ctrl-D</kbd>                           | (if line *is* empty) End of File --- quit from the console |
+| <kbd>Ctrl-C</kbd>                           | Reset input (create new empty prompt)                      |
+| <kbd>Ctrl-L</kbd>                           | Clear screen (line is unmodified)                          |
+| <kbd>Ctrl-T</kbd>                           | Transpose previous character with current character        |
+| <kbd>Ctrl-H</kbd>, <kbd>BackSpace</kbd>     | Delete character before cursor                             |
+| <kbd>Ctrl-W</kbd>, <kbd>Alt-BackSpace</kbd> | Delete word leading up to cursor                           |
+| <kbd>Alt-D</kbd>                            | Delete word following cursor                               |
+| <kbd>Ctrl-K</kbd>                           | Delete from cursor to end of line                          |
+| <kbd>Ctrl-U</kbd>                           | Delete from start of line to cursor                        |
+| <kbd>Ctrl-P</kbd>, <kbd>Up</kbd>            | Previous match from history                                |
+| <kbd>Ctrl-N</kbd>, <kbd>Down</kbd>          | Next match from history                                    |
+| <kbd>Ctrl-R</kbd>                           | Reverse Search history (Ctrl-S forward, Ctrl-G cancel)     |
+| <kbd>Ctrl-Y</kbd>                           | Paste from Yank buffer (Alt-Y to paste next yank instead)  |
+| <kbd>Tab</kbd>                              | Next completion                                            |
+| <kbd>Shift-Tab</kbd>                        | (after Tab) Previous completion                            |
 
 ## TODO
 

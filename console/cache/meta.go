@@ -3,7 +3,6 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -32,7 +31,7 @@ func SaveMetaSession(addr string) error {
 		return err
 	}
 	cacheFile := cachePath()
-	err = ioutil.WriteFile(cacheFile, data, 0644)
+	err = os.WriteFile(cacheFile, data, 0644)
 	if err != nil {
 		fmt.Println("Save meta session failed: ", err.Error())
 		return err
@@ -42,7 +41,7 @@ func SaveMetaSession(addr string) error {
 
 func LoadMetaSession() (*MetaSession, error) {
 	cachePath := cachePath()
-	data, err := ioutil.ReadFile(cachePath)
+	data, err := os.ReadFile(cachePath)
 	if err != nil {
 		return nil, err
 	}
