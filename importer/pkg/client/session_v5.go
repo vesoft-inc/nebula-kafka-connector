@@ -1,7 +1,6 @@
 package client
 
 import (
-	"fmt"
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
@@ -9,50 +8,36 @@ import (
 )
 
 type defaultSessionV5 struct {
-	session     *nebula.Session
-	hostAddress nebula.HostAddress
+	session     nebula.Conn
+	hostAddress string
 	user        string
 	password    string
 	logger      logger.Logger
 }
 
-func newSessionV5(hostAddress HostAddress, user, password string, l logger.Logger) Session {
+func newSessionV5(hostAddress, user, password string, l logger.Logger) Session {
 	if l == nil {
 		l = logger.NopLogger
 	}
 	return &defaultSessionV5{
-		hostAddress: nebula.HostAddress{
-			Host: hostAddress.Host,
-			Port: hostAddress.Port,
-		},
-		user:     user,
-		password: password,
-		logger:   l,
+		hostAddress: hostAddress,
+		user:        user,
+		password:    password,
+		logger:      l,
 	}
 }
 
 func (s *defaultSessionV5) Open() error {
 	hostAddress := s.hostAddress
-	connection := nebula.NewConnection(hostAddress)
-	if err := connection.Open(hostAddress, 0, nil); err != nil {
-		return err
-	}
-	authResp, err := connection.Authenticate(s.user, s.password)
+	connection, err := nebula.NewNebulaClient(hostAddress, s.user, s.password)
 	if err != nil {
 		return err
 	}
+	if err := connection.Ping(); err != nil {
+		return err
+	}
 
-	session := nebula.NewSession(
-		*authResp.Identifier,
-		connection,
-		newNebulaLogger(s.logger.With(logger.Field{
-			Key:   "address",
-			Value: fmt.Sprintf("%s:%d", hostAddress.Host, hostAddress.Port),
-		})),
-	)
-
-	s.session = session
-
+	s.session = connection
 	return nil
 }
 
@@ -62,10 +47,10 @@ func (s *defaultSessionV5) Execute(statement string) (Response, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newResponseV5(rs, time.Since(startTime)), nil
+	return newResponseV5(rs, time.Since(startTime), nil), nil
 }
 
 func (s *defaultSessionV5) Close() error {
-	s.session.Release()
+	s.session.Close()
 	return nil
 }

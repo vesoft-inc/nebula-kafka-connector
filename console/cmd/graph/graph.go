@@ -326,46 +326,25 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 }
 
 // TODO(Aiee) We don't have a complete gql status yet
-func printResultSet(res *nebulago.ResultSet, startTime time.Time, isVertical bool) (duration time.Duration) {
-	if !res.IsSucceed() {
-		// fmt.Printf("[ERROR (%d)]: %s", res.GetErrorCode(), res.GetErrorMsg())
-		fmt.Printf("[ERROR]: %s", res.GetStatus())
-		fmt.Println()
-		fmt.Println()
-		return
-	}
+func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (duration time.Duration) {
 	// Show table
-	if res.IsSetData() {
+	if res.RowSize() > 0 {
 		if isVertical {
 			dataSetVerticalPrinter.PrintDataSet(res)
 		} else {
 			dataSetPrinter.PrintDataSet(res)
 		}
-		numRows := res.GetRowSize()
+		numRows := res.RowSize()
 		duration = time.Since(startTime)
-		if numRows > 0 {
-			fmt.Printf("Got %d rows (time spent %v/%v)\n", numRows, time.Duration(res.GetLatency()*1000), duration)
-		} else {
-			fmt.Printf("Empty set (time spent %v/%v)\n", time.Duration(res.GetLatency()*1000), duration)
-		}
+		fmt.Printf("Got %d rows (time spent %v/%v)\n", numRows, time.Duration(res.Latency()*1000), duration)
 	} else {
 		duration = time.Since(startTime)
-		fmt.Printf("Execution succeeded (time spent %v/%v)\n", time.Duration(res.GetLatency()*1000), duration)
+		fmt.Printf("Execution succeeded (time spent %v/%v)\n", time.Duration(res.Latency()*1000), duration)
 	}
 
-	// if res.IsPartialSucceed() {
-	// 	fmt.Println()
-	// 	fmt.Printf("[WARNING]: Got partial result.")
-	// }
-
-	// if res.IsSetComment() {
-	// 	fmt.Println()
-	// 	fmt.Printf("[WARNING]: %s", res.GetComment())
-	// }
-
-	if res.IsSetPlanDesc() {
+	if res.PlanDesc() != nil {
 		fmt.Println()
-		planDescPrinter.PrintPlanDesc(res)
+		planDescPrinter.PrintPlanDesc(res.PlanDesc())
 	}
 	fmt.Println()
 
@@ -408,9 +387,12 @@ func loop(c cli.Cli) error {
 		var t2 int64 = 0
 		for i := 0; i < g_repeats; i++ {
 			start := time.Now()
-			res, err := session.Execute(line)
+			res, err := client.Execute(line)
 			if err != nil {
-				return err
+				fmt.Printf("[ERROR]: %s", err.Error())
+				fmt.Println()
+				fmt.Println()
+				break
 			}
 
 			if c.Output() {
@@ -519,14 +501,14 @@ func validateFlags() {
 	}
 }
 
-var session *nebulago.Session
+var client nebulago.Client
 
-func handleGraphCmd() {
+func handleGraphCmd() error {
 	parameterMap = make(ParameterMap)
 
 	if flag.NFlag() == 1 && version {
 		fmt.Printf("nebula-console version Git: %s, Build Time: %s\n", gitCommit, buildDate)
-		return
+		return nil
 	}
 
 	// Check if flags are valid
@@ -543,53 +525,18 @@ func handleGraphCmd() {
 		}
 		historyHome = filepath.Dir(ex) // Set to executable folder
 	}
-
-	hostAddr := nebulago.HostAddress{Host: address, Port: port}
-	// hostList := []nebulago.HostAddress{hostAddress}
-	// poolConfig := nebulago.PoolConfig{
-	// 	TimeOut:         time.Duration(*timeout) * time.Millisecond,
-	// 	IdleTime:        0 * time.Millisecond,
-	// 	MaxConnPoolSize: 2,
-	// 	MinConnPoolSize: 1,
-	// }
+	address := fmt.Sprintf("%s:%d", address, port)
 	var err error
-	// if *enableSsl {
-	// 	sslConfig, err2 := genSslConfig(*sslRootCAPath, *sslCertPath, *sslPrivateKeyPath)
-	// 	if err2 != nil {
-	// 		log.Panicf(fmt.Sprintf("Fail to generate the ssl config, ssl_root_ca_path: %s, ssl_cert_path: %s, ssl_private_key_path: %s, %s", *sslRootCAPath, *sslCertPath, *sslPrivateKeyPath, err2.Error()))
-	// 	}
-	// 	pool, err = nebulago.NewSslConnectionPool(hostList, poolConfig, sslConfig, nebulago.DefaultLogger{})
-	// } else {
-	// 	pool, err = nebulago.NewConnectionPool(hostList, poolConfig, nebulago.DefaultLogger{})
-	// }
-	// if err != nil {
-	// 	log.Panicf(fmt.Sprintf("Fail to initialize the connection pool, host: %s, port: %d, %s", *address, *port, err.Error()))
-	// }
-	// defer pool.Close()
-
-	// Build connection
-	connection := nebulago.NewConnection(hostAddr)
-	err = connection.Open(hostAddr, time.Duration(timeout)*time.Millisecond, nil)
+	client, err = nebulago.NewNebulaClient(address, username, password)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
+	client.SetRequestTimeout(0)
 
-	// Authenticate to get the identifier
-	authResp, err := connection.Authenticate(username, password)
-	if err != nil {
-		log.Fatal(err.Error())
+	defer client.Close()
+	if err := client.Ping(); err != nil {
+		return err
 	}
-	if string(authResp.GetGqlStatus().Status) != "SUCCESS" {
-		log.Fatal(fmt.Sprintf("authentication failed, error: %s", string(authResp.GetGqlStatus().Status)))
-	}
-	log.Println(fmt.Sprintf("Authentication with Identifier: %d succeed", authResp.GetIdentifier()))
-
-	// Build session
-	session = nebulago.NewSession(authResp.GetIdentifier(), connection, nebulago.DefaultLogger{})
-	// if err != nil {
-	// 	log.Panicf("Fail to create a new session from connection pool, %s", err.Error())
-	// }
-	defer session.Release()
 
 	welcome(interactive)
 	defer bye(username, interactive)
@@ -610,7 +557,7 @@ func handleGraphCmd() {
 	}
 
 	if c == nil {
-		return
+		return fmt.Errorf("invalid cli")
 	}
 
 	defer c.Close()
@@ -620,14 +567,15 @@ func handleGraphCmd() {
 	if err != nil {
 		log.Panicf("Loop error, %s", err.Error())
 	}
+	return nil
 }
 
 var rootCmd = &cobra.Command{
 	Use:   "nebula-console",
 	Short: "Run nebula-console to connect to nebula-graphd by default.",
 	Long:  `Use nebula-console --addr [addr] --port [port] -u [user] -p [password] to connect to nebula-graphd.`,
-	Run: func(cmd *cobra.Command, args []string) {
-		handleGraphCmd()
+	RunE: func(cmd *cobra.Command, args []string) error {
+		return handleGraphCmd()
 	},
 }
 

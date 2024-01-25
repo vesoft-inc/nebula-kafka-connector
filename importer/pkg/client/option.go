@@ -1,6 +1,7 @@
 package client
 
 import (
+	"fmt"
 	"strings"
 	"time"
 
@@ -54,7 +55,8 @@ func WithV3() Option {
 func WithV5() Option {
 	return func(c *options) {
 		WithNewSessionFunc(func(hostAddress HostAddress) Session {
-			return newSessionV5(hostAddress, c.user, c.password, c.logger)
+			address := fmt.Sprintf("%s:%d", hostAddress.Host, hostAddress.Port)
+			return newSessionV5(address, c.user, c.password, c.logger)
 		})(c)
 	}
 }

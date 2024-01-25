@@ -10,23 +10,36 @@ type Logger interface {
 	Info(msg string)
 	Warn(msg string)
 	Error(msg string)
-	Fatal(msg string)
 }
 
-type DefaultLogger struct{}
+type nebulaLogger struct{}
+type emptyLogger struct{}
 
-func (l DefaultLogger) Info(msg string) {
+var (
+	DefaultLogger = &nebulaLogger{}
+	EmptyLogger   = &emptyLogger{}
+)
+
+func (l nebulaLogger) Info(msg string) {
 	log.Printf("[INFO] %s\n", msg)
 }
 
-func (l DefaultLogger) Warn(msg string) {
+func (l nebulaLogger) Warn(msg string) {
 	log.Printf("[WARNING] %s\n", msg)
 }
 
-func (l DefaultLogger) Error(msg string) {
+func (l nebulaLogger) Error(msg string) {
 	log.Printf("[ERROR] %s\n", msg)
 }
 
-func (l DefaultLogger) Fatal(msg string) {
-	log.Fatalf("[FATAL] %s\n", msg)
+func (l emptyLogger) Info(msg string) {
+	return
+}
+
+func (l emptyLogger) Warn(msg string) {
+	return
+}
+
+func (l emptyLogger) Error(msg string) {
+	return
 }

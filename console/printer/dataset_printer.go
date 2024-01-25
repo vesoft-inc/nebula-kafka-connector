@@ -56,24 +56,22 @@ func (p *DataSetPrinter) closeFile() {
 	}
 }
 
-// TODO(Aiee) Result set is unimplemented yet
-func (p *DataSetPrinter) PrintDataSet(res *nebula.ResultSet) {
-	if res.GetColSize() == 0 {
+func (p *DataSetPrinter) PrintDataSet(res nebula.Result) {
+	if res.RowSize() == 0 {
 		return
 	}
 
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	var header []interface{}
-	for _, columName := range res.GetColNames() {
-		header = append(header, nebula.ProcessCarriageReturn(columName))
+	for _, columName := range res.Columns() {
+		header = append(header, columName)
 	}
 	p.writer.AppendHeader(table.Row(header))
-	numRows := res.GetRowSize()
-	numCols := res.GetColSize()
-	for i := 0; i < numRows; i++ {
+	numCols := len(res.Columns())
+	for res.HasNext() {
 		var newRow []interface{}
-		record, err := res.GetRowValuesByIndex(i)
+		record, err := res.Next()
 		if err != nil {
 			continue
 		}

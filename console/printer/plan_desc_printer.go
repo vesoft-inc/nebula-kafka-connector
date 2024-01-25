@@ -98,14 +98,14 @@ func (p PlanDescPrinter) renderDotGraphByStruct(s string) string {
 	return p.writer.Render()
 }
 
-func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
+func (p PlanDescPrinter) renderByRow(plan nebula.PlanDescer) string {
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	p.configWriterDotRenderStyle(false)
 	var columnConfigs []table.ColumnConfig
 	headerRow := table.Row{}
-	rightSepToTailWidth, rows := rs.MakePlanByRow()
-	header := rs.GetHeader()
+	rightSepToTailWidth, rows := plan.MakePlanByRow()
+	header := plan.GetHeader()
 
 	if len(rightSepToTailWidth) != len(header) {
 		log.Fatalf("rightSepToTailWidth and header length not equal: %d vs %d", len(rightSepToTailWidth), len(header))
@@ -166,23 +166,27 @@ func (p PlanDescPrinter) renderByRow(rs *nebula.ResultSet) string {
 	return p.writer.Render()
 }
 
-func (p *PlanDescPrinter) PrintPlanDesc(res *nebula.ResultSet) {
+func (p *PlanDescPrinter) PrintPlanDesc(plan nebula.PlanDescer) {
 	var s string
-	format := strings.ToLower(res.GetPlanPrintFormat())
+	format := strings.ToLower(plan.GetPlanPrintFormat())
 	switch format {
 	case "row":
-		s = p.renderByRow(res)
+		s = p.renderByRow(plan)
 		fmt.Println(s)
 	case "dot":
-		s = res.MakeDotGraph()
-		fmt.Println(p.renderDotGraph(s))
+		fmt.Printf("not support yet")
+		return
+		// s = plan.MakeDotGraph()
+		// fmt.Println(p.renderDotGraph(s))
 	case "dot:struct":
-		s = res.MakeDotGraphByStruct()
-		fmt.Println(p.renderDotGraphByStruct(s))
+		fmt.Printf("not support yet")
+		return
+		// s = res.MakeDotGraphByStruct()
+		// fmt.Println(p.renderDotGraphByStruct(s))
 	}
 	fmt.Printf("Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side",
-		res.GetBuildTimeInUs(),
-		res.GetOptimizeTimeInUs())
+		plan.GetBuildTimeInUs(),
+		plan.GetOptimizeTimeInUs())
 
 	if p.fd != nil {
 		fmt.Fprintln(p.fd, s)

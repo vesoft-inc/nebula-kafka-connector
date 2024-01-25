@@ -15,8 +15,6 @@ concurrency:
 
 jobs:
   go-client:
-    env:
-      GOPROXY: https://mirrors.aliyun.com/goproxy/
     runs-on: [self-hosted, nebula-fast]
     strategy:
       matrix:

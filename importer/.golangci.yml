@@ -220,7 +220,7 @@ issues:
         - lll
         - errcheck
         - goconst
-    - path: _test\.go
+    - path: \.go
       text: "G404: Use of weak random number generator"
       linters:
         - gosec

@@ -30,11 +30,11 @@ type (
 		graphOption       *common.GraphOption
 	}
 
-	graphClientGetter func(endpoint, username, password string) (*nebula.Session, error)
+	graphClientGetter func(endpoint, username, password string) (nebula.Conn, error)
 
 	// GraphClient a wrapper for nebula client, could read data from DataCh
 	GraphClient struct {
-		Session  *nebula.Session
+		Session  nebula.Conn
 		Pool     *GraphPool
 		DataCh   chan common.Data
 		username string
@@ -43,7 +43,7 @@ type (
 
 	// Response a wrapper for nebula resultSet
 	Response struct {
-		*nebula.ResultSet
+		ResultSet    nebula.Result
 		err          error
 		ResponseTime int32
 	}
@@ -99,30 +99,16 @@ var outputHeader []string = []string{
 // NewNebulaGraph New for k6 initialization.
 func NewNebulaGraph() *GraphPool {
 	return &GraphPool{
-		clientGetter: func(endpoint string, username, password string) (*nebula.Session, error) {
-			if len(strings.Split(endpoint, ":")) != 2 {
-				return nil, fmt.Errorf("Invalid address: %s", endpoint)
-			}
-			host, p := strings.Split(endpoint, ":")[0], strings.Split(endpoint, ":")[1]
-			port, err := strconv.Atoi(p)
+		clientGetter: func(endpoint string, username, password string) (nebula.Conn, error) {
+			conn, err := nebula.NewNebulaClient(endpoint, username, password)
 			if err != nil {
 				return nil, err
 			}
-			hostAddr := nebula.HostAddress{Host: host, Port: port}
-			conn := nebula.NewConnection(hostAddr)
-			if err := conn.Open(hostAddr, 3*time.Second, nil); err != nil {
-				return nil, fmt.Errorf("Failed to open connection: %s", err.Error())
+
+			if err := conn.Ping(); err != nil {
+				return nil, fmt.Errorf("Failed to ping: %s", err.Error())
 			}
-			// Authenticate to get the identifier
-			authResp, err := conn.Authenticate(username, password)
-			if err != nil {
-				return nil, fmt.Errorf("Failed to authenticate: %s", err.Error())
-			}
-			if string(authResp.GetGqlStatus().Status) != "SUCCESS" {
-				return nil, fmt.Errorf("authentication failed, error: %s", string(authResp.GetGqlStatus().Status))
-			}
-			session := nebula.NewSession(authResp.GetIdentifier(), conn, &nebula.DefaultLogger{})
-			return session, nil
+			return conn, nil
 		},
 	}
 }
@@ -198,7 +184,7 @@ func (gp *GraphPool) Close() error {
 	for _, s := range gp.clients {
 		if s != nil {
 			if s.Session != nil {
-				s.Session.Release()
+				s.Session.Close()
 			}
 		}
 	}
@@ -229,7 +215,7 @@ func (gc *GraphClient) Open() error {
 	return nil
 }
 func (gc *GraphClient) Close() error {
-	gc.Session.Release()
+	gc.Session.Close()
 	return nil
 }
 
@@ -249,7 +235,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		isSucceed  bool = true
 		errMessage string
 		err        error
-		resp       *nebula.ResultSet
+		resp       nebula.Result
 		rows       int32
 		latency    int64
 	)
@@ -261,14 +247,9 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		errMessage = err.Error()
 		rows = 0
 		latency = 0
-	} else if !resp.IsSucceed() {
-		isSucceed = false
-		errMessage = resp.GetStatus()
-		rows = 0
-		latency = 0
 	} else {
-		rows = int32(resp.GetRowSize())
-		latency = resp.GetLatency()
+		rows = int32(resp.RowSize())
+		latency = resp.Latency()
 	}
 
 	responseTime := int32(time.Since(start) / 1000)
@@ -278,18 +259,14 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		var fr []string
 		if rows != 0 {
 			// print the first row of the result
-			cols := resp.GetColSize()
-
-			r, err := resp.GetRowValuesByIndex(0)
+			row, err := resp.Next()
 			if err != nil {
 				return nil, err
 			}
-			for i := 0; i < cols; i++ {
-				s, err := r.GetValueByIndex(i)
-				if err != nil {
-					return nil, err
-				}
-				fr = append(fr, s.String())
+
+			for _, v := range row.Values() {
+				fr = append(fr, v.String())
+
 			}
 		}
 		o := &output{
@@ -320,17 +297,16 @@ func (r *Response) GetResponseTime() int32 {
 
 // IsSucceed IsSucceed
 func (r *Response) IsSucceed() bool {
-	if r.err != nil || !r.ResultSet.IsSucceed() {
+	if r.err != nil {
 		return false
 	}
 
 	return true
 }
 
-// GetLatency GetLatency
 func (r *Response) GetLatency() int64 {
 	if r.ResultSet != nil {
-		return r.ResultSet.GetLatency()
+		return r.ResultSet.Latency()
 	}
 	return 0
 }
@@ -338,7 +314,7 @@ func (r *Response) GetLatency() int64 {
 // GetRowSize GetRowSize
 func (r *Response) GetRowSize() int32 {
 	if r.ResultSet != nil {
-		return int32(r.ResultSet.GetRowSize())
+		return int32(r.ResultSet.RowSize())
 	}
 	return 0
 }

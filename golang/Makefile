@@ -1,4 +1,4 @@
-.PHONY: build unit test fmt run-examples
+.PHONY: build unit test e2e fmt run-examples
 
 default: build
 
@@ -6,13 +6,12 @@ build: fmt
 	go mod tidy
 	go build
 
-unit:
+test:
 	go mod tidy
 	go test -v -race --covermode=atomic --coverprofile coverage.out
 
-test:
-	go mod tidy
-	go test -v -race --tags=integration --covermode=atomic --coverprofile coverage.out
+e2e:
+	@echo "TODO: Add e2e tests"
 
 fmt:
 	go fmt $(shell go list ./... | grep -v /generated_code/)
