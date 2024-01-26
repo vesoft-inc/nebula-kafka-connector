@@ -1,0 +1,61 @@
+syntax = "v1"
+
+type (
+	CmdExecuteReq {
+		Command string `json:"command"`
+		Timeout int    `json:"timeout"`
+	}
+
+	CmdExecuteResp {
+		Stdout string `json:"stdout"`
+		Stderr string `json:"stderr"`
+	}
+
+	CmdExecuteAsyncReq {
+		CmdId   string `json:"cmdId"`
+		Command string `json:"command"`
+		Timeout int    `json:"timeout"`
+	}
+
+	CmdExecuteAsyncResp {
+		Pid int `json:"pid"`
+	}
+
+	GetCmdExecuteAsyncStatusReq {
+		CmdId string `path:"cmdId"`
+	}
+	GetCmdExecuteAsyncStatusResp {
+		Done   bool   `json:"done"`
+		Stdout string `json:"stdout"`
+		Stderr string `json:"stderr"`
+	}
+
+	UploadFileReq {
+		UploadPath string `form:"uploadPath"`
+	}
+	UploadFileResp {
+		Data interface{} `json:"data"`
+	}
+)
+
+@server(
+	group: common
+)
+
+service agent-api {
+	@doc "Cmd Execute"
+	@handler CmdExecute
+	post /api/v1/common/execute(CmdExecuteReq) returns(CmdExecuteResp)
+	
+	@doc "Cmd Execute Async"
+	@handler CmdExecuteAsync
+	post /api/v1/common/execute-async(CmdExecuteAsyncReq) returns(CmdExecuteAsyncResp)
+	
+	@doc "Get Cmd Execute Async Status"
+	@handler GetCmdExecuteAsyncStatus
+	get /api/v1/common/execute-async/:cmdId(GetCmdExecuteAsyncStatusReq) returns(GetCmdExecuteAsyncStatusResp)
+	
+	@doc "Upload File"
+	@handler UploadFile
+	post /api/v1/common/upload(UploadFileReq) returns(UploadFileResp)
+}
