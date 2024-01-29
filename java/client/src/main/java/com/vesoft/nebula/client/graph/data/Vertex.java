@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.Node;
-import com.vesoft.nebula.Value;
+import com.vesoft.nebula.proto.Node;
+import com.vesoft.nebula.proto.Value;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,9 +30,9 @@ public class Vertex extends BaseDataObject {
         if (node == null) {
             throw new RuntimeException("Input an null node object");
         }
-        vid = node.nodeID;
+        vid = node.getNodeId();
         this.node = node;
-        this.typeId = node.getNodeTypeID();
+        this.typeId = node.getNodeTypeId();
     }
 
     /**
@@ -71,8 +71,8 @@ public class Vertex extends BaseDataObject {
      */
     public List<String> getColumnNames() throws UnsupportedEncodingException {
         List<String> keys = new ArrayList<>();
-        for (byte[] name : node.properties.keySet()) {
-            keys.add(new String(name, getDecodeType()));
+        for (String name : node.getPropertiesMap().keySet()) {
+            keys.add(new String(name));
         }
         return keys;
     }
@@ -84,8 +84,8 @@ public class Vertex extends BaseDataObject {
      */
     public List<ValueWrapper> getValues() {
         List<ValueWrapper> values = new ArrayList<>();
-        for (Map.Entry<byte[], Value> kv : node.properties.entrySet()) {
-            values.add(new ValueWrapper(kv.getValue(), getDecodeType()));
+        for (Map.Entry<String, Value> kv : node.getPropertiesMap().entrySet()) {
+            values.add(new ValueWrapper(kv.getValue()));
         }
         return values;
     }
@@ -97,8 +97,8 @@ public class Vertex extends BaseDataObject {
      */
     public Map<String, ValueWrapper> getProperties() {
         Map<String, ValueWrapper> props = new HashMap<>();
-        for (Map.Entry<byte[], Value> p : node.getProperties().entrySet()) {
-            props.put(new String(p.getKey()), new ValueWrapper(p.getValue(), getDecodeType()));
+        for (Map.Entry<String, Value> p : node.getProperties().entrySet()) {
+            props.put(p.getKey(), new ValueWrapper(p.getValue()));
         }
         return props;
     }
@@ -127,7 +127,7 @@ public class Vertex extends BaseDataObject {
         for (String propName : props.keySet()) {
             propStrs.add(propName + ": " + props.get(propName).toString());
         }
-
-        return String.format("(%d:%d {%s})", vid, node.nodeTypeID, String.join(" ", propStrs));
+        return String.format("(%d:%d {%s})",
+                vid, node.getNodeTypeId(), String.join(", ", propStrs));
     }
 }

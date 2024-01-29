@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.Duration;
+import com.vesoft.nebula.proto.Duration;
 import java.util.Objects;
 
 public class NDuration {
@@ -38,10 +38,10 @@ public class NDuration {
 
     @Override
     public String toString() {
-        long totalSeconds = duration.seconds + duration.microseconds / 1000000;
-        int remainMicroSeconds = duration.microseconds % 1000000;
+        long totalSeconds = duration.getSeconds() + duration.getMicroseconds() / 1000000;
+        int remainMicroSeconds = duration.getMicroseconds() % 1000000;
         String microSends = String.format("%06d", remainMicroSeconds) + "000";
-        return String.format("P%dMT%d.%sS", duration.months, totalSeconds, microSends);
+        return String.format("P%dMT%d.%sS", duration.getMonths(), totalSeconds, microSends);
     }
 
     @Override
@@ -53,9 +53,9 @@ public class NDuration {
             return false;
         }
         NDuration that = (NDuration) o;
-        return duration.months == that.getMonths()
-                && duration.seconds == that.getSeconds()
-                && duration.microseconds == that.getMicroseconds();
+        return duration.getMonths() == that.getMonths()
+                && duration.getSeconds() == that.getSeconds()
+                && duration.getMicroseconds() == that.getMicroseconds();
     }
 
     @Override

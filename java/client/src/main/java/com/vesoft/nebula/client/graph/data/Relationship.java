@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.Edge;
-import com.vesoft.nebula.Value;
+import com.vesoft.nebula.proto.Edge;
+import com.vesoft.nebula.proto.Value;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -35,7 +35,7 @@ public class Relationship extends BaseDataObject {
      * @return String
      */
     public String getEdgeName() {
-        return String.valueOf(edge.getEdgeTypeID());
+        return String.valueOf(edge.getEdgeTypeId());
     }
 
     /**
@@ -44,7 +44,7 @@ public class Relationship extends BaseDataObject {
      * @return int
      */
     public int getEdgeId() {
-        return edge.getEdgeTypeID();
+        return edge.getEdgeTypeId();
     }
 
     /**
@@ -53,7 +53,7 @@ public class Relationship extends BaseDataObject {
      * @return long
      */
     public long getSrcId() {
-        return edge.edgeTypeID > 0 ? edge.srcID : edge.dstID;
+        return edge.getEdgeTypeId() > 0 ? edge.getSrcId() : edge.getDstId();
     }
 
     /**
@@ -62,7 +62,7 @@ public class Relationship extends BaseDataObject {
      * @return long
      */
     public long getDstId() {
-        return edge.edgeTypeID > 0 ? edge.dstID : edge.srcID;
+        return edge.getEdgeTypeId() > 0 ? edge.getDstId() : edge.getSrcId();
     }
 
     /**
@@ -71,7 +71,7 @@ public class Relationship extends BaseDataObject {
      * @return long
      */
     public long getRank() {
-        return edge.rank;
+        return edge.getRank();
     }
 
     /**
@@ -81,8 +81,8 @@ public class Relationship extends BaseDataObject {
      */
     public List<String> getColumnNames() {
         List<String> propNames = new ArrayList<>();
-        for (byte[] name : edge.properties.keySet()) {
-            propNames.add(new String(name));
+        for (String name : edge.getPropertiesMap().keySet()) {
+            propNames.add(name);
         }
         return propNames;
     }
@@ -92,10 +92,10 @@ public class Relationship extends BaseDataObject {
      *
      * @return the List of property values
      */
-    public List<ValueWrapper> getValues() {
+    public List<ValueWrapper> getPropertyValues() {
         List<ValueWrapper> values = new ArrayList<>();
-        for (Map.Entry<byte[], Value> kv : edge.properties.entrySet()) {
-            values.add(new ValueWrapper(kv.getValue(), getDecodeType()));
+        for (Map.Entry<String, Value> kv : edge.getPropertiesMap().entrySet()) {
+            values.add(new ValueWrapper(kv.getValue()));
         }
         return values;
     }
@@ -107,9 +107,8 @@ public class Relationship extends BaseDataObject {
      */
     public HashMap<String, ValueWrapper> getProperties() {
         HashMap<String, ValueWrapper> properties = new HashMap<>();
-        for (byte[] key : edge.properties.keySet()) {
-            properties.put(new String(key), new ValueWrapper(edge.properties.get(key),
-                    getDecodeType()));
+        for (String key : edge.getPropertiesMap().keySet()) {
+            properties.put(key, new ValueWrapper(edge.getPropertiesMap().get(key)));
         }
         return properties;
     }
@@ -141,8 +140,15 @@ public class Relationship extends BaseDataObject {
         for (String key : props.keySet()) {
             propStrs.add(key + ": " + props.get(key).toString());
         }
-        return String.format("(%d)-[:%s@%d{%s}]->(%d)",
-                getSrcId(), getEdgeName(), getRank(), String.join(", ", propStrs),
-                getDstId());
+        if (edge.getEdgeTypeId() > 0) {
+            return String.format("(%d)-[:%s@%d{%s}]->(%d)",
+                    getSrcId(), getEdgeName(), getRank(), String.join(", ", propStrs),
+                    getDstId());
+        } else {
+            return String.format("(%d)-[:%s@%d{%s}]->(%d)",
+                    getDstId(), getEdgeName(), getRank(), String.join(", ", propStrs),
+                    getSrcId());
+        }
+
     }
 }

@@ -38,7 +38,7 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
                     + "server is connected.");
         }
 
-        SyncConnection connection = new SyncConnection();
+        GrpcConnection connection = new GrpcConnection();
         int tryConnect = goodHosts.size();
         while (tryConnect-- > 0) {
             try {

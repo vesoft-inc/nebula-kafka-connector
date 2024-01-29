@@ -7,6 +7,7 @@ package com.vesoft.nebula.client.graph.net;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
+import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
@@ -18,17 +19,12 @@ import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -138,17 +134,22 @@ public class NebulaClient implements Serializable {
             Session session = getSession();
             try {
                 resultSet = session.execute(stmt);
-                if (resultSet.isSucceeded() || "E_SEMANTIC_ERROR".equals(resultSet.getGqlStatus())
-                        || "E_SYNTAX_ERROR".equals(resultSet.getGqlStatus())) {
+                if (resultSet.isSucceeded()
+                        || ErrorCode.SEMANTIC_ERROR_PREFIX.code
+                        .equals(resultSet.getErrorCode().substring(0, 2))
+                        || ErrorCode.SYNTAX_ERROR_PREFIX.code
+                        .equals(resultSet.getErrorCode().substring(0, 2))) {
                     return resultSet;
                 }
-                if ("E_SESSION_NOT_FOUND".equals(resultSet.getGqlStatus())
-                        || "E_SESSION_INVALID".equals(resultSet.getGqlStatus())
-                        || "E_SESSION_TIMEOUT".equals(resultSet.getGqlStatus())) {
+                if (ErrorCode.SESSION_ERROR_PREFIX.code
+                        .equals(resultSet.getErrorCode().substring(0, 2))) {
                     isBadSession = true;
                 }
-                log.warn(String.format("execute error,  message: %s, retry: %d",
-                        resultSet.getGqlStatus(), tryTimes));
+                log.warn(String.format("execute error for times %s,  message: %s", tryTimes + 1,
+                        resultSet.getErrorCode()));
+                if (tryTimes <= retryTimes) {
+                    log.info("now retry the execute...");
+                }
             } catch (IOErrorException e) {
                 isBadSession = true;
                 loadBalancer.updateServersStatus();
@@ -426,7 +427,7 @@ public class NebulaClient implements Serializable {
         ResultSet resultSet = execute(descNodeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             log.error(String.format("get description of %s failed for %s", nodeType,
-                    resultSet.getGqlStatus()));
+                    resultSet.getErrorCode()));
             throw new IllegalArgumentException(String.format("node type %s does not exist in %s",
                     nodeType, graphName));
         }
@@ -441,7 +442,8 @@ public class NebulaClient implements Serializable {
         // define the property name list, and put the pk on the head of list.
         List<String> propertyNames = new ArrayList<>();
         propertyNames.add(pk);
-        Map<String, ValueWrapper> properties = resultSet.getRows().get(0).get("properties").asMap();
+        Map<String, ValueWrapper> properties =
+                resultSet.getRows().get(0).get("properties").asRecord();
         for (String key : properties.keySet()) {
             if (pk.equals(key)) {
                 continue;
@@ -468,12 +470,13 @@ public class NebulaClient implements Serializable {
         ResultSet resultSet = execute(descEdgeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             log.error(String.format("get description of %s failed for %s", edgeType,
-                    resultSet.getGqlStatus()));
+                    resultSet.getErrorCode()));
             throw new IllegalArgumentException(String.format("edge type %s does not exist in %s",
                     edgeType, graphName));
         }
 
-        Map<String, ValueWrapper> properties = resultSet.getRows().get(0).get("properties").asMap();
+        Map<String, ValueWrapper> properties =
+                resultSet.getRows().get(0).get("properties").asRecord();
         List<String> propertyNames = new ArrayList<>();
         propertyNames.addAll(properties.keySet());
 

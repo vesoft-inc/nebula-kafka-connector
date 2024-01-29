@@ -73,8 +73,8 @@ public class GraphClientExample {
         ResultSet resp = client.execute(createSchema);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    createSchema, resp.getGqlStatus()));
-            System.out.println("create graph type failed, " + resp.getGqlStatus());
+                    createSchema, resp.getErrorCode()));
+            System.out.println("create graph type failed, " + resp.getErrorCode());
             System.exit(1);
         }
         TimeUnit.SECONDS.sleep(5);
@@ -86,8 +86,8 @@ public class GraphClientExample {
         ResultSet resp = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,
-                    resp.getGqlStatus()));
-            System.out.println("create graph failed, " + resp.getGqlStatus());
+                    resp.getErrorCode()));
+            System.out.println("create graph failed, " + resp.getErrorMessage());
             System.exit(1);
         }
         TimeUnit.SECONDS.sleep(5);
@@ -102,8 +102,8 @@ public class GraphClientExample {
         ResultSet resp = client.execute(insertVertexes);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    insertVertexes, resp.getGqlStatus()));
-            System.out.println("insert graph node failed, " + resp.getGqlStatus());
+                    insertVertexes, resp.getErrorCode()));
+            System.out.println("insert graph node failed, " + resp.getErrorCode());
             System.exit(1);
         }
 
@@ -113,8 +113,8 @@ public class GraphClientExample {
         resp = client.execute(insertEdges);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    insertEdges, resp.getGqlStatus()));
-            System.out.println("insert graph edge failed, " + resp.getGqlStatus());
+                    insertEdges, resp.getErrorCode()));
+            System.out.println("insert graph edge failed, " + resp.getErrorCode());
             System.exit(1);
         }
     }
@@ -126,7 +126,7 @@ public class GraphClientExample {
         ResultSet resp = client.execute(queryNode);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    queryNode, resp.getGqlStatus()));
+                    queryNode, resp.getErrorCode()));
         }
         resolve(resp);
 
@@ -136,7 +136,7 @@ public class GraphClientExample {
         resp = client.execute(queryEdge);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    queryNode, resp.getGqlStatus()));
+                    queryNode, resp.getErrorCode()));
         }
         resolve(resp);
     }
@@ -144,7 +144,7 @@ public class GraphClientExample {
 
     private static void resolve(ResultSet resultSet) {
         if (!resultSet.isSucceeded()) {
-            System.out.println("result is not succeed, status is : " + resultSet.getGqlStatus());
+            System.out.println("result is not succeed, status is : " + resultSet.getErrorCode());
             return;
         }
 
@@ -166,10 +166,6 @@ public class GraphClientExample {
                     System.out.printf("%15s |", "");
                 } else if (valueWrapper.isEmpty()) {
                     System.out.printf("%15s |", "_EMPTY_");
-                } else if (valueWrapper.isByte()) {
-                    System.out.printf("%15s |", valueWrapper.asByte());
-                } else if (valueWrapper.isShort()) {
-                    System.out.printf("%15s |", valueWrapper.asShort());
                 } else if (valueWrapper.isInt()) {
                     System.out.printf("%15s |", valueWrapper.asInt());
                 } else if (valueWrapper.isLong()) {
@@ -190,8 +186,8 @@ public class GraphClientExample {
                     System.out.printf("%15s |", valueWrapper.asDuration());
                 } else if (valueWrapper.isList()) {
                     System.out.printf("%15s |", valueWrapper.asList());
-                } else if (valueWrapper.isMap()) {
-                    System.out.printf("%15s |", valueWrapper.asMap());
+                } else if (valueWrapper.isRecord()) {
+                    System.out.printf("%15s |", valueWrapper.asRecord());
                 } else if (valueWrapper.isNode()) {
                     Vertex node = valueWrapper.asNode();
                     long nodeId = node.getId();

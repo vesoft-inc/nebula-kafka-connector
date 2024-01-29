@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.client.graph.net;
 
+import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
@@ -35,7 +36,7 @@ public class NebulaClientTest {
                     .setReconnect(true)
                     .build();
             ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getGqlStatus(), "SUCCESS");
+            Assert.assertEquals(resultSet.getErrorMessage(), ErrorCode.SUCCESSFUL_COMPLETION.code);
         } catch (UnknownHostException | IOErrorException | NoValidSessionException e) {
             Assert.fail(e.getMessage());
         }
@@ -151,7 +152,7 @@ public class NebulaClientTest {
                     .setStrictlyServerHealthy(false)
                     .build();
             ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getGqlStatus(), "SUCCESS");
+            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);
             client.close();
         } catch (UnknownHostException | IOErrorException | NoValidSessionException e) {
             Assert.fail(e.getMessage());
@@ -194,8 +195,9 @@ public class NebulaClientTest {
             executorService.submit(() -> {
                 try {
                     ResultSet resultSet = finalClient.execute("SLEEP 10");
-                    System.out.println(resultSet.getGqlStatus());
-                    Assert.assertEquals("SUCCESS", resultSet.getGqlStatus());
+                    System.out.println(resultSet.getErrorMessage());
+                    Assert.assertEquals(ErrorCode.SUCCESSFUL_COMPLETION.code,
+                            resultSet.getErrorCode());
                 } catch (IOErrorException | NoValidSessionException e) {
                     Assert.fail(e.getMessage());
                 }

@@ -5,50 +5,51 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.LocalTime;
+import com.vesoft.nebula.proto.ZonedTime;
 import java.util.Objects;
 
-public class NTime {
-    private final LocalTime localTime;
+public class NZonedTime {
 
-    public NTime(LocalTime localTime) {
-        this.localTime = localTime;
+    private final ZonedTime zonedTime;
+
+    public NZonedTime(ZonedTime zonedTime) {
+        this.zonedTime = zonedTime;
     }
 
     /**
      * @return utc Time hour
      */
     public int getHour() {
-        return localTime.getHour();
+        return zonedTime.getHour();
     }
 
     /**
      * @return utc Time minute
      */
     public int getMinute() {
-        return localTime.getMinute();
+        return zonedTime.getMinute();
     }
 
     /**
      * @return utc Time second
      */
     public int getSecond() {
-        return localTime.getSec();
+        return zonedTime.getSec();
     }
 
     /**
      * @return utc Time microsec
      */
     public int getMicrosec() {
-        return localTime.getMicrosec();
+        return zonedTime.getMicrosec();
     }
 
 
     @Override
     public String toString() {
         return String.format("%02d:%02d:%02d.%06d",
-                localTime.getHour(), localTime.getMinute(),
-                localTime.getSec(), localTime.getMicrosec());
+                zonedTime.getHour(), zonedTime.getMinute(),
+                zonedTime.getSec(), zonedTime.getMicrosec());
     }
 
     @Override
@@ -59,15 +60,15 @@ public class NTime {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        NTime that = (NTime) o;
-        return localTime.getHour() == that.getHour()
-                && localTime.getHour() == that.getMinute()
-                && localTime.getSec() == that.getSecond()
-                && localTime.getMicrosec() == that.getMicrosec();
+        NZonedTime that = (NZonedTime) o;
+        return zonedTime.getHour() == that.getHour()
+                && zonedTime.getHour() == that.getMinute()
+                && zonedTime.getSec() == that.getSecond()
+                && zonedTime.getMicrosec() == that.getMicrosec();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(localTime);
+        return Objects.hash(zonedTime);
     }
 }

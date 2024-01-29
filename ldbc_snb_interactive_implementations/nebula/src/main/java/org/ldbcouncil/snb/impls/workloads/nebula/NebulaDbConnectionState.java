@@ -6,7 +6,6 @@ import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 
 import com.vesoft.nebula.client.graph.net.NebulaClient;
 import com.vesoft.nebula.client.graph.net.Session;
-import com.vesoft.nebula.graph.GraphService;
 import org.ldbcouncil.snb.impls.workloads.BaseDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.QueryStore;
 

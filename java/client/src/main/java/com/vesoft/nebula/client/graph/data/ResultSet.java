@@ -5,10 +5,14 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.ExecutionResponse;
-import com.vesoft.nebula.ResultTable;
-import com.vesoft.nebula.Row;
-import com.vesoft.nebula.Value;
+import com.google.common.base.Charsets;
+import com.google.protobuf.ByteString;
+import com.vesoft.nebula.client.graph.ErrorCode;
+import com.vesoft.nebula.proto.ExecuteResponse;
+import com.vesoft.nebula.proto.ResultTable;
+import com.vesoft.nebula.proto.Row;
+import com.vesoft.nebula.proto.Value;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,25 +20,27 @@ import java.util.Spliterator;
 import java.util.function.Consumer;
 
 public class ResultSet {
-    private final ExecutionResponse response;
+    private final ExecuteResponse response;
     private final List<String> columnNames = new ArrayList<>();
-    private final String decodeType = "utf-8";
+    private final Charset charset = Charsets.UTF_8;
+
+    private boolean isEmpty = false;
 
     public static class Record implements Iterable<ValueWrapper> {
         private final List<ValueWrapper> colValues = new ArrayList<>();
         private List<String> columnNames = new ArrayList<>();
 
-        public Record(List<String> columnNames, Row row, String decodeType) {
+        public Record(List<String> columnNames, Row row) {
             if (columnNames == null) {
                 return;
             }
 
-            if (row == null || row.values == null) {
+            if (row == null || row.getValuesList().isEmpty()) {
                 return;
             }
 
-            for (Value value : row.values) {
-                this.colValues.add(new ValueWrapper(value, decodeType));
+            for (Value value : row.getValuesList()) {
+                this.colValues.add(new ValueWrapper(value));
             }
 
             this.columnNames = columnNames;
@@ -126,18 +132,17 @@ public class ResultSet {
 
     }
 
-    public ResultSet(ExecutionResponse resp) {
-        if (resp == null || resp.executionOutcome == null) {
+    public ResultSet(ExecuteResponse resp) {
+        if (resp == null || !resp.hasExecutionOutcome()) {
             throw new RuntimeException("got null object for server's response");
         }
         this.response = resp;
-
-        if (resp.executionOutcome.result != null
-                && resp.executionOutcome.result.columnNames != null) {
-            // space name's charset is 'utf-8'
-            for (byte[] column : resp.executionOutcome.result.columnNames) {
-                this.columnNames.add(new String(column));
-            }
+        if (resp.getExecutionOutcome().hasResult()
+                || resp.getExecutionOutcome().getResult().getRecordsList().isEmpty()) {
+            isEmpty = true;
+        }
+        for (ByteString column : resp.getExecutionOutcome().getResult().getColumnNamesList()) {
+            this.columnNames.add(column.toString(charset));
         }
     }
 
@@ -147,7 +152,8 @@ public class ResultSet {
      * @return boolean
      */
     public boolean isSucceeded() {
-        return "SUCCESS".equals(new String(response.executionOutcome.gqlStatus.status));
+        return ErrorCode.SUCCESSFUL_COMPLETION.code.equals(
+                response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
     }
 
     /**
@@ -156,17 +162,26 @@ public class ResultSet {
      * @return boolean
      */
     public boolean isEmpty() {
-        return response.executionOutcome.result == null
-                || response.executionOutcome.result.records.isEmpty();
+        return isEmpty;
     }
 
     /**
-     * get status of execute result
+     * get error code of execute result
+     * TODO return {@link ErrorCode}
      *
      * @return String
      */
-    public String getGqlStatus() {
-        return new String(response.executionOutcome.gqlStatus.status);
+    public String getErrorCode() {
+        return response.getExecutionOutcome().getGqlStatus().getCode().toString(charset);
+    }
+
+    /**
+     * get error message of execute result
+     *
+     * @return String
+     */
+    public String getErrorMessage() {
+        return response.getExecutionOutcome().getGqlStatus().getMessage().toString(charset);
     }
 
 
@@ -176,7 +191,7 @@ public class ResultSet {
      * @return int
      */
     public long getLatency() {
-        return response.latencyInUs;
+        return response.getLatencyInUs();
     }
 
     /**
@@ -185,7 +200,7 @@ public class ResultSet {
      * @return PlanDescription
      */
     public String getPlanDesc() {
-        return new String(response.executionOutcome.plan_desc);
+        return response.getExecutionOutcome().getPlanDesc().toString(charset);
     }
 
     /**
@@ -203,11 +218,11 @@ public class ResultSet {
      * @return int
      */
     public int rowsSize() {
-        ResultTable result = response.executionOutcome.result;
-        if (result == null || result.records == null) {
+        if (isEmpty) {
             return 0;
         }
-        return result.records.size();
+        ResultTable result = response.getExecutionOutcome().getResult();
+        return result.getRecordsList().size();
     }
 
     /**
@@ -217,14 +232,11 @@ public class ResultSet {
      * @return Record
      */
     public Record rowValues(int index) {
-        if (response.executionOutcome.result == null) {
+        if (isEmpty) {
             throw new RuntimeException("Empty data");
         }
-        List<Row> records = response.executionOutcome.result.records;
-        if (index >= records.size()) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        return new Record(columnNames, records.get(index), decodeType);
+        Row row = response.getExecutionOutcome().getResult().getRecords(index);
+        return new Record(columnNames, row);
     }
 
     /**
@@ -234,7 +246,7 @@ public class ResultSet {
      * @return the list of ValueWrapper
      */
     public List<ValueWrapper> colValues(String columnName) {
-        if (response.executionOutcome.result == null) {
+        if (isEmpty) {
             throw new RuntimeException("Empty data");
         }
         int index = columnNames.indexOf(columnName);
@@ -242,9 +254,9 @@ public class ResultSet {
             throw new ArrayIndexOutOfBoundsException();
         }
         List<ValueWrapper> values = new ArrayList<>();
-        List<Row> records = response.executionOutcome.result.records;
+        List<Row> records = response.getExecutionOutcome().getResult().getRecordsList();
         for (int i = 0; i < records.size(); i++) {
-            values.add(new ValueWrapper(records.get(i).values.get(index), decodeType));
+            values.add(new ValueWrapper(records.get(i).getValues(index)));
         }
         return values;
     }
@@ -255,28 +267,20 @@ public class ResultSet {
      * @return the list of Row
      */
     public List<Record> getRows() {
-        if (response.executionOutcome.result == null) {
-            return null;
+        if (isEmpty) {
+            return new ArrayList<>();
         }
         List<Record> rows = new ArrayList<>();
-        if (response.getExecutionOutcome().getResult().getRecords() == null
-                || response.getExecutionOutcome().getResult().getRecords().size() == 0) {
-            return rows;
-        }
-        for (Row row : response.getExecutionOutcome().getResult().getRecords()) {
-            rows.add(new Record(columnNames, row, "utf-8"));
+        for (Row row : response.getExecutionOutcome().getResult().getRecordsList()) {
+            rows.add(new Record(columnNames, row));
         }
         return rows;
     }
 
     @Override
     public String toString() {
-        // When error, print the raw data directly
         if (!isSucceeded()) {
-            if (response.getExecutionOutcome().getGqlStatus() == null) {
-                return null;
-            }
-            return new String(response.getExecutionOutcome().getGqlStatus().status);
+            return response.getExecutionOutcome().getGqlStatus().getMessage().toString(charset);
         }
         int i = 0;
         List<String> rowStrs = new ArrayList<>();

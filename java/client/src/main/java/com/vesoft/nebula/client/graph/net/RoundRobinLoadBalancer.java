@@ -84,7 +84,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
 
     public boolean ping(HostAddress addr) {
         try {
-            Connection connection = new SyncConnection();
+            Connection connection = new GrpcConnection();
             connection.open(addr, this.connTimeout, this.requestTimeout);
             connection.close();
             return true;

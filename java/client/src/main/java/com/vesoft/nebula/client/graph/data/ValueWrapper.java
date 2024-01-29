@@ -5,9 +5,11 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.Value;
+import com.google.common.base.Charsets;
 import com.vesoft.nebula.client.graph.exception.InvalidValueException;
+import com.vesoft.nebula.proto.Value;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -60,57 +62,76 @@ public class ValueWrapper {
     }
 
     private final Value value;
-    private String decodeType = "utf-8";
+    private final Charset charset = Charsets.UTF_8;
 
     public String getDataType() {
-        switch (value.getSetField()) {
-            case Value.BOOLVAL:
-                return "BOOLEAN";
-            case Value.INT8VAL:
-                return "BYTE";
-            case Value.INT16VAL:
-                return "SHORT";
-            case Value.INT32VAL:
-                return "INT";
-            case Value.INT64VAL:
-                return "LONG";
-            case Value.FLOATVAL:
-                return "FLOAT";
-            case Value.DOUBLEVAL:
-                return "DOUBLE";
-            case Value.STRINGVAL:
-                return "STRING";
-            case Value.NODEVAL:
-                return "NODE";
-            case Value.EDGEVAL:
-                return "EDGE";
-            case Value.LISTVAL:
-                return "LIST";
-            case Value.DURATIONVAL:
-                return "DURATION";
-            case Value.LOCALTIMEVAL:
-                return "LOCALTIME";
-            case Value.LOCALDATETIMEVAL:
-                return "LOCALDATETIME";
-            case Value.DATEVAL:
-                return "DATE";
-            case Value.RECORDVAL:
-                return "MAP";
-            case Value.PATHVAL:
-                return "PATH";
-            default:
-                throw new IllegalArgumentException("Unknown field id " + value.getSetField());
+
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.BOOL_VALUE) {
+            return "BOOLEAN";
         }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT8_VALUE) {
+            return "BYTE";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT16_VALUE) {
+            return "SHORT";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT32_VALUE) {
+
+            return "INT";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE) {
+            return "LONG";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE) {
+            return "FLOAT";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DOUBLE_VALUE) {
+            return "DOUBLE";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.STRING_VALUE) {
+            return "STRING";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.NODE_VALUE) {
+            return "NODE";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.EDGE_VALUE) {
+            return "EDGE";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LIST_VALUE) {
+            return "LIST";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DURATION_VALUE) {
+            return "DURATION";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LOCAL_TIME_VALUE) {
+            return "LOCAL_TIME";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LOCAL_DATATIME_VALUE) {
+            return "LOCAL_DATETIME";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.ZONED_TIME_VALUE) {
+            return "ZONED_TIME";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.ZONED_DATATIME_VALUE) {
+            return "ZONED_DATETIME";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DATE_VALUE) {
+            return "DATE";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.RECORD_VALUE) {
+            return "MAP";
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.PATH_VALUE) {
+            return "PATH";
+        }
+        throw new IllegalArgumentException("Unknown field id " + value.getDataCase());
     }
 
     /**
-     * @param value      the Value get from service
-     * @param decodeType the decodeType get from the service to decode the byte array,
-     *                   but now the service no return the decodeType, so use the utf-8
+     * @param value the Value get from service
      */
-    public ValueWrapper(Value value, String decodeType) {
+    public ValueWrapper(Value value) {
         this.value = value;
-        this.decodeType = decodeType;
     }
 
     /**
@@ -128,7 +149,7 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isEmpty() {
-        return value.getSetField() == 0;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DATA_NOT_SET;
     }
 
     public boolean isNull() {
@@ -141,7 +162,7 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isBoolean() {
-        return value.getSetField() == Value.BOOLVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.BOOL_VALUE;
     }
 
     /**
@@ -150,7 +171,7 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isLong() {
-        return value.getSetField() == Value.INT64VAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE;
     }
 
     /**
@@ -159,25 +180,9 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isInt() {
-        return value.getSetField() == Value.INT32VAL;
-    }
-
-    /**
-     * judge the Value is Short type
-     *
-     * @return boolean
-     */
-    public boolean isShort() {
-        return value.getSetField() == Value.INT16VAL;
-    }
-
-    /**
-     * judge the Value is Byte type
-     *
-     * @return boolean
-     */
-    public boolean isByte() {
-        return value.getSetField() == Value.INT8VAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT32_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT16_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT8_VALUE;
     }
 
     /**
@@ -186,7 +191,8 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isDouble() {
-        return value.getSetField() == Value.FLOATVAL || value.getSetField() == Value.DOUBLEVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DOUBLE_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE;
     }
 
     /**
@@ -195,7 +201,7 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isString() {
-        return value.getSetField() == Value.STRINGVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.STRING_VALUE;
     }
 
     /**
@@ -204,50 +210,50 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isList() {
-        return value.getSetField() == Value.LISTVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LIST_VALUE;
     }
 
 
     public boolean isNode() {
-        return value.getSetField() == Value.NODEVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.NODE_VALUE;
     }
 
     public boolean isEdge() {
-        return value.getSetField() == Value.EDGEVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.EDGE_VALUE;
     }
 
     public boolean isLocalTime() {
-        return value.getSetField() == Value.LOCALTIMEVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LOCAL_TIME_VALUE;
+    }
+
+    public boolean isZonedTime() {
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.ZONED_TIME_VALUE;
     }
 
     public boolean isLocalDateTime() {
-        return value.getSetField() == Value.LOCALDATETIMEVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LOCAL_DATATIME_VALUE;
+    }
+
+    public boolean isZonedDateTime() {
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.ZONED_DATATIME_VALUE;
     }
 
     public boolean isDate() {
-        return value.getSetField() == Value.DATEVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DATE_VALUE;
     }
 
-    public boolean isMap() {
-        return value.getSetField() == Value.RECORDVAL;
+    public boolean isRecord() {
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.RECORD_VALUE;
     }
 
     public boolean isDuration() {
-        return value.getSetField() == Value.DURATIONVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DURATION_VALUE;
     }
 
     public boolean isPath() {
-        return value.getSetField() == Value.PATHVAL;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.PATH_VALUE;
     }
 
-    /**
-     * Convert the original data type Value to Object
-     *
-     * @return Object
-     */
-    public Object asObject() {
-        return value.getFieldValue();
-    }
 
     /**
      * Convert the original data type Value to boolean
@@ -256,42 +262,13 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not boolean
      */
     public boolean asBoolean() throws InvalidValueException {
-        if (value.getSetField() == Value.BOOLVAL) {
-            return (boolean) (value.getFieldValue());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.BOOL_VALUE) {
+            return value.getBoolValue();
         }
         throw new InvalidValueException(
                 "Cannot get field `boolean` because value's type is " + getDataType());
     }
 
-    /**
-     * Convert the original data type Value to byte
-     *
-     * @return byte
-     * @throws InvalidValueException if the value type is not byte
-     */
-    public byte asByte() throws InvalidValueException {
-        if (value.getSetField() == Value.INT8VAL) {
-            return (value.getInt8Val());
-        } else {
-            throw new InvalidValueException(
-                    "Cannot get field `byte` because value's type is " + getDataType());
-        }
-    }
-
-    /**
-     * Convert the original data type Value to short
-     *
-     * @return short
-     * @throws InvalidValueException if the value type is not short
-     */
-    public short asShort() throws InvalidValueException {
-        if (value.getSetField() == Value.INT16VAL) {
-            return value.getInt16Val();
-        } else {
-            throw new InvalidValueException(
-                    "Cannot get field `short` because value's type is " + getDataType());
-        }
-    }
 
     /**
      * Convert the original data type Value to int
@@ -300,8 +277,12 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not int32
      */
     public int asInt() throws InvalidValueException {
-        if (value.getSetField() == Value.INT32VAL) {
-            return value.getInt32Val();
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT8_VALUE) {
+            return value.getInt8Value();
+        } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT16_VALUE) {
+            return value.getInt16Value();
+        } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT32_VALUE) {
+            return value.getInt32Value();
         } else {
             throw new InvalidValueException(
                     "Cannot get field `int` because value's type is " + getDataType());
@@ -315,8 +296,8 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not long
      */
     public long asLong() throws InvalidValueException {
-        if (value.getSetField() == Value.INT64VAL) {
-            return value.getInt64Val();
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE) {
+            return value.getInt64Value();
         } else {
             throw new InvalidValueException(
                     "Cannot get field `long` because value's type is " + getDataType());
@@ -332,8 +313,8 @@ public class ValueWrapper {
      * @throws UnsupportedEncodingException if decode failed
      */
     public String asString() throws InvalidValueException {
-        if (value.getSetField() == Value.STRINGVAL) {
-            return new String((byte[]) value.getFieldValue());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.STRING_VALUE) {
+            return value.getStringValue().toString(charset);
         }
         throw new InvalidValueException(
                 "Cannot get field `string` because value's type is " + getDataType());
@@ -346,8 +327,11 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not double
      */
     public double asDouble() throws InvalidValueException {
-        if (value.getSetField() == Value.DOUBLEVAL || value.getSetField() == Value.FLOATVAL) {
-            return (double) value.getFieldValue();
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DOUBLE_VALUE) {
+            return value.getDoubleValue();
+        }
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE) {
+            return (double) value.getFloatValue();
         }
         throw new InvalidValueException(
                 "Cannot get field `double` because value's type is " + getDataType());
@@ -360,10 +344,10 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not list
      */
     public List<ValueWrapper> asList() throws InvalidValueException {
-        if (value.getSetField() == Value.LISTVAL) {
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LIST_VALUE) {
             List<ValueWrapper> values = new ArrayList<>();
-            for (Value value : value.getListVal().getValues()) {
-                values.add(new ValueWrapper(value, decodeType));
+            for (Value value : value.getListValue().getValuesList()) {
+                values.add(new ValueWrapper(value));
             }
             return values;
         }
@@ -378,8 +362,8 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not node
      */
     public Vertex asNode() throws InvalidValueException {
-        if (value.getSetField() == Value.NODEVAL) {
-            return new Vertex(value.getNodeVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.NODE_VALUE) {
+            return new Vertex(value.getNodeValue());
         }
         throw new InvalidValueException(
                 "cannot get field `node` because value's type is " + getDataType());
@@ -392,8 +376,8 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not edge
      */
     public Relationship asEdge() throws InvalidValueException {
-        if (value.getSetField() == Value.EDGEVAL) {
-            return new Relationship(value.getEdgeVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.EDGE_VALUE) {
+            return new Relationship(value.getEdgeValue());
         }
         throw new InvalidValueException(
                 "cannot get field `edge` because value's type is " + getDataType());
@@ -406,12 +390,28 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not localtime
      */
     public NTime asLocalTime() throws InvalidValueException {
-        if (value.getSetField() == Value.LOCALTIMEVAL) {
-            return new NTime(value.getLocalTimeVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LOCAL_TIME_VALUE) {
+            return new NTime(value.getLocalTimeValue());
         }
         throw new InvalidValueException(
                 "cannot get field `LocalTime` because value's type is " + getDataType());
     }
+
+
+    /**
+     * Convert the original data type Value to {@link NZonedTime}
+     *
+     * @return NTime
+     * @throws InvalidValueException if the value type is not localtime
+     */
+    public NZonedTime asZonedTime() throws InvalidValueException {
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.ZONED_TIME_VALUE) {
+            return new NZonedTime(value.getZonedTimeValue());
+        }
+        throw new InvalidValueException(
+                "cannot get field `LocalTime` because value's type is " + getDataType());
+    }
+
 
     /**
      * Convert the original data type Value to {@link NDate}
@@ -420,8 +420,8 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not localtime
      */
     public NDate asDate() throws InvalidValueException {
-        if (value.getSetField() == Value.DATEVAL) {
-            return new NDate(value.getDateVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DATE_VALUE) {
+            return new NDate(value.getDateValue());
         }
         throw new InvalidValueException(
                 "cannot get field `Date` because value's type is " + getDataType());
@@ -434,8 +434,22 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not localDatetime
      */
     public NDateTime asLocalDateTime() throws InvalidValueException {
-        if (value.getSetField() == Value.LOCALDATETIMEVAL) {
-            return new NDateTime(value.getLocalDatetimeVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.LOCAL_DATATIME_VALUE) {
+            return new NDateTime(value.getLocalDatatimeValue());
+        }
+        throw new InvalidValueException(
+                "cannot get field `LocalDatetime` because value's type is " + getDataType());
+    }
+
+    /**
+     * Convert the original data type Value to {@link NZonedDateTime}
+     *
+     * @return NZonedDateTime
+     * @throws InvalidValueException if the value type is not localDatetime
+     */
+    public NZonedDateTime asZonedDateTime() throws InvalidValueException {
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.ZONED_DATATIME_VALUE) {
+            return new NZonedDateTime(value.getZonedDatatimeValue());
         }
         throw new InvalidValueException(
                 "cannot get field `LocalDatetime` because value's type is " + getDataType());
@@ -448,29 +462,29 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not duration
      */
     public NDuration asDuration() throws InvalidValueException {
-        if (value.getSetField() == Value.DURATIONVAL) {
-            return new NDuration(value.getDurationVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DURATION_VALUE) {
+            return new NDuration(value.getDurationValue());
         }
         throw new InvalidValueException(
                 "cannot get field `LocalDatetime` because value's type is " + getDataType());
     }
 
-    public Map<String, ValueWrapper> asMap() throws InvalidValueException {
-        if (value.getSetField() == Value.RECORDVAL) {
-            Map<byte[], Value> values = value.getRecordVal().getValues();
+    public Map<String, ValueWrapper> asRecord() throws InvalidValueException {
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.RECORD_VALUE) {
+            Map<String, Value> values = value.getRecordValue().getValuesMap();
             Map<String, ValueWrapper> recordValues = new HashMap<>(values.size());
-            for (Map.Entry<byte[], Value> kv : values.entrySet()) {
-                recordValues.put(new String(kv.getKey()), new ValueWrapper(kv.getValue(), "utf-8"));
+            for (Map.Entry<String, Value> kv : values.entrySet()) {
+                recordValues.put(kv.getKey(), new ValueWrapper(kv.getValue()));
             }
             return recordValues;
         }
         throw new InvalidValueException(
-                "cannot get field `map` because value's type is " + getDataType());
+                "cannot get field `record` because value's type is " + getDataType());
     }
 
     public NPath asPath() throws InvalidValueException {
-        if (value.getSetField() == Value.PATHVAL) {
-            return new NPath(value.getPathVal());
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.PATH_VALUE) {
+            return new NPath(value.getPathValue());
         }
         throw new InvalidValueException(
                 "cannot get field `path` because value's type is " + getDataType());
@@ -486,13 +500,12 @@ public class ValueWrapper {
             return false;
         }
         ValueWrapper that = (ValueWrapper) o;
-        return Objects.equals(value, that.value)
-                && Objects.equals(decodeType, that.decodeType);
+        return Objects.equals(value, that.value);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(value, decodeType);
+        return Objects.hash(value);
     }
 
     /**
@@ -508,10 +521,6 @@ public class ValueWrapper {
             return null;
         } else if (isBoolean()) {
             return String.valueOf(asBoolean());
-        } else if (isByte()) {
-            return String.valueOf(asByte());
-        } else if (isShort()) {
-            return String.valueOf(asShort());
         } else if (isInt()) {
             return String.valueOf(asInt());
         } else if (isLong()) {
@@ -522,8 +531,8 @@ public class ValueWrapper {
             return asString();
         } else if (isList()) {
             return asList().toString();
-        } else if (isMap()) {
-            return asMap().toString();
+        } else if (isRecord()) {
+            return asRecord().toString();
         } else if (isNode()) {
             return asNode().toString();
         } else if (isEdge()) {

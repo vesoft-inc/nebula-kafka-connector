@@ -1,0 +1,98 @@
+/* Copyright (c) 2023 vesoft inc. All rights reserved.
+ *
+ * This source code is licensed under Apache 2.0 License.
+ */
+
+package com.vesoft.nebula.client.graph.data;
+
+import com.vesoft.nebula.proto.LocalDatetime;
+import com.vesoft.nebula.proto.ZonedDatetime;
+import java.util.Objects;
+
+public class NZonedDateTime {
+    private final ZonedDatetime zonedDateTime;
+
+    public NZonedDateTime(ZonedDatetime zonedDateTime) {
+        this.zonedDateTime = zonedDateTime;
+    }
+
+    /**
+     * @return utc datetime year
+     */
+    public int getYear() {
+        return zonedDateTime.getYear();
+    }
+
+    /**
+     * @return utc datetime month
+     */
+    public int getMonth() {
+        return zonedDateTime.getMonth();
+    }
+
+    /**
+     * @return datetime day
+     */
+    public int getDay() {
+        return zonedDateTime.getDay();
+    }
+
+    /**
+     * @return datetime hour
+     */
+    public int getHour() {
+        return zonedDateTime.getHour();
+    }
+
+    /**
+     * @return datetime minute
+     */
+    public int getMinute() {
+        return zonedDateTime.getMinute();
+    }
+
+    /**
+     * @return utc datetime second
+     */
+    public int getSecond() {
+        return zonedDateTime.getSec();
+    }
+
+    /**
+     * @return utc datetime microsec
+     */
+    public int getMicrosec() {
+        return zonedDateTime.getMicrosec();
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%d-%02d-%02dT%02d:%02d:%02d.%06d",
+                zonedDateTime.getYear(), zonedDateTime.getMonth(), zonedDateTime.getDay(),
+                zonedDateTime.getHour(), zonedDateTime.getMinute(), zonedDateTime.getSec(),
+                zonedDateTime.getMicrosec());
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        NZonedDateTime that = (NZonedDateTime) o;
+        return zonedDateTime.getYear() == that.getYear()
+                && zonedDateTime.getMonth() == that.getMonth()
+                && zonedDateTime.getDay() == that.getDay()
+                && zonedDateTime.getHour() == that.getHour()
+                && zonedDateTime.getMinute() == that.getMinute()
+                && zonedDateTime.getSec() == that.getSecond()
+                && zonedDateTime.getMicrosec() == that.getMicrosec();
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(zonedDateTime);
+    }
+}

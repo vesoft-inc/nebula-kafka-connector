@@ -58,9 +58,9 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
                                         + "scan again in the next next()",
                                 partCur.getKey(),
                                 labelName,
-                                result.getGqlStatus()));
+                                result.getErrorMessage()));
                         exceptions.add(new Exception(String.format("part %d of %s scan error: ",
-                                partCur.getKey(), labelName, result.getGqlStatus())));
+                                partCur.getKey(), labelName, result.getErrorMessage())));
                     }
                 } catch (Exception e) {
                     LOGGER.error(String.format("Scan node error for %s", e.getMessage()), e);

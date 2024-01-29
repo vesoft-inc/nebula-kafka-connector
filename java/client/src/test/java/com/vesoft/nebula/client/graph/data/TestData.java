@@ -6,23 +6,24 @@
 package com.vesoft.nebula.client.graph.data;
 
 
-import com.vesoft.nebula.Date;
-import com.vesoft.nebula.Edge;
-import com.vesoft.nebula.ExecutionOutcome;
-import com.vesoft.nebula.ExecutionResponse;
-import com.vesoft.nebula.GQLStatus;
-import com.vesoft.nebula.LocalDatetime;
-import com.vesoft.nebula.LocalTime;
-import com.vesoft.nebula.NList;
-import com.vesoft.nebula.NRecord;
-import com.vesoft.nebula.Node;
-import com.vesoft.nebula.Path;
-import com.vesoft.nebula.ResultTable;
-import com.vesoft.nebula.Row;
-import com.vesoft.nebula.Value;
+import com.google.common.base.Charsets;
+import com.google.protobuf.ByteString;
+import com.vesoft.nebula.client.graph.ErrorCode;
+import com.vesoft.nebula.proto.Date;
+import com.vesoft.nebula.proto.Edge;
+import com.vesoft.nebula.proto.ExecuteResponse;
+import com.vesoft.nebula.proto.ExecutionOutcome;
+import com.vesoft.nebula.proto.GQLStatus;
+import com.vesoft.nebula.proto.LocalDatetime;
+import com.vesoft.nebula.proto.LocalTime;
+import com.vesoft.nebula.proto.Node;
+import com.vesoft.nebula.proto.Path;
+import com.vesoft.nebula.proto.Record;
+import com.vesoft.nebula.proto.ResultTable;
+import com.vesoft.nebula.proto.Row;
+import com.vesoft.nebula.proto.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,11 +47,11 @@ public class TestData {
             assert Objects.equals(
                     vertex.getColumnNames().stream().sorted().collect(Collectors.toList()),
                     names.stream().sorted().collect(Collectors.toList()));
-            List<Value> propValues = Arrays.asList(new Value(Value.INT64VAL, 0L),
-                    new Value(Value.INT64VAL, 1L),
-                    new Value(Value.INT64VAL, 2L),
-                    new Value(Value.INT64VAL, 3L),
-                    new Value(Value.INT64VAL, 4L));
+            List<Value> propValues = Arrays.asList(
+                    Value.newBuilder().setInt64Value(1L).build(),
+                    Value.newBuilder().setInt16Value(2).build(),
+                    Value.newBuilder().setInt16Value(3).build(),
+                    Value.newBuilder().setInt8Value(4).build());
             for (String name : vertex.getProperties().keySet()) {
                 if (name.equals("prop0")) {
                     assert vertex.getProperties().get(name).asLong() == 0;
@@ -87,7 +88,7 @@ public class TestData {
                     names.stream().sorted().collect(Collectors.toList()));
 
             // check get values
-            List<ValueWrapper> values = relationShip.getValues();
+            List<ValueWrapper> values = relationShip.getPropertyValues();
             assert values.get(0).isInt();
             ArrayList<Integer> longVals = new ArrayList<>();
             for (ValueWrapper val : values) {
@@ -126,16 +127,25 @@ public class TestData {
     @Test
     public void testResult() {
         try {
-            ExecutionResponse resp = new ExecutionResponse();
-            resp.setExecutionOutcome(new ExecutionOutcome(new GQLStatus("SUCCESS".getBytes()),
-                    getDateset(), null)).setLatencyInUs(1000);
+            ResultTable resultTable = getDateset();
+            ExecutionOutcome outcome = ExecutionOutcome
+                    .newBuilder()
+                    .setResult(resultTable)
+                    .setGqlStatus(GQLStatus.newBuilder()
+                            .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build())
+                    .build();
+            ExecuteResponse resp = ExecuteResponse
+                    .newBuilder()
+                    .setExecutionOutcome(outcome)
+                    .setLatencyInUs(1000)
+                    .build();
 
             ResultSet resultSet = new ResultSet(resp);
             assert resultSet.isSucceeded();
-            assert resultSet.getGqlStatus().equals("SUCCESS");
+            assert resultSet.getErrorCode().equals(ErrorCode.SUCCESSFUL_COMPLETION.code);
             assert !resultSet.isEmpty();
             Assert.assertEquals(1000, resultSet.getLatency());
-            assert resultSet.getPlanDesc() == null;
+            assert resultSet.getPlanDesc().equals("");
             List<String> expectColNames = Arrays.asList("col0_empty", "col1_bool", "col2_int64",
                     "col3_int32", "col4_int16", "col5_int8", "col6_float", "col7_double",
                     "col8_string", "col9_list", "col10_vertex", "col11_edge");
@@ -155,33 +165,33 @@ public class TestData {
             assert record.get(3).isInt();
             assert record.get(3).asInt() == 2;
 
-            assert record.get(4).isShort();
-            assert record.get(4).asShort() == 3;
+            assert record.get(4).isInt();
+            assert record.get(4).asInt() == 3;
 
-            assert record.get(5).isByte();
-            assert record.get(5).asByte() == 4;
+            assert record.get(5).isInt();
+            assert record.get(5).asInt() == 4;
 
             assert record.get(6).isDouble();
-            assert Double.compare(record.get(6).asDouble(), 10.01) == 0;
+            assert Math.abs(record.get(6).asDouble() - 10.01) < 0.001;
 
             assert record.get(7).isDouble();
-            assert Double.compare(record.get(7).asDouble(), 20.01) == 0;
+            assert Math.abs(record.get(7).asDouble() - 20.01) < 0.001;
 
             assert record.get(8).isString();
             assert Objects.equals("value1", record.get(8).asString());
 
             Assert.assertArrayEquals(
                     record.get(9).asList().stream().map(ValueWrapper::asLong).toArray(),
-                    Arrays.asList((long) 1, (long) 2).toArray());
+                    Arrays.asList(10L, 11L, 12L, 13L).toArray());
 
 
             assert record.get(10).isNode();
             assert Objects.equals(record.get(10).asNode(),
-                    new Vertex(getNode(100)));
+                    new Vertex(getNode(1)));
 
             assert record.get(11).isEdge();
             assert Objects.equals(record.get(11).asEdge(),
-                    new Relationship(getEdge(101L, 102L, 0)));
+                    new Relationship(getEdge(1, 2, 10)));
         } catch (Exception e) {
             e.printStackTrace();
             assert (false);
@@ -192,38 +202,51 @@ public class TestData {
     public void testToString() {
         try {
             // test node
-            ValueWrapper valueWrapper = new ValueWrapper(
-                    new Value(Value.NODEVAL, getSimpleNode()), "utf-8");
+            ValueWrapper valueWrapper = new ValueWrapper(Value
+                    .newBuilder()
+                    .setNodeValue(getSimpleNode())
+                    .build());
             String expectString =
-                    "(1:0 {prop: 100})";
-            Assert.assertEquals(expectString, valueWrapper.asNode().toString());
+                    "(1:0 {prop: Bob})";
 
+            Assert.assertEquals(expectString, valueWrapper.asNode().toString());
             // test relationship
-            valueWrapper = new ValueWrapper(
-                    new Value(Value.EDGEVAL, getSimpleEdge(false)), "utf-8");
+            valueWrapper = new ValueWrapper(Value
+                    .newBuilder()
+                    .setEdgeValue(getSimpleEdge(false, 1, 2))
+                    .build());
             expectString = "(1)-[:1@10{edge_prop: 100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
-            valueWrapper = new ValueWrapper(
-                    new Value(Value.EDGEVAL, getSimpleEdge(true)), "utf-8");
+            valueWrapper = new ValueWrapper(Value
+                    .newBuilder()
+                    .setEdgeValue(getSimpleEdge(true, 1, 2))
+                    .build());
             expectString = "(2)-[:-1@10{edge_prop: 100}]->(1)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             // test local time
-            valueWrapper = new ValueWrapper(new Value(Value.LOCALTIMEVAL, getSimpleLocalTime()),
-                    "utf-8");
+            valueWrapper = new ValueWrapper(Value
+                    .newBuilder()
+                    .setLocalTimeValue(getSimpleLocalTime())
+                    .build());
             expectString = "12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalTime().toString());
 
             // test local datetime
-            valueWrapper = new ValueWrapper(new Value(Value.LOCALDATETIMEVAL,
-                    getSimpleLocalDateTime()), "utf-8");
-            expectString = "2023-01-01T12:20:15.000030";
+            valueWrapper = new ValueWrapper(Value
+                    .newBuilder()
+                    .setLocalDatatimeValue(getSimpleLocalDateTime())
+                    .build());
+            expectString = "2024-01-01T12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalDateTime().toString());
 
             // test date
-            valueWrapper = new ValueWrapper(new Value(Value.DATEVAL, getSimpleDate()), "utf-8");
-            expectString = "2023-01-01";
+            valueWrapper = new ValueWrapper(Value
+                    .newBuilder()
+                    .setDateValue(getSimpleDate())
+                    .build());
+            expectString = "2024-01-01";
             Assert.assertEquals(expectString, valueWrapper.asDate().toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -233,9 +256,10 @@ public class TestData {
 
     @Test
     public void testPath() {
-        ValueWrapper valueWrapper = new ValueWrapper(new Value(Value.PATHVAL, getPath()), "utf-8");
-        String expectString = "81-[:1{prop2:2,prop1:1,prop0:0,prop4:4,prop3:3}]->82"
-                + "-[:1{prop2:2,prop1:1,prop0:0,prop4:4,prop3:3}]->83";
+        ValueWrapper valueWrapper = new ValueWrapper(
+                Value.newBuilder().setPathValue(getPath()).build());
+        String expectString = "1-[:1{edge_prop:100}]->2"
+                + "-[:1{edge_prop:100}]->3";
         Assert.assertEquals(expectString, valueWrapper.asPath().toString());
 
         NPath path = valueWrapper.asPath();
@@ -246,27 +270,32 @@ public class TestData {
 
     @Test
     public void testMap() {
-        ValueWrapper valueWrapper = new ValueWrapper(
-                new Value(Value.RECORDVAL, getRowRecord()), "utf-8");
+        ValueWrapper valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setRecordValue(getRowRecord())
+                .build());
         List<String> expectMapKeys = Arrays.asList("prop1", "prop2", "prop3", "prop4", "prop5",
                 "prop6");
-        Map<String, ValueWrapper> values = valueWrapper.asMap();
+        Map<String, ValueWrapper> values = valueWrapper.asRecord();
         Assert.assertEquals(expectMapKeys.stream().sorted().collect(Collectors.toList()),
                 values.keySet().stream().sorted().collect(Collectors.toList()));
-        Assert.assertEquals((short) 1, values.get("prop1").asShort());
+        Assert.assertEquals(1, values.get("prop1").asInt());
         Assert.assertEquals(2L, values.get("prop2").asLong());
         Assert.assertEquals("Tom", values.get("prop3").asString());
         Assert.assertTrue(values.get("prop4").asBoolean());
-        Assert.assertEquals(1L, values.get("prop5").asNode().getId());
-        Assert.assertEquals(1, values.get("prop5").asNode().getNodeTypeId());
-        Assert.assertEquals("Bob",
+        Assert.assertEquals(1, values.get("prop5").asNode().getId());
+        Assert.assertEquals(0, values.get("prop5").asNode().getNodeTypeId());
+        Assert.assertEquals("prop",
                 values.get("prop5").asNode().getProperties().keySet().toArray()[0]);
     }
 
 
     @Test
     public void testList() {
-        ValueWrapper valueWrapper = new ValueWrapper(new Value(Value.LISTVAL, getList()), "utf-8");
+        ValueWrapper valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setListValue(getList())
+                .build());
         List<ValueWrapper> values = valueWrapper.asList();
         Assert.assertEquals(4, values.size());
     }
@@ -275,137 +304,156 @@ public class TestData {
     // mock data
     private Node getNode(long vid) {
 
-        Map<byte[], Value> props = new HashMap<>();
+        Map<String, Value> props = new HashMap<>();
         for (int j = 0; j < 5; j++) {
-            Value value = new Value();
-            value.setInt64Val(j);
-            props.put(String.format("prop%d", j).getBytes(), value);
+            Value value = Value.newBuilder().setInt64Value(j).build();
+            props.put(String.format("prop%d", j), value);
         }
         short nodeType = 0;
-        return new Node(vid, nodeType, props);
+        Node.Builder builder = Node.newBuilder().setNodeId(vid).setNodeTypeId(nodeType);
+        builder.putAllProperties(props);
+        return builder.build();
     }
 
     private Edge getEdge(long srcId, long dstId, long rank) {
-        Map<byte[], Value> props = new HashMap<>();
-        for (int i = 0; i < 5; i++) {
-            Value value = new Value();
-            value.setInt32Val(i);
-            props.put(String.format("prop%d", i).getBytes(), value);
-        }
         int edgeType = 1;
-        return new Edge(srcId, dstId, edgeType, rank, props);
+        Edge.Builder builder = Edge
+                .newBuilder()
+                .setEdgeTypeId(edgeType)
+                .setSrcId(srcId)
+                .setDstId(dstId)
+                .setRank(rank);
+        for (int i = 0; i < 5; i++) {
+            Value value = Value.newBuilder().setInt32Value(i).build();
+            builder.putProperties(String.format("prop%d", i), value);
+        }
+        return builder.build();
     }
 
     private Node getSimpleNode() {
-        Map<byte[], Value> props1 = new HashMap<>();
-        props1.put("prop".getBytes(), new Value(Value.INT64VAL, (long) 100));
+        Map<String, Value> props = new HashMap<>();
+        props.put("prop", Value.newBuilder()
+                .setStringValue(ByteString.copyFrom("Bob", Charsets.UTF_8)).build());
         long nodeId = 1;
         short nodeType = 0;
-        return new Node(nodeId, nodeType, props1);
+
+        Node node = Node.newBuilder()
+                .setNodeId(nodeId)
+                .setNodeTypeId(nodeType)
+                .putAllProperties(props)
+                .build();
+        return node;
     }
 
-    private Edge getSimpleEdge(boolean isReverse) {
-        Map<byte[], Value> props = new HashMap<>();
-        props.put("edge_prop".getBytes(), new Value(Value.INT64VAL, (long) 100));
+    private Edge getSimpleEdge(boolean isReverse, long srcId, long dstId) {
+        Map<String, Value> props = new HashMap<>();
+        props.put("edge_prop", Value.newBuilder().setInt64Value(100L).build());
         int type = 1;
         if (isReverse) {
             type = -1;
         }
-        long srcId = 1;
-        long dstId = 2;
         int edgeType = type;
         long rank = 10;
-        return new Edge(srcId, dstId, edgeType, rank, props);
-    }
 
-    private NRecord getRowRecord() {
-        Map<byte[], Value> values = new HashMap<>();
-        values.put("prop1".getBytes(), new Value(Value.INT8VAL, (byte) 1));
-        values.put("prop2".getBytes(), new Value(Value.INT64VAL, 2L));
-        values.put("prop3".getBytes(), new Value(Value.STRINGVAL, "Tom".getBytes()));
-        values.put("prop4".getBytes(), new Value(Value.BOOLVAL, true));
-
-        Map<byte[], Value> properties = new HashMap<>();
-        properties.put("name".getBytes(), new Value(Value.STRINGVAL, "Bob".getBytes()));
-        Node node = new Node(1L, (short) 1, properties);
-        values.put("prop5".getBytes(), new Value(Value.NODEVAL, node));
-        values.put("prop6".getBytes(), new Value(Value.DOUBLEVAL, 12.1));
-        return new NRecord(values);
-    }
-
-    private NList getList() {
-        List<Value> values = new ArrayList<>();
-        values.add(new Value(Value.STRINGVAL, "player".getBytes()));
-        values.add(new Value(Value.INT64VAL, 10L));
-        values.add(new Value(Value.DOUBLEVAL, 10.1));
-        values.add(new Value(Value.BOOLVAL, true));
-        return new NList(values);
-    }
-
-    private LocalTime getSimpleLocalTime() {
-        LocalTime time = new LocalTime((byte) 12, (byte) 20, (byte) 15, 30);
-        return time;
-    }
-
-    private LocalDatetime getSimpleLocalDateTime() {
-        LocalDatetime datetime = new LocalDatetime((short) 2023, (byte) 1, (byte) 1, (byte) 12,
-                (byte) 20, (byte) 15, 30);
-        return datetime;
-    }
-
-    private Date getSimpleDate() {
-        Date date = new Date((short) 2023, (byte) 1, (byte) 1);
-        return date;
+        return Edge.newBuilder()
+                .setEdgeTypeId(edgeType)
+                .setSrcId(srcId)
+                .setDstId(dstId)
+                .setRank(rank)
+                .putAllProperties(props)
+                .build();
     }
 
     private Path getPath() {
-        List<Value> values = new ArrayList<>();
-        values.add(new Value(Value.NODEVAL, getNode(81)));
-        values.add(new Value(Value.EDGEVAL, getEdge(81, 82, 1)));
-        values.add(new Value(Value.NODEVAL, getNode(82)));
-        values.add(new Value(Value.EDGEVAL, getEdge(82, 83, 1)));
-        values.add(new Value(Value.NODEVAL, getNode(83)));
-        Path path = new Path(values);
-        return path;
+        Path.Builder builder = Path.newBuilder();
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode()));
+        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 1, 2)).build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode()).build());
+        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 2, 3)).build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode()).build());
+        return builder.build();
     }
 
+    private Record getRowRecord() {
+        Map<String, Value> values = new HashMap<>();
+        values.put("prop1", Value.newBuilder().setInt8Value(1).build());
+        values.put("prop2", Value.newBuilder().setInt64Value(2).build());
+        values.put("prop3", Value.newBuilder()
+                .setStringValue(ByteString.copyFrom("Tom", Charsets.UTF_8)).build());
+        values.put("prop4", Value.newBuilder().setBoolValue(true).build());
+        values.put("prop5", Value.newBuilder().setNodeValue(getSimpleNode()).build());
+        values.put("prop6", Value.newBuilder().setDoubleValue(20.1).build());
+
+        return Record.newBuilder().putAllValues(values).build();
+    }
+
+    private com.vesoft.nebula.proto.List getList() {
+        List<Value> values = new ArrayList<>();
+        values.add(Value.newBuilder().setInt64Value(10).build());
+        values.add(Value.newBuilder().setInt64Value(11).build());
+        values.add(Value.newBuilder().setInt64Value(12).build());
+        values.add(Value.newBuilder().setInt64Value(13).build());
+        com.vesoft.nebula.proto.List.Builder builder = com.vesoft.nebula.proto.List.newBuilder();
+        builder.addAllValues(values);
+        return builder.build();
+    }
+
+    private LocalTime getSimpleLocalTime() {
+        return LocalTime.newBuilder().setHour(12).setMinute(20).setSec(15).setMicrosec(30).build();
+    }
+
+    private LocalDatetime getSimpleLocalDateTime() {
+        return LocalDatetime.newBuilder()
+                .setYear(2024)
+                .setMonth(1)
+                .setDay(1)
+                .setHour(12)
+                .setMinute(20)
+                .setSec(15)
+                .setMicrosec(30)
+                .build();
+    }
+
+    private Date getSimpleDate() {
+        return Date.newBuilder().setYear(2024).setMonth(1).setDay(1).build();
+    }
+
+
     private ResultTable getDateset() {
-        final ArrayList<Value> list = new ArrayList<>();
-        list.add(new Value(Value.INT64VAL, 1L));
-        list.add(new Value(Value.INT64VAL, 2L));
+        List<Value> values = Arrays.asList(
+                Value.newBuilder().build(),
+                Value.newBuilder().setBoolValue(false).build(),
+                Value.newBuilder().setInt64Value(1).build(),
+                Value.newBuilder().setInt32Value(2).build(),
+                Value.newBuilder().setInt16Value(3).build(),
+                Value.newBuilder().setInt8Value(4).build(),
+                Value.newBuilder().setFloatValue(10.01f).build(),
+                Value.newBuilder().setDoubleValue(20.01).build(),
+                Value.newBuilder()
+                        .setStringValue(ByteString.copyFrom("value1", Charsets.UTF_8))
+                        .build(),
+                Value.newBuilder().setListValue(getList()).build(),
+                Value.newBuilder().setNodeValue(getSimpleNode()).build(),
+                Value.newBuilder().setEdgeValue(getSimpleEdge(false, 1, 2)).build());
 
-        final HashMap<byte[], Value> map = new HashMap();
-        map.put("key1".getBytes(), new Value(Value.INT64VAL, 1L));
-        map.put("key2".getBytes(), new Value(Value.INT64VAL, 2L));
+        Row row = Row.newBuilder().addAllValues(values).build();
 
-        final Row row = new Row(Arrays.asList(
-                new Value(),
-                new Value(Value.BOOLVAL, false),
-                new Value(Value.INT64VAL, 1L),
-                new Value(Value.INT32VAL, 2),
-                new Value(Value.INT16VAL, (short) 3),
-                new Value(Value.INT8VAL, (byte) 4),
-                new Value(Value.FLOATVAL, 10.01),
-                new Value(Value.DOUBLEVAL, 20.01),
-                new Value(Value.STRINGVAL, "value1".getBytes()),
-                new Value(Value.LISTVAL, new NList(list)),
-                new Value(Value.NODEVAL, getNode(100L)),
-                new Value(Value.EDGEVAL, getEdge(101L, 102L, 0L))));
-        // TODO add NMap datatype, depends on the server finish
+        final List<ByteString> columnNames = Arrays.asList(
+                ByteString.copyFrom("col0_empty", Charsets.UTF_8),
+                ByteString.copyFrom("col1_bool", Charsets.UTF_8),
+                ByteString.copyFrom("col2_int64", Charsets.UTF_8),
+                ByteString.copyFrom("col3_int32", Charsets.UTF_8),
+                ByteString.copyFrom("col4_int16", Charsets.UTF_8),
+                ByteString.copyFrom("col5_int8", Charsets.UTF_8),
+                ByteString.copyFrom("col6_float", Charsets.UTF_8),
+                ByteString.copyFrom("col7_double", Charsets.UTF_8),
+                ByteString.copyFrom("col8_string", Charsets.UTF_8),
+                ByteString.copyFrom("col9_list", Charsets.UTF_8),
+                ByteString.copyFrom("col10_vertex", Charsets.UTF_8),
+                ByteString.copyFrom("col11_edge", Charsets.UTF_8));
+        ResultTable.Builder tableBuilder = ResultTable.newBuilder().addAllColumnNames(columnNames);
 
-        final List<byte[]> columnNames = Arrays.asList(
-                "col0_empty".getBytes(),
-                "col1_bool".getBytes(),
-                "col2_int64".getBytes(),
-                "col3_int32".getBytes(),
-                "col4_int16".getBytes(),
-                "col5_int8".getBytes(),
-                "col6_float".getBytes(),
-                "col7_double".getBytes(),
-                "col8_string".getBytes(),
-                "col9_list".getBytes(),
-                "col10_vertex".getBytes(),
-                "col11_edge".getBytes());
-        return new ResultTable(columnNames, Collections.singletonList(row));
+        tableBuilder.addRecords(row);
+        return tableBuilder.build();
     }
 }

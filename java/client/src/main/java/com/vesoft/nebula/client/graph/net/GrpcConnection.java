@@ -44,17 +44,24 @@ public class GrpcConnection extends Connection {
 
     @Override
     public void reopen() throws IOErrorException, ClientServerIncompatibleException {
-        // TODO
+        close();
+        open(serverAddr, connTimeout, requestTimeout);
     }
 
     @Override
     public void close() {
-        channel.shutdownNow();
+        if (channel != null && !channel.isShutdown()) {
+            channel.shutdownNow();
+        }
     }
 
     @Override
     public boolean ping(long sessionID) throws IOErrorException {
-        return false;
+        ExecuteResponse response = execute(sessionID, "RETURN 1");
+        return response.hasExecutionOutcome()
+                && response.getExecutionOutcome().hasGqlStatus()
+                && ErrorCode.SUCCESSFUL_COMPLETION.code.equals(
+                response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
     }
 
     public AuthResult authenticate(String user, String password)
@@ -67,9 +74,9 @@ public class GrpcConnection extends Connection {
                     .setClientVersion(ByteString.copyFrom("v5.0.0", charset))
                     .build();
             AuthResponse resp = stub.authenticate(authReq);
-            String s = resp.getGqlStatus().getCode().toString(charset);
-            if (!s.equals(ErrorCode.SUCCESSFUL_COMPLETION.code)) {
-                throw new AuthFailedException(resp.getGqlStatus().toString());
+            String code = resp.getGqlStatus().getCode().toString(charset);
+            if (!ErrorCode.SUCCESSFUL_COMPLETION.code.equals(code)) {
+                throw new AuthFailedException(resp.getGqlStatus().getMessage().toString());
             }
             return new AuthResult(resp.getSessionId());
         } catch (Exception e) {
@@ -92,12 +99,7 @@ public class GrpcConnection extends Connection {
     }
 
     public void signout(long sessionID) {
-        try {
-            SignoutRequest request = SignoutRequest.newBuilder().setSessionId(sessionID).build();
-            stub.signout(request);
-        } catch (Exception e) {
-            // TODO
-            throw e;
-        }
+        SignoutRequest request = SignoutRequest.newBuilder().setSessionId(sessionID).build();
+        stub.signout(request);
     }
 }

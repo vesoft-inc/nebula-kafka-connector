@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.client.graph.scan;
 
-import com.vesoft.nebula.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.net.Session;
 import java.io.Serializable;

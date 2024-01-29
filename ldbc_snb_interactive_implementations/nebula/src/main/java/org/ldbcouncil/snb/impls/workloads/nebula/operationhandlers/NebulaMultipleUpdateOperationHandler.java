@@ -25,7 +25,7 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
                 state.logQuery(operation.getClass().getSimpleName(), queryString);
                 ResultSet result = client.execute(queryString);
                 if (!result.isSucceeded()) {
-                    System.out.println(result.getGqlStatus());
+                    System.out.println(result.getErrorMessage());
                 }
             }
         } catch (Exception e) {

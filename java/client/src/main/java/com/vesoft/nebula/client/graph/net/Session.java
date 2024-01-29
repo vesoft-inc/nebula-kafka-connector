@@ -5,13 +5,10 @@
 
 package com.vesoft.nebula.client.graph.net;
 
-import com.vesoft.nebula.NList;
-import com.vesoft.nebula.Value;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,7 +31,7 @@ public class Session implements Serializable {
     private static final Logger log = LoggerFactory.getLogger(Session.class);
 
     private final long sessionID;
-    private SyncConnection connection;
+    private GrpcConnection connection;
     private final int connTimeout;
     private final int requestTimeout;
     private final LoadBalancer loadBalancer;
@@ -48,7 +45,7 @@ public class Session implements Serializable {
      * @param loadBalancer the loadBalancer
      * @param retryConnect whether to retry after the connection is disconnected
      */
-    protected Session(SyncConnection connection,
+    protected Session(GrpcConnection connection,
                       int connTimeout,
                       int requestTimeout,
                       AuthResult authResult,
@@ -124,7 +121,7 @@ public class Session implements Serializable {
         connection.close();
         List<HostAddress> goodHosts = loadBalancer.getGoodAddresses();
         int tryConnect = goodHosts.size();
-        SyncConnection newConnection = new SyncConnection();
+        GrpcConnection newConnection = new GrpcConnection();
         while (tryConnect-- > 0) {
             try {
                 newConnection.open(loadBalancer.getAddress(), connTimeout, requestTimeout);
@@ -140,64 +137,4 @@ public class Session implements Serializable {
         }
     }
 
-    /**
-     * convert java list to nebula thrift list
-     *
-     * @param list java list
-     * @return nebula list
-     */
-    private static NList list2Nlist(List<Object> list) throws UnsupportedOperationException {
-        NList nlist = new NList(new ArrayList<Value>());
-        for (Object item : list) {
-            nlist.values.add(value2Nvalue(item));
-        }
-        return nlist;
-    }
-
-    /**
-     * convert java value type to nebula thrift value type
-     *
-     * @param value java obj
-     * @return nebula value
-     */
-    private static Value value2Nvalue(Object value) throws UnsupportedOperationException {
-        Value nvalue = new Value();
-        if (value == null) {
-            // TODO nvalue.set(NullType.__NULL__);
-        } else if (value instanceof Boolean) {
-            boolean bval = (Boolean) value;
-            nvalue.setBoolVal(bval);
-        } else if (value instanceof Integer) {
-            int ival = (Integer) value;
-            nvalue.setInt32Val(ival);
-        } else if (value instanceof Short) {
-            short ival = (Short) value;
-            nvalue.setInt16Val(ival);
-        } else if (value instanceof Byte) {
-            byte ival = (Byte) value;
-            nvalue.setInt8Val(ival);
-        } else if (value instanceof Long) {
-            long ival = (Long) value;
-            nvalue.setInt64Val(ival);
-        } else if (value instanceof Float) {
-            float fval = (Float) value;
-            nvalue.setFloatVal(fval);
-        } else if (value instanceof Double) {
-            double dval = (Double) value;
-            nvalue.setDoubleVal(dval);
-        } else if (value instanceof String) {
-            byte[] sval = ((String) value).getBytes();
-            nvalue.setStringVal(sval);
-        } else if (value instanceof List) {
-            nvalue.setListVal(list2Nlist((List<Object>) value));
-        } else if (value instanceof Value) {
-            return (Value) value;
-        } else {
-            // unsupport other Value type, use this function carefully
-            throw new UnsupportedOperationException(
-                    "Only support convert boolean/float/int/string/map/list to nebula.Value but was"
-                            + value.getClass().getTypeName());
-        }
-        return nvalue;
-    }
 }

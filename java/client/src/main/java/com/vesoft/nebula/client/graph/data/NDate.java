@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.Date;
+import com.vesoft.nebula.proto.Date;
 import java.util.Objects;
 
 public class NDate {
@@ -15,21 +15,21 @@ public class NDate {
         this.date = date;
     }
 
-    public short getYear() {
+    public int getYear() {
         return date.getYear();
     }
 
-    public byte getMonth() {
+    public int getMonth() {
         return date.getMonth();
     }
 
-    public byte getDay() {
+    public int getDay() {
         return date.getDay();
     }
 
     @Override
     public String toString() {
-        return String.format("%d-%02d-%02d", date.year, date.month, date.day);
+        return String.format("%d-%02d-%02d", date.getYear(), date.getMonth(), date.getDay());
     }
 
     @Override
@@ -41,9 +41,9 @@ public class NDate {
             return false;
         }
         NDate that = (NDate) o;
-        return date.year == that.getYear()
-                && date.month == that.getMonth()
-                && date.day == that.getDay();
+        return date.getYear() == that.getYear()
+                && date.getMonth() == that.getMonth()
+                && date.getDay() == that.getDay();
     }
 
     @Override

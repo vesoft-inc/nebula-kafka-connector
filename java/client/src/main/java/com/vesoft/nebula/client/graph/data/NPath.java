@@ -5,12 +5,11 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.Path;
-import com.vesoft.nebula.Value;
+import com.vesoft.nebula.proto.Path;
+import com.vesoft.nebula.proto.Value;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 public class NPath {
     private Path path;
@@ -25,13 +24,13 @@ public class NPath {
             return;
         }
         this.path = path;
-        for (Value value : path.values) {
-            values.add(new ValueWrapper(value, decodeType));
-            if (new ValueWrapper(value, decodeType).isNode()) {
-                nodes.add(new Vertex(value.getNodeVal()));
+        for (Value value : path.getValuesList()) {
+            values.add(new ValueWrapper(value));
+            if (new ValueWrapper(value).isNode()) {
+                nodes.add(new Vertex(value.getNodeValue()));
             }
-            if (new ValueWrapper(value, decodeType).isEdge()) {
-                relationships.add(new Relationship(value.getEdgeVal()));
+            if (new ValueWrapper(value).isEdge()) {
+                relationships.add(new Relationship(value.getEdgeValue()));
             }
         }
     }

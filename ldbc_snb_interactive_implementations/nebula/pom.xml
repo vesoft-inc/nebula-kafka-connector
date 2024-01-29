@@ -20,8 +20,14 @@
         </dependency>
         <dependency>
             <groupId>com.vesoft</groupId>
-            <artifactId>nebula-client</artifactId>
+            <artifactId>client</artifactId>
             <version>5.0.0</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>guava</artifactId>
+                    <groupId>com.google.guava</groupId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
@@ -51,7 +57,11 @@
                             </excludes>
                         </filter>
                     </filters>
-                </configuration>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">
+                    </transformer>
+                </transformers>
+            </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>

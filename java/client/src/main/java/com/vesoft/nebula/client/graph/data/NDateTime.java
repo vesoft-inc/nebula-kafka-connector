@@ -6,7 +6,7 @@
 package com.vesoft.nebula.client.graph.data;
 
 
-import com.vesoft.nebula.LocalDatetime;
+import com.vesoft.nebula.proto.LocalDatetime;
 import java.util.Objects;
 
 public class NDateTime {
@@ -19,42 +19,42 @@ public class NDateTime {
     /**
      * @return utc datetime year
      */
-    public short getYear() {
+    public int getYear() {
         return localDateTime.getYear();
     }
 
     /**
      * @return utc datetime month
      */
-    public byte getMonth() {
+    public int getMonth() {
         return localDateTime.getMonth();
     }
 
     /**
      * @return datetime day
      */
-    public byte getDay() {
+    public int getDay() {
         return localDateTime.getDay();
     }
 
     /**
      * @return datetime hour
      */
-    public byte getHour() {
+    public int getHour() {
         return localDateTime.getHour();
     }
 
     /**
      * @return datetime minute
      */
-    public byte getMinute() {
+    public int getMinute() {
         return localDateTime.getMinute();
     }
 
     /**
      * @return utc datetime second
      */
-    public byte getSecond() {
+    public int getSecond() {
         return localDateTime.getSec();
     }
 
@@ -68,9 +68,9 @@ public class NDateTime {
     @Override
     public String toString() {
         return String.format("%d-%02d-%02dT%02d:%02d:%02d.%06d",
-                localDateTime.year, localDateTime.month, localDateTime.day,
-                localDateTime.hour, localDateTime.minute, localDateTime.sec,
-                localDateTime.microsec);
+                localDateTime.getYear(), localDateTime.getMonth(), localDateTime.getDay(),
+                localDateTime.getHour(), localDateTime.getMinute(), localDateTime.getSec(),
+                localDateTime.getMicrosec());
     }
 
     @Override
@@ -82,13 +82,13 @@ public class NDateTime {
             return false;
         }
         NDateTime that = (NDateTime) o;
-        return localDateTime.year == that.getYear()
-                && localDateTime.month == that.getMonth()
-                && localDateTime.day == that.getDay()
-                && localDateTime.hour == that.getHour()
-                && localDateTime.minute == that.getMinute()
-                && localDateTime.sec == that.getSecond()
-                && localDateTime.microsec == that.getMicrosec();
+        return localDateTime.getYear() == that.getYear()
+                && localDateTime.getMonth() == that.getMonth()
+                && localDateTime.getDay() == that.getDay()
+                && localDateTime.getHour() == that.getHour()
+                && localDateTime.getMinute() == that.getMinute()
+                && localDateTime.getSec() == that.getSecond()
+                && localDateTime.getMicrosec() == that.getMicrosec();
     }
 
     @Override
