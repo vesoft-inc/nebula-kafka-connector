@@ -36,9 +36,17 @@ type GetCmdExecuteAsyncStatusResp struct {
 }
 
 type UploadFileReq struct {
-	UploadPath string `form:"uploadPath"`
+	Path string `form:"path"`
 }
 
 type UploadFileResp struct {
+	Data interface{} `json:"data"`
+}
+
+type DownloadFileReq struct {
+	Path string `form:"path"`
+}
+
+type DownloadFileResp struct {
 	Data interface{} `json:"data"`
 }

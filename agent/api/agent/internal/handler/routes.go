@@ -44,6 +44,11 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/v1/common/upload",
 				Handler: common.UploadFileHandler(serverCtx),
 			},
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/v1/common/download",
+				Handler: common.DownloadFileHandler(serverCtx),
+			},
 		},
 	)
 }

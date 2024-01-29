@@ -33,13 +33,13 @@ func (s *commonService) UploadFile(req *types.UploadFileReq) (*types.UploadFileR
 	if err = validateFile(header); err != nil {
 		return nil, err
 	}
-	if _, err = os.Stat(req.UploadPath); os.IsNotExist(err) {
-		if err = os.MkdirAll(req.UploadPath, 0755); err != nil {
+	if _, err = os.Stat(req.Path); os.IsNotExist(err) {
+		if err = os.MkdirAll(req.Path, 0755); err != nil {
 			return nil, err
 		}
 	}
 
-	filePath := path.Join(req.UploadPath, header.Filename)
+	filePath := path.Join(req.Path, header.Filename)
 	if _, err = utils.SaveFormFile(header, filePath); err != nil {
 		return nil, err
 	}
