@@ -158,7 +158,9 @@ func (cn *connection) Ping() error {
 		SessionId: cn.sessionId,
 		Stmt:      stmt,
 	}
-	_, err := cn.graphClient.Execute(context.Background(), in)
+	ctx, cancel := context.WithTimeout(context.Background(), cn.timeout)
+	defer cancel()
+	_, err := cn.graphClient.Execute(ctx, in)
 	return err
 }
 
@@ -166,7 +168,13 @@ func (cn *connection) Close() error {
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
 	// logout via statment, ignore the logout error
-	// _, _ = cn.graphClient.Execute(context.Background(), cn.sessionId, []byte("signout"))
+	in := &proto.ExecuteRequest{
+		SessionId: cn.sessionId,
+		Stmt:      []byte("SESSION CLOSE"),
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), cn.timeout)
+	defer cancel()
+	_, _ = cn.graphClient.Execute(ctx, in)
 	_ = cn.clientConn.Close()
 	return nil
 }

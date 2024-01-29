@@ -328,12 +328,12 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 // TODO(Aiee) We don't have a complete gql status yet
 func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (duration time.Duration) {
 	// Show table
+	if isVertical {
+		dataSetVerticalPrinter.PrintDataSet(res)
+	} else {
+		dataSetPrinter.PrintDataSet(res)
+	}
 	if res.RowSize() > 0 {
-		if isVertical {
-			dataSetVerticalPrinter.PrintDataSet(res)
-		} else {
-			dataSetPrinter.PrintDataSet(res)
-		}
 		numRows := res.RowSize()
 		duration = time.Since(startTime)
 		fmt.Printf("Got %d rows (time spent %v/%v)\n", numRows, time.Duration(res.Latency()*1000), duration)

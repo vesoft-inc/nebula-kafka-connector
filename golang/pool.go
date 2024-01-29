@@ -98,14 +98,23 @@ func (dp *driverPool) OnOpenClient(fn func(ConnSetter)) {
 }
 
 func (dp *driverPool) SetRequestTimeout(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = math.MaxInt64
+	}
 	dp.connCfg.requestTimeout = timeout
 }
 
 func (dp *driverPool) SetConnectTimeout(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = math.MaxInt64
+	}
 	dp.connCfg.connectTimeout = timeout
 }
 
 func (dp *driverPool) SetMaxLifeTime(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = math.MaxInt64
+	}
 	dp.connMaxLifeTime = timeout
 }
 

@@ -57,10 +57,6 @@ func (p *DataSetPrinter) closeFile() {
 }
 
 func (p *DataSetPrinter) PrintDataSet(res nebula.Result) {
-	if res.RowSize() == 0 {
-		return
-	}
-
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	var header []interface{}

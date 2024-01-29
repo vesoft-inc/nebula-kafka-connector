@@ -2,6 +2,7 @@ package nebula_ng
 
 import (
 	"context"
+	"math"
 	"math/rand"
 	"time"
 )
@@ -243,14 +244,23 @@ func (dc *driverConn) SetLogger(logger Logger) {
 }
 
 func (dc *driverConn) SetRequestTimeout(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = math.MaxInt64
+	}
 	dc.cfg.requestTimeout = timeout
 }
 
 func (dc *driverConn) SetConnectTimeout(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = math.MaxInt64
+	}
 	dc.cfg.connectTimeout = timeout
 }
 
 func (dc *driverConn) SetMaxLifeTime(timeout time.Duration) {
+	if timeout <= 0 {
+		timeout = math.MaxInt64
+	}
 	dc.maxLifeTime = timeout
 }
 
