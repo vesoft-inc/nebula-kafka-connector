@@ -2,10 +2,12 @@ package main
 
 import (
 	"compress/gzip"
-	"embed"
+	"crypto/tls"
+	"crypto/x509"
 	"flag"
 	"fmt"
-	"net/http"
+	"log"
+	"os"
 
 	gopkgmiddleware "github.com/vesoft-inc/go-pkg/middleware"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/config"
@@ -20,27 +22,36 @@ import (
 
 var configFile = flag.String("f", "etc/agent-api.yaml", "the config file")
 
-//go:embed assets/*
-var assetsFS embed.FS
-
 func main() {
 	flag.Parse()
 
 	var c config.Config
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
 
+	caCert, err := os.ReadFile(c.CAFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	cert, err := tls.LoadX509KeyPair(c.CertFile, c.KeyFile)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	tlsConfig := &tls.Config{
+		ClientCAs:    caCertPool,
+		ClientAuth:   tls.RequireAndVerifyClientCert,
+		Certificates: []tls.Certificate{cert},
+	}
+	tlsConfig.BuildNameToCertificate()
+
 	svcCtx := svc.NewServiceContext(c)
 
 	gzipHandler := gziphandler.MustNewGzipLevelHandler(gzip.DefaultCompression)
 	server := rest.MustNewServer(c.RestConf,
-		rest.WithNotFoundHandler(gzipHandler(
-			gopkgmiddleware.NewAssetsHandler(gopkgmiddleware.AssetsConfig{
-				Prefix:     "/assets/",
-				Root:       "./assets/",
-				SPA:        true,
-				Filesystem: http.FS(assetsFS),
-			}),
-		)),
+		rest.WithTLSConfig(tlsConfig),
 	)
 	defer server.Stop()
 

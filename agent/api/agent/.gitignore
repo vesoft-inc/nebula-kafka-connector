@@ -9,6 +9,7 @@ testbin/*
 tmp/*
 assets/*
 !assets/.gitkeep
+certs
 
 # Test binary, build with `go test -c`
 *.test

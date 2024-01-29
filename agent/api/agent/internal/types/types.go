@@ -7,7 +7,7 @@ type GetHealth struct {
 
 type CmdExecuteReq struct {
 	Command string `json:"command"`
-	Timeout int    `json:"timeout"`
+	Timeout int    `json:"timeout,optional"`
 }
 
 type CmdExecuteResp struct {
@@ -18,7 +18,7 @@ type CmdExecuteResp struct {
 type CmdExecuteAsyncReq struct {
 	CmdId   string `json:"cmdId"`
 	Command string `json:"command"`
-	Timeout int    `json:"timeout"`
+	Timeout int    `json:"timeout,optional"`
 }
 
 type CmdExecuteAsyncResp struct {
