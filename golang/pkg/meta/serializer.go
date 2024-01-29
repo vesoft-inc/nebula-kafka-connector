@@ -3,6 +3,8 @@ package meta
 import (
 	"bytes"
 	"encoding/binary"
+
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 
 // internel inteface for req reqSerializer and resp deserializer
@@ -191,14 +193,20 @@ func (d *defaultDeserializer) deserializeHeader() (*HeaderResponse, error) {
 		return nil, err
 	}
 	if !ok {
-		header.Code, err = d.deserializeUINT64()
+		code, err := d.deserializeUINT64()
 		if err != nil {
 			return nil, err
 		}
+		bs := make([]byte, 8)
+		binary.LittleEndian.PutUint64(bs, code)
+		header.Code = string(bs[:5])
+
 		header.Msg, err = d.deserializeString()
 		if err != nil {
 			return nil, err
 		}
+	} else {
+		header.Code = nebula.ErrorSuccessfulCompletion
 	}
 
 	header.NewHost, err = d.deserializeString()

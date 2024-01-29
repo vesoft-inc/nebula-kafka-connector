@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/nrpc"
 )
 
@@ -113,10 +114,10 @@ func (c *metaClient) sendWithRetry(req reqSerializer, resp respDeserializer) err
 			return fmt.Errorf("internal error: resp is not responseHeader")
 		}
 		header := hresp.getHeader()
-		if header.Code == 0 {
+		if header.Code == nebula.ErrorSuccessfulCompletion {
 			return nil
 		}
-		if header.Code == ErrorLeaderChange.Code() {
+		if header.Code == nebula.ErrorLeaderChange {
 			c.client = nil
 			c.address = fmt.Sprintf("%s:%d", header.NewHost, header.NewPort)
 			continue

@@ -153,7 +153,7 @@ func TestPoolPut(t *testing.T) {
 		errMsg   string
 	}{
 		{false, false, ""},
-		{true, false, "connection to 127.0.0.1:9669 is closed"},
+		{true, false, "[99005]: connection to 127.0.0.1:9669 is closed"},
 		{false, true, ""},
 	}
 	for _, tc := range testcases {

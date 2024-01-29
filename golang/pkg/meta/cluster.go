@@ -1,5 +1,9 @@
 package meta
 
+import (
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+)
+
 type (
 	CreateClusterReq struct {
 		*headerRequest
@@ -163,7 +167,7 @@ func (resp *ShowClusterResp) deserialize(d deserializer) error {
 		return err
 	}
 	//should handle leader change outside
-	if resp.GetErrorCode() != 0 {
+	if resp.GetErrorCode() != nebula.ErrorSuccessfulCompletion {
 		return nil
 	}
 	clusterLen, err := d.deserializeUINT32()
@@ -244,7 +248,7 @@ func (resp *ShowServiceResp) deserialize(d deserializer) error {
 		return err
 	}
 	//should handle leader change outside
-	if resp.GetErrorCode() != 0 {
+	if resp.GetErrorCode() != nebula.ErrorSuccessfulCompletion {
 		return nil
 	}
 

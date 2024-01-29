@@ -7,6 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/console/cache"
 	"github.com/vesoft-inc/nebula-ng-tools/console/printer"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
 
@@ -135,7 +136,7 @@ var metaCreateClusterCmd = &cobra.Command{
 		if err != nil {
 			return metaConsoleError("Create cluster failed", err.Error())
 		}
-		if resp.GetErrorCode() != 0 {
+		if resp.GetErrorCode() != nebula.ErrorSuccessfulCompletion {
 			return metaConsoleError("Create cluster failed", resp.GetErrorMsg())
 		}
 		fmt.Println("Create cluster successfully.")
@@ -171,7 +172,7 @@ var metaInitClusterCmd = &cobra.Command{
 		if err != nil {
 			return metaConsoleError("Init cluster failed", err.Error())
 		}
-		if resp.Code != 0 {
+		if resp.Code != nebula.ErrorSuccessfulCompletion {
 			return metaConsoleError("Init cluster failed", resp.GetErrorMsg())
 		}
 		fmt.Println("Init cluster successfully.")
@@ -203,7 +204,7 @@ var metaShowClusterCmd = &cobra.Command{
 		if err != nil {
 			return metaConsoleError("Show cluster failed", err.Error())
 		}
-		if resp.GetErrorCode() != 0 {
+		if resp.GetErrorCode() != nebula.ErrorSuccessfulCompletion {
 			return metaConsoleError("Show cluster failed", resp.GetErrorMsg())
 		}
 		header := []string{"cluster id", "cluster name", "replica", "zones"}
@@ -274,7 +275,7 @@ var metaAddServiceCmd = &cobra.Command{
 		if err != nil {
 			return metaConsoleError("Add service failed", err.Error())
 		}
-		if resp.GetErrorCode() != 0 {
+		if resp.GetErrorCode() != nebula.ErrorSuccessfulCompletion {
 			return metaConsoleError("Add service failed", resp.GetErrorMsg())
 		}
 		fmt.Println("Add service successfully.")
@@ -310,7 +311,7 @@ var metaShowServiceCmd = &cobra.Command{
 		if err != nil {
 			return metaConsoleError("Show service failed", err.Error())
 		}
-		if resp.Code != 0 {
+		if resp.Code != nebula.ErrorSuccessfulCompletion {
 			return metaConsoleError("Show service failed", resp.GetErrorMsg())
 		}
 		header := []string{"service id", "service type", "host", "port"}

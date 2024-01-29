@@ -33,7 +33,8 @@ type NebulaError struct {
 }
 
 func (e *NebulaError) Error() string {
-	return fmt.Sprintf(e.errorFormat, e.errorArgs...)
+	msg := fmt.Sprintf(e.errorFormat, e.errorArgs...)
+	return fmt.Sprintf("[%s]: %s", e.code, msg)
 }
 
 func (e *NebulaError) Code() string {

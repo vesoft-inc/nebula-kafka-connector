@@ -6,7 +6,7 @@ type (
 		clusterId   int64 // meta admin dont need clusterId
 	}
 	HeaderResponse struct {
-		Code    uint64
+		Code    string
 		Msg     string
 		NewHost string // only if code is leader changed
 		NewPort uint32 // only if code is leader changed
@@ -15,7 +15,7 @@ type (
 	responseHeader interface {
 		//getHeader for internal usage, would reconnect if the leader chanage.
 		getHeader() *HeaderResponse
-		GetErrorCode() uint64
+		GetErrorCode() string
 		GetErrorMsg() string
 	}
 )
@@ -24,7 +24,7 @@ func (hresp *HeaderResponse) getHeader() *HeaderResponse {
 	return hresp
 }
 
-func (hresp *HeaderResponse) GetErrorCode() uint64 {
+func (hresp *HeaderResponse) GetErrorCode() string {
 	return hresp.Code
 }
 
