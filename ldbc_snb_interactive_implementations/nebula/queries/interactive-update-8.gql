@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE PERSON_KNOWS_PERSON ({id:$person1Id})-[{creationDate : localdatetime($creationDate)}]->({id:$person2Id})
+INSERT EDGE PERSON_KNOWS_PERSON ({id:$person1Id})-[{creationDate : local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")}]->({id:$person2Id})

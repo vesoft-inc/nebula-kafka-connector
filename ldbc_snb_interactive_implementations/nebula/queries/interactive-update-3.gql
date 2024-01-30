@@ -1,2 +1,2 @@
 USE $graphName
-INSERT EDGE PERSON_LIKES_COMMENT ({id:$personId})-[{creationDate:localdatetime($creationDate)}]->({id: $commentId})
+INSERT EDGE PERSON_LIKES_COMMENT ({id:$personId})-[{creationDate:local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")}]->({id: $commentId})

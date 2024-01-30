@@ -13,11 +13,11 @@ RETURN DISTINCT tag, post
 NEXT
 USE $graphName
 LET valid = CASE
-        WHEN localdatetime($endDate) > post.creationDate AND post.creationDate >= localdatetime($startDate) THEN 1
+        WHEN local_datetime($endDate, "%Y-%m-%dT%H:%M:%S") > post.creationDate AND post.creationDate >= local_datetime($startDate, "%Y-%m-%dT%H:%M:%S") THEN 1
         ELSE 0
     END,
     invalid = CASE
-        WHEN localdatetime($startDate) > post.creationDate THEN 1
+        WHEN local_datetime($startDate, "%Y-%m-%dT%H:%M:%S") > post.creationDate THEN 1
         ELSE 0
     END
 RETURN sum(valid) AS postCount, sum(invalid) AS inValidPostCount, tag GROUP BY tag

@@ -11,7 +11,7 @@ WHERE friend <> root
 RETURN DISTINCT friend
 NEXT
 USE $graphName
-    MATCH (friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < localdatetime($maxDate))
+    MATCH (friend:Person)<-[:HAS_CREATOR]-(message:Message WHERE message.creationDate < local_datetime($maxDate, "%Y-%m-%dT%H:%M:%S"))
 ORDER BY
   message.creationDate DESC,
   message.id ASC
