@@ -69,26 +69,27 @@ var loginCmd = &cobra.Command{
 	Short: "Login meta server.",
 	Long:  `login meta server --addr [ip] --port [port] --user [user] --password [password]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var address string
 		if loginFlags.Metas == "" {
-			address := fmt.Sprintf("%s:%d", loginFlags.Addr, loginFlags.Port)
-			_, err := meta.NewMetaClient(address)
-			if err != nil {
-				return err
-			}
-			// TODO should login?
-			// metaclient.Login(loginFlags.User, loginFlags.Pass)
-			cache.SaveMetaSession(address)
+			address = fmt.Sprintf("%s:%d", loginFlags.Addr, loginFlags.Port)
 		} else {
 			metas := strings.Split(loginFlags.Metas, ",")
 			if len(metas) == 0 {
 				return fmt.Errorf("meta server address is empty")
 			}
-			_, err := meta.NewMetaClient(loginFlags.Metas)
-			if err != nil {
-				return err
-			}
-			cache.SaveMetaSession(loginFlags.Metas)
+			address = loginFlags.Metas
 		}
+		_, err := meta.NewMetaClient(address)
+		if err != nil {
+			return err
+		}
+		cache.SaveMetaSession(address)
+		// TODO should login?
+		// metaclient.Login(loginFlags.User, loginFlags.Pass)
+
+		fmt.Println("[Warning] Login meta is not implemented yet.")
+		fmt.Println("You can do operations without login now.")
+
 		return nil
 	},
 }
