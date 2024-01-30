@@ -6,10 +6,13 @@
 }
 */
 USE $graphName
-MATCH
-  path1 = ANY SHORTEST PATH (person1:Person{id: $person1Id})<-[:KNOWS]->{1,10}(person2:Person{id: $person2Id})
-RETURN
-  CASE
-      WHEN path1 IS NULL THEN -1
-      ELSE length(path1)
-  END AS shortestPathLength
+MATCH (s:Person)
+OPTIONAL MATCH (s:Person)-[e:KNOWS]->(t:Person)
+RETURN toGraph(s, toUndirected(e), t) AS g GROUP BY ()
+NEXT
+MATCH (person1:Person{id: $person1Id}), (person2:Person{id: $person2Id})
+RETURN g, element_id(person1) AS src_id, element_id(person2) AS dst_id
+NEXT
+CALL algo.bfs(g, src_id)
+FILTER node_id = dst_id
+RETURN distance as shortestPathLength
