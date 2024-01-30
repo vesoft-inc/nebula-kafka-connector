@@ -1,0 +1,205 @@
+version: '3'
+services:
+  metad0: &metad
+    image: ${IMAGE_GROUP}/nebula-metad:${IMAGE_VERSION}
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: metad0
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9559
+      - --data_path=/data/meta
+      - --log_dir=/logs
+      - --v=0
+      - --minloglevel=0
+      - --fromenv=local_ip
+    # healthcheck:
+    #   test: ["CMD", "curl", "-sf", "http://${NAME}:19559/status"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 20s
+    ports:
+      - 9559
+      - 19559
+      - 19560
+    volumes:
+      - ./data/metad0:/data/meta
+      - ./logs/metad0:/logs
+    networks:
+      - nebula-ng
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+
+  metad1:
+    <<: *metad
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: metad1
+    volumes:
+      - ./data/metad1:/data/meta
+      - ./logs/metad1:/logs
+
+  metad2:
+    <<: *metad
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: metad2
+    volumes:
+      - ./data/metad2:/data/meta
+      - ./logs/metad2:/logs
+
+  storaged0: &storaged
+    image: ${IMAGE_GROUP}/nebula-storaged:${IMAGE_VERSION}
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: storaged0
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9779
+      - --data_path=/data/storage
+      - --log_dir=/logs
+      - --v=0
+      - --minloglevel=0
+      - --fromenv=local_ip
+    depends_on:
+      - metad0
+      - metad1
+      - metad2
+    # healthcheck:
+    #   test: ["CMD", "curl", "-sf", "http://${NAME}:19779/status"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 20s
+    ports:
+      - 9779
+      - 19779
+      - 19780
+    volumes:
+      - ./data/storaged0:/data/storage
+      - ./logs/storaged0:/logs
+    networks:
+      - nebula-ng
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+
+  storaged1:
+    <<: *storaged
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: storaged1
+    volumes:
+      - ./data/storaged1:/data/storage
+      - ./logs/storaged1:/logs
+
+  storaged2:
+    <<: *storaged
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: storaged2
+    volumes:
+      - ./data/storaged2:/data/storage
+      - ./logs/storaged2:/logs
+
+  graphd0: &graphd
+    image: ${IMAGE_GROUP}/nebula-graphd:${IMAGE_VERSION}
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: graphd0
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9669
+      - --log_dir=/logs
+      - --v=0
+      - --minloglevel=0
+      - --fromenv=local_ip
+    depends_on:
+      - storaged0
+      - storaged1
+      - storaged2
+    # healthcheck:
+    #   test: ["CMD", "curl", "-sf", "http://graphd:19669/status"]
+    #   interval: 30s
+    #   timeout: 10s
+    #   retries: 3
+    #   start_period: 20s
+    ports:
+      - "9669:9669"
+      - 19669
+      - 19670
+    volumes:
+      - ./logs/graphd0:/logs
+    networks:
+      - nebula-ng
+    restart: on-failure
+    cap_add:
+      - SYS_PTRACE
+
+  graphd1:
+    <<: *graphd
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: graphd1
+    ports:
+      - 9669
+      - 19669
+      - 19670
+    volumes:
+      - ./logs/graphd0:/logs
+
+  graphd2:
+    <<: *graphd
+    environment:
+      USER: root
+      TZ:   "${TZ}"
+      FLAGS_local_ip: graphd2
+    ports:
+      - 9669
+      - 19669
+      - 19670
+    volumes:
+      - ./logs/graphd2:/logs
+  
+  console:
+    image: ${IMAGE_GROUP}/meta-console:${IMAGE_VERSION}
+    entrypoint: ""
+    command: 
+      - sh
+      - -c
+      - |
+        sleep 5;
+        meta-console login -m metad0:9559;
+        for i in `seq 1 60`;do
+          var=`meta-console cluster create --cluster my_cluster1 --replica 3 --zones zh_sh,zh_bj,zh_hz`;
+          if [[ $$? == 0 ]];then
+            break;
+          fi;
+          sleep 1;
+          echo "retry to connect metad0";
+        done ;
+        for i in `seq 0 2`;do
+          meta-console service add --type graph --ip graphd$${i} --port 9669 --cluster my_cluster1
+          meta-console service add --type storage --ip storaged$${i} --port 9559 --cluster my_cluster1
+        done;
+        tail -f /dev/null;
+
+    depends_on:
+      - metad0
+      - metad1
+      - metad2  
+    networks:
+      - nebula-ng
+
+networks:
+  nebula-ng:
