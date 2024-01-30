@@ -36,7 +36,7 @@ public class NebulaClientTest {
                     .setReconnect(true)
                     .build();
             ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getErrorMessage(), ErrorCode.SUCCESSFUL_COMPLETION.code);
+            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);
         } catch (UnknownHostException | IOErrorException | NoValidSessionException e) {
             Assert.fail(e.getMessage());
         }

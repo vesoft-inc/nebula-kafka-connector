@@ -171,8 +171,8 @@ public class TestData {
             assert record.get(5).isInt();
             assert record.get(5).asInt() == 4;
 
-            assert record.get(6).isDouble();
-            assert Math.abs(record.get(6).asDouble() - 10.01) < 0.001;
+            assert record.get(6).isFloat();
+            assert Math.abs(record.get(6).asFloat() - 10.01) < 0.001;
 
             assert record.get(7).isDouble();
             assert Math.abs(record.get(7).asDouble() - 20.01) < 0.001;
@@ -269,24 +269,59 @@ public class TestData {
     }
 
     @Test
-    public void testMap() {
+    public void testRecord() {
         ValueWrapper valueWrapper = new ValueWrapper(Value
                 .newBuilder()
                 .setRecordValue(getRowRecord())
                 .build());
+
+        NRecord record = valueWrapper.asRecord();
+        assert (!record.isEmpty());
+        Assert.assertEquals(6, record.size());
+        Assert.assertEquals(1, record.getValue("prop1").asInt());
+        Assert.assertEquals(2L, record.getValue("prop2").asLong());
+        Assert.assertEquals("Tom", record.getValue("prop3").asString());
+        Assert.assertTrue(record.getValue("prop4").asBoolean());
+        Assert.assertEquals(1, record.getValue("prop5").asNode().getId());
+        Assert.assertEquals(0, record.getValue("prop5").asNode().getNodeTypeId());
+        Assert.assertEquals("prop",
+                record.getValue("prop5").asNode().getProperties().keySet().toArray()[0]);
+
+        Map<String, ValueWrapper> values = record.getValuesMap();
         List<String> expectMapKeys = Arrays.asList("prop1", "prop2", "prop3", "prop4", "prop5",
                 "prop6");
-        Map<String, ValueWrapper> values = valueWrapper.asRecord();
         Assert.assertEquals(expectMapKeys.stream().sorted().collect(Collectors.toList()),
                 values.keySet().stream().sorted().collect(Collectors.toList()));
-        Assert.assertEquals(1, values.get("prop1").asInt());
-        Assert.assertEquals(2L, values.get("prop2").asLong());
-        Assert.assertEquals("Tom", values.get("prop3").asString());
-        Assert.assertTrue(values.get("prop4").asBoolean());
-        Assert.assertEquals(1, values.get("prop5").asNode().getId());
-        Assert.assertEquals(0, values.get("prop5").asNode().getNodeTypeId());
-        Assert.assertEquals("prop",
-                values.get("prop5").asNode().getProperties().keySet().toArray()[0]);
+    }
+
+    @Test
+    public void testEmptyRecord() {
+        ValueWrapper valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setRecordValue(Record.newBuilder().build())
+                .build());
+        NRecord record = valueWrapper.asRecord();
+        assert (record.isEmpty());
+    }
+
+    @Test
+    public void testEqualRecord() {
+        Map<String, Value> map = new HashMap<>();
+        map.put("prop", Value.newBuilder().setInt32Value(1).build());
+
+        ValueWrapper valueWrapper1 = new ValueWrapper(Value
+                .newBuilder()
+                .setRecordValue(Record.newBuilder().putAllValues(map).build())
+                .build());
+        NRecord record1 = valueWrapper1.asRecord();
+
+        ValueWrapper valueWrapper2 = new ValueWrapper(Value
+                .newBuilder()
+                .setRecordValue(Record.newBuilder().putAllValues(map).build())
+                .build());
+        NRecord record2 = valueWrapper2.asRecord();
+        Assert.assertEquals(record1, record2);
+        Assert.assertEquals(record1.hashCode(), record2.hashCode());
     }
 
 

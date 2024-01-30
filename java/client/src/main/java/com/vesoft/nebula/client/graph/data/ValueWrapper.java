@@ -171,7 +171,8 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isLong() {
-        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE;
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT64_VALUE;
     }
 
     /**
@@ -181,9 +182,22 @@ public class ValueWrapper {
      */
     public boolean isInt() {
         return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT32_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT32_VALUE
                 || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT16_VALUE
-                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT8_VALUE;
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT16_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT8_VALUE
+                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT8_VALUE;
     }
+
+    /**
+     * judge the Value is Float type
+     *
+     * @return boolean
+     */
+    public boolean isFloat() {
+        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE;
+    }
+
 
     /**
      * judge the Value is Double type
@@ -191,8 +205,7 @@ public class ValueWrapper {
      * @return boolean
      */
     public boolean isDouble() {
-        return value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DOUBLE_VALUE
-                || value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE;
+        return value.getDataCase() == Value.DataCase.DOUBLE_VALUE;
     }
 
     /**
@@ -283,6 +296,12 @@ public class ValueWrapper {
             return value.getInt16Value();
         } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT32_VALUE) {
             return value.getInt32Value();
+        } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT8_VALUE) {
+            return value.getUint8Value();
+        } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT16_VALUE) {
+            return value.getUint16Value();
+        } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT32_VALUE) {
+            return value.getUint32Value();
         } else {
             throw new InvalidValueException(
                     "Cannot get field `int` because value's type is " + getDataType());
@@ -298,6 +317,8 @@ public class ValueWrapper {
     public long asLong() throws InvalidValueException {
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE) {
             return value.getInt64Value();
+        } else if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.UINT64_VALUE) {
+            return value.getUint64Value();
         } else {
             throw new InvalidValueException(
                     "Cannot get field `long` because value's type is " + getDataType());
@@ -321,6 +342,20 @@ public class ValueWrapper {
     }
 
     /**
+     * Convert the original data type Value to float
+     *
+     * @return float
+     * @throws InvalidValueException if the value type is not float
+     */
+    public float asFloat() throws InvalidValueException {
+        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE) {
+            return value.getFloatValue();
+        }
+        throw new InvalidValueException(
+                "Cannot get field `float` because value's type is " + getDataType());
+    }
+
+    /**
      * Convert the original data type Value to double
      *
      * @return double
@@ -329,9 +364,6 @@ public class ValueWrapper {
     public double asDouble() throws InvalidValueException {
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.DOUBLE_VALUE) {
             return value.getDoubleValue();
-        }
-        if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.FLOAT_VALUE) {
-            return (double) value.getFloatValue();
         }
         throw new InvalidValueException(
                 "Cannot get field `double` because value's type is " + getDataType());
@@ -469,14 +501,9 @@ public class ValueWrapper {
                 "cannot get field `LocalDatetime` because value's type is " + getDataType());
     }
 
-    public Map<String, ValueWrapper> asRecord() throws InvalidValueException {
+    public NRecord asRecord() throws InvalidValueException {
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.RECORD_VALUE) {
-            Map<String, Value> values = value.getRecordValue().getValuesMap();
-            Map<String, ValueWrapper> recordValues = new HashMap<>(values.size());
-            for (Map.Entry<String, Value> kv : values.entrySet()) {
-                recordValues.put(kv.getKey(), new ValueWrapper(kv.getValue()));
-            }
-            return recordValues;
+            return new NRecord(value.getRecordValue());
         }
         throw new InvalidValueException(
                 "cannot get field `record` because value's type is " + getDataType());
@@ -525,6 +552,8 @@ public class ValueWrapper {
             return String.valueOf(asInt());
         } else if (isLong()) {
             return String.valueOf(asLong());
+        } else if (isFloat()) {
+            return String.valueOf(asFloat());
         } else if (isDouble()) {
             return String.valueOf(asDouble());
         } else if (isString()) {

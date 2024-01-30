@@ -9,6 +9,7 @@ import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
+import com.vesoft.nebula.client.graph.data.NRecord;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -442,9 +443,9 @@ public class NebulaClient implements Serializable {
         // define the property name list, and put the pk on the head of list.
         List<String> propertyNames = new ArrayList<>();
         propertyNames.add(pk);
-        Map<String, ValueWrapper> properties =
+        NRecord properties =
                 resultSet.getRows().get(0).get("properties").asRecord();
-        for (String key : properties.keySet()) {
+        for (String key : properties.getValuesMap().keySet()) {
             if (pk.equals(key)) {
                 continue;
             }
@@ -475,10 +476,10 @@ public class NebulaClient implements Serializable {
                     edgeType, graphName));
         }
 
-        Map<String, ValueWrapper> properties =
+        NRecord properties =
                 resultSet.getRows().get(0).get("properties").asRecord();
         List<String> propertyNames = new ArrayList<>();
-        propertyNames.addAll(properties.keySet());
+        propertyNames.addAll(properties.getValuesMap().keySet());
 
         return propertyNames;
     }

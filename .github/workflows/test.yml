@@ -46,5 +46,7 @@ jobs:
         with:
           maven-version: 3.8.2
       - name: Build with Maven
-        run: mvn -B package
+        run: |
+          mvn -B install -pl client -D test=TestData
+          mvn -B package -Dmaven.test.skip=true
         working-directory: java
