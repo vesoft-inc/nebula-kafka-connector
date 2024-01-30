@@ -140,15 +140,8 @@ public class Relationship extends BaseDataObject {
         for (String key : props.keySet()) {
             propStrs.add(key + ": " + props.get(key).toString());
         }
-        if (edge.getEdgeTypeId() > 0) {
-            return String.format("(%d)-[:%s@%d{%s}]->(%d)",
-                    getSrcId(), getEdgeName(), getRank(), String.join(", ", propStrs),
-                    getDstId());
-        } else {
-            return String.format("(%d)-[:%s@%d{%s}]->(%d)",
-                    getDstId(), getEdgeName(), getRank(), String.join(", ", propStrs),
-                    getSrcId());
-        }
-
+        return String.format("(%d)-[:%s@%d{%s}]->(%d)",
+                getSrcId(), getEdgeName(), getRank(), String.join(", ", propStrs),
+                getDstId());
     }
 }

@@ -137,7 +137,7 @@ public class ResultSet {
             throw new RuntimeException("got null object for server's response");
         }
         this.response = resp;
-        if (resp.getExecutionOutcome().hasResult()
+        if (!resp.getExecutionOutcome().hasResult()
                 || resp.getExecutionOutcome().getResult().getRecordsList().isEmpty()) {
             isEmpty = true;
         }
