@@ -10,6 +10,7 @@ tmp/*
 assets/*
 !assets/.gitkeep
 certs
+logs
 
 # Test binary, build with `go test -c`
 *.test

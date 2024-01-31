@@ -6,3 +6,4 @@ KeyFile: certs/server.key
 CAFile: certs/ca.crt
 Debug:
   Enable: false
+AuditLogFile: logs/audit/audit.log

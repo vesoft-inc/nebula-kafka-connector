@@ -8,11 +8,16 @@ import (
 
 	gopkgmiddleware "github.com/vesoft-inc/go-pkg/middleware"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/types"
+	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/audit"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/ecode"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/utils"
 )
 
 func (s *commonService) UploadFile(req *types.UploadFileReq) (*types.UploadFileResp, error) {
+	if err := audit.RecordOperation(s.ctx, audit.OpUploadFile, fmt.Sprintf("upload file to %s", req.Path)); err != nil {
+		return nil, err
+	}
+
 	httpReq, ok := gopkgmiddleware.GetRequest(s.ctx)
 	if !ok {
 		return nil, ecode.WithInternalServer(fmt.Errorf("unset KeepRequest"))

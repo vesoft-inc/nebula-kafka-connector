@@ -8,4 +8,5 @@ type Config struct {
 	Debug  struct {
 		Enable bool
 	}
+	AuditLogFile string `json:",default=logs/audit/audit.log"`
 }

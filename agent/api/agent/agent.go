@@ -13,6 +13,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/config"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/svc"
+	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/audit"
 
 	"github.com/NYTimes/gziphandler"
 	"github.com/zeromicro/go-zero/core/conf"
@@ -28,6 +29,12 @@ func main() {
 	var c config.Config
 	conf.MustLoad(*configFile, &c, conf.UseEnv())
 
+	// init audit log file
+	if err := audit.InitLogFile(c.AuditLogFile); err != nil {
+		log.Fatal(err)
+	}
+
+	// init tlsConfig
 	caCert, err := os.ReadFile(c.CAFile)
 	if err != nil {
 		log.Fatal(err)
