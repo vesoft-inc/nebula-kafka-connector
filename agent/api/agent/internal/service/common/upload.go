@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"mime/multipart"
 	"os"
-	"path"
+	"path/filepath"
 
 	gopkgmiddleware "github.com/vesoft-inc/go-pkg/middleware"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/types"
@@ -33,13 +33,23 @@ func (s *commonService) UploadFile(req *types.UploadFileReq) (*types.UploadFileR
 	if err = validateFile(header); err != nil {
 		return nil, err
 	}
-	if _, err = os.Stat(req.Path); os.IsNotExist(err) {
-		if err = os.MkdirAll(req.Path, 0755); err != nil {
+
+	filePath := ""
+	destFileInfo, err := os.Stat(req.Path)
+	if err != nil {
+		if !os.IsNotExist(err) {
 			return nil, err
+		}
+		filePath = req.Path
+	} else {
+		// If the destination path exists
+		if destFileInfo.IsDir() {
+			filePath = filepath.Join(req.Path, header.Filename)
+		} else {
+			filePath = req.Path
 		}
 	}
 
-	filePath := path.Join(req.Path, header.Filename)
 	if _, err = utils.SaveFormFile(header, filePath); err != nil {
 		return nil, err
 	}

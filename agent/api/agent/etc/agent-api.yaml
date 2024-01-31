@@ -1,6 +1,6 @@
 Name: agent-api
 Host: 0.0.0.0
-Port: 8888
+Port: 6688
 CertFile: certs/server.crt
 KeyFile: certs/server.key
 CAFile: certs/ca.crt
