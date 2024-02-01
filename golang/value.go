@@ -17,9 +17,6 @@ type UInt64 uint64
 type Float float32
 type Double float64
 type String string
-type Duration time.Duration
-type Datetime time.Time
-
 type ValueType uint8
 
 type (
@@ -42,10 +39,11 @@ type (
 		AsList() (List, error)
 		AsRecord() (Record, error)
 		AsDuration() (Duration, error)
-		AsLocalTime() (Time, error)
+		AsLocalTime() (LocalTime, error)
 		AsLocalDatetime() (LocalDatetime, error)
 		AsDate() (Date, error)
-		// AsDatetime() (Datetime, error)
+		AsZonedDatetime() (ZonedDatetime, error)
+		AsZonedTime() (ZonedTime, error)
 		AsNode() (Node, error)
 		AsEdge() (Edge, error)
 		AsPath() (Path, error)
@@ -60,25 +58,46 @@ type (
 		GetValues() map[string]Value
 	}
 
+	Duration interface {
+		String() string
+		GetMonths() uint32
+		GetSeconds() uint64
+		GetMicroseconds() uint32
+	}
+
 	LocalDatetime interface {
 		String() string
 		Date
-		Time
+		LocalTime
 	}
 
-	Date interface {
-		String() string
-		GetYear() uint32
-		GetMonth() uint32
-		GetDay() uint32
-	}
-
-	Time interface {
+	LocalTime interface {
 		String() string
 		GetHour() uint32
 		GetMinute() uint32
 		GetSec() uint32
 		GetMicrosec() uint32
+	}
+	ZonedDatetime interface {
+		LocalDatetime
+		TimeZone
+		Time() *time.Time
+	}
+	ZonedTime interface {
+		LocalTime
+		TimeZone
+	}
+
+	TimeZone interface {
+		//GetOffset return the time zone offset in seconds
+		GetOffset() int
+	}
+
+	Date interface {
+		String() string
+		GetYear() int32
+		GetMonth() uint32
+		GetDay() uint32
 	}
 
 	Node interface {
@@ -117,12 +136,11 @@ const (
 	ValueTypeEdge
 	ValueTypePath
 	ValueTypeDuration
-	ValueTypeLocalDate
+	ValueTypeDate
 	ValueTypeLocalTime
 	ValueTypeLocalDateTime
-	ValueTypeDate
-	ValueTypeTime
-	ValueTypeDateTime
+	ValueTypeZonedTime
+	ValueTypeZonedDateTime
 )
 
 func (vt ValueType) String() string {
@@ -149,10 +167,14 @@ func (vt ValueType) String() string {
 		return "DURATION"
 	case ValueTypeDate:
 		return "DATE"
-	case ValueTypeTime:
-		return "TIME"
-	case ValueTypeDateTime:
-		return "DATETIME"
+	case ValueTypeLocalTime:
+		return "LOCALTIME"
+	case ValueTypeLocalDateTime:
+		return "LOCALDATETIME"
+	case ValueTypeZonedTime:
+		return "ZONEDTIME"
+	case ValueTypeZonedDateTime:
+		return "ZONEDDATETIME"
 	case ValueTypeList:
 		return "LIST"
 	case ValueTypeRecord:
@@ -241,7 +263,7 @@ func (nv *EmptyValue) AsRecord() (Record, error) {
 }
 
 func (nv *EmptyValue) AsDuration() (Duration, error) {
-	return 0, nil
+	return nil, nil
 }
 
 // AsTime() (time.Time, error)
@@ -261,7 +283,14 @@ func (nv *EmptyValue) AsLocalDatetime() (LocalDatetime, error) {
 	return nil, nil
 }
 
-func (nv *EmptyValue) AsLocalTime() (Time, error) {
+func (nv *EmptyValue) AsLocalTime() (LocalTime, error) {
+	return nil, nil
+}
+
+func (nv *EmptyValue) AsZonedTime() (ZonedTime, error) {
+	return nil, nil
+}
+func (nv *EmptyValue) AsZonedDatetime() (ZonedDatetime, error) {
 	return nil, nil
 }
 

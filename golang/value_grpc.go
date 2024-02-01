@@ -14,12 +14,20 @@ type (
 	grpcValue struct {
 		data *proto.Value
 	}
-
 	grpcLocalTime struct {
 		data *proto.LocalTime
 	}
 	grpcLocalDatetime struct {
 		data *proto.LocalDatetime
+	}
+	grpcZonedTime struct {
+		data *proto.ZonedTime
+	}
+	grpcZonedDatetime struct {
+		data *proto.ZonedDatetime
+	}
+	grpcDuration struct {
+		data *proto.Duration
 	}
 	grpcDate struct {
 		data *proto.Date
@@ -80,16 +88,22 @@ func (v *grpcValue) String() string {
 		return s.String()
 	case ValueTypeDuration:
 		d, _ := v.AsDuration()
-		return time.Duration(d).String()
-	case ValueTypeLocalDateTime:
-		dt, _ := v.AsLocalDatetime()
-		return dt.String()
+		return d.String()
 	case ValueTypeDate:
 		d, _ := v.AsDate()
 		return d.String()
+	case ValueTypeLocalDateTime:
+		dt, _ := v.AsLocalDatetime()
+		return dt.String()
 	case ValueTypeLocalTime:
 		t, _ := v.AsLocalTime()
 		return t.String()
+	case ValueTypeZonedTime:
+		t, _ := v.AsZonedTime()
+		return t.String()
+	case ValueTypeZonedDateTime:
+		dt, _ := v.AsZonedDatetime()
+		return dt.String()
 	case ValueTypeList:
 		l, _ := v.AsList()
 		return l.String()
@@ -146,6 +160,10 @@ func (v *grpcValue) GetType() ValueType {
 		return ValueTypeLocalTime
 	case *proto.Value_LocalDatatimeValue:
 		return ValueTypeLocalDateTime
+	case *proto.Value_ZonedTimeValue:
+		return ValueTypeZonedTime
+	case *proto.Value_ZonedDatatimeValue:
+		return ValueTypeZonedDateTime
 	case *proto.Value_DateValue:
 		return ValueTypeDate
 	case *proto.Value_ListValue:
@@ -267,14 +285,9 @@ func (v *grpcValue) AsRecord() (Record, error) {
 
 func (v *grpcValue) AsDuration() (Duration, error) {
 	if v.GetType() != ValueTypeDuration {
-		return 0, errType("value is not duration")
+		return nil, errType("value is not duration")
 	}
-	var d time.Duration
-	d += time.Duration(v.data.GetDurationValue().GetMicroseconds()) * time.Microsecond
-	d += time.Duration(v.data.GetDurationValue().GetSeconds()) * time.Second
-	//TODO
-	// d += time.Duration(v.data.GetDurationValue().GetMinutes()) * time.Minute
-	return Duration(d), nil
+	return &grpcDuration{data: v.data.GetDurationValue()}, nil
 }
 
 func (v *grpcValue) AsNode() (Node, error) {
@@ -320,11 +333,25 @@ func (v *grpcValue) AsDate() (Date, error) {
 	return &grpcDate{data: v.data.GetDateValue()}, nil
 }
 
-func (v *grpcValue) AsLocalTime() (Time, error) {
+func (v *grpcValue) AsLocalTime() (LocalTime, error) {
 	if v.GetType() != ValueTypeLocalTime {
 		return nil, errType("value is not local time")
 	}
 	return &grpcLocalTime{data: v.data.GetLocalTimeValue()}, nil
+}
+
+func (v *grpcValue) AsZonedTime() (ZonedTime, error) {
+	if v.GetType() != ValueTypeZonedTime {
+		return nil, errType("value is not zoned time")
+	}
+	return &grpcZonedTime{data: v.data.GetZonedTimeValue()}, nil
+}
+
+func (v *grpcValue) AsZonedDatetime() (ZonedDatetime, error) {
+	if v.GetType() != ValueTypeZonedDateTime {
+		return nil, errType("value is not zoned time")
+	}
+	return &grpcZonedDatetime{data: v.data.GetZonedDatatimeValue()}, nil
 }
 
 func (l *grpcList) GetValues() []Value {
@@ -448,7 +475,7 @@ func (l *grpcLocalDatetime) String() string {
 		l.data.Hour, l.data.Minute, l.data.Sec, l.data.Microsec)
 }
 
-func (l *grpcLocalDatetime) GetYear() uint32 {
+func (l *grpcLocalDatetime) GetYear() int32 {
 	return l.data.Year
 }
 
@@ -480,8 +507,8 @@ func (d *grpcDate) String() string {
 	return fmt.Sprintf("%04d-%02d-%02d", d.data.Year, d.data.Month, d.data.Day)
 }
 
-func (d *grpcDate) GetYear() uint32 {
-	return d.data.Day
+func (d *grpcDate) GetYear() int32 {
+	return d.data.Year
 }
 
 func (d *grpcDate) GetMonth() uint32 {
@@ -511,4 +538,155 @@ func (t *grpcLocalTime) GetSec() uint32 {
 
 func (t *grpcLocalTime) GetMicrosec() uint32 {
 	return t.data.Microsec
+}
+
+func (d *grpcDuration) String() string {
+	var prefix, suffix string
+	if d.GetMonths() > 0 {
+		y := d.GetMonths() / 12
+		m := d.GetMonths() % 12
+		if y > 0 {
+			prefix += fmt.Sprintf("%dY", y)
+		}
+		if m > 0 {
+			prefix += fmt.Sprintf("%dM", m)
+		}
+	}
+	if d.GetSeconds() > 0 || d.GetMicroseconds() > 0 {
+		h, m, s := d.GetSeconds()/3600, (d.GetSeconds()%3600)/60, d.GetSeconds()%60
+		ms := d.GetMicroseconds()
+		ss := float64(s) + float64(ms)/1000000
+		if h > 0 {
+			suffix += fmt.Sprintf("%dH", h)
+		}
+		if m > 0 {
+			suffix += fmt.Sprintf("%dM", m)
+		}
+		if ms > 0 {
+			suffix += fmt.Sprintf("%fS", ss)
+		} else if s > 0 {
+			suffix += fmt.Sprintf("%dS", s)
+		}
+	}
+	if suffix == "" {
+		return fmt.Sprintf("P%s", prefix)
+	} else {
+		return fmt.Sprintf("P%sT%s", prefix, suffix)
+	}
+}
+
+func (d *grpcDuration) GetMonths() uint32 {
+	return d.data.Months
+}
+
+func (d *grpcDuration) GetSeconds() uint64 {
+	return d.data.Seconds
+}
+
+func (d *grpcDuration) GetMicroseconds() uint32 {
+	return d.data.Microseconds
+}
+
+func (zt *grpcZonedTime) String() string {
+	//TODO server would return offset with seconds
+	offset := zt.GetOffset()
+	var zone string
+	if offset < 0 {
+		zone = fmt.Sprintf("-%02d:%02d", -offset/3600, (-offset%3600)/60)
+	} else if offset > 0 {
+		zone = fmt.Sprintf("%02d:%02d", offset/3600, (offset%3600)/60)
+	} else {
+		zone = ""
+	}
+
+	return fmt.Sprintf("%02d:%02d:%02d.%06dZ%s",
+		zt.data.Hour,
+		zt.data.Minute,
+		zt.data.Sec,
+		zt.data.Microsec,
+		zone,
+	)
+}
+
+func (zt *grpcZonedTime) GetHour() uint32 {
+	return zt.data.Hour
+}
+
+func (zt *grpcZonedTime) GetMinute() uint32 {
+	return zt.data.Minute
+}
+
+func (zt *grpcZonedTime) GetSec() uint32 {
+	return zt.data.Sec
+}
+
+func (zt *grpcZonedTime) GetMicrosec() uint32 {
+	return zt.data.Microsec
+}
+
+func (zt *grpcZonedTime) GetOffset() int {
+	return 0
+}
+
+func (zdt *grpcZonedDatetime) String() string {
+	offset := zdt.GetOffset()
+	var zone string
+	if offset < 0 {
+		zone = fmt.Sprintf("-%02d:%02d", -offset/3600, (-offset%3600)/60)
+	} else if offset > 0 {
+		zone = fmt.Sprintf("%02d:%02d", offset/3600, (offset%3600)/60)
+	} else {
+		zone = ""
+	}
+	return fmt.Sprintf("%04d-%02d-%02dT%02d:%02d:%02d.%06dZ%s",
+		zdt.data.Year, zdt.data.Month, zdt.data.Day,
+		zdt.data.Hour, zdt.data.Minute, zdt.data.Sec, zdt.data.Microsec,
+		zone)
+}
+
+func (zdt *grpcZonedDatetime) GetOffset() int {
+	return 0
+}
+
+func (zdt *grpcZonedDatetime) Time() *time.Time {
+	timezone := time.FixedZone("", zdt.GetOffset())
+	t := time.Date(
+		int(zdt.data.Year),
+		time.Month(zdt.data.Month),
+		int(zdt.data.Day),
+		int(zdt.data.Hour),
+		int(zdt.data.Minute),
+		int(zdt.data.Sec),
+		int(zdt.data.Microsec)*int(time.Microsecond),
+		timezone,
+	)
+	return &t
+}
+
+func (zdt *grpcZonedDatetime) GetYear() int32 {
+	return zdt.data.Year
+}
+
+func (zdt *grpcZonedDatetime) GetMonth() uint32 {
+	return zdt.data.Month
+}
+
+func (zdt *grpcZonedDatetime) GetDay() uint32 {
+	return zdt.data.Day
+}
+
+func (zdt *grpcZonedDatetime) GetHour() uint32 {
+	return zdt.data.Hour
+}
+
+func (zdt *grpcZonedDatetime) GetMinute() uint32 {
+	return zdt.data.Minute
+}
+
+func (zdt *grpcZonedDatetime) GetSec() uint32 {
+	return zdt.data.Sec
+}
+
+func (zdt *grpcZonedDatetime) GetMicrosec() uint32 {
+	return zdt.data.Microsec
 }
