@@ -30,11 +30,11 @@ type (
 		graphOption       *common.GraphOption
 	}
 
-	graphClientGetter func(endpoint, username, password string) (nebula.Conn, error)
+	graphClientGetter func(endpoint, username, password string) (nebula.Client, error)
 
 	// GraphClient a wrapper for nebula client, could read data from DataCh
 	GraphClient struct {
-		Session  nebula.Conn
+		Session  nebula.Client
 		Pool     *GraphPool
 		DataCh   chan common.Data
 		username string
@@ -99,12 +99,11 @@ var outputHeader []string = []string{
 // NewNebulaGraph New for k6 initialization.
 func NewNebulaGraph() *GraphPool {
 	return &GraphPool{
-		clientGetter: func(endpoint string, username, password string) (nebula.Conn, error) {
+		clientGetter: func(endpoint string, username, password string) (nebula.Client, error) {
 			conn, err := nebula.NewNebulaClient(endpoint, username, password)
 			if err != nil {
 				return nil, err
 			}
-
 			if err := conn.Ping(); err != nil {
 				return nil, fmt.Errorf("Failed to ping: %s", err.Error())
 			}
@@ -205,7 +204,8 @@ func (gp *GraphPool) GetSession() (common.IGraphClient, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	client.SetRequestTimeout(time.Duration(gp.graphOption.TimeoutUs))
+	// client.SetGraph(gp.graphOption.Space)
 	s := &GraphClient{Session: client, Pool: gp, DataCh: gp.DataCh}
 	gp.clients = append(gp.clients, s)
 	return s, nil
@@ -239,6 +239,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		rows       int32
 		latency    int64
 	)
+	stmt = common.ProcessStmt(stmt)
 	start := time.Now()
 	resp, err = gc.Session.Execute(stmt)
 
@@ -247,6 +248,12 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		errMessage = err.Error()
 		rows = 0
 		latency = 0
+		gc.Session.Close()
+		sess, err := gc.Pool.GetSession()
+		if err != nil {
+			return nil, err
+		}
+		gc = sess.(*GraphClient)
 	} else {
 		rows = int32(resp.RowSize())
 		latency = resp.Latency()
@@ -266,7 +273,6 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 
 			for _, v := range row.Values() {
 				fr = append(fr, v.String())
-
 			}
 		}
 		o := &output{

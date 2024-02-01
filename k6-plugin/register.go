@@ -9,7 +9,7 @@ import (
 )
 
 func init() {
-	modules.Register("k6/x/nebulagraph", nebulagraph.NewNebulaGraph())
+	modules.Register("k6/x/nebulagraph", nebulagraph.NewModule())
 	modules.Register("k6/x/nebulagraph5", nebulagraph5.NewNebulaGraph())
 	output.RegisterExtension("aggcsv", func(p output.Params) (output.Output, error) {
 		return aggcsv.New(p)

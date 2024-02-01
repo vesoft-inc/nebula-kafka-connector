@@ -3,7 +3,7 @@ module github.com/vesoft-inc/nebula-ng-tools/k6-plugin
 go 1.19
 
 require (
-	github.com/vesoft-inc/k6-plugin v1.1.5
+	github.com/vesoft-inc/k6-plugin v1.1.8-0.20240129083933-183053c42291
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20230817035213-d28bc30bb8fc
 	go.k6.io/k6 v0.45.1
 )
@@ -17,6 +17,7 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/pprof v0.0.0-20230207041349-798e818bf904 // indirect
 	github.com/josharian/intern v1.0.0 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.19 // indirect
@@ -25,7 +26,8 @@ require (
 	github.com/serenize/snaker v0.0.0-20201027110005-a7ad2135616e // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/spf13/afero v1.1.2 // indirect
-	github.com/vesoft-inc/nebula-go/v3 v3.5.0 // indirect
+	github.com/vesoft-inc/fbthrift v0.0.0-20230214024353-fa2f34755b28 // indirect
+	github.com/vesoft-inc/nebula-go/v3 v3.6.1 // indirect
 	golang.org/x/net v0.16.0 // indirect
 	golang.org/x/sys v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
