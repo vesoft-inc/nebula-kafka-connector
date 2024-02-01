@@ -26,7 +26,7 @@ func NewServiceContext(c config.Config) *ServiceContext {
 }
 
 func createResponseHandler(c config.Config) response.Handler { //nolint:gocritic
-	detailsType := response.StandardHandlerDetailsNone
+	detailsType := response.StandardHandlerDetailsWithError
 	if c.Debug.Enable {
 		detailsType = response.StandardHandlerDetailsFull
 	}
