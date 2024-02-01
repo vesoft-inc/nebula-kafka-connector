@@ -3,7 +3,7 @@ syntax = "v1"
 type (
 	CmdExecuteReq {
 		Command string `json:"command"`
-		Timeout int    `json:"timeout,optional"`
+		Timeout int    `json:"timeout,default=60"`
 	}
 
 	CmdExecuteResp {
@@ -14,7 +14,7 @@ type (
 	CmdExecuteAsyncReq {
 		CmdId   string `json:"cmdId"`
 		Command string `json:"command"`
-		Timeout int    `json:"timeout,optional"`
+		Timeout int    `json:"timeout,default=60"`
 	}
 
 	CmdExecuteAsyncResp {
