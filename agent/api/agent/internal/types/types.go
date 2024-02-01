@@ -13,6 +13,7 @@ type CmdExecuteReq struct {
 type CmdExecuteResp struct {
 	Stdout string `json:"stdout"`
 	Stderr string `json:"stderr"`
+	Err    string `json:"err"`
 }
 
 type CmdExecuteAsyncReq struct {

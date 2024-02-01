@@ -18,13 +18,16 @@ func (s *commonService) CmdExecute(req *types.CmdExecuteReq) (resp *types.CmdExe
 
 	exec := executor.NewExecutor()
 	stdout, stderr, err := exec.Execute(s.ctx, req.Command, timeout)
+
+	errmsg := ""
 	if err != nil {
-		return nil, err
+		errmsg = err.Error()
 	}
 
 	return &types.CmdExecuteResp{
 		Stdout: string(stdout),
 		Stderr: string(stderr),
+		Err:    errmsg,
 	}, nil
 }
 

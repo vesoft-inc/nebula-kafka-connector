@@ -9,6 +9,7 @@ type (
 	CmdExecuteResp {
 		Stdout string `json:"stdout"`
 		Stderr string `json:"stderr"`
+		Err    string `json:"err"`
 	}
 
 	CmdExecuteAsyncReq {
