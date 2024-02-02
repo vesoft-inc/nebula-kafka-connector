@@ -4,6 +4,7 @@ use (
     ./console
 	./golang
 	./operator
-    ./k6-plugin
 	./agent
+  ./k6-plugin
+  ./ngadmin
 )

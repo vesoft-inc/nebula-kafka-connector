@@ -100,7 +100,6 @@ func (e *defaultExecutor) ExecuteAsync(ctx context.Context, cmdId, command strin
 	}()
 
 	return pid, nil
-
 }
 
 func (e *defaultExecutor) GetStatus(cmdId string) (done bool, stdout []byte, stderr []byte, err error) {

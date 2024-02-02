@@ -1,0 +1,27 @@
+kind: NebulaCluster
+version: "1.0"
+rollback: true
+installPath: /home/zhuang.miao/nebula5.x
+spec:
+  metad:
+    packagePath: ./bin/nebula-graph-5.0-x86_64-glibc-2.17.sh
+    config:
+      port: "9559"
+    hosts:
+    - host: 192.168.8.240:6688
+    clusters:
+    - zoneList:
+      - zone1
+      name: cluster_mizy_test
+      partition: 1
+      replica: 1
+      graphd:
+        config:
+          port: "9669"
+        hosts:
+        - host: 192.168.8.240:6688
+      storaged:
+        config:
+          port: "9779"
+        hosts:
+        - host: 192.168.8.240:6688
