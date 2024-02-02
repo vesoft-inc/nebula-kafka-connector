@@ -26,7 +26,7 @@ Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="
     $ go version
     ```
 
-    The version should be newer than 1.13.
+    The version should be newer than 1.19.
 
     Use Git to clone the source code of Nebula Graph Console to your host.
 
