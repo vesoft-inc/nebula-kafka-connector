@@ -71,7 +71,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             if ( !record.get( 11 ).isNull() ) {
                 List<ValueWrapper> valueList = record.get(11).asList();
                 for (ValueWrapper nebulaRecordVal : valueList) {
-                    Map<String, ValueWrapper> nebulaRecord = nebulaRecordVal.asRecord();
+                    Map<String, ValueWrapper> nebulaRecord = nebulaRecordVal.asRecord().getValuesMap();
                     if (nebulaRecord.containsKey("uniName") && nebulaRecord.containsKey("studyAtClassYear") && nebulaRecord.containsKey("uniCityName")) {
                         universities.add(new LdbcQuery1Result.Organization(nebulaRecord.get("uniName").asString(), getIntValue(nebulaRecord.get("studyAtClassYear")), nebulaRecord.get("uniCityName").asString()));
                     } else {
@@ -83,7 +83,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             if ( !record.get( 12 ).isNull() ) {
                 List<ValueWrapper> valueList = record.get(12).asList();
                 for (ValueWrapper nebulaRecordVal : valueList) {
-                    Map<String, ValueWrapper> nebulaRecord = nebulaRecordVal.asRecord();
+                    Map<String, ValueWrapper> nebulaRecord = nebulaRecordVal.asRecord().getValuesMap();
                     if (nebulaRecord.containsKey("companyName") && nebulaRecord.containsKey("workAtWorkFrom") && nebulaRecord.containsKey("companyCountryName")) {
                         companies.add(new LdbcQuery1Result.Organization(nebulaRecord.get("companyName").asString(), getIntValue(nebulaRecord.get("workAtWorkFrom")), nebulaRecord.get("companyCountryName").asString()));
                     } else {
