@@ -16,6 +16,7 @@ import com.vesoft.nebula.proto.SignoutRequest;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.nio.charset.Charset;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,8 +52,14 @@ public class GrpcConnection extends Connection {
     @Override
     public void close() {
         if (channel != null && !channel.isShutdown()) {
-            channel.shutdownNow();
+            try {
+                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                LOGGER.warn("close grpc connection is interrupted.", e);
+            }
         }
+        channel = null;
+        stub = null;
     }
 
     @Override

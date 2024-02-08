@@ -19,13 +19,17 @@ import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.client.graph.scan.TableRow;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GraphClientExample {
     private static final Logger log = LoggerFactory.getLogger(GraphClientExample.class);
-    static String host = "192.168.8.211:3999";
+    static String host = "192.168.15.8:9669";
     static String user = "root";
     static String passwd = "nebula";
 
@@ -36,7 +40,7 @@ public class GraphClientExample {
             client = NebulaClient.builder(host, user, passwd)
                     .setConnectTimeoutMills(1000)
                     .setRequestTimeoutMills(3000)
-                    .setMaxSessionSize(10)
+                    .setMaxSessionSize(200)
                     .setMinSessionSize(1)
                     .setRetryTimes(3)
                     .setIntervalTimeMills(1000)
@@ -45,11 +49,11 @@ public class GraphClientExample {
                     .setMaxWaitMills(1000)
                     .setStrictlyServerHealthy(true)
                     .build();
-
             createGraphType(client);
             createGraph(client);
             insertData(client);
             query(client);
+            queryWithMultiThread(client);
             scanNode(client);
             scanEdge(client);
 
@@ -76,19 +80,23 @@ public class GraphClientExample {
                     createSchema, resp.getErrorCode()));
             System.out.println("create graph type failed, " + resp.getErrorCode());
             System.exit(1);
+        } else {
+            log.info("crete graph type succeed!");
         }
         TimeUnit.SECONDS.sleep(5);
     }
 
     private static void createGraph(NebulaClient client) throws IOErrorException,
             InterruptedException, NoValidSessionException {
-        String createGraph = "CREATE GRAPH nba OF graph_type_nba";
+        String createGraph = "CREATE GRAPH nba graph_type_nba";
         ResultSet resp = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,
                     resp.getErrorCode()));
             System.out.println("create graph failed, " + resp.getErrorMessage());
             System.exit(1);
+        } else {
+            log.info("crete graph succeed!");
         }
         TimeUnit.SECONDS.sleep(5);
     }
@@ -106,6 +114,7 @@ public class GraphClientExample {
             System.out.println("insert graph node failed, " + resp.getErrorCode());
             System.exit(1);
         }
+        log.info("insert graph node succeed!");
 
         String insertEdges = "USE nba INSERT EDGE edge_type_follow ({id:1})-[{followness:90, "
                 + "likeness: 66.8}]->({id:2}),({id:2})-[{followness:100, likeness: 93.35}]->"
@@ -117,6 +126,7 @@ public class GraphClientExample {
             System.out.println("insert graph edge failed, " + resp.getErrorCode());
             System.exit(1);
         }
+        log.info("insert graph edge succeed!");
     }
 
     private static void query(NebulaClient client) throws IOErrorException,
@@ -128,6 +138,7 @@ public class GraphClientExample {
             log.error(String.format("Execute: `%s', failed: %s",
                     queryNode, resp.getErrorCode()));
         }
+        log.info("query succeed!");
         resolve(resp);
 
         System.out.println("\n\n");
@@ -139,6 +150,42 @@ public class GraphClientExample {
                     queryNode, resp.getErrorCode()));
         }
         resolve(resp);
+    }
+
+    private static void queryWithMultiThread(NebulaClient client) {
+        String queryNode = "USE nba MATCH (v:player) RETURN v.id, v.name, v.score, v.gender, "
+                + "v.rate";
+        int parallel = 200;
+
+        CountDownLatch countDownLatch = new CountDownLatch(parallel);
+        ExecutorService executorService = Executors.newFixedThreadPool(parallel);
+        AtomicInteger failed = new AtomicInteger(0);
+        for (int i = 0; i < parallel; i++) {
+            executorService.submit(() -> {
+                try {
+                    ResultSet result = client.execute(
+                            "USE nba MATCH ()-[e:follow]->() RETURN e.followness, e.likeness");
+                    if (!result.isSucceeded()) {
+                        log.error(String.format("Execute: `%s', failed: %s",
+                                queryNode, result.getErrorCode()));
+                        failed.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    countDownLatch.countDown();
+                }
+            });
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("failed execute: " + failed.get());
+
+        executorService.shutdown();
     }
 
 

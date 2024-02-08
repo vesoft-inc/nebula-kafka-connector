@@ -147,7 +147,7 @@ public class NebulaClient implements Serializable {
                     isBadSession = true;
                 }
                 log.warn(String.format("execute error for times %s,  message: %s", tryTimes + 1,
-                        resultSet.getErrorCode()));
+                        resultSet.getErrorMessage()));
                 if (tryTimes <= retryTimes) {
                     log.info("now retry the execute...");
                 }
@@ -428,7 +428,7 @@ public class NebulaClient implements Serializable {
         ResultSet resultSet = execute(descNodeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             log.error(String.format("get description of %s failed for %s", nodeType,
-                    resultSet.getErrorCode()));
+                    resultSet.getErrorMessage()));
             throw new IllegalArgumentException(String.format("node type %s does not exist in %s",
                     nodeType, graphName));
         }
@@ -471,7 +471,7 @@ public class NebulaClient implements Serializable {
         ResultSet resultSet = execute(descEdgeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             log.error(String.format("get description of %s failed for %s", edgeType,
-                    resultSet.getErrorCode()));
+                    resultSet.getErrorMessage()));
             throw new IllegalArgumentException(String.format("edge type %s does not exist in %s",
                     edgeType, graphName));
         }
