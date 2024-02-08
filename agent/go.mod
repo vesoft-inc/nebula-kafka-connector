@@ -4,6 +4,10 @@ go 1.20
 
 require (
 	github.com/NYTimes/gziphandler v1.1.1
+	github.com/aws/aws-sdk-go v1.50.8
+	github.com/colinmarc/hdfs/v2 v2.4.0
+	github.com/jcmturner/gokrb5/v8 v8.4.4
+	github.com/juju/ratelimit v1.0.2
 	github.com/vesoft-inc/go-pkg v0.0.0-20231117110005-307b542ecb31
 	github.com/zeromicro/go-zero v1.6.1
 )
@@ -23,6 +27,13 @@ require (
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.4.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway/v2 v2.18.0 // indirect
+	github.com/hashicorp/go-uuid v1.0.3 // indirect
+	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
+	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
+	github.com/jcmturner/gofork v1.7.6 // indirect
+	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
+	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/leodido/go-urn v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

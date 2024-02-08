@@ -1,0 +1,81 @@
+syntax = "v1"
+
+type (
+	S3DownloadReq {
+		Endpoint  string `json:"endpoint"`
+		Region    string `json:"region"`
+		AccessKey string `json:"accessKey"`
+		SecretKey string `json:"secretKey"`
+		Bucket    string `json:"bucket"`
+		Path      string `json:"path"`
+		LocalPath string `json:"localPath"`
+	}
+	S3DownloadResp {
+		Data interface{} `json:"data"`
+	}
+
+	S3UploadReq {
+		Endpoint  string `json:"endpoint"`
+		Region    string `json:"region"`
+		AccessKey string `json:"accessKey"`
+		SecretKey string `json:"secretKey"`
+		Bucket    string `json:"bucket"`
+		Path      string `json:"path"`
+		LocalPath string `json:"localPath"`
+	}
+	S3UploadResp {
+		Data interface{} `json:"data"`
+	}
+
+	KerberosConfig {
+		Enable                       bool   `json:"enable"`
+		Principle                    string `json:"principle"`
+		KeytabFilePath               string `json:"keytabFilePath"`
+		ConfigFilePath               string `json:"configFilePath"`
+		KerberosServicePrincipleName string `json:"kerberosServicePrincipleName"`
+	}
+
+	HDFSDownloadReq {
+		Address   string         `json:"address"`
+		Username  string         `json:"username"`
+		Path      string         `json:"path"`
+		LocalPath string         `json:"localPath"`
+		Kerberos  KerberosConfig `json:"kerberos,optional"`
+	}
+	HDFSDownloadResp {
+		Data interface{} `json:"data"`
+	}
+
+	HDFSUploadReq {
+		Address   string         `json:"address"`
+		Username  string         `json:"username"`
+		Path      string         `json:"path"`
+		LocalPath string         `json:"localPath"`
+		Kerberos  KerberosConfig `json:"kerberos,optional"`
+	}
+	HDFSUploadResp {
+		Data interface{} `json:"data"`
+	}
+)
+
+@server(
+	group: storage
+)
+
+service agent-api {
+	@doc "S3 Download"
+	@handler s3Download
+	post /api/v1/storage/s3/download(S3DownloadReq) returns (S3DownloadResp)
+	
+	@doc "S3 Upload"
+	@handler s3Upload
+	post /api/v1/storage/s3/upload(S3UploadReq) returns (S3UploadResp)
+	
+	@doc "HDFS Download"
+	@handler hdfsDownload
+	post /api/v1/storage/hdfs/download(HDFSDownloadReq) returns (HDFSDownloadResp)
+	
+	@doc "HDFS Upload"
+	@handler hdfsUpload
+	post /api/v1/storage/hdfs/upload(HDFSUploadReq) returns (HDFSUploadResp)
+}

@@ -51,3 +51,63 @@ type DownloadFileReq struct {
 type DownloadFileResp struct {
 	Data interface{} `json:"data"`
 }
+
+type S3DownloadReq struct {
+	Endpoint  string `json:"endpoint"`
+	Region    string `json:"region"`
+	AccessKey string `json:"accessKey"`
+	SecretKey string `json:"secretKey"`
+	Bucket    string `json:"bucket"`
+	Path      string `json:"path"`
+	LocalPath string `json:"localPath"`
+}
+
+type S3DownloadResp struct {
+	Data interface{} `json:"data"`
+}
+
+type S3UploadReq struct {
+	Endpoint  string `json:"endpoint"`
+	Region    string `json:"region"`
+	AccessKey string `json:"accessKey"`
+	SecretKey string `json:"secretKey"`
+	Bucket    string `json:"bucket"`
+	Path      string `json:"path"`
+	LocalPath string `json:"localPath"`
+}
+
+type S3UploadResp struct {
+	Data interface{} `json:"data"`
+}
+
+type KerberosConfig struct {
+	Enable                       bool   `json:"enable"`
+	Principle                    string `json:"principle"`
+	KeytabFilePath               string `json:"keytabFilePath"`
+	ConfigFilePath               string `json:"configFilePath"`
+	KerberosServicePrincipleName string `json:"kerberosServicePrincipleName"`
+}
+
+type HDFSDownloadReq struct {
+	Address   string         `json:"address"`
+	Username  string         `json:"username"`
+	Path      string         `json:"path"`
+	LocalPath string         `json:"localPath"`
+	Kerberos  KerberosConfig `json:"kerberos,optional"`
+}
+
+type HDFSDownloadResp struct {
+	Data interface{} `json:"data"`
+}
+
+type HDFSUploadReq struct {
+	Address   string         `json:"address"`
+	Username  string         `json:"username"`
+	Path      string         `json:"path"`
+	LocalPath string         `json:"localPath"`
+	Kerberos  KerberosConfig `json:"kerberos,optional"`
+}
+
+type HDFSUploadResp struct {
+	Data interface{} `json:"data"`
+}

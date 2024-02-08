@@ -6,6 +6,7 @@ import (
 
 	common "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/common"
 	health "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/health"
+	storage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/svc"
 
 	"github.com/zeromicro/go-zero/rest"
@@ -48,6 +49,31 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodGet,
 				Path:    "/api/v1/common/download",
 				Handler: common.DownloadFileHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/s3/download",
+				Handler: storage.S3DownloadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/s3/upload",
+				Handler: storage.S3UploadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/hdfs/download",
+				Handler: storage.HdfsDownloadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/hdfs/upload",
+				Handler: storage.HdfsUploadHandler(serverCtx),
 			},
 		},
 	)
