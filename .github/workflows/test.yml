@@ -16,33 +16,38 @@ concurrency:
 jobs:
   go-client:
     runs-on: [self-hosted, nebula-fast]
-    strategy:
-      matrix:
-        goVer: ['1.19']
+    container:
+      image: vesoft/nebula-dev:ubuntu2004
     steps:
-      - uses: actions/checkout@v3
-#      - name: Setup go ${{ matrix.goVer }}
-#        uses: actions/setup-go@v4
-#        with:
-#          go-version: ${{ matrix.goVer }}
-#          cache-dependency-path: golang/go.sum
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: false
       - name: NebulaGo Unit tests
-        run: |
-          export PATH=$PATH:/usr/local/go/bin
-          go test
+        run: make test
         working-directory: golang
+      - name: console build
+        run: make build
+        working-directory: console
+      - name: ngadmin build
+        run: make build
+        working-directory: ngadmin
+      - name: k6-plugin build
+        run: make build-dev
+        working-directory: k6-plugin
 
   java-client:
     runs-on: [self-hosted, nebula-fast]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Set up JDK 1.8
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '8'
       - name: Set up Maven
-        uses: stCarolas/setup-maven@v4.5
+        uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
       - name: Build with Maven

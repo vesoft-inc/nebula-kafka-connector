@@ -3,26 +3,25 @@ module github.com/vesoft-inc/nebula-ng-tools/ngadmin
 go 1.18
 
 require (
-	github.com/cheggaaa/pb/v3 v3.1.5
+	github.com/spf13/cobra v1.7.0
+	github.com/stretchr/testify v1.8.4
 	github.com/unknwon/goconfig v1.0.0
+	github.com/vesoft-inc/go-pkg v0.0.0-20231117110005-307b542ecb31
+	golang.org/x/sync v0.6.0
+	gopkg.in/yaml.v2 v2.4.0
+	gopkg.in/yaml.v3 v3.0.1
 )
 
-require github.com/acarl005/stripansi v0.0.0-20180116102854-5a71ef0e047d // indirect
-
 require (
-	github.com/VividCortex/ewma v1.2.0 // indirect
-	github.com/cheggaaa/pb v1.0.29 // indirect
-	github.com/fatih/color v1.15.0 // indirect
-	github.com/gizak/termui/v3 v3.1.0 // indirect
-	github.com/mattn/go-colorable v0.1.13 // indirect
-	github.com/mattn/go-isatty v0.0.20 // indirect
-	github.com/mattn/go-runewidth v0.0.15 // indirect
-	github.com/mitchellh/colorstring v0.0.0-20190213212951-d06e56a500db // indirect
-	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
-	github.com/nsf/termbox-go v0.0.0-20190121233118-02980233997d // indirect
-	github.com/rivo/uniseg v0.4.6 // indirect
-	github.com/schollz/progressbar/v3 v3.14.1 // indirect
-	github.com/vbauerster/mpb/v7 v7.5.3
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/term v0.16.0 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/go-resty/resty/v2 v2.10.0 // indirect
+	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/kr/pretty v0.3.1 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
+	golang.org/x/net v0.19.0 // indirect
+	golang.org/x/time v0.5.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 )
