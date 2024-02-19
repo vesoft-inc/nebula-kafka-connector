@@ -22,7 +22,6 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -443,13 +442,13 @@ public class NebulaClient implements Serializable {
         // define the property name list, and put the pk on the head of list.
         List<String> propertyNames = new ArrayList<>();
         propertyNames.add(pk);
-        NRecord properties =
-                resultSet.getRows().get(0).get("properties").asRecord();
-        for (String key : properties.getValuesMap().keySet()) {
-            if (pk.equals(key)) {
+        List<ValueWrapper> properties = resultSet.getRows().get(0).get("properties").asList();
+        for (ValueWrapper property : properties) {
+            String propertyName = property.asString().split(":")[0];
+            if (pk.equals(propertyName)) {
                 continue;
             }
-            propertyNames.add(key);
+            propertyNames.add(propertyName);
         }
         return propertyNames;
     }
@@ -476,11 +475,13 @@ public class NebulaClient implements Serializable {
                     edgeType, graphName));
         }
 
-        NRecord properties =
-                resultSet.getRows().get(0).get("properties").asRecord();
+        List<ValueWrapper> properties =
+                resultSet.getRows().get(0).get("properties").asList();
         List<String> propertyNames = new ArrayList<>();
-        propertyNames.addAll(properties.getValuesMap().keySet());
-
+        for (ValueWrapper property : properties) {
+            String propertyName = property.asString().split(":")[0];
+            propertyNames.add(propertyName);
+        }
         return propertyNames;
     }
 
