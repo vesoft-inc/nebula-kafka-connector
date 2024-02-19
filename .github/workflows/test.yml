@@ -18,6 +18,8 @@ jobs:
     runs-on: [self-hosted, nebula-fast]
     container:
       image: vesoft/nebula-dev:ubuntu2004
+      env:
+        GOPROXY: ${{ vars.GOPROXY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
