@@ -39,6 +39,8 @@ jobs:
 
   java-client:
     runs-on: [self-hosted, nebula-fast]
+    container:
+      image: vesoft/nebula-dev:ubuntu2004
     steps:
       - uses: actions/checkout@v4
       - name: Set up JDK 1.8

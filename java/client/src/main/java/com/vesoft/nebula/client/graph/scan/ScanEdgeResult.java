@@ -42,21 +42,19 @@ public class ScanEdgeResult extends ScanResult {
         if (tableRows.isEmpty()) {
             for (ResultSet resultSet : results) {
                 List<ResultSet.Record> records = resultSet.getRows();
-                records.remove(records.size() - 1);
                 for (ResultSet.Record record : records) {
-                    List<ValueWrapper> values = record.values();
                     List<ValueWrapper> rowValues = new ArrayList<>();
-                    Map<String, ValueWrapper> properties;
-                    Vertex srcNode = values.get(0).asNode();
-                    Vertex dstNode = values.get(1).asNode();
-                    Relationship edge = values.get(2).asEdge();
+
+                    Vertex srcNode = record.get("Src").asNode();
+                    Vertex dstNode = record.get("Dst").asNode();
+                    Relationship edge = record.get("Edge").asEdge();
                     for (String key : srcNode.getProperties().keySet()) {
                         rowValues.add(srcNode.getProperties().get(key));
                     }
                     for (String key : dstNode.getProperties().keySet()) {
                         rowValues.add(dstNode.getProperties().get(key));
                     }
-                    properties = edge.getProperties();
+                    Map<String, ValueWrapper> properties = edge.getProperties();
                     for (String propName : propNames) {
                         rowValues.add(properties.get(propName));
                     }

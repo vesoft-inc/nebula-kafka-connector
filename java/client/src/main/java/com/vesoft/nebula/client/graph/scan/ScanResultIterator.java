@@ -6,6 +6,7 @@
 package com.vesoft.nebula.client.graph.scan;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.net.Session;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -105,5 +106,13 @@ public class ScanResultIterator implements Serializable {
             pool.returnObject(session);
         }
         return result;
+    }
+
+    protected String getCursor(ResultSet resultSet) {
+        Map<String, List<ValueWrapper>> extraInfo = resultSet.getExtraInfo();
+        if (!extraInfo.containsKey("cursor")) {
+            throw new RuntimeException("result does not contain cursor in extra info.");
+        }
+        return extraInfo.get("cursor").get(0).asString();
     }
 }

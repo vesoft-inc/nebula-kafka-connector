@@ -101,10 +101,4 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
         return new ScanEdgeResult(results, propNames);
     }
 
-    private String getCursor(ResultSet resultSet) {
-        List<ResultSet.Record> records = resultSet.getRows();
-        ResultSet.Record record = records.get(records.size() - 1);
-        ValueWrapper value = record.values().get(2);
-        return value.asEdge().getProperties().get(CURSOR_NAME).asString();
-    }
 }

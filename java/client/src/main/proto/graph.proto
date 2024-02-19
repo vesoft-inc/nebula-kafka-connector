@@ -208,6 +208,7 @@ message ExecutionOutcome {
     GQLStatus           gql_status              = 1;
     ResultTable         result                  = 2;
     bytes               plan_desc               = 3;
+    map<string, Row>    extra_info              = 4;
 }
 
 message ExecuteRequest {

@@ -36,7 +36,6 @@ public class ScanNodeResult extends ScanResult {
         if (tableRows.isEmpty()) {
             for (ResultSet resultSet : results) {
                 List<ResultSet.Record> records = resultSet.getRows();
-                records.remove(records.size() - 1);
                 for (ResultSet.Record record : records) {
                     List<ValueWrapper> values = record.values();
                     List<ValueWrapper> rowValues = new ArrayList<>();

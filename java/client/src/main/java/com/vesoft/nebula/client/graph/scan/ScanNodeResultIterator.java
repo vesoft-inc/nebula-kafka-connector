@@ -100,11 +100,4 @@ public class ScanNodeResultIterator extends ScanResultIterator {
         return new ScanNodeResult(results, propNames);
     }
 
-    private String getCursor(ResultSet resultSet) {
-        List<ResultSet.Record> records = resultSet.getRows();
-        ResultSet.Record record = records.get(records.size() - 1);
-        ValueWrapper value = record.values().get(0);
-        return value.asNode().getProperties().get(CURSOR_NAME).asString();
-    }
-
 }

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 
 public class GraphClientExample {
     private static final Logger log = LoggerFactory.getLogger(GraphClientExample.class);
-    static String host = "192.168.15.8:9669";
+    static String host = "192.168.8.6:3820";
     static String user = "root";
     static String passwd = "nebula";
 
@@ -259,8 +259,13 @@ public class GraphClientExample {
         String nodeType = "node_type_player";
 
         ScanNodeResultIterator iterator = client.scanNode(graphName, nodeType, 3, 10);
+        boolean hasPrintPropNames = false;
         while (iterator.hasNext()) {
             ScanNodeResult result = iterator.next();
+            if (!hasPrintPropNames) {
+                System.out.println(result.getPropNames());
+                hasPrintPropNames = true;
+            }
             if (result.isEmpty()) {
                 continue;
             }
@@ -278,13 +283,18 @@ public class GraphClientExample {
         String graphName = "nba";
         String edgeType = "edge_type_follow";
 
-        ScanEdgeResultIterator iterator = client.scanEdge(graphName, edgeType, 3, 10);
+        ScanEdgeResultIterator iterator = client.scanEdge(graphName, edgeType, 2, 10);
+        boolean hasPrintPropNames = false;
         while (iterator.hasNext()) {
             ScanEdgeResult result = iterator.next();
+            if (!hasPrintPropNames) {
+                System.out.println(result.getPropNames());
+                hasPrintPropNames = true;
+            }
             if (result.isEmpty()) {
                 continue;
             }
-            System.out.println(result.getPropNames());
+
             List<TableRow> tableRows = result.getTableRows();
             for (TableRow row : tableRows) {
                 System.out.println(row.getValues());

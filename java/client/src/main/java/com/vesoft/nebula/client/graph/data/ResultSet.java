@@ -14,8 +14,10 @@ import com.vesoft.nebula.proto.Row;
 import com.vesoft.nebula.proto.Value;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Spliterator;
 import java.util.function.Consumer;
 
@@ -275,6 +277,27 @@ public class ResultSet {
             rows.add(new Record(columnNames, row));
         }
         return rows;
+    }
+
+    /**
+     * get extra info for result
+     *
+     * @return map for extra info
+     */
+    public Map<String, List<ValueWrapper>> getExtraInfo() {
+        if (!response.hasExecutionOutcome()) {
+            return new HashMap<>();
+        }
+        Map<String, Row> extraInfos = response.getExecutionOutcome().getExtraInfoMap();
+        Map<String, List<ValueWrapper>> extraInfoMap = new HashMap<>();
+        for (Map.Entry<String, Row> info : extraInfos.entrySet()) {
+            List<ValueWrapper> infoValues = new ArrayList<>();
+            for (Value value : info.getValue().getValuesList()) {
+                infoValues.add(new ValueWrapper(value));
+            }
+            extraInfoMap.put(info.getKey(), infoValues);
+        }
+        return extraInfoMap;
     }
 
     @Override
