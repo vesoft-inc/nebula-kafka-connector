@@ -1,10 +1,10 @@
 go 1.20
 
 use (
-    ./console
+	./console
 	./golang
 	./operator
 	./agent
-  ./k6-plugin
-  ./ngadmin
+	./k6-plugin
+	./ngadmin
 )

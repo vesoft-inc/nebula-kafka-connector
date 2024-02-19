@@ -1,6 +1,6 @@
 module github.com/vesoft-inc/nebula-ng-tools/console
 
-go 1.18
+go 1.19
 
 require (
 	github.com/c-bata/go-prompt v0.2.6
