@@ -24,8 +24,11 @@ spec:
             port: 9779
           hosts:
             - host: "192.168.8.240:6688"
-  licenseManager:
-    packagePath: "/path/to/nebulagraph-5.0.sh"
+  license-manager:
+    packagePath: "./bin/lm.tar.gz"
+    execShellPath: "./nebula-license-manager/scripts/license-manager.service"
+    binPath: "./nebula-license-manager/nebula-license-manager"
+    startType: "shell" # systemd or shell, if systemd, need to provide binPath else provide execShellPath
     config:
       port: 9119
     hosts:

@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
 )
@@ -58,6 +59,8 @@ func (d *Extract) Execute() error {
 			return fmt.Errorf("chmod failed %s stderr: %s, err: %s", d.pkgPath, string(stderr), err.Error())
 		}
 		cmd = fmt.Sprintf("%s --prefix=%s", d.pkgPath, d.extractPath)
+	} else if strings.HasSuffix(d.pkgPath, ".tar.gz") {
+		cmd = fmt.Sprintf("tar -zxf %s -C %s", d.pkgPath, d.extractPath)
 	}
 	_, stderr, err = executor.Shell(cmd, d.sudo)
 	if err != nil {
@@ -81,5 +84,5 @@ func (d *Extract) Rollback() error {
 }
 
 func (d *Extract) String() string {
-	return "Extract"
+	return "Extract " + d.pkgPath
 }

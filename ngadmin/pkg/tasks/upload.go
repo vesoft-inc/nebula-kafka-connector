@@ -67,5 +67,5 @@ func (d *Upload) Rollback() error {
 }
 
 func (d *Upload) String() string {
-	return "Upload"
+	return "Upload " + d.srcPath + " to " + d.host + ":" + d.dstPath
 }

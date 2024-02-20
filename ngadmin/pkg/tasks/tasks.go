@@ -12,18 +12,23 @@ var mu = &sync.Mutex{}
 
 func Init() {
 	TasksMap = map[string]TaskGernerator{
-		"debug":            NewDebug,
-		"shell":            NewShell,
-		"connect":          NewConnect,
-		"upload":           NewUpload,
-		"serial":           NewSerial,
-		"parallel":         NewParallel,
-		"config":           NewConfig,
-		"init_config":      NewInitConfig,
-		"create_cluster":   NewCreateCluster,
-		"nebula_operation": NewNebulaOperation,
-		"extract":          NewExtract,
-		"check_dir":        NewCheckDir,
+		"debug":              NewDebug,
+		"shell":              NewShell,
+		"connect":            NewConnect,
+		"upload":             NewUpload,
+		"serial":             NewSerial,
+		"parallel":           NewParallel,
+		"config":             NewConfig,
+		"init_config":        NewInitConfig,
+		"create_cluster":     NewCreateCluster,
+		"nebula_operation":   NewNebulaOperation,
+		"extract":            NewExtract,
+		"check_dir":          NewCheckDir,
+		"delete_nebula_data": NewDeleteNebulaDataTask,
+		"delay":              NewDelay,
+		"nebula_status":      NewNebulaStatus,
+		"operate":            NewOperate,
+		"rm":                 NewRM,
 	}
 
 }

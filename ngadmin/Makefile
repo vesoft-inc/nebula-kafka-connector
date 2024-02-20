@@ -20,5 +20,8 @@ test:
 test-install:build
 	./bin/ngadmin install -c ./examples/nebula.yaml --force
 
+test-uninstall:build
+	./bin/ngadmin uninstall -c ./examples/nebula.yaml
+
 test-verify:build
 	./bin/ngadmin verify -c ./examples/nebula.yaml

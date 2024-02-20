@@ -14,11 +14,9 @@ func Verify(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 		return nil, err
 	}
 	workflow := &types.WorkflowSpec{
-		Type: "parallel",
-		Params: &tasks.ParallelParams{
-			Name: "verify",
-		},
-		Rollback: spec.Rollback,
+		Type:        "parallel",
+		Description: "verify nebula cluster",
+		Rollback:    spec.Rollback,
 		Tasks: []*types.TaskSpec{
 			verifyTask,
 		},

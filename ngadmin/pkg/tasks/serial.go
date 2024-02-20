@@ -13,7 +13,6 @@ type Serial struct {
 	name       string
 }
 type SerialParams struct {
-	Name string `json:"name"`
 }
 
 func NewSerial(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
@@ -25,15 +24,11 @@ func NewSerial(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) 
 		}
 		tasks = append(tasks, task)
 	}
-	params, ok := taskSpec.Params.(*SerialParams)
-	if !ok {
-		params = &SerialParams{}
-	}
 	return &Serial{
 		JobContext: taskContext,
 		taskSpec:   taskSpec,
 		tasks:      tasks,
-		name:       params.Name,
+		name:       taskSpec.Description,
 	}, nil
 }
 

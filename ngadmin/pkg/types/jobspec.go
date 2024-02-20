@@ -9,13 +9,17 @@ type JobSpec struct {
 }
 
 type ProcessMap struct {
-	Metad *MetadSpec `yaml:"metad,omitempty"`
+	Metad          *MetadSpec `yaml:"metad,omitempty"`
+	LicenseManager *Process   `yaml:"license-manager,omitempty"`
 }
 
 type Process struct {
-	PackagePath string            `yaml:"packagePath,omitempty"`
-	Config      map[string]string `yaml:"config,omitempty"`
-	Hosts       []Agent           `yaml:"hosts,omitempty"`
+	Name          string            `yaml:"name,omitempty"`
+	PackagePath   string            `yaml:"packagePath,omitempty"`
+	Config        map[string]string `yaml:"config,omitempty"`
+	Hosts         []Agent           `yaml:"hosts,omitempty"`
+	StartType     string            `yaml:"startType,omitempty"`     //systemd, shell
+	ExecShellPath string            `yaml:"execShellPath,omitempty"` // exec path
 }
 
 type MetadSpec struct {
@@ -34,4 +38,12 @@ type Cluster struct {
 	Replica   int      `yaml:"replica,omitempty"`
 	Graphd    Process  `yaml:"graphd,omitempty"`
 	Storaged  Process  `yaml:"storaged,omitempty"`
+}
+
+type StatusItem struct {
+	Product string
+	Service string
+	Host    string
+	Port    string
+	Status  string
 }

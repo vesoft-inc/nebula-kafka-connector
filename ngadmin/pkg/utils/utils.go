@@ -5,6 +5,7 @@ import (
 	"path"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
 )
@@ -15,6 +16,10 @@ func GetClusterPath(installPath string) string {
 
 func GetDownloadPath(installPath string) string {
 	return path.Join(installPath, "download/")
+}
+
+func GetUtilPath(installPath, utilName string) string {
+	return path.Join(installPath, utilName)
 }
 
 func GetMetaAddressListString(metaHosts []types.Agent, port string) string {
@@ -59,4 +64,20 @@ func GetHttpsHost(host string) string {
 		return "https://" + host
 	}
 	return host
+}
+
+func ParseTimeoutString(timeout string) (time.Duration, error) {
+	lastStr := timeout[len(timeout)-1:]
+	var timeType time.Duration
+	if lastStr == "m" {
+		timeType = time.Minute
+	} else {
+		timeType = time.Second
+	}
+	numberStr := timeout[:len(timeout)-1]
+	number, err := strconv.Atoi(numberStr)
+	if err != nil {
+		return 0, fmt.Errorf("parse timeout string error: %s", err)
+	}
+	return time.Duration(number) * timeType, nil
 }

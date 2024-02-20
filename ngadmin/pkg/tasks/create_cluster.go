@@ -2,7 +2,6 @@ package tasks
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
@@ -82,7 +81,6 @@ func (d *CreateCluster) Execute() error {
 		}
 		d.JobContext.Logger.Info("add host success: " + host.Host + " " + resp.Msg)
 	}
-	time.Sleep(5 * time.Second) // now we need to wait for the service to be ready
 	if d.ifExited() {
 		return fmt.Errorf("exited signal received")
 	}

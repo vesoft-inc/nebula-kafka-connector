@@ -16,6 +16,8 @@ func main() {
 	cmd.RegisteInstallCmd(rootCmd)
 	cmd.RegisteVerifyCmd(rootCmd)
 	cmd.RegisteUninstallCmd(rootCmd)
+	cmd.RegisteOperationCmd(rootCmd)
+	cmd.RegisteStatusCmd(rootCmd)
 
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)

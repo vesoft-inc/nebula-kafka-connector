@@ -48,7 +48,7 @@ func (j *Job) RunWorkflow(workflow *types.WorkflowSpec) error {
 	j.WorkflowSpec = workflow
 	j.Context.TasksTree = []tasks.Task{}
 	j.Context.Progress.Total = j.GetTotalTaskNum(workflow)
-	j.Context.Logger.Info(fmt.Sprintf("job %s start", j.Name))
+	j.Context.Logger.Info(fmt.Sprintf("job \"%s\" start", j.Name))
 
 	tasks := workflow.Tasks
 	if workflow.Type == "" {
@@ -72,7 +72,7 @@ func (j *Job) RunWorkflow(workflow *types.WorkflowSpec) error {
 		}
 		return err
 	}
-	j.Context.Logger.Info(fmt.Sprintf("job %s done", j.Name))
+	j.Context.Logger.Info(fmt.Sprintf("job \"%s\" done", j.Name))
 	return nil
 }
 

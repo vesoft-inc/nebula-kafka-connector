@@ -1,18 +1,20 @@
 # ngadmin
 
+## linux software dependencies
++ timeout
+
 ## build
 
 ```bash
 make
 ```
 
-# make ca cert
+# test
+## make ca cert
 
 be sure to put the cert in the certs directory in the bin directory
 ```bash
-cd bin 
-mkdir cert
-cd cert
+mkdir certs
 ```
 
 ## server cert
@@ -28,4 +30,15 @@ openssl req -new -x509 -key server.key -out ca.crt -days 365
 openssl genrsa -out client.key 2048
 openssl req -new -key client.key -out client.csr
 openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey server.key -set_serial 01 -out client.crt
+```
+
+## start agent
+```bash
+cd agent/api/agent && go run agent.go
+```
+
+## run ngadmin
+```bash
+make test-install
+make test-uninstall
 ```

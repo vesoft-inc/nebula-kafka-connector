@@ -11,6 +11,7 @@ type ShellParams struct {
 	Command string
 	Sudo    bool
 	CmdID   string
+	NeedLog bool
 }
 
 func NewShell(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
@@ -26,6 +27,7 @@ func NewShell(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
 		command:    params.Command,
 		sudo:       params.Sudo,
 		cmdID:      params.CmdID,
+		needLog:    params.NeedLog,
 	}, nil
 }
 
@@ -36,6 +38,7 @@ type Shell struct {
 	command    string
 	sudo       bool
 	cmdID      string
+	needLog    bool
 }
 
 func (d *Shell) Execute() error {
@@ -47,6 +50,9 @@ func (d *Shell) Execute() error {
 	outputID := d.host
 	if d.cmdID != "" {
 		outputID = d.cmdID
+	}
+	if d.needLog {
+		d.JobContext.Logger.Info(d.command + ":\n" + stdout)
 	}
 	d.JobContext.SetValue(outputID, map[string]any{
 		"stdout": stdout,

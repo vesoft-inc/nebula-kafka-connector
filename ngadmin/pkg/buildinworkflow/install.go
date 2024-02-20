@@ -1,8 +1,8 @@
 package buildinworkflow
 
 import (
-	"fmt"
 	"path"
+	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
@@ -11,7 +11,7 @@ import (
 
 func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {
 	workflow := &types.WorkflowSpec{
-		Type:     "parallel",
+		Type:     "serial",
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
@@ -22,6 +22,14 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 	if installTask != nil {
 		workflow.Tasks = append(workflow.Tasks, installTask)
 	}
+	installUtilsTask, err := InstallUtils(args, spec)
+	if err != nil {
+		return nil, err
+	}
+	if installUtilsTask != nil {
+		workflow.Tasks = append(workflow.Tasks, installUtilsTask)
+	}
+
 	return workflow, nil
 }
 
@@ -30,22 +38,10 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 		args = map[string]any{}
 	}
 	if spec.Spec.Metad == nil {
-		return nil, fmt.Errorf("metad spec is nil")
+		return nil, nil
 	}
 	metaCluster := spec.Spec.Metad
 	metaHosts := spec.Spec.Metad.Hosts
-	allNeedHosts := make(map[string]*types.Agent, 0)
-	for _, agent := range metaHosts {
-		allNeedHosts[agent.Host] = &agent
-	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			allNeedHosts[agent.Host] = &agent
-		}
-		for _, agent := range cluster.Storaged.Hosts {
-			allNeedHosts[agent.Host] = &agent
-		}
-	}
 
 	uploadTasks := []*types.TaskSpec{}
 	connectTasks := []*types.TaskSpec{}
@@ -53,6 +49,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	if !ok {
 		force = false
 	}
+	allNeedHosts := GetMetadAllNeedHosts(spec)
 	for _, agent := range allNeedHosts {
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
@@ -102,10 +99,8 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	startNeededProcessesTask := []*types.TaskSpec{}
 	for _, agent := range metaHosts {
 		startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
-			Type: "serial",
-			Params: &tasks.SerialParams{
-				Name: "start metad",
-			},
+			Type:        "serial",
+			Description: "start metad",
 			SubTasks: []*types.TaskSpec{
 				{
 					Type: "init_config",
@@ -135,7 +130,8 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 		// 4.1 start graphd
 		for _, agent := range cluster.Graphd.Hosts {
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
-				Type: "serial",
+				Type:        "serial",
+				Description: "start graphd",
 				SubTasks: []*types.TaskSpec{
 					{
 						Type: "init_config",
@@ -163,10 +159,8 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 		// 4.2 start storaged
 		for _, agent := range cluster.Storaged.Hosts {
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
-				Type: "serial",
-				Params: &tasks.SerialParams{
-					Name: "start storaged",
-				},
+				Type:        "serial",
+				Description: "start storaged",
 				SubTasks: []*types.TaskSpec{
 					{
 						Type: "init_config",
@@ -214,18 +208,21 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 				SubTasks: connectTasks,
 			},
 			{
-				Type: "parallel",
-				Params: &tasks.SerialParams{
-					Name: "upload-packages",
-				},
-				SubTasks: uploadTasks,
+				Type:        "parallel",
+				Description: "upload packages",
+				SubTasks:    uploadTasks,
 			},
 			{
-				Type: "parallel",
-				Params: &tasks.SerialParams{
-					Name: "start-needed-processes",
+				Type:        "parallel",
+				Description: "start needed processes",
+				SubTasks:    startNeededProcessesTask,
+			},
+			{
+				Type: "delay",
+				Params: &tasks.DelayParams{
+					Duration: 5 * time.Second,
 				},
-				SubTasks: startNeededProcessesTask,
+				Description: "wait for nebula service start",
 			},
 			{
 				Type:     "serial",
@@ -233,4 +230,20 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 			},
 		},
 	}, nil
+}
+
+func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
+	allNeedHosts := make(map[string]*types.Agent, 0)
+	for _, agent := range spec.Spec.Metad.Hosts {
+		allNeedHosts[agent.Host] = &agent
+	}
+	for _, cluster := range spec.Spec.Metad.Clusters {
+		for _, agent := range cluster.Graphd.Hosts {
+			allNeedHosts[agent.Host] = &agent
+		}
+		for _, agent := range cluster.Storaged.Hosts {
+			allNeedHosts[agent.Host] = &agent
+		}
+	}
+	return allNeedHosts
 }

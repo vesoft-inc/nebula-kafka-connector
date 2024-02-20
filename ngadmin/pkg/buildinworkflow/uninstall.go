@@ -1,15 +1,14 @@
 package buildinworkflow
 
 import (
-	"fmt"
-
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/utils"
 )
 
 func Uninstall(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {
 	workflow := &types.WorkflowSpec{
-		Type:     "parallel",
+		Type:     "serial",
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
@@ -20,57 +19,96 @@ func Uninstall(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, e
 	if uninstallTask != nil {
 		workflow.Tasks = append(workflow.Tasks, uninstallTask)
 	}
+	uninstallTask, err = UninstallUtils(args, spec)
+	if err != nil {
+		return nil, err
+	}
+	if uninstallTask != nil {
+		workflow.Tasks = append(workflow.Tasks, uninstallTask)
+	}
 	return workflow, nil
 }
 
 func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
-	if args == nil {
-		args = map[string]any{}
-	}
 	if spec.Spec.Metad == nil {
-		return nil, fmt.Errorf("metad spec is nil")
+		return nil, nil
 	}
-	metaHosts := spec.Spec.Metad.Hosts
-	allNeedHosts := make(map[string]*types.Agent, 0)
-	for _, agent := range metaHosts {
-		allNeedHosts[agent.Host] = &agent
+	killWait, ok := args["kill-wait"].(string)
+	if !ok {
+		killWait = ""
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			allNeedHosts[agent.Host] = &agent
-		}
-		for _, agent := range cluster.Storaged.Hosts {
-			allNeedHosts[agent.Host] = &agent
-		}
+	uninstallTask := &types.TaskSpec{
+		Type:     "serial", //all task serial for safe delete data
+		SubTasks: []*types.TaskSpec{},
 	}
-
-	connectTasks := []*types.TaskSpec{}
-	for _, agent := range allNeedHosts {
-		//1. connect
-		connectTasks = append(connectTasks, &types.TaskSpec{
-			Type: "serial",
-			SubTasks: []*types.TaskSpec{
-				{
-					Type:   "connect",
-					Params: &tasks.ConnectParams{Host: agent.Host},
+	// stop first
+	stopTasks, err := OperationCluster(spec, "stop", "all", "", killWait)
+	if err != nil {
+		return nil, err
+	}
+	if stopTasks != nil {
+		uninstallTask.SubTasks = append(uninstallTask.SubTasks, stopTasks)
+	}
+	// delete data
+	drain, _ := args["drain"].(bool)
+	clusters := spec.Spec.Metad.Clusters
+	deletedMap := make(map[string]*types.TaskSpec)
+	for _, cluster := range clusters {
+		storaged := cluster.Storaged
+		for _, storage := range storaged.Hosts {
+			task := &types.TaskSpec{
+				Type: "delete_nebula_data",
+				Params: &tasks.DeleteNebulaDataParams{
+					Host:  storage.Host,
+					Path:  utils.GetClusterPath(spec.InstallPath),
+					Drain: drain,
 				},
-			},
-		})
+			}
+			deletedMap[storage.Host] = task
+		}
+		for _, graphd := range cluster.Graphd.Hosts {
+			if _, ok := deletedMap[graphd.Host]; ok {
+				continue
+			}
+			task := &types.TaskSpec{
+				Type: "delete_nebula_data",
+				Params: &tasks.DeleteNebulaDataParams{
+					Host:  graphd.Host,
+					Path:  utils.GetClusterPath(spec.InstallPath),
+					Drain: true, //for graph delete all data
+				},
+			}
+			deletedMap[graphd.Host] = task
+		}
 	}
-	//2. stop todo: add stop task
-	stopTasks := []*types.TaskSpec{}
-
-	return &types.TaskSpec{
-		Type: "serial",
-		SubTasks: []*types.TaskSpec{
-			{
-				Type:     "parallel",
-				SubTasks: connectTasks,
+	for _, metad := range spec.Spec.Metad.Hosts {
+		if _, ok := deletedMap[metad.Host]; ok {
+			continue
+		}
+		task := &types.TaskSpec{
+			Type: "delete_nebula_data",
+			Params: &tasks.DeleteNebulaDataParams{
+				Host:  metad.Host,
+				Path:  utils.GetClusterPath(spec.InstallPath),
+				Drain: drain,
 			},
-			{
-				Type:     "parallel",
-				SubTasks: stopTasks,
+		}
+		deletedMap[metad.Host] = task
+	}
+	for _, task := range deletedMap {
+		uninstallTask.SubTasks = append(uninstallTask.SubTasks, task)
+	}
+	allHosts := GetMetadAllNeedHosts(spec)
+	// delete download path
+	for _, host := range allHosts {
+		task := &types.TaskSpec{
+			Type: "rm",
+			Params: &tasks.RMParams{
+				Host: host.Host,
+				Path: utils.GetDownloadPath(spec.InstallPath),
 			},
-		},
-	}, nil
+		}
+		uninstallTask.SubTasks = append(uninstallTask.SubTasks, task)
+	}
+	return uninstallTask, nil
 }

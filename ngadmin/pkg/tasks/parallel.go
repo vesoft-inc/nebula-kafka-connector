@@ -15,7 +15,6 @@ type Parallel struct {
 }
 
 type ParallelParams struct {
-	Name string `json:"name"`
 }
 
 func NewParallel(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
@@ -27,15 +26,11 @@ func NewParallel(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error
 		}
 		tasks = append(tasks, task)
 	}
-	params, ok := taskSpec.Params.(*ParallelParams)
-	if !ok {
-		params = &ParallelParams{}
-	}
 	return &Parallel{
 		JobContext: taskContext,
 		taskSpec:   taskSpec,
 		tasks:      tasks,
-		name:       params.Name,
+		name:       taskSpec.Description,
 	}, nil
 }
 
