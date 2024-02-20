@@ -181,8 +181,7 @@ public class NebulaClient implements Serializable {
 
     // not implemented.
     public ScanNodeResultIterator scanNode(String graphName, String nodeType) {
-        // TODO get all parts
-        List<Integer> parts = new ArrayList<>();
+        List<Integer> parts = getAllParts();
         return scanNode(graphName, nodeType, new ArrayList<>(), true, parts, defaultBatchSize);
     }
 
@@ -301,8 +300,7 @@ public class NebulaClient implements Serializable {
 
     // not implemented.
     public ScanEdgeResultIterator scanEdge(String graphName, String edgeType) {
-        // TODO get all parts
-        List<Integer> parts = new ArrayList<>();
+        List<Integer> parts = getAllParts();
         return scanEdge(graphName, edgeType, new ArrayList<>(), true, parts, defaultBatchSize);
     }
 
@@ -415,6 +413,35 @@ public class NebulaClient implements Serializable {
         return new ScanEdgeResultIterator(pool, graphName, edgeType, propertyList,
                 parts, batchSize, threadPool, retryTimes, intervalTime);
     }
+
+
+    /**
+     * get all parts
+     *
+     * @return list of part id
+     */
+    private List<Integer> getAllParts() {
+        String showPartitions = "CALL show_partitions() RETURN *";
+        ResultSet resultSet;
+        try {
+            resultSet = execute(showPartitions);
+        } catch (Exception e) {
+            log.error("get all partitions error", e);
+            throw new RuntimeException("get all partitions error", e);
+        }
+        if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
+            log.error("get all partitions failed for {}", resultSet.getErrorMessage());
+            throw new RuntimeException(
+                    "get all partitions failed for " + resultSet.getErrorMessage());
+        }
+        List<ValueWrapper> partitionsValue = resultSet.getRows().get(0).values().get(0).asList();
+        List<Integer> partitions = new ArrayList<>();
+        for (ValueWrapper part : partitionsValue) {
+            partitions.add(part.asInt());
+        }
+        return partitions;
+    }
+
 
     /**
      * get node type's properties

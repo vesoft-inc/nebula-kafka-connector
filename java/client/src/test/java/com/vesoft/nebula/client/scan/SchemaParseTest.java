@@ -11,6 +11,8 @@ import com.vesoft.nebula.client.util.MockGraph;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.UnknownHostException;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -25,7 +27,7 @@ public class SchemaParseTest {
     String passwd = "nebula";
 
 
-    @Before
+    //@Before
     public void setup() {
         MockGraph.mockGraphData();
     }
@@ -108,6 +110,25 @@ public class SchemaParseTest {
         } catch (IOErrorException | UnknownHostException | NoSuchMethodException
                  | InvocationTargetException | IllegalAccessException e) {
             log.error("test getEdgeProperties error", e);
+            assert false;
+        }
+    }
+
+    @Test
+    public void testGetAllParts() {
+        try {
+            NebulaClient client = NebulaClient.builder(address, user, passwd).build();
+            Method getNodeProperties = client.getClass().getDeclaredMethod("getAllParts");
+            getNodeProperties.setAccessible(true);
+            List<Integer> result = (List<Integer>) getNodeProperties.invoke(client);
+            assert result.size() == 10;
+            Collections.sort(result);
+            List<Integer> expectList = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9, 10);
+            Collections.sort(expectList);
+            assert result.equals(expectList);
+        } catch (IOErrorException | UnknownHostException | NoSuchMethodException
+                 | InvocationTargetException | IllegalAccessException e) {
+            log.error("test getAllParts error", e);
             assert false;
         }
     }
