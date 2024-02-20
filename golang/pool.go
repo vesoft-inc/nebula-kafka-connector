@@ -2,6 +2,7 @@ package nebula_ng
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"sync"
 	"time"
@@ -126,6 +127,10 @@ func (dp *driverPool) SetRetryTimes(times int) {
 	dp.connRetryTimes = times
 }
 
+func (dp *driverPool) SetTimeZone(timezone string) {
+	dp.connCfg.timezone = timezone
+}
+
 func (dp *driverPool) Close() error {
 	dp.mu.Lock()
 	for dc := range dp.connMap {
@@ -152,6 +157,13 @@ func (dp *driverPool) openNewConnLocked() (*driverConn, error) {
 	dc.maxLifeTime = dp.connMaxLifeTime
 	dc.retryTimes = dp.connRetryTimes
 	dc.createAt = time.Now()
+	// init session context
+	if dc.cfg.timezone != "" {
+		_, err = conn.Execute(fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dc.cfg.timezone))
+		if err != nil {
+			return nil, err
+		}
+	}
 
 	dp.connMap[conn] = struct{}{}
 	return dc, nil

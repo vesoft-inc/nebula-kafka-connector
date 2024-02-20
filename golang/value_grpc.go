@@ -594,12 +594,12 @@ func (zt *grpcZonedTime) String() string {
 	if offset < 0 {
 		zone = fmt.Sprintf("-%02d:%02d", -offset/3600, (-offset%3600)/60)
 	} else if offset > 0 {
-		zone = fmt.Sprintf("%02d:%02d", offset/3600, (offset%3600)/60)
+		zone = fmt.Sprintf("+%02d:%02d", offset/3600, (offset%3600)/60)
 	} else {
-		zone = ""
+		zone = "Z"
 	}
 
-	return fmt.Sprintf("%02d:%02d:%02d.%06dZ%s",
+	return fmt.Sprintf("%02d:%02d:%02d.%06d%s",
 		zt.data.Hour,
 		zt.data.Minute,
 		zt.data.Sec,
@@ -625,7 +625,7 @@ func (zt *grpcZonedTime) GetMicrosec() uint32 {
 }
 
 func (zt *grpcZonedTime) GetOffset() int {
-	return 0
+	return int(zt.data.GetOffset())
 }
 
 func (zdt *grpcZonedDatetime) String() string {
@@ -634,18 +634,18 @@ func (zdt *grpcZonedDatetime) String() string {
 	if offset < 0 {
 		zone = fmt.Sprintf("-%02d:%02d", -offset/3600, (-offset%3600)/60)
 	} else if offset > 0 {
-		zone = fmt.Sprintf("%02d:%02d", offset/3600, (offset%3600)/60)
+		zone = fmt.Sprintf("+%02d:%02d", offset/3600, (offset%3600)/60)
 	} else {
-		zone = ""
+		zone = "Z"
 	}
-	return fmt.Sprintf("%04d-%02d-%02dT%02d:%02d:%02d.%06dZ%s",
+	return fmt.Sprintf("%04d-%02d-%02dT%02d:%02d:%02d.%06d%s",
 		zdt.data.Year, zdt.data.Month, zdt.data.Day,
 		zdt.data.Hour, zdt.data.Minute, zdt.data.Sec, zdt.data.Microsec,
 		zone)
 }
 
 func (zdt *grpcZonedDatetime) GetOffset() int {
-	return 0
+	return int(zdt.data.GetOffset())
 }
 
 func (zdt *grpcZonedDatetime) Time() *time.Time {

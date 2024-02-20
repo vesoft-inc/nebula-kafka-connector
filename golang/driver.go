@@ -2,6 +2,7 @@ package nebula_ng
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"math/rand"
 	"time"
@@ -41,6 +42,7 @@ type (
 		SetMaxLifeTime(timeout time.Duration)
 		SetRetryTimes(times int)
 		SetGraph(graph string)
+		SetTimeZone(timezone string)
 	}
 
 	Conn interface {
@@ -75,6 +77,7 @@ type (
 		graph          string
 		requestTimeout time.Duration
 		connectTimeout time.Duration
+		timezone       string
 	}
 
 	ColumnType int
@@ -168,6 +171,7 @@ func (dc *driverConn) retryExecuteLocked(ctx context.Context, stmt string) (Resu
 	var (
 		result Result
 		err    error
+		conn   Conn
 	)
 
 	for i := 0; i < dc.retryTimes+1; i++ {
@@ -176,7 +180,7 @@ func (dc *driverConn) retryExecuteLocked(ctx context.Context, stmt string) (Resu
 		}
 
 		if dc.pool == nil && dc.conn == nil {
-			conn, err := dc.newDirect()
+			conn, err = dc.newDirect()
 			if err != nil {
 				// TODO warning
 				continue
@@ -257,6 +261,10 @@ func (dc *driverConn) SetConnectTimeout(timeout time.Duration) {
 	dc.cfg.connectTimeout = timeout
 }
 
+func (dc *driverConn) SetTimeZone(timezone string) {
+	dc.cfg.timezone = timezone
+}
+
 func (dc *driverConn) SetMaxLifeTime(timeout time.Duration) {
 	if timeout <= 0 {
 		timeout = math.MaxInt64
@@ -282,6 +290,13 @@ func (dc *driverConn) newDirect() (Conn, error) {
 		return nil, err
 	}
 	dc.createAt = time.Now()
+	// init session context
+	if dc.cfg != nil && dc.cfg.timezone != "" {
+		_, err = conn.Execute(fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dc.cfg.timezone))
+		if err != nil {
+			return nil, err
+		}
+	}
 	return conn, nil
 }
 
