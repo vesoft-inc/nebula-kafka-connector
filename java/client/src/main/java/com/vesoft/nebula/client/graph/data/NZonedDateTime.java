@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
+import com.vesoft.nebula.client.graph.utils.ZoneOffsetUtil;
 import com.vesoft.nebula.proto.LocalDatetime;
 import com.vesoft.nebula.proto.ZonedDatetime;
 import java.util.Objects;
@@ -65,12 +66,19 @@ public class NZonedDateTime {
         return zonedDateTime.getMicrosec();
     }
 
+    /**
+     * @return zoned offset in seconds
+     */
+    public int getOffset() {
+        return zonedDateTime.getOffset();
+    }
+
     @Override
     public String toString() {
-        return String.format("%d-%02d-%02dT%02d:%02d:%02d.%06d",
+        return String.format("%d-%02d-%02dT%02d:%02d:%02d.%06d%s",
                 zonedDateTime.getYear(), zonedDateTime.getMonth(), zonedDateTime.getDay(),
                 zonedDateTime.getHour(), zonedDateTime.getMinute(), zonedDateTime.getSec(),
-                zonedDateTime.getMicrosec());
+                zonedDateTime.getMicrosec(), ZoneOffsetUtil.buildOffset(zonedDateTime.getOffset()));
     }
 
     @Override
@@ -93,6 +101,6 @@ public class NZonedDateTime {
 
     @Override
     public int hashCode() {
-        return Objects.hash(zonedDateTime);
+        return Objects.hash(zonedDateTime, getOffset());
     }
 }

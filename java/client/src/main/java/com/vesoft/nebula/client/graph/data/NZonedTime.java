@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
+import com.vesoft.nebula.client.graph.utils.ZoneOffsetUtil;
 import com.vesoft.nebula.proto.ZonedTime;
 import java.util.Objects;
 
@@ -44,12 +45,22 @@ public class NZonedTime {
         return zonedTime.getMicrosec();
     }
 
+    /**
+     * get zone offset in seconds
+     *
+     * @return offset
+     */
+    public int getOffset() {
+        return zonedTime.getOffset();
+    }
+
 
     @Override
     public String toString() {
-        return String.format("%02d:%02d:%02d.%06d",
+        return String.format("%02d:%02d:%02d.%06d%s",
                 zonedTime.getHour(), zonedTime.getMinute(),
-                zonedTime.getSec(), zonedTime.getMicrosec());
+                zonedTime.getSec(), zonedTime.getMicrosec(),
+                ZoneOffsetUtil.buildOffset(zonedTime.getOffset()));
     }
 
     @Override
@@ -69,6 +80,6 @@ public class NZonedTime {
 
     @Override
     public int hashCode() {
-        return Objects.hash(zonedTime);
+        return Objects.hash(zonedTime, getOffset());
     }
 }

@@ -73,6 +73,7 @@ message ZonedTime {
     uint32              minute                  = 2;
     uint32              sec                     = 3;
     uint32              microsec                = 4;
+    int32               offset                  = 5;
 }
 
 message LocalDatetime {
@@ -93,6 +94,7 @@ message ZonedDatetime {
     uint32              minute                  = 5;
     uint32              sec                     = 6;
     uint32              microsec                = 7;
+    int32               offset                  = 8;
 }
 
 message List {

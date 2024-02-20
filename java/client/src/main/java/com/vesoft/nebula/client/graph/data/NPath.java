@@ -115,4 +115,21 @@ public class NPath {
         }
         return String.join("", edgeStrs);
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        NPath that = (NPath) obj;
+        return values.equals(that.values);
+    }
+
+    @Override
+    public int hashCode() {
+        return values.hashCode();
+    }
 }

@@ -18,7 +18,7 @@ public class Vertex extends BaseDataObject {
     private final Node node;
     private final long vid;
 
-    private String label;
+    private String label = "";
     private int typeId;
 
     /**

@@ -15,7 +15,7 @@ import java.util.Objects;
 
 public class Relationship extends BaseDataObject {
     private final Edge edge;
-    private String label;
+    private String label = "";
 
     /**
      * Relationship is a wrapper around the Edge type returned by nebula-graph
@@ -130,7 +130,7 @@ public class Relationship extends BaseDataObject {
 
     @Override
     public int hashCode() {
-        return Objects.hash(edge, getDecodeType());
+        return Objects.hash(edge, getDecodeType(), label);
     }
 
     @Override

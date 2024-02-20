@@ -9,7 +9,6 @@ import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
-import com.vesoft.nebula.client.graph.data.NRecord;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -19,6 +18,7 @@ import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import java.io.Serializable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -44,6 +44,8 @@ public class NebulaClient implements Serializable {
     private int intervalTime;
     private long maxWaitMills;
 
+    private ZoneId zoneId;
+
     // the default batch size for scan data, config for scan
     private final int defaultBatchSize = 10;
 
@@ -60,6 +62,7 @@ public class NebulaClient implements Serializable {
         this.intervalTime = builder.intervalTime;
         this.maxWaitMills = builder.maxWaitMills;
         this.scanParallel = builder.maxSessionSize;
+        this.zoneId = builder.zoneId;
 
         this.loadBalancer = new RoundRobinLoadBalancer(builder.address, builder.connectTimeout,
                 builder.requestTimeout, builder.strictlyServerHealthy, builder.healthCheckTime);
@@ -550,7 +553,17 @@ public class NebulaClient implements Serializable {
     private Session getSession() throws NoValidSessionException {
         checkClosed();
         try {
-            return pool.borrowObject(maxWaitMills);
+            Session session = pool.borrowObject(maxWaitMills);
+            if (zoneId != null) {
+                ResultSet resultSet = session.execute(
+                        "SESSION SET TIME ZONE \"" + zoneId + "\"");
+                if (!resultSet.isSucceeded()) {
+                    log.error("failed to set time zone for {}", resultSet.getErrorMessage());
+                    throw new RuntimeException("failed to set timezone for "
+                            + resultSet.getErrorMessage());
+                }
+            }
+            return session;
         } catch (Exception e) {
             log.error("get session from pool failed.", e);
             throw new NoValidSessionException(e.getMessage());
@@ -641,6 +654,9 @@ public class NebulaClient implements Serializable {
         // if need all servers are strictly healthy.
         // if true, all addresses must be available, if false, at least one address is available.
         private boolean strictlyServerHealthy = false;
+
+        // the time zone, used to parse ZonedTime and ZonedDatetime
+        private ZoneId zoneId = null;
 
 
         public Builder(String address, String userName, String password)
@@ -733,6 +749,11 @@ public class NebulaClient implements Serializable {
 
         public Builder setStrictlyServerHealthy(boolean strictlyServerHealthy) {
             this.strictlyServerHealthy = strictlyServerHealthy;
+            return this;
+        }
+
+        public Builder setTimeZone(ZoneId zoneId) {
+            this.zoneId = zoneId;
             return this;
         }
 
