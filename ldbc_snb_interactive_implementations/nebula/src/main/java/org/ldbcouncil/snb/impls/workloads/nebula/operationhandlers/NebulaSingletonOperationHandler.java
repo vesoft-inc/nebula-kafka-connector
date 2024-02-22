@@ -9,6 +9,7 @@ import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
+import org.ldbcouncil.snb.impls.workloads.nebula.NebulaNewClient;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.SingletonOperationHandler;
 
 import java.io.UnsupportedEncodingException;
@@ -17,10 +18,13 @@ import java.util.Map;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.net.Session;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class NebulaSingletonOperationHandler<TOperation extends Operation<TOperationResult>, TOperationResult>
         implements SingletonOperationHandler<TOperationResult,TOperation,NebulaDbConnectionState>
 {
+    private static final Logger LOGGER = LoggerFactory.getLogger(NebulaSingletonOperationHandler.class);
     public abstract TOperationResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException;
 
     public abstract Map<String, Object> getParameters(NebulaDbConnectionState state, TOperation operation );
@@ -30,7 +34,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
                                   ResultReporter resultReporter ) throws DbException
     {
         try {
-            NebulaClient client = state.getClient();
+            NebulaNewClient client = state.getClient(operation.type());
             String query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
@@ -38,8 +42,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
             // final Map<String, Object> parameters = getParameters(state, operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
 
-            final ResultSet resultSet = client.execute(query);
-
+            final ResultSet resultSet = client.getClient().execute(query);
             if (resultSet.rowsSize() > 0) {
                 resultReporter.report(1, toResult(resultSet.rowValues(0)), operation);
             } else {
