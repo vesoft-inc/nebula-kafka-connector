@@ -29,6 +29,8 @@ func Init() {
 		"nebula_status":      NewNebulaStatus,
 		"operate":            NewOperate,
 		"rm":                 NewRM,
+		"status":             NewStatus,
+		"systemd":            NewSystemd,
 	}
 
 }

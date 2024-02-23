@@ -37,23 +37,20 @@ func CheckMetaSpec(metaSpec *types.MetadSpec) error {
 		return fmt.Errorf("metad clusters is nil")
 	}
 	if metaSpec.Config == nil {
-		metaSpec.Config = make(map[string]string)
-	}
-	if _, ok := metaSpec.Config["port"]; !ok {
-		metaSpec.Config["port"] = "9559"
+		metaSpec.Config = make(map[string]any)
 	}
 	for _, cluster := range metaSpec.Clusters {
 		if cluster.Graphd.Hosts == nil {
 			return fmt.Errorf("graphd hosts is nil")
 		}
 		if cluster.Graphd.Config == nil {
-			cluster.Graphd.Config = make(map[string]string)
+			cluster.Graphd.Config = make(map[string]any)
 		}
 		if cluster.Storaged.Hosts == nil {
 			return fmt.Errorf("storaged hosts is nil")
 		}
 		if cluster.Storaged.Config == nil {
-			cluster.Storaged.Config = make(map[string]string)
+			cluster.Storaged.Config = make(map[string]any)
 		}
 	}
 	return nil
@@ -69,4 +66,40 @@ func CacheConfig(jobSpec *types.JobSpec) error {
 		return err
 	}
 	return nil
+}
+
+type anyMap map[string]interface{}
+
+func merge(dst, src anyMap) anyMap {
+	for key, srcVal := range src {
+		if dstVal, ok := dst[key]; ok {
+			srcMap, srcOk := srcVal.(anyMap)
+			dstMap, dstOk := dstVal.(anyMap)
+			if srcOk && dstOk {
+				dst[key] = merge(dstMap, srcMap)
+			} else {
+				dst[key] = srcVal
+			}
+		} else {
+			dst[key] = srcVal
+		}
+	}
+	return dst
+}
+
+func ApplyConfigByYamlString(yamlString string, config anyMap) (string, error) {
+	var values anyMap = make(map[string]any)
+	err := yaml.Unmarshal([]byte(yamlString), &values)
+	if err != nil {
+		return "", err
+	}
+
+	values = merge(values, config)
+
+	newYamlString, err := yaml.Marshal(values)
+	if err != nil {
+		return "", err
+	}
+
+	return string(newYamlString), nil
 }

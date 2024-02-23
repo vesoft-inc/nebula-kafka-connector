@@ -35,7 +35,7 @@ type CreateCluster struct {
 
 func (d *CreateCluster) Execute() error {
 	//1. meta client init & login
-	metaClient, err := meta.NewMetaClient(utils.GetMetaAddressListString(d.metaSpec.Hosts, d.metaSpec.Config["port"]))
+	metaClient, err := meta.NewMetaClient(utils.GetMetaAddressListString(d.metaSpec.Hosts, utils.GetConfigPort(d.metaSpec.Config)))
 	if err != nil {
 		return fmt.Errorf("create meta client failed: %s", err)
 	}
@@ -55,7 +55,7 @@ func (d *CreateCluster) Execute() error {
 		if d.ifExited() {
 			return fmt.Errorf("exited signal received")
 		}
-		port, err := utils.GetUint32Port(d.clusterSpec.Graphd.Config["port"])
+		port, err := utils.GetUint32Port(utils.GetConfigPort(d.clusterSpec.Graphd.Config))
 		if err != nil {
 			return fmt.Errorf("get graphd port failed: %s", err)
 		}
@@ -70,7 +70,7 @@ func (d *CreateCluster) Execute() error {
 		if d.ifExited() {
 			return fmt.Errorf("exited signal received")
 		}
-		port, err := utils.GetUint32Port(d.clusterSpec.Storaged.Config["port"])
+		port, err := utils.GetUint32Port(utils.GetConfigPort(d.clusterSpec.Storaged.Config))
 		if err != nil {
 			return fmt.Errorf("get storaged port failed: %s", err)
 		}

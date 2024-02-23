@@ -66,3 +66,31 @@ func TestUtilsInstall(t *testing.T) {
 	assert.NoError(t, err)
 	// Add more assertions for the workflow.Tasks if needed
 }
+
+func TestUtilsInstallSystemd(t *testing.T) {
+	tasks.Init()
+	executor.SetCertPath("../../certs")
+	args := map[string]interface{}{
+		"force": true,
+	}
+	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+	spec.Rollback = false
+	spec.Spec.Metad = nil
+	spec.Spec.LicenseManager.StartType = "systemd"
+	spec.Spec.LicenseManager.PackagePath = "../../bin/lm.tar.gz"
+	workflow, err := buildinworkflow.Install(args, spec)
+	assert.NoError(t, err)
+	assert.NotNil(t, workflow)
+	yamls, err := yaml.Marshal(workflow)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(string(yamls))
+	job := runner.NewJob("test")
+	err = job.Run("install", args, spec)
+	assert.NoError(t, err)
+	// Add more assertions for the workflow.Tasks if needed
+}

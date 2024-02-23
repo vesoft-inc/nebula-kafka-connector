@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
@@ -56,7 +57,7 @@ func (d *NebulaStatus) Execute() error {
 			continue
 		}
 		d.JobContext.SetValue("status-"+utils.GetHostIP(d.host)+"-"+name+"-"+port, types.StatusItem{
-			Product: "nebula",
+			Product: "nebulagraph",
 			Service: name,
 			Host:    utils.GetHostIP(d.host),
 			Port:    port,
@@ -76,6 +77,11 @@ func (d *NebulaStatus) String() string {
 
 func matchProcessName(line string) string {
 	name := "unknown"
+	r := regexp.MustCompile(`\[\S+\] (\S+)`)
+	match := r.FindStringSubmatch(line)
+	if len(match) > 1 {
+		name = match[1]
+	}
 	if strings.Contains(line, "nebula-graphd") {
 		name = "graphd"
 	} else if strings.Contains(line, "nebula-metad") {

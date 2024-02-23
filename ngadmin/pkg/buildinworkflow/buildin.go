@@ -15,6 +15,7 @@ var BuildInWorkflowConverterMap = map[string]WorkflowConverter{
 	"operation": Operation,
 	"uninstall": Uninstall,
 	"status":    Status,
+	"config":    Config,
 }
 
 func GetBuildinWorkflow(cmd string, args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {

@@ -37,6 +37,12 @@ openssl x509 -req -days 365 -in client.csr -CA ca.crt -CAkey server.key -set_ser
 cd agent/api/agent && go run agent.go
 ```
 
+## install 
+```bash
+make
+./bin/ngadmin -f ./examples/nebula.yaml 
+```
+
 ## run ngadmin
 ```bash
 make test-install

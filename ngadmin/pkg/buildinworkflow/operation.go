@@ -2,6 +2,7 @@ package buildinworkflow
 
 import (
 	"fmt"
+	"path"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
@@ -41,8 +42,72 @@ func Operation(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, e
 			workflow.Tasks = append(workflow.Tasks, operationTask)
 		}
 	}
-	//todo: add other component operation. explorer, studio, etc
+
+	// append utils operation
+	operationTask, err := OperateUtils(spec, component, operation, host)
+	if err != nil {
+		return nil, err
+	}
+	if operationTask != nil {
+		workflow.Tasks = append(workflow.Tasks, operationTask)
+	}
+
 	return workflow, nil
+}
+
+func OperateUtils(spec *types.JobSpec, component, operation, host string) (*types.TaskSpec, error) {
+	allUitils := GetAllUtilsProcess(spec)
+	operateTasks := []*types.TaskSpec{}
+	connectTasks := []*types.TaskSpec{}
+	for _, process := range allUitils {
+		for _, agent := range process.Hosts {
+			if host != "" && host != agent.Host {
+				continue
+			}
+			connectTasks = append(connectTasks, &types.TaskSpec{
+				Type: "connect",
+				Params: &tasks.ConnectParams{
+					Host: agent.Host,
+				},
+			})
+
+			if process.Name == component || component == "all" {
+				if process.StartType == "shell" {
+					scriptPath := path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ExecShellPath)
+					operateTasks = append(operateTasks, &types.TaskSpec{
+						Type: "operate",
+						Params: &tasks.OperateParams{
+							Operation: operation,
+							ExecPath:  scriptPath,
+							Host:      agent.Host,
+						},
+					})
+				} else {
+					operateTasks = append(operateTasks, &types.TaskSpec{
+						Type: "systemd",
+						Params: &tasks.SystemdParams{
+							Operate: operation,
+							Name:    process.Name,
+							Host:    agent.Host,
+						},
+					})
+				}
+			}
+		}
+	}
+	return &types.TaskSpec{
+		Type: "serial",
+		SubTasks: []*types.TaskSpec{
+			{
+				Type:     "parallel",
+				SubTasks: connectTasks,
+			},
+			{
+				Type:     "parallel",
+				SubTasks: operateTasks,
+			},
+		},
+	}, nil
 }
 
 func isNebulaComponent(component string) bool {

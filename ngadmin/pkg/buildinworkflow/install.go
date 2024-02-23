@@ -106,9 +106,9 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					Type: "init_config",
 					Params: &tasks.InitConfigParams{
 						Host: agent.Host,
-						ChangeMap: utils.MergeConfigMap(metaCluster.Config, map[string]string{
+						ChangeMap: utils.MergeNebulaConfigMap(metaCluster.Config, map[string]string{
 							"local_ip":          utils.GetHostIP(agent.Host),
-							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, metaCluster.Config["port"]),
+							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 						}),
 						Dst: path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-metad.conf"),
 					},
@@ -137,9 +137,9 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 						Type: "init_config",
 						Params: &tasks.InitConfigParams{
 							Host: agent.Host,
-							ChangeMap: utils.MergeConfigMap(cluster.Graphd.Config, map[string]string{
+							ChangeMap: utils.MergeNebulaConfigMap(cluster.Graphd.Config, map[string]string{
 								"local_ip":          utils.GetHostIP(agent.Host),
-								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, metaCluster.Config["port"]),
+								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 							}),
 							Dst: path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-graphd.conf"),
 						},
@@ -166,9 +166,9 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 						Type: "init_config",
 						Params: &tasks.InitConfigParams{
 							Host: agent.Host,
-							ChangeMap: utils.MergeConfigMap(cluster.Storaged.Config, map[string]string{
+							ChangeMap: utils.MergeNebulaConfigMap(cluster.Storaged.Config, map[string]string{
 								"local_ip":          utils.GetHostIP(agent.Host),
-								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, metaCluster.Config["port"]),
+								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 							}),
 							Dst: path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-storaged.conf"),
 						},

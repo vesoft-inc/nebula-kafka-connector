@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/cmd"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
@@ -23,17 +24,34 @@ func TestStatus(t *testing.T) {
 	err = job.Run("status", map[string]any{
 		"component": "all",
 	}, spec)
-	if err != nil {
-		yamls, err := yaml.Marshal(job.WorkflowSpec)
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(string(yamls))
-	}
 	assert.NoError(t, err)
-	yamls, err := yaml.Marshal(job.Context.ValueMap)
+	yamls, err := yaml.Marshal(job.WorkflowSpec)
 	if err != nil {
 		log.Fatal(err)
 	}
 	log.Println(string(yamls))
+	assert.NoError(t, err)
+	cmd.RenderStatusTableByJob(job)
+}
+
+func TestSystemdStatus(t *testing.T) {
+	tasks.Init()
+	executor.SetCertPath("../../certs")
+	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+	spec.Spec.LicenseManager.StartType = "systemd"
+	job := runner.NewJob("test stop")
+	err = job.Run("status", map[string]any{
+		"component": "all",
+	}, spec)
+	assert.NoError(t, err)
+	yamls, err := yaml.Marshal(job.WorkflowSpec)
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(string(yamls))
+	assert.NoError(t, err)
+	cmd.RenderStatusTableByJob(job)
 }

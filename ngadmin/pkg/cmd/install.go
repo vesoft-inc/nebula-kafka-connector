@@ -41,7 +41,7 @@ func RegisteInstallCmd(rootCmd *cobra.Command) *cobra.Command {
 		},
 	}
 	// add --force
-	installCmd.Flags().BoolVarP(&force, "force", "f", false, "force to install")
+	installCmd.Flags().BoolVarP(&force, "force", "", false, "force to install")
 	rootCmd.AddCommand(installCmd)
 	return installCmd
 }

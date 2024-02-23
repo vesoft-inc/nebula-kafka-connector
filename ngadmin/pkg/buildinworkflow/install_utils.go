@@ -23,6 +23,7 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 		}
 	}
 	//2. upload and start
+	//2.1 todo: apply utils config
 	uploadAndStartTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
 		for _, agent := range process.Hosts {
@@ -46,6 +47,15 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 							PkgPath:     dstPath,
 						},
 					},
+					{
+						Type: "config",
+						Params: &tasks.ConfigParams{
+							Host:   agent.Host,
+							Config: process.Config,
+							Dst:    path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ConfigPath),
+							Type:   "yaml",
+						},
+					},
 				},
 			}
 			if process.StartType == "shell" {
@@ -59,15 +69,16 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 					},
 				})
 			} else if process.StartType == "systemd" {
-				// TODO: start systemd
-				// task.SubTasks = append(task.SubTasks, &types.TaskSpec{
-				// 	Type: "systemd",
-				// 	Params: &tasks.SystemdParams{
-				// 		Host: agent.Host,
-				// 		Name: process.Name,
-				// 		Cmd:  "start",
-				// 	},
-				// })
+				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
+					Type: "systemd",
+					Params: &tasks.SystemdParams{
+						Host:             agent.Host,
+						Name:             process.Name,
+						ExecStartPath:    path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ExecStartPath),
+						WorkingDirectory: path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.WorkingDir),
+						Operate:          "install",
+					},
+				})
 			}
 			uploadAndStartTasks = append(uploadAndStartTasks, task)
 		}
@@ -89,11 +100,17 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 	}, nil
 }
 
+// map component name
 func GetAllUtilsProcess(spec *types.JobSpec) []*types.Process {
 	allUtils := []*types.Process{}
 	if spec.Spec.LicenseManager != nil {
-		spec.Spec.LicenseManager.Name = "license-manager"
+		spec.Spec.LicenseManager.Name = "nebula-license-manager"
 		allUtils = append(allUtils, spec.Spec.LicenseManager)
+	}
+	for _, process := range allUtils {
+		if process.Config == nil {
+			process.Config = map[string]any{}
+		}
 	}
 	return allUtils
 }

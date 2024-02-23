@@ -14,12 +14,15 @@ type ProcessMap struct {
 }
 
 type Process struct {
-	Name          string            `yaml:"name,omitempty"`
-	PackagePath   string            `yaml:"packagePath,omitempty"`
-	Config        map[string]string `yaml:"config,omitempty"`
-	Hosts         []Agent           `yaml:"hosts,omitempty"`
-	StartType     string            `yaml:"startType,omitempty"`     //systemd, shell
-	ExecShellPath string            `yaml:"execShellPath,omitempty"` // exec path
+	Name          string         `yaml:"name,omitempty"`
+	PackagePath   string         `yaml:"packagePath,omitempty"`
+	ConfigPath    string         `yaml:"configPath,omitempty"`
+	Config        map[string]any `yaml:"config,omitempty"`
+	Hosts         []Agent        `yaml:"hosts,omitempty"`
+	StartType     string         `yaml:"startType,omitempty"`     //systemd, shell
+	ExecShellPath string         `yaml:"execShellPath,omitempty"` // exec path
+	ExecStartPath string         `yaml:"execStartPath,omitempty"` // bin path
+	WorkingDir    string         `yaml:"workingDir,omitempty"`    // working dir
 }
 
 type MetadSpec struct {

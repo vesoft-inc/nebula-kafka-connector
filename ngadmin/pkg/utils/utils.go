@@ -23,6 +23,9 @@ func GetUtilPath(installPath, utilName string) string {
 }
 
 func GetMetaAddressListString(metaHosts []types.Agent, port string) string {
+	if port == "" {
+		port = "9559"
+	}
 	metaAddressList := ""
 	for _, meta := range metaHosts {
 
@@ -36,9 +39,11 @@ func RemoveAddressPort(address string) string {
 	return strings.Split(address, ":")[0]
 }
 
-func MergeConfigMap(configMap map[string]string, newConfigMap map[string]string) map[string]string {
+func MergeNebulaConfigMap(configMap map[string]any, newConfigMap map[string]string) map[string]string {
 	for k, v := range configMap {
-		newConfigMap[k] = v
+		if vStr, ok := v.(string); ok {
+			newConfigMap[k] = vStr
+		}
 	}
 	return newConfigMap
 }
@@ -80,4 +85,14 @@ func ParseTimeoutString(timeout string) (time.Duration, error) {
 		return 0, fmt.Errorf("parse timeout string error: %s", err)
 	}
 	return time.Duration(number) * timeType, nil
+}
+
+func GetConfigPort(config map[string]any) string {
+	if configPort, ok := config["port"]; ok {
+		return fmt.Sprintf("%v", configPort)
+	}
+	if configPort, ok := config["Port"]; ok {
+		return fmt.Sprintf("%v", configPort)
+	}
+	return ""
 }

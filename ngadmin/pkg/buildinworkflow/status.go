@@ -28,7 +28,14 @@ func Status(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 			workflow.Tasks = append(workflow.Tasks, statusTask)
 		}
 	}
-	//todo: add other component status. explorer, studio, etc
+	utilStatusTask, err := StatusUtils(spec, component)
+	if err != nil {
+		return nil, err
+	}
+	if utilStatusTask != nil {
+		workflow.Tasks = append(workflow.Tasks, utilStatusTask)
+	}
+
 	return workflow, nil
 }
 

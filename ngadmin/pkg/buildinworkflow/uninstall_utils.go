@@ -41,15 +41,14 @@ func UninstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					},
 				})
 			} else if process.StartType == "systemd" {
-				// TODO: stop systemd & rm service
-				// task.SubTasks = append(task.SubTasks, &types.TaskSpec{
-				// 	Type: "systemd",
-				// 	Params: &tasks.SystemdParams{
-				// 		Host: agent.Host,
-				// 		Name: process.Name,
-				// 		Cmd:  "start",
-				// 	},
-				// })
+				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
+					Type: "systemd",
+					Params: &tasks.SystemdParams{
+						Host:    agent.Host,
+						Name:    process.Name,
+						Operate: "uninstall",
+					},
+				})
 			}
 			task.SubTasks = append(task.SubTasks, &types.TaskSpec{
 				Type: "rm",

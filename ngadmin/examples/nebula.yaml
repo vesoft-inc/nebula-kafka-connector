@@ -7,6 +7,7 @@ spec:
     packagePath: "./bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
     config:
       port: 9559
+      test: "test"
     hosts:
       - host: "192.168.8.240:6688"
     clusters:
@@ -26,10 +27,17 @@ spec:
             - host: "192.168.8.240:6688"
   license-manager:
     packagePath: "./bin/lm.tar.gz"
-    execShellPath: "./nebula-license-manager/scripts/license-manager.service"
-    binPath: "./nebula-license-manager/nebula-license-manager"
     startType: "shell" # systemd or shell, if systemd, need to provide binPath else provide execShellPath
+    # for shell
+    execShellPath: "./nebula-license-manager/scripts/license-manager.service"
+    # for systemd
+    execStartPath: "./nebula-license-manager/nebula-license-manager"
+    workingDir: "./nebula-license-manager/"
+    # if need custom config, provide the path
+    configPath: "./nebula-license-manager/etc/nebula-license-manager.yaml"
+    # config key need be seem with the process config yaml key
     config:
-      port: 9119
+      Port: 9119
+      Test: "test"
     hosts:
       - host: "192.168.8.240:6688"

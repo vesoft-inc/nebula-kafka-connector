@@ -56,3 +56,27 @@ func TestUninstallUtils(t *testing.T) {
 	}
 	assert.NoError(t, err)
 }
+
+func TestUninstallUtilsSystemd(t *testing.T) {
+	tasks.Init()
+	executor.SetCertPath("../../certs")
+	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+	spec.Spec.Metad = nil
+	spec.Spec.LicenseManager.StartType = "systemd"
+	job := runner.NewJob("test uninstall")
+	err = job.Run("uninstall", map[string]any{
+		"drain":     true,
+		"kill-wait": "10s",
+	}, spec)
+	if err != nil {
+		yamls, err := yaml.Marshal(job.WorkflowSpec)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(string(yamls))
+	}
+	assert.NoError(t, err)
+}

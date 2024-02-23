@@ -10,12 +10,13 @@ import (
 
 var OperationHost string
 var KillWait = ""
+var ProductInfo = "<all|nebulagraph|metad|graphd|stroaged|other product name>"
 
 func RegisteOperationCmd(rootCmd *cobra.Command) {
 	startCmd := &cobra.Command{
 		Use:   "start",
 		Short: "start nebula cluster",
-		Long:  `start nebula cluster by config file which is default to .ngadmin.yaml`,
+		Long:  `start nebula cluster by config file which is default to .ngadmin.yaml ` + ProductInfo,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runOperation(args, "start")
 			if err != nil {
@@ -30,7 +31,7 @@ func RegisteOperationCmd(rootCmd *cobra.Command) {
 	stopCmd := &cobra.Command{
 		Use:   "stop",
 		Short: "stop nebula cluster",
-		Long:  `stop nebula cluster by config file which is default to .ngadmin.yaml`,
+		Long:  `stop nebula cluster by config file which is default to .ngadmin.yaml ` + ProductInfo,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runOperation(args, "stop")
 			if err != nil {
@@ -46,7 +47,7 @@ func RegisteOperationCmd(rootCmd *cobra.Command) {
 	restartCmd := &cobra.Command{
 		Use:   "restart",
 		Short: "restart nebula cluster",
-		Long:  `restart nebula cluster by config file which is default to .ngadmin.yaml`,
+		Long:  `restart nebula cluster by config file which is default to .ngadmin.yaml ` + ProductInfo,
 		Run: func(cmd *cobra.Command, args []string) {
 			err := runOperation(args, "restart")
 			if err != nil {
