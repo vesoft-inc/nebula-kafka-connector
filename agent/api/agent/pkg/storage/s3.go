@@ -83,7 +83,7 @@ func (s *s3Client) downloadToFile(file, key string) error {
 
 	// Create the directories in the path
 	dir := filepath.Dir(file)
-	if err := os.MkdirAll(dir, 0775); err != nil {
+	if err := os.MkdirAll(dir, 0o775); err != nil {
 		return fmt.Errorf("ensure dir %s failed: %w", dir, err)
 	}
 

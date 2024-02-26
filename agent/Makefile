@@ -13,6 +13,9 @@ endif
 
 all: check
 
+build:
+	cd api/agent && $(GO_BUILD) -o bin/agent
+
 go-generate: $(GOBIN)/mockgen
 	go generate ./...
 

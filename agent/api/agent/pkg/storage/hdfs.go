@@ -78,7 +78,7 @@ func (h *hdfsClient) downloadPrefix(localDir, prefix string) error {
 		localPath := filepath.Join(localDir, file.Name())
 
 		if file.IsDir() {
-			err = os.MkdirAll(localPath, 0775)
+			err = os.MkdirAll(localPath, 0o775)
 			if err != nil {
 				return fmt.Errorf("failed to create local directory: %w", err)
 			}

@@ -1,13 +1,9 @@
 # This is temporary action for clients test.
 
-name: test client
+name: build-ngadmin
 on:
   push:
-    branches: [master, "release-**"]
-  pull_request:
-    branches: [master, "release-**"]
-  schedule:
-    - cron: "0 6 * * *"
+    branches: [master, mizy-test, "release-**"]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,32 +14,31 @@ jobs:
     name: build package
     runs-on:
       - self-hosted
-      - ${{ matrix.os[1] }}
+      - ${{ matrix.os[0] }}
     strategy:
       matrix:
-        # output: CPU_ARCH(x86_64/arm64)
-        # - centos7
-        #   - nebula-explorer-${VERSION}.${CPU_ARCH}.tar.gz
-        #   - nebula-explorer-${VERSION}.${CPU_ARCH}.rpm
-        # - ubuntu
-        #   - nebula-explorer_${VERSION}_${CPU_ARCH}.tar.gz
-        #   - nebula-explorer_${VERSION}_${CPU_ARCH}.deb
         os:
-          - [centos7, nebula-arm, arm64]
-          - [ubuntu, nebula-arm, arm64]
-          - [centos7, nebula-fast, amd64]
-          - [ubuntu, nebula-fast, amd64]
+          - [nebula-arm, arm64]
+          - [nebula-fast, amd64]
     container:
-      image: reg.vesoft-inc.com/dashboard/dashboard-dev:${{ matrix.os[2] }}-${{ matrix.os[0] }}-latest
-      credentials:
-        username: ${{ secrets.harbor_username }}
-        password: ${{ secrets.harbor_password }}
+      image: vesoft/nebula-dev:ubuntu2004@${{ matrix.os[1] }}
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache: false
       - name: ngadmin build
         run: make build
         working-directory: ngadmin
+      - name: ngadmin build
+        run: make build
+        working-directory: agent
       - uses: actions/upload-artifact@v2
         with:
           path: ./ngadmin/bin/ngadmin
-          name: ngadmin-${{matrix.os[0]}}-${{ matrix.os[2] }}
+          name: ngadmin-linux-${{ matrix.os[1] }}
+      - uses: actions/upload-artifact@v2
+        with:
+          path: ./agent/api/agent/bin/agent
+          name: agent-linux-${{ matrix.os[1] }}
