@@ -21,7 +21,7 @@ jobs:
           - [nebula-arm, arm64]
           - [nebula-fast, amd64]
     container:
-      image: vesoft/nebula-dev:ubuntu2004@${{ matrix.os[1] }}
+      image: vesoft/nebula-dev:ubuntu2004
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
