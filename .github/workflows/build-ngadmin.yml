@@ -29,16 +29,24 @@ jobs:
           go-version-file: go.work
           cache: false
       - name: ngadmin build
-        run: make build
+        run: |
+          make build
+          mkdir build
+          cp -r examples build/
+          cp bin/ngadmin build/
         working-directory: ngadmin
       - name: ngadmin build
-        run: make build
+        run: |
+          make build
+          mkdir build
+          cp -r ./api/agent/etc build/
+          cp ./api/agent/bin/agent build/
         working-directory: agent
       - uses: actions/upload-artifact@v2
         with:
-          path: ./ngadmin/bin/ngadmin
+          path: ./ngadmin/build/*
           name: ngadmin-linux-${{ matrix.os[1] }}
       - uses: actions/upload-artifact@v2
         with:
-          path: ./agent/api/agent/bin/agent
+          path: ./agent/build/*
           name: agent-linux-${{ matrix.os[1] }}

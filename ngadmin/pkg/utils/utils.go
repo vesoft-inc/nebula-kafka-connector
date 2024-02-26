@@ -41,9 +41,7 @@ func RemoveAddressPort(address string) string {
 
 func MergeNebulaConfigMap(configMap map[string]any, newConfigMap map[string]string) map[string]string {
 	for k, v := range configMap {
-		if vStr, ok := v.(string); ok {
-			newConfigMap[k] = vStr
-		}
+		newConfigMap[k] = fmt.Sprintf("%v", v) // convert to string
 	}
 	return newConfigMap
 }
