@@ -25,6 +25,10 @@ func (p *plan) GetPlanPrintFormat() string {
 	return "row"
 }
 
+func (p *plan) GetPlanDesc() map[string]interface{} {
+	return p.planDesc
+}
+
 func (p *plan) MakePlanByRow() (rightSepToTailWidth []int, rows [][]interface{}) {
 	header := p.GetHeader()
 	if len(header) == 0 {

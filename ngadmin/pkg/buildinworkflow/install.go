@@ -235,14 +235,17 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	allNeedHosts := make(map[string]*types.Agent, 0)
 	for _, agent := range spec.Spec.Metad.Hosts {
-		allNeedHosts[agent.Host] = &agent
+		agentCopy := agent
+		allNeedHosts[agent.Host] = &agentCopy
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
 		for _, agent := range cluster.Graphd.Hosts {
-			allNeedHosts[agent.Host] = &agent
+			agentCopy := agent
+			allNeedHosts[agent.Host] = &agentCopy
 		}
 		for _, agent := range cluster.Storaged.Hosts {
-			allNeedHosts[agent.Host] = &agent
+			agentCopy := agent
+			allNeedHosts[agent.Host] = &agentCopy
 		}
 	}
 	return allNeedHosts

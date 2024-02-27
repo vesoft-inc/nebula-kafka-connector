@@ -33,6 +33,27 @@ func TestUninstall(t *testing.T) {
 	}
 	assert.NoError(t, err)
 }
+func TestUninstallCluster(t *testing.T) {
+	tasks.Init()
+	executor.SetCertPath("../../certs")
+	spec, err := yamlparser.ParseYamlByPath("../../examples/cluster.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+	job := runner.NewJob("test uninstall")
+	err = job.Run("uninstall", map[string]any{
+		"drain":     true,
+		"kill-wait": "10s",
+	}, spec)
+	if err != nil {
+		yamls, err := yaml.Marshal(job.WorkflowSpec)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(string(yamls))
+	}
+	assert.NoError(t, err)
+}
 
 func TestUninstallUtils(t *testing.T) {
 	tasks.Init()

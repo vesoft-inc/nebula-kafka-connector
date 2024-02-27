@@ -71,6 +71,7 @@ type (
 	PlanDescer interface {
 		GetHeader() []string
 		GetPlanPrintFormat() string
+		GetPlanDesc() map[string]interface{}
 		MakePlanByRow() (rightSepToTailWidth []int, rows [][]interface{})
 		GetBuildTimeInUs() int64
 		GetOptimizeTimeInUs() int64

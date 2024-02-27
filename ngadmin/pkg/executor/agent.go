@@ -84,6 +84,9 @@ func (a *AgentExecutor) Health() error {
 
 func (a *AgentExecutor) Shell(cmd string, sudo bool) (stdout string, stderr string, err error) {
 	var respBody AgentResponse
+	if sudo {
+		cmd = fmt.Sprintf("sudo %s", cmd)
+	}
 	err = a.client.Post(CmdExecutePath, map[string]any{
 		"command": cmd,
 		"timeout": a.timeout,

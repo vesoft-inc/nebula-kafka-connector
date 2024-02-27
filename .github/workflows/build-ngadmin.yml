@@ -41,6 +41,8 @@ jobs:
           mkdir build
           cp -r ./api/agent/etc build/
           cp ./api/agent/bin/agent build/
+          cp ../ngadmin/build/ngadmin build/
+          cp ../ngadmin/examples/ build/
         working-directory: agent
       - uses: actions/upload-artifact@v2
         with:
@@ -49,4 +51,4 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           path: ./agent/build/*
-          name: agent-linux-${{ matrix.os[1] }}
+          name: ngadmin-agent-linux-${{ matrix.os[1] }}
