@@ -109,10 +109,10 @@ public class ScanResultIterator implements Serializable {
     }
 
     protected String getCursor(ResultSet resultSet) {
-        Map<String, List<ValueWrapper>> extraInfo = resultSet.getExtraInfo();
+        Map<String, ValueWrapper> extraInfo = resultSet.getExtraInfo();
         if (!extraInfo.containsKey("cursor")) {
             throw new RuntimeException("result does not contain cursor in extra info.");
         }
-        return extraInfo.get("cursor").get(0).asString();
+        return extraInfo.get("cursor").asString();
     }
 }

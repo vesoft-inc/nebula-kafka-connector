@@ -284,18 +284,14 @@ public class ResultSet {
      *
      * @return map for extra info
      */
-    public Map<String, List<ValueWrapper>> getExtraInfo() {
+    public Map<String, ValueWrapper> getExtraInfo() {
         if (!response.hasExecutionOutcome()) {
             return new HashMap<>();
         }
-        Map<String, Row> extraInfos = response.getExecutionOutcome().getExtraInfoMap();
-        Map<String, List<ValueWrapper>> extraInfoMap = new HashMap<>();
-        for (Map.Entry<String, Row> info : extraInfos.entrySet()) {
-            List<ValueWrapper> infoValues = new ArrayList<>();
-            for (Value value : info.getValue().getValuesList()) {
-                infoValues.add(new ValueWrapper(value));
-            }
-            extraInfoMap.put(info.getKey(), infoValues);
+        Map<String, Value> extraInfos = response.getExecutionOutcome().getExtraInfoMap();
+        Map<String, ValueWrapper> extraInfoMap = new HashMap<>();
+        for (Map.Entry<String, Value> info : extraInfos.entrySet()) {
+            extraInfoMap.put(info.getKey(), new ValueWrapper(info.getValue()));
         }
         return extraInfoMap;
     }

@@ -17,55 +17,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class ValueWrapper {
-    public static class NullType {
-        public static final int __NULL__ = 0;
-        public static final int NaN = 1;
-        public static final int BAD_DATA = 2;
-        public static final int BAD_TYPE = 3;
-        public static final int ERR_OVERFLOW = 4;
-        public static final int UNKNOWN_PROP = 5;
-        public static final int DIV_BY_ZERO = 6;
-        public static final int OUT_OF_RANGE = 7;
-        int nullType;
-
-        public NullType(int nullType) {
-            this.nullType = nullType;
-        }
-
-        public int getNullType() {
-            return nullType;
-        }
-
-        @Override
-        public String toString() {
-            switch (nullType) {
-                case __NULL__:
-                    return "NULL";
-                case NaN:
-                    return "NaN";
-                case BAD_DATA:
-                    return "BAD_DATA";
-                case BAD_TYPE:
-                    return "BAD_TYPE";
-                case ERR_OVERFLOW:
-                    return "ERR_OVERFLOW";
-                case UNKNOWN_PROP:
-                    return "UNKNOWN_PROP";
-                case DIV_BY_ZERO:
-                    return "DIV_BY_ZERO";
-                case OUT_OF_RANGE:
-                    return "OUT_OF_RANGE";
-                default:
-                    return "Unknown type: " + nullType;
-            }
-        }
-    }
 
     private final Value value;
     private final Charset charset = Charsets.UTF_8;
 
     public String getDataType() {
-
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.BOOL_VALUE) {
             return "BOOLEAN";
         }
@@ -76,7 +32,6 @@ public class ValueWrapper {
             return "SHORT";
         }
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT32_VALUE) {
-
             return "INT";
         }
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.INT64_VALUE) {
@@ -119,7 +74,7 @@ public class ValueWrapper {
             return "DATE";
         }
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.RECORD_VALUE) {
-            return "MAP";
+            return "RECORD";
         }
         if (value.getDataCase() == com.vesoft.nebula.proto.Value.DataCase.PATH_VALUE) {
             return "PATH";
@@ -426,7 +381,7 @@ public class ValueWrapper {
             return new NTime(value.getLocalTimeValue());
         }
         throw new InvalidValueException(
-                "cannot get field `LocalTime` because value's type is " + getDataType());
+                "cannot get field `localtime` because value's type is " + getDataType());
     }
 
 
@@ -441,7 +396,7 @@ public class ValueWrapper {
             return new NZonedTime(value.getZonedTimeValue());
         }
         throw new InvalidValueException(
-                "cannot get field `LocalTime` because value's type is " + getDataType());
+                "cannot get field `zonedtime` because value's type is " + getDataType());
     }
 
 
@@ -456,7 +411,7 @@ public class ValueWrapper {
             return new NDate(value.getDateValue());
         }
         throw new InvalidValueException(
-                "cannot get field `Date` because value's type is " + getDataType());
+                "cannot get field `date` because value's type is " + getDataType());
     }
 
     /**
@@ -470,7 +425,7 @@ public class ValueWrapper {
             return new NDateTime(value.getLocalDatatimeValue());
         }
         throw new InvalidValueException(
-                "cannot get field `LocalDatetime` because value's type is " + getDataType());
+                "cannot get field `localdatetime` because value's type is " + getDataType());
     }
 
     /**
@@ -484,7 +439,7 @@ public class ValueWrapper {
             return new NZonedDateTime(value.getZonedDatatimeValue());
         }
         throw new InvalidValueException(
-                "cannot get field `LocalDatetime` because value's type is " + getDataType());
+                "cannot get field `zoneddatetime` because value's type is " + getDataType());
     }
 
     /**
@@ -498,7 +453,7 @@ public class ValueWrapper {
             return new NDuration(value.getDurationValue());
         }
         throw new InvalidValueException(
-                "cannot get field `LocalDatetime` because value's type is " + getDataType());
+                "cannot get field `duration` because value's type is " + getDataType());
     }
 
     public NRecord asRecord() throws InvalidValueException {
@@ -568,8 +523,12 @@ public class ValueWrapper {
             return asEdge().toString();
         } else if (isLocalTime()) {
             return asLocalTime().toString();
+        } else if (isZonedTime()) {
+            return asZonedTime().toString();
         } else if (isLocalDateTime()) {
             return asLocalDateTime().toString();
+        } else if (isZonedDateTime()) {
+            return asZonedDateTime().toString();
         } else if (isDate()) {
             return asDate().toString();
         } else if (isDuration()) {
