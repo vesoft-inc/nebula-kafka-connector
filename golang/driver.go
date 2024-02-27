@@ -17,12 +17,17 @@ type (
 		ColumnTypes() []ColumnType //not support yet
 		RowSize() int
 		PlanDesc() PlanDescer
+		ExtraInfo() ExtraInfo
 	}
 
 	Row interface {
 		Values() []Value
 		GetValueByName(name string) (Value, error)
 		GetValueByIndex(index int) (Value, error)
+	}
+
+	ExtraInfo interface {
+		GetValueByName(name string) (Value, error)
 	}
 
 	// an internel interface to get the connection
@@ -214,7 +219,7 @@ func (dc *driverConn) retryExecuteLocked(ctx context.Context, stmt string) (Resu
 			_ = dc.replaceFromPool()
 		}
 	}
-	return nil, err
+	return result, err
 }
 
 func (dc *driverConn) Ping() error {

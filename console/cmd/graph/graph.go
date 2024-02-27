@@ -65,6 +65,8 @@ var dataSetVerticalPrinter = printer.NewDataSetVerticalPrinter()
 
 var planDescPrinter = printer.NewPlanDescPrinter()
 
+var extraInfoPrinter printer.ExtraInfoPrinter
+
 /*
 	Every statement will be repeatedly executed `g_repeats` times,
 
@@ -346,8 +348,13 @@ func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (
 		fmt.Println()
 		planDescPrinter.PrintPlanDesc(res.PlanDesc())
 	}
-	fmt.Println()
 
+	extraInfo := res.ExtraInfo()
+	if extraInfo != nil {
+		fmt.Println()
+		extraInfoPrinter.PrintMutationInfo(extraInfo)
+	}
+	fmt.Println()
 	return
 }
 
@@ -390,6 +397,14 @@ func loop(c cli.Cli) error {
 			res, err := client.Execute(line)
 			if err != nil {
 				fmt.Printf("[ERROR]: %s", err.Error())
+				if res != nil {
+					extraInfo := res.ExtraInfo()
+					if extraInfo != nil {
+						fmt.Println()
+						fmt.Println()
+						extraInfoPrinter.PrintMutationInfo(extraInfo)
+					}
+				}
 				fmt.Println()
 				fmt.Println()
 				break

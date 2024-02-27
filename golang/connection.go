@@ -30,15 +30,20 @@ type connection struct {
 }
 
 type resultSet struct {
-	index    int
-	latency  uint64
-	result   *proto.ResultTable
-	planDesc []byte
+	index     int
+	latency   uint64
+	result    *proto.ResultTable
+	planDesc  []byte
+	extraInfo map[string]*proto.Value
 }
 
 type rowData struct {
 	resultSet *resultSet
 	values    []Value
+}
+
+type extraInfoData struct {
+	extraInfo map[string]Value
 }
 
 func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Conn, error) {
@@ -131,23 +136,25 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		}
 		return nil, err
 	}
-
 	if resp.ExecutionOutcome == nil {
 		return nil, errInternel("execute failed, response is nil")
 	}
 
+	resultResp := resultSet{
+		index:     0,
+		latency:   (resp.LatencyInUs),
+		result:    resp.ExecutionOutcome.Result,
+		planDesc:  resp.ExecutionOutcome.PlanDesc,
+		extraInfo: resp.ExecutionOutcome.ExtraInfo,
+	}
+
 	if string(resp.ExecutionOutcome.GetGqlStatus().GetCode()) != (ErrorSuccessfulCompletion) {
-		return nil, errServerResponse(
+		return &resultResp, errServerResponse(
 			string(resp.ExecutionOutcome.GetGqlStatus().GetCode()),
 			(string(resp.GetExecutionOutcome().GetGqlStatus().GetMessage())))
 	}
 
-	return &resultSet{
-		index:    0,
-		latency:  (resp.LatencyInUs),
-		result:   resp.ExecutionOutcome.Result,
-		planDesc: resp.ExecutionOutcome.PlanDesc,
-	}, nil
+	return &resultResp, nil
 }
 
 func (cn *connection) Ping() error {
@@ -245,6 +252,19 @@ func (rs *resultSet) PlanDesc() PlanDescer {
 	}
 }
 
+func (rs *resultSet) ExtraInfo() ExtraInfo {
+	if rs.extraInfo == nil {
+		return nil
+	}
+	var res = &extraInfoData{
+		extraInfo: make(map[string]Value, len(rs.extraInfo)),
+	}
+	for key, val := range rs.extraInfo {
+		res.extraInfo[key] = &grpcValue{data: val}
+	}
+	return res
+}
+
 func (rd *rowData) Values() []Value {
 	return rd.values
 }
@@ -269,4 +289,12 @@ func (rd *rowData) GetValueByIndex(index int) (Value, error) {
 		return nil, errInternel(fmt.Sprintf("index out of range"))
 	}
 	return rd.values[index], nil
+}
+
+func (ed *extraInfoData) GetValueByName(name string) (Value, error) {
+	value, ok := ed.extraInfo[name]
+	if !ok {
+		return nil, errInternel(fmt.Sprintf("ExtraInfo %s not found", name))
+	}
+	return value, nil
 }
