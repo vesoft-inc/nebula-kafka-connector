@@ -247,7 +247,11 @@ public class NebulaClient implements Serializable {
                                            List<String> returnProperties,
                                            List<Integer> parts,
                                            int batchSize) {
-        return scanNode(graphName, nodeType, returnProperties, false, parts, batchSize);
+        boolean allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
+        return scanNode(graphName, nodeType, returnProperties, allProperties, parts, batchSize);
     }
 
     /**
@@ -289,8 +293,12 @@ public class NebulaClient implements Serializable {
             String primaryKey = nodeProperties.get(0);
             // put the primary key always on the head of the propertyList for scan
             propertyList.add(primaryKey);
-            returnProperties.remove(primaryKey);
-            propertyList.addAll(returnProperties);
+            for (String propName : returnProperties) {
+                if (propName.trim().equals(primaryKey)) {
+                    continue;
+                }
+                propertyList.add(propName);
+            }
         }
 
         return new ScanNodeResultIterator(pool, graphName, nodeType, propertyList,
@@ -344,7 +352,11 @@ public class NebulaClient implements Serializable {
                                            List<String> returnProperties,
                                            int part,
                                            int batchSize) {
-        return scanEdge(graphName, edgeType, returnProperties, false,
+        boolean allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
+        return scanEdge(graphName, edgeType, returnProperties, allProperties,
                 Collections.singletonList(part),
                 batchSize);
     }
@@ -369,6 +381,10 @@ public class NebulaClient implements Serializable {
                                            List<Integer> parts,
                                            int batchSize) {
         initScanThreadPool();
+        boolean allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
         return scanEdge(graphName, edgeType, returnProperties, false, parts, batchSize);
     }
 

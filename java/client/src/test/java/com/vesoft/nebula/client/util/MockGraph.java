@@ -20,7 +20,7 @@ public class MockGraph {
     public static void mockGraphData() {
         try {
             NebulaClient client = NebulaClient.builder(address, user, passwd).build();
-            String createGraphType = "CREATE GRAPH TYPE graph_type_nba AS "
+            String createGraphType = "CREATE GRAPH TYPE IF NOT EXISTS graph_type_nba AS "
                     + "{(node_type_player LABEL player "
                     + "{id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE}),"
                     + "(node_type_player)-[edge_type_follow LABEL follow "
@@ -33,7 +33,7 @@ public class MockGraph {
                 System.exit(1);
             }
 
-            String createGraph = "CREATE GRAPH nba graph_type_nba";
+            String createGraph = "CREATE GRAPH IF NOT EXISTS nba graph_type_nba";
             resultSet = client.execute(createGraph);
             if (!resultSet.isSucceeded()) {
                 log.error("create graph `nba` failed.", resultSet.getErrorMessage());
