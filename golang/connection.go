@@ -10,7 +10,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -23,7 +23,7 @@ type graphConnector struct{}
 
 type connection struct {
 	mu          sync.Mutex
-	graphClient proto.GraphClient
+	graphClient graph.GraphClient
 	clientConn  *grpc.ClientConn
 	sessionId   int64
 	timeout     time.Duration
@@ -32,9 +32,9 @@ type connection struct {
 type resultSet struct {
 	index     int
 	latency   uint64
-	result    *proto.ResultTable
+	result    *graph.ResultTable
 	planDesc  []byte
-	extraInfo map[string]*proto.Value
+	extraInfo map[string]*graph.Value
 }
 
 type rowData struct {
@@ -83,12 +83,12 @@ func (cn *connection) open(host string, port int, timeout time.Duration, sslConf
 	}
 
 	cn.clientConn = grpcConn
-	cn.graphClient = proto.NewGraphClient(grpcConn)
+	cn.graphClient = graph.NewGraphClient(grpcConn)
 	return nil
 }
 
 func (cn *connection) authenticate(username, password string) error {
-	in := proto.AuthRequest{
+	in := graph.AuthRequest{
 		Username: []byte(username),
 		Password: []byte(password),
 	}
@@ -120,7 +120,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 	}
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
-	in := &proto.ExecuteRequest{
+	in := &graph.ExecuteRequest{
 		SessionId: cn.sessionId,
 		Stmt:      []byte(stmt),
 	}
@@ -161,7 +161,7 @@ func (cn *connection) Ping() error {
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
 	stmt := []byte("RETURN 1")
-	in := &proto.ExecuteRequest{
+	in := &graph.ExecuteRequest{
 		SessionId: cn.sessionId,
 		Stmt:      stmt,
 	}
@@ -175,7 +175,7 @@ func (cn *connection) Close() error {
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
 	// logout via statment, ignore the logout error
-	in := &proto.ExecuteRequest{
+	in := &graph.ExecuteRequest{
 		SessionId: cn.sessionId,
 		Stmt:      []byte("SESSION CLOSE"),
 	}

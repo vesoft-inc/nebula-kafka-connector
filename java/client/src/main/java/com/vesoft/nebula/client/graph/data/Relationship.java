@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.Edge;
-import com.vesoft.nebula.proto.Value;
+import com.vesoft.nebula.proto.graph.Edge;
+import com.vesoft.nebula.proto.graph.Value;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

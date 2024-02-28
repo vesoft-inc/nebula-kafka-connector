@@ -7,12 +7,13 @@ import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.proto.AuthRequest;
-import com.vesoft.nebula.proto.AuthResponse;
-import com.vesoft.nebula.proto.ExecuteRequest;
-import com.vesoft.nebula.proto.ExecuteResponse;
-import com.vesoft.nebula.proto.GraphGrpc;
-import com.vesoft.nebula.proto.SignoutRequest;
+import com.vesoft.nebula.proto.graph.AuthRequest;
+import com.vesoft.nebula.proto.graph.AuthResponse;
+import com.vesoft.nebula.proto.graph.ExecuteRequest;
+import com.vesoft.nebula.proto.graph.ExecuteResponse;
+import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
+import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
+import com.vesoft.nebula.proto.graph.SignoutRequest;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.nio.charset.Charset;
@@ -25,7 +26,7 @@ public class GrpcConnection extends Connection {
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcConnection.class);
 
     private ManagedChannel channel;
-    private GraphGrpc.GraphBlockingStub stub;
+    private GraphServiceGrpc.GraphServiceBlockingStub stub;
     private int connTimeout = 0;
     private int requestTimeout = 0;
 
@@ -40,7 +41,7 @@ public class GrpcConnection extends Connection {
         channel = ManagedChannelBuilder
                 .forAddress(address.getHost(), address.getPort()).usePlaintext()
                 .build();
-        stub = GraphGrpc.newBlockingStub(channel);
+        stub = GraphServiceGrpc.newBlockingStub(channel);
     }
 
     @Override

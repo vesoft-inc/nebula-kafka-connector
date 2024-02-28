@@ -9,19 +9,19 @@ package com.vesoft.nebula.client.graph.data;
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
-import com.vesoft.nebula.proto.Date;
-import com.vesoft.nebula.proto.Edge;
-import com.vesoft.nebula.proto.ExecuteResponse;
-import com.vesoft.nebula.proto.ExecutionOutcome;
-import com.vesoft.nebula.proto.GQLStatus;
-import com.vesoft.nebula.proto.LocalDatetime;
-import com.vesoft.nebula.proto.LocalTime;
-import com.vesoft.nebula.proto.Node;
-import com.vesoft.nebula.proto.Path;
-import com.vesoft.nebula.proto.Record;
-import com.vesoft.nebula.proto.ResultTable;
-import com.vesoft.nebula.proto.Row;
-import com.vesoft.nebula.proto.Value;
+import com.vesoft.nebula.proto.graph.Date;
+import com.vesoft.nebula.proto.graph.Edge;
+import com.vesoft.nebula.proto.graph.ExecuteResponse;
+import com.vesoft.nebula.proto.graph.ExecutionOutcome;
+import com.vesoft.nebula.proto.graph.GQLStatus;
+import com.vesoft.nebula.proto.graph.LocalDatetime;
+import com.vesoft.nebula.proto.graph.LocalTime;
+import com.vesoft.nebula.proto.graph.Node;
+import com.vesoft.nebula.proto.graph.Path;
+import com.vesoft.nebula.proto.graph.Record;
+import com.vesoft.nebula.proto.graph.ResultTable;
+import com.vesoft.nebula.proto.graph.Row;
+import com.vesoft.nebula.proto.graph.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -422,13 +422,14 @@ public class TestData {
         return Record.newBuilder().putAllValues(values).build();
     }
 
-    private com.vesoft.nebula.proto.List getList() {
+    private com.vesoft.nebula.proto.graph.List getList() {
         List<Value> values = new ArrayList<>();
         values.add(Value.newBuilder().setInt64Value(10).build());
         values.add(Value.newBuilder().setInt64Value(11).build());
         values.add(Value.newBuilder().setInt64Value(12).build());
         values.add(Value.newBuilder().setInt64Value(13).build());
-        com.vesoft.nebula.proto.List.Builder builder = com.vesoft.nebula.proto.List.newBuilder();
+        com.vesoft.nebula.proto.graph.List.Builder builder =
+                com.vesoft.nebula.proto.graph.List.newBuilder();
         builder.addAllValues(values);
         return builder.build();
     }

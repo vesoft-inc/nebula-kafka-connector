@@ -33,7 +33,7 @@
 // data structures anyway.
 // So we put the generated code into the a separate namespace or package, i.e. `proto'
 
-package proto
+package graph
 
 import (
 	context "context"
@@ -48,10 +48,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Graph_Authenticate_FullMethodName     = "/nebula.proto.Graph/Authenticate"
-	Graph_Signout_FullMethodName          = "/nebula.proto.Graph/Signout"
-	Graph_Execute_FullMethodName          = "/nebula.proto.Graph/Execute"
-	Graph_StreamingExecute_FullMethodName = "/nebula.proto.Graph/StreamingExecute"
+	Graph_Authenticate_FullMethodName     = "/nebula.proto.GraphService/Authenticate"
+	Graph_Signout_FullMethodName          = "/nebula.proto.GraphService/Signout"
+	Graph_Execute_FullMethodName          = "/nebula.proto.GraphService/Execute"
+	Graph_StreamingExecute_FullMethodName = "/nebula.proto.GraphService/StreamingExecute"
 )
 
 // GraphClient is the client API for Graph service.
@@ -250,7 +250,7 @@ func (x *graphStreamingExecuteServer) Send(m *ExecuteResponse) error {
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var Graph_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "nebula.proto.Graph",
+	ServiceName: "nebula.proto.GraphService",
 	HandlerType: (*GraphServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{

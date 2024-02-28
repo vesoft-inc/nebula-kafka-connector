@@ -3,12 +3,12 @@ package nebula_ng
 import (
 	"testing"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 )
 
 func TestGRPCString(t *testing.T) {
 	testcases := []struct {
-		value  *proto.Value
+		value  *graph.Value
 		expect string
 	}{
 		{
@@ -16,171 +16,171 @@ func TestGRPCString(t *testing.T) {
 			expect: "null",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_BoolValue{true}},
+			value:  &graph.Value{Data: &graph.Value_BoolValue{true}},
 			expect: "true",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_BoolValue{false}},
+			value:  &graph.Value{Data: &graph.Value_BoolValue{false}},
 			expect: "false",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_Int8Value{8}},
+			value:  &graph.Value{Data: &graph.Value_Int8Value{8}},
 			expect: "8",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_Int16Value{16}},
+			value:  &graph.Value{Data: &graph.Value_Int16Value{16}},
 			expect: "16",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_FloatValue{16.02}},
+			value:  &graph.Value{Data: &graph.Value_FloatValue{16.02}},
 			expect: "16.02",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_DoubleValue{16}},
+			value:  &graph.Value{Data: &graph.Value_DoubleValue{16}},
 			expect: "16.0",
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_StringValue{[]byte("string")}},
+			value:  &graph.Value{Data: &graph.Value_StringValue{[]byte("string")}},
 			expect: `"string"`,
 		},
 		{
-			value:  &proto.Value{Data: &proto.Value_StringValue{[]byte("abc\rde")}},
+			value:  &graph.Value{Data: &graph.Value_StringValue{[]byte("abc\rde")}},
 			expect: `"dec"`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_ListValue{
-				&proto.List{
-					Values: []*proto.Value{
-						{Data: &proto.Value_Int8Value{8}},
-						{Data: &proto.Value_StringValue{[]byte("dec")}},
+			value: &graph.Value{Data: &graph.Value_ListValue{
+				&graph.List{
+					Values: []*graph.Value{
+						{Data: &graph.Value_Int8Value{8}},
+						{Data: &graph.Value_StringValue{[]byte("dec")}},
 					}},
 			}},
 			expect: `[8, "dec"]`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_RecordValue{
-				&proto.Record{
-					Values: map[string]*proto.Value{
-						"int": {Data: &proto.Value_Int8Value{8}},
-						"str": {Data: &proto.Value_StringValue{[]byte("dec")}},
+			value: &graph.Value{Data: &graph.Value_RecordValue{
+				&graph.Record{
+					Values: map[string]*graph.Value{
+						"int": {Data: &graph.Value_Int8Value{8}},
+						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 					},
 				},
 			}},
 			expect: `{"int":8,"str":"dec"}`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_NodeValue{
-				&proto.Node{
+			value: &graph.Value{Data: &graph.Value_NodeValue{
+				&graph.Node{
 					NodeId:     1,
 					NodeTypeId: 123,
-					Properties: map[string]*proto.Value{
-						"int": {Data: &proto.Value_Int8Value{8}},
-						"str": {Data: &proto.Value_StringValue{[]byte("dec")}},
+					Properties: map[string]*graph.Value{
+						"int": {Data: &graph.Value_Int8Value{8}},
+						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 					},
 				},
 			}},
 			expect: `({"int":8,"str":"dec"})`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_EdgeValue{
-				&proto.Edge{
+			value: &graph.Value{Data: &graph.Value_EdgeValue{
+				&graph.Edge{
 					SrcId:      1,
 					DstId:      2,
 					EdgeTypeId: 123,
-					Properties: map[string]*proto.Value{
-						"int": {Data: &proto.Value_Int8Value{8}},
-						"str": {Data: &proto.Value_StringValue{[]byte("dec")}},
+					Properties: map[string]*graph.Value{
+						"int": {Data: &graph.Value_Int8Value{8}},
+						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 					},
 				},
 			}},
 			expect: `[{"int":8,"str":"dec"}]`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_PathValue{
-				&proto.Path{
-					Values: []*proto.Value{
-						{Data: &proto.Value_NodeValue{
-							&proto.Node{
+			value: &graph.Value{Data: &graph.Value_PathValue{
+				&graph.Path{
+					Values: []*graph.Value{
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
 								NodeId:     1,
 								NodeTypeId: 123,
-								Properties: map[string]*proto.Value{
-									"int": {Data: &proto.Value_Int8Value{8}},
-									"str": {Data: &proto.Value_StringValue{[]byte("dec")}},
+								Properties: map[string]*graph.Value{
+									"int": {Data: &graph.Value_Int8Value{8}},
+									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 								}},
 						}},
-						{Data: &proto.Value_EdgeValue{
-							&proto.Edge{
+						{Data: &graph.Value_EdgeValue{
+							&graph.Edge{
 								SrcId:      1,
 								DstId:      2,
 								EdgeTypeId: 123,
-								Properties: map[string]*proto.Value{
-									"int": {Data: &proto.Value_Int8Value{8}},
-									"str": {Data: &proto.Value_StringValue{[]byte("dec")}},
+								Properties: map[string]*graph.Value{
+									"int": {Data: &graph.Value_Int8Value{8}},
+									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 								}},
 						}},
-						{Data: &proto.Value_NodeValue{
-							&proto.Node{
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
 								NodeId:     2,
 								NodeTypeId: 456,
-								Properties: map[string]*proto.Value{
-									"int": {Data: &proto.Value_Int8Value{9}},
-									"str": {Data: &proto.Value_StringValue{[]byte("abc")}},
+								Properties: map[string]*graph.Value{
+									"int": {Data: &graph.Value_Int8Value{9}},
+									"str": {Data: &graph.Value_StringValue{[]byte("abc")}},
 								}},
 						}},
 					}}}},
 			expect: `[({"int":8,"str":"dec"}) [{"int":8,"str":"dec"}] ({"int":9,"str":"abc"})]`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_LocalTimeValue{
-				&proto.LocalTime{
+			value: &graph.Value{Data: &graph.Value_LocalTimeValue{
+				&graph.LocalTime{
 					Hour: 23, Minute: 59, Sec: 59, Microsec: 999999,
 				},
 			}},
 			expect: `23:59:59.999999`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_LocalDatatimeValue{
-				&proto.LocalDatetime{
+			value: &graph.Value{Data: &graph.Value_LocalDatatimeValue{
+				&graph.LocalDatetime{
 					Year: 2024, Month: 12, Day: 31, Hour: 23, Minute: 59, Sec: 59, Microsec: 999999,
 				},
 			}},
 			expect: `2024-12-31T23:59:59.999999`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_ZonedTimeValue{
-				&proto.ZonedTime{
+			value: &graph.Value{Data: &graph.Value_ZonedTimeValue{
+				&graph.ZonedTime{
 					Hour: 23, Minute: 59, Sec: 59, Microsec: 999999,
 				},
 			}},
 			expect: `23:59:59.999999Z`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_ZonedDatatimeValue{
-				&proto.ZonedDatetime{
+			value: &graph.Value{Data: &graph.Value_ZonedDatatimeValue{
+				&graph.ZonedDatetime{
 					Year: 2024, Month: 12, Day: 31, Hour: 23, Minute: 59, Sec: 59, Microsec: 999999,
 				},
 			}},
 			expect: `2024-12-31T23:59:59.999999Z`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_DurationValue{
-				&proto.Duration{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
 					Months: 12, Seconds: 23, Microseconds: 999999,
 				},
 			}},
 			expect: `P1YT23.999999S`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_DurationValue{
-				&proto.Duration{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
 					Months: 13, Seconds: 3600, Microseconds: 0,
 				},
 			}},
 			expect: `P1Y1MT1H`,
 		},
 		{
-			value: &proto.Value{Data: &proto.Value_DurationValue{
-				&proto.Duration{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
 					Months: 0, Seconds: 3661, Microseconds: 0,
 				},
 			}},

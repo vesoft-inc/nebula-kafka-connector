@@ -7,45 +7,45 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 )
 
 type (
 	grpcValue struct {
-		data *proto.Value
+		data *graph.Value
 	}
 	grpcLocalTime struct {
-		data *proto.LocalTime
+		data *graph.LocalTime
 	}
 	grpcLocalDatetime struct {
-		data *proto.LocalDatetime
+		data *graph.LocalDatetime
 	}
 	grpcZonedTime struct {
-		data *proto.ZonedTime
+		data *graph.ZonedTime
 	}
 	grpcZonedDatetime struct {
-		data *proto.ZonedDatetime
+		data *graph.ZonedDatetime
 	}
 	grpcDuration struct {
-		data *proto.Duration
+		data *graph.Duration
 	}
 	grpcDate struct {
-		data *proto.Date
+		data *graph.Date
 	}
 	grpcList struct {
-		data *proto.List
+		data *graph.List
 	}
 	grpcRecord struct {
-		data *proto.Record
+		data *graph.Record
 	}
 	grpcNode struct {
-		data *proto.Node
+		data *graph.Node
 	}
 	grpcEdge struct {
-		data *proto.Edge
+		data *graph.Edge
 	}
 	grpcPath struct {
-		data *proto.Path
+		data *graph.Path
 	}
 )
 
@@ -130,51 +130,51 @@ func (v *grpcValue) GetType() ValueType {
 		return ValueTypeNull
 	}
 	switch v.data.Data.(type) {
-	case *proto.Value_BoolValue:
+	case *graph.Value_BoolValue:
 		return ValueTypeBool
-	case *proto.Value_Int8Value:
+	case *graph.Value_Int8Value:
 		return ValueTypeInt8
-	case *proto.Value_Int16Value:
+	case *graph.Value_Int16Value:
 		return ValueTypeInt16
-	case *proto.Value_Int32Value:
+	case *graph.Value_Int32Value:
 		return ValueTypeInt32
-	case *proto.Value_Int64Value:
+	case *graph.Value_Int64Value:
 		return ValueTypeInt64
-	case *proto.Value_Uint8Value:
+	case *graph.Value_Uint8Value:
 		return ValueTypeUInt8
-	case *proto.Value_Uint16Value:
+	case *graph.Value_Uint16Value:
 		return ValueTypeUInt16
-	case *proto.Value_Uint32Value:
+	case *graph.Value_Uint32Value:
 		return ValueTypeUInt32
-	case *proto.Value_Uint64Value:
+	case *graph.Value_Uint64Value:
 		return ValueTypeUInt64
-	case *proto.Value_FloatValue:
+	case *graph.Value_FloatValue:
 		return ValueTypeFloat
-	case *proto.Value_DoubleValue:
+	case *graph.Value_DoubleValue:
 		return ValueTypeDouble
-	case *proto.Value_StringValue:
+	case *graph.Value_StringValue:
 		return ValueTypeString
-	case *proto.Value_DurationValue:
+	case *graph.Value_DurationValue:
 		return ValueTypeDuration
-	case *proto.Value_LocalTimeValue:
+	case *graph.Value_LocalTimeValue:
 		return ValueTypeLocalTime
-	case *proto.Value_LocalDatatimeValue:
+	case *graph.Value_LocalDatatimeValue:
 		return ValueTypeLocalDateTime
-	case *proto.Value_ZonedTimeValue:
+	case *graph.Value_ZonedTimeValue:
 		return ValueTypeZonedTime
-	case *proto.Value_ZonedDatatimeValue:
+	case *graph.Value_ZonedDatatimeValue:
 		return ValueTypeZonedDateTime
-	case *proto.Value_DateValue:
+	case *graph.Value_DateValue:
 		return ValueTypeDate
-	case *proto.Value_ListValue:
+	case *graph.Value_ListValue:
 		return ValueTypeList
-	case *proto.Value_RecordValue:
+	case *graph.Value_RecordValue:
 		return ValueTypeRecord
-	case *proto.Value_NodeValue:
+	case *graph.Value_NodeValue:
 		return ValueTypeNode
-	case *proto.Value_EdgeValue:
+	case *graph.Value_EdgeValue:
 		return ValueTypeEdge
-	case *proto.Value_PathValue:
+	case *graph.Value_PathValue:
 		return ValueTypePath
 	default:
 		return ValueTypeNull

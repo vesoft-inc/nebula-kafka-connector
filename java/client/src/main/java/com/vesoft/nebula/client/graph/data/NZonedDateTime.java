@@ -6,8 +6,8 @@
 package com.vesoft.nebula.client.graph.data;
 
 import com.vesoft.nebula.client.graph.utils.ZoneOffsetUtil;
-import com.vesoft.nebula.proto.LocalDatetime;
-import com.vesoft.nebula.proto.ZonedDatetime;
+import com.vesoft.nebula.proto.graph.LocalDatetime;
+import com.vesoft.nebula.proto.graph.ZonedDatetime;
 import java.util.Objects;
 
 public class NZonedDateTime {

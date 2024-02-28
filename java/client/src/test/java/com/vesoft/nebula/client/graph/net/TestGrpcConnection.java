@@ -5,10 +5,8 @@
 
 package com.vesoft.nebula.client.graph.net;
 
-import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.data.HostAddress;
-import com.vesoft.nebula.proto.ExecuteResponse;
-import java.nio.charset.Charset;
+import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;

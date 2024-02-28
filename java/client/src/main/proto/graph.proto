@@ -30,13 +30,13 @@ syntax = "proto3";
  * data structures anyway.
  * So we put the generated code into the a separate namespace or package, i.e. `proto'
  */
-package nebula.proto;
-option go_package = "./proto";
-option java_package = "com.vesoft.nebula.proto";
+package nebula.proto.graph;
+option go_package = "./proto/graph";
+option java_package = "com.vesoft.nebula.proto.graph";
 option java_multiple_files = true;
 
 // Interface definition
-service Graph {
+service GraphService {
     rpc Authenticate(AuthRequest) returns(AuthResponse) {}
     rpc Signout(SignoutRequest) returns(SignoutResponse) {}
     rpc Execute(ExecuteRequest) returns(ExecuteResponse) {}

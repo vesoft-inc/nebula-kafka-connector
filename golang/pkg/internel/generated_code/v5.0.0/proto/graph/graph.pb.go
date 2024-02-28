@@ -33,7 +33,7 @@
 // data structures anyway.
 // So we put the generated code into the a separate namespace or package, i.e. `proto'
 
-package proto
+package graph
 
 import (
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
