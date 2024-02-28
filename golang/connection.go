@@ -23,7 +23,7 @@ type graphConnector struct{}
 
 type connection struct {
 	mu          sync.Mutex
-	graphClient graph.GraphClient
+	graphClient graph.GraphServiceClient
 	clientConn  *grpc.ClientConn
 	sessionId   int64
 	timeout     time.Duration
@@ -83,7 +83,7 @@ func (cn *connection) open(host string, port int, timeout time.Duration, sslConf
 	}
 
 	cn.clientConn = grpcConn
-	cn.graphClient = graph.NewGraphClient(grpcConn)
+	cn.graphClient = graph.NewGraphServiceClient(grpcConn)
 	return nil
 }
 
@@ -97,7 +97,7 @@ func (cn *connection) authenticate(username, password string) error {
 		_ = cn.Close()
 		return err
 	}
-	if string(resp.GetGqlStatus().GetCode()) != ErrorSuccessfulCompletion {
+	if string(resp.GetGqlStatus().GetCode()) != string(ErrorSuccessfulCompletion) {
 		return errServerResponse(string(resp.GetGqlStatus().GetCode()), resp.GetGqlStatus().String())
 	}
 	cn.sessionId = resp.GetSessionId()
@@ -148,7 +148,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		extraInfo: resp.ExecutionOutcome.ExtraInfo,
 	}
 
-	if string(resp.ExecutionOutcome.GetGqlStatus().GetCode()) != (ErrorSuccessfulCompletion) {
+	if string(resp.ExecutionOutcome.GetGqlStatus().GetCode()) != string(ErrorSuccessfulCompletion) {
 		return &resultResp, errServerResponse(
 			string(resp.ExecutionOutcome.GetGqlStatus().GetCode()),
 			(string(resp.GetExecutionOutcome().GetGqlStatus().GetMessage())))

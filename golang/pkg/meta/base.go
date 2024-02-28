@@ -1,33 +1,31 @@
 package meta
 
+import (
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+)
+
 type (
 	headerRequest struct {
 		requestType string
 		clusterId   int64 // meta admin dont need clusterId
 	}
 	HeaderResponse struct {
-		Code    string
+		OK      bool
+		Code    nebula.ErrorCode
 		Msg     string
 		NewHost string // only if code is leader changed
 		NewPort uint32 // only if code is leader changed
 	}
-
-	responseHeader interface {
-		//getHeader for internal usage, would reconnect if the leader chanage.
-		getHeader() *HeaderResponse
-		GetErrorCode() string
-		GetErrorMsg() string
-	}
 )
 
-func (hresp *HeaderResponse) getHeader() *HeaderResponse {
-	return hresp
+func (h *HeaderResponse) GetErrorCode() nebula.ErrorCode {
+	return h.Code
 }
 
-func (hresp *HeaderResponse) GetErrorCode() string {
-	return hresp.Code
+func (h *HeaderResponse) GetErrorMsg() string {
+	return h.Msg
 }
 
-func (hresp *HeaderResponse) GetErrorMsg() string {
-	return hresp.Msg
+func (h *HeaderResponse) IsSucceeded() bool {
+	return h.OK
 }

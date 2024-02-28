@@ -47,14 +47,14 @@ func isConnectionError(err error) bool {
 	if !ok {
 		return false
 	}
-	codes := []string{
+	codes := []ErrorCode{
 		ErrorConnIsBroken,
 		ErrorConnConnectTimeout,
 		ErrorConnRequestTimeout,
 		ErrorConnIsClosed,
 	}
 	for _, c := range codes {
-		if ne.code == c {
+		if ne.errorCode == c {
 			return true
 		}
 	}

@@ -4,41 +4,43 @@ import (
 	"fmt"
 )
 
+type ErrorCode string
+
 var (
 	// Error in client side
 	// Tmp error code, would be redefined in future
-	ErrorAddressNotValid    string = newErrorCode("99", "000")
-	ErrorCannotOpen                = newErrorCode("99", "001")
-	ErrorConnIsBroken              = newErrorCode("99", "002")
-	ErrorConnConnectTimeout        = newErrorCode("99", "003")
-	ErrorConnRequestTimeout        = newErrorCode("99", "004")
-	ErrorConnIsClosed              = newErrorCode("99", "005")
-	ErrorWaitPoolTimeout           = newErrorCode("99", "006")
-	ErrorIllegal                   = newErrorCode("99", "007")
-	ErrorType                      = newErrorCode("99", "008")
-	ErrorClientInternel            = newErrorCode("99", "009")
+	ErrorAddressNotValid    ErrorCode = newErrorCode("99", "000")
+	ErrorCannotOpen                   = newErrorCode("99", "001")
+	ErrorConnIsBroken                 = newErrorCode("99", "002")
+	ErrorConnConnectTimeout           = newErrorCode("99", "003")
+	ErrorConnRequestTimeout           = newErrorCode("99", "004")
+	ErrorConnIsClosed                 = newErrorCode("99", "005")
+	ErrorWaitPoolTimeout              = newErrorCode("99", "006")
+	ErrorIllegal                      = newErrorCode("99", "007")
+	ErrorType                         = newErrorCode("99", "008")
+	ErrorClientInternel               = newErrorCode("99", "009")
 
 	// Error in server side
 	ErrorSuccessfulCompletion = newErrorCode("00", "000")
 	//TODO need to add more error codes
-	ErrorLeaderChange   = newErrorCode("ND", "004")
+	ErrorLeaderChange   = newErrorCode("ND", "005")
 	ErrorClusterExisted = newErrorCode("NI", "001")
 )
 
 // TODO add error code in future
 type NebulaError struct {
-	code        string
+	errorCode   ErrorCode
 	errorFormat string
 	errorArgs   []interface{}
 }
 
 func (e *NebulaError) Error() string {
 	msg := fmt.Sprintf(e.errorFormat, e.errorArgs...)
-	return fmt.Sprintf("[%s]: %s", e.code, msg)
+	return fmt.Sprintf("[%s]: %s", e.errorCode, msg)
 }
 
-func (e *NebulaError) Code() string {
-	return e.code
+func (e *NebulaError) Code() ErrorCode {
+	return e.errorCode
 }
 
 func errAddressNotValid(address string, msg string) error {
@@ -55,7 +57,7 @@ func errAddressNotValid(address string, msg string) error {
 		args = []interface{}{address, msg}
 	}
 	return &NebulaError{
-		code:        ErrorAddressNotValid,
+		errorCode:   ErrorAddressNotValid,
 		errorFormat: format,
 		errorArgs:   args,
 	}
@@ -63,7 +65,7 @@ func errAddressNotValid(address string, msg string) error {
 
 func errConnCannotOpen(host string, port int, msg string) error {
 	return &NebulaError{
-		code:        ErrorCannotOpen,
+		errorCode:   ErrorCannotOpen,
 		errorFormat: "cannot open connection to %s:%d, %s",
 		errorArgs:   []interface{}{host, port, msg},
 	}
@@ -71,7 +73,7 @@ func errConnCannotOpen(host string, port int, msg string) error {
 
 func errConnBroken(host string, port int) error {
 	return &NebulaError{
-		code:        ErrorConnIsBroken,
+		errorCode:   ErrorConnIsBroken,
 		errorFormat: "connection to %s:%d is broken",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -79,7 +81,7 @@ func errConnBroken(host string, port int) error {
 
 func errConnConnectTimeout(host string, port int) error {
 	return &NebulaError{
-		code:        ErrorConnConnectTimeout,
+		errorCode:   ErrorConnConnectTimeout,
 		errorFormat: "connection to %s:%d timeout",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -87,7 +89,7 @@ func errConnConnectTimeout(host string, port int) error {
 
 func errConnRequestTimeout(host string, port int) error {
 	return &NebulaError{
-		code:        ErrorConnRequestTimeout,
+		errorCode:   ErrorConnRequestTimeout,
 		errorFormat: "request to %s:%d timeout",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -95,7 +97,7 @@ func errConnRequestTimeout(host string, port int) error {
 
 func errConnIsClosed(host string, port int) error {
 	return &NebulaError{
-		code:        ErrorConnIsClosed,
+		errorCode:   ErrorConnIsClosed,
 		errorFormat: "connection to %s:%d is closed",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -103,7 +105,7 @@ func errConnIsClosed(host string, port int) error {
 
 func errWaitPoolTimeout() error {
 	return &NebulaError{
-		code:        ErrorWaitPoolTimeout,
+		errorCode:   ErrorWaitPoolTimeout,
 		errorFormat: "get from pool timeout",
 		errorArgs:   []interface{}{},
 	}
@@ -111,7 +113,7 @@ func errWaitPoolTimeout() error {
 
 func errIllegal(msg string) error {
 	return &NebulaError{
-		code:        ErrorIllegal, // TODO need to add error code
+		errorCode:   ErrorIllegal, // TODO need to add error code
 		errorFormat: "Illegal error, %s",
 		errorArgs:   []interface{}{msg},
 	}
@@ -119,7 +121,7 @@ func errIllegal(msg string) error {
 
 func errType(msg string) error {
 	return &NebulaError{
-		code:        ErrorType,
+		errorCode:   ErrorType,
 		errorFormat: "Type error, %s",
 		errorArgs:   []interface{}{msg},
 	}
@@ -129,7 +131,7 @@ func errType(msg string) error {
 // user should not see this error
 func errInternel(msg string) error {
 	return &NebulaError{
-		code:        ErrorClientInternel,
+		errorCode:   ErrorClientInternel,
 		errorFormat: "Internel error, %s",
 		errorArgs:   []interface{}{msg},
 	}
@@ -138,15 +140,31 @@ func errInternel(msg string) error {
 func errServerResponse(code string, msg string) error {
 	// TODO should set the error code
 	return &NebulaError{
-		code:        code,
+		errorCode:   ErrorCode(code),
 		errorFormat: "%s",
 		errorArgs:   []interface{}{msg},
 	}
 }
 
-func newErrorCode(class, subClass string) string {
+func newErrorCode(class, subClass string) ErrorCode {
 	if len(class) != 2 || len(subClass) != 3 {
 		return ""
 	}
-	return class + subClass
+	return ErrorCode(class + subClass)
+}
+
+func ErrorFromInt(c uint64) ErrorCode {
+	encodeSubClass := c >> 16
+	encodeClass := c & 0x0000FFFF
+	class := string([]byte{byte(encodeClass), byte(encodeClass >> 8)})
+	subClass := string([]byte{byte(encodeSubClass), byte(encodeSubClass >> 8),
+		byte(encodeSubClass >> 16)})
+	return ErrorCode(class + subClass)
+}
+
+func (e ErrorCode) codeInt() uint64 {
+	class, subClass := e[0:2], e[2:5]
+	encodeClass := uint64(class[1])<<8 | uint64(class[0])
+	encodeSubClass := uint64(subClass[2])<<16 | uint64(subClass[1])<<8 | uint64(subClass[0])
+	return encodeSubClass<<16 | encodeClass
 }

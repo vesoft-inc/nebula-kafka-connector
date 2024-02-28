@@ -11,6 +11,7 @@ require (
 )
 
 require (
+	github.com/go-playground/assert/v2 v2.2.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

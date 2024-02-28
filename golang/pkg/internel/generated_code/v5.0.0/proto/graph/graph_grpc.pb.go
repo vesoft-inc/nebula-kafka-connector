@@ -48,63 +48,63 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Graph_Authenticate_FullMethodName     = "/nebula.proto.GraphService/Authenticate"
-	Graph_Signout_FullMethodName          = "/nebula.proto.GraphService/Signout"
-	Graph_Execute_FullMethodName          = "/nebula.proto.GraphService/Execute"
-	Graph_StreamingExecute_FullMethodName = "/nebula.proto.GraphService/StreamingExecute"
+	GraphService_Authenticate_FullMethodName     = "/nebula.proto.graph.GraphService/Authenticate"
+	GraphService_Signout_FullMethodName          = "/nebula.proto.graph.GraphService/Signout"
+	GraphService_Execute_FullMethodName          = "/nebula.proto.graph.GraphService/Execute"
+	GraphService_StreamingExecute_FullMethodName = "/nebula.proto.graph.GraphService/StreamingExecute"
 )
 
-// GraphClient is the client API for Graph service.
+// GraphServiceClient is the client API for GraphService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type GraphClient interface {
+type GraphServiceClient interface {
 	Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
 	Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error)
 	Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error)
-	StreamingExecute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (Graph_StreamingExecuteClient, error)
+	StreamingExecute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (GraphService_StreamingExecuteClient, error)
 }
 
-type graphClient struct {
+type graphServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewGraphClient(cc grpc.ClientConnInterface) GraphClient {
-	return &graphClient{cc}
+func NewGraphServiceClient(cc grpc.ClientConnInterface) GraphServiceClient {
+	return &graphServiceClient{cc}
 }
 
-func (c *graphClient) Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
+func (c *graphServiceClient) Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	out := new(AuthResponse)
-	err := c.cc.Invoke(ctx, Graph_Authenticate_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, GraphService_Authenticate_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *graphClient) Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error) {
+func (c *graphServiceClient) Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error) {
 	out := new(SignoutResponse)
-	err := c.cc.Invoke(ctx, Graph_Signout_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, GraphService_Signout_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *graphClient) Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error) {
+func (c *graphServiceClient) Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error) {
 	out := new(ExecuteResponse)
-	err := c.cc.Invoke(ctx, Graph_Execute_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, GraphService_Execute_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *graphClient) StreamingExecute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (Graph_StreamingExecuteClient, error) {
-	stream, err := c.cc.NewStream(ctx, &Graph_ServiceDesc.Streams[0], Graph_StreamingExecute_FullMethodName, opts...)
+func (c *graphServiceClient) StreamingExecute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (GraphService_StreamingExecuteClient, error) {
+	stream, err := c.cc.NewStream(ctx, &GraphService_ServiceDesc.Streams[0], GraphService_StreamingExecute_FullMethodName, opts...)
 	if err != nil {
 		return nil, err
 	}
-	x := &graphStreamingExecuteClient{stream}
+	x := &graphServiceStreamingExecuteClient{stream}
 	if err := x.ClientStream.SendMsg(in); err != nil {
 		return nil, err
 	}
@@ -114,16 +114,16 @@ func (c *graphClient) StreamingExecute(ctx context.Context, in *ExecuteRequest, 
 	return x, nil
 }
 
-type Graph_StreamingExecuteClient interface {
+type GraphService_StreamingExecuteClient interface {
 	Recv() (*ExecuteResponse, error)
 	grpc.ClientStream
 }
 
-type graphStreamingExecuteClient struct {
+type graphServiceStreamingExecuteClient struct {
 	grpc.ClientStream
 }
 
-func (x *graphStreamingExecuteClient) Recv() (*ExecuteResponse, error) {
+func (x *graphServiceStreamingExecuteClient) Recv() (*ExecuteResponse, error) {
 	m := new(ExecuteResponse)
 	if err := x.ClientStream.RecvMsg(m); err != nil {
 		return nil, err
@@ -131,145 +131,145 @@ func (x *graphStreamingExecuteClient) Recv() (*ExecuteResponse, error) {
 	return m, nil
 }
 
-// GraphServer is the server API for Graph service.
-// All implementations must embed UnimplementedGraphServer
+// GraphServiceServer is the server API for GraphService service.
+// All implementations must embed UnimplementedGraphServiceServer
 // for forward compatibility
-type GraphServer interface {
+type GraphServiceServer interface {
 	Authenticate(context.Context, *AuthRequest) (*AuthResponse, error)
 	Signout(context.Context, *SignoutRequest) (*SignoutResponse, error)
 	Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error)
-	StreamingExecute(*ExecuteRequest, Graph_StreamingExecuteServer) error
-	mustEmbedUnimplementedGraphServer()
+	StreamingExecute(*ExecuteRequest, GraphService_StreamingExecuteServer) error
+	mustEmbedUnimplementedGraphServiceServer()
 }
 
-// UnimplementedGraphServer must be embedded to have forward compatible implementations.
-type UnimplementedGraphServer struct {
+// UnimplementedGraphServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedGraphServiceServer struct {
 }
 
-func (UnimplementedGraphServer) Authenticate(context.Context, *AuthRequest) (*AuthResponse, error) {
+func (UnimplementedGraphServiceServer) Authenticate(context.Context, *AuthRequest) (*AuthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
 }
-func (UnimplementedGraphServer) Signout(context.Context, *SignoutRequest) (*SignoutResponse, error) {
+func (UnimplementedGraphServiceServer) Signout(context.Context, *SignoutRequest) (*SignoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Signout not implemented")
 }
-func (UnimplementedGraphServer) Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error) {
+func (UnimplementedGraphServiceServer) Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
 }
-func (UnimplementedGraphServer) StreamingExecute(*ExecuteRequest, Graph_StreamingExecuteServer) error {
+func (UnimplementedGraphServiceServer) StreamingExecute(*ExecuteRequest, GraphService_StreamingExecuteServer) error {
 	return status.Errorf(codes.Unimplemented, "method StreamingExecute not implemented")
 }
-func (UnimplementedGraphServer) mustEmbedUnimplementedGraphServer() {}
+func (UnimplementedGraphServiceServer) mustEmbedUnimplementedGraphServiceServer() {}
 
-// UnsafeGraphServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to GraphServer will
+// UnsafeGraphServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to GraphServiceServer will
 // result in compilation errors.
-type UnsafeGraphServer interface {
-	mustEmbedUnimplementedGraphServer()
+type UnsafeGraphServiceServer interface {
+	mustEmbedUnimplementedGraphServiceServer()
 }
 
-func RegisterGraphServer(s grpc.ServiceRegistrar, srv GraphServer) {
-	s.RegisterService(&Graph_ServiceDesc, srv)
+func RegisterGraphServiceServer(s grpc.ServiceRegistrar, srv GraphServiceServer) {
+	s.RegisterService(&GraphService_ServiceDesc, srv)
 }
 
-func _Graph_Authenticate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _GraphService_Authenticate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AuthRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GraphServer).Authenticate(ctx, in)
+		return srv.(GraphServiceServer).Authenticate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Graph_Authenticate_FullMethodName,
+		FullMethod: GraphService_Authenticate_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GraphServer).Authenticate(ctx, req.(*AuthRequest))
+		return srv.(GraphServiceServer).Authenticate(ctx, req.(*AuthRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Graph_Signout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _GraphService_Signout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(SignoutRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GraphServer).Signout(ctx, in)
+		return srv.(GraphServiceServer).Signout(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Graph_Signout_FullMethodName,
+		FullMethod: GraphService_Signout_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GraphServer).Signout(ctx, req.(*SignoutRequest))
+		return srv.(GraphServiceServer).Signout(ctx, req.(*SignoutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Graph_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _GraphService_Execute_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ExecuteRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(GraphServer).Execute(ctx, in)
+		return srv.(GraphServiceServer).Execute(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Graph_Execute_FullMethodName,
+		FullMethod: GraphService_Execute_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GraphServer).Execute(ctx, req.(*ExecuteRequest))
+		return srv.(GraphServiceServer).Execute(ctx, req.(*ExecuteRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Graph_StreamingExecute_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _GraphService_StreamingExecute_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(ExecuteRequest)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(GraphServer).StreamingExecute(m, &graphStreamingExecuteServer{stream})
+	return srv.(GraphServiceServer).StreamingExecute(m, &graphServiceStreamingExecuteServer{stream})
 }
 
-type Graph_StreamingExecuteServer interface {
+type GraphService_StreamingExecuteServer interface {
 	Send(*ExecuteResponse) error
 	grpc.ServerStream
 }
 
-type graphStreamingExecuteServer struct {
+type graphServiceStreamingExecuteServer struct {
 	grpc.ServerStream
 }
 
-func (x *graphStreamingExecuteServer) Send(m *ExecuteResponse) error {
+func (x *graphServiceStreamingExecuteServer) Send(m *ExecuteResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
-// Graph_ServiceDesc is the grpc.ServiceDesc for Graph service.
+// GraphService_ServiceDesc is the grpc.ServiceDesc for GraphService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var Graph_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "nebula.proto.GraphService",
-	HandlerType: (*GraphServer)(nil),
+var GraphService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "nebula.proto.graph.GraphService",
+	HandlerType: (*GraphServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "Authenticate",
-			Handler:    _Graph_Authenticate_Handler,
+			Handler:    _GraphService_Authenticate_Handler,
 		},
 		{
 			MethodName: "Signout",
-			Handler:    _Graph_Signout_Handler,
+			Handler:    _GraphService_Signout_Handler,
 		},
 		{
 			MethodName: "Execute",
-			Handler:    _Graph_Execute_Handler,
+			Handler:    _GraphService_Execute_Handler,
 		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "StreamingExecute",
-			Handler:       _Graph_StreamingExecute_Handler,
+			Handler:       _GraphService_StreamingExecute_Handler,
 			ServerStreams: true,
 		},
 	},
