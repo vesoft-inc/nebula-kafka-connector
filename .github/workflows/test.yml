@@ -18,8 +18,8 @@ jobs:
     runs-on: [self-hosted, nebula-fast]
     container:
       image: vesoft/nebula-dev:ubuntu2004
-      env:
-        GOPROXY: ${{ vars.GOPROXY }}
+    env:
+      GOPROXY: ${{ vars.GOPROXY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
@@ -54,6 +54,9 @@ jobs:
         uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
+      - uses: s4u/maven-settings-action@v3.0.0
+        with:
+          mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
       - name: Build with Maven
         run: |
           mvn -B install -pl client -D test=TestData
