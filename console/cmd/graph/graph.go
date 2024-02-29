@@ -346,7 +346,12 @@ func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (
 
 	if res.PlanDesc() != nil {
 		fmt.Println()
-		planDescPrinter.PrintPlanDesc(res.PlanDesc())
+		p, err := printer.NewPlan(res.PlanDesc())
+		if err != nil {
+			fmt.Println("Error: ", err.Error())
+			return
+		}
+		planDescPrinter.PrintPlanDesc(p)
 	}
 
 	extraInfo := res.ExtraInfo()

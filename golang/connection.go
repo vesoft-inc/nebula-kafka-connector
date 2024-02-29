@@ -3,7 +3,6 @@ package nebula_ng
 import (
 	"context"
 	"crypto/tls"
-	"encoding/json"
 	"fmt"
 	"io"
 	"math"
@@ -239,17 +238,8 @@ func (rs *resultSet) ColumnTypes() []ColumnType {
 	return nil
 }
 
-func (rs *resultSet) PlanDesc() PlanDescer {
-	if rs.planDesc == nil {
-		return nil
-	}
-	var planDesc = make(map[string]interface{})
-	if err := json.Unmarshal(rs.planDesc, &planDesc); err != nil {
-		return nil
-	}
-	return &plan{
-		planDesc: planDesc,
-	}
+func (rs *resultSet) PlanDesc() []byte {
+	return rs.planDesc
 }
 
 func (rs *resultSet) ExtraInfo() ExtraInfo {

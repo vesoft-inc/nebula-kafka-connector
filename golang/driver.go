@@ -16,7 +16,7 @@ type (
 		Columns() []string
 		ColumnTypes() []ColumnType //not support yet
 		RowSize() int
-		PlanDesc() PlanDescer
+		PlanDesc() []byte
 		ExtraInfo() ExtraInfo
 	}
 
@@ -66,15 +66,6 @@ type (
 		PutClient(Conn) error
 		OnOpenClient(func(ConnSetter))
 		Close() error
-	}
-
-	PlanDescer interface {
-		GetHeader() []string
-		GetPlanPrintFormat() string
-		GetPlanDesc() map[string]interface{}
-		MakePlanByRow() (rightSepToTailWidth []int, rows [][]interface{})
-		GetBuildTimeInUs() int64
-		GetOptimizeTimeInUs() int64
 	}
 
 	connConfig struct {

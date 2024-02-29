@@ -13,7 +13,6 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 
 func graphvizString(s string) string {
@@ -98,7 +97,7 @@ func (p PlanDescPrinter) renderDotGraphByStruct(s string) string {
 	return p.writer.Render()
 }
 
-func (p PlanDescPrinter) renderByRow(plan nebula.PlanDescer) string {
+func (p PlanDescPrinter) renderByRow(plan PlanDescer) string {
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	p.configWriterDotRenderStyle(false)
@@ -166,7 +165,7 @@ func (p PlanDescPrinter) renderByRow(plan nebula.PlanDescer) string {
 	return p.writer.Render()
 }
 
-func (p *PlanDescPrinter) PrintPlanDesc(plan nebula.PlanDescer) {
+func (p *PlanDescPrinter) PrintPlanDesc(plan PlanDescer) {
 	var s string
 	format := strings.ToLower(plan.GetPlanPrintFormat())
 	switch format {

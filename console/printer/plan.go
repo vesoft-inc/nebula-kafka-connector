@@ -1,6 +1,9 @@
-package nebula_ng
+package printer
 
-import "strings"
+import (
+	"encoding/json"
+	"strings"
+)
 
 const (
 	dash       string = `├─`
@@ -9,8 +12,25 @@ const (
 	spacerLast string = `  `
 )
 
+type PlanDescer interface {
+	GetHeader() []string
+	GetPlanPrintFormat() string
+	GetPlanDesc() map[string]interface{}
+	MakePlanByRow() (rightSepToTailWidth []int, rows [][]interface{})
+	GetBuildTimeInUs() int64
+	GetOptimizeTimeInUs() int64
+}
+
 type plan struct {
 	planDesc map[string]interface{}
+}
+
+func NewPlan(bs []byte) (PlanDescer, error) {
+	planDesc := make(map[string]interface{})
+	if err := json.Unmarshal(bs, &planDesc); err != nil {
+		return nil, err
+	}
+	return &plan{planDesc: planDesc}, nil
 }
 
 func (p *plan) GetHeader() []string {
