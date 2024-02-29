@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/vesoft-inc/k6-plugin v1.1.8-0.20240129083933-183053c42291
-	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20230817035213-d28bc30bb8fc
+	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20240229074953-a30fb56c0cbe
 	go.k6.io/k6 v0.45.1
 )
 
