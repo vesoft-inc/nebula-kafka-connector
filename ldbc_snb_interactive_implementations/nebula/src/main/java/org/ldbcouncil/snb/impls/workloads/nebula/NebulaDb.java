@@ -1,7 +1,6 @@
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
 import com.google.common.collect.ImmutableMap;
-import com.vesoft.nebula.proto.Value;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.InvalidValueException;
@@ -9,7 +8,6 @@ import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.control.LoggingService;
 import org.ldbcouncil.snb.driver.workloads.interactive.*;
-import org.ldbcouncil.snb.impls.workloads.QueryType;
 import org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaListOperationHandler;
 import org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaSingletonOperationHandler;
 import org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers.NebulaUpdateOperationHandler;
@@ -21,7 +19,6 @@ import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.*;
 import java.util.Collections;
-import java.util.stream.Collectors;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
 
