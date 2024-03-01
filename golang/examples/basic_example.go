@@ -62,6 +62,9 @@ func main() {
 		panic(err.Error())
 	}
 	defer client.Close()
+	if err := client.Ping(); err != nil {
+		panic(err.Error())
+	}
 
 	// Execute a query
 	log.Info("Create graph type...")
@@ -90,8 +93,8 @@ func main() {
 	pool, err := nebula.NewNebulaPool(addresses, username, password)
 	defer pool.Close()
 	pool.OnOpenClient(func(conn nebula.ConnSetter) {
-		conn.SetRequestTimeout(100 * time.Second)
-		conn.SetConnectTimeout(100 * time.Second)
+		conn.SetRequestTimeout(10 * time.Second)
+		conn.SetConnectTimeout(10 * time.Second)
 	})
 	client2, err := pool.GetClient()
 	defer pool.PutClient(client2)
