@@ -253,7 +253,8 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		if err != nil {
 			return nil, err
 		}
-		gc = sess.(*GraphClient)
+		newClient := sess.(*GraphClient)
+		*gc = *newClient
 	} else {
 		rows = int32(resp.RowSize())
 		latency = resp.Latency()
