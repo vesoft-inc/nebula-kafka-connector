@@ -18,8 +18,6 @@ public abstract class Connection implements Serializable {
     public abstract void open(HostAddress address, int connTimeout, int requestTimeout)
             throws IOErrorException;
 
-    public abstract void reopen() throws IOErrorException, ClientServerIncompatibleException;
-
     public abstract void close();
 
     public abstract boolean ping(long sessionID) throws IOErrorException;

@@ -678,7 +678,7 @@ public class NebulaClient implements Serializable {
         private boolean reconnect = false;
 
         // The healthCheckTime for schedule check the health of session, unit: millisecond
-        private int healthCheckTime = 3000;
+        private int healthCheckTime = 300000;
 
         // if block when session is exhausted, if false, throw exception.
         private boolean blockWhenExhausted = false;

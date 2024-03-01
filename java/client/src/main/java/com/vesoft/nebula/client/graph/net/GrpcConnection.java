@@ -17,6 +17,7 @@ import com.vesoft.nebula.proto.graph.SignoutRequest;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.nio.charset.Charset;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,8 @@ public class GrpcConnection extends Connection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcConnection.class);
 
-    private ManagedChannel channel;
+    private static ConcurrentHashMap<HostAddress, ManagedChannel> channels =
+            new ConcurrentHashMap<>();
     private GraphServiceGrpc.GraphServiceBlockingStub stub;
     private int connTimeout = 0;
     private int requestTimeout = 0;
@@ -38,29 +40,30 @@ public class GrpcConnection extends Connection {
         this.serverAddr = address;
         this.connTimeout = connTimeout <= 0 ? Integer.MAX_VALUE : connTimeout;
         this.requestTimeout = requestTimeout <= 0 ? Integer.MAX_VALUE : requestTimeout;
-        channel = ManagedChannelBuilder
-                .forAddress(address.getHost(), address.getPort()).usePlaintext()
-                .build();
-        stub = GraphServiceGrpc.newBlockingStub(channel);
-    }
-
-    @Override
-    public void reopen() throws IOErrorException, ClientServerIncompatibleException {
-        close();
-        open(serverAddr, connTimeout, requestTimeout);
+        synchronized (GrpcConnection.class) {
+            if (!channels.containsKey(address)) {
+                ManagedChannel channel = ManagedChannelBuilder
+                        .forAddress(address.getHost(), address.getPort()).usePlaintext()
+                        .build();
+                channels.put(address, channel);
+            }
+        }
+        stub = GraphServiceGrpc.newBlockingStub(channels.get(address));
     }
 
     @Override
     public void close() {
-        if (channel != null && !channel.isShutdown()) {
-            try {
-                channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-            } catch (InterruptedException e) {
-                LOGGER.warn("close grpc connection is interrupted.", e);
+        for (ManagedChannel channel : channels.values()) {
+            if (channel != null && !channel.isShutdown()) {
+                try {
+                    channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+                } catch (InterruptedException e) {
+                    LOGGER.warn("close grpc connection is interrupted.", e);
+                }
             }
         }
-        channel = null;
         stub = null;
+        channels.clear();
     }
 
     @Override
