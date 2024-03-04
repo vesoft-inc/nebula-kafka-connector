@@ -27,6 +27,7 @@ type (
 	ClusterClient interface {
 		CreateCluster(req *CreateClusterReq) (*CreateClusterResp, error)
 		AddService(req *AddServiceReq) (*AddServiceResp, error)
+		DropService(req *DropServiceReq) (*DropServiceResp, error)
 		ShowService(req *ShowServiceReq) (*ShowServiceResp, error)
 		InitCluster(req *InitClusterReq) (*InitClusterResp, error)
 		ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error)
@@ -350,5 +351,34 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 	return &ShowClusterResp{
 		HeaderResponse: responseHeader,
 		Clusters:       clusters,
+	}, nil
+}
+
+func (c *metaClient) DropService(req *DropServiceReq) (*DropServiceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &meta.DropServiceRequest{
+		Header:  &meta.RequestHeader{},
+		Name:    []byte(req.host),
+		Port:    req.port,
+		Type:    meta.ServiceType(req.serviceType),
+		Cluster: []byte(req.clustername),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.DropService(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	response, ok := resp.(*meta.DropServiceResponse)
+	if !ok {
+		return nil, fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return nil, err
+	}
+	return &DropServiceResp{
+		HeaderResponse: responseHeader,
 	}, nil
 }

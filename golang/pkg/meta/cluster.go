@@ -23,6 +23,16 @@ type (
 		*HeaderResponse
 	}
 
+	DropServiceReq struct {
+		host        string
+		port        uint32
+		serviceType ServiceType
+		clustername string
+	}
+	DropServiceResp struct {
+		*HeaderResponse
+	}
+
 	ServiceType int8
 
 	ClusterInfo struct {
@@ -105,5 +115,14 @@ func NewInitClusterReq(clusterName string) *InitClusterReq {
 func NewShowServiceReq(clusterName string) *ShowServiceReq {
 	return &ShowServiceReq{
 		clusterName: clusterName,
+	}
+}
+
+func NewDropServiceReq(host string, port uint32, serviceType ServiceType, clusterName string) *DropServiceReq {
+	return &DropServiceReq{
+		host:        host,
+		port:        port,
+		serviceType: serviceType,
+		clustername: clusterName,
 	}
 }
