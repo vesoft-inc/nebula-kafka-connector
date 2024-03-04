@@ -54,8 +54,7 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
   }
 
   test("test WriteNebulaConfig") {
-    var writeNebulaConfig: WriteNebulaVertexConfig = null
-    writeNebulaConfig = WriteNebulaVertexConfig
+    val writeNebulaConfig: WriteNebulaVertexConfig = WriteNebulaVertexConfig
       .builder()
       .withGraphName("test")
       .withNodeType("tag")
@@ -74,6 +73,50 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
         .withPrimaryKeyField("vId")
         .withBatchSize(-1)
         .build())
+  }
+
+  test("test ReadNebulaConfig") {
+    val readNebulaConfig = ReadNebulaConfig
+      .builder()
+      .withGraphName("test")
+      .withTypeName("person")
+      .withReturnCols(List("name"))
+      .withBatchSize(1000)
+      .withPartitionNum(1)
+      .build()
+    assert(readNebulaConfig.getReturnCols.size == 1)
+    assert(readNebulaConfig.getGraphName.equals("test"))
+    assert(readNebulaConfig.getTypeName.equals("person"))
+    assert(readNebulaConfig.getBatchSize == 1000)
+    assert(readNebulaConfig.getPartitionNum == 1)
+  }
+
+  test("test default ReadNebulaConfig") {
+    val readNebulaConfig = ReadNebulaConfig
+      .builder()
+      .withGraphName("test")
+      .withTypeName("person")
+      .build()
+    assert(readNebulaConfig.getPartitionNum == 100)
+    assert(readNebulaConfig.getBatchSize == 2000)
+    assert(readNebulaConfig.getReturnCols == null)
+  }
+
+  test("test wrong batchSize") {
+    assertThrows[AssertionError](
+      ReadNebulaConfig
+        .builder()
+        .withGraphName("test")
+        .withTypeName("person")
+        .withBatchSize(-1)
+        .build()
+    )
+
+    assertThrows[AssertionError](
+      ReadNebulaConfig
+        .builder()
+        .build()
+    )
   }
 
 }

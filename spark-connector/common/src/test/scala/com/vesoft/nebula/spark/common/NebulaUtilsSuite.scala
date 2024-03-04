@@ -45,4 +45,6 @@ class NebulaUtilsSuite extends AnyFunSuite{
     // a\bbc -> a\\bbc
     assert(NebulaUtils.escapeUtil("a\bbc").equals("a\\bbc"))
   }
+
+
 }

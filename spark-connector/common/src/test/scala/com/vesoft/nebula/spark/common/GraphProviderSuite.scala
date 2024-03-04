@@ -23,7 +23,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
       "(node_type_player)-[edge_type_follow LABEL follow {followness INT, likeness FLOAT64}]->(node_type_player)}"
     val resp = graphProvider.submit(createSchema)
     if (!resp.isSucceeded) {
-      System.out.println("create graph type failed, " + resp.getGqlStatus)
+      System.out.println("create graph type failed, " + resp.getErrorMessage)
       System.exit(1)
     }
     TimeUnit.SECONDS.sleep(5)

@@ -5,8 +5,10 @@
 
 package com.vesoft.nebula.connector
 
+import com.vesoft.nebula.connector.reader.{NebulaDataSourceEdgeReader, NebulaDataSourceNodeReader}
 import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaOptions}
 import com.vesoft.nebula.spark.common.exception.IllegalOptionException
+
 import java.util.Map.Entry
 import java.util.Optional
 import com.vesoft.nebula.connector.writer.{NebulaDataSourceEdgeWriter, NebulaDataSourceVertexWriter}
@@ -22,35 +24,45 @@ import org.slf4j.LoggerFactory
 import scala.collection.JavaConversions.iterableAsScalaIterable
 
 class NebulaDataSource
-    extends DataSourceV2
+  extends DataSourceV2
     with ReadSupport
     with WriteSupport
     with DataSourceRegister {
   private val LOG = LoggerFactory.getLogger(this.getClass)
 
   /**
-    * The string that represents the format that nebula data source provider uses.
-    */
+   * The string that represents the format that nebula data source provider uses.
+   */
   override def shortName(): String = "nebula"
 
   /**
-    * Creates a {@link DataSourceReader} to scan the data from Nebula Graph.
-    */
+   * Creates a {@link DataSourceReader} to scan the data from Nebula Graph.
+   */
   override def createReader(options: DataSourceOptions): DataSourceReader = {
-    throw new UnsupportedOperationException("does not support to read from NebulaGraph 5")
-    null
+    val nebulaOptions = getNebulaOptions(options)
+    val dataType = nebulaOptions.dataType
+    LOG.info("create NebulaGraph reader")
+    val parameters = options.asMap()
+    parameters.remove(NebulaOptions.PASSWD)
+    LOG.info(s"options: ${parameters}")
+
+    if (DataTypeEnum.NODE == DataTypeEnum.withName(dataType)) {
+      new NebulaDataSourceNodeReader(nebulaOptions)
+    } else {
+      new NebulaDataSourceEdgeReader(nebulaOptions)
+    }
   }
 
   /**
-    * Creates an optional {@link DataSourceWriter} to save the data to Nebula Graph.
-    */
+   * Creates an optional {@link DataSourceWriter} to save the data to Nebula Graph.
+   */
   override def createWriter(writeUUID: String,
                             schema: StructType,
                             mode: SaveMode,
                             options: DataSourceOptions): Optional[DataSourceWriter] = {
 
     val nebulaOptions = getNebulaOptions(options)
-    val dataType      = nebulaOptions.dataType
+    val dataType = nebulaOptions.dataType
     if (mode == SaveMode.Ignore || mode == SaveMode.ErrorIfExists) {
       LOG.warn(s"Currently do not support mode")
     }
@@ -101,15 +113,15 @@ class NebulaDataSource
 
       Optional.of(
         new NebulaDataSourceEdgeWriter(nebulaOptions,
-                                       edgeFieldsIndex._1,
-                                       edgeFieldsIndex._2,
-                                       schema))
+          edgeFieldsIndex._1,
+          edgeFieldsIndex._2,
+          schema))
     }
   }
 
   /**
-    * construct nebula options with DataSourceOptions
-    */
+   * construct nebula options with DataSourceOptions
+   */
   def getNebulaOptions(options: DataSourceOptions): NebulaOptions = {
     var parameters: Map[String, String] = Map()
     for (entry: Entry[String, String] <- options.asMap().entrySet) {

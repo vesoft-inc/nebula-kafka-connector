@@ -20,7 +20,7 @@ class NebulaWriter(nebulaOptions: NebulaOptions) extends Serializable {
   val failedExecs: ListBuffer[String] = new ListBuffer[String]
 
   val graphProvider = new GraphProvider(
-    nebulaOptions.getGraphAddress,
+    nebulaOptions.graphAddress,
     nebulaOptions.user,
     nebulaOptions.passwd,
     nebulaOptions.timeout

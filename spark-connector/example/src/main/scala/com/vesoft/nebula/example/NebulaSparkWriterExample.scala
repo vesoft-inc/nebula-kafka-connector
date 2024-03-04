@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.example
 
-import com.facebook.thrift.protocol.TCompactProtocol
 import com.sun.org.slf4j.internal.LoggerFactory
 import com.vesoft.nebula.connector.NebulaDataFrameWriter
 import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, WriteMode, WriteNebulaEdgeConfig, WriteNebulaVertexConfig}

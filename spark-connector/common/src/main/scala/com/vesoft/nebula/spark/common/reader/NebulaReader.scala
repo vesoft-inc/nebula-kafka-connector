@@ -1,0 +1,217 @@
+/* Copyright (c) 2024 vesoft inc. All rights reserved.
+ *
+ * This source code is licensed under Apache 2.0 License.
+ */
+
+package com.vesoft.nebula.spark.common.reader
+
+import com.vesoft.nebula.client.graph.data._
+import com.vesoft.nebula.client.graph.scan.{ScanEdgeResult, ScanEdgeResultIterator, ScanNodeResult, ScanNodeResultIterator, TableRow}
+import com.vesoft.nebula.spark.common.NebulaUtils.NebulaValueGetter
+import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
+import com.vesoft.nebula.spark.common.nebula.GraphProvider
+import org.apache.spark.sql.catalyst.InternalRow
+import org.apache.spark.sql.catalyst.expressions.SpecificInternalRow
+import org.apache.spark.sql.types.StructType
+import org.slf4j.{Logger, LoggerFactory}
+
+import scala.collection.JavaConverters._
+import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
+
+trait NebulaReader {
+  private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
+
+  private var schema: StructType = _
+
+  protected var dataIterator: Iterator[TableRow] = _
+  protected var scanPartIterator: Iterator[Int] = _
+  protected var resultValues: mutable.ListBuffer[List[Object]] = mutable.ListBuffer[List[Object]]()
+  protected var graphProvider: GraphProvider = _
+  protected var nebulaOptions: NebulaOptions = _
+
+  private var vertexResponseIterator: ScanNodeResultIterator = _
+  private var edgeResponseIterator: ScanEdgeResultIterator = _
+
+  /**
+   * init the reader: init metaProvider, storageClient
+   */
+  def init(index: Int, nebulaOptions: NebulaOptions, schema: StructType): Int = {
+    this.schema = schema
+    this.nebulaOptions = nebulaOptions
+
+    // init graphProvider
+    graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.passwd, nebulaOptions.timeout)
+
+    // allocate scanPart to this partition
+    val totalPart = graphProvider.getAllParts(nebulaOptions.graphName).size()
+    totalPart
+  }
+
+  /**
+   * resolve the vertex/edge data to InternalRow
+   */
+  protected def getRow(): InternalRow = {
+    val resultSet: Array[ValueWrapper] =
+      dataIterator.next().getValues.toArray.map(v => v.asInstanceOf[ValueWrapper])
+    val getters: Array[NebulaValueGetter] = NebulaUtils.makeGetters(schema)
+    val mutableRow = new SpecificInternalRow(schema.fields.map(x => x.dataType))
+
+    // the value is property data, will not be Node,Edge,Record.
+    for (i <- getters.indices) {
+      val value: ValueWrapper = resultSet(i)
+      if (value.isNull) {
+        mutableRow.setNullAt(i)
+      }
+      if (value.isEmpty) {
+        mutableRow.setNullAt(i)
+      }
+      if (value.isString) {
+        getters(i).apply(value.asString(), mutableRow, i)
+      }
+      if (value.isDate) {
+        getters(i).apply(value.asDate(), mutableRow, i)
+      }
+      if (value.isLocalTime) {
+        getters(i).apply(value.asLocalTime(), mutableRow, i)
+      }
+      if (value.isZonedTime) {
+        getters(i).apply(value.asZonedTime(), mutableRow, i)
+      }
+      if (value.isLocalDateTime) {
+        getters(i).apply(value.asLocalDateTime(), mutableRow, i)
+      }
+      if (value.isZonedDateTime) {
+        getters(i).apply(value.asZonedDateTime(), mutableRow, i)
+      }
+      if (value.isInt) {
+        getters(i).apply(value.asInt(), mutableRow, i)
+      }
+      if (value.isLong) {
+        getters(i).apply(value.asLong(), mutableRow, i)
+      }
+      if (value.isBoolean) {
+        getters(i).apply(value.asBoolean(), mutableRow, i)
+      }
+      if (value.isFloat) {
+        getters(i).apply(value.asFloat(), mutableRow, i)
+      }
+      if (value.isDouble) {
+        getters(i).apply(value.asDouble(), mutableRow, i)
+      }
+      if (value.isDuration) {
+        getters(i).apply(value.asDuration(), mutableRow, i)
+      }
+      if (value.isList) {
+        getters(i).apply(value.asList(), mutableRow, i)
+      }
+    }
+    mutableRow
+  }
+
+  /**
+   * if the scan response has next vertex
+   */
+  protected def hasNextVertexRow: Boolean = {
+    (dataIterator != null || vertexResponseIterator != null || scanPartIterator.hasNext) && {
+      var continue: Boolean = false
+      var break: Boolean = false
+      while ((dataIterator == null || !dataIterator.hasNext) && !break) {
+        resultValues.clear()
+        continue = false
+        if (vertexResponseIterator == null || !vertexResponseIterator.hasNext) {
+          if (scanPartIterator.hasNext) {
+            try {
+              // if returnCols is null, scan all the property of node, if returnCols is empty, just scan the pk of node.
+              if (nebulaOptions.getReturnCols == null) {
+                vertexResponseIterator = graphProvider.scanNode(nebulaOptions.graphName,
+                  nebulaOptions.label,
+                  scanPartIterator.next(),
+                  nebulaOptions.batchSize)
+              } else {
+                vertexResponseIterator =
+                  graphProvider.scanNode(nebulaOptions.graphName,
+                    nebulaOptions.label,
+                    nebulaOptions.getReturnCols.asJava,
+                    scanPartIterator.next(),
+                    nebulaOptions.batchSize)
+              }
+            } catch {
+              case e: Exception =>
+                LOG.error(s"Exception scanning vertex ${nebulaOptions.label}", e)
+                graphProvider.close()
+                throw new Exception(e.getMessage, e)
+            }
+            // jump to the next loop
+            continue = true
+          }
+          // break while loop
+          break = !continue
+        } else {
+          val next: ScanNodeResult = vertexResponseIterator.next
+          if (!next.isEmpty) {
+            dataIterator = next.getTableRows.iterator().asScala
+          }
+        }
+      }
+
+      dataIterator != null && dataIterator.hasNext
+    }
+  }
+
+  /**
+   * if the scan response has next edge
+   */
+  protected def hasNextEdgeRow: Boolean =
+    (dataIterator != null || edgeResponseIterator != null || scanPartIterator.hasNext) && {
+      var continue: Boolean = false
+      var break: Boolean = false
+      while ((dataIterator == null || !dataIterator.hasNext) && !break) {
+        resultValues.clear()
+        continue = false
+        if (edgeResponseIterator == null || !edgeResponseIterator.hasNext) {
+          if (scanPartIterator.hasNext) {
+            try {
+              // if returnCols is null, scan src node pk and dst node pk and all the property of edge,
+              // if returnCols is empty, just scan the pk of src node and dst node.
+              if (nebulaOptions.getReturnCols == null) {
+                edgeResponseIterator = graphProvider.scanEdge(nebulaOptions.graphName,
+                  nebulaOptions.label,
+                  scanPartIterator.next(),
+                  nebulaOptions.batchSize)
+              } else {
+                edgeResponseIterator = graphProvider.scanEdge(nebulaOptions.graphName,
+                  nebulaOptions.label,
+                  nebulaOptions.getReturnCols.asJava,
+                  scanPartIterator.next(),
+                  nebulaOptions.batchSize)
+              }
+            } catch {
+              case e: Exception =>
+                LOG.error(s"Exception scanning vertex ${nebulaOptions.label}", e)
+                graphProvider.close()
+                throw new Exception(e.getMessage, e)
+            }
+            // jump to the next loop
+            continue = true
+          }
+          // break while loop
+          break = !continue
+        } else {
+          val next: ScanEdgeResult = edgeResponseIterator.next
+          if (!next.isEmpty) {
+            dataIterator = next.getTableRows.iterator().asScala
+          }
+        }
+      }
+
+      dataIterator != null && dataIterator.hasNext
+    }
+
+  /**
+   * close the reader
+   */
+  protected def closeReader(): Unit = {
+    graphProvider.close()
+  }
+}

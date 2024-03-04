@@ -17,5 +17,4 @@ object PartitionUtils {
     */
   def getScanParts(index: Int, nebulaTotalPart: Int, sparkPartitionNum: Int): List[Int] =
     (index to nebulaTotalPart by sparkPartitionNum).toList
-
 }

@@ -31,7 +31,7 @@ class NebulaGraphMock {
     val createResp = nebulaClient.execute(createSpace)
     if (!createResp.isSucceeded) {
       close()
-      LOG.error("create string type space failed," + createResp.getGqlStatus)
+      LOG.error("create string type space failed," + createResp.getErrorMessage)
       sys.exit(-1)
     }
 
@@ -59,7 +59,7 @@ class NebulaGraphMock {
     val insertTagResp = nebulaClient.execute(insertTag)
     if (!insertTagResp.isSucceeded) {
       close()
-      LOG.error("insert vertex for string type space failed," + insertTagResp.getGqlStatus)
+      LOG.error("insert vertex for string type space failed," + insertTagResp.getErrorMessage)
       sys.exit(-1)
     }
 
@@ -81,7 +81,7 @@ class NebulaGraphMock {
     val insertEdgeResp = nebulaClient.execute(insertEdge)
     if (!insertEdgeResp.isSucceeded) {
       close()
-      LOG.error("insert edge for string type space failed," + insertEdgeResp.getGqlStatus)
+      LOG.error("insert edge for string type space failed," + insertEdgeResp.getErrorMessage)
       sys.exit(-1)
     }
   }
@@ -96,7 +96,7 @@ class NebulaGraphMock {
     val createResp = nebulaClient.execute(createSpace)
     if (!createResp.isSucceeded) {
       close()
-      LOG.error("create int type space failed," + createResp.getGqlStatus)
+      LOG.error("create int type space failed," + createResp.getErrorMessage)
       sys.exit(-1)
     }
 
@@ -127,7 +127,7 @@ class NebulaGraphMock {
     val insertTagResp = nebulaClient.execute(insertTag)
     if (!insertTagResp.isSucceeded) {
       close()
-      LOG.error("insert vertex for int type space failed," + insertTagResp.getGqlStatus)
+      LOG.error("insert vertex for int type space failed," + insertTagResp.getErrorMessage)
       sys.exit(-1)
     }
 
@@ -147,7 +147,7 @@ class NebulaGraphMock {
     val insertEdgeResp = nebulaClient.execute(insertEdge)
     if (!insertEdgeResp.isSucceeded) {
       close()
-      LOG.error("insert edge for int type space failed," + insertEdgeResp.getGqlStatus)
+      LOG.error("insert edge for int type space failed," + insertEdgeResp.getErrorMessage)
       sys.exit(-1)
     }
   }
@@ -161,7 +161,7 @@ class NebulaGraphMock {
     val createResp = nebulaClient.execute(createSpace)
     if (!createResp.isSucceeded) {
       close()
-      LOG.error("create string type space failed," + createResp.getGqlStatus)
+      LOG.error("create string type space failed," + createResp.getErrorMessage)
       sys.exit(-1)
     }
     Thread.sleep(10000)
@@ -176,7 +176,7 @@ class NebulaGraphMock {
     val createResp = nebulaClient.execute(createSpace)
     if (!createResp.isSucceeded) {
       close()
-      LOG.error("create int type space failed," + createResp.getGqlStatus)
+      LOG.error("create int type space failed," + createResp.getErrorMessage)
       sys.exit(-1)
     }
     Thread.sleep(10000)

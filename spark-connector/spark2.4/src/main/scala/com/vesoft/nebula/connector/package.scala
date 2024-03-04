@@ -6,32 +6,25 @@
 package com.vesoft.nebula
 
 import com.vesoft.nebula.spark.common.utils.SparkValidate
-import com.vesoft.nebula.spark.common.{
-  DataTypeEnum,
-  NebulaConnectionConfig,
-  NebulaOptions,
-  OperaType,
-  WriteNebulaConfig,
-  WriteNebulaEdgeConfig,
-  WriteNebulaVertexConfig
-}
-import org.apache.spark.sql.{DataFrameWriter, Row, SaveMode}
+import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaConnectionConfig, NebulaOptions, OperaType, ReadNebulaConfig, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaVertexConfig}
+import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row, SaveMode}
 
 package object connector {
 
   /**
-    * spark writer for nebula graph
-    */
+   * spark writer for nebula graph
+   */
   implicit class NebulaDataFrameWriter(writer: DataFrameWriter[Row]) {
 
     private var connectionConfig: NebulaConnectionConfig = _
-    private var writeNebulaConfig: WriteNebulaConfig     = _
+    private var writeNebulaConfig: WriteNebulaConfig = _
 
     /**
-      * config nebula connection
-      * @param connectionConfig connection parameters
-      * @param writeNebulaConfig write parameters for vertex or edge
-      */
+     * config nebula connection
+     *
+     * @param connectionConfig  connection parameters
+     * @param writeNebulaConfig write parameters for vertex or edge
+     */
     def nebula(connectionConfig: NebulaConnectionConfig,
                writeNebulaConfig: WriteNebulaConfig): NebulaDataFrameWriter = {
       SparkValidate.validate("2.4.*")
@@ -41,11 +34,11 @@ package object connector {
     }
 
     /**
-      * write dataframe into nebula vertex
-      */
+     * write dataframe into nebula vertex
+     */
     def writeVertices(): Unit = {
       assert(connectionConfig != null && writeNebulaConfig != null,
-             "nebula config is not set, please call nebula() before writeVertices")
+        "nebula config is not set, please call nebula() before writeVertices")
       val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaVertexConfig]
       val dfWriter = writer
         .format(classOf[NebulaDataSource].getName)
@@ -68,12 +61,12 @@ package object connector {
     }
 
     /**
-      * write dataframe into nebula edge
-      */
+     * write dataframe into nebula edge
+     */
     def writeEdges(): Unit = {
 
       assert(connectionConfig != null && writeNebulaConfig != null,
-             "nebula config is not set, please call nebula() before writeEdges")
+        "nebula config is not set, please call nebula() before writeEdges")
       val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaEdgeConfig]
       val dfWriter = writer
         .format(classOf[NebulaDataSource].getName)
@@ -99,4 +92,66 @@ package object connector {
     }
   }
 
+  /**
+   * spark reader for nebula graph
+   */
+  implicit class NebulaDataFrameReader(reader: DataFrameReader) {
+    var connectionConfig: NebulaConnectionConfig = _
+    var readConfig: ReadNebulaConfig = _
+
+    def nebula(connectionConfig: NebulaConnectionConfig, readConfig: ReadNebulaConfig): NebulaDataFrameReader = {
+      SparkValidate.validate("2.4.*")
+      this.connectionConfig = connectionConfig
+      this.readConfig = readConfig
+      this
+    }
+
+    /**
+     * Reading nodes from NebulaGraph
+     *
+     * @return DataFrame
+     */
+    def loadNode(): DataFrame = {
+      assert(connectionConfig != null && readConfig != null, "nebula config is not set, please call nebula() before loadVerticesToDF")
+      val dfReader = reader
+        .format(classOf[NebulaDataSource].getName)
+        .option(NebulaOptions.TYPE, DataTypeEnum.NODE.toString)
+        .option(NebulaOptions.OPERATE_TYPE, OperaType.READ.toString)
+        .option(NebulaOptions.TIMEOUT, connectionConfig.getTimeout)
+        .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
+        .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
+        .option(NebulaOptions.GRAPH_ADDRESS, connectionConfig.getGraphAddress)
+        .option(NebulaOptions.USER_NAME, connectionConfig.getUser)
+        .option(NebulaOptions.PASSWD, connectionConfig.getPasswd)
+        .option(NebulaOptions.GRAPH_NAME, readConfig.getGraphName)
+        .option(NebulaOptions.LABEL, readConfig.getTypeName)
+        .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
+        .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
+        .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
+
+      dfReader.load()
+    }
+
+
+    def loadEdge(): DataFrame = {
+      assert(connectionConfig != null && readConfig != null, "nebula config is not set, please call nebula() before loadVerticesToDF")
+      val dfReader = reader
+        .format(classOf[NebulaDataSource].getName)
+        .option(NebulaOptions.TYPE, DataTypeEnum.EDGE.toString)
+        .option(NebulaOptions.OPERATE_TYPE, OperaType.READ.toString)
+        .option(NebulaOptions.TIMEOUT, connectionConfig.getTimeout)
+        .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
+        .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
+        .option(NebulaOptions.GRAPH_ADDRESS, connectionConfig.getGraphAddress)
+        .option(NebulaOptions.USER_NAME, connectionConfig.getUser)
+        .option(NebulaOptions.PASSWD, connectionConfig.getPasswd)
+        .option(NebulaOptions.GRAPH_NAME, readConfig.getGraphName)
+        .option(NebulaOptions.LABEL, readConfig.getTypeName)
+        .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
+        .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
+        .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
+
+      dfReader.load()
+    }
+  }
 }

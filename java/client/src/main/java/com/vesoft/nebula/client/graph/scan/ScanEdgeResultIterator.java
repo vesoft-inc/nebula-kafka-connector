@@ -59,7 +59,7 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
                                 partCur.getKey(),
                                 labelName,
                                 result.getErrorMessage()));
-                        exceptions.add(new Exception(String.format("part %d of %s scan error: ",
+                        exceptions.add(new Exception(String.format("part %d of %s scan error: %s",
                                 partCur.getKey(), labelName, result.getErrorMessage())));
                     }
                 } catch (Exception e) {

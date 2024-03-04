@@ -71,7 +71,7 @@ class NebulaVertexWriter(nebulaOptions: NebulaOptions, vertexIndex: Int, schema:
     } else {
       // re-execute the vertices one by one
       LOG.warn(
-        s"write node ${nebulaOptions.label} failed error message: ${result.getGqlStatus}, " +
+        s"write node ${nebulaOptions.label} failed error message: ${result.getErrorMessage}, " +
           s"mow retry writing one by one.\n ${exec}")
       vertices.par.foreach { vertex =>
         writeNode(vertex)
@@ -88,18 +88,18 @@ class NebulaVertexWriter(nebulaOptions: NebulaOptions, vertexIndex: Int, schema:
       }
       return
     }
-    if (result.getGqlStatus.contains("(9,8000)")) {
+    if (result.getErrorCode.equals("ND002")) {
       LOG.warn(
         s"write ${nebulaOptions.label} failed, the node already exists. node: ${vertex.toString}")
       return
     }
-    // retry the write execution for RAFT_RPC_FAILURE(6029), RAFT_LEADER_CHANGED(6026), RAFT_BUFFER_OVERFLOW(6019)
+    // retry the write execution for RPC_ERROR(NN), LEADER_CHANGED(ND005), RAFT_ERROR(NA)
     var executeResult = result
     var retry         = 0
     while (retry < nebulaOptions.executionRetry &&
-           (executeResult.getGqlStatus.contains("6029")
-           || executeResult.getGqlStatus.contains("6026")
-           || executeResult.getGqlStatus.contains("6019"))) {
+           (executeResult.getErrorCode.contains("NN")
+           || executeResult.getErrorCode.equals("ND005")
+           || executeResult.getErrorCode.contains("NA"))) {
       retry += 1
       Thread.sleep(nebulaOptions.executionRetryInterval)
       executeResult = submit(exec)
@@ -111,7 +111,7 @@ class NebulaVertexWriter(nebulaOptions: NebulaOptions, vertexIndex: Int, schema:
         return
       }
     }
-    LOG.error(s"write node failed for ${executeResult.getGqlStatus}, statement:\n ${exec}")
+    LOG.error(s"write node failed for ${executeResult.getErrorMessage}, statement:\n ${exec}")
     failedExecs.append(exec)
   }
 

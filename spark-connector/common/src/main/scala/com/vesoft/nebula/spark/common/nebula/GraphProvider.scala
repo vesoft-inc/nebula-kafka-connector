@@ -7,16 +7,19 @@ package com.vesoft.nebula.spark.common.nebula
 
 import com.vesoft.nebula.client.graph.data.{ResultSet, ValueWrapper}
 import com.vesoft.nebula.client.graph.net.NebulaClient
+import com.vesoft.nebula.client.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
 import org.slf4j.LoggerFactory
 
+import java.util
+import java.util.{ArrayList, List}
 import scala.collection.JavaConverters.{asScalaBufferConverter, mapAsScalaMapConverter}
 import scala.collection.{breakOut, mutable}
 
 /**
-  * GraphProvider for Nebula Graph Service
-  */
+ * GraphProvider for Nebula Graph Service
+ */
 class GraphProvider(addresses: String, user: String, password: String, timeout: Int)
-    extends AutoCloseable
+  extends AutoCloseable
     with Serializable {
   @transient private[this] lazy val LOG = LoggerFactory.getLogger(this.getClass)
   @transient val client: NebulaClient = NebulaClient
@@ -30,20 +33,81 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     .build()
 
   /**
-    * close Nebula client
-    */
+   * close Nebula client
+   */
   override def close(): Unit = {
     client.close()
   }
 
   /**
-    * execute the statement
-    *
-    * @param statement insert node/edge statement
-    * @return execute result
-    */
+   * execute the statement
+   *
+   * @param statement insert node/edge statement
+   * @return execute result
+   */
   def submit(statement: String): ResultSet =
     client.execute(statement)
+
+  /**
+   * scan node type
+   *
+   * @param graphName graph name
+   * @param nodeType  node type name
+   * @param part      NebulaGraph partition id
+   * @param batchSize batchSize for each scan request
+   * @return {@link ScanNodeResultIterator}
+   */
+  def scanNode(graphName: String, nodeType: String, part: Int, batchSize: Int): ScanNodeResultIterator = {
+    client.scanNode(graphName, nodeType, part, batchSize)
+  }
+
+
+  def scanNode(graphName: String, nodeType: String, returnCols: util.List[String], part: Int, batchSize: Int): ScanNodeResultIterator = {
+    client.scanNode(graphName, nodeType, returnCols, part, batchSize)
+  }
+
+  /**
+   * scan edge type
+   *
+   * @param graphName graph name
+   * @param edgeType  edge type name
+   * @param part      NebulaGraph partition id
+   * @param batchSize batchSize for each scan request
+   * @return {@link ScanEdgeResultIterator}
+   */
+  def scanEdge(graphName: String, edgeType: String, part: Int, batchSize: Int): ScanEdgeResultIterator = {
+    client.scanEdge(graphName, edgeType, part, batchSize)
+  }
+
+
+  def scanEdge(graphName: String, edgeType: String, returnCols: util.List[String], part: Int, batchSize: Int): ScanEdgeResultIterator = {
+    client.scanEdge(graphName, edgeType, returnCols, part, batchSize)
+  }
+
+  /**
+   * get all part list for NebulaGraph
+   */
+  def getAllParts(graphName: String): List[Integer] = {
+    val showPartitions: String = "CALL show_partitions() RETURN *"
+    var resultSet: ResultSet = null
+    try resultSet = client.execute(showPartitions)
+    catch {
+      case e: Exception =>
+        LOG.error("get all partitions error", e)
+        throw new RuntimeException("get all partitions error", e)
+    }
+    if (!resultSet.isSucceeded || resultSet.isEmpty) {
+      LOG.error("get all partitions failed for {}", resultSet.getErrorMessage)
+      throw new RuntimeException("get all partitions failed for " + resultSet.getErrorMessage)
+    }
+    val partitionsValue: util.List[ValueWrapper] = resultSet.getRows.get(0).values.get(0).asList
+    val partitions: util.List[Integer] = new util.ArrayList[Integer]
+    import scala.collection.JavaConversions._
+    for (part <- partitionsValue) {
+      partitions.add(part.asInt)
+    }
+    partitions
+  }
 
   def getIdType(graphName: String, nodeType: String): VidType.Value = {
     val nodeDesc = getNodeDesc(graphName, nodeType)
@@ -51,62 +115,65 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
   }
 
   /**
-    * get node's schema info
-    *
-    * @param graphName
-    * @param nodeType
-    * @return {@link NodeDesc}
-    */
+   * get node's schema info
+   *
+   * @param graphName
+   * @param nodeType
+   * @return {@link NodeDesc}
+   */
   def getNodeDesc(graphName: String, nodeType: String): NodeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val graphType                               = getGraphType(graphName)
+    val graphType = getGraphType(graphName)
 
     val descNodeType = s"DESCRIBE NODE TYPE $nodeType OF $graphType"
-    val result       = client.execute(descNodeType)
+    val result = client.execute(descNodeType)
     if (!result.isSucceeded || result.isEmpty) {
-      LOG.error(s"get 'describe' of $nodeType failed for ${result.getGqlStatus}")
+      LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $nodeType does not exist in $graphName.")
     }
-    val properties = result.getRows.get(0).get("properties").asMap()
-    for ((k, v) <- properties.asScala) schema += (k -> v.asString())
+    val properties = result.getRows.get(0).get("properties").asList()
+    for (prop <- properties.asScala) {
+      val kv = prop.asString().split(":")
+      schema += (kv(0) -> kv(1).trim)
+    }
 
     // for now, the pk is one property, composite pk is not support yet.
-    val pks: List[ValueWrapper] = result.getRows.get(0).get("primary_keys").asList().asScala.toList
+    val pks = result.getRows.get(0).get("primary_keys").asList().asScala.toList
     if (pks.isEmpty) {
       LOG.error(s"node type $nodeType has no primary key.")
       throw new RuntimeException(s"node type $nodeType has no primary key")
     }
     val pk: String = pks.head.asString()
 
-    var flag                      = true
+    var flag = true
     var idDataType: VidType.Value = null
     for (entry <- schema if flag) {
       if (entry._1.equals(pk)) {
-        idDataType = VidType.withName(entry._2)
+        idDataType = VidType.withName(entry._2.trim)
         flag = false
       }
     }
     if (idDataType == null) {
       throw new RuntimeException(s"can not get the pk $pk for $nodeType")
     }
-    NodeDesc(nodeType, idDataType, schema.toMap)
+    NodeDesc(nodeType, pk, idDataType, schema.toMap)
   }
 
   /**
-    * get edge description info
-    *
-    * @param graphName
-    * @param edgeType
-    * @return {@link EdgeDesc}
-    */
+   * get edge description info
+   *
+   * @param graphName
+   * @param edgeType
+   * @return {@link EdgeDesc}
+   */
   def getEdgeDesc(graphName: String, edgeType: String): EdgeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val graphType                               = getGraphType(graphName)
+    val graphType = getGraphType(graphName)
 
     val descEdgeType = s"DESCRIBE EDGE TYPE $edgeType OF $graphType"
-    val result       = client.execute(descEdgeType)
+    val result = client.execute(descEdgeType)
     if (!result.isSucceeded || result.isEmpty) {
-      LOG.error(s"get 'describe' of $edgeType failed for ${result.getGqlStatus}")
+      LOG.error(s"get 'describe' of $edgeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"edge type $edgeType does not exist in $graphName.")
     }
 
@@ -123,10 +190,16 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     val srcNodeIdDataType = getIdType(graphName, srcNodeType)
     val dstNodeIdDataType = getIdType(graphName, dstNodeType)
 
-    val properties = result.getRows.get(0).get("properties").asMap()
-    for ((k, v) <- properties.asScala) schema += (k -> v.asString())
+    val srcNodePkName = getNodeDesc(graphName, srcNodeType).nodePkName
+    val dstNodePkName = getNodeDesc(graphName, dstNodeType).nodePkName
 
-    EdgeDesc(edgeType, srcNodeType, srcNodeIdDataType, dstNodeType, dstNodeIdDataType, schema.toMap)
+    val properties = result.getRows.get(0).get("properties").asList()
+    for (prop <- properties.asScala) {
+      val kv = prop.asString().split(":")
+      schema += (kv(0) -> kv(1))
+    }
+
+    EdgeDesc(edgeType, srcNodeType, srcNodePkName, srcNodeIdDataType, dstNodeType, dstNodePkName, dstNodeIdDataType, schema.toMap)
   }
 
   private def getGraphType(graphName: String): String = {
@@ -144,5 +217,5 @@ object VidType extends Enumeration {
   type Type = Value
 
   val STRING = Value("STRING")
-  val INT    = Value("INT64")
+  val INT = Value("INT64")
 }

@@ -79,7 +79,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     } else {
       // re-execute the vertices one by one
       LOG.warn(
-        s"write edge ${nebulaOptions.label} failed error message: ${result.getGqlStatus}, " +
+        s"write edge ${nebulaOptions.label} failed error message: ${result.getErrorMessage}, " +
           s"mow retry writing one by one.\n ${exec}")
       edges.par.foreach { edge =>
         writeEdge(edge)
@@ -96,13 +96,13 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
       }
       return
     }
-    // retry the write execution for RAFT_RPC_FAILURE(6029), RAFT_LEADER_CHANGED(6026), RAFT_BUFFER_OVERFLOW(6019)
+    // retry the write execution for RPC_ERROR(NN), LEADER_CHANGED(ND005), RAFT_ERROR(NA)
     var executeResult = result
     var retry         = 0
     while (retry < nebulaOptions.executionRetry &&
-           (executeResult.getGqlStatus.contains("6029")
-           || executeResult.getGqlStatus.contains("6026")
-           || executeResult.getGqlStatus.contains("6019"))) {
+           (executeResult.getErrorCode.contains("NN")
+           || executeResult.getErrorCode.equals("ND005")
+           || executeResult.getErrorCode.contains("NA"))) {
       retry += 1
       Thread.sleep(nebulaOptions.executionRetryInterval)
       executeResult = submit(exec)
@@ -114,7 +114,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
         return
       }
     }
-    LOG.error(s"write edge failed for ${executeResult.getGqlStatus}, statement:\n ${exec}")
+    LOG.error(s"write edge failed for ${executeResult.getErrorMessage}, statement:\n ${exec}")
     failedExecs.append(exec)
   }
 
