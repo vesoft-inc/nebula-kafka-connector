@@ -2,6 +2,7 @@ package component
 
 import (
 	"fmt"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -9,10 +10,10 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -130,11 +131,11 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 		return err
 	}
 
-	if equal && nm.MetadComponent().IsReady() {
-		if err := c.setVersion(nm); err != nil {
-			return err
-		}
-	}
+	//if equal && nm.MetadComponent().IsReady() {
+	//	if err := c.setVersion(nm); err != nil {
+	//		return err
+	//	}
+	//}
 
 	return updateWorkload(c.clientSet.Workload(), newWorkload, oldWorkload)
 }
@@ -162,21 +163,19 @@ func (c *metadCluster) syncNebulaMetadStatus(nm *v2alpha1.NebulaMetad, oldWorklo
 		nm.Status.Phase = v2alpha1.RunningPhase
 	}
 
-	// TODO: show metad hosts state with metad peers
 	return syncComponentStatus(nm.MetadComponent(), &nm.Status.ComponentStatus, oldWorkload)
 }
 
 func (c *metadCluster) setVersion(nm *v2alpha1.NebulaMetad) error {
 	endpoints := []string{nm.GetMetadThriftConnAddress()}
-	metaClient, err := nebula.NewMetaClient(endpoints)
+	metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","))
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = metaClient.Disconnect()
+		metaClient.Close()
 	}()
 
-	// TODO: get metad version
 	return nil
 }
 

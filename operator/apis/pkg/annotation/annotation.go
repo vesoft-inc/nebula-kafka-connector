@@ -30,8 +30,6 @@ const (
 	AnnLastReplicas = "nebula-graph.io/last-replicas"
 	// AnnLastAppliedDynamicFlagsKey is annotation key to indicate the last applied custom dynamic flags
 	AnnLastAppliedDynamicFlagsKey = "nebula-graph.io/last-applied-dynamic-flags"
-	// AnnLastAppliedStaticFlagsKey is annotation key to indicate the last applied custom static flags
-	AnnLastAppliedStaticFlagsKey = "nebula-graph.io/last-applied-static-flags"
 	// AnnLastAppliedConfigKey is annotation key to indicate the last applied configuration
 	AnnLastAppliedConfigKey = "nebula-graph.io/last-applied-configuration"
 	// AnnPodConfigMapHash is pod configmap hash key to update configuration dynamically

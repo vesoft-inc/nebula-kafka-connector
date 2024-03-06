@@ -18,15 +18,16 @@ package component
 
 import (
 	"fmt"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -61,11 +62,11 @@ func (s *storageScaler) ScaleOut(nc *v2alpha1.NebulaCluster, oldReplicas, newRep
 		return err
 	}
 
-	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
 	if err := addStorageServices(nc, metadEndpoints, oldReplicas, newReplicas); err != nil {
 		klog.Errorf("add storaged services failed: %v", err)
 		return err
@@ -84,26 +85,31 @@ func (s *storageScaler) ScaleIn(nc *v2alpha1.NebulaCluster, oldReplicas, newRepl
 		return err
 	}
 
-	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
 
-	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = metaClient.Disconnect()
+		metaClient.Close()
 	}()
 
-	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameThrift)
+	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameGRPC)
 	if oldReplicas-newReplicas > 0 {
 		for i := oldReplicas - 1; i >= newReplicas; i-- {
 			host := nc.StoragedComponent().GetPodFQDN(i)
-			if err := metaClient.DropService(nc.Name, nebula.StorageService, host, uint32(port)); err != nil {
+			req := meta.NewDropServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)
+			resp, err := metaClient.DropService(req)
+			if err != nil {
 				return err
+			}
+			if !resp.OK {
+				return fmt.Errorf("drop storaged service failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
 			}
 		}
 	}

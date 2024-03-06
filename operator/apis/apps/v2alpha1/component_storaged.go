@@ -27,12 +27,12 @@ import (
 )
 
 const (
-	StoragedComponentType     ComponentType = "storaged"
-	StoragedPortNameThrift                  = "thrift"
-	defaultStoragedPortThrift               = 9779
-	StoragedPortNameHTTP                    = "http"
-	defaultStoragedPortHTTP                 = 19779
-	defaultStoragedImage                    = "vesoft/nebula-storaged"
+	StoragedComponentType   ComponentType = "storaged"
+	StoragedPortNameGRPC                  = "grpc"
+	defaultStoragedPortGRPC               = 9779
+	StoragedPortNameHTTP                  = "http"
+	defaultStoragedPortHTTP               = 19779
+	defaultStoragedImage                  = "vesoft/nebula-storaged"
 )
 
 var _ NebulaComponent = &storagedComponent{}
@@ -148,7 +148,7 @@ func (c *storagedComponent) GenerateLabels() map[string]string {
 }
 
 func (c *storagedComponent) GenerateContainerPorts() []corev1.ContainerPort {
-	thriftPort, err := parseCustomPort(defaultStoragedPortThrift, c.GetConfig()["port"])
+	thriftPort, err := parseCustomPort(defaultStoragedPortGRPC, c.GetConfig()["port"])
 	if err != nil {
 		return nil
 	}
@@ -160,7 +160,7 @@ func (c *storagedComponent) GenerateContainerPorts() []corev1.ContainerPort {
 
 	return []corev1.ContainerPort{
 		{
-			Name:          StoragedPortNameThrift,
+			Name:          StoragedPortNameGRPC,
 			ContainerPort: thriftPort,
 		},
 		{

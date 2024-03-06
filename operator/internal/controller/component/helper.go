@@ -280,9 +280,7 @@ func syncConfigMap(
 	return cm, cmHash, nil
 }
 
-func syncPVC(
-	component v2alpha1.NebulaComponent,
-	pvcClient kube.PersistentVolumeClaim) error {
+func syncPVC(component v2alpha1.NebulaComponent, pvcClient kube.PersistentVolumeClaim) error {
 	replicas := int(component.ComponentSpec().Replicas())
 	volumeClaims, err := component.GenerateVolumeClaim()
 	if err != nil {

@@ -18,15 +18,16 @@ package component
 
 import (
 	"fmt"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -56,11 +57,11 @@ func (s *graphScaler) Scale(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.S
 func (s *graphScaler) ScaleOut(nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.GraphdComponent().GetName()
-	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
 	if err := addGraphdServices(nc, metadEndpoints, oldReplicas, newReplicas); err != nil {
 		klog.Errorf("add graphd services failed: %v", err)
 		return err
@@ -77,26 +78,31 @@ func (s *graphScaler) ScaleIn(nc *v2alpha1.NebulaCluster, oldReplicas, newReplic
 		return err
 	}
 
-	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
 
-	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = metaClient.Disconnect()
+		metaClient.Close()
 	}()
 
-	port := nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameThrift)
+	port := nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameGRPC)
 	if oldReplicas-newReplicas > 0 {
 		for i := oldReplicas - 1; i >= newReplicas; i-- {
 			host := nc.GraphdComponent().GetPodFQDN(i)
-			if err := metaClient.DropService(nc.Name, nebula.GraphService, host, uint32(port)); err != nil {
+			req := meta.NewDropServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
+			resp, err := metaClient.DropService(req)
+			if err != nil {
 				return err
+			}
+			if !resp.OK {
+				return fmt.Errorf("drop graphd service failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
 			}
 		}
 	}

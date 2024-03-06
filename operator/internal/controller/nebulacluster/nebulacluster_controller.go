@@ -116,16 +116,13 @@ func NewClusterReconciler(mgr ctrl.Manager) (*ClusterReconciler, error) {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res reconcile.Result, retErr error) {
 	key := req.NamespacedName.String()
-	subCtx, cancel := context.WithTimeout(ctx, time.Minute*1)
-	defer cancel()
-
 	startTime := time.Now()
 	defer func() {
 		if retErr == nil {
 			if res.Requeue || res.RequeueAfter > 0 {
-				klog.V(4).Infof("Finished reconciling NebulaCluster [%s] (%v), result: %v", key, time.Since(startTime), res)
+				klog.Infof("Finished reconciling NebulaCluster [%s] (%v), result: %v", key, time.Since(startTime), res)
 			} else {
-				klog.V(4).Infof("Finished reconciling NebulaCluster [%s], spendTime: (%v)", key, time.Since(startTime))
+				klog.Infof("Finished reconciling NebulaCluster [%s], spendTime: (%v)", key, time.Since(startTime))
 			}
 		} else {
 			klog.Errorf("Failed to reconcile NebulaCluster [%s], spendTime: (%v)", key, time.Since(startTime))
@@ -133,7 +130,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	}()
 
 	var nebulaCluster v2alpha1.NebulaCluster
-	if err := r.client.Get(subCtx, req.NamespacedName, &nebulaCluster); err != nil {
+	if err := r.client.Get(context.Background(), req.NamespacedName, &nebulaCluster); err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Infof("Skipping because NebulaCluster [%s] has been deleted", key)
 		}

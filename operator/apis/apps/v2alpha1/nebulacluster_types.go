@@ -42,7 +42,7 @@ type NebulaClusterSpec struct {
 
 	Zones []string `json:"zones,omitempty"`
 
-	Auth *Auth `json:"auth,omitempty"`
+	Credential *Credential `json:"credential,omitempty"`
 
 	// +kubebuilder:default=default-scheduler
 	// +optional
@@ -112,8 +112,8 @@ type StoragedSpec struct {
 	EnableAutoBalance *bool `json:"enableAutoBalance,omitempty"`
 }
 
-// Auth defines details of user login info
-type Auth struct {
+// Credential defines details of user login info
+type Credential struct {
 	// +kubebuilder:default=root
 	// +optional
 	Username string `json:"username,omitempty"`
@@ -121,13 +121,6 @@ type Auth struct {
 	// +kubebuilder:default=nebula
 	// +optional
 	Password string `json:"password,omitempty"`
-}
-
-type NebulaHost struct {
-	Host string `json:"host"`
-
-	// +kubebuilder:default=9559
-	Port int32 `json:"port,omitempty"`
 }
 
 // StorageClaim contains details of storage
@@ -194,9 +187,6 @@ type ComponentStatus struct {
 // +kubebuilder:printcolumn:name="STORAGED-DESIRED",type="string",JSONPath=".spec.storaged.replicas",description="The desired number of storaged pods."
 // +kubebuilder:printcolumn:name="STORAGED-READY",type="string",JSONPath=".status.storaged.workload.readyReplicas",description="The number of storaged pods ready."
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is represented in RFC3339 form and is in UTC."
-
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
 
 // NebulaCluster is the Schema for the nebulaclusters API
 type NebulaCluster struct {

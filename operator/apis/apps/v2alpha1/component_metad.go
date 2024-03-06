@@ -28,12 +28,12 @@ import (
 )
 
 const (
-	MetadComponentType     ComponentType = "metad"
-	MetadPortNameThrift                  = "thrift"
-	defaultMetadPortThrift               = 9559
-	MetadPortNameHTTP                    = "http"
-	defaultMetadPortHTTP                 = 19559
-	defaultMetadImage                    = "vesoft/nebula-metad"
+	MetadComponentType   ComponentType = "metad"
+	MetadPortNameGRPC                  = "grpc"
+	defaultMetadPortGRPC               = 9559
+	MetadPortNameHTTP                  = "http"
+	defaultMetadPortHTTP               = 19559
+	defaultMetadImage                  = "vesoft/nebula-metad"
 )
 
 var _ NebulaComponent = &metadComponent{}
@@ -175,7 +175,7 @@ func (m *metadComponent) GenerateLabels() map[string]string {
 }
 
 func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {
-	thriftPort, err := parseCustomPort(defaultMetadPortThrift, m.GetConfig()["port"])
+	thriftPort, err := parseCustomPort(defaultMetadPortGRPC, m.GetConfig()["port"])
 	if err != nil {
 		return nil
 	}
@@ -187,7 +187,7 @@ func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {
 
 	return []corev1.ContainerPort{
 		{
-			Name:          MetadPortNameThrift,
+			Name:          MetadPortNameGRPC,
 			ContainerPort: thriftPort,
 		},
 		{
@@ -293,7 +293,7 @@ func (m *metadComponent) GenerateVolumeClaim() ([]corev1.PersistentVolumeClaim, 
 }
 
 func (m *metadComponent) GenerateWorkload(cm *corev1.ConfigMap, _ []string) (*appsv1.StatefulSet, error) {
-	metadEndpoints := m.GetEndpoints(MetadPortNameThrift)
+	metadEndpoints := m.GetEndpoints(MetadPortNameGRPC)
 	return generateWorkload(m, metadEndpoints, cm)
 }
 

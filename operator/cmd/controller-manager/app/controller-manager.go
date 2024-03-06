@@ -145,6 +145,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 		Controller: config.Controller{
 			GroupKindConcurrency: map[string]int{
 				v2alpha1.SchemeGroupVersion.WithKind("NebulaCluster").GroupKind().String(): opts.ConcurrentNebulaClusterSyncs,
+				v2alpha1.SchemeGroupVersion.WithKind("NebulaMetad").GroupKind().String():   opts.ConcurrentNebulaMetadSyncs,
 			},
 			RecoverPanic: pointer.Bool(true),
 		},

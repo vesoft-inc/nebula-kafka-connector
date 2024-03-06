@@ -27,7 +27,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/apimachinery/pkg/util/sets"
-	"k8s.io/utils/pointer"
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 )
@@ -40,13 +39,6 @@ const (
 
 	ZoneSuffix = "zone"
 )
-
-func getMetadAddress(host *NebulaHost) string {
-	if host == nil {
-		return ""
-	}
-	return fmt.Sprintf("%s:%d", host.Host, host.Port)
-}
 
 func getComponentName(objectName string, typ ComponentType) string {
 	return fmt.Sprintf("%s-%s", objectName, typ)
@@ -191,76 +183,6 @@ func parseStorageRequest(res corev1.ResourceList) (corev1.ResourceRequirements, 
 	}, nil
 }
 
-func genNodeLabelsContainer(nc *NebulaCluster) corev1.Container {
-	script := `
-set -exo pipefail
-
-TOKEN=$(cat ${SERVICEACCOUNT}/token)
-CACERT=${SERVICEACCOUNT}/ca.crt
-            
-curl -s --cacert ${CACERT} --header "Authorization: Bearer ${TOKEN}" -X GET ${APISERVER}/api/v1/nodes/${NODENAME} | jq .metadata.labels > /node/labels.json
-
-NODE_ZONE=$(jq '."topology.kubernetes.io/zone"' -r /node/labels.json)
-echo "NODE_ZONE is ${NODE_ZONE}"
-echo "export NODE_ZONE=${NODE_ZONE}" > /node/zone
-`
-	image := defaultAlpineImage
-	if nc.Spec.AlpineImage != nil {
-		image = pointer.StringDeref(nc.Spec.AlpineImage, "")
-	}
-
-	container := corev1.Container{
-		Name:    "node-labels",
-		Image:   image,
-		Command: []string{"/bin/sh", "-c"},
-		Args:    []string{`echo "$SCRIPT" > /tmp/script && sh /tmp/script`},
-		Env: []corev1.EnvVar{
-			{
-				Name: "NODENAME",
-				ValueFrom: &corev1.EnvVarSource{
-					FieldRef: &corev1.ObjectFieldSelector{
-						FieldPath: "spec.nodeName",
-					},
-				},
-			},
-			{
-				Name:  "APISERVER",
-				Value: "https://kubernetes.default.svc",
-			},
-			{
-				Name:  "SERVICEACCOUNT",
-				Value: "/var/run/secrets/kubernetes.io/serviceaccount",
-			},
-			{
-				Name:  "SCRIPT",
-				Value: script,
-			},
-		},
-		VolumeMounts: []corev1.VolumeMount{
-			{
-				Name:      "node-info",
-				MountPath: "/node",
-			},
-		},
-	}
-
-	imagePullPolicy := nc.Spec.ImagePullPolicy
-	if imagePullPolicy != nil {
-		container.ImagePullPolicy = *imagePullPolicy
-	}
-	return container
-}
-
-func generateInitContainers(c NebulaComponent) []corev1.Container {
-	containers := c.ComponentSpec().InitContainers()
-	nc := c.GetCluster()
-	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
-		nodeLabelsContainer := genNodeLabelsContainer(nc)
-		containers = append(containers, nodeLabelsContainer)
-	}
-	return containers
-}
-
 func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *corev1.ConfigMap) []corev1.Container {
 	componentType := c.ComponentType().String()
 	nc := c.GetCluster()
@@ -280,21 +202,12 @@ func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *co
 	}
 
 	metadAddress := strings.Join(metadEndpoints, ",")
+	cmd := []string{"/bin/sh", "-ecx"}
 	flags := " --meta_server_addrs=" + metadAddress +
 		" --local_ip=$(hostname)." + c.GetServiceFQDN() +
 		" --daemonize=false" + dataPath
-	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
-		flags += " --assigned_zone=$NODE_ZONE"
-	}
-
-	cmd := []string{"/bin/sh", "-ecx"}
-	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
-		cmd = append(cmd, fmt.Sprintf(". /node/zone; echo $NODE_ZONE; exec /usr/local/nebula/bin/nebula-%s", componentType)+
-			fmt.Sprintf(" --flagfile=/usr/local/nebula/etc/nebula-%s.conf", componentType)+flags)
-	} else {
-		cmd = append(cmd, fmt.Sprintf("exec /usr/local/nebula/bin/nebula-%s", componentType)+
-			fmt.Sprintf(" --flagfile=/usr/local/nebula/etc/nebula-%s.conf", componentType)+flags)
-	}
+	cmd = append(cmd, fmt.Sprintf("exec /usr/local/nebula/bin/nebula-%s", componentType)+
+		fmt.Sprintf(" --flagfile=/usr/local/nebula/etc/nebula-%s.conf", componentType)+flags)
 
 	mounts := c.GenerateVolumeMounts()
 	if cm != nil {
@@ -306,15 +219,8 @@ func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *co
 		})
 		mounts = append(mounts, c.ComponentSpec().VolumeMounts()...)
 	}
-	if c.ComponentType() == GraphdComponentType && isZoneEnabled(nc) {
-		mounts = append(mounts, corev1.VolumeMount{
-			Name:      "node-info",
-			MountPath: "/node",
-		})
-	}
 
 	ports := c.GenerateContainerPorts()
-
 	baseContainer := corev1.Container{
 		Name:            componentType,
 		Image:           c.ComponentSpec().PodImage(),
@@ -325,24 +231,25 @@ func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *co
 		VolumeMounts:    mounts,
 	}
 
-	baseContainer.LivenessProbe = c.ComponentSpec().LivenessProbe()
-	readinessProbe := c.ComponentSpec().ReadinessProbe()
-	if readinessProbe != nil {
-		baseContainer.ReadinessProbe = readinessProbe
-	} else {
-		baseContainer.ReadinessProbe = &corev1.Probe{
-			ProbeHandler: corev1.ProbeHandler{
-				HTTPGet: &corev1.HTTPGetAction{
-					Path:   "/status",
-					Port:   intstr.FromInt32(ports[1].ContainerPort),
-					Scheme: corev1.URISchemeHTTP,
-				},
-			},
-			InitialDelaySeconds: int32(10),
-			TimeoutSeconds:      int32(5),
-			PeriodSeconds:       int32(10),
-		}
-	}
+	// TODO support readiness probe
+	//baseContainer.LivenessProbe = c.ComponentSpec().LivenessProbe()
+	//readinessProbe := c.ComponentSpec().ReadinessProbe()
+	//if readinessProbe != nil {
+	//	baseContainer.ReadinessProbe = readinessProbe
+	//} else {
+	//	baseContainer.ReadinessProbe = &corev1.Probe{
+	//		ProbeHandler: corev1.ProbeHandler{
+	//			HTTPGet: &corev1.HTTPGetAction{
+	//				Path:   "/status",
+	//				Port:   intstr.FromInt32(ports[1].ContainerPort),
+	//				Scheme: corev1.URISchemeHTTP,
+	//			},
+	//		},
+	//		InitialDelaySeconds: int32(10),
+	//		TimeoutSeconds:      int32(5),
+	//		PeriodSeconds:       int32(10),
+	//	}
+	//}
 
 	resources := c.ComponentSpec().Resources()
 	if resources != nil {
@@ -369,7 +276,7 @@ func generateStatefulSet(c NebulaComponent, metadEndpoints []string, cm *corev1.
 	nc := c.GetCluster()
 
 	cmKey := getCmKey(componentType)
-	initContainers := generateInitContainers(c)
+	initContainers := c.ComponentSpec().InitContainers()
 	containers := generateNebulaContainers(c, metadEndpoints, cm)
 	volumes := c.GenerateVolumes()
 	if cm != nil {

@@ -23,8 +23,9 @@ var (
 	// Error in server side
 	ErrorSuccessfulCompletion = newErrorCode("00", "000")
 	//TODO need to add more error codes
-	ErrorLeaderChange   = newErrorCode("ND", "005")
-	ErrorClusterExisted = newErrorCode("NI", "001")
+	ErrorLeaderChange          = newErrorCode("ND", "005")
+	ErrorClusterExisted        = newErrorCode("NI", "001")
+	ErrServiceStaticPortExists = newErrorCode("NM", "019")
 )
 
 // TODO add error code in future

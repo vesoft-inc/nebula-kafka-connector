@@ -72,13 +72,10 @@ type NebulaMetadStatus struct {
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:shortName=nm
 // +kubebuilder:printcolumn:name="READY",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
-// +kubebuilder:printcolumn:name="METAD-DESIRED",type="string",JSONPath=".spec.metad.replicas",description="The desired number of metad pods."
-// +kubebuilder:printcolumn:name="METAD-READY",type="string",JSONPath=".status.metad.workload.readyReplicas",description="The number of metad pods ready."
-// +kubebuilder:printcolumn:name="MANAGED-CLUSTERS",type="string",JSONPath=".status.metad.managedClusters",description="The managed clusters of this metad."
+// +kubebuilder:printcolumn:name="METAD-DESIRED",type="string",JSONPath=".spec.replicas",description="The desired number of metad pods."
+// +kubebuilder:printcolumn:name="METAD-READY",type="string",JSONPath=".status.workload.readyReplicas",description="The number of metad pods ready."
+// +kubebuilder:printcolumn:name="MANAGED-CLUSTERS",type="string",JSONPath=".status.managedClusters",description="The managed clusters of this metad."
 // +kubebuilder:printcolumn:name="AGE",type="date",JSONPath=".metadata.creationTimestamp",description="CreationTimestamp is a timestamp representing the server time when this object was created. It is represented in RFC3339 form and is in UTC."
-
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
 
 // NebulaMetad is the Schema for the nebulametads API
 type NebulaMetad struct {

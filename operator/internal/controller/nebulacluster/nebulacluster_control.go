@@ -19,17 +19,19 @@ package nebulacluster
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -130,21 +132,28 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 	if nc.Spec.MetadRef == nil {
 		return component.ErrorMetadReferenceIsNil
 	}
-	metad, err := c.metadClient.GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+
+	metad, err := c.metadClient.GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
+		klog.Errorf("failed to get metad cluster: %v", err)
 		return err
 	}
 	if !metad.MetadComponent().IsReady() {
 		return fmt.Errorf("metad [%s/%s] is not ready", metad.Namespace, metad.Name)
 	}
 	if !nc.Status.CreatedDone {
-		metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
-		mc, err := nebula.NewMetaClient(metadEndpoints)
+		metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
+		mc, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
 		if err != nil {
 			return err
 		}
-		if err := mc.CreateCluster(nc.Name, int(nc.Spec.Replica), nc.Spec.Zones); err != nil {
+		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.Replica), nc.Spec.Zones)
+		resp, err := mc.CreateCluster(req)
+		if err != nil {
 			return err
+		}
+		if !resp.OK && resp.Code != nebula.ErrorClusterExisted {
+			return fmt.Errorf("create cluster failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
 		}
 	}
 

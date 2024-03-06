@@ -99,16 +99,13 @@ func NewMetadReconciler(mgr ctrl.Manager) (*MetadReconciler, error) {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.16.3/pkg/reconcile
 func (r *MetadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res ctrl.Result, retErr error) {
 	key := req.NamespacedName.String()
-	subCtx, cancel := context.WithTimeout(ctx, time.Minute*1)
-	defer cancel()
-
 	startTime := time.Now()
 	defer func() {
 		if retErr == nil {
 			if res.Requeue || res.RequeueAfter > 0 {
-				klog.V(4).Infof("Finished reconciling NebulaMetad [%s] (%v), result: %v", key, time.Since(startTime), res)
+				klog.Infof("Finished reconciling NebulaMetad [%s] (%v), result: %v", key, time.Since(startTime), res)
 			} else {
-				klog.V(4).Infof("Finished reconciling NebulaMetad [%s], spendTime: (%v)", key, time.Since(startTime))
+				klog.Infof("Finished reconciling NebulaMetad [%s], spendTime: (%v)", key, time.Since(startTime))
 			}
 		} else {
 			klog.Errorf("Failed to reconcile NebulaMetad [%s], spendTime: (%v)", key, time.Since(startTime))
@@ -116,15 +113,15 @@ func (r *MetadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	}()
 
 	var nebulaMetad v2alpha1.NebulaMetad
-	if err := r.Get(subCtx, req.NamespacedName, &v2alpha1.NebulaMetad{}); err != nil {
+	if err := r.Get(context.Background(), req.NamespacedName, &nebulaMetad); err != nil {
 		if apierrors.IsNotFound(err) {
-			klog.Info("Skipping because NebulaMetad [%s] has been deleted", key)
+			klog.Infof("Skipping because NebulaMetad [%s] has been deleted", key)
 		}
 		return ctrl.Result{}, client.IgnoreNotFound(err)
 	}
 
 	klog.Info("Start to reconcile NebulaMetad")
-	if err := r.syncNebulaMetad(ctx, nebulaMetad.DeepCopy()); err != nil {
+	if err := r.syncNebulaMetad(nebulaMetad.DeepCopy()); err != nil {
 		klog.Errorf("NebulaMetad [%s] reconcile failed: %v", key, err)
 
 		if errorsutil.IsReconcileError(err) {
@@ -136,7 +133,7 @@ func (r *MetadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	return ctrl.Result{}, nil
 }
 
-func (r *MetadReconciler) syncNebulaMetad(_ context.Context, nm *v2alpha1.NebulaMetad) error {
+func (r *MetadReconciler) syncNebulaMetad(nm *v2alpha1.NebulaMetad) error {
 	if nm.DeletionTimestamp != nil {
 		return r.control.DeleteNebulaMetad(nm)
 	}

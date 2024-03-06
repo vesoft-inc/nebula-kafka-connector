@@ -27,12 +27,12 @@ import (
 )
 
 const (
-	GraphdComponentType     ComponentType = "graphd"
-	GraphdPortNameThrift                  = "thrift"
-	defaultGraphdPortThrift               = 9669
-	GraphdPortNameHTTP                    = "http"
-	defaultGraphdPortHTTP                 = 19669
-	defaultGraphdImage                    = "vesoft/nebula-graphd"
+	GraphdComponentType   ComponentType = "graphd"
+	GraphdPortNameGRPC                  = "grpc"
+	defaultGraphdPortGRPC               = 9669
+	GraphdPortNameHTTP                  = "http"
+	defaultGraphdPortHTTP               = 19669
+	defaultGraphdImage                  = "vesoft/nebula-graphd"
 )
 
 var _ NebulaComponent = &graphdComponent{}
@@ -135,7 +135,7 @@ func (c *graphdComponent) GenerateLabels() map[string]string {
 }
 
 func (c *graphdComponent) GenerateContainerPorts() []corev1.ContainerPort {
-	thriftPort, err := parseCustomPort(defaultGraphdPortThrift, c.GetConfig()["port"])
+	thriftPort, err := parseCustomPort(defaultGraphdPortGRPC, c.GetConfig()["port"])
 	if err != nil {
 		return nil
 	}
@@ -147,7 +147,7 @@ func (c *graphdComponent) GenerateContainerPorts() []corev1.ContainerPort {
 
 	return []corev1.ContainerPort{
 		{
-			Name:          GraphdPortNameThrift,
+			Name:          GraphdPortNameGRPC,
 			ContainerPort: thriftPort,
 		},
 		{

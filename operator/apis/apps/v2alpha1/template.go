@@ -35,7 +35,7 @@ const (
 --local_config=true
 
 ########## plugins ##########
---plugins=dbms.so,file_audit.so,logrotate.so
+--plugins=dbms.so,algo.so,file_audit.so,logrotate.so
 
 ########## audit ##########
 # This variable is used to enable audit. The value can be 'true' or 'false'.
@@ -102,11 +102,11 @@ const (
 
 ########## networking ##########
 # Comma separated Meta Server Addresses
---meta_server_addrs=192.168.8.176:9559
+--meta_server_addrs=127.0.0.1:9559
 # Local IP used to identify the nebula-graphd process.
 # Change it to an address other than loopback if the service is distributed or
 # will be accessed remotely.
---local_ip=192.168.8.176
+--local_ip=127.0.0.1
 # Network device to listen on
 --listen_netdev=any
 # Port to listen on
@@ -120,12 +120,6 @@ const (
 # The number of seconds before idle sessions expire
 # The range should be in [1, 604800]
 --session_idle_timeout_secs=28800
-# The number of threads to accept incoming connections
---num_accept_threads=1
-# The number of networking IO threads, 0 for # of CPU cores
---num_netio_threads=0
-# The number of threads to execute user queries, 0 for # of CPU cores
---num_worker_threads=0
 # HTTP service ip
 --ws_ip=0.0.0.0
 # HTTP service port
@@ -134,6 +128,16 @@ const (
 --storage_client_timeout_ms=60000
 # Port to listen on Meta with HTTP protocol, it corresponds to ws_http_port in metad's configuration file
 --ws_meta_http_port=19559
+
+########## threads ##########
+# The number of threads to accept incoming connections
+--num_accept_threads=1
+# The number of networking IO threads, 0 for # of CPU cores
+--num_netio_threads=0
+# The number of threads to execute user queries, 0 for # of CPU cores
+--num_worker_threads=0
+# The number of threads used for computing algorithms
+--num_computing_threads=8
 
 ########## authentication ##########
 # Enable authorization
@@ -149,9 +153,14 @@ const (
 # background checking memory interval, changes made to graphd_max_memory_mib will take effect in this interval, default 1s
 --check_memory_interval_in_secs=1
 
-
 ########## metrics ##########
 --enable_space_level_metrics=false
+
+########## schema ##########
+# The duration after which the schema is considered expired
+--schema_expired_duration_ms=3600
+# The heartbeat interval of schema synchronization
+--schema_heartbeat_interval_ms=1000
 `
 
 	MetadhConfigTemplate = `
@@ -206,17 +215,15 @@ const (
 
 ########## meta service ##########
 # Comma separated Meta Server addresses
---meta_server_addrs=192.168.8.176:9559
+--meta_server_addrs=127.0.0.1:9559
 
 # Local IP used to identify the nebula-metad process.
 # Change it to an address other than loopback if the service is distributed or
 # will be accessed remotely.
---local_ip=192.168.8.176
+--local_ip=127.0.0.1
 
 # Meta daemon listening port
 --port=9559
-# (To be deleted) Http port to execute meta command.
---admin_port=19559
 
 ########## storage ##########
 # Root data path, here should be only single path for metad
@@ -269,11 +276,11 @@ const (
 
 ########## networking ##########
 # Comma separated Meta server addresses
---meta_server_addrs=192.168.8.176:9559
+--meta_server_addrs=127.0.0.1:9559
 # Local IP used to identify the nebula-storaged process.
 # Change it to an address other than loopback if the service is distributed or
 # will be accessed remotely.
---local_ip=192.168.8.176
+--local_ip=127.0.0.1
 # Storage daemon listening port
 --port=9779
 # HTTP service ip
@@ -295,5 +302,15 @@ const (
 --memory_stats_log=false
 # background checking memory interval, changes made to storaged_max_memory_mib will take effect in this interval, default 1s
 --check_memory_interval_in_secs=1
+
+########## threads ##########
+# The number of threads to accomplish network IO
+--num_io_threads=16
+# The num of raft worker threads
+--num_raft_worker_threads=32
+# The num of threads to handle request and response
+--num_storage_worker_threads=32
+# The num of threads to run execution plan
+--num_storage_query_threads=32
 `
 )

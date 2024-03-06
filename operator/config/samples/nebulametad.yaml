@@ -1,0 +1,29 @@
+apiVersion: apps.nebula-graph.io/v2alpha1
+kind: NebulaMetad
+metadata:
+  name: metad-sample
+spec:
+  enablePVReclaim: true
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "500Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+  replicas: 3
+  image: reg.vesoft-inc.com/vesoft-ng/nebula-metad
+  version: nightly
+  dataVolumeClaim:
+    resources:
+      requests:
+        storage: 5Gi
+    storageClassName: local-path
+  schedulerName: default-scheduler
+  imagePullPolicy: Always
+  imagePullSecrets:
+  - name: nebula-image
+  topologySpreadConstraints:
+  - topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
+

@@ -23,6 +23,14 @@ import (
 	"k8s.io/utils/pointer"
 )
 
+func (nc *NebulaCluster) GetMetadNamespace() string {
+	namespace := nc.Namespace
+	if nc.Spec.MetadRef.Namespace != "" {
+		namespace = nc.Spec.MetadRef.Namespace
+	}
+	return namespace
+}
+
 func (nc *NebulaCluster) GraphdComponent() ClusterComponent {
 	return newGraphdComponent(nc)
 }

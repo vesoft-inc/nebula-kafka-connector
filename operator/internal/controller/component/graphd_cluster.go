@@ -19,6 +19,7 @@ package component
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -27,10 +28,11 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/nebula"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
@@ -98,11 +100,11 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 		return err
 	}
 
-	metad, err := g.clientSet.NebulaMetad().GetNebulaMetad(nc.Spec.MetadRef.Namespace, nc.Spec.MetadRef.Name)
+	metad, err := g.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameThrift)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
 	newSts, err := nc.GraphdComponent().GenerateWorkload(cm, metadEndpoints)
 	if err != nil {
 		klog.Errorf("generate graphd cluster template failed: %v", err)
@@ -232,12 +234,12 @@ func (g *graphdCluster) Delete(nc *v2alpha1.NebulaCluster) error {
 }
 
 func addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
-	metaClient, err := nebula.NewMetaClient(metadEndpoints)
+	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
 	if err != nil {
 		return err
 	}
 	defer func() {
-		_ = metaClient.Disconnect()
+		metaClient.Close()
 	}()
 
 	var start int32
@@ -245,11 +247,16 @@ func addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldR
 		start = oldReplicas
 	}
 
-	port := nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameThrift)
+	port := nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameGRPC)
 	for i := start; i < newReplicas; i++ {
 		host := nc.GraphdComponent().GetPodFQDN(i)
-		if err := metaClient.AddService(host, uint32(port), nebula.GraphService, nc.Name); err != nil {
+		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
+		resp, err := metaClient.AddService(req)
+		if err != nil {
 			return err
+		}
+		if !resp.OK && resp.Code != nebula.ErrServiceStaticPortExists {
+			return fmt.Errorf("add graphd service failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
 		}
 	}
 

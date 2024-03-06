@@ -1,0 +1,55 @@
+apiVersion: apps.nebula-graph.io/v2alpha1
+kind: NebulaCluster
+metadata:
+  name: nebula-sample
+spec:
+  replica: 3
+  zones:
+  - az1
+  - az2
+  - az3
+  metadRef:
+    name: metad-sample
+  graphd:
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "500Mi"
+      limits:
+        cpu: "2"
+        memory: "2Gi"
+    replicas: 1
+    image: reg.vesoft-inc.com/vesoft-ng/nebula-graphd
+    version: nightly
+    service:
+      type: NodePort
+      externalTrafficPolicy: Local
+    logVolumeClaim:
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: local-path
+  storaged:
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "500Mi"
+      limits:
+        cpu: "2"
+        memory: "2Gi"
+    replicas: 3
+    image: reg.vesoft-inc.com/vesoft-ng/nebula-storaged
+    version: nightly
+    dataVolumeClaims:
+    - resources:
+        requests:
+          storage: 10Gi
+      storageClassName: local-path
+  enablePVReclaim: true
+  schedulerName: default-scheduler
+  imagePullPolicy: Always
+  imagePullSecrets:
+  - name: nebula-image
+  topologySpreadConstraints:
+  - topologyKey: kubernetes.io/hostname
+    whenUnsatisfiable: ScheduleAnyway
