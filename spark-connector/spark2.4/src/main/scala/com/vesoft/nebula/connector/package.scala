@@ -6,7 +6,7 @@
 package com.vesoft.nebula
 
 import com.vesoft.nebula.spark.common.utils.SparkValidate
-import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaConnectionConfig, NebulaOptions, OperaType, ReadNebulaConfig, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaVertexConfig}
+import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaConnectionConfig, NebulaOptions, OperaType, ReadNebulaConfig, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaNodeConfig}
 import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row, SaveMode}
 
 package object connector {
@@ -23,7 +23,7 @@ package object connector {
      * config nebula connection
      *
      * @param connectionConfig  connection parameters
-     * @param writeNebulaConfig write parameters for vertex or edge
+     * @param writeNebulaConfig write parameters for node or edge
      */
     def nebula(connectionConfig: NebulaConnectionConfig,
                writeNebulaConfig: WriteNebulaConfig): NebulaDataFrameWriter = {
@@ -34,12 +34,12 @@ package object connector {
     }
 
     /**
-     * write dataframe into nebula vertex
+     * write dataframe into nebula node type
      */
     def writeVertices(): Unit = {
       assert(connectionConfig != null && writeNebulaConfig != null,
         "nebula config is not set, please call nebula() before writeVertices")
-      val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaVertexConfig]
+      val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaNodeConfig]
       val dfWriter = writer
         .format(classOf[NebulaDataSource].getName)
         .mode(SaveMode.Overwrite)
@@ -53,7 +53,6 @@ package object connector {
         .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
         .option(NebulaOptions.GRAPH_NAME, writeConfig.getGraphName)
         .option(NebulaOptions.LABEL, writeConfig.getNodeType)
-        .option(NebulaOptions.PK_FIELD, writeConfig.getPkField)
         .option(NebulaOptions.BATCH_SIZE, writeConfig.getBatchSize)
         .option(NebulaOptions.WRITE_MODE, writeConfig.getWriteMode)
         .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
@@ -61,7 +60,7 @@ package object connector {
     }
 
     /**
-     * write dataframe into nebula edge
+     * write dataframe into nebula edge type
      */
     def writeEdges(): Unit = {
 

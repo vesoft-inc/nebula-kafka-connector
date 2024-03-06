@@ -38,7 +38,15 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     */
   override def write(row: InternalRow): Unit = {
     val srcId = NebulaExecutor.extraID(schema, row, srcIndex, isSourceIdStringType)
+    if(srcId == null){
+      LOG.warn(s">>>> record has null value at index $srcIndex for primary key, ignore it. record:$row")
+      return
+    }
     val dstId = NebulaExecutor.extraID(schema, row, dstIndex, isTargetIdStringType)
+    if (dstId == null) {
+      LOG.warn(s">>>> record has null value at index $dstIndex for primary key, ignore it. record:$row")
+      return
+    }
 
     val values =
       if (nebulaOptions.writeMode == WriteMode.DELETE) {
@@ -53,7 +61,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
                                         nebulaOptions.dstPkAsProp,
                                         fieldTypeMap)
       }
-    val nebulaEdge = NebulaEdge(srcId, dstId, values)
+    val nebulaEdge = NebulaEdge(edgeDesc.srcNodePkName, srcId, edgeDesc.dstNodePkName, dstId, values)
     edges.append(nebulaEdge)
     if (edges.size >= nebulaOptions.batchSize) {
       execute()

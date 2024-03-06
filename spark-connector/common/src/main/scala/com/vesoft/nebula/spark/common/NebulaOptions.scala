@@ -74,7 +74,6 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 
   /** write parameters */
 
-  var pkField: String = _
   var srcPkField: String = _
   var dstPkField: String = _
   var srcPkAsProp: Boolean = _
@@ -83,7 +82,6 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   var disableWriteLog: Boolean = _
 
   if (operaType == OperaType.WRITE) {
-    pkField = parameters.getOrElse(PK_FIELD, null)
     srcPkField = parameters.getOrElse(SRC_PK_FIELD, null)
     dstPkField = parameters.getOrElse(DST_PK_FIELD, null)
     srcPkAsProp = parameters.getOrElse(SRC_PK_AS_PROP, false).toString.toBoolean
@@ -128,7 +126,6 @@ object NebulaOptions {
 
   /** write config */
   val RATE_LIMIT: String = "rateLimit"
-  val PK_FIELD = "pkField"
   val SRC_PK_FIELD = "srcPkField"
   val DST_PK_FIELD = "dstPkField"
   val SRC_PK_AS_PROP: String = "srcPkAsProp"

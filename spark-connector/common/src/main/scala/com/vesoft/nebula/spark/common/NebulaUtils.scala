@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.spark.common
 
-import com.vesoft.nebula.client.graph.data.{NDateTime, NTime}
 import com.vesoft.nebula.spark.common.nebula.GraphProvider
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types._
@@ -46,14 +45,7 @@ object NebulaUtils {
           row.setInt(pos, prop.asInstanceOf[Int])
       case _ =>
         (prop: Any, row: InternalRow, pos: Int) =>
-          prop match {
-            case wrapper: NDateTime =>
-              row.update(pos, UTF8String.fromString(wrapper.toString))
-            case wrapper: NTime =>
-              row.update(pos, UTF8String.fromString(wrapper.toString))
-            case _ =>
-              row.update(pos, UTF8String.fromString(String.valueOf(prop)))
-          }
+          row.update(pos, UTF8String.fromString(String.valueOf(prop)))
     }
   }
 
@@ -75,12 +67,12 @@ object NebulaUtils {
   def escapeUtil(str: String): String =
     str
       .replaceAll("\\\\", "\\\\\\\\")
-      .replaceAll("\t", "\\\t")
-      .replaceAll("\n", "\\\n")
-      .replaceAll("\"", "\\\"")
-      .replaceAll("\'", "\\\'")
-      .replaceAll("\r", "\\\r")
-      .replaceAll("\b", "\\\b")
+      .replaceAll("\t", "\\\\t")
+      .replaceAll("\n", "\\\\n")
+      .replaceAll("\"", "\\\\\"")
+      .replaceAll("\'", "\\\\'")
+      .replaceAll("\r", "\\\\r")
+      .replaceAll("\b", "\\\\b")
 
 
   /**

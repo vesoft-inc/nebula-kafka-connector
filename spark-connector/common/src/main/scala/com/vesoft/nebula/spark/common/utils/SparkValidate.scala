@@ -13,7 +13,6 @@ object SparkValidate {
     if (sparkVersion != "UNKNOWN" && !supportedVersions.exists(sparkVersion.matches)) {
       throw new RuntimeException(
         s"""Your current spark version ${sparkVersion} is not supported by the current NebulaGraph Spark Connector.
-           | please visit https://github.com/vesoft-inc/nebula-spark-connector#version-match to know which Connector you need.
            | """.stripMargin)
     }
   }

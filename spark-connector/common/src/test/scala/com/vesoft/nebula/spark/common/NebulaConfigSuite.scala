@@ -54,11 +54,10 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
   }
 
   test("test WriteNebulaConfig") {
-    val writeNebulaConfig: WriteNebulaVertexConfig = WriteNebulaVertexConfig
+    val writeNebulaConfig: WriteNebulaNodeConfig = WriteNebulaNodeConfig
       .builder()
       .withGraphName("test")
       .withNodeType("tag")
-      .withPrimaryKeyField("vid")
       .build()
 
     assert(writeNebulaConfig.getGraphName.equals("test"))
@@ -66,11 +65,10 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   test("test wrong batch") {
     assertThrows[AssertionError](
-      WriteNebulaVertexConfig
+      WriteNebulaNodeConfig
         .builder()
         .withGraphName("test")
         .withNodeType("tag")
-        .withPrimaryKeyField("vId")
         .withBatchSize(-1)
         .build())
   }

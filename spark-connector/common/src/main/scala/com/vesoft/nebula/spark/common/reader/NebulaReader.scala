@@ -30,7 +30,7 @@ trait NebulaReader {
   protected var graphProvider: GraphProvider = _
   protected var nebulaOptions: NebulaOptions = _
 
-  private var vertexResponseIterator: ScanNodeResultIterator = _
+  private var nodeResponseIterator: ScanNodeResultIterator = _
   private var edgeResponseIterator: ScanEdgeResultIterator = _
 
   /**
@@ -49,7 +49,7 @@ trait NebulaReader {
   }
 
   /**
-   * resolve the vertex/edge data to InternalRow
+   * resolve the node/edge data to InternalRow
    */
   protected def getRow(): InternalRow = {
     val resultSet: Array[ValueWrapper] =
@@ -110,26 +110,26 @@ trait NebulaReader {
   }
 
   /**
-   * if the scan response has next vertex
+   * if the scan response has next node
    */
-  protected def hasNextVertexRow: Boolean = {
-    (dataIterator != null || vertexResponseIterator != null || scanPartIterator.hasNext) && {
+  protected def hasNextNodeRow: Boolean = {
+    (dataIterator != null || nodeResponseIterator != null || scanPartIterator.hasNext) && {
       var continue: Boolean = false
       var break: Boolean = false
       while ((dataIterator == null || !dataIterator.hasNext) && !break) {
         resultValues.clear()
         continue = false
-        if (vertexResponseIterator == null || !vertexResponseIterator.hasNext) {
+        if (nodeResponseIterator == null || !nodeResponseIterator.hasNext) {
           if (scanPartIterator.hasNext) {
             try {
               // if returnCols is null, scan all the property of node, if returnCols is empty, just scan the pk of node.
               if (nebulaOptions.getReturnCols == null) {
-                vertexResponseIterator = graphProvider.scanNode(nebulaOptions.graphName,
+                nodeResponseIterator = graphProvider.scanNode(nebulaOptions.graphName,
                   nebulaOptions.label,
                   scanPartIterator.next(),
                   nebulaOptions.batchSize)
               } else {
-                vertexResponseIterator =
+                nodeResponseIterator =
                   graphProvider.scanNode(nebulaOptions.graphName,
                     nebulaOptions.label,
                     nebulaOptions.getReturnCols.asJava,
@@ -138,7 +138,7 @@ trait NebulaReader {
               }
             } catch {
               case e: Exception =>
-                LOG.error(s"Exception scanning vertex ${nebulaOptions.label}", e)
+                LOG.error(s"Exception scanning node type ${nebulaOptions.label}", e)
                 graphProvider.close()
                 throw new Exception(e.getMessage, e)
             }
@@ -148,7 +148,7 @@ trait NebulaReader {
           // break while loop
           break = !continue
         } else {
-          val next: ScanNodeResult = vertexResponseIterator.next
+          val next: ScanNodeResult = nodeResponseIterator.next
           if (!next.isEmpty) {
             dataIterator = next.getTableRows.iterator().asScala
           }
@@ -188,7 +188,7 @@ trait NebulaReader {
               }
             } catch {
               case e: Exception =>
-                LOG.error(s"Exception scanning vertex ${nebulaOptions.label}", e)
+                LOG.error(s"Exception scanning edge type ${nebulaOptions.label}", e)
                 graphProvider.close()
                 throw new Exception(e.getMessage, e)
             }

@@ -10,10 +10,10 @@ import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.reader.{InputPartition, InputPartitionReader}
 import org.apache.spark.sql.types.StructType
 
-class NebulaVertexPartition(index: Int, nebulaOptions: NebulaOptions, schema: StructType)
+class NebulaNodePartition(index: Int, nebulaOptions: NebulaOptions, schema: StructType)
     extends InputPartition[InternalRow] {
   override def createPartitionReader(): InputPartitionReader[InternalRow] =
-    new NebulaVertexPartitionReader(index, nebulaOptions, schema)
+    new NebulaNodePartitionReader(index, nebulaOptions, schema)
 }
 
 class NebulaEdgePartition(index: Int, nebulaOptions: NebulaOptions, schema: StructType)

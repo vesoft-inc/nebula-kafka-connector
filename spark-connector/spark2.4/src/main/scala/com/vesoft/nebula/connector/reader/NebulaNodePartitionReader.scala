@@ -8,8 +8,8 @@ package com.vesoft.nebula.connector.reader
 import com.vesoft.nebula.spark.common.NebulaOptions
 import org.apache.spark.sql.types.StructType
 
-class NebulaVertexPartitionReader(index: Int, nebulaOptions: NebulaOptions, schema: StructType)
+class NebulaNodePartitionReader(index: Int, nebulaOptions: NebulaOptions, schema: StructType)
     extends NebulaPartitionReader(index, nebulaOptions, schema) {
 
-  override def next(): Boolean = hasNextVertexRow
+  override def next(): Boolean = hasNextNodeRow
 }

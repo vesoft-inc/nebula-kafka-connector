@@ -10,6 +10,8 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
 import java.util.concurrent.TimeUnit
+import scala.collection.JavaConversions.asJavaCollection
+import scala.collection.JavaConverters.asScalaBufferConverter
 
 class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   var graphProvider: GraphProvider = null
@@ -18,7 +20,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     val address = "192.168.8.6:3820"
     graphProvider = new GraphProvider(address, "root", "nebula", 3000)
 
-    val createSchema = "CREATE GRAPH TYPE graph_type_nba AS GRAPH TYPE{" +
+    val createSchema = "CREATE GRAPH TYPE graph_type_nba AS {" +
       "(node_type_player LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
       "(node_type_player)-[edge_type_follow LABEL follow {followness INT, likeness FLOAT64}]->(node_type_player)}"
     val resp = graphProvider.submit(createSchema)
@@ -58,6 +60,13 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     assert(edgeDesc.properties.size == 2)
     assert(edgeDesc.properties.keySet.contains("followness"))
     assert(edgeDesc.properties.keySet.contains("likeness"))
+  }
+
+  test("getAllParts") {
+    val parts:List[Integer] = graphProvider.getAllParts("nba").asScala.toList
+    assert(parts.size() == 10)
+    val expectParts = List(1, 2, 3, 4 ,5, 6, 7, 8, 9, 10)
+    assert(parts.containsAll(expectParts))
   }
 
 }

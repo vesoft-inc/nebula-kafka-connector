@@ -138,46 +138,42 @@ class WriteNebulaConfig(graphName: String,
 }
 
 /**
- * subclass of WriteNebulaConfig to config vertex when write dataframe into nebula graph
+ * subclass of WriteNebulaConfig to config node when write dataframe into nebula graph
  *
  * @param graphName       : nebula graph name
  * @param nodeType        : node type name
- * @param pkField         : field in dataframe to indicate vertexId
  * @param batchSize       : amount of one batch when write into nebula graph
  * @param writeMode       : write mode, insert / update / delete
  * @param disableWriteLog : disable the log print for write result, such as batch size and latency
  */
-class WriteNebulaVertexConfig(graphName: String,
-                              nodeType: String,
-                              pkField: String,
-                              batchSize: Int,
-                              writeMode: String,
-                              disableWriteLog: Boolean)
+class WriteNebulaNodeConfig(graphName: String,
+                            nodeType: String,
+                            batchSize: Int,
+                            writeMode: String,
+                            disableWriteLog: Boolean)
   extends WriteNebulaConfig(graphName, batchSize, writeMode, disableWriteLog) {
   def getNodeType = nodeType
 
-  def getPkField = pkField
 }
 
 /**
- * object WriteNebulaVertexConfig
+ * object WriteNebulaNodeConfig
  * */
-object WriteNebulaVertexConfig {
+object WriteNebulaNodeConfig {
 
   private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
 
-  class WriteVertexConfigBuilder {
+  class WriteNodeConfigBuilder {
     private var graphName: String = _
     private var nodeType: String = _
     private var writeMode: String = "insert"
     private var disableWriteLog: Boolean = false
-    private var pkField: String = _
     private var batchSize: Int = 512
 
     /**
      * set graph name
      */
-    def withGraphName(graphName: String): WriteVertexConfigBuilder = {
+    def withGraphName(graphName: String): WriteNodeConfigBuilder = {
       this.graphName = graphName
       this
     }
@@ -185,23 +181,15 @@ object WriteNebulaVertexConfig {
     /**
      * set tag name
      */
-    def withNodeType(nodeType: String): WriteVertexConfigBuilder = {
+    def withNodeType(nodeType: String): WriteNodeConfigBuilder = {
       this.nodeType = nodeType
-      this
-    }
-
-    /**
-     * set which field in dataframe as nebula tag's id
-     */
-    def withPrimaryKeyField(pkField: String): WriteVertexConfigBuilder = {
-      this.pkField = pkField
       this
     }
 
     /**
      * set data amount for one batch, default is 512
      */
-    def withBatchSize(batchSize: Int): WriteVertexConfigBuilder = {
+    def withBatchSize(batchSize: Int): WriteNodeConfigBuilder = {
       this.batchSize = batchSize
       this
     }
@@ -209,7 +197,7 @@ object WriteNebulaVertexConfig {
     /**
      * set nebula write mode for nebula tag, INSERT or UPDATE
      */
-    def withWriteMode(writeMode: WriteMode.Value): WriteVertexConfigBuilder = {
+    def withWriteMode(writeMode: WriteMode.Value): WriteNodeConfigBuilder = {
       this.writeMode = writeMode.toString
       this
     }
@@ -217,31 +205,29 @@ object WriteNebulaVertexConfig {
     /**
      * set disableWriteLog, default is false
      */
-    def withDisableWriteLog(disableWriteLog: Boolean): WriteVertexConfigBuilder = {
+    def withDisableWriteLog(disableWriteLog: Boolean): WriteNodeConfigBuilder = {
       this.disableWriteLog = disableWriteLog
       this
     }
 
     /**
-     * check and get WriteNebulaVertexConfig
+     * check and get WriteNebulaNodeConfig
      */
-    def build(): WriteNebulaVertexConfig = {
+    def build(): WriteNebulaNodeConfig = {
       check()
-      new WriteNebulaVertexConfig(graphName,
+      new WriteNebulaNodeConfig(graphName,
         nodeType,
-        pkField,
         batchSize,
         writeMode,
         disableWriteLog)
     }
 
     /**
-     * check the validation for {@link WriteNebulaVertexConfig}
+     * check the validation for {@link WriteNebulaNodeConfig}
      */
     private def check(): Unit = {
       assert(graphName != null && graphName.nonEmpty, s"config graphName can not be empty.")
       assert(nodeType != null && nodeType.nonEmpty, "config nodeType can not be empty")
-      assert(pkField != null && pkField.nonEmpty, "config primaryKeyField can not be empty.")
       assert(batchSize > 0, s"config batchSize must be positive, your batchSize is $batchSize.")
 
       try {
@@ -255,13 +241,13 @@ object WriteNebulaVertexConfig {
       }
 
       LOG.info(
-        s"NebulaWriteVertexConfig={graphName=$graphName,nodeType=$nodeType,pkField=$pkField," +
+        s"NebulaWriteNodeConfig={graphName=$graphName,nodeType=$nodeType," +
           s"batchSize=$batchSize,writeMode=$writeMode,disableWriteLog=$disableWriteLog}")
     }
   }
 
-  def builder(): WriteVertexConfigBuilder = {
-    new WriteVertexConfigBuilder
+  def builder(): WriteNodeConfigBuilder = {
+    new WriteNodeConfigBuilder
   }
 }
 
@@ -270,8 +256,8 @@ object WriteNebulaVertexConfig {
  *
  * @param graphName       : nebula graph name
  * @param edgeType        : edge name
- * @param srcPkFiled      : field in dataframe to indicate src vertex primary key
- * @param dstPkField      : field in dataframe to indicate dst vertex primary key
+ * @param srcPkFiled      : field in dataframe to indicate src node primary key
+ * @param dstPkField      : field in dataframe to indicate dst node primary key
  * @param batchSize       : amount of one batch when write into nebula graph
  * @param srcPkAsProp     : whether use src node primary key as edge's property
  * @param dstPkAsProp     : whether use dst node primary key as edge's property

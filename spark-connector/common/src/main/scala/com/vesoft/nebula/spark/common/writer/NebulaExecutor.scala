@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.spark.common.writer
 
-import com.vesoft.nebula.spark.common.{NebulaEdges, NebulaUtils, NebulaVertices}
+import com.vesoft.nebula.spark.common.{NebulaEdges, NebulaUtils, NebulaNodes}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types.StructType
 import org.slf4j.LoggerFactory
@@ -17,23 +17,23 @@ object NebulaExecutor {
   private val LOG = LoggerFactory.getLogger(this.getClass)
 
   /**
-    * deal with vertex ID, used to extra vertex's id and edge's srcId,dstId
+    * used to extra edge's src node primary key,dst node primary key
     * @param schema
     * @param record
     * @param index
     * @param policy
-    * @param isVidStringType true if vid_type is Fix_String
+    * @param isPkStringType true if primary key is String data type
     */
   def extraID(schema: StructType,
               record: InternalRow,
               index: Int,
-              isVidStringType: Boolean): String = {
+              isPkStringType: Boolean): String = {
     val types = schema.fields.map(field => field.dataType)
     if (record.isNullAt(index)) {
-      LOG.warn(s">>>> record has null value at index $index, ignore it. record:$record")
+      return null
     }
     val vid = record.get(index, types(index)).toString
-    if (isVidStringType) {
+    if (isPkStringType) {
       NebulaUtils.escapeUtil(vid).mkString("\"", "", "\"")
     } else {
       if (!NebulaUtils.isNumic(vid)) {
@@ -45,18 +45,16 @@ object NebulaExecutor {
   }
 
   /**
-    * deal with vertex property values
+    * deal with node property values
     * @param schema
     * @param record
-    * @param vertexIndex
     * @param fieldTypeMap
     *
     * @return Map of property name to property value
     * */
-  def assignVertexPropValues(schema: StructType,
-                             record: InternalRow,
-                             vertexIndex: Int,
-                             fieldTypeMap: Map[String, String]): Map[String, String] = {
+  def assignNodePropValues(schema: StructType,
+                           record: InternalRow,
+                           fieldTypeMap: Map[String, String]): Map[String, String] = {
     val properties: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     for {
       index <- schema.fields.indices
@@ -116,8 +114,10 @@ object NebulaExecutor {
       case "STRING" =>
         NebulaUtils.escapeUtil(propValue.toString).mkString("\"", "", "\"")
       case "DATE"          => "date(\"" + propValue + "\")"
-      case "LOCALDATETIME" => "localdatetime(\"" + propValue + "\")"
-      case "LOCALTIME"        => "localtime(\"" + propValue + "\")"
+      case "LOCAL DATETIME" => "local_datetime(\"" + propValue + "\")"
+      case "LOCAL TIME"        => "local_time(\"" + propValue + "\")"
+      case "ZONED TIME" => "zoned_time(\"" + propValue +" \")"
+      case "ZONED DATETIME" => "zoned_datetime(\"" + propValue +" \")"
       case _ =>
         if (simpleName.equalsIgnoreCase("UTF8String")) propValue.toString
         else propValue.toString
@@ -125,10 +125,10 @@ object NebulaExecutor {
   }
 
   /**
-    * construct insert statement for vertex
+    * construct insert statement for node
     */
-  def toExecuteSentence(graphName: String, nodeType: String, vertices: NebulaVertices): String = {
-    s"USE $graphName INSERT NODE `$nodeType` ${vertices.getVerticesStr}"
+  def toExecuteSentence(graphName: String, nodeType: String, vertices: NebulaNodes): String = {
+    s"USE $graphName INSERT NODE `$nodeType` ${vertices.getNodesStr}"
   }
 
   /**

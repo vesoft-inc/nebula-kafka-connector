@@ -7,8 +7,7 @@ package com.vesoft.nebula.example
 
 import com.sun.org.slf4j.internal.LoggerFactory
 import com.vesoft.nebula.connector.NebulaDataFrameWriter
-import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, WriteMode, WriteNebulaEdgeConfig, WriteNebulaVertexConfig}
-import org.apache.spark.SparkConf
+import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, WriteMode, WriteNebulaEdgeConfig, WriteNebulaNodeConfig}
 import org.apache.spark.sql.SparkSession
 import org.apache.spark.storage.StorageLevel
 
@@ -22,7 +21,7 @@ object NebulaSparkWriterExample {
       .master("local")
       .getOrCreate()
 
-    writeVertex(spark)
+    writeNode(spark)
     writeEdge(spark)
 
     spark.close()
@@ -38,22 +37,20 @@ object NebulaSparkWriterExample {
   }
 
   /**
-    * for this example, your nebula tag schema should have property names: name, age, born
-    * if your withVidAsProp is true, then tag schema also should have property name: id
+    * for this example, your nebula tag schema should have property names: id, name, age, born
     */
-  def writeVertex(spark: SparkSession): Unit = {
+  private def writeNode(spark: SparkSession): Unit = {
     val df = spark.read.json("spark-connector/example/src/main/resources/vertex")
     df.show()
 
-    val nebulaWriteVertexConfig: WriteNebulaVertexConfig = WriteNebulaVertexConfig
+    val nebulaWriteNodeConfig: WriteNebulaNodeConfig = WriteNebulaNodeConfig
       .builder()
       .withGraphName("nba")
       .withNodeType("node_type_player")
-      .withPrimaryKeyField("id")
       .withWriteMode(WriteMode.INSERT)
       .withBatchSize(1)
       .build()
-    df.write.nebula(getNebulaConnectionConfig, nebulaWriteVertexConfig).writeVertices()
+    df.write.nebula(getNebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()
   }
 
   /**
@@ -61,7 +58,7 @@ object NebulaSparkWriterExample {
     * if your withSrcAsProperty is true, then edge schema also should have property name: src
     * if your withDstAsProperty is true, then edge schema also should have property name: dst
     */
-  def writeEdge(spark: SparkSession): Unit = {
+  private def writeEdge(spark: SparkSession): Unit = {
     val df = spark.read.json("spark-connector/example/src/main/resources/vertex")
     df.show()
     df.persist(StorageLevel.MEMORY_AND_DISK_SER)

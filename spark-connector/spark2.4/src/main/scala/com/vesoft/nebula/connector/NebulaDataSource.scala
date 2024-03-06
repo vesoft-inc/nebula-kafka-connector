@@ -11,7 +11,7 @@ import com.vesoft.nebula.spark.common.exception.IllegalOptionException
 
 import java.util.Map.Entry
 import java.util.Optional
-import com.vesoft.nebula.connector.writer.{NebulaDataSourceEdgeWriter, NebulaDataSourceVertexWriter}
+import com.vesoft.nebula.connector.writer.{NebulaDataSourceEdgeWriter, NebulaDataSourceNodeWriter}
 import org.apache.spark.sql.SaveMode
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 import org.apache.spark.sql.sources.DataSourceRegister
@@ -73,42 +73,28 @@ class NebulaDataSource
     LOG.info(s"options ${parameters}")
 
     if (DataTypeEnum.NODE == DataTypeEnum.withName(dataType)) {
-      val vertexFiled = nebulaOptions.pkField
-      val vertexIndex: Int = {
-        var index: Int = -1
-        for (i <- schema.fields.indices) {
-          if (schema.fields(i).name.equals(vertexFiled)) {
-            index = i
-          }
-        }
-        if (index < 0) {
-          throw new IllegalOptionException(
-            s" vertex field ${vertexFiled} does not exist in dataframe")
-        }
-        index
-      }
-      Optional.of(new NebulaDataSourceVertexWriter(nebulaOptions, vertexIndex, schema))
+      Optional.of(new NebulaDataSourceNodeWriter(nebulaOptions, schema))
     } else {
-      val srcVertexFiled = nebulaOptions.srcPkField
-      val dstVertexField = nebulaOptions.dstPkField
+      val srcPkFiled = nebulaOptions.srcPkField
+      val dstPkField = nebulaOptions.dstPkField
       val edgeFieldsIndex = {
-        var srcIndex: Int = -1
-        var dstIndex: Int = -1
+        var srcPkIndex: Int = -1
+        var dstPkIndex: Int = -1
         for (i <- schema.fields.indices) {
-          if (schema.fields(i).name.equals(srcVertexFiled)) {
-            srcIndex = i
+          if (schema.fields(i).name.equals(srcPkFiled)) {
+            srcPkIndex = i
           }
-          if (schema.fields(i).name.equals(dstVertexField)) {
-            dstIndex = i
+          if (schema.fields(i).name.equals(dstPkField)) {
+            dstPkIndex = i
           }
 
         }
         // check src filed and dst field
-        if (srcIndex < 0 || dstIndex < 0) {
+        if (srcPkIndex < 0 || dstPkIndex < 0) {
           throw new IllegalOptionException(
-            s" srcVertex field ${srcVertexFiled} or dstVertex field ${dstVertexField} do not exist in dataframe")
+            s" src node primary key field ${srcPkFiled} or dst node primary key field ${dstPkField} do not exist in dataframe")
         }
-        (srcIndex, dstIndex)
+        (srcPkIndex, dstPkIndex)
       }
 
       Optional.of(

@@ -60,7 +60,7 @@ public class NebulaClient implements Serializable {
         }
         this.retryTimes = builder.retryTimes;
         this.intervalTime = builder.intervalTime;
-        this.maxWaitMills = builder.maxWaitMills;
+        this.maxWaitMills = builder.maxWaitMills < 0 ? Long.MAX_VALUE : maxWaitMills;
         this.scanParallel = builder.maxSessionSize;
         this.zoneId = builder.zoneId;
 

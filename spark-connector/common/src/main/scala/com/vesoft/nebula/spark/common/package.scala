@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.spark.common
 
-case class NebulaVertex(id: String, values: Map[String, String]) {
-  def getVertexStr: String = s"({id:$id,${getMapValues(values)}})"
+case class NebulaNode(values: Map[String, String]) {
+  def getNodeStr: String = s"({${getMapValues(values)}})"
 
   private[this] def getMapValues(values: Map[String, String]): String = {
     values
@@ -15,12 +15,12 @@ case class NebulaVertex(id: String, values: Map[String, String]) {
   }
 }
 
-case class NebulaVertices(nodeType: String, values: List[NebulaVertex]) {
-  def getVerticesStr = values.map(v => v.getVertexStr).mkString(",")
+case class NebulaNodes(nodeType: String, values: List[NebulaNode]) {
+  def getNodesStr = values.map(v => v.getNodeStr).mkString(",")
 }
 
-case class NebulaEdge(srcId: String, dstId: String, values: Map[String, String]) {
-  def getEdgeStr: String = s"({id:$srcId})-[{${getMapValues(values)}]->({id:$dstId})"
+case class NebulaEdge(srcPkName:String, srcId: String, dstPkName:String, dstId: String, values: Map[String, String]) {
+  def getEdgeStr: String = s"({`$srcPkName`:$srcId})-[{${getMapValues(values)}}]->({`$dstPkName`:$dstId})"
 
   private[this] def getMapValues(values: Map[String, String]): String = {
     values
