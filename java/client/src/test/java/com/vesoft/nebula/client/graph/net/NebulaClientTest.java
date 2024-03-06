@@ -18,7 +18,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 public class NebulaClientTest {
-    String addresses = "192.168.8.6:3713";
+    String addresses = "192.168.8.6:3820";
     String user = "root";
     String passwd = "nebula";
 
@@ -194,7 +194,7 @@ public class NebulaClientTest {
         for (int i = 0; i < client.getConfig().getMaxSessionSize(); i++) {
             executorService.submit(() -> {
                 try {
-                    ResultSet resultSet = finalClient.execute("SLEEP 10");
+                    ResultSet resultSet = finalClient.execute("RETURN 10");
                     System.out.println(resultSet.getErrorMessage());
                     Assert.assertEquals(ErrorCode.SUCCESSFUL_COMPLETION.code,
                             resultSet.getErrorCode());
@@ -203,9 +203,8 @@ public class NebulaClientTest {
                 }
             });
         }
-        Assert.assertEquals(finalClient.getActiveSessions(),
-                client.getConfig().getMaxSessionSize());
-        Assert.assertEquals(finalClient.getIdleSessions(), 0);
+        Assert.assertEquals(finalClient.getActiveSessions(), 0);
+        Assert.assertEquals(finalClient.getIdleSessions(), client.getConfig().getMaxSessionSize());
         Assert.assertEquals(finalClient.getWaiters(), 0);
 
         // test no available idle session.
@@ -438,5 +437,32 @@ public class NebulaClientTest {
         } catch (IOErrorException | NoValidSessionException e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testCloseClient() {
+        NebulaClient.Builder clientBuilder = null;
+        NebulaClient nebulaClient = null;
+        try {
+            nebulaClient = NebulaClient.builder(addresses, user, passwd)
+                    .setMinSessionSize(6)
+                    .setRetryTimes(50)
+                    .setIntervalTimeMills(2000)
+                    .setHealthCheckTimeMills(10000)
+                    .build();
+        } catch (IOErrorException | UnknownHostException e) {
+            Assert.fail(e.getMessage());
+        }
+
+        // execution lasts 20 seconds
+        long start = System.currentTimeMillis();
+        while ((System.currentTimeMillis() - start) < 20000) {
+            try {
+                nebulaClient.execute("RETURN 1");
+            } catch (IOErrorException | NoValidSessionException e) {
+                Assert.fail(e.getMessage());
+            }
+        }
+        nebulaClient.close();
     }
 }

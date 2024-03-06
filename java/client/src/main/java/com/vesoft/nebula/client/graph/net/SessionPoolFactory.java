@@ -59,7 +59,6 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
                     sessionPoolConfig.getPassword());
         } catch (AuthFailedException e) {
             log.error(e.getMessage());
-            connection.close();
             throw e;
         }
 

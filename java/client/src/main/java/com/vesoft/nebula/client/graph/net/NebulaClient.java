@@ -574,19 +574,18 @@ public class NebulaClient implements Serializable {
      * close the client
      */
     public void close() {
-        if (isClosed.get()) {
-            return;
-        }
-        isClosed.compareAndSet(false, true);
-        loadBalancer.close();
-        if (pool != null && !pool.isClosed()) {
-            pool.close();
-        }
-        if (threadPool != null && !threadPool.isShutdown()) {
-            threadPool.shutdown();
+        if (!isClosed.get() && isClosed.compareAndSet(false, true)) {
+            loadBalancer.close();
+            if (pool != null && !pool.isClosed()) {
+                pool.close();
+            }
+
+            GrpcConnection.closeChannel();
+            if (threadPool != null && !threadPool.isShutdown()) {
+                threadPool.shutdown();
+            }
         }
     }
-
 
     /**
      * get available session

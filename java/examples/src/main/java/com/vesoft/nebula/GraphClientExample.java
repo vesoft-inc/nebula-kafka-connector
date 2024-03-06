@@ -56,7 +56,6 @@ public class GraphClientExample {
             queryWithMultiThread(client);
             scanNode(client);
             scanEdge(client);
-
         } catch (Exception e) {
             e.printStackTrace();
             System.exit(1);

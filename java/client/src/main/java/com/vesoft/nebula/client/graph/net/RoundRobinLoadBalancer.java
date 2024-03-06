@@ -24,7 +24,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
     private final int connTimeout;
     private final int requestTimeout;
     private final AtomicInteger pos = new AtomicInteger(0);
-    private final ScheduledExecutorService schedule = Executors.newScheduledThreadPool(1);
+    private ScheduledExecutorService schedule;
 
     public RoundRobinLoadBalancer(List<HostAddress> addresses, int connTimeout, int requestTimeout,
                                   boolean strictlyServerHealthy, int healthCheckTime) {
@@ -36,11 +36,15 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
         }
         this.strictlyServerHealthy = strictlyServerHealthy;
 
-        schedule.scheduleAtFixedRate(this::scheduleTask, 0, healthCheckTime, TimeUnit.MILLISECONDS);
+        if (healthCheckTime > 0) {
+            schedule = Executors.newScheduledThreadPool(1);
+            schedule.scheduleAtFixedRate(this::scheduleTask, 0,
+                    healthCheckTime, TimeUnit.MILLISECONDS);
+        }
     }
 
     public void close() {
-        if (!schedule.isShutdown()) {
+        if (schedule != null && !schedule.isShutdown()) {
             schedule.shutdownNow();
         }
     }
@@ -86,7 +90,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
         try {
             Connection connection = new GrpcConnection();
             connection.open(addr, this.connTimeout, this.requestTimeout);
-            connection.close();
+            connection = null;
             return true;
         } catch (IOErrorException e) {
             LOGGER.error("ping failed, ", e);

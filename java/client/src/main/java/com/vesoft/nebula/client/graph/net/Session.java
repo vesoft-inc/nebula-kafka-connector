@@ -96,7 +96,7 @@ public class Session implements Serializable {
         try {
             connection.signout(sessionID);
         } catch (Exception e) {
-            log.warn("Release session or return object to pool failed:" + e.getMessage());
+            log.warn("Release session failed:" + e.getMessage());
         }
         connection = null;
     }
@@ -111,30 +111,6 @@ public class Session implements Serializable {
             return null;
         }
         return connection.getServerAddress();
-    }
-
-    /**
-     * set current connection is invalid, and get a new connection from the pool,
-     * if get connection failed, return false, else return true
-     */
-    protected void retryConnect() throws IOErrorException {
-        connection.close();
-        List<HostAddress> goodHosts = loadBalancer.getGoodAddresses();
-        int tryConnect = goodHosts.size();
-        GrpcConnection newConnection = new GrpcConnection();
-        while (tryConnect-- > 0) {
-            try {
-                newConnection.open(loadBalancer.getAddress(), connTimeout, requestTimeout);
-                connection = newConnection;
-                break;
-            } catch (IOErrorException e) {
-                if (tryConnect == 0 || !retryConnect) {
-                    throw e;
-                } else {
-                    log.warn("connect failed, " + e.getMessage());
-                }
-            }
-        }
     }
 
 }

@@ -28,9 +28,9 @@ public class SessionPoolConfig implements Serializable {
     // Socket request timeout, unit: millisecond. 0 means never timeout
     private int requestTimeout = 0;
 
-    // The healthCheckTime for schedule check the health of session, unit: second.
+    // The healthCheckTime for schedule check the health of session, unit: millisecond.
     // 0 means never check the health of session.
-    private int healthCheckTime = 600;
+    private int healthCheckTime = 300000;
 
     // retry times for failed execute
     private int retryTimes = 3;
