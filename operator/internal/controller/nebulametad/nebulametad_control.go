@@ -18,6 +18,7 @@ package nebulametad
 
 import (
 	"context"
+	"fmt"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"
@@ -117,9 +118,9 @@ func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v2alpha1.NebulaMetad) 
 }
 
 func (c *defaultNebulaMetadControl) DeleteNebulaMetad(nm *v2alpha1.NebulaMetad) error {
-	//if nm.Status.ManagedClusters > 0 {
-	//	return fmt.Errorf("managed clusters is %d, cannot be deleted now", nm.Status.ManagedClusters)
-	//}
+	if nm.Status.ManagedClusters > 0 {
+		return fmt.Errorf("managed clusters is %d, cannot be deleted now", nm.Status.ManagedClusters)
+	}
 	if err := c.metadCluster.Delete(nm); err != nil {
 		return err
 	}

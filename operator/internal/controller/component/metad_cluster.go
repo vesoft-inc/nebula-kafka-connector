@@ -131,11 +131,23 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 		return err
 	}
 
-	//if equal && nm.MetadComponent().IsReady() {
-	//	if err := c.setVersion(nm); err != nil {
-	//		return err
-	//	}
-	//}
+	if equal && nm.MetadComponent().IsReady() {
+		endpoints := []string{nm.GetMetadThriftConnAddress()}
+		metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","))
+		if err != nil {
+			return err
+		}
+		defer func() {
+			metaClient.Close()
+		}()
+
+		if err := c.syncManagedClusters(metaClient, nm); err != nil {
+			return err
+		}
+		if err := c.setVersion(metaClient, nm); err != nil {
+			return err
+		}
+	}
 
 	return updateWorkload(c.clientSet.Workload(), newWorkload, oldWorkload)
 }
@@ -166,16 +178,21 @@ func (c *metadCluster) syncNebulaMetadStatus(nm *v2alpha1.NebulaMetad, oldWorklo
 	return syncComponentStatus(nm.MetadComponent(), &nm.Status.ComponentStatus, oldWorkload)
 }
 
-func (c *metadCluster) setVersion(nm *v2alpha1.NebulaMetad) error {
-	endpoints := []string{nm.GetMetadThriftConnAddress()}
-	metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","))
+func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v2alpha1.NebulaMetad) error {
+	req := meta.NewShowClusterReq("")
+	resp, err := mc.ShowCluster(req)
 	if err != nil {
 		return err
 	}
-	defer func() {
-		metaClient.Close()
-	}()
+	if !resp.OK {
+		return fmt.Errorf("show cluster failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
+	}
+	nm.Status.ManagedClusters = int32(len(resp.Clusters))
+	return nil
+}
 
+// TODO set server version
+func (c *metadCluster) setVersion(mc meta.Client, nm *v2alpha1.NebulaMetad) error {
 	return nil
 }
 
