@@ -482,7 +482,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
                     personIdsInPath.add(getLongValue(val));
                 }
             }
-            long pathWeight = getLongValue(record.get(1));
+            double pathWeight = record.get(1).asDouble();
             return new LdbcQuery14Result(
                     personIdsInPath,
                     pathWeight );

@@ -20,6 +20,9 @@ public class ValueWrapper {
     private final Charset charset = Charsets.UTF_8;
 
     public String getDataType() {
+        if (value.getDataCase() == Value.DataCase.DATA_NOT_SET) {
+            return "DATA_NOT_SET";
+        }
         if (value.getDataCase() == Value.DataCase.BOOL_VALUE) {
             return "BOOLEAN";
         }
