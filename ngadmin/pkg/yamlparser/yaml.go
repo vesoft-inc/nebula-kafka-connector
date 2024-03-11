@@ -8,7 +8,10 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-// todo: parser
+type SpecMap struct {
+	Spec map[string]types.Process `yaml:"spec,omitempty"`
+}
+
 func ParseYamlByPath(path string) (jobSpec *types.JobSpec, err error) {
 	// Read the file
 	data, err := os.ReadFile(path)
@@ -21,9 +24,53 @@ func ParseYamlByPath(path string) (jobSpec *types.JobSpec, err error) {
 	if err != nil {
 		return nil, err
 	}
+	anyMap := &SpecMap{}
+	err = yaml.Unmarshal(data, &anyMap)
+	if err != nil {
+		return nil, err
+	}
+	ParseUtilsProcess(jobSpec, anyMap)
 	// append needed config fields
 	CheckMetaSpec(jobSpec.Spec.Metad)
 	return jobSpec, err
+}
+
+func ParseUtilsProcess(jobSpec *types.JobSpec, specMap *SpecMap) {
+	if jobSpec.UtilsProcesses == nil {
+		jobSpec.UtilsProcesses = make(map[string]*types.Process)
+	}
+	spec := specMap.Spec
+	if spec == nil {
+		return
+	}
+	for key, process := range spec {
+		if key == "metad" {
+			continue
+		}
+		// apply default process
+		defaultProcess, ok := UtilsProcesses[key]
+		if ok {
+			if process.ExecShellPath == "" {
+				process.ExecShellPath = defaultProcess.ExecShellPath
+			}
+			if process.ExecStartPath == "" {
+				process.ExecStartPath = defaultProcess.ExecStartPath
+			}
+			if process.WorkingDir == "" {
+				process.WorkingDir = defaultProcess.WorkingDir
+			}
+			if process.ConfigPath == "" {
+				process.ConfigPath = defaultProcess.ConfigPath
+			}
+			if process.Name == "" {
+				process.Name = defaultProcess.Name
+			}
+		}
+		if process.Name == "" {
+			process.Name = key
+		}
+		jobSpec.UtilsProcesses[key] = &process
+	}
 }
 
 func CheckMetaSpec(metaSpec *types.MetadSpec) error {

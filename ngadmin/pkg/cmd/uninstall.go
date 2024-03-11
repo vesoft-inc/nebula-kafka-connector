@@ -8,8 +8,6 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/yamlparser"
 )
 
-var Drain bool = false
-
 func RegisteUninstallCmd(rootCmd *cobra.Command) {
 	uninstallCmd := &cobra.Command{
 		Use:   "uninstall",
@@ -22,16 +20,20 @@ func RegisteUninstallCmd(rootCmd *cobra.Command) {
 				return
 			}
 			job := runner.NewJob("uninstall")
+			drain, err := cmd.Flags().GetBool("drain")
+			if err != nil {
+				drain = false
+			}
 			err = job.Run("uninstall", map[string]any{
 				"kill-wait": KillWait,
-				"drain":     Drain,
+				"drain":     drain,
 			}, jobSpec)
 			if err != nil {
 				fmt.Println("uninstall failed: ", err)
 			}
 		},
 	}
-	uninstallCmd.Flags().BoolP("drain", "d", Drain, "delete nebulagraph cluster data")
+	uninstallCmd.Flags().Bool("drain", false, "delete nebulagraph cluster data")
 	uninstallCmd.Flags().StringVarP(&KillWait, "kill-wait", "k", KillWait, "wait for the process to exit, or kill it after the timeout. (support m,s) max 5m")
 	rootCmd.AddCommand(uninstallCmd)
 }

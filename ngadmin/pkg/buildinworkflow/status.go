@@ -1,8 +1,6 @@
 package buildinworkflow
 
 import (
-	"fmt"
-
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/utils"
@@ -42,7 +40,7 @@ func Status(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec, error) {
 	componentType := types.NebulaServiceComponentMap[component]
 	if spec.Spec.Metad == nil {
-		return nil, fmt.Errorf("metad spec is nil")
+		return nil, nil
 	}
 	metaHosts := spec.Spec.Metad.Hosts
 	allNeedOperations := make(map[string]map[types.NebulaServiceComponent]bool, 0)

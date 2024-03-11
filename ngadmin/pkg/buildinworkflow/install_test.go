@@ -25,8 +25,9 @@ func TestInstall(t *testing.T) {
 	}
 	spec.Rollback = false
 	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
-	if spec.Spec.LicenseManager != nil {
-		spec.Spec.LicenseManager.PackagePath = "../../bin/lm.tar.gz"
+	lm, ok := spec.UtilsProcesses["LicenseManager"]
+	if ok {
+		lm.PackagePath = "../../bin/lm.tar.gz"
 	}
 	workflow, err := buildinworkflow.Install(args, spec)
 	assert.NoError(t, err)
@@ -80,7 +81,8 @@ func TestUtilsInstall(t *testing.T) {
 	}
 	spec.Rollback = false
 	spec.Spec.Metad = nil
-	spec.Spec.LicenseManager.PackagePath = "../../bin/lm.tar.gz"
+	lm := spec.UtilsProcesses["license-manager"]
+	lm.PackagePath = "../../bin/lm.tar.gz"
 	workflow, err := buildinworkflow.Install(args, spec)
 	assert.NoError(t, err)
 	assert.NotNil(t, workflow)
@@ -107,8 +109,9 @@ func TestUtilsInstallSystemd(t *testing.T) {
 	}
 	spec.Rollback = false
 	spec.Spec.Metad = nil
-	spec.Spec.LicenseManager.StartType = "systemd"
-	spec.Spec.LicenseManager.PackagePath = "../../bin/lm.tar.gz"
+	lm := spec.UtilsProcesses["LicenseManager"]
+	lm.StartType = "systemd"
+	lm.PackagePath = "../../bin/lm.tar.gz"
 	workflow, err := buildinworkflow.Install(args, spec)
 	assert.NoError(t, err)
 	assert.NotNil(t, workflow)

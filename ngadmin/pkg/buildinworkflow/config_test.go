@@ -27,7 +27,8 @@ func TestConfig(t *testing.T) {
 	spec.Spec.Metad.Config["test_metad"] = time.Now().String()
 	spec.Spec.Metad.Clusters[0].Graphd.Config["test_graphd"] = time.Now().String()
 	spec.Spec.Metad.Clusters[0].Storaged.Config["test_storaged"] = time.Now().String()
-	spec.Spec.LicenseManager.Config["test_lm"] = time.Now().String()
+	lm := spec.UtilsProcesses["license-manager"]
+	lm.Config["test_lm"] = time.Now().String()
 	workflow, err := buildinworkflow.Config(args, spec)
 	assert.NoError(t, err)
 	assert.NotNil(t, workflow)

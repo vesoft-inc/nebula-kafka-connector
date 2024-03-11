@@ -1,16 +1,16 @@
 package types
 
 type JobSpec struct {
-	Kind        string     `yaml:"kind,omitempty"`
-	Version     string     `yaml:"version,omitempty"`
-	Rollback    bool       `yaml:"rollback,omitempty"`
-	InstallPath string     `yaml:"installPath,omitempty"`
-	Spec        ProcessMap `yaml:"spec,omitempty"`
+	Kind           string     `yaml:"kind,omitempty"`
+	Version        string     `yaml:"version,omitempty"`
+	Rollback       bool       `yaml:"rollback,omitempty"`
+	InstallPath    string     `yaml:"installPath,omitempty"`
+	Spec           ProcessMap `yaml:"spec,omitempty"`
+	UtilsProcesses map[string]*Process
 }
 
 type ProcessMap struct {
-	Metad          *MetadSpec `yaml:"metad,omitempty"`
-	LicenseManager *Process   `yaml:"license-manager,omitempty"`
+	Metad *MetadSpec `yaml:"metad,omitempty"`
 }
 
 type Process struct {

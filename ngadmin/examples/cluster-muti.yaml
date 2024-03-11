@@ -10,6 +10,8 @@ spec:
       test: "test"
     hosts:
       - host: "192.168.8.240:6688"
+      - host: "192.168.8.231:6688"
+      - host: "192.168.8.233:6688"
     clusters:
       - zoneList: [zone1]
         name: cluster_mizy_test
@@ -25,11 +27,17 @@ spec:
             port: 9779
           hosts:
             - host: "192.168.8.240:6688"
-  license-manager:
-    packagePath: "./bin/lm.tar.gz"
-    startType: "shell" # systemd or shell, if systemd, need to provide binPath else provide execShellPath
-    config:
-      Port: 9119
-      Test: "test"
-    hosts:
-      - host: "192.168.8.240:6688"
+      - zoneList: [zone2]
+        name: cluster_mizy_test2
+        replica: 1
+        partition: 1
+        graphd:
+          config:
+            port: 9669
+          hosts:
+            - host: "192.168.8.231:6688"
+        storaged:
+          config:
+            port: 9779
+          hosts:
+            - host: "192.168.8.231:6688"

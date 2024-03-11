@@ -46,7 +46,7 @@ func TestStopUtil(t *testing.T) {
 	job := runner.NewJob("test stop")
 	err = job.Run("operation", map[string]any{
 		"operation": "stop",
-		"component": "nebula-license-manager",
+		"component": "license-manager",
 		"host":      "",
 	}, spec)
 	if err != nil {

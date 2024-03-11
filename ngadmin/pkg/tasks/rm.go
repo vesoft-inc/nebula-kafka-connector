@@ -50,5 +50,5 @@ func (d *RM) Rollback() error {
 }
 
 func (d *RM) String() string {
-	return fmt.Sprintf("delete path %s", d.path)
+	return fmt.Sprintf("delete path %s:%s", d.host, d.path)
 }

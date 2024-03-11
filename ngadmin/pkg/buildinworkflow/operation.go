@@ -134,7 +134,7 @@ func addNeedOperation(allNeedOperations *map[string]map[types.NebulaServiceCompo
 		if (*allNeedOperations)[nowHost] == nil {
 			(*allNeedOperations)[nowHost] = make(map[types.NebulaServiceComponent]bool)
 		}
-		(*allNeedOperations)[nowHost][newComponent] = true
+		(*allNeedOperations)[nowHost][nowComponent] = true
 	}
 	return flag
 }

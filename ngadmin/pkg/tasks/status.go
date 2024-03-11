@@ -67,7 +67,8 @@ func (d *Status) Execute() error {
 		if port == "" {
 			port = d.port
 		}
-		if name == "unknown" {
+
+		if name == "unknown" || status == "unknown" {
 			continue
 		}
 		d.JobContext.SetValue("status-"+utils.GetHostIP(d.host)+"-"+name+"-"+port, types.StatusItem{

@@ -67,6 +67,9 @@ func RenderStatusTableByJob(job *runner.Job) error {
 	}
 	// sort by product and service
 	sort.Slice(arrs, func(i, j int) bool {
+		if arrs[i].Product == arrs[j].Product {
+			return arrs[i].Service < arrs[j].Service
+		}
 		return arrs[i].Product < arrs[j].Product
 	})
 	// sort by product and service

@@ -97,14 +97,19 @@ Restart=always
 
 [Install]
 WantedBy=multi-user.target`, d.name, d.execStartPath, d.workingDirectory)
-
-	cmd := fmt.Sprintf("cat <<EOF > /etc/systemd/system/%s.service \n %s\nEOF", d.name, serviceFileContent)
-	stdout, stderr, err := executor.Shell(cmd, true)
+	cmd := "mkdir -p ~/.config/systemd/user/"
+	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil || len(stderr) > 0 {
 		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
 	}
-	cmd = fmt.Sprintf("systemctl enable %s", d.name)
-	stdout, stderr, err = executor.Shell(cmd, true)
+
+	cmd = fmt.Sprintf("cat <<EOF > ~/.config/systemd/user/%s.service \n %s\nEOF", d.name, serviceFileContent)
+	stdout, stderr, err = executor.Shell(cmd, false)
+	if err != nil || len(stderr) > 0 {
+		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
+	}
+	cmd = fmt.Sprintf("systemctl --user daemon-reload && systemctl --user enable %s ", d.name)
+	stdout, stderr, err = executor.Shell(cmd, false)
 	if err != nil || (len(stderr) > 0 && !strings.Contains("Created symlink", stderr)) {
 		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
 	}
@@ -116,12 +121,12 @@ func (d *Systemd) Uninstall() error {
 	if executor == nil {
 		return fmt.Errorf("executor not found for host: %s", d.host)
 	}
-	cmd := fmt.Sprintf("systemctl stop %s", d.name)
+	cmd := fmt.Sprintf("systemctl --user stop %s", d.name)
 	executor.Shell(cmd, true)
-	cmd = fmt.Sprintf("systemctl disable %s", d.name)
+	cmd = fmt.Sprintf("systemctl --user disable %s", d.name)
 	executor.Shell(cmd, true)
-	cmd = fmt.Sprintf("rm -f /etc/systemd/system/%s.service", d.name)
-	stdout, stderr, err := executor.Shell(cmd, true)
+	cmd = fmt.Sprintf("rm -f ~/.config/systemd/user/%s.service", d.name)
+	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil || len(stderr) > 0 {
 		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
 	}
@@ -133,7 +138,7 @@ func (d *Systemd) Status() error {
 	if executor == nil {
 		return fmt.Errorf("executor not found for host: %s", d.host)
 	}
-	cmd := fmt.Sprintf("systemctl status %s", d.name)
+	cmd := fmt.Sprintf("systemctl --user status %s", d.name)
 	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil {
 		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)

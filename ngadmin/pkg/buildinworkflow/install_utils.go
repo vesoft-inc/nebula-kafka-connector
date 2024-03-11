@@ -103,14 +103,12 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 // map component name
 func GetAllUtilsProcess(spec *types.JobSpec) []*types.Process {
 	allUtils := []*types.Process{}
-	if spec.Spec.LicenseManager != nil {
-		spec.Spec.LicenseManager.Name = "nebula-license-manager"
-		allUtils = append(allUtils, spec.Spec.LicenseManager)
-	}
-	for _, process := range allUtils {
+
+	for _, process := range spec.UtilsProcesses {
 		if process.Config == nil {
 			process.Config = map[string]any{}
 		}
+		allUtils = append(allUtils, process)
 	}
 	return allUtils
 }

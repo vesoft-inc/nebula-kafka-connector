@@ -56,7 +56,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 	for _, agent := range spec.Spec.Metad.Hosts {
 		configTask = append(configTask, &types.TaskSpec{
 			Type:        "serial",
-			Description: "config graphd",
+			Description: "config metad",
 			SubTasks: []*types.TaskSpec{
 				{
 					Type: "config",
@@ -65,15 +65,6 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 						Config: spec.Spec.Metad.Config,
 						Type:   "nebulagraph",
 						Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-metad.conf"),
-					},
-				},
-				{
-					Type: "nebula_operation",
-					Params: &tasks.NebulaOperationParams{
-						Host:      agent.Host,
-						Operation: "restart",
-						Component: "metad",
-						Path:      utils.GetClusterPath(spec.InstallPath),
 					},
 				},
 			},
@@ -94,15 +85,6 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 							Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-graphd.conf"),
 						},
 					},
-					{
-						Type: "nebula_operation",
-						Params: &tasks.NebulaOperationParams{
-							Host:      agent.Host,
-							Operation: "restart",
-							Component: "graphd",
-							Path:      utils.GetClusterPath(spec.InstallPath),
-						},
-					},
 				},
 			})
 		}
@@ -119,16 +101,6 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 							Config: cluster.Storaged.Config,
 							Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-storaged.conf"),
 							Type:   "nebulagraph",
-						},
-					},
-					{
-						Type: "nebula_operation",
-						Params: &tasks.NebulaOperationParams{
-							Host:         agent.Host,
-							Operation:    "restart",
-							Component:    "storaged",
-							NeedRollback: true,
-							Path:         utils.GetClusterPath(spec.InstallPath),
 						},
 					},
 				},
@@ -174,8 +146,7 @@ func ConfigUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, err
 				Type: "serial",
 				SubTasks: []*types.TaskSpec{
 					{
-						Type:        "config",
-						Description: "config " + process.Name,
+						Type: "config",
 						Params: &tasks.ConfigParams{
 							Host:   agent.Host,
 							Config: process.Config,
@@ -184,26 +155,6 @@ func ConfigUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, err
 						},
 					},
 				},
-			}
-			if process.StartType == "shell" {
-				scriptPath := path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ExecShellPath)
-				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
-					Type: "operate",
-					Params: &tasks.OperateParams{
-						Host:      agent.Host,
-						ExecPath:  scriptPath,
-						Operation: "restart",
-					},
-				})
-			} else if process.StartType == "systemd" {
-				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
-					Type: "systemd",
-					Params: &tasks.SystemdParams{
-						Host:    agent.Host,
-						Name:    process.Name,
-						Operate: "restart",
-					},
-				})
 			}
 			configTasks = append(configTasks, task)
 		}

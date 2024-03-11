@@ -86,7 +86,11 @@ func TestUninstallUtilsSystemd(t *testing.T) {
 		t.Error(err)
 	}
 	spec.Spec.Metad = nil
-	spec.Spec.LicenseManager.StartType = "systemd"
+	lm, ok := spec.UtilsProcesses["LicenseManager"]
+	if !ok {
+		log.Fatal("LicenseManager not found")
+	}
+	lm.StartType = "systemd"
 	job := runner.NewJob("test uninstall")
 	err = job.Run("uninstall", map[string]any{
 		"drain":     true,

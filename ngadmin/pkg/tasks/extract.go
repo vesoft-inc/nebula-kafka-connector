@@ -48,7 +48,7 @@ func (d *Extract) Execute() error {
 	cmd := fmt.Sprintf("mkdir -p %s", d.extractPath)
 	_, stderr, err := executor.Shell(cmd, d.sudo)
 	if err != nil || stderr != "" {
-		return fmt.Errorf("mkdir failed %s stderr: %s, err: %s", d.extractPath, string(stderr), err.Error())
+		return fmt.Errorf("mkdir failed %s stderr: %s, err: %s", d.extractPath, string(stderr), err)
 	}
 	pkgType := path.Ext(d.pkgPath)
 	if pkgType == ".sh" {
@@ -56,7 +56,7 @@ func (d *Extract) Execute() error {
 		cmd = fmt.Sprintf("chmod +x %s", d.pkgPath)
 		_, stderr, err = executor.Shell(cmd, d.sudo)
 		if err != nil || stderr != "" {
-			return fmt.Errorf("chmod failed %s stderr: %s, err: %s", d.pkgPath, string(stderr), err.Error())
+			return fmt.Errorf("chmod failed %s stderr: %s, err: %s", d.pkgPath, string(stderr), err)
 		}
 		cmd = fmt.Sprintf("%s --prefix=%s", d.pkgPath, d.extractPath)
 	} else if strings.HasSuffix(d.pkgPath, ".tar.gz") {
@@ -64,7 +64,7 @@ func (d *Extract) Execute() error {
 	}
 	_, stderr, err = executor.Shell(cmd, d.sudo)
 	if err != nil {
-		return fmt.Errorf("extract failed %s stderr: %s, err: %s", d.pkgPath, string(stderr), err.Error())
+		return fmt.Errorf("extract failed %s stderr: %s, err: %s", d.pkgPath, string(stderr), err)
 	}
 
 	return nil
@@ -78,7 +78,7 @@ func (d *Extract) Rollback() error {
 	}
 	_, stderr, err := executor.Shell(cmd, d.sudo)
 	if err != nil {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 	return nil
 }

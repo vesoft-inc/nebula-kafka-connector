@@ -59,7 +59,7 @@ func (d *InitConfig) Execute() error {
 		cmd := fmt.Sprintf("cat %s.default", d.dst)
 		stdout, stderr, err := executor.Shell(cmd, d.sudo)
 		if err != nil {
-			return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+			return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 		}
 		d.originConfig = string(stdout)
 	}
@@ -85,7 +85,7 @@ func (d *InitConfig) Execute() error {
 EOF`, d.dst, config)
 	_, stderr, err := executor.Shell(cmd, d.sudo)
 	if err != nil {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 
 	// for save config to database

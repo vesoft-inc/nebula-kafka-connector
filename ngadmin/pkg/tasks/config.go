@@ -55,7 +55,7 @@ func (d *Config) Execute() error {
 	cmd := fmt.Sprintf("cat %s", d.dst)
 	stdout, stderr, err := executor.Shell(cmd, d.sudo)
 	if err != nil {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 	d.originConfig = string(stdout)
 	configString := ""
@@ -98,7 +98,7 @@ func (d *Config) Execute() error {
 EOF`, d.dst, configString)
 	_, stderr, err = executor.Shell(cmd, d.sudo)
 	if err != nil {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 
 	return nil
@@ -117,11 +117,11 @@ func (d *Config) Rollback() error {
 EOF`, d.dst, d.originConfig)
 	_, stderr, err := executor.Shell(cmd, d.sudo)
 	if err != nil {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 	return nil
 }
 
 func (d *Config) String() string {
-	return "Config"
+	return "Config " + d.host + " " + d.dst
 }

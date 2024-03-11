@@ -53,7 +53,7 @@ func (d *NebulaStatus) Execute() error {
 		status := matchProcessStatus(line)
 		name := matchProcessName(line)
 		port := matchProcessPort(line)
-		if name == "unknown" {
+		if name == "unknown" || status == "unknown" {
 			continue
 		}
 		d.JobContext.SetValue("status-"+utils.GetHostIP(d.host)+"-"+name+"-"+port, types.StatusItem{

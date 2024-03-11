@@ -51,14 +51,14 @@ func (d *DeleteNebulaData) Execute() error {
 	cmd := fmt.Sprintf("cat %s.default", path.Join(d.path, "etc/nebula-storaged.conf"))
 	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil || len(stderr) > 0 {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 	storageConfig := string(stdout)
 
 	cmd = fmt.Sprintf("cat %s.default", path.Join(d.path, "etc/nebula-metad.conf"))
 	stdout, stderr, err = executor.Shell(cmd, false)
 	if err != nil || len(stderr) > 0 {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 	metaConfig := string(stdout)
 	// get process config
@@ -99,7 +99,7 @@ func (d *DeleteNebulaData) Execute() error {
 	}
 	_, stderr, err = executor.Shell(cmd, false)
 	if err != nil || len(stderr) > 0 {
-		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err.Error())
+		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}
 	return nil
 }
@@ -109,5 +109,5 @@ func (d *DeleteNebulaData) Rollback() error {
 }
 
 func (d *DeleteNebulaData) String() string {
-	return fmt.Sprintf("delete data %s", d.host)
+	return fmt.Sprintf("delete data %s drain:%v", d.host, d.drain)
 }

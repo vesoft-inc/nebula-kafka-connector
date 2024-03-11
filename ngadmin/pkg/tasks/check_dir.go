@@ -54,7 +54,7 @@ func (d *CheckDir) Execute() error {
 		return fmt.Errorf("check dir failed %s, %s, %w", stdout, stderr, err)
 	}
 	if len(stdout) > 0 {
-		return fmt.Errorf("dir %s is not empty", d.path)
+		return fmt.Errorf("dir %s:%s is not empty", d.host, d.path)
 	}
 	return nil
 }
