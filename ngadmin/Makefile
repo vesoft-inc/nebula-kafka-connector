@@ -12,7 +12,7 @@ endif
 all: build
 
 build:
-	$(GO_BUILD) -ldflags '$(LDFLAGS)' -o bin/ngadmin ./cmd/
+	$(GO_BUILD) -ldflags '$(LDFLAGS)' -o bin/ngadmin ./ngadmin/main.go
 
 test:
 	go test -gcflags=all="-l" -v -covermode=atomic ./pkg/... 

@@ -5,6 +5,7 @@ type JobSpec struct {
 	Version        string     `yaml:"version,omitempty"`
 	Rollback       bool       `yaml:"rollback,omitempty"`
 	InstallPath    string     `yaml:"installPath,omitempty"`
+	CertsPath      string     `yaml:"certsPath,omitempty"`
 	Spec           ProcessMap `yaml:"spec,omitempty"`
 	UtilsProcesses map[string]*Process
 }

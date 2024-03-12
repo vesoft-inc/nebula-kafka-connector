@@ -35,14 +35,14 @@ jobs:
           cp -r examples build/
           cp bin/ngadmin build/
         working-directory: ngadmin
-      - name: ngadmin build
+      - name: ngadmin-agent build
         run: |
           make build
           mkdir build
           cp -r ./api/agent/etc build/
           cp ./api/agent/bin/agent build/
           cp ../ngadmin/build/ngadmin build/
-          cp ../ngadmin/examples/ build/
+          cp -r ../ngadmin/examples/ build/
         working-directory: agent
       - uses: actions/upload-artifact@v2
         with:

@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/buildinworkflow"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/logger"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/types"
@@ -34,6 +35,9 @@ func NewJob(name string) *Job {
 }
 
 func (j *Job) Run(cmd string, args map[string]any, spec *types.JobSpec) error {
+	if spec.CertsPath != "" {
+		executor.SetCertPath(spec.CertsPath)
+	}
 	workflow, err := buildinworkflow.GetBuildinWorkflow(cmd, args, spec)
 	if workflow == nil || err != nil {
 		return fmt.Errorf("workflow %s build err:%s", cmd, err.Error())
