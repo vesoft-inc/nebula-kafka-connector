@@ -39,8 +39,8 @@ public class TestData {
     public void testNode() {
         try {
             Vertex vertex = new Vertex(getNode(1L));
-            assert Objects.equals(vertex.getId(), 1L);
-            assert (vertex.toString().startsWith("(1:0"));
+            assert Objects.equals(vertex.getNodeId(), 1L);
+            assert (vertex.toString().startsWith("(1:person"));
 
 
             List<String> names = Arrays.asList("prop0", "prop1", "prop2", "prop3", "prop4");
@@ -207,7 +207,7 @@ public class TestData {
                     .setNodeValue(getSimpleNode())
                     .build());
             String expectString =
-                    "(1:0 {prop: Bob})";
+                    "(1:person {prop: Bob})";
 
             Assert.assertEquals(expectString, valueWrapper.asNode().toString());
             // test relationship
@@ -215,14 +215,14 @@ public class TestData {
                     .newBuilder()
                     .setEdgeValue(getSimpleEdge(false, 1, 2))
                     .build());
-            expectString = "(1)-[:1@10{edge_prop: 100}]->(2)";
+            expectString = "(1)-[:knows{edge_prop: 100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             valueWrapper = new ValueWrapper(Value
                     .newBuilder()
                     .setEdgeValue(getSimpleEdge(true, 1, 2))
                     .build());
-            expectString = "(2)-[:-1@10{edge_prop: 100}]->(1)";
+            expectString = "(1)-[:knows{edge_prop: 100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             // test local time
@@ -258,8 +258,8 @@ public class TestData {
     public void testPath() {
         ValueWrapper valueWrapper = new ValueWrapper(
                 Value.newBuilder().setPathValue(getPath()).build());
-        String expectString = "1-[:1{edge_prop:100}]->2"
-                + "-[:1{edge_prop:100}]->3";
+        String expectString = "1-[:knows{edge_prop:100}]->2"
+                + "-[:knows{edge_prop:100}]->3";
         Assert.assertEquals(expectString, valueWrapper.asPath().toString());
 
         NPath path = valueWrapper.asPath();
@@ -282,8 +282,11 @@ public class TestData {
         Assert.assertEquals(2L, record.getValue("prop2").asLong());
         Assert.assertEquals("Tom", record.getValue("prop3").asString());
         Assert.assertTrue(record.getValue("prop4").asBoolean());
-        Assert.assertEquals(1, record.getValue("prop5").asNode().getId());
-        Assert.assertEquals(0, record.getValue("prop5").asNode().getNodeTypeId());
+        Assert.assertEquals(1, record.getValue("prop5").asNode().getNodeId());
+        Assert.assertEquals("person",
+                record.getValue("prop5").asNode().getNodeType());
+        Assert.assertEquals("teacher",
+                record.getValue("prop5").asNode().getNodeLabels().get(0));
         Assert.assertEquals("prop",
                 record.getValue("prop5").asNode().getProperties().keySet().toArray()[0]);
 
@@ -344,17 +347,20 @@ public class TestData {
             Value value = Value.newBuilder().setInt64Value(j).build();
             props.put(String.format("prop%d", j), value);
         }
-        short nodeType = 0;
-        Node.Builder builder = Node.newBuilder().setNodeId(vid).setNodeTypeId(nodeType);
+        String nodeType = "person";
+        Node.Builder builder = Node.newBuilder().setNodeId(vid).setType(nodeType);
         builder.putAllProperties(props);
         return builder.build();
     }
 
     private Edge getEdge(long srcId, long dstId, long rank) {
-        int edgeType = 1;
+        String edgeType = "knows";
+        String graphName = "test";
         Edge.Builder builder = Edge
                 .newBuilder()
-                .setEdgeTypeId(edgeType)
+                .setType(edgeType)
+                .setGraph(graphName)
+                .setDirectionValue(1)
                 .setSrcId(srcId)
                 .setDstId(dstId)
                 .setRank(rank);
@@ -370,11 +376,13 @@ public class TestData {
         props.put("prop", Value.newBuilder()
                 .setStringValue(ByteString.copyFrom("Bob", Charsets.UTF_8)).build());
         long nodeId = 1;
-        short nodeType = 0;
+        String nodeType = "person";
 
         Node node = Node.newBuilder()
                 .setNodeId(nodeId)
-                .setNodeTypeId(nodeType)
+                .setType(nodeType)
+                .addLabels("teacher")
+                .setGraph("test")
                 .putAllProperties(props)
                 .build();
         return node;
@@ -383,15 +391,11 @@ public class TestData {
     private Edge getSimpleEdge(boolean isReverse, long srcId, long dstId) {
         Map<String, Value> props = new HashMap<>();
         props.put("edge_prop", Value.newBuilder().setInt64Value(100L).build());
-        int type = 1;
-        if (isReverse) {
-            type = -1;
-        }
-        int edgeType = type;
+        String edgeType = "knows";
         long rank = 10;
 
         return Edge.newBuilder()
-                .setEdgeTypeId(edgeType)
+                .setType(edgeType)
                 .setSrcId(srcId)
                 .setDstId(dstId)
                 .setRank(rank)

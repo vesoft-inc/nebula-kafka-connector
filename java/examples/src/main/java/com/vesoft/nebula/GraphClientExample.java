@@ -76,11 +76,11 @@ public class GraphClientExample {
         ResultSet resp = client.execute(createSchema);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    createSchema, resp.getErrorCode()));
-            System.out.println("create graph type failed, " + resp.getErrorCode());
+                    createSchema, resp.getErrorMessage()));
+            System.out.println("create graph type failed, " + resp.getErrorMessage());
             System.exit(1);
         } else {
-            log.info("crete graph type succeed!");
+            log.info("create type succeed!");
         }
         TimeUnit.SECONDS.sleep(5);
     }
@@ -91,11 +91,11 @@ public class GraphClientExample {
         ResultSet resp = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,
-                    resp.getErrorCode()));
+                    resp.getErrorMessage()));
             System.out.println("create graph failed, " + resp.getErrorMessage());
             System.exit(1);
         } else {
-            log.info("crete graph succeed!");
+            log.info("create graph succeed!");
         }
         TimeUnit.SECONDS.sleep(5);
     }
@@ -109,8 +109,8 @@ public class GraphClientExample {
         ResultSet resp = client.execute(insertVertexes);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    insertVertexes, resp.getErrorCode()));
-            System.out.println("insert graph node failed, " + resp.getErrorCode());
+                    insertVertexes, resp.getErrorMessage()));
+            System.out.println("insert graph node failed, " + resp.getErrorMessage());
             System.exit(1);
         }
         log.info("insert graph node succeed!");
@@ -121,8 +121,8 @@ public class GraphClientExample {
         resp = client.execute(insertEdges);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    insertEdges, resp.getErrorCode()));
-            System.out.println("insert graph edge failed, " + resp.getErrorCode());
+                    insertEdges, resp.getErrorMessage()));
+            System.out.println("insert graph edge failed, " + resp.getErrorMessage());
             System.exit(1);
         }
         log.info("insert graph edge succeed!");
@@ -135,10 +135,11 @@ public class GraphClientExample {
         ResultSet resp = client.execute(queryNode);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    queryNode, resp.getErrorCode()));
+                    queryNode, resp.getErrorMessage()));
+        } else {
+            log.info("query node succeed!");
+            resolve(resp);
         }
-        log.info("query succeed!");
-        resolve(resp);
 
         System.out.println("\n\n");
 
@@ -146,9 +147,12 @@ public class GraphClientExample {
         resp = client.execute(queryEdge);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    queryNode, resp.getErrorCode()));
+                    queryNode, resp.getErrorMessage()));
+        } else {
+            log.info("query edge succeed!");
+            resolve(resp);
         }
-        resolve(resp);
+
     }
 
     private static void queryWithMultiThread(NebulaClient client) {
@@ -166,7 +170,7 @@ public class GraphClientExample {
                             "USE nba MATCH ()-[e:follow]->() RETURN e.followness, e.likeness");
                     if (!result.isSucceeded()) {
                         log.error(String.format("Execute: `%s', failed: %s",
-                                queryNode, result.getErrorCode()));
+                                queryNode, result.getErrorMessage()));
                         failed.incrementAndGet();
                     }
                 } catch (Exception e) {
@@ -190,7 +194,7 @@ public class GraphClientExample {
 
     private static void resolve(ResultSet resultSet) {
         if (!resultSet.isSucceeded()) {
-            System.out.println("result is not succeed, status is : " + resultSet.getErrorCode());
+            System.out.println("result is not succeed, status is : " + resultSet.getErrorMessage());
             return;
         }
 
@@ -236,7 +240,7 @@ public class GraphClientExample {
                     System.out.printf("%15s |", valueWrapper.asRecord());
                 } else if (valueWrapper.isNode()) {
                     Vertex node = valueWrapper.asNode();
-                    long nodeId = node.getId();
+                    long nodeId = node.getNodeId();
                     String nodeType = node.getNodeType();
                     Map<String, ValueWrapper> properties = node.getProperties();
                     System.out.printf("%15s |", valueWrapper.asNode());
@@ -244,7 +248,6 @@ public class GraphClientExample {
                     Relationship relationship = valueWrapper.asEdge();
                     long srcId = relationship.getSrcId();
                     long dstId = relationship.getDstId();
-                    long rank = relationship.getRank();
                     Map<String, ValueWrapper> properties = relationship.getProperties();
                     System.out.printf("%15s |", valueWrapper.asEdge());
                 }

@@ -77,40 +77,20 @@ public class NPath {
             for (String key : props.keySet()) {
                 propStrs.add(key + ":" + props.get(key).toString());
             }
-            if (relationship.getEdgeId() > 0) {
-                String template;
-                if (i == 0) {
-                    template = "%s-[:%s{%s}]->%s";
-                    edgeStrs.add(String.format(template,
-                            relationship.getSrcId(),
-                            relationship.getEdgeName(),
-                            String.join(",", propStrs),
-                            relationship.getDstId()));
-                } else {
-                    template = "-[:%s{%s}]->%s";
-                    edgeStrs.add(String.format(template,
-                            relationship.getEdgeName(),
-                            String.join(",", propStrs),
-                            relationship.getDstId()));
-                }
-
+            String template;
+            if (i == 0) {
+                template = "%s-[:%s{%s}]->%s";
+                edgeStrs.add(String.format(template,
+                        relationship.getSrcId(),
+                        relationship.getEdgeType(),
+                        String.join(",", propStrs),
+                        relationship.getDstId()));
             } else {
-                String template;
-                if (i == 0) {
-                    template = "%s<-[:%s{%s}]-%s";
-                    edgeStrs.add(String.format(template,
-                            relationship.getDstId(),
-                            relationship.getEdgeName(),
-                            String.join(",", propStrs),
-                            relationship.getSrcId()));
-                } else {
-                    template = "<-[:%s{%s}]-%s";
-                    edgeStrs.add(String.format(template,
-                            relationship.getEdgeName(),
-                            String.join(",", propStrs),
-                            relationship.getSrcId()));
-                }
-
+                template = "-[:%s{%s}]->%s";
+                edgeStrs.add(String.format(template,
+                        relationship.getEdgeType(),
+                        String.join(",", propStrs),
+                        relationship.getDstId()));
             }
         }
         return String.join("", edgeStrs);

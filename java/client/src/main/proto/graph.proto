@@ -107,16 +107,26 @@ message Record {
 
 message Node {
     int64               node_id                 = 1;
-    int32               node_type_id            = 2;
-    map<string, Value>  properties              = 3;
+    string              graph                   = 2;
+    string              type                    = 3;
+    repeated string     labels                  = 4;
+    map<string, Value>  properties              = 5;
+}
+
+enum Direction {
+    DIRECTED                                    = 0;
+    UNDIRECTED                                  = 1;
 }
 
 message Edge {
     int64               src_id                  = 1;
     int64               dst_id                  = 2;
-    int32               edge_type_id            = 3;
-    int64               rank                    = 4;
-    map<string, Value>  properties              = 5;
+    Direction           direction               = 3;
+    string              graph                   = 4;
+    string              type                    = 5;
+    repeated string     labels                  = 6;
+    int64               rank                    = 7;
+    map<string, Value>  properties              = 8;
 }
 
 message Path {

@@ -16,10 +16,7 @@ import java.util.Objects;
 
 public class Vertex extends BaseDataObject {
     private final Node node;
-    private final long vid;
 
-    private String label = "";
-    private int typeId;
 
     /**
      * Node is a wrapper around the Vertex type returned by nebula-graph
@@ -30,27 +27,24 @@ public class Vertex extends BaseDataObject {
         if (node == null) {
             throw new RuntimeException("Input an null node object");
         }
-        vid = node.getNodeId();
         this.node = node;
-        this.typeId = node.getNodeTypeId();
     }
 
     /**
-     * get node type name, TODO core server should return the node type name
+     * get node type name
      *
      * @return String
      */
     public String getNodeType() {
-        return label;
+        return node.getType();
     }
 
+
     /**
-     * get node type id
      *
-     * @return int
      */
-    public int getNodeTypeId() {
-        return typeId;
+    public List<String> getNodeLabels() {
+        return node.getLabelsList();
     }
 
     /**
@@ -58,8 +52,8 @@ public class Vertex extends BaseDataObject {
      *
      * @return long id
      */
-    public long getId() {
-        return vid;
+    public long getNodeId() {
+        return node.getNodeId();
     }
 
 
@@ -97,7 +91,7 @@ public class Vertex extends BaseDataObject {
      */
     public Map<String, ValueWrapper> getProperties() {
         Map<String, ValueWrapper> props = new HashMap<>();
-        for (Map.Entry<String, Value> p : node.getProperties().entrySet()) {
+        for (Map.Entry<String, Value> p : node.getPropertiesMap().entrySet()) {
             props.put(p.getKey(), new ValueWrapper(p.getValue()));
         }
         return props;
@@ -112,12 +106,12 @@ public class Vertex extends BaseDataObject {
             return false;
         }
         Vertex node = (Vertex) o;
-        return vid == node.vid;
+        return getNodeId() == node.getNodeId();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(node, vid, getDecodeType(), label);
+        return Objects.hash(node, getDecodeType());
     }
 
     @Override
@@ -127,7 +121,7 @@ public class Vertex extends BaseDataObject {
         for (String propName : props.keySet()) {
             propStrs.add(propName + ": " + props.get(propName).toString());
         }
-        return String.format("(%d:%d {%s})",
-                vid, node.getNodeTypeId(), String.join(", ", propStrs));
+        return String.format("(%d:%s {%s})",
+                getNodeId(), getNodeType(), String.join(", ", propStrs));
     }
 }

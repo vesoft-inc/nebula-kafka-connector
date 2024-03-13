@@ -49,7 +49,7 @@ public class GrpcConnection extends Connection {
             lock.readLock().unlock();
         }
         stub = GraphServiceGrpc.newBlockingStub(channels.get(serverAddr))
-                .withDeadline(Deadline.after(requestTimeout, TimeUnit.MILLISECONDS));
+                .withDeadline(Deadline.after(this.requestTimeout, TimeUnit.MILLISECONDS));
     }
 
     public static void closeChannel() {
