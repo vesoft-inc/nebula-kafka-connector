@@ -27,7 +27,6 @@ public class NebulaClientTest {
         System.out.println("<==== testBuildNebulaClient ====>");
         try {
             NebulaClient client = NebulaClient.builder(addresses, user, passwd)
-                    .setConnectTimeoutMills(1000)
                     .setRequestTimeoutMills(3000)
                     .setRetryTimes(3)
                     .setMaxSessionSize(1)
@@ -95,15 +94,6 @@ public class NebulaClientTest {
             Assert.assertTrue("expect reach here:" + e.getMessage(), true);
         }
 
-        // config illegal, illegal connTimeout
-        try {
-            builder.setConnectTimeoutMills(-1).build();
-        } catch (IOErrorException e) {
-            Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
-        }
-
         // config illegal, illegal requestTimeout
         try {
             builder.setRequestTimeoutMills(-1).build();
@@ -159,7 +149,7 @@ public class NebulaClientTest {
         }
 
         try {
-            NebulaClient client = NebulaClient.builder(address, user, passwd)
+            NebulaClient.builder(address, user, passwd)
                     .setStrictlyServerHealthy(true)
                     .build();
             Assert.fail("client build should failed, strictlyServerHealthy is true, "

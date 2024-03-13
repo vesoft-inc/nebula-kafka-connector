@@ -21,14 +21,12 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
     private final List<HostAddress> addresses = new ArrayList<>();
     private final Map<HostAddress, Integer> serversStatus = new ConcurrentHashMap<>();
     private final boolean strictlyServerHealthy;
-    private final int connTimeout;
-    private final int requestTimeout;
+    private final long requestTimeout;
     private final AtomicInteger pos = new AtomicInteger(0);
     private ScheduledExecutorService schedule;
 
-    public RoundRobinLoadBalancer(List<HostAddress> addresses, int connTimeout, int requestTimeout,
+    public RoundRobinLoadBalancer(List<HostAddress> addresses, long requestTimeout,
                                   boolean strictlyServerHealthy, int healthCheckTime) {
-        this.connTimeout = connTimeout;
         this.requestTimeout = requestTimeout;
         for (HostAddress addr : addresses) {
             this.addresses.add(addr);
@@ -89,7 +87,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
     public boolean ping(HostAddress addr) {
         try {
             Connection connection = new GrpcConnection();
-            connection.open(addr, this.connTimeout, this.requestTimeout);
+            connection.open(addr, this.requestTimeout);
             connection = null;
             return true;
         } catch (IOErrorException e) {

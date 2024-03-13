@@ -38,7 +38,6 @@ public class GraphClientExample {
         try {
             // init the NebulaPool and get session
             client = NebulaClient.builder(host, user, passwd)
-                    .setConnectTimeoutMills(1000)
                     .setRequestTimeoutMills(3000)
                     .setMaxSessionSize(200)
                     .setMinSessionSize(1)

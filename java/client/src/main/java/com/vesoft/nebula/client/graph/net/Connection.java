@@ -15,7 +15,7 @@ public abstract class Connection implements Serializable {
         return this.serverAddr;
     }
 
-    public abstract void open(HostAddress address, int connTimeout, int requestTimeout)
+    public abstract void open(HostAddress address, long requestTimeout)
             throws IOErrorException;
 
     public abstract void close();

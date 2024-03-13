@@ -35,7 +35,6 @@ public class NebulaGraphProvider implements Serializable {
         this.passwd = config.passwd;
         try {
             client = NebulaClient.builder(host, user, passwd)
-                    .setConnectTimeoutMills(config.connectTimeout)
                     .setRequestTimeoutMills(config.requestTimeout)
                     .setMaxSessionSize(config.sinkPartition)
                     .setMinSessionSize(1)

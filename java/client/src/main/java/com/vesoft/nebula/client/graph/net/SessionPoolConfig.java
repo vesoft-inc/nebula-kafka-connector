@@ -26,7 +26,7 @@ public class SessionPoolConfig implements Serializable {
     private int connTimeout = 0;
 
     // Socket request timeout, unit: millisecond. 0 means never timeout
-    private int requestTimeout = 0;
+    private long requestTimeout = 0;
 
     // The healthCheckTime for schedule check the health of session, unit: millisecond.
     // 0 means never check the health of session.
@@ -116,11 +116,11 @@ public class SessionPoolConfig implements Serializable {
         return this;
     }
 
-    public int getRequestTimeout() {
+    public long getRequestTimeout() {
         return requestTimeout;
     }
 
-    public SessionPoolConfig setRequestTimeout(int requestTimeout) {
+    public SessionPoolConfig setRequestTimeout(long requestTimeout) {
         if (requestTimeout < 0) {
             throw new IllegalArgumentException("request timeout cannot be less than 0.");
         }

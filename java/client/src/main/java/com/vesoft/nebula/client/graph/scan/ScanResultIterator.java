@@ -38,11 +38,12 @@ public class ScanResultIterator implements Serializable {
 
     protected final int retryTimes;
     protected final int intervalTime;
+    protected final long timeoutMs;
 
     protected ScanResultIterator(GenericObjectPool<Session> pool, String graphName,
                                  String labelName, List<String> propNames, List<Integer> parts,
                                  int batchSize, ExecutorService threadPool, int retryTimes,
-                                 int intervalTime) {
+                                 int intervalTime, long timeoutMs) {
         this.graphName = graphName;
         this.labelName = labelName;
         this.pool = pool;
@@ -54,6 +55,7 @@ public class ScanResultIterator implements Serializable {
         this.threadPool = threadPool;
         this.retryTimes = retryTimes;
         this.intervalTime = intervalTime;
+        this.timeoutMs = timeoutMs;
     }
 
     /**
@@ -92,12 +94,12 @@ public class ScanResultIterator implements Serializable {
         ResultSet result;
         try {
             session = pool.borrowObject(Long.MAX_VALUE);
-            result = session.execute(producer);
+            result = session.execute(producer, timeoutMs);
             int retry = retryTimes;
             while (retry > 0) {
                 retry--;
                 Thread.sleep(intervalTime);
-                result = session.execute(producer);
+                result = session.execute(producer, timeoutMs);
                 if (result.isSucceeded()) {
                     break;
                 }

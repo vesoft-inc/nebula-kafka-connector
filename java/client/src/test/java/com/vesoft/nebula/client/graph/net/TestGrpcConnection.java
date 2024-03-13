@@ -20,7 +20,7 @@ public class TestGrpcConnection {
         try {
             // Test open
             GrpcConnection connection = new GrpcConnection();
-            connection.open(new HostAddress("127.0.0.1", 20584), 1000, 1000);
+            connection.open(new HostAddress("127.0.0.1", 20584),  1000);
 
             // Test authenticate
             AuthResult authResult = connection.authenticate("root", "nebula");

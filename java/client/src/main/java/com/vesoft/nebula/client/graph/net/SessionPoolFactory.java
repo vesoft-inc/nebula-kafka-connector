@@ -42,8 +42,7 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
         int tryConnect = goodHosts.size();
         while (tryConnect-- > 0) {
             try {
-                connection.open(loadBalancer.getAddress(), sessionPoolConfig.getConnTimeout(),
-                        sessionPoolConfig.getRequestTimeout());
+                connection.open(loadBalancer.getAddress(), sessionPoolConfig.getRequestTimeout());
                 break;
             } catch (Exception e) {
                 if (tryConnect == 0 || !sessionPoolConfig.isReconnect()) {
@@ -62,9 +61,8 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
             throw e;
         }
 
-        Session session = new Session(connection, sessionPoolConfig.getConnTimeout(),
-                sessionPoolConfig.getRequestTimeout(), authResult, sessionPoolConfig.isReconnect(),
-                loadBalancer);
+        Session session = new Session(connection, sessionPoolConfig.getRequestTimeout(),
+                authResult, sessionPoolConfig.isReconnect(), loadBalancer);
         return session;
     }
 

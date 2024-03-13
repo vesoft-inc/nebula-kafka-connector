@@ -34,7 +34,6 @@ public class ScanTest {
     public void setup() {
         try {
             client = NebulaClient.builder(addresses, user, passwd)
-                    .setConnectTimeoutMills(1000)
                     .setRequestTimeoutMills(3000)
                     .setRetryTimes(3)
                     .setMaxSessionSize(1)

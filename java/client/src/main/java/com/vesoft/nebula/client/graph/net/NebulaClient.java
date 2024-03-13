@@ -43,6 +43,7 @@ public class NebulaClient implements Serializable {
     private int retryTimes;
     private int intervalTime;
     private long maxWaitMills;
+    private long timeoutMs;
 
     private ZoneId zoneId;
 
@@ -60,12 +61,13 @@ public class NebulaClient implements Serializable {
         }
         this.retryTimes = builder.retryTimes;
         this.intervalTime = builder.intervalTime;
-        this.maxWaitMills = builder.maxWaitMills < 0 ? Long.MAX_VALUE : maxWaitMills;
+        this.maxWaitMills = builder.maxWaitMills < 0 ? Long.MAX_VALUE : builder.maxWaitMills;
+        this.timeoutMs = builder.requestTimeout <= 0 ? Long.MAX_VALUE : builder.requestTimeout;
         this.scanParallel = builder.maxSessionSize;
         this.zoneId = builder.zoneId;
 
-        this.loadBalancer = new RoundRobinLoadBalancer(builder.address, builder.connectTimeout,
-                builder.requestTimeout, builder.strictlyServerHealthy, builder.healthCheckTime);
+        this.loadBalancer = new RoundRobinLoadBalancer(builder.address, this.timeoutMs,
+                builder.strictlyServerHealthy, builder.healthCheckTime);
         if (!loadBalancer.isServersOK()) {
             loadBalancer.close();
             log.error("servers status is not ok, please check the server status or network.");
@@ -76,14 +78,13 @@ public class NebulaClient implements Serializable {
                 builder.password)
                 .setMaxSessionSize(builder.maxSessionSize)
                 .setMinSessionSize(builder.minSessionSize)
-                .setConnTimeout(builder.connectTimeout)
-                .setRequestTimeout(builder.requestTimeout)
-                .setRetryTimes(builder.retryTimes)
-                .setIntervalTime(builder.intervalTime)
+                .setRequestTimeout(this.timeoutMs)
+                .setRetryTimes(this.retryTimes)
+                .setIntervalTime(this.intervalTime)
                 .setReconnect(builder.reconnect)
                 .setHealthCheckTime(builder.healthCheckTime)
                 .setBlockWhenExhausted(builder.blockWhenExhausted)
-                .setMaxWaitMills(builder.maxWaitMills)
+                .setMaxWaitMills(this.maxWaitMills)
                 .setIdleEvictScheduleMills(builder.idleEvictScheduleMills)
                 .setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis)
                 .setStrictlyServerHealthy(builder.strictlyServerHealthy);
@@ -93,7 +94,7 @@ public class NebulaClient implements Serializable {
         objConfig.setMinIdle(builder.minSessionSize);
         objConfig.setMaxTotal(builder.maxSessionSize);
         objConfig.setBlockWhenExhausted(builder.blockWhenExhausted);
-        objConfig.setMaxWaitMillis(builder.maxWaitMills);
+        objConfig.setMaxWaitMillis(this.maxWaitMills);
         objConfig.setTimeBetweenEvictionRunsMillis(builder.idleEvictScheduleMills);
         objConfig.setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis);
         // just test the validation when session is idle. When session execute failed,
@@ -106,6 +107,11 @@ public class NebulaClient implements Serializable {
         SessionPoolFactory factory = new SessionPoolFactory(sessionPoolConfig, loadBalancer);
         pool = new GenericObjectPool<>(factory, objConfig);
         hasInit.compareAndSet(false, true);
+    }
+
+
+    public ResultSet execute(String stmt) throws IOErrorException, NoValidSessionException {
+        return execute(stmt, this.timeoutMs);
     }
 
     /**
@@ -123,7 +129,8 @@ public class NebulaClient implements Serializable {
      * @param stmt graph statement
      * @return {@link ResultSet}
      */
-    public ResultSet execute(String stmt) throws IOErrorException, NoValidSessionException {
+    public ResultSet execute(String stmt, long timeoutMs)
+            throws IOErrorException, NoValidSessionException {
         checkClosed();
         int tryTimes = 0;
         boolean isBadSession = false;
@@ -136,7 +143,7 @@ public class NebulaClient implements Serializable {
             }
             Session session = getSession();
             try {
-                resultSet = session.execute(stmt);
+                resultSet = session.execute(stmt, timeoutMs);
                 if (resultSet.isSucceeded()
                         || ErrorCode.SEMANTIC_ERROR_PREFIX.code
                         .equals(resultSet.getErrorCode().substring(0, 2))
@@ -302,7 +309,7 @@ public class NebulaClient implements Serializable {
         }
 
         return new ScanNodeResultIterator(pool, graphName, nodeType, propertyList,
-                parts, batchSize, threadPool, retryTimes, intervalTime);
+                parts, batchSize, threadPool, retryTimes, intervalTime, timeoutMs);
     }
 
 
@@ -427,7 +434,7 @@ public class NebulaClient implements Serializable {
             propertyList.addAll(returnProperties);
         }
         return new ScanEdgeResultIterator(pool, graphName, edgeType, propertyList,
-                parts, batchSize, threadPool, retryTimes, intervalTime);
+                parts, batchSize, threadPool, retryTimes, intervalTime, timeoutMs);
     }
 
 
@@ -598,7 +605,7 @@ public class NebulaClient implements Serializable {
             Session session = pool.borrowObject(maxWaitMills);
             if (zoneId != null) {
                 ResultSet resultSet = session.execute(
-                        "SESSION SET TIME ZONE \"" + zoneId + "\"");
+                        "SESSION SET TIME ZONE \"" + zoneId + "\"", this.timeoutMs);
                 if (!resultSet.isSucceeded()) {
                     log.error("failed to set time zone for {}", resultSet.getErrorMessage());
                     throw new RuntimeException("failed to set timezone for "
@@ -661,9 +668,6 @@ public class NebulaClient implements Serializable {
         // The min sessions in pool
         private int minSessionSize = 1;
 
-        // socket timeout for connection, unit: millisecond
-        private int connectTimeout = 0;
-
         // socket timeout for request, unit: millisecond
         private int requestTimeout = 0;
 
@@ -721,14 +725,6 @@ public class NebulaClient implements Serializable {
                 throw new IllegalArgumentException("minSessionSize cannot be less than 0.");
             }
             this.minSessionSize = minSessionSize;
-            return this;
-        }
-
-        public Builder setConnectTimeoutMills(int connectTimeout) {
-            if (connectTimeout < 0) {
-                throw new IllegalArgumentException("connect timeout cannot be less than 0.");
-            }
-            this.connectTimeout = connectTimeout;
             return this;
         }
 

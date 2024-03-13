@@ -30,26 +30,23 @@ public class GrpcConnection extends Connection {
     private static ConcurrentHashMap<HostAddress, ManagedChannel> channels =
             new ConcurrentHashMap<>();
     private GraphServiceGrpc.GraphServiceBlockingStub stub;
-    private int connTimeout = 0;
-    private int requestTimeout = 0;
+    private long requestTimeout = 0;
 
     private Charset charset = Charsets.UTF_8;
 
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
     @Override
-    public void open(HostAddress address, int connTimeout, int requestTimeout) {
+    public void open(HostAddress address, long requestTimeout) {
         this.serverAddr = address;
-        this.connTimeout = connTimeout <= 0 ? Integer.MAX_VALUE : connTimeout;
-        this.requestTimeout = requestTimeout <= 0 ? Integer.MAX_VALUE : requestTimeout;
+        this.requestTimeout = requestTimeout;
         lock.readLock().lock();
         try {
             channels.computeIfAbsent(serverAddr, key -> createChannel());
         } finally {
             lock.readLock().unlock();
         }
-        stub = GraphServiceGrpc.newBlockingStub(channels.get(serverAddr))
-                .withDeadline(Deadline.after(this.requestTimeout, TimeUnit.MILLISECONDS));
+        stub = GraphServiceGrpc.newBlockingStub(channels.get(serverAddr));
     }
 
     public static void closeChannel() {
@@ -86,8 +83,7 @@ public class GrpcConnection extends Connection {
                 response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
     }
 
-    public AuthResult authenticate(String user, String password)
-            throws AuthFailedException, IOErrorException {
+    public AuthResult authenticate(String user, String password) throws AuthFailedException {
         try {
             AuthRequest authReq = AuthRequest.newBuilder()
                     .setUsername(ByteString.copyFrom(user, charset))
@@ -96,7 +92,9 @@ public class GrpcConnection extends Connection {
                     .setClientVersion(ByteString.copyFrom("v5.0.0", charset))
                     .build();
             getChannel();
-            AuthResponse resp = stub.authenticate(authReq);
+            AuthResponse resp = stub
+                    .withDeadlineAfter(requestTimeout, TimeUnit.MILLISECONDS)
+                    .authenticate(authReq);
             String code = resp.getGqlStatus().getCode().toString(charset);
             if (!ErrorCode.SUCCESSFUL_COMPLETION.code.equals(code)) {
                 throw new AuthFailedException(resp.getGqlStatus().getMessage().toString());
@@ -108,23 +106,29 @@ public class GrpcConnection extends Connection {
         }
     }
 
-    public ExecuteResponse execute(long sessionID, String stmt) throws IOErrorException {
+    public ExecuteResponse execute(long sessionID, String stmt, long timeout)
+            throws IOErrorException {
         getChannel();
         try {
             ExecuteRequest request = ExecuteRequest.newBuilder()
                     .setSessionId(sessionID)
                     .setStmt(ByteString.copyFrom(stmt, charset))
                     .build();
-            return stub.execute(request);
+
+            return stub.withDeadlineAfter(timeout, TimeUnit.MILLISECONDS).execute(request);
         } catch (Exception e) {
             // TODO
             throw e;
         }
     }
 
+    public ExecuteResponse execute(long sessionID, String stmt) throws IOErrorException {
+        return execute(sessionID, stmt, this.requestTimeout);
+    }
+
     public void signout(long sessionID) {
         SignoutRequest request = SignoutRequest.newBuilder().setSessionId(sessionID).build();
-        stub.signout(request);
+        stub.withDeadlineAfter(requestTimeout, TimeUnit.MILLISECONDS).signout(request);
     }
 
 

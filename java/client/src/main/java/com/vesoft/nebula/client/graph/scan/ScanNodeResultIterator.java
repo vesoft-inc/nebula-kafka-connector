@@ -29,9 +29,9 @@ public class ScanNodeResultIterator extends ScanResultIterator {
     public ScanNodeResultIterator(GenericObjectPool<Session> pool, String graphName,
                                   String label, List<String> propNames, List<Integer> parts,
                                   int batchSize, ExecutorService threadPool, int retryTimes,
-                                  int intervalTime) {
+                                  int intervalTime, long timeoutMs) {
         super(pool, graphName, label, propNames, parts, batchSize, threadPool, retryTimes,
-                intervalTime);
+                intervalTime, timeoutMs);
     }
 
 

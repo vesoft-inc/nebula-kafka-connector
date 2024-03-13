@@ -32,8 +32,7 @@ public class Session implements Serializable {
 
     private final long sessionID;
     private GrpcConnection connection;
-    private final int connTimeout;
-    private final int requestTimeout;
+    private final long requestTimeout;
     private final LoadBalancer loadBalancer;
     private final Boolean retryConnect;
 
@@ -46,8 +45,7 @@ public class Session implements Serializable {
      * @param retryConnect whether to retry after the connection is disconnected
      */
     protected Session(GrpcConnection connection,
-                      int connTimeout,
-                      int requestTimeout,
+                      long requestTimeout,
                       AuthResult authResult,
                       Boolean retryConnect,
                       LoadBalancer loadBalancer) {
@@ -55,7 +53,6 @@ public class Session implements Serializable {
         this.sessionID = authResult.getSessionId();
         this.loadBalancer = loadBalancer;
         this.retryConnect = retryConnect;
-        this.connTimeout = connTimeout;
         this.requestTimeout = requestTimeout;
     }
 
@@ -66,8 +63,8 @@ public class Session implements Serializable {
      *             such as insert ngql `INSERT VERTEX person(name) VALUES "Tom":("Tom");`
      * @return The ResultSet
      */
-    public ResultSet execute(String stmt) throws IOErrorException {
-        return new ResultSet(connection.execute(sessionID, stmt));
+    public ResultSet execute(String stmt, long timeoutMs) throws IOErrorException {
+        return new ResultSet(connection.execute(sessionID, stmt, timeoutMs));
     }
 
 
