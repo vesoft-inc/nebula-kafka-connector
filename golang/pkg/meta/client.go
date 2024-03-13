@@ -10,7 +10,8 @@ import (
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/meta"
+	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
+	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"google.golang.org/grpc"
 )
 
@@ -35,14 +36,14 @@ type (
 
 	metaClient struct {
 		address    string
-		client     meta.MetaServiceClient
+		client     admin.AdminServiceClient
 		clientConn *grpc.ClientConn
 		retryTimes int
 		timeout    time.Duration
 	}
 
 	responseHeader interface {
-		GetHeader() *meta.ResponseHeader
+		GetHeader() *common.ResponseHeader
 	}
 
 	WithOption func(*metaClient)
@@ -121,7 +122,7 @@ func (c *metaClient) open(host string, port int, timeout time.Duration, sslConfi
 	}
 
 	c.clientConn = conn
-	c.client = meta.NewMetaServiceClient(conn)
+	c.client = admin.NewAdminServiceClient(conn)
 	return nil
 }
 
@@ -195,9 +196,9 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) (*CreateClusterResp, e
 	for _, z := range req.zones {
 		zones = append(zones, []byte(z))
 	}
-	in := &meta.CreateClusterRequest{
-		Header: &meta.RequestHeader{},
-		ClusterDesc: &meta.ClusterDesc{
+	in := &admin.CreateClusterRequest{
+		Header: &common.RequestHeader{},
+		ClusterDesc: &admin.ClusterDesc{
 			ClusterName:   []byte(req.clusterName),
 			ReplicaFactor: uint32(req.replica),
 			Zones:         zones,
@@ -209,7 +210,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) (*CreateClusterResp, e
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*meta.CreateClusterResponse)
+	response, ok := resp.(*admin.CreateClusterResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
@@ -225,11 +226,11 @@ func (c *metaClient) AddService(req *AddServiceReq) (*AddServiceResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 
-	in := &meta.AddServiceRequest{
-		Header:      &meta.RequestHeader{},
+	in := &admin.AddServiceRequest{
+		Header:      &common.RequestHeader{},
 		Host:        []byte(req.host),
 		Port:        req.port,
-		Type:        meta.ServiceType(req.serviceType),
+		Type:        common.ServiceType(req.serviceType),
 		ClusterName: []byte(req.clustername),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -238,7 +239,7 @@ func (c *metaClient) AddService(req *AddServiceReq) (*AddServiceResp, error) {
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*meta.AddServiceResponse)
+	response, ok := resp.(*admin.AddServiceResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
@@ -253,8 +254,8 @@ func (c *metaClient) AddService(req *AddServiceReq) (*AddServiceResp, error) {
 func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
-	in := &meta.ShowServiceRequest{
-		Header:      &meta.RequestHeader{},
+	in := &admin.ShowServiceRequest{
+		Header:      &common.RequestHeader{},
 		ClusterName: []byte(req.clusterName),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -263,7 +264,7 @@ func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) 
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*meta.ShowServiceResponse)
+	response, ok := resp.(*admin.ShowServiceResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
@@ -291,8 +292,8 @@ func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) 
 func (c *metaClient) InitCluster(req *InitClusterReq) (*InitClusterResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
-	in := &meta.InitStorageRequest{
-		Header:      &meta.RequestHeader{},
+	in := &admin.InitStorageRequest{
+		Header:      &common.RequestHeader{},
 		ClusterName: []byte(req.clustername),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -301,7 +302,7 @@ func (c *metaClient) InitCluster(req *InitClusterReq) (*InitClusterResp, error) 
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*meta.InitStorageResponse)
+	response, ok := resp.(*admin.InitStorageResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
@@ -317,8 +318,8 @@ func (c *metaClient) InitCluster(req *InitClusterReq) (*InitClusterResp, error) 
 func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
-	in := &meta.ShowClusterRequest{
-		Header:      &meta.RequestHeader{},
+	in := &admin.ShowClusterRequest{
+		Header:      &common.RequestHeader{},
 		ClusterName: []byte(req.clusterName),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -327,7 +328,7 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*meta.ShowClusterResponse)
+	response, ok := resp.(*admin.ShowClusterResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
@@ -357,11 +358,11 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 func (c *metaClient) DropService(req *DropServiceReq) (*DropServiceResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
-	in := &meta.DropServiceRequest{
-		Header:  &meta.RequestHeader{},
+	in := &admin.DropServiceRequest{
+		Header:  &common.RequestHeader{},
 		Name:    []byte(req.host),
 		Port:    req.port,
-		Type:    meta.ServiceType(req.serviceType),
+		Type:    common.ServiceType(req.serviceType),
 		Cluster: []byte(req.clustername),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -370,7 +371,7 @@ func (c *metaClient) DropService(req *DropServiceReq) (*DropServiceResp, error) 
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*meta.DropServiceResponse)
+	response, ok := resp.(*admin.DropServiceResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}

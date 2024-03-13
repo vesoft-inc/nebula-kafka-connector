@@ -158,11 +158,11 @@ func (v *grpcValue) GetType() ValueType {
 		return ValueTypeDuration
 	case *graph.Value_LocalTimeValue:
 		return ValueTypeLocalTime
-	case *graph.Value_LocalDatatimeValue:
+	case *graph.Value_LocalDatetimeValue:
 		return ValueTypeLocalDateTime
 	case *graph.Value_ZonedTimeValue:
 		return ValueTypeZonedTime
-	case *graph.Value_ZonedDatatimeValue:
+	case *graph.Value_ZonedDatetimeValue:
 		return ValueTypeZonedDateTime
 	case *graph.Value_DateValue:
 		return ValueTypeDate
@@ -323,7 +323,7 @@ func (v *grpcValue) AsLocalDatetime() (LocalDatetime, error) {
 	if v.GetType() != ValueTypeLocalDateTime {
 		return nil, errType("value is not local datetime")
 	}
-	return &grpcLocalDatetime{data: v.data.GetLocalDatatimeValue()}, nil
+	return &grpcLocalDatetime{data: v.data.GetLocalDatetimeValue()}, nil
 }
 
 func (v *grpcValue) AsDate() (Date, error) {
@@ -351,7 +351,7 @@ func (v *grpcValue) AsZonedDatetime() (ZonedDatetime, error) {
 	if v.GetType() != ValueTypeZonedDateTime {
 		return nil, errType("value is not zoned time")
 	}
-	return &grpcZonedDatetime{data: v.data.GetZonedDatatimeValue()}, nil
+	return &grpcZonedDatetime{data: v.data.GetZonedDatetimeValue()}, nil
 }
 
 func (l *grpcList) GetValues() []Value {
@@ -419,8 +419,20 @@ func (n *grpcNode) GetProperties() map[string]Value {
 	return properties
 }
 
-func (n *grpcNode) GetNodeTypeId() int32 {
-	return n.data.NodeTypeId
+func (n *grpcNode) GetId() int64 {
+	return n.data.NodeId
+}
+
+func (n *grpcNode) GetGraph() string {
+	return n.data.Graph
+}
+
+func (n *grpcNode) GetType() string {
+	return n.data.Type
+}
+
+func (n *grpcNode) GetLabels() []string {
+	return n.data.Labels
 }
 
 func (e *grpcEdge) String() string {
@@ -448,8 +460,32 @@ func (e *grpcEdge) GetProperties() map[string]Value {
 	return properties
 }
 
-func (e *grpcEdge) GetEdgeTypeId() int32 {
-	return e.data.EdgeTypeId
+func (e *grpcEdge) GetSrcId() int64 {
+	return e.data.SrcId
+}
+
+func (e *grpcEdge) GetDstId() int64 {
+	return e.data.DstId
+}
+
+func (e *grpcEdge) GetGraph() string {
+	return e.data.Graph
+}
+
+func (e *grpcEdge) GetType() string {
+	return e.data.Type
+}
+
+func (e *grpcEdge) GetLabels() []string {
+	return e.data.Labels
+}
+
+func (e *grpcEdge) GetRank() int64 {
+	return e.data.Rank
+}
+
+func (e *grpcEdge) IsDirected() bool {
+	return e.data.Direction == graph.Direction_DIRECTED
 }
 
 func (p *grpcPath) String() string {

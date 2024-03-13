@@ -103,12 +103,21 @@ type (
 	Node interface {
 		String() string
 		GetProperties() map[string]Value
-		GetNodeTypeId() int32
+		GetGraph() string
+		GetType() string
+		GetLabels() []string
+		GetId() int64
 	}
 	Edge interface {
 		String() string
 		GetProperties() map[string]Value
-		GetEdgeTypeId() int32
+		GetSrcId() int64
+		GetDstId() int64
+		GetGraph() string
+		GetType() string
+		GetLabels() []string
+		GetRank() int64
+		IsDirected() bool
 	}
 	Path interface {
 		String() string

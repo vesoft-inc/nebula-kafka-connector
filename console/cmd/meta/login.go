@@ -41,8 +41,8 @@ var loginCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(loginCmd)
-	loginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "", "meta server host")
-	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port, default: 9559")
+	loginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "127.0.0.1", "meta server host")
+	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
 	loginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "", "user name")
 	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "", "password")
 }

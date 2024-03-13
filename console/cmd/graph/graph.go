@@ -26,7 +26,7 @@ import (
 
 // root flags variables
 var (
-	address               string
+	host                  string
 	port                  int
 	username              string
 	password              string
@@ -545,13 +545,13 @@ func handleGraphCmd() error {
 		}
 		historyHome = filepath.Dir(ex) // Set to executable folder
 	}
-	address := fmt.Sprintf("%s:%d", address, port)
+	address := fmt.Sprintf("%s:%d", host, port)
 	var err error
 	client, err = nebulago.NewNebulaClient(address, username, password)
 	if err != nil {
 		return err
 	}
-	client.SetRequestTimeout(0)
+	client.SetRequestTimeout(time.Duration(timeout) * time.Second)
 
 	defer client.Close()
 	if err := client.Ping(); err != nil {
@@ -607,13 +607,13 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.Flags().StringVarP(&address, "addr", "", "127.0.0.1", "Nebula Graph address")
-	rootCmd.Flags().IntVarP(&port, "port", "", -1, "The Nebula Graph port")
-	rootCmd.Flags().StringVarP(&username, "user", "u", "", "The Nebula Graph login user name")
-	rootCmd.Flags().StringVarP(&password, "password", "p", "", "The Nebula Graph login password")
+	rootCmd.Flags().StringVarP(&host, "host", "H", "127.0.0.1", "Nebula Graph host")
+	rootCmd.Flags().IntVarP(&port, "port", "P", 9669, "The Nebula Graph port")
+	rootCmd.Flags().StringVarP(&username, "user", "u", "root", "The Nebula Graph login user name")
+	rootCmd.Flags().StringVarP(&password, "password", "p", "nebula", "The Nebula Graph login password")
 	rootCmd.Flags().IntVarP(&timeout, "timeout", "t", 0, "The Nebula Graph client connection timeout in seconds, 0 means never timeout")
-	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The nGQL directly")
-	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The nGQL script file name")
+	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The GQL directly")
+	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The GQL script file name")
 	rootCmd.Flags().IntVarP(&widthMax, "width_max", "", 100, "The max width of the column of the execution plan")
 }
 

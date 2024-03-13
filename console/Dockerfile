@@ -18,9 +18,9 @@ COPY --from=builder /usr/src/data/ /data/
 ENTRYPOINT ["nebula-console"]
 
 
-FROM alpine as meta-console
+FROM alpine as meta-ctl
 
-COPY --from=builder /usr/src/meta-console /usr/local/bin/meta-console
+COPY --from=builder /usr/src/meta-ctl /usr/local/bin/meta-ctl
 COPY --from=builder /usr/src/data/ /data/
 
-ENTRYPOINT ["meta-console"]
+ENTRYPOINT ["meta-ctl"]

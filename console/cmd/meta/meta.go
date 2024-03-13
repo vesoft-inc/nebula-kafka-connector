@@ -48,9 +48,9 @@ func metaConsoleError(message string, err string) error {
 var metaOutput io.Writer = os.Stdout
 
 var rootCmd = &cobra.Command{
-	Use:   "meta-console",
+	Use:   "meta-ctl",
 	Short: "Execute meta command in cli mode.",
-	Long: `Execute meta command in cli mode. Use 'meta-console -h' to see usage.
+	Long: `Execute meta command in cli mode. Use 'meta-ctl -h' to see usage.
 	**Notice:** You should login meta server first`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()

@@ -1,5 +1,5 @@
 graphConsole ?= nebula-console
-metaConsole ?= meta-console
+metaCtl ?= meta-ctl
 
 # build with verison infos
 buildDate = $(shell TZ=UTC date +%FT%T%z)
@@ -13,16 +13,16 @@ default: build
 
 build: clean fmt
 	@CGO_ENABLED=0 go build -o ${graphConsole} -ldflags ${ldflags} ./cmd/graph/
-	@CGO_ENABLED=0 go build -o ${metaConsole} -ldflags ${ldflags} ./cmd/meta/
+	@CGO_ENABLED=0 go build -o ${metaCtl} -ldflags ${ldflags} ./cmd/meta/
 
 vendorbuild: clean fmt
 	@CGO_ENABLED=0 go mod vendor && go build -mod vendor -o ${graphConsole} --tags netgo -ldflags ${ldflags} ./cmd/graph/
 
 clean:
-	@rm -rf ${graphConsole} ${metaConsole} vendor
+	@rm -rf ${graphConsole} ${metaCtl} vendor
 
 clean-all:
-	@rm -rf ${graphConsole} ${metaConsole} vendor box/blob.go
+	@rm -rf ${graphConsole} ${metaCtl} vendor box/blob.go
 
 fmt:
 	@go mod tidy && find . -path vendor -prune -o -type f -iname '*.go' -exec go fmt {} \;

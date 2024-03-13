@@ -71,8 +71,7 @@ func TestGRPCString(t *testing.T) {
 		{
 			value: &graph.Value{Data: &graph.Value_NodeValue{
 				&graph.Node{
-					NodeId:     1,
-					NodeTypeId: 123,
+					NodeId: 1,
 					Properties: map[string]*graph.Value{
 						"int": {Data: &graph.Value_Int8Value{8}},
 						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
@@ -84,9 +83,8 @@ func TestGRPCString(t *testing.T) {
 		{
 			value: &graph.Value{Data: &graph.Value_EdgeValue{
 				&graph.Edge{
-					SrcId:      1,
-					DstId:      2,
-					EdgeTypeId: 123,
+					SrcId: 1,
+					DstId: 2,
 					Properties: map[string]*graph.Value{
 						"int": {Data: &graph.Value_Int8Value{8}},
 						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
@@ -101,8 +99,7 @@ func TestGRPCString(t *testing.T) {
 					Values: []*graph.Value{
 						{Data: &graph.Value_NodeValue{
 							&graph.Node{
-								NodeId:     1,
-								NodeTypeId: 123,
+								NodeId: 1,
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{8}},
 									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
@@ -110,9 +107,8 @@ func TestGRPCString(t *testing.T) {
 						}},
 						{Data: &graph.Value_EdgeValue{
 							&graph.Edge{
-								SrcId:      1,
-								DstId:      2,
-								EdgeTypeId: 123,
+								SrcId: 1,
+								DstId: 2,
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{8}},
 									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
@@ -120,8 +116,8 @@ func TestGRPCString(t *testing.T) {
 						}},
 						{Data: &graph.Value_NodeValue{
 							&graph.Node{
-								NodeId:     2,
-								NodeTypeId: 456,
+								NodeId: 2,
+								Type:   "name",
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{9}},
 									"str": {Data: &graph.Value_StringValue{[]byte("abc")}},
@@ -139,7 +135,7 @@ func TestGRPCString(t *testing.T) {
 			expect: `23:59:59.999999`,
 		},
 		{
-			value: &graph.Value{Data: &graph.Value_LocalDatatimeValue{
+			value: &graph.Value{Data: &graph.Value_LocalDatetimeValue{
 				&graph.LocalDatetime{
 					Year: 2024, Month: 12, Day: 31, Hour: 23, Minute: 59, Sec: 59, Microsec: 999999,
 				},
@@ -155,7 +151,7 @@ func TestGRPCString(t *testing.T) {
 			expect: `23:59:59.999999Z`,
 		},
 		{
-			value: &graph.Value{Data: &graph.Value_ZonedDatatimeValue{
+			value: &graph.Value{Data: &graph.Value_ZonedDatetimeValue{
 				&graph.ZonedDatetime{
 					Year: 2024, Month: 12, Day: 31, Hour: 23, Minute: 59, Sec: 59, Microsec: 999999,
 				},
