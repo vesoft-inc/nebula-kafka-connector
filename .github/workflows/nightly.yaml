@@ -9,10 +9,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-env:
-  IMAGE_GROUP: reg.vesoft-inc.com/vesoft-ng
-  IMAGE_TAG: nightly
-
 defaults:
   run:
     shell: bash
@@ -35,7 +31,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-          tags: $IMAGE_GROUP/meta-ctl:$IMAGE_TAG
+          tags: reg.vesoft-inc.com/vesoft-ng/meta-ctl:ngihtly
           push: true
           context: .
           file: ./console/Dockerfile
@@ -44,7 +40,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-          tags: $IMAGE_GROUP/nebula-console:$IMAGE_TAG
+          tags: reg.vesoft-inc.com/vesoft-ng/nebula-console:nightly
           push: true
           context: .
           file: ./console/Dockerfile

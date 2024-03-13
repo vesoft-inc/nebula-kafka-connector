@@ -47,30 +47,25 @@ Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="
     To connect to your Nebula Graph services, use the following command.
 
     ```bash
-    $ ./nebula-console -addr <ip> -port <port> -u <username> -p <password>
+    $ ./nebula-console --host <host> --port <port> --user <username> --password <password>
         [-t 120] [-e "nGQL_statement" | -f filename.nGQL]
     ```
 
     | Option                      | Description                                                                                                                                                             |
     | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
     | `-h`                        | Shows the help menu.                                                                                                                                                    |
-    | `-addr/-address`            | Sets the IP/HOST address of the graphd service.                                                                                                                         |
+    | `-H/--host`            | Sets the HOST address of the graphd service.                                                                                                                         |
     | `-P/-port`                  | Sets the port number of the graphd service.                                                                                                                             |
     | `-u/-user`                  | Sets the username of your Nebula Graph account. See [authentication](https://docs.nebula-graph.io/2.0/7.data-security/1.authentication/1.authentication/).              |
     | `-p/-password`              | Sets the password of your Nebula Graph account.                                                                                                                         |
-    | `-t/-timeout`               | Sets an integer-type timeout threshold for the connection. The unit is second. The default value is 120.                                                                |
+    | `-t/-timeout`               | Sets an integer-type timeout threshold for the connection. The unit is second. The default value is 0.                                                                |
     | `-e/-eval`                  | Sets a string-type nGQL statement. The nGQL statement is executed once the connection succeeds. The connection stops after the result is returned.                      |
     | `-f/-file`                  | Sets the path of an nGQL file. The nGQL statements in the file are executed once the connection succeeds. You'll get the return messages and the connection stops then. |
-    | `-enable_ssl`               | Enable SSL when connecting to Nebula Graph                                                                                                                              |
-    | `-ssl_root_ca_path`         | Sets the path of the certification authority file                                                                                                                       |
-    | `-ssl_cert_path`            | Sets the path of the certificate file                                                                                                                                   |
-    | `-ssl_private_key_path`     | Sets the path of the private key file                                                                                                                                   |
-    | `-ssl_insecure_skip_verify` | Controls whether a client verifies the server's certificate chain and host name                                                                                         |
 
 
     E.g.,
     ```bash
-    $./nebula-console -addr=192.168.10.111 -port 9669 -u root -p nebula
+    $./nebula-console -H 192.168.10.111 -P 9669 -u root -p nebula
     2021/03/15 15:21:43 [INFO] connection pool is initialized successfully
     Welcome to Nebula Graph!
     ```
@@ -92,7 +87,7 @@ Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="
 - Connect to your Nebula Graph services:
 
 ```bash
-$ ./<$YOUR_BINARY> -addr <ip> -port <port> -u <username> -p <password>
+$ ./<$YOUR_BINARY> -H <host> -P <port> -u <username> -p <password>
         [-t 120] [-e "nGQL_statement" | -f filename.nGQL]
 ```
 
@@ -107,7 +102,7 @@ $ docker run --rm -ti --network nebula-docker-compose_nebula-net --entrypoint=/b
 To connect to your Nebula Graph services, run the follow command in the container:
 
 ```bash
-docker> nebula-console -u <user> -p <password> --address=<graphd> --port=9669
+docker> nebula-console -u <user> -p <password> -H <graphd> -P 9669
 ```
 
 ## Print result vertically

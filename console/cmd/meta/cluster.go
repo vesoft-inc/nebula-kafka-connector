@@ -12,7 +12,7 @@ import (
 
 type clusterFlagsType struct {
 	clusterName string
-	replica     int
+	replicas    int
 	zones       []string
 }
 
@@ -30,7 +30,7 @@ var clusterCmd = &cobra.Command{
 var createClusterCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create cluster in meta server.",
-	Long:  `meta-console cluster create --cluster [clustername] --replica [replica] --zones [zone1,zone2,...] --if_not_exists`,
+	Long:  `meta-ctl cluster create --cluster [clustername] --replica [replica] --zones [zone1,zone2,...]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -42,10 +42,10 @@ var createClusterCmd = &cobra.Command{
 		if clusterFlags.clusterName == "" {
 			return metaConsoleError("Cluster name is empty", "")
 		}
-		if clusterFlags.replica == 0 {
+		if clusterFlags.replicas == 0 {
 			return metaConsoleError("Replica number is invalid", "")
 		}
-		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replica, clusterFlags.zones)
+		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replicas, clusterFlags.zones)
 		resp, err := metaClient.CreateCluster(req)
 		if err != nil {
 			return metaConsoleError("Create cluster failed", err.Error())
@@ -61,7 +61,7 @@ var createClusterCmd = &cobra.Command{
 var initClusterCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Init cluster storage part.",
-	Long:  `meta-console cluster init --cluster [clustername]`,
+	Long:  `meta-ctl cluster init --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -136,6 +136,6 @@ func init() {
 	clusterCmd.AddCommand(createClusterCmd)
 	clusterCmd.AddCommand(initClusterCmd)
 	clusterCmd.AddCommand(showClusterCmd)
-	createClusterCmd.Flags().IntVarP(&clusterFlags.replica, "replica", "r", 3, "replica number, default: 3")
+	createClusterCmd.Flags().IntVarP(&clusterFlags.replicas, "replica-factor", "r", 3, "replica number, default: 3")
 	createClusterCmd.Flags().StringArrayVarP(&clusterFlags.zones, "zones", "z", []string{}, "zones")
 }

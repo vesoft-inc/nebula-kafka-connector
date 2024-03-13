@@ -30,7 +30,7 @@ var serviceCmd = &cobra.Command{
 var addServiceCmd = &cobra.Command{
 	Use:   "add",
 	Short: `Add service into assigned cluster.`,
-	Long:  `meta-console service add --type [graphd|storaged] --host [host] --port [port] --cluster [clustername]`,
+	Long:  `meta-ctl service add --type [graphd|storaged] --host [host] --port [port] --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -71,7 +71,7 @@ var addServiceCmd = &cobra.Command{
 var dropServiceCmd = &cobra.Command{
 	Use:   "drop",
 	Short: `Drop service from assigned cluster.`,
-	Long:  `meta-console service drop --type [graphd|storaged] --host [host] --port [port] --cluster [clustername]`,
+	Long:  `meta-ctl service drop --type [graphd|storaged] --host [host] --port [port] --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -112,7 +112,7 @@ var dropServiceCmd = &cobra.Command{
 var showServiceCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show service in cluster.",
-	Long:  `meta-console service show --cluster [clustername]`,
+	Long:  `meta-ctl service show --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
