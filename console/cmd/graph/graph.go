@@ -593,7 +593,7 @@ func handleGraphCmd() error {
 var rootCmd = &cobra.Command{
 	Use:   "nebula-console",
 	Short: "Run nebula-console to connect to nebula-graphd by default.",
-	Long:  `Use nebula-console --addr [addr] --port [port] -u [user] -p [password] to connect to nebula-graphd.`,
+	Long:  `Use nebula-console --host [host] --port [port] -u [user] -p [password] to connect to nebula-graphd.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		return handleGraphCmd()
 	},
