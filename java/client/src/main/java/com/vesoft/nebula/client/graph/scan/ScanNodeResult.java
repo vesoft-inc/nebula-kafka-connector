@@ -35,8 +35,9 @@ public class ScanNodeResult extends ScanResult {
         }
         if (tableRows.isEmpty()) {
             for (ResultSet resultSet : results) {
-                List<ResultSet.Record> records = resultSet.getRows();
-                for (ResultSet.Record record : records) {
+
+                while (resultSet.hasNext()) {
+                    ResultSet.Record record = resultSet.next();
                     List<ValueWrapper> values = record.values();
                     List<ValueWrapper> rowValues = new ArrayList<>();
                     Map<String, ValueWrapper> properties;

@@ -423,7 +423,7 @@ public class NebulaClientTest {
             // TODO depend on server's `show sessions` statement.
             ResultSet resultSet = client.execute("show sessions");
             assert (resultSet.isSucceeded());
-            assert (resultSet.getRows().size() == 1);
+            assert (resultSet.rowSize() == 1);
         } catch (IOErrorException | NoValidSessionException e) {
             Assert.fail(e.getMessage());
         }

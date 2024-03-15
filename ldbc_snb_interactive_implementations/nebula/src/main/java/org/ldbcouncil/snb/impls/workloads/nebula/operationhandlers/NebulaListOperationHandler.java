@@ -43,9 +43,8 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
             final List<TOperationResult> results = new ArrayList<>();
 
             final ResultSet resultSet = client.getClient().execute(query);
-            long recordSize = resultSet.rowSize();
-            for (int i = 0; i < recordSize; ++i) {
-                final ResultSet.Record record = resultSet.rowValues(i);
+            while (resultSet.hasNext()) {
+                final ResultSet.Record record = resultSet.next();
                 results.add(toResult(record));
             }
             resultReporter.report(results.size(), results, operation);

@@ -151,8 +151,9 @@ public class DataTest {
                     "col8_string", "col9_list", "col10_vertex", "col11_edge");
             assert Objects.equals(resultSet.getColumnNames(), expectColNames);
 
-            assert resultSet.getRows().size() == 1;
-            ResultSet.Record record = resultSet.rowValues(0);
+            assert resultSet.rowSize() == 1;
+            assert resultSet.hasNext();
+            ResultSet.Record record = resultSet.next();
             assert record.size() == 12;
             assert record.get(0).isEmpty();
 

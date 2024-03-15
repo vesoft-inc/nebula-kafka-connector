@@ -41,8 +41,9 @@ public class ScanEdgeResult extends ScanResult {
         }
         if (tableRows.isEmpty()) {
             for (ResultSet resultSet : results) {
-                List<ResultSet.Record> records = resultSet.getRows();
-                for (ResultSet.Record record : records) {
+
+                while (resultSet.hasNext()) {
+                    ResultSet.Record record = resultSet.next();
                     List<ValueWrapper> rowValues = new ArrayList<>();
 
                     Vertex srcNode = record.get("Src").asNode();

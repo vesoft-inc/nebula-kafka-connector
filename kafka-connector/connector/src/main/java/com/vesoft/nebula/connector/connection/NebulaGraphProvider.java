@@ -62,9 +62,9 @@ public class NebulaGraphProvider implements Serializable {
         NebulaNodeSchema nodeSchema = new NebulaNodeSchema();
         Map<String, String> schema = new HashMap<>();
         ResultSet result = getGraphDesc(graphName);
-        List<ResultSet.Record> records = result.getRows();
 
-        for (ResultSet.Record record : records) {
+        while (result.hasNext()) {
+            ResultSet.Record record = result.next();
             if (record.get("Field").asString().equalsIgnoreCase(nodeType)) {
                 String propertyString = record.get("Properties").asString();
                 String[] proeprties =
@@ -108,11 +108,11 @@ public class NebulaGraphProvider implements Serializable {
     private Map<String, String> getEdgeInfo(String graphName, String edgeType) throws IOErrorException, NoValidSessionException {
         Map<String, String> schema = new HashMap<>();
         ResultSet result = getGraphDesc(graphName);
-        List<ResultSet.Record> records = result.getRows();
         String sourceNodeType;
         String targetNodeType;
 
-        for (ResultSet.Record record : records) {
+        while (result.hasNext()) {
+            ResultSet.Record record = result.next();
             if (record.get("Kind").asString().equals("Edge")) {
                 String fullEdgeType = record.get("Field").asString();
                 String regex = "\\((.*)\\)-\\[(.*)\\]->\\((.*)\\)";
@@ -144,7 +144,7 @@ public class NebulaGraphProvider implements Serializable {
         ResultSet resultSet = client.execute("DESCRIBE GRAPH " + graphName);
         String graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
-            graphType = resultSet.getRows().get(0).values().get(1).asString();
+            graphType = resultSet.next().values().get(1).asString();
         } else {
             throw new IllegalArgumentException("graphName " + graphName + " does not exist.");
         }

@@ -198,15 +198,15 @@ public class GraphClientExample {
         }
 
         // resolve the resultSet content only when resultSet is succeed.
-        System.out.println("query result row size: " + resultSet.getRows().size());
+        System.out.println("query result row size: " + resultSet.rowSize());
 
         System.out.println("query latency: " + resultSet.getLatency());
 
         List<String> columns = resultSet.getColumnNames();
         System.out.println("result columns: " + columns);
 
-        List<ResultSet.Record> records = resultSet.getRows();
-        for (ResultSet.Record record : records) {
+        while (resultSet.hasNext()) {
+            ResultSet.Record record = resultSet.next();
             // process each line
             List<ValueWrapper> values = record.values();
             for (ValueWrapper valueWrapper : values) {

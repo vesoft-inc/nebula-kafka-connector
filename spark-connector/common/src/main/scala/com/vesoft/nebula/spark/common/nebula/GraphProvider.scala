@@ -99,7 +99,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       LOG.error("get all partitions failed for {}", resultSet.getErrorMessage)
       throw new RuntimeException("get all partitions failed for " + resultSet.getErrorMessage)
     }
-    val partitionsValue: util.List[ValueWrapper] = resultSet.getRows.get(0).values.get(0).asList
+    val partitionsValue: util.List[ValueWrapper] = resultSet.next().values.get(0).asList
     val partitions: util.List[Integer] = new util.ArrayList[Integer]
     import scala.collection.JavaConversions._
     for (part <- partitionsValue) {
@@ -130,14 +130,14 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $nodeType does not exist in $graphName.")
     }
-    val properties = result.getRows.get(0).get("properties").asList()
+    val properties = result.next().get("properties").asList()
     for (prop <- properties.asScala) {
       val kv = prop.asString().split(":")
       schema += (kv(0) -> kv(1).trim)
     }
 
     // for now, the pk is one property, composite pk is not support yet.
-    val pks = result.getRows.get(0).get("primary_keys").asList().asScala.toList
+    val pks = result.next().get("primary_keys").asList().asScala.toList
     if (pks.isEmpty) {
       LOG.error(s"node type $nodeType has no primary key.")
       throw new RuntimeException(s"node type $nodeType has no primary key")
@@ -176,7 +176,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       throw new IllegalArgumentException(s"edge type $edgeType does not exist in $graphName.")
     }
 
-    val types = result.getRows.get(0).get("types").asList()
+    val types = result.next().get("types").asList()
     // the 'Types' in result for DESCRIBE EDGE TYPE should contain 'src node type', 'edge type', 'dst node type'
     if (types.size() < 3) {
       LOG.error(s"types size is less than 3 for edge type $edgeType")
@@ -192,7 +192,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     val srcNodePkName = getNodeDesc(graphName, srcNodeType).nodePkName
     val dstNodePkName = getNodeDesc(graphName, dstNodeType).nodePkName
 
-    val properties = result.getRows.get(0).get("properties").asList()
+    val properties = result.next().get("properties").asList()
     for (prop <- properties.asScala) {
       val kv = prop.asString().split(":")
       schema += (kv(0) -> kv(1))
@@ -204,7 +204,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
   private def getGraphType(graphName: String): String = {
     var resultSet = client.execute(s"DESCRIBE GRAPH $graphName")
     val graphType = if (resultSet.isSucceeded && !resultSet.isEmpty) {
-      resultSet.getRows.get(0).values().get(1).asString
+      resultSet.next().values().get(1).asString
     } else {
       throw new IllegalArgumentException(s"graphName $graphName does not exist.")
     }

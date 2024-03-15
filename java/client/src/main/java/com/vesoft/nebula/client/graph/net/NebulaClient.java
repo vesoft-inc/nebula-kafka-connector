@@ -453,7 +453,7 @@ public class NebulaClient implements Serializable {
             throw new RuntimeException(
                     "get all partitions failed for " + resultSet.getErrorMessage());
         }
-        List<ValueWrapper> partitionsValue = resultSet.getRows().get(0).values().get(0).asList();
+        List<ValueWrapper> partitionsValue = resultSet.next().values().get(0).asList();
         List<Integer> partitions = new ArrayList<>();
         for (ValueWrapper part : partitionsValue) {
             partitions.add(part.asInt());
@@ -481,7 +481,7 @@ public class NebulaClient implements Serializable {
                     nodeType, graphName));
         }
 
-        List<ValueWrapper> pks = resultSet.getRows().get(0).get("primary_keys").asList();
+        List<ValueWrapper> pks = resultSet.next().get("primary_keys").asList();
         if (pks.isEmpty()) {
             log.error("node type " + nodeType + " has no primary key.");
             throw new RuntimeException("node type " + nodeType + " has no primary key");
@@ -491,7 +491,7 @@ public class NebulaClient implements Serializable {
         // define the property name list, and put the pk on the head of list.
         List<String> propertyNames = new ArrayList<>();
         propertyNames.add(pk);
-        List<ValueWrapper> properties = resultSet.getRows().get(0).get("properties").asList();
+        List<ValueWrapper> properties = resultSet.next().get("properties").asList();
         for (ValueWrapper property : properties) {
             String propertyName = property.asString().split(":")[0];
             if (pk.equals(propertyName)) {
@@ -524,8 +524,7 @@ public class NebulaClient implements Serializable {
                     edgeType, graphName));
         }
 
-        List<ValueWrapper> properties =
-                resultSet.getRows().get(0).get("properties").asList();
+        List<ValueWrapper> properties = resultSet.next().get("properties").asList();
         List<String> propertyNames = new ArrayList<>();
         for (ValueWrapper property : properties) {
             String propertyName = property.asString().split(":")[0];
@@ -547,7 +546,7 @@ public class NebulaClient implements Serializable {
         ResultSet resultSet = execute(String.format("DESCRIBE GRAPH %s", graphName));
         String graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
-            graphType = resultSet.getRows().get(0).values().get(1).asString();
+            graphType = resultSet.next().values().get(1).asString();
         } else {
             throw new IllegalArgumentException("graphName " + graphName + " does not exist.");
         }

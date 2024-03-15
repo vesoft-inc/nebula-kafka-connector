@@ -39,8 +39,8 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
             state.logQuery(operation.getClass().getSimpleName(), query);
 
             final ResultSet resultSet = client.getClient().execute(query);
-            if (resultSet.rowSize() > 0) {
-                resultReporter.report(1, toResult(resultSet.rowValues(0)), operation);
+            if (resultSet.hasNext()) {
+                resultReporter.report(1, toResult(resultSet.next()), operation);
             } else {
                 resultReporter.report(0, null, operation);
             }

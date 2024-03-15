@@ -9,7 +9,6 @@ import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
-import com.vesoft.nebula.proto.graph.ResultTable;
 import com.vesoft.nebula.proto.graph.Row;
 import com.vesoft.nebula.proto.graph.Value;
 import java.nio.charset.Charset;
@@ -18,7 +17,9 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Spliterator;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 public class ResultSet {
@@ -27,6 +28,10 @@ public class ResultSet {
     private final Charset charset = Charsets.UTF_8;
 
     private boolean isEmpty = false;
+
+    private volatile AtomicInteger index = new AtomicInteger(0);
+
+    private final int size;
 
     public static class Record implements Iterable<ValueWrapper> {
         private final List<ValueWrapper> colValues = new ArrayList<>();
@@ -114,7 +119,7 @@ public class ResultSet {
         }
 
         /**
-         * get the size of record
+         * get the size of record columns
          *
          * @return int the size of columns
          */
@@ -142,6 +147,9 @@ public class ResultSet {
         if (!resp.getExecutionOutcome().hasResult()
                 || resp.getExecutionOutcome().getResult().getRecordsList().isEmpty()) {
             isEmpty = true;
+            size = 0;
+        } else {
+            size = resp.getExecutionOutcome().getResult().getRecordsCount();
         }
         for (ByteString column : resp.getExecutionOutcome().getResult().getColumnNamesList()) {
             this.columnNames.add(column.toString(charset));
@@ -224,21 +232,27 @@ public class ResultSet {
         if (isEmpty) {
             return 0;
         }
-        ResultTable result = response.getExecutionOutcome().getResult();
-        return result.getRecordsList().size();
+        return size;
     }
 
     /**
-     * get row values with the row index
-     *
-     * @param index the index of the rows
-     * @return Record
+     * if the ResultSet has row Record
      */
-    public Record rowValues(int index) {
+    public boolean hasNext() {
         if (isEmpty) {
-            throw new RuntimeException("Empty data");
+            return false;
         }
-        Row row = response.getExecutionOutcome().getResult().getRecords(index);
+        return index.get() < size;
+    }
+
+    /**
+     * get the next row Record
+     */
+    public Record next() {
+        if (!hasNext()) {
+            throw new NoSuchElementException("no more row record data");
+        }
+        Row row = response.getExecutionOutcome().getResult().getRecords(index.getAndIncrement());
         return new Record(columnNames, row);
     }
 
@@ -264,21 +278,6 @@ public class ResultSet {
         return values;
     }
 
-    /**
-     * get all rows, see {@link Record}
-     *
-     * @return the list of Row
-     */
-    public List<Record> getRows() {
-        if (isEmpty) {
-            return new ArrayList<>();
-        }
-        List<Record> rows = new ArrayList<>();
-        for (Row row : response.getExecutionOutcome().getResult().getRecordsList()) {
-            rows.add(new Record(columnNames, row));
-        }
-        return rows;
-    }
 
     /**
      * get extra info for result
@@ -302,16 +301,14 @@ public class ResultSet {
         if (!isSucceeded()) {
             return response.getExecutionOutcome().getGqlStatus().getMessage().toString(charset);
         }
-        int i = 0;
         List<String> rowStrs = new ArrayList<>();
-        while (i < rowSize()) {
+        while (hasNext()) {
             List<String> valueStrs = new ArrayList<>();
-            for (ValueWrapper value : rowValues(i)) {
+            for (ValueWrapper value : next().values()) {
                 valueStrs.add(value.toString());
             }
             String values = "[" + String.join(",", valueStrs) + "]";
             rowStrs.add(values);
-            i++;
         }
         return String.format("ColumnName: %s,\n Rows: %s",
                 columnNames.toString(), rowStrs.toString());
