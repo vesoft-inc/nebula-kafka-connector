@@ -67,7 +67,7 @@ Available Commands:
 创建一个集群的常用命令如下：
 
 ```bash
-meta-ctl cluster create -c=<clusterName> --replica=3 --zones="z1,z2,z3"
+meta-ctl cluster create -c=<clusterName> --replica-factor=3 --zones="z1,z2,z3"
 ```
 
 创建集群需要指定：
@@ -207,7 +207,7 @@ meta-ctl service drop --type graphd -H 192.168.8.6 -P 9669 -c testcluster
 ### 显示服务
 
 ```bash
-meta-console service show --cluster [clustername]
+meta-ctl service show --cluster [clustername]
 
 Usage:
   meta-ctl service show [flags]
