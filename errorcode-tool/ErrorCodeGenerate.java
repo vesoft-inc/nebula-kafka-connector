@@ -3,8 +3,6 @@
  * This source code is licensed under Apache 2.0 License.
  */
 
-package com.vesoft.nebula.client;
-
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
@@ -19,10 +17,11 @@ public class ErrorCodeGenerate {
 
     public static void main(String[] args) throws IOException {
 
+        String codeFileName = args[0];
+
         Pattern pattern = Pattern.compile("DEFINE_ERRORCODE\\((.*), \"(.*)\", (.*?)\\),");
 
-        String fileName = "java/client/src/test/resources/errorcode";
-        File file = new File(fileName);
+        File file = new File(codeFileName);
         FileReader fr = new FileReader(file);
         BufferedReader br = new BufferedReader(fr);
         String line;
