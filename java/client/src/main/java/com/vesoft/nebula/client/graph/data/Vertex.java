@@ -31,19 +31,31 @@ public class Vertex extends BaseDataObject {
     }
 
     /**
+     * get graph
+     *
+     * @return String
+     */
+    public String getGraph() {
+        return node.getGraph();
+    }
+
+
+    /**
      * get node type name
      *
      * @return String
      */
-    public String getNodeType() {
+    public String getType() {
         return node.getType();
     }
 
 
     /**
+     * get node label list
      *
+     * @return list of label
      */
-    public List<String> getNodeLabels() {
+    public List<String> getLabels() {
         return node.getLabelsList();
     }
 
@@ -52,7 +64,7 @@ public class Vertex extends BaseDataObject {
      *
      * @return long id
      */
-    public long getNodeId() {
+    public long getId() {
         return node.getNodeId();
     }
 
@@ -106,7 +118,7 @@ public class Vertex extends BaseDataObject {
             return false;
         }
         Vertex node = (Vertex) o;
-        return getNodeId() == node.getNodeId();
+        return getId() == node.getId();
     }
 
     @Override
@@ -122,6 +134,6 @@ public class Vertex extends BaseDataObject {
             propStrs.add(propName + ": " + props.get(propName).toString());
         }
         return String.format("(%d:%s {%s})",
-                getNodeId(), getNodeType(), String.join(", ", propStrs));
+                getId(), getType(), String.join(", ", propStrs));
     }
 }

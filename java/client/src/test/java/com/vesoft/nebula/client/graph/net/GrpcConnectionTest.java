@@ -12,7 +12,7 @@ import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class TestGrpcConnection {
+public class GrpcConnectionTest {
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcConnection.class);
 
     @Test(timeout = 3000)

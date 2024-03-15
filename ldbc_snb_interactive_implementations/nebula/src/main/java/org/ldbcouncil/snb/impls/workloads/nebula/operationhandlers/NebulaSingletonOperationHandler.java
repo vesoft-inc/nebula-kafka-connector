@@ -1,10 +1,7 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
-import com.vesoft.nebula.client.graph.exception.AuthFailedException;
-import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
-import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -17,7 +14,6 @@ import java.text.ParseException;
 import java.util.Map;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.net.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +39,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
             state.logQuery(operation.getClass().getSimpleName(), query);
 
             final ResultSet resultSet = client.getClient().execute(query);
-            if (resultSet.rowsSize() > 0) {
+            if (resultSet.rowSize() > 0) {
                 resultReporter.report(1, toResult(resultSet.rowValues(0)), operation);
             } else {
                 resultReporter.report(0, null, operation);

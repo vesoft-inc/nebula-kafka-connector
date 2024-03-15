@@ -1,4 +1,4 @@
-/* Copyright (c) 2022 vesoft inc. All rights reserved.
+/* Copyright (c) 2024 vesoft inc. All rights reserved.
  *
  * This source code is licensed under Apache 2.0 License.
  */
@@ -239,8 +239,8 @@ public class GraphClientExample {
                     System.out.printf("%15s |", valueWrapper.asRecord());
                 } else if (valueWrapper.isNode()) {
                     Vertex node = valueWrapper.asNode();
-                    long nodeId = node.getNodeId();
-                    String nodeType = node.getNodeType();
+                    long nodeId = node.getId();
+                    String nodeType = node.getType();
                     Map<String, ValueWrapper> properties = node.getProperties();
                     System.out.printf("%15s |", valueWrapper.asNode());
                 } else if (valueWrapper.isEdge()) {

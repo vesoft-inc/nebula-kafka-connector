@@ -5,19 +5,19 @@
  * between the client SDKs and the server of NebulaGraph
  */
 
- /**
-  *             === Some Key Notes About Protobuf ===
-  * 1. Field Presence
-  *     - `required' is removed from proto3 while `optional' kept.
-  *     - Without `optional', the user cannot distinguish the situation.
-  *       that a field was not set from being set to its default value.
-  *     - With `optional' specified the field will have the NULL semantic(via `has_xxx')
-  * 2. Compatibility
-  *     - Never change a field number.
-  *     - Reserve the field number of deleted fields with `reserved'.
-  *     - Some field types can be changed without breaking the compatibility.
-  *       Please refer to the official documents for details.
-  */
+/**
+ *             === Some Key Notes About Protobuf ===
+ * 1. Field Presence
+ *     - `required' is removed from proto3 while `optional' kept.
+ *     - Without `optional', the user cannot distinguish the situation.
+ *       that a field was not set from being set to its default value.
+ *     - With `optional' specified the field will have the NULL semantic(via `has_xxx')
+ * 2. Compatibility
+ *     - Never change a field number.
+ *     - Reserve the field number of deleted fields with `reserved'.
+ *     - Some field types can be changed without breaking the compatibility.
+ *       Please refer to the official documents for details.
+ */
 
 // gRPC requires the proto3 syntax
 syntax = "proto3";
@@ -34,6 +34,7 @@ package nebula.proto.graph;
 option go_package = "./proto/graph";
 option java_package = "com.vesoft.nebula.proto.graph";
 option java_multiple_files = true;
+option optimize_for = SPEED;
 
 // Interface definition
 service GraphService {
@@ -56,7 +57,7 @@ message Duration {
 }
 
 message Date {
-    uint32              year                    = 1;
+    int32               year                    = 1;
     uint32              month                   = 2;
     uint32              day                     = 3;
 }
@@ -77,7 +78,7 @@ message ZonedTime {
 }
 
 message LocalDatetime {
-    uint32              year                    = 1;
+    int32               year                    = 1;
     uint32              month                   = 2;
     uint32              day                     = 3;
     uint32              hour                    = 4;
@@ -87,7 +88,7 @@ message LocalDatetime {
 }
 
 message ZonedDatetime {
-    uint32              year                    = 1;
+    int32               year                    = 1;
     uint32              month                   = 2;
     uint32              day                     = 3;
     uint32              hour                    = 4;
@@ -112,6 +113,7 @@ message Node {
     repeated string     labels                  = 4;
     map<string, Value>  properties              = 5;
 }
+
 
 enum Direction {
     DIRECTED                                    = 0;
@@ -168,8 +170,8 @@ message Value {
         LocalTime       local_time_value        = 19;
         ZonedTime       zoned_time_value        = 20;
         Date            date_value              = 21;
-        LocalDatetime   local_datatime_value    = 22;
-        ZonedDatetime   zoned_datatime_value    = 23;
+        LocalDatetime   local_datetime_value    = 22;
+        ZonedDatetime   zoned_datetime_value    = 23;
         Ref             ref_value               = 24;
     }
 }
@@ -217,10 +219,10 @@ message GQLStatus {
 }
 
 message ExecutionOutcome {
-    GQLStatus           gql_status              = 1;
-    ResultTable         result                  = 2;
-    bytes               plan_desc               = 3;
-    map<string, Value>    extra_info              = 4;
+    GQLStatus                   gql_status      = 1;
+    ResultTable                 result          = 2;
+    bytes                       plan_desc       = 3;
+    map<string, Value>          extra_info      = 4;
 }
 
 message ExecuteRequest {

@@ -30,12 +30,30 @@ public class Relationship extends BaseDataObject {
     }
 
     /**
+     * get graph
+     *
+     * @return String
+     */
+    public String getGraph() {
+        return edge.getGraph();
+    }
+
+    /**
      * get edge type name
      *
      * @return String
      */
-    public String getEdgeType() {
+    public String getType() {
         return edge.getType();
+    }
+
+    /**
+     * if the edge is directed
+     *
+     * @return true if edge is directed
+     */
+    public boolean isDirected() {
+        return edge.getDirection() == Direction.DIRECTED;
     }
 
     /**
@@ -43,7 +61,7 @@ public class Relationship extends BaseDataObject {
      *
      * @return list of edge labels
      */
-    public List<String> getEdgeLabels() {
+    public List<String> getLabels() {
         return edge.getLabelsList();
     }
 
@@ -122,12 +140,12 @@ public class Relationship extends BaseDataObject {
             return getRank() == that.getRank()
                     && getSrcId() == that.getSrcId()
                     && getDstId() == that.getDstId()
-                    && Objects.equals(getEdgeType(), that.getEdgeType());
+                    && Objects.equals(getType(), that.getType());
         } else {
             return getRank() == that.getRank()
                     && ((getSrcId() == that.getSrcId() && getDstId() == that.getDstId())
                     || (getSrcId() == that.getDstId() && getDstId() == that.getSrcId()))
-                    && Objects.equals(getEdgeType(), that.getEdgeType());
+                    && Objects.equals(getType(), that.getType());
         }
     }
 
@@ -145,10 +163,10 @@ public class Relationship extends BaseDataObject {
         }
         if (edge.getDirection() == Direction.DIRECTED) {
             return String.format("(%d)-[:%s{%s}]->(%d)",
-                    getSrcId(), getEdgeType(), String.join(", ", propStrs), getDstId());
+                    getSrcId(), getType(), String.join(", ", propStrs), getDstId());
         } else {
             return String.format("(%d)-[:%s{%s}]-(%d)",
-                    getSrcId(), getEdgeType(), String.join(", ", propStrs), getDstId());
+                    getSrcId(), getType(), String.join(", ", propStrs), getDstId());
         }
 
     }

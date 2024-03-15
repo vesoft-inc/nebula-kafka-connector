@@ -23,7 +23,7 @@ public class NRecord {
      *
      * @param key key whose presence in this record is to be checked
      * @return true if this record contains a mapping for the specified key
-     * @Throws NullPointerException if the specified key is null
+     * @throws NullPointerException if the specified key is null
      */
     public boolean containsKey(String key) {
         if (key == null) {

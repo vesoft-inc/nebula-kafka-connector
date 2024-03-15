@@ -7,7 +7,6 @@ package com.vesoft.nebula.client.graph.net;
 
 import com.google.common.net.InetAddresses;
 import com.google.common.net.InternetDomainName;
-import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
@@ -145,14 +144,11 @@ public class NebulaClient implements Serializable {
             try {
                 resultSet = session.execute(stmt, timeoutMs);
                 if (resultSet.isSucceeded()
-                        || ErrorCode.SEMANTIC_ERROR_PREFIX.code
-                        .equals(resultSet.getErrorCode().substring(0, 2))
-                        || ErrorCode.SYNTAX_ERROR_PREFIX.code
-                        .equals(resultSet.getErrorCode().substring(0, 2))) {
+                        || resultSet.getErrorCode().isSemanticError()
+                        || resultSet.getErrorCode().isSyntaxError()) {
                     return resultSet;
                 }
-                if (ErrorCode.SESSION_ERROR_PREFIX.code
-                        .equals(resultSet.getErrorCode().substring(0, 2))) {
+                if (resultSet.getErrorCode().isSessionError()) {
                     isBadSession = true;
                 }
                 log.warn(String.format("execute error for times %s,  message: %s", tryTimes + 1,

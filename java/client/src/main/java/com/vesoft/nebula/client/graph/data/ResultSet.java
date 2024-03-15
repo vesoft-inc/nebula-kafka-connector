@@ -173,8 +173,9 @@ public class ResultSet {
      *
      * @return String
      */
-    public String getErrorCode() {
-        return response.getExecutionOutcome().getGqlStatus().getCode().toString(charset);
+    public ErrorCode getErrorCode() {
+        return ErrorCode.find(
+                response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
     }
 
     /**
@@ -197,9 +198,9 @@ public class ResultSet {
     }
 
     /**
-     * get the PalnDesc
+     * get the PlanDesc
      *
-     * @return PlanDescription
+     * @return string
      */
     public String getPlanDesc() {
         return response.getExecutionOutcome().getPlanDesc().toString(charset);
@@ -219,7 +220,7 @@ public class ResultSet {
      *
      * @return int
      */
-    public int rowsSize() {
+    public int rowSize() {
         if (isEmpty) {
             return 0;
         }
@@ -303,7 +304,7 @@ public class ResultSet {
         }
         int i = 0;
         List<String> rowStrs = new ArrayList<>();
-        while (i < rowsSize()) {
+        while (i < rowSize()) {
             List<String> valueStrs = new ArrayList<>();
             for (ValueWrapper value : rowValues(i)) {
                 valueStrs.add(value.toString());

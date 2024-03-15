@@ -82,13 +82,13 @@ public class NPath {
                 template = "%s-[:%s{%s}]->%s";
                 edgeStrs.add(String.format(template,
                         relationship.getSrcId(),
-                        relationship.getEdgeType(),
+                        relationship.getType(),
                         String.join(",", propStrs),
                         relationship.getDstId()));
             } else {
                 template = "-[:%s{%s}]->%s";
                 edgeStrs.add(String.format(template,
-                        relationship.getEdgeType(),
+                        relationship.getType(),
                         String.join(",", propStrs),
                         relationship.getDstId()));
             }

@@ -33,13 +33,13 @@ import org.junit.Assert;
 import org.junit.Test;
 
 
-public class TestData {
+public class DataTest {
 
     @Test
     public void testNode() {
         try {
             Vertex vertex = new Vertex(getNode(1L));
-            assert Objects.equals(vertex.getNodeId(), 1L);
+            assert Objects.equals(vertex.getId(), 1L);
             assert (vertex.toString().startsWith("(1:person"));
 
 
@@ -142,7 +142,7 @@ public class TestData {
 
             ResultSet resultSet = new ResultSet(resp);
             assert resultSet.isSucceeded();
-            assert resultSet.getErrorCode().equals(ErrorCode.SUCCESSFUL_COMPLETION.code);
+            assert resultSet.getErrorCode() == ErrorCode.SUCCESSFUL_COMPLETION;
             assert !resultSet.isEmpty();
             Assert.assertEquals(1000, resultSet.getLatency());
             assert resultSet.getPlanDesc().equals("");
@@ -236,7 +236,7 @@ public class TestData {
             // test local datetime
             valueWrapper = new ValueWrapper(Value
                     .newBuilder()
-                    .setLocalDatatimeValue(getSimpleLocalDateTime())
+                    .setLocalDatetimeValue(getSimpleLocalDateTime())
                     .build());
             expectString = "2024-01-01T12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalDateTime().toString());
@@ -282,11 +282,11 @@ public class TestData {
         Assert.assertEquals(2L, record.getValue("prop2").asLong());
         Assert.assertEquals("Tom", record.getValue("prop3").asString());
         Assert.assertTrue(record.getValue("prop4").asBoolean());
-        Assert.assertEquals(1, record.getValue("prop5").asNode().getNodeId());
+        Assert.assertEquals(1, record.getValue("prop5").asNode().getId());
         Assert.assertEquals("person",
-                record.getValue("prop5").asNode().getNodeType());
+                record.getValue("prop5").asNode().getType());
         Assert.assertEquals("teacher",
-                record.getValue("prop5").asNode().getNodeLabels().get(0));
+                record.getValue("prop5").asNode().getLabels().get(0));
         Assert.assertEquals("prop",
                 record.getValue("prop5").asNode().getProperties().keySet().toArray()[0]);
 

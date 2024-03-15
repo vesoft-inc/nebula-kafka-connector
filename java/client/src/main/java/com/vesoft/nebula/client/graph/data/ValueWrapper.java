@@ -62,13 +62,13 @@ public class ValueWrapper {
         if (value.getDataCase() == Value.DataCase.LOCAL_TIME_VALUE) {
             return "LOCAL_TIME";
         }
-        if (value.getDataCase() == Value.DataCase.LOCAL_DATATIME_VALUE) {
+        if (value.getDataCase() == Value.DataCase.LOCAL_DATETIME_VALUE) {
             return "LOCAL_DATETIME";
         }
         if (value.getDataCase() == Value.DataCase.ZONED_TIME_VALUE) {
             return "ZONED_TIME";
         }
-        if (value.getDataCase() == Value.DataCase.ZONED_DATATIME_VALUE) {
+        if (value.getDataCase() == Value.DataCase.ZONED_DATETIME_VALUE) {
             return "ZONED_DATETIME";
         }
         if (value.getDataCase() == Value.DataCase.DATE_VALUE) {
@@ -200,11 +200,11 @@ public class ValueWrapper {
     }
 
     public boolean isLocalDateTime() {
-        return value.getDataCase() == Value.DataCase.LOCAL_DATATIME_VALUE;
+        return value.getDataCase() == Value.DataCase.LOCAL_DATETIME_VALUE;
     }
 
     public boolean isZonedDateTime() {
-        return value.getDataCase() == Value.DataCase.ZONED_DATATIME_VALUE;
+        return value.getDataCase() == Value.DataCase.ZONED_DATETIME_VALUE;
     }
 
     public boolean isDate() {
@@ -422,8 +422,8 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not localDatetime
      */
     public NDateTime asLocalDateTime() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.LOCAL_DATATIME_VALUE) {
-            return new NDateTime(value.getLocalDatatimeValue());
+        if (value.getDataCase() == Value.DataCase.LOCAL_DATETIME_VALUE) {
+            return new NDateTime(value.getLocalDatetimeValue());
         }
         throw new InvalidValueException(
                 "cannot get field `localdatetime` because value's type is " + getDataType());
@@ -436,8 +436,8 @@ public class ValueWrapper {
      * @throws InvalidValueException if the value type is not localDatetime
      */
     public NZonedDateTime asZonedDateTime() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.ZONED_DATATIME_VALUE) {
-            return new NZonedDateTime(value.getZonedDatatimeValue());
+        if (value.getDataCase() == Value.DataCase.ZONED_DATETIME_VALUE) {
+            return new NZonedDateTime(value.getZonedDatetimeValue());
         }
         throw new InvalidValueException(
                 "cannot get field `zoneddatetime` because value's type is " + getDataType());

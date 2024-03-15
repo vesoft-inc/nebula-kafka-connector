@@ -1,10 +1,7 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
-import com.vesoft.nebula.client.graph.exception.AuthFailedException;
-import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
-import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -19,7 +16,6 @@ import java.util.List;
 import java.util.Map;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.net.Session;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,7 +43,7 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
             final List<TOperationResult> results = new ArrayList<>();
 
             final ResultSet resultSet = client.getClient().execute(query);
-            long recordSize = resultSet.rowsSize();
+            long recordSize = resultSet.rowSize();
             for (int i = 0; i < recordSize; ++i) {
                 final ResultSet.Record record = resultSet.rowValues(i);
                 results.add(toResult(record));
