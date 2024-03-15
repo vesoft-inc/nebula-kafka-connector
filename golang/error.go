@@ -9,23 +9,381 @@ type ErrorCode string
 var (
 	// Error in client side
 	// Tmp error code, would be redefined in future
-	ErrorAddressNotValid    ErrorCode = newErrorCode("99", "000")
-	ErrorCannotOpen                   = newErrorCode("99", "001")
-	ErrorConnIsBroken                 = newErrorCode("99", "002")
-	ErrorConnConnectTimeout           = newErrorCode("99", "003")
-	ErrorConnRequestTimeout           = newErrorCode("99", "004")
-	ErrorConnIsClosed                 = newErrorCode("99", "005")
-	ErrorWaitPoolTimeout              = newErrorCode("99", "006")
-	ErrorIllegal                      = newErrorCode("99", "007")
-	ErrorType                         = newErrorCode("99", "008")
-	ErrorClientInternel               = newErrorCode("99", "009")
+	ERROR_ADDRESS_NOT_VALID    ErrorCode = "99000"
+	ERROR_CANNOT_OPEN          ErrorCode = "99001"
+	ERROR_CONN_IS_BROKEN       ErrorCode = "99002"
+	ERROR_CONN_CONNECT_TIMEOUT ErrorCode = "99003"
+	ERROR_CONN_REQUEST_TIMEOUT ErrorCode = "99004"
+	ERROR_CONN_IS_CLOSED       ErrorCode = "99005"
+	ERROR_WAIT_POOL_TIMEOUT    ErrorCode = "99006"
+	ERROR_ILLEGAL              ErrorCode = "99007"
+	ERROR_TYPE                 ErrorCode = "99008"
+	ERROR_CLIENT_INTERNEL      ErrorCode = "99009"
 
 	// Error in server side
-	ErrorSuccessfulCompletion = newErrorCode("00", "000")
-	//TODO need to add more error codes
-	ErrorLeaderChange          = newErrorCode("ND", "005")
-	ErrorClusterExisted        = newErrorCode("NI", "001")
-	ErrServiceStaticPortExists = newErrorCode("NM", "019")
+
+	ERROR_SUCCESSFUL_COMPLETION ErrorCode = "00000"
+	ERROR_OMITTED_RESULT        ErrorCode = "00001"
+
+	ERROR_WARNING                               ErrorCode = "01000"
+	ERROR_WARNING_STRING_DATA_RIGHT_TRUNCATION  ErrorCode = "01004"
+	ERROR_CATALOG_GRAPH_NOT_FOUND               ErrorCode = "01G03"
+	ERROR_CATALOG_GRAPH_TYPE_NOT_FOUND          ErrorCode = "01G04"
+	ERROR_NULL_VALUE_ELIMINATED_IN_SET_FUNCTION ErrorCode = "01G11"
+
+	ERROR_NO_DATA ErrorCode = "02000"
+
+	ERROR_INFORMATIONAL ErrorCode = "03000"
+
+	ERROR_CONNECTION_EXCEPTION           ErrorCode = "08000"
+	ERROR_TRANSACTION_RESOLUTION_UNKNOWN ErrorCode = "08007"
+
+	ERROR_DATA_EXCEPTION                                           ErrorCode = "22000"
+	ERROR_DATA_STRING_DATA_RIGHT_TRUNCATION                        ErrorCode = "22001"
+	ERROR_NUMERIC_VALUE_OUT_OF_RANGE                               ErrorCode = "22003"
+	ERROR_NULL_VALUE_NOT_ALLOWED                                   ErrorCode = "22004"
+	ERROR_INVALID_DATE_TIME_OR_DATETIME_FORMAT                     ErrorCode = "22007"
+	ERROR_DATETIME_FIELD_OVERFLOW                                  ErrorCode = "22008"
+	ERROR_PARSE_TEMPORAL_FAIL                                      ErrorCode = "22009"
+	ERROR_SUBSTRING_ERROR                                          ErrorCode = "22011"
+	ERROR_DIVISION_BY_ZERO                                         ErrorCode = "22012"
+	ERROR_INTERVAL_FIELD_OVERFLOW                                  ErrorCode = "22015"
+	ERROR_INVALID_CHARACTER_VALUE_FOR_CAST                         ErrorCode = "22018"
+	ERROR_INVALID_ARGUMENT_FOR_NATURAL_LOGARITHM                   ErrorCode = "2201E"
+	ERROR_INVALID_ARGUMENT_FOR_POWER_FUNCTION                      ErrorCode = "2201F"
+	ERROR_TRIM_ERROR                                               ErrorCode = "22027"
+	ERROR_ARRAY_DATA_RIGHT_TRUNCATION                              ErrorCode = "2202F"
+	ERROR_NEGATIVE_LIMIT_VALUE                                     ErrorCode = "22G02"
+	ERROR_INVALID_VALUE_TYPE                                       ErrorCode = "22G03"
+	ERROR_VALUES_NOT_COMPARABLE                                    ErrorCode = "22G04"
+	ERROR_INVALID_DATE_TIME_OR_DATETIME_FUNCTION_FIELD_NAME        ErrorCode = "22G05"
+	ERROR_INVALID_DATETIME_FUNCTION_VALUE                          ErrorCode = "22G06"
+	ERROR_INVALID_DURATION_FUNCTION_FIELD_NAME                     ErrorCode = "22G07"
+	ERROR_LIST_DATA_RIGHT_TRUNCATION                               ErrorCode = "22G0B"
+	ERROR_LIST_ELEMENT_ERROR                                       ErrorCode = "22G0C"
+	ERROR_INVALID_NUMBER_OF_PATHS_OR_GROUPS                        ErrorCode = "22G0F"
+	ERROR_INVALID_DURATION_FORMAT                                  ErrorCode = "22G0H"
+	ERROR_MULTIPLE_ASSIGNMENTS_TO_A_GRAPH_ELEMENT_PROPERTY         ErrorCode = "22G0M"
+	ERROR_DATA_NUMBER_OF_NODE_LABELS_BELOW_SUPPORTED_MINIMUM       ErrorCode = "22G0N"
+	ERROR_DATA_NUMBER_OF_NODE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM     ErrorCode = "22G0P"
+	ERROR_DATA_NUMBER_OF_EDGE_LABELS_BELOW_SUPPORTED_MINIMUM       ErrorCode = "22G0Q"
+	ERROR_DATA_NUMBER_OF_EDGE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM     ErrorCode = "22G0R"
+	ERROR_DATA_NUMBER_OF_NODE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM ErrorCode = "22G0S"
+	ERROR_DATA_NUMBER_OF_EDGE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM ErrorCode = "22G0T"
+	ERROR_RECORD_FIELDS_DO_NOT_MATCH                               ErrorCode = "22G0U"
+	ERROR_REFERENCE_VALUE_INVALID_BASE_TYPE                        ErrorCode = "22G0V"
+	ERROR_REFERENCE_VALUE_INVALID_CONSTRAINED_TYPE                 ErrorCode = "22G0W"
+	ERROR_RECORD_DATA_FIELD_UNASSIGNABLE                           ErrorCode = "22G0X"
+	ERROR_RECORD_DATA_FIELD_MISSING                                ErrorCode = "22G0Y"
+	ERROR_MALFORMED_PATH                                           ErrorCode = "22G0Z"
+	ERROR_PATH_DATE_RIGHT_TRUNCATION                               ErrorCode = "22G10"
+	ERROR_REFERENCE_VALUE_REFERENT_DELETED                         ErrorCode = "22G11"
+
+	ERROR_INVALID_GROUP_VARIABLE_VALUE              ErrorCode = "22G13"
+	ERROR_INCOMPATIBLE_TEMPORAL_INSTANT_UNIT_GROUPS ErrorCode = "22G14"
+
+	ERROR_INVALID_CAST ErrorCode = "22G15"
+
+	ERROR_INVALID_TRANSACTION_STATE                       ErrorCode = "25000"
+	ERROR_ACTIVE_GQL_TRANSACTION                          ErrorCode = "25G01"
+	ERROR_CATALOG_AND_DATA_STATEMENT_MIXING_NOT_SUPPORTED ErrorCode = "25G02"
+	ERROR_READ_ONLY_GQL_TRANSACTION                       ErrorCode = "25G03"
+	ERROR_ACCESSING_MULTIPLE_GRAPHS_NOT_SUPPORTED         ErrorCode = "25G04"
+
+	ERROR_INVALID_TRANSACTION_TERMINATION ErrorCode = "2D000"
+
+	ERROR_TRANSACTION_ROLLBACK         ErrorCode = "40000"
+	ERROR_STATEMENT_COMPLETION_UNKNOWN ErrorCode = "40003"
+
+	ERROR_SYNTAX_ERROR_OR_ACCESS_RULE_VIOLATION                      ErrorCode = "42000"
+	ERROR_INVALID_SYNTAX                                             ErrorCode = "42001"
+	ERROR_INVALID_REFERENCE                                          ErrorCode = "42002"
+	ERROR_USE_OF_VISUALLY_CONFUSABLE_IDENTIFIERS                     ErrorCode = "42004"
+	ERROR_SYNTAX_NUMBER_OF_EDGE_LABELS_BELOW_SUPPORTED_MINIMUM       ErrorCode = "42006"
+	ERROR_SYNTAX_NUMBER_OF_EDGE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM     ErrorCode = "42007"
+	ERROR_SYNTAX_NUMBER_OF_EDGE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM ErrorCode = "42008"
+	ERROR_SYNTAX_NUMBER_OF_NODE_LABELS_BELOW_SUPPORTED_MINIMUM       ErrorCode = "42009"
+	ERROR_SYNTAX_NUMBER_OF_NODE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM     ErrorCode = "42010"
+	ERROR_SYNTAX_NUMBER_OF_NODE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM ErrorCode = "42011"
+	ERROR_NUMBER_OF_NODE_TYPE_KEY_LABELS_BELOW_SUPPORTED_MINIMUM     ErrorCode = "42012"
+	ERROR_NUMBER_OF_NODE_TYPE_KEY_LABELS_EXCEEDS_SUPPORTED_MAXIMUM   ErrorCode = "42013"
+	ERROR_NUMBER_OF_EDGE_TYPE_KEY_LABELS_BELOW_SUPPORTED_MINIMUM     ErrorCode = "42014"
+	ERROR_NUMBER_OF_EDGE_TYPE_KEY_LABELS_EXCEEDS_SUPPORTED_MAXIMUM   ErrorCode = "42015"
+
+	ERROR_EMPTY_STATEMENT                                  ErrorCode = "42N01"
+	ERROR_INVALID_SYNTAX_MULTIPLE_PRIMARY_KEY              ErrorCode = "42N02"
+	ERROR_INVALID_SYNTAX_PRIMARY_KEY_NOT_FOUND_IN_PROPS    ErrorCode = "42N03"
+	ERROR_INVALID_SYNTAX_SRC_TYPE_OF_EDGE_NOT_SPECIFIED    ErrorCode = "42N04"
+	ERROR_INVALID_SYNTAX_DST_TYPE_OF_EDGE_NOT_SPECIFIED    ErrorCode = "42N05"
+	ERROR_INVALID_SYNTAX_UNKNOWN_ELEMENT_TYPE              ErrorCode = "42N06"
+	ERROR_INVALID_SYNTAX_INDEX_TYPE_ALIAS_ILLEGAL          ErrorCode = "42N07"
+	ERROR_INVALID_SYNTAX_DUPLICATE_PROPERTY                ErrorCode = "42N08"
+	ERROR_INVALID_SYNTAX_NEST_QUERY_LAST_STATEMENT_ERROR   ErrorCode = "42N09"
+	ERROR_INVALID_SYNTAX_NEST_QUERY_RESULT_STATEMENT_ERROR ErrorCode = "42N10"
+	ERROR_INVALID_SYNTAX_NEST_QUERY_COLUMN_SIZE_ERROR      ErrorCode = "42N11"
+	ERROR_INVALID_SYNTAX_NEST_QUERY_RETURN_AGG_ERROR       ErrorCode = "42N12"
+	ERROR_INVALID_SYNTAX_NEST_QUERY_RETURN_LIMIT_ERROR     ErrorCode = "42N13"
+	ERROR_INVALID_SYNTAX_VAR_TYPE_CONFLICT                 ErrorCode = "42N14"
+	ERROR_INVALID_SYNTAX_EQUI_JOIN_ON_CONDITIONAL_VAR      ErrorCode = "42N15"
+	ERROR_INVALID_SYNTAX_EQUI_JOIN_ON_GROUP_VAR            ErrorCode = "42N16"
+	ERROR_INVALID_SYNTAX_VAR_TYPE_ERROR                    ErrorCode = "42N17"
+	ERROR_INVALID_SYNTAX_VAR_NOT_DEFINED                   ErrorCode = "42N18"
+	ERROR_INVALID_SYNTAX_INSERT_BOUND_NODE                 ErrorCode = "42N19"
+	ERROR_INVALID_SYNTAX_VAR_INVALID_NODE_TYPE             ErrorCode = "42N20"
+	ERROR_INVALID_SYNTAX_VAR_REFER_MULTIPLE_NODE_TYPE      ErrorCode = "42N21"
+	ERROR_INVALID_SYNTAX_REDEFINED_VAR                     ErrorCode = "42N22"
+	ERROR_INVALID_SYNTAX_CONFLICT_VAR_TYPE                 ErrorCode = "42N23"
+	ERROR_INVALID_SYNTAX_YIELD_ITEM_TYPE                   ErrorCode = "42N24"
+	ERROR_INVALID_SYNTAX_MULTIPLE_NODE_INSERT              ErrorCode = "42N25"
+
+	ERROR_DEPENDENT_OBJECT_ERROR                     ErrorCode = "G1000"
+	ERROR_EDGES_STILL_EXIST                          ErrorCode = "G1001"
+	ERROR_ENDPOINT_NODE_IS_DELETED                   ErrorCode = "G1002"
+	ERROR_ENDPOINT_NODE_NOT_IN_CURRENT_WORKING_GRAPH ErrorCode = "G1003"
+
+	ERROR_GRAPH_TYPE_VIOLATION ErrorCode = "G2000"
+
+	ERROR_PART_NOT_FOUND             ErrorCode = "ND001"
+	ERROR_NODE_ALREADY_EXIST         ErrorCode = "ND002"
+	ERROR_EDGE_ALREADY_EXIST         ErrorCode = "ND003"
+	ERROR_PROPERTY_NOT_FOUND         ErrorCode = "ND004"
+	ERROR_LEADER_CHANGED             ErrorCode = "ND005"
+	ERROR_BINDING_TABLE_WRITE_FAILED ErrorCode = "ND006"
+	ERROR_BINDING_TABLE_NO_SPACE     ErrorCode = "ND007"
+
+	ERROR_CATALOG_DIRECTORY_NOT_FOUND               ErrorCode = "NC001"
+	ERROR_CATALOG_SCHEMA_NOT_FOUND                  ErrorCode = "NC002"
+	ERROR_CATALOG_NODE_TYPE_NOT_FOUND               ErrorCode = "NC003"
+	ERROR_CATALOG_EDGE_TYPE_NOT_FOUND               ErrorCode = "NC004"
+	ERROR_CATALOG_PRIMARY_KEY_NOT_FOUND             ErrorCode = "NC005"
+	ERROR_CATALOG_PROPERTY_NOT_FOUND                ErrorCode = "NC006"
+	ERROR_CATALOG_INDEX_NOT_FOUND                   ErrorCode = "NC007"
+	ERROR_CATALOG_PRIMARY_KEY_PROPERTY_NOT_FOUND    ErrorCode = "NC008"
+	ERROR_CATALOG_ELEMENT_TYPE_FOR_INSERT_NOT_FOUND ErrorCode = "NC009"
+
+	ERROR_CATALOG_SCHEMA_ALREADY_EXISTS       ErrorCode = "NC101"
+	ERROR_CATALOG_EDGE_TYPE_ALREADY_EXIST     ErrorCode = "NC102"
+	ERROR_CATALOG_NODE_TYPE_ALREADY_EXIST     ErrorCode = "NC103"
+	ERROR_CATALOG_GRAPH_TYPE_ALREADY_EXIST    ErrorCode = "NC104"
+	ERROR_CATALOG_GRAPH_ALREADY_EXIST         ErrorCode = "NC105"
+	ERROR_CATALOG_PROPERTY_TYPE_ALREADY_EXIST ErrorCode = "NC106"
+	ERROR_CATALOG_NODE_INDEX_ALREADY_EXISTS   ErrorCode = "NC107"
+	ERROR_CATALOG_EDGE_INDEX_ALREADY_EXISTS   ErrorCode = "NC108"
+
+	ERROR_CATALOG_GRAPH_TYPE_MISMATCH               ErrorCode = "NC201"
+	ERROR_CATALOG_PRIMARY_KEY_NULLABLE              ErrorCode = "NC202"
+	ERROR_CATALOG_INDEX_PROPERTY_TYPE_NOT_SUPPORTED ErrorCode = "NC203"
+	ERROR_CATALOG_PROPERTY_INVALID                  ErrorCode = "NC204"
+
+	ERROR_CATALOG_CANCEL_JOB_FAILED       ErrorCode = "NC301"
+	ERROR_CATALOG_DDL_MANAGER_STOPPED     ErrorCode = "NC302"
+	ERROR_CATALOG_STATE_PERMISSION_DENIED ErrorCode = "NC303"
+	ERROR_CATALOG_VERSION_RETIRED         ErrorCode = "NC304"
+
+	ERROR_META_CLUSTER_ALREADY_EXISTS ErrorCode = "NI001"
+	ERROR_META_CLUSTER_NOT_FOUND      ErrorCode = "NI002"
+
+	ERROR_META_SERVICE_HOST_NOT_ADDED         ErrorCode = "NI101"
+	ERROR_META_SERVICE_REPORT_NOT_MATCH_ADDED ErrorCode = "NI102"
+	ERROR_META_SERVICE_ALREADY_EXISTS         ErrorCode = "NI103"
+
+	ERROR_META_PART_CONFIG_INVALID ErrorCode = "NI201"
+
+	ERROR_STORAGE_EXECUTOR_PARAMETER_INVALID             ErrorCode = "NI301"
+	ERROR_STORAGE_EXECUTOR_PARAMETER_TYPE_INVALID        ErrorCode = "NI302"
+	ERROR_STORAGE_EXECUTOR_PARAMETER_PRIMARY_KEY_INVALID ErrorCode = "NI303"
+
+	ERROR_CONFIGURATION_INVALID                  ErrorCode = "NI401"
+	ERROR_CONFIGURATION_ITEM_NOT_FOUND           ErrorCode = "NI402"
+	ERROR_CONFIGURATION_ITEM_TYPE_INVALID        ErrorCode = "NI403"
+	ERROR_CONFIGURATION_ITEM_RANGE_INVALID       ErrorCode = "NI404"
+	ERROR_CONFIGURATION_INFO_FILE_FORMAT_ILLEGAL ErrorCode = "NI405"
+	ERROR_CONFIGURATION_INVALID_CONFIG_KEY       ErrorCode = "NI406"
+	ERROR_CONFIGURATION_INVALID_AUDIT_CATEGORY   ErrorCode = "NI407"
+	ERROR_CONFIGURATION_MISSING_CONFIG_KEY       ErrorCode = "NI408"
+	ERROR_CONFIGURATION_ILLEGAL_FORMAT           ErrorCode = "NI409"
+
+	ERROR_GRAPH_COMPUTE_ERROR ErrorCode = "NG000"
+
+	ERROR_PLUGIN_ERROR              ErrorCode = "NP000"
+	ERROR_PLUGIN_INVALID_TYPE       ErrorCode = "NP001"
+	ERROR_PLUGIN_MULTIPLE_PLUGIN    ErrorCode = "NP002"
+	ERROR_PLUGIN_CONFIG_NOT_FOUND   ErrorCode = "NP003"
+	ERROR_PLUGIN_CONFIG_PARSE_ERROR ErrorCode = "NP004"
+	ERROR_PLUGIN_INIT_ERROR         ErrorCode = "NP005"
+	ERROR_PLUGIN_DESTROY_ERROR      ErrorCode = "NP006"
+
+	ERROR_PROCEDURE_ERROR                   ErrorCode = "NP101"
+	ERROR_PROCEDURE_INVALID_ARGUMENT        ErrorCode = "NP102"
+	ERROR_PROCEDURE_NOT_FOUND               ErrorCode = "NP103"
+	ERROR_PROCEDURE_NO_INPUT                ErrorCode = "NP104"
+	ERROR_PROCEDURE_NUM_ARGS_NOT_ENOUGH     ErrorCode = "NP105"
+	ERROR_PROCEDURE_NUM_ARGS_EXCEEDED       ErrorCode = "NP106"
+	ERROR_PROCEDURE_INVALID_ARGUMENT_TYPE   ErrorCode = "NP107"
+	ERROR_PROCEDURE_INVALID_ARGUMENT_ENCODE ErrorCode = "NP108"
+	ERROR_PROCEDURE_YIELD_COLUMN_ERROR      ErrorCode = "NP109"
+	ERROR_PROCEDURE_UNKNOWN_YIELD_COLUMN    ErrorCode = "NP110"
+
+	ERROR_UDF_ERROR ErrorCode = "NP201"
+
+	ERROR_MODULE_ERROR                      ErrorCode = "NP301"
+	ERROR_MODULE_ALREADY_LOADED             ErrorCode = "NP302"
+	ERROR_MODULE_NOT_FOUND                  ErrorCode = "NP303"
+	ERROR_MODULE_BEING_USED                 ErrorCode = "NP304"
+	ERROR_MODULE_INVALID_PROC_NAME          ErrorCode = "NP305"
+	ERROR_MODULE_INVALID_FUNC_NAME          ErrorCode = "NP306"
+	ERROR_MODULE_INVALID_PLUGIN_NAME        ErrorCode = "NP307"
+	ERROR_MODULE_INVALID_PLUGIN_API_VERSION ErrorCode = "NP308"
+	ERROR_MODULE_INVALID_NULL_PLUGIN        ErrorCode = "NP309"
+	ERROR_MODULE_DLOPEN_ERROR               ErrorCode = "NP310"
+
+	ERROR_SESSION_ERROR         ErrorCode = "NE000"
+	ERROR_CREATE_SESSION_FAILED ErrorCode = "NE001"
+
+	ERROR_STORAGE_CODEC_PROPERTY_NOT_NULLABLE                       ErrorCode = "NO001"
+	ERROR_STORAGE_CODEC_PROPERTY_NOT_SET                            ErrorCode = "NO002"
+	ERROR_STORAGE_CODEC_PROPERTY_NOT_FOUND                          ErrorCode = "NO003"
+	ERROR_STORAGE_CODEC_PROPERTY_TYPE_NOT_MATCH                     ErrorCode = "NO004"
+	ERROR_STORAGE_CODEC_PROPERTY_OUT_OF_RANGE                       ErrorCode = "NO005"
+	ERROR_STORAGE_CODEC_PROPERTY_UNABLE_TO_ENCODE                   ErrorCode = "NO006"
+	ERROR_STORAGE_CODEC_INDEX_ILLEGAL                               ErrorCode = "NO007"
+	ERROR_STORAGE_CODEC_INDEX_PROPERTIES_ILLEGAL                    ErrorCode = "NO008"
+	ERROR_STORAGE_CODEC_INDEX_PROPERTY_NOT_REQUIRED                 ErrorCode = "NO009"
+	ERROR_STORAGE_CODEC_DECODE_FAILED                               ErrorCode = "NO010"
+	ERROR_STORAGE_CODEC_PROPERTY_LIST_NEST_TYPE_NOT_FOUND           ErrorCode = "NO011"
+	ERROR_STORAGE_CODEC_INDEX_CORRUPTION_NO_TERMINATOR              ErrorCode = "NO012"
+	ERROR_STORAGE_CODEC_INDEX_PROPERTIES_ILLEGAL_PROPERTY_NOT_EXIST ErrorCode = "NO013"
+	ERROR_STORAGE_CODEC_INDEX_ILLEGAL_NOT_RESERVED_PROPERTY         ErrorCode = "NO014"
+	ERROR_STORAGE_CODEC_WRITE_VECTOR_FAILED                         ErrorCode = "NO015"
+
+	ERROR_GET_ALL_PART_FAILED    ErrorCode = "NO101"
+	ERROR_GET_PART_ROUTER_FAILED ErrorCode = "NO102"
+	ERROR_GET_ALL_LEADER_FAILED  ErrorCode = "NO103"
+
+	ERROR_EXPR_EVAL_FAILED ErrorCode = "22N02"
+
+	ERROR_RUNTIME_ERROR ErrorCode = "NR000"
+
+	ERROR_EXPR_ERROR                        ErrorCode = "NR001"
+	ERROR_UNDEFINED_FUNCTION                ErrorCode = "NR002"
+	ERROR_INVALID_FUNCTION_ARGUMENT         ErrorCode = "NR003"
+	ERROR_INVALID_LOGICAL_EXPRESSION        ErrorCode = "NR004"
+	ERROR_EXPR_COMPILE_FAILED               ErrorCode = "NR005"
+	ERROR_RESOLVE_FUNCTION_FAILED           ErrorCode = "NR006"
+	ERROR_EXPR_TYPE_INFER_FAILED            ErrorCode = "NR007"
+	ERROR_INVALID_CAST_EXPR                 ErrorCode = "NR008"
+	ERROR_INVALID_CONST_EXPR                ErrorCode = "NR009"
+	ERROR_INVALID_CONSTRUCT_PATH_EXPR_INPUT ErrorCode = "NR010"
+	ERROR_INVALID_CASE_EXPR_INPUT           ErrorCode = "NR011"
+	ERROR_INVALID_EXPRESSION_TYPE           ErrorCode = "NR012"
+
+	ERROR_CREATE_NODE_INDEX_FAILED                ErrorCode = "NR100"
+	ERROR_CREATE_EDGE_INDEX_FAILED                ErrorCode = "NR101"
+	ERROR_CREATE_GRAPH_TYPE_FAILED                ErrorCode = "NR102"
+	ERROR_CREATE_GRAPH_FAILED                     ErrorCode = "NR103"
+	ERROR_DROP_REFERNCED_GRAPH_TYPE               ErrorCode = "NR104"
+	ERROR_DROP_GRAPH_TYPE_FAILED                  ErrorCode = "NR105"
+	ERROR_DROP_GRAPH_FAILED                       ErrorCode = "NR106"
+	ERROR_DROP_INDEX_FAILED                       ErrorCode = "NR107"
+	ERROR_CATALOG_MIRROR_GRAPH_ALREADY_EXIST      ErrorCode = "NR108"
+	ERROR_CATALOG_MIRROR_GRAPH_NOT_FOUND          ErrorCode = "NR109"
+	ERROR_CATALOG_GRAPH_ALREADY_HAVE_MIRROR_GRAPH ErrorCode = "NR110"
+	ERROR_CATALOG_GRAPH_DO_NOT_HAVE_MIRROR_GRAPH  ErrorCode = "NR111"
+	ERROR_CATALOG_MIRROR_GRAPH_NAME_CONFLICT      ErrorCode = "NR112"
+	ERROR_CATALOG_MIRROR_GRAPH_BASE_GRAPH_EMPTY   ErrorCode = "NR113"
+	ERROR_DISCRIMINATOR_NOT_FOUND_IN_PROPS        ErrorCode = "NR114"
+
+	ERROR_INSERT_NODE_FAILED                  ErrorCode = "NR201"
+	ERROR_GET_NODE_ID_FAILED                  ErrorCode = "NR202"
+	ERROR_INSERT_EDGE_FAILED                  ErrorCode = "NR203"
+	ERROR_SRC_NODE_NOT_EXISTED                ErrorCode = "NR204"
+	ERROR_DST_NODE_NOT_EXISTED                ErrorCode = "NR205"
+	ERROR_DML_NUM_OF_PROPERTY_NOT_MATCH       ErrorCode = "NR206"
+	ERROR_DML_PROPERTY_NOT_NULLABLE           ErrorCode = "NR207"
+	ERROR_PRIMARY_KEY_CONSTRAINT_VIOLATION    ErrorCode = "NR208"
+	ERROR_EDGE_RANK_CONSTRAINT_VIOLATION      ErrorCode = "NR209"
+	ERROR_NODE_IS_MISSING                     ErrorCode = "NR210"
+	ERROR_GET_NODE_ID_FROM_PRIMARY_KEY_FAILED ErrorCode = "NR211"
+	ERROR_INSERT_INFER_MORE_THAN_ONE_TYPE     ErrorCode = "NR212"
+	ERROR_ENDPOINT_NODE_TYPES_MISMATCH        ErrorCode = "NR213"
+
+	ERROR_SET_FAILED       ErrorCode = "NR231"
+	ERROR_SET_INVALID_TYPE ErrorCode = "NR232"
+
+	ERROR_DELETE_NODE_FAILED  ErrorCode = "NR251"
+	ERROR_DELETE_EDGE_FAILED  ErrorCode = "NR252"
+	ERROR_INVALID_DELETE_TYPE ErrorCode = "NR253"
+
+	ERROR_MEMORY_EXCEEDED              ErrorCode = "NR301"
+	ERROR_QUERY_CANCELED               ErrorCode = "NR302"
+	ERROR_BAD_PLAN_NODE_TYPE           ErrorCode = "NR303"
+	ERROR_SPLIT_PLAN_TO_STORAGE_FAILED ErrorCode = "NR304"
+
+	ERROR_KILL_QUERY_FAILED           ErrorCode = "NR401"
+	ERROR_KILL_SESSION_FAILED         ErrorCode = "NR402"
+	ERROR_QUERY_ID_NOT_FOUND          ErrorCode = "NR403"
+	ERROR_MAX_EXECUTION_TIME_EXCEEDED ErrorCode = "NR404"
+	ERROR_SESSION_NOT_FOUND           ErrorCode = "NR405"
+	ERROR_SESSION_IS_BUSY             ErrorCode = "NR406"
+
+	ERROR_SEMANTIC_ERROR                             ErrorCode = "NS000"
+	ERROR_UNDEFINED_VARIABLE                         ErrorCode = "NS001"
+	ERROR_DUPLICATE_DEFINE_VARIABLE                  ErrorCode = "NS002"
+	ERROR_UNDEFINED_PARAMETER                        ErrorCode = "NS003"
+	ERROR_SEMANTIC_LINEAR_QUERY_COLUMN_SIZE_MISMATCH ErrorCode = "NS004"
+	ERROR_SEMANTIC_FILTER_CLAUSE_MUST_BE_BOOL_TYPE   ErrorCode = "NS005"
+	ERROR_SEMANTIC_INVALID_EXPRESSION_TYPE           ErrorCode = "NS006"
+
+	ERROR_SEMANTIC_NODE_PRIMARY_KEY_PROPERTY_NUM_MISMATCH             ErrorCode = "NS101"
+	ERROR_SEMANTIC_NODE_PRIMARY_KEY_PROPERTY_NOT_FOUND                ErrorCode = "NS102"
+	ERROR_SEMANTIC_GRAPH_PATTERN_QUANTIFIER_EXCEED_LOW_BOUND          ErrorCode = "NS103"
+	ERROR_SEMANTIC_GRAPH_PATTERN_QUANTIFIER_LOW_BOUND_EXCEED_UP_BOUND ErrorCode = "NS104"
+	ERROR_SEMANTIC_INVALID_EDGE_PATTERN                               ErrorCode = "NS105"
+	ERROR_SEMANTIC_RETURN_ALL_WITH_GROUPBY                            ErrorCode = "NS106"
+	ERROR_SEMANTIC_RETURN_ALL_WITH_NO_VARS_IN_SCOPE                   ErrorCode = "NS107"
+	ERROR_SEMANTIC_RETURN_ALL_WITH_EMPTY_GROUPBY                      ErrorCode = "NS108"
+	ERROR_SEMANTIC_RETURN_DUPLICATE_COLUMN                            ErrorCode = "NS109"
+	ERROR_SEMANTIC_INVALID_EDGE_PREDICATE                             ErrorCode = "NS110"
+
+	ERROR_SEMANTIC_EMPTY_GROUPBY_MISMATCH          ErrorCode = "NS201"
+	ERROR_SEMANTIC_NO_AGG_FOUND_WITH_GROUPBY       ErrorCode = "NS202"
+	ERROR_SEMANTIC_GROUPBY_NO_BINDING              ErrorCode = "NS203"
+	ERROR_SEMANTIC_GROUPBY_CONTAIN_AGG_EXPR        ErrorCode = "NS204"
+	ERROR_SEMANTIC_GROUPBY_MISMATCH                ErrorCode = "NS205"
+	ERROR_SEMANTIC_IMPLICIT_AGG_IN_RETURN          ErrorCode = "NS206"
+	ERROR_SEMANTIC_VAR_PROP_SETITEM_ERROR          ErrorCode = "NS207"
+	ERROR_SEMANTIC_CAST_EXPR_TYPE_ERROR            ErrorCode = "NS208"
+	ERROR_SEMANTIC_CURRENT_WORKING_GRAPH_NOT_FOUND ErrorCode = "NS209"
+
+	ERROR_UNSUPPORTED ErrorCode = "NT000"
+
+	ERROR_UNSUPPORTED_INDEX_PROPERTY_TYPE           ErrorCode = "NT001"
+	ERROR_UNSUPPORTED_NODE_TYPE_WITHOUT_PRIMARY_KEY ErrorCode = "NT002"
+	ERROR_UNSUPPORTED_GRAPH_TYPE_EXPR               ErrorCode = "NT003"
+	ERROR_UNSUPPORTED_GRAPH_TYPE_INITIALIZER        ErrorCode = "NT004"
+	ERROR_UNSUPPORTED_EDGE_DIRECTION                ErrorCode = "NT005"
+
+	ERROR_UNSUPPORTED_INSERT_EDGE_STATEMENT  ErrorCode = "NT101"
+	ERROR_UNSUPPORTED_INSERT_NODE_STATEMENT  ErrorCode = "NT102"
+	ERROR_UNSUPPORTED_DATE_MODIFY_STATEMENT  ErrorCode = "NT103"
+	ERROR_UNSUPPORTED_MULTIPLE_PATH_PATTERN  ErrorCode = "NT104"
+	ERROR_UNSUPPORTED_UPDATE_PRIMARY_KEY     ErrorCode = "NT105"
+	ERROR_UNSUPPORTED_SET_MULTIPLE_NODE_TYPE ErrorCode = "NT106"
+	ERROR_UNSUPPORTED_SET_ALL_SET_LABEL      ErrorCode = "NT107"
+
+	ERROR_UNSUPPORTED_AGGREGATION_EXPRESSION        ErrorCode = "NT201"
+	ERROR_UNSUPPORTED_AGGREGATION_EXPRESSION_NESTED ErrorCode = "NT202"
+	ERROR_AGGREGATION_EXPRESSION_NOT_ALLOWED        ErrorCode = "NT203"
+	ERROR_UNDEFINED_AGG_FUNCTION                    ErrorCode = "NT204"
+	ERROR_UNSUPPORTED_TRIM_NON_ASCII_CHAR           ErrorCode = "NT205"
+	ERROR_UNSUPPORTED_TYPE_GET_PROP                 ErrorCode = "NT206"
+
+	ERROR_UNSUPPORTED_PATH_FACTOR ErrorCode = "NT301"
+
+	ERROR_UNSUPPORTED_CHARSET                     ErrorCode = "NT401"
+	ERROR_UNSUPPORTED_COLLATION                   ErrorCode = "NT402"
+	ERROR_UNSUPPORTED_CHARSET_COLLATION_NOT_MATCH ErrorCode = "NT403"
+	ERROR_UNSUPPORTED_HETEROGENEOUS_LIST_TYPE     ErrorCode = "NT404"
 )
 
 // TODO add error code in future
@@ -58,7 +416,7 @@ func errAddressNotValid(address string, msg string) error {
 		args = []interface{}{address, msg}
 	}
 	return &NebulaError{
-		errorCode:   ErrorAddressNotValid,
+		errorCode:   ERROR_ADDRESS_NOT_VALID,
 		errorFormat: format,
 		errorArgs:   args,
 	}
@@ -66,7 +424,7 @@ func errAddressNotValid(address string, msg string) error {
 
 func errConnCannotOpen(host string, port int, msg string) error {
 	return &NebulaError{
-		errorCode:   ErrorCannotOpen,
+		errorCode:   ERROR_CANNOT_OPEN,
 		errorFormat: "cannot open connection to %s:%d, %s",
 		errorArgs:   []interface{}{host, port, msg},
 	}
@@ -74,7 +432,7 @@ func errConnCannotOpen(host string, port int, msg string) error {
 
 func errConnBroken(host string, port int) error {
 	return &NebulaError{
-		errorCode:   ErrorConnIsBroken,
+		errorCode:   ERROR_CONN_IS_BROKEN,
 		errorFormat: "connection to %s:%d is broken",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -82,7 +440,7 @@ func errConnBroken(host string, port int) error {
 
 func errConnConnectTimeout(host string, port int) error {
 	return &NebulaError{
-		errorCode:   ErrorConnConnectTimeout,
+		errorCode:   ERROR_CONN_CONNECT_TIMEOUT,
 		errorFormat: "connection to %s:%d timeout",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -90,7 +448,7 @@ func errConnConnectTimeout(host string, port int) error {
 
 func errConnRequestTimeout(host string, port int) error {
 	return &NebulaError{
-		errorCode:   ErrorConnRequestTimeout,
+		errorCode:   ERROR_CONN_REQUEST_TIMEOUT,
 		errorFormat: "request to %s:%d timeout",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -98,7 +456,7 @@ func errConnRequestTimeout(host string, port int) error {
 
 func errConnIsClosed(host string, port int) error {
 	return &NebulaError{
-		errorCode:   ErrorConnIsClosed,
+		errorCode:   ERROR_CONN_IS_CLOSED,
 		errorFormat: "connection to %s:%d is closed",
 		errorArgs:   []interface{}{host, port},
 	}
@@ -106,7 +464,7 @@ func errConnIsClosed(host string, port int) error {
 
 func errWaitPoolTimeout() error {
 	return &NebulaError{
-		errorCode:   ErrorWaitPoolTimeout,
+		errorCode:   ERROR_WAIT_POOL_TIMEOUT,
 		errorFormat: "get from pool timeout",
 		errorArgs:   []interface{}{},
 	}
@@ -114,7 +472,7 @@ func errWaitPoolTimeout() error {
 
 func errIllegal(msg string) error {
 	return &NebulaError{
-		errorCode:   ErrorIllegal, // TODO need to add error code
+		errorCode:   ERROR_ILLEGAL, // TODO need to add error code
 		errorFormat: "Illegal error, %s",
 		errorArgs:   []interface{}{msg},
 	}
@@ -122,7 +480,7 @@ func errIllegal(msg string) error {
 
 func errType(msg string) error {
 	return &NebulaError{
-		errorCode:   ErrorType,
+		errorCode:   ERROR_TYPE,
 		errorFormat: "Type error, %s",
 		errorArgs:   []interface{}{msg},
 	}
@@ -132,7 +490,7 @@ func errType(msg string) error {
 // user should not see this error
 func errInternel(msg string) error {
 	return &NebulaError{
-		errorCode:   ErrorClientInternel,
+		errorCode:   ERROR_CLIENT_INTERNEL,
 		errorFormat: "Internel error, %s",
 		errorArgs:   []interface{}{msg},
 	}
@@ -145,13 +503,6 @@ func errServerResponse(code string, msg string) error {
 		errorFormat: "%s",
 		errorArgs:   []interface{}{msg},
 	}
-}
-
-func newErrorCode(class, subClass string) ErrorCode {
-	if len(class) != 2 || len(subClass) != 3 {
-		return ""
-	}
-	return ErrorCode(class + subClass)
 }
 
 func ErrorFromInt(c uint64) ErrorCode {

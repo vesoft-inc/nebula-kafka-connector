@@ -147,7 +147,7 @@ func (c *metaClient) retry(fn func() (responseHeader, error)) (responseHeader, e
 			return resp, nil
 		}
 		// if the error is not leader change, then return and do not retry
-		if nebula.ErrorFromInt(header.GetCode()) != nebula.ErrorLeaderChange {
+		if nebula.ErrorFromInt(header.GetCode()) != nebula.ERROR_LEADER_CHANGED {
 			return resp, nil
 		}
 		newLeader := header.GetLeader()

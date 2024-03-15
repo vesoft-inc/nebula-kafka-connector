@@ -7,10 +7,10 @@ import (
 )
 
 func TestErrorCode(t *testing.T) {
-	assert.Equal(t, ErrorLeaderChange.codeInt(), uint64(228441736270))
+	assert.Equal(t, ERROR_LEADER_CHANGED.codeInt(), uint64(228441736270))
 }
 
 func TestErrorFromInt(t *testing.T) {
 	c := uint64(228441736270)
-	assert.Equal(t, ErrorLeaderChange, ErrorFromInt(c))
+	assert.Equal(t, ERROR_LEADER_CHANGED, ErrorFromInt(c))
 }

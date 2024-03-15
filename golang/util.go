@@ -48,10 +48,10 @@ func isConnectionError(err error) bool {
 		return false
 	}
 	codes := []ErrorCode{
-		ErrorConnIsBroken,
-		ErrorConnConnectTimeout,
-		ErrorConnRequestTimeout,
-		ErrorConnIsClosed,
+		ERROR_CONN_IS_BROKEN,
+		ERROR_CONN_CONNECT_TIMEOUT,
+		ERROR_CONN_REQUEST_TIMEOUT,
+		ERROR_CONN_IS_CLOSED,
 	}
 	for _, c := range codes {
 		if ne.errorCode == c {

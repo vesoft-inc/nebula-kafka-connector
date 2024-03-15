@@ -11,14 +11,18 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Generator to generate the error code for client from Server ErrorCode definition
+ * Generator to generate the error code for client from Server ErrorCode
+ * definition
  */
 public class ErrorCodeGenerate {
 
     public static void main(String[] args) throws IOException {
 
         String codeFileName = args[0];
-
+        String client = args[1];
+        if (client == null) {
+            client = "java";
+        }
         Pattern pattern = Pattern.compile("DEFINE_ERRORCODE\\((.*), \"(.*)\", (.*?)\\),");
 
         File file = new File(codeFileName);
@@ -33,7 +37,6 @@ public class ErrorCodeGenerate {
                 continue;
             }
 
-
             Matcher matcher = pattern.matcher(error);
             if (matcher.find()) {
                 String errorPrefix = getCodePrefix(matcher.group(1));
@@ -42,15 +45,23 @@ public class ErrorCodeGenerate {
                 }
                 String errorCode = matcher.group(2);
                 String errorName = matcher.group(3);
-                String newCode = String.format("%s(\"%s\"),",
-                        errorName, errorPrefix + errorCode);
+                String newCode = "";
+                switch (client) {
+                    case "java":
+                        newCode = String.format("%s(\"%s\"),",
+                                errorName, errorPrefix + errorCode);
+                        break;
+                    case "golang":
+                        newCode = String.format("ERROR_%s ErrorCode = \"%s\"",
+                                errorName, errorPrefix + errorCode);
+                        break;
+                }
                 System.out.println(newCode);
             } else {
-                System.out.println("===== 未解析成功：" + error);
+                System.out.println("===== cannot parse the error code, " + error);
             }
         }
     }
-
 
     public static String getCodePrefix(String code) {
         switch (code.trim()) {
@@ -102,27 +113,28 @@ public class ErrorCodeGenerate {
             case "UNSUPPORTED":
                 return "NT";
             /* internal errors */
-            /*case "METADATA_ERROR":
-                return "NM";
-            case "RPC_ERROR":
-                return "NN";
-            case "KVSTORE_ERROR":
-                return "NK";
-            case "RAFT_ERROR":
-                return "NA";
-            case "SYSTEM_ERROR":
-                return "NY";
-            case "JOB_ERROR":
-                return "NJ";
-            case "LICENSE_ERROR":
-                return "NL";
-            case "UNKNOWN":
-                return "NU";*/
+            /*
+             * case "METADATA_ERROR":
+             * return "NM";
+             * case "RPC_ERROR":
+             * return "NN";
+             * case "KVSTORE_ERROR":
+             * return "NK";
+             * case "RAFT_ERROR":
+             * return "NA";
+             * case "SYSTEM_ERROR":
+             * return "NY";
+             * case "JOB_ERROR":
+             * return "NJ";
+             * case "LICENSE_ERROR":
+             * return "NL";
+             * case "UNKNOWN":
+             * return "NU";
+             */
             default:
                 return null;
         }
     }
-
 
     public static boolean isInternal(String code) {
         if (code.startsWith("NM")

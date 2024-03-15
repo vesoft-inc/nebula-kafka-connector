@@ -18,7 +18,7 @@ func main() {
 		panic(err)
 	}
 	defer c.Close()
-	if resp.Code == nebula.ErrorClusterExisted {
+	if resp.Code == nebula.ERROR_META_CLUSTER_ALREADY_EXISTS {
 		panic(fmt.Sprintf("msg:%s, code:%s", resp.GetErrorMsg(), resp.GetErrorCode()))
 	}
 }

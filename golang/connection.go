@@ -96,7 +96,7 @@ func (cn *connection) authenticate(username, password string) error {
 		_ = cn.Close()
 		return err
 	}
-	if string(resp.GetGqlStatus().GetCode()) != string(ErrorSuccessfulCompletion) {
+	if string(resp.GetGqlStatus().GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
 		return errServerResponse(string(resp.GetGqlStatus().GetCode()), resp.GetGqlStatus().String())
 	}
 	cn.sessionId = resp.GetSessionId()
@@ -147,7 +147,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		extraInfo: resp.ExecutionOutcome.ExtraInfo,
 	}
 
-	if string(resp.ExecutionOutcome.GetGqlStatus().GetCode()) != string(ErrorSuccessfulCompletion) {
+	if string(resp.ExecutionOutcome.GetGqlStatus().GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
 		return &resultResp, errServerResponse(
 			string(resp.ExecutionOutcome.GetGqlStatus().GetCode()),
 			(string(resp.GetExecutionOutcome().GetGqlStatus().GetMessage())))
