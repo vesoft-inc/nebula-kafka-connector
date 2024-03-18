@@ -15,24 +15,25 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_KEY;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import com.google.common.base.Charsets;
+import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
-import com.vesoft.nebula.graph.ExecutionOutcome;
-import com.vesoft.nebula.graph.ExecutionResponse;
-import com.vesoft.nebula.graph.GQLStatus;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.vesoft.nebula.proto.graph.ExecuteResponse;
+import com.vesoft.nebula.proto.graph.ExecutionOutcome;
+import com.vesoft.nebula.proto.graph.GQLStatus;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -88,8 +89,11 @@ public class NebulaWriterTest {
 
     @Test
     public void testWrite() {
-        ExecutionOutcome outcome = new ExecutionOutcome(new GQLStatus("SUCCESS".getBytes()));
-        ExecutionResponse response = new ExecutionResponse(outcome, 1000);
+        ExecutionOutcome outcome = ExecutionOutcome
+                .newBuilder()
+                .setGqlStatus(GQLStatus.newBuilder()
+                        .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build()).build();
+        ExecuteResponse response = ExecuteResponse.newBuilder().setExecutionOutcome(outcome).build();
         ResultSet result = new ResultSet(response);
         try {
             PowerMockito.when(mockProvider.execute(anyString())).thenReturn(result);
@@ -112,7 +116,6 @@ public class NebulaWriterTest {
             Method getNodeMethod = writer.getClass().getDeclaredMethod("getNode", Map.class);
             getNodeMethod.setAccessible(true);
             NebulaNode node = (NebulaNode) getNodeMethod.invoke(writer, properties);
-            assertEquals("1", node.getVid());
             assert (node.getProperties().containsKey("Name"));
             assert (node.getProperties().containsKey("Age"));
             assert (node.getProperties().containsValue("Bob"));
@@ -159,12 +162,12 @@ public class NebulaWriterTest {
         properties1.put("name", "A");
         properties1.put("age", 10);
         properties1.put("weight", 12);
-        NebulaNode node1 = new NebulaNode("1", properties1);
+        NebulaNode node1 = new NebulaNode(properties1);
         Map<String, Object> properties2 = new HashMap<>();
         properties2.put("name", "B");
         properties2.put("age", 20);
         properties2.put("weight", 22);
-        NebulaNode node2 = new NebulaNode("2", properties2);
+        NebulaNode node2 = new NebulaNode(properties2);
         nodes.add(node1);
         nodes.add(node2);
 
@@ -173,8 +176,8 @@ public class NebulaWriterTest {
                     , List.class);
             getNodeStatementMethod.setAccessible(true);
             String statement = (String) getNodeStatementMethod.invoke(writer, nodes);
-            String expect = ("USE nba INSERT NODE `person` ({id:1,name:\"A\",age:\"10\",weight:\"12\"})," +
-                    "({id:2,name:\"B\",age:\"20\",weight:\"22\"})");
+            String expect = ("USE `nba` INSERT NODE `person` ({`name`:\"A\",`age`:\"10\",`weight`:\"12\"})," +
+                    "({`name`:\"B\",`age`:\"20\",`weight`:\"22\"})");
             String statementStr = statement.chars().sorted().collect(StringBuilder::new,
                     StringBuilder::appendCodePoint, StringBuilder::append).toString();
             String expectStr = expect
@@ -197,11 +200,11 @@ public class NebulaWriterTest {
         Map<String, Object> properties1 = new HashMap<>();
         properties1.put("degree", 1);
         properties1.put("type", "friend");
-        NebulaEdge edge1 = new NebulaEdge("1", "2", properties1);
+        NebulaEdge edge1 = new NebulaEdge("srcId","1", "dstId","2", properties1);
         Map<String, Object> properties2 = new HashMap<>();
         properties2.put("degree", 2);
         properties2.put("type", "friend");
-        NebulaEdge edge2 = new NebulaEdge("2", "3", properties2);
+        NebulaEdge edge2 = new NebulaEdge("srcId","2", "dstId","3", properties2);
         edges.add(edge1);
         edges.add(edge2);
 
@@ -209,8 +212,8 @@ public class NebulaWriterTest {
             Method getEdgeStatementMethod = writer.getClass().getDeclaredMethod("getEdgeStatement", List.class);
             getEdgeStatementMethod.setAccessible(true);
             String statement = (String) getEdgeStatementMethod.invoke(writer, edges);
-            String expect = ("USE nba INSERT EDGE `friend` ({id:1})-[{degree:\"1\",type:\"friend\"}]->({id:2})," +
-                    "({id:2})-[{degree:\"2\",type:\"friend\"}]->({id:3})");
+            String expect = ("USE `nba` INSERT EDGE `friend` ({`srcId`:1})-[{`degree`:\"1\",`type`:\"friend\"}]->({`dstId`:2})," +
+                    "({`srcId`:2})-[{`degree`:\"2\",`type`:\"friend\"}]->({`dstId`:3})");
             String statementStr = statement.chars().sorted().collect(StringBuilder::new,
                     StringBuilder::appendCodePoint, StringBuilder::append).toString();
             String expectStr = expect
@@ -227,7 +230,7 @@ public class NebulaWriterTest {
         }
     }
 
-    private List<SinkRecord> getSinkRecords() {
+    private Collection<SinkRecord> getSinkRecords() {
         final Schema SCHEMA = SchemaBuilder.struct()
                 .field("id", Schema.STRING_SCHEMA)
                 .field("src", Schema.STRING_SCHEMA)

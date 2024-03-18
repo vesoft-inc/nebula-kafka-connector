@@ -74,7 +74,7 @@ public class NebulaGraphProvider implements Serializable {
                     schema.put(nameAndType[0], nameAndType[1]);
                 }
                 nodeSchema.setNodeTypeName(nodeType);
-                nodeSchema.setNodeIdType(schema.get("id"));
+                nodeSchema.setNodePkType(schema.get("id"));
                 nodeSchema.setNodeProperties(schema);
                 return nodeSchema;
             }
@@ -88,14 +88,14 @@ public class NebulaGraphProvider implements Serializable {
         Map<String, String> edgeInfo = getEdgeInfo(graphName, edgeType);
         String sourceType = edgeInfo.get("sourceType");
         String targetType = edgeInfo.get("targetType");
-        String sourceIdType = getNodeSchema(graphName, sourceType).getNodeIdType();
-        String targetIdType = getNodeSchema(graphName, targetType).getNodeIdType();
+        String sourceIdType = getNodeSchema(graphName, sourceType).getNodePkType();
+        String targetIdType = getNodeSchema(graphName, targetType).getNodePkType();
 
         edgeSchema.setEdgeTypeName(edgeType);
         edgeSchema.setSourceNodeTypeName(sourceType);
-        edgeSchema.setSourceNodeIdType(sourceIdType);
+        edgeSchema.setSourceNodePkType(sourceIdType);
         edgeSchema.setTargetNodeTypeName(targetType);
-        edgeSchema.setTargetNodeIdType(targetIdType);
+        edgeSchema.setTargetNodePkType(targetIdType);
 
         edgeInfo.remove("sourceType");
         edgeInfo.remove("targetType");
@@ -152,7 +152,7 @@ public class NebulaGraphProvider implements Serializable {
         String queryStatement = "DESCRIBE GRAPH TYPE " + graphType;
         resultSet = client.execute(queryStatement);
         if (!resultSet.isSucceeded()) {
-            throw new RuntimeException("query error with " + queryStatement + " for " + resultSet.getGqlStatus());
+            throw new RuntimeException("query error with " + queryStatement + " for " + resultSet.getErrorMessage());
         }
         return resultSet;
     }

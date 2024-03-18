@@ -23,7 +23,7 @@ public class NebulaNodeTest {
         props.put("age", 18);
         props.put("weight", 100);
         props.put("gender", "male");
-        node = new NebulaNode("1", props);
+        node = new NebulaNode(props);
 
         Map<String, String> schema = new HashMap<>();
         schema.put("id","STRING");
@@ -32,7 +32,7 @@ public class NebulaNodeTest {
         schema.put("weight", "INT32");
         schema.put("gender", "STRING");
         nodeSchema.setNodeTypeName("player");
-        nodeSchema.setNodeIdType("STRING");
+        nodeSchema.setNodePkType("STRING");
         nodeSchema.setNodeProperties(schema);
     }
 
@@ -47,7 +47,7 @@ public class NebulaNodeTest {
                                     StringBuilder::appendCodePoint,
                                     StringBuilder::append)
                             .toString();
-            String expect = "({id:\"1\",name:\"Tom\",age:18,weight:100,gender:\"male\"})"
+            String expect = "({`id`:\"1\",`name`:\"Tom\",`age`:18,`weight`:100,`gender`:\"male\"})"
                     .chars()
                     .sorted()
                     .collect(StringBuilder::new,
@@ -70,7 +70,7 @@ public class NebulaNodeTest {
                         StringBuilder::append)
                 .toString();
         String expect =
-                "{vid:1,name:Tom,age:18,gender:male,weight:100}"
+                "{`vid`:1,`name`:Tom,`age`:18,`gender`:male,`weight`:100}"
                         .chars()
                         .sorted()
                         .collect(StringBuilder::new,

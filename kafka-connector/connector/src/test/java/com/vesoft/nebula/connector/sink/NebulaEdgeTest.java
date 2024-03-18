@@ -22,16 +22,16 @@ public class NebulaEdgeTest {
         props.put("duration", 10);
         props.put("type", "friend");
         props.put("degree", 5);
-        edge = new NebulaEdge("1", "2", props);
+        edge = new NebulaEdge("srcId","1","dstId", "2", props);
 
         Map<String, String> schema = new HashMap<>();
         schema.put("duration", "INT64");
         schema.put("type", "STRING");
         schema.put("degree", "INT64");
         edgeSchema.setSourceNodeTypeName("person");
-        edgeSchema.setSourceNodeIdType("INT64");
+        edgeSchema.setSourceNodePkType("INT64");
         edgeSchema.setTargetNodeTypeName("person");
-        edgeSchema.setTargetNodeIdType("INT64");
+        edgeSchema.setTargetNodePkType("INT64");
         edgeSchema.setProperties(schema);
     }
 
@@ -46,7 +46,7 @@ public class NebulaEdgeTest {
                                     StringBuilder::appendCodePoint,
                                     StringBuilder::append)
                             .toString();
-            String expect = "({id:1})-[{duration:10,type:\"friend\",degree:5}]->({id:2})"
+            String expect = "({`id`:1})-[{`duration`:10,`type`:\"friend\",`degree`:5}]->({`id`:2})"
                     .chars()
                     .sorted()
                     .collect(StringBuilder::new,
@@ -69,7 +69,7 @@ public class NebulaEdgeTest {
                         StringBuilder::append)
                 .toString();
         String expect =
-                "{srcPk:1,dstPk:2,duration:10,degree:5,type:friend}"
+                "{`srcPk`:1,`dstPk`:2,`duration`:10,`degree`:5,`type`:friend}"
                         .chars()
                         .sorted()
                         .collect(StringBuilder::new,

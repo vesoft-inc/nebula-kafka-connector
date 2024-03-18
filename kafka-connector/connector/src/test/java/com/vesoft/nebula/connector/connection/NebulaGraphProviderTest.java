@@ -54,7 +54,7 @@ public class NebulaGraphProviderTest {
         try {
             NebulaNodeSchema schema = provider.getNodeSchema(graphName, nodeType);
             assert(schema.getNodeTypeName().equalsIgnoreCase(nodeType));
-            assert(schema.getNodeIdType().equalsIgnoreCase("INT64"));
+            assert(schema.getNodePkType().equalsIgnoreCase("INT64"));
             assert(schema.getNodeProperties().size() == 5);
         } catch (IOErrorException | NoValidSessionException e) {
             e.printStackTrace();
@@ -69,9 +69,9 @@ public class NebulaGraphProviderTest {
             NebulaEdgeSchema schema = provider.getEdgeSchema(graphName, edgeType);
             assert(schema.getEdgeTypeName().equalsIgnoreCase(edgeType));
             assert(schema.getSourceNodeTypeName().equalsIgnoreCase(nodeType));
-            assert(schema.getTargetNodeIdType().equalsIgnoreCase(nodeType));
-            assert(schema.getSourceNodeIdType().equalsIgnoreCase("INT64"));
-            assert(schema.getTargetNodeIdType().equalsIgnoreCase("INT64"));
+            assert(schema.getTargetNodePkType().equalsIgnoreCase(nodeType));
+            assert(schema.getSourceNodePkType().equalsIgnoreCase("INT64"));
+            assert(schema.getTargetNodePkType().equalsIgnoreCase("INT64"));
             assert(schema.getProperties().size()==2);
         }catch (Exception e){
             e.printStackTrace();
@@ -89,12 +89,12 @@ public class NebulaGraphProviderTest {
         try{
             ResultSet result  = provider.execute(createSchema);
             if(!result.isSucceeded()){
-                log.error(">>>>> create graph schema failed, {}", result.getGqlStatus());
+                log.error(">>>>> create graph schema failed, {}", result.getErrorMessage());
                 assert false;
             }
             result = provider.execute(createGraph);
             if(!result.isSucceeded()){
-                log.error(">>>>> create graph failed, {}", result.getGqlStatus());
+                log.error(">>>>> create graph failed, {}", result.getErrorMessage());
                 assert false;
             }
         }catch (Exception e){

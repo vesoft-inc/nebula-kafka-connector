@@ -23,11 +23,8 @@
     <dependencies>
         <dependency>
             <groupId>com.vesoft</groupId>
-            <artifactId>nebula-client</artifactId>
+            <artifactId>client</artifactId>
             <version>5.0.0</version>
-            <scope>system</scope>
-            <systemPath>/Users/nicole/repo/com/vesoft/nebula-client/5.0.0/nebula-client-5.0.0.jar
-            </systemPath>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

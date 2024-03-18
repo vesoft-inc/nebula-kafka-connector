@@ -128,14 +128,14 @@ object NebulaExecutor {
     * construct insert statement for node
     */
   def toExecuteSentence(graphName: String, nodeType: String, vertices: NebulaNodes): String = {
-    s"USE $graphName INSERT NODE `$nodeType` ${vertices.getNodesStr}"
+    s"USE `$graphName` INSERT NODE `$nodeType` ${vertices.getNodesStr}"
   }
 
   /**
     * construct insert statement for edge
     */
   def toExecuteSentence(graphName: String, edgeType: String, edges: NebulaEdges): String = {
-    s"USE $graphName INSERT EDGE `$edgeType` ${edges.getEdgesStr}"
+    s"USE `$graphName` INSERT EDGE `$edgeType` ${edges.getEdgesStr}"
   }
 
   /**

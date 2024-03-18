@@ -6,20 +6,28 @@
 package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.EDGE_VALUES_TEMPLATE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.PROPERTY_TEMPLATE;
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import com.vesoft.nebula.connector.util.NebulaUtils;
+import org.apache.kafka.common.protocol.types.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 public class NebulaEdge {
+    private String srcPkName;
     private String srcPk;
+    private String dstPkName;
     private String dstPk;
 
     private Map<String, Object> properties;
 
-    public NebulaEdge(String srcPk, String dstPk, Map<String, Object> properties) {
+    public NebulaEdge(String srcPkName, String srcPk,
+                      String dstPkName, String dstPk,
+                      Map<String, Object> properties) {
+        this.srcPkName = srcPkName;
         this.srcPk = srcPk;
+        this.dstPkName = dstPkName;
         this.dstPk = dstPk;
         this.properties = properties;
     }
@@ -28,16 +36,24 @@ public class NebulaEdge {
     public String getEdgeStatement(NebulaEdgeSchema edgeSchema) throws DataFormatException {
         List<String> propEntryStringList = new ArrayList<>();
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String propString = entry.getKey() + ":" + NebulaUtils.extractPropertyValue(edgeSchema.getProperties(),
-                    entry);
+            String propString = String.format(PROPERTY_TEMPLATE, entry.getKey(),
+                    NebulaUtils.extractPropertyValue(edgeSchema.getProperties(), entry));
             propEntryStringList.add(propString);
         }
         String props = String.join(",", propEntryStringList);
 
-        String srcId = NebulaUtils.extractIdValue(edgeSchema.getSourceNodeIdType(), srcPk);
-        String dstId = NebulaUtils.extractIdValue(edgeSchema.getTargetNodeIdType(), dstPk);
+        String srcPkValue = NebulaUtils.extractIdValue(edgeSchema.getSourceNodePkType(), srcPk);
+        String dstPkValue = NebulaUtils.extractIdValue(edgeSchema.getTargetNodePkType(), dstPk);
 
-        return String.format(EDGE_VALUES_TEMPLATE, srcId, props, dstId);
+        return String.format(EDGE_VALUES_TEMPLATE, srcPkName, srcPkValue, props, dstPkName, dstPkValue);
+    }
+
+    public String getSrcPkName() {
+        return srcPkName;
+    }
+
+    public void setSrcPkName(String srcPkName) {
+        this.srcPkName = srcPkName;
     }
 
     public String getSrcPk() {
@@ -46,6 +62,14 @@ public class NebulaEdge {
 
     public void setSrcPk(String srcPk) {
         this.srcPk = srcPk;
+    }
+
+    public String getDstPkName() {
+        return dstPkName;
+    }
+
+    public void setDstPkName(String dstPkName) {
+        this.dstPkName = dstPkName;
     }
 
     public String getDstPk() {
@@ -66,11 +90,7 @@ public class NebulaEdge {
 
     public String getEdgeString() {
         StringBuilder sb = new StringBuilder();
-        sb.append("{srcPk:");
-        sb.append(srcPk);
-        sb.append(",dstPk:");
-        sb.append(dstPk);
-        sb.append(",");
+        sb.append("{");
         for (Map.Entry<String, Object> kv : properties.entrySet()) {
             sb.append(kv.getKey());
             sb.append(":");

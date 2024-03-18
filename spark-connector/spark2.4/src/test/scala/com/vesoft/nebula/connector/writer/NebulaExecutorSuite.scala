@@ -112,7 +112,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       NebulaExecutor.toExecuteSentence(graphName, nodeType, nebulaNodes)
 
     val expectStatement =
-      s"""USE $graphName INSERT NODE `$nodeType` ({`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}),({`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")})""".stripMargin
+      s"""USE `$graphName` INSERT NODE `$nodeType` ({`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}),({`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")})""".stripMargin
 
     expectStatement.toCharArray.sorted.mkString("")
     assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
@@ -147,7 +147,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
     val edgeStatement = NebulaExecutor.toExecuteSentence(graphName, edgeType, nebulaEdges)
 
     val expectStatement =
-      s"""USE $graphName INSERT EDGE `$edgeType` ({`id`:\"vid1\"})-[{`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}]->({`id`:\"vid2\"}),({`id`:\"vid2\"})-[{`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")}]->({`id`:\"vid1\"})""".stripMargin
+      s"""USE `$graphName` INSERT EDGE `$edgeType` ({`id`:\"vid1\"})-[{`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}]->({`id`:\"vid2\"}),({`id`:\"vid2\"})-[{`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")}]->({`id`:\"vid1\"})""".stripMargin
     assert(expectStatement.toCharArray.sorted.mkString("").equals(edgeStatement.toCharArray.sorted.mkString("")))
   }
 }

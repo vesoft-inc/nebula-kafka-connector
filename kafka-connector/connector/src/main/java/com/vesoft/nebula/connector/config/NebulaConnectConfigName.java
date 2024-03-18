@@ -51,10 +51,11 @@ public class NebulaConnectConfigName {
 
 
     // ########## NebulaGraph Sink statement template
-    public static String BATCH_INSERT_NODE_TEMPLATE = "USE %s INSERT NODE `%s` %s";
-    public static String BATCH_INSERT_EDGE_TEMPLATE = "USE %s INSERT EDGE `%s` %s";
+    public static String BATCH_INSERT_NODE_TEMPLATE = "USE `%s` INSERT NODE `%s` %s";
+    public static String BATCH_INSERT_EDGE_TEMPLATE = "USE `%s` INSERT EDGE `%s` %s";
     public static String NODE_VALUES_TEMPLATE = "({%s})";
-    public static String EDGE_VALUES_TEMPLATE = "({id:%s})-[{%s}]->({id:%s})";
+    public static String EDGE_VALUES_TEMPLATE = "({`%s`:%s})-[{%s}]->({`%s`:%s})";
+    public static String PROPERTY_TEMPLATE = "`%s`:%s";
 
 
 }

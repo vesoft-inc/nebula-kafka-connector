@@ -12,7 +12,7 @@ import java.util.Map;
 public class NebulaUtils {
 
     public static String extractPropertyValue(Map<String, String> schema, Map.Entry<String,
-            Object> entry) throws DataFormatException {
+            Object> entry) {
         String propName = entry.getKey();
         String value = String.valueOf(entry.getValue());
         switch (schema.get(propName)) {
@@ -20,11 +20,15 @@ public class NebulaUtils {
                 return mkString(value, "\"", "", "\"");
             case "DATE":
                 return "date(\"" + value + "\")";
-            case "LOCALDATETIME":
-                return "localdatetime(\"" + value + "\")";
-            case "LOCALTIME": {
-                return "localtime(\"" + value + "\")";
+            case "LOCAL DATETIME":
+                return "local_datetime(\"" + value + "\")";
+            case "LOCAL TIME": {
+                return "local_time(\"" + value + "\")";
             }
+            case "ZONED DATETIME":
+                return "zoned_datetime(\"" + value + "\")";
+            case "ZONED TIME":
+                return "zoned_time(\"" + value + "\")";
             case "DURATION": {
                 return "duration(\"" + value + "\")";
             }
@@ -69,6 +73,24 @@ public class NebulaUtils {
             builder.append(value);
             builder.append(sep);
         }
-        return builder.deleteCharAt(builder.length() - 1).toString();
+        if (builder.length() > 0) {
+            builder.deleteCharAt(builder.length() - 1);
+        }
+        return builder.toString();
     }
+
+    public static boolean isNumeric(String str) {
+        String newStr = str;
+        if (str.startsWith("-")) {
+            newStr = str.substring(1);
+        }
+
+        for (char c : newStr.toCharArray()) {
+            if (!Character.isDigit(c)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
 }

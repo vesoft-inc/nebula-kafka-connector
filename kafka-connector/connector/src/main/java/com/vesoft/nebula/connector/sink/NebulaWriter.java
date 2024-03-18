@@ -7,6 +7,7 @@ package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.BATCH_INSERT_EDGE_TEMPLATE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.BATCH_INSERT_NODE_TEMPLATE;
+import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
@@ -52,7 +53,12 @@ public class NebulaWriter {
             if (config.dataType == NebulaConnectDataTypeEnum.NODE) {
                 nebulaNodeSchema = graphProvider.getNodeSchema(config.graphName,
                         config.graphNodeType);
+            } else if (config.dataType == NebulaConnectDataTypeEnum.EDGE) {
+                nebulaEdgeSchema = graphProvider.getEdgeSchema(config.graphName,
+                        config.graphEdgeType);
             } else {
+                nebulaNodeSchema = graphProvider.getNodeSchema(config.graphName,
+                        config.graphNodeType);
                 nebulaEdgeSchema = graphProvider.getEdgeSchema(config.graphName,
                         config.graphEdgeType);
             }
@@ -141,18 +147,19 @@ public class NebulaWriter {
         }
 
         int retry = 0;
-        while (retry++ < config.retryTimes && (result.getGqlStatus().contains("6029")
-                || result.getGqlStatus().contains("6026")
-                || result.getGqlStatus().contains("6019"))) {
+        // retry the write execution for RPC_ERROR, LEADER_CHANGED, RAFT_ERROR
+        while (retry++ < config.retryTimes && (result.getErrorCode().isRpcError()
+                || result.getErrorCode() == ErrorCode.LEADER_CHANGED
+                || result.getErrorCode().isRaftError())) {
             Thread.sleep(config.intervalTimeMill);
             result = graphProvider.execute(statement);
-            if(result.isSucceeded()){
+            if (result.isSucceeded()) {
                 log.info(">> write {} batch({}), latency({})", type, batch, result.getLatency());
                 return result;
             }
         }
 
-        log.error(">> write {} failed for {}", type, result.getGqlStatus());
+        log.error(">> write {} failed for {}", type, result.getErrorMessage());
         return result;
     }
 
@@ -178,8 +185,18 @@ public class NebulaWriter {
                     properties.get(nodePropertyNames.get(index)));
         }
 
+        if (properties.get(pk) == null) {
+            log.error(">>>>> record {} has null value for node primary key", pk);
+            return null;
+        }
+        if (nebulaNodeSchema.getNodePkType().equals("INT64")
+                && !NebulaUtils.isNumeric(properties.get(pk).toString())) {
+            log.error(">>>>> record {} value {} is not INT64 for node primary key", pk, properties.get(pk));
+            return null;
+        }
         // 将kafka properties 转换成nebula properties
-        NebulaNode node = new NebulaNode(String.valueOf(properties.get(pk)), nodeProperties);
+        NebulaNode node = new NebulaNode(nodeProperties);
+
         log.debug("nebula node: {}", node);
         return node;
     }
@@ -187,8 +204,30 @@ public class NebulaWriter {
     private NebulaEdge getEdge(Map<String, Object> properties) {
         List<String> edgePropertyNames = config.kafkaEdgePropertyNames;
         List<String> nebulaEdgePropertyNames = config.nebulaEdgePropertyNames;
+        String srcPkName = nebulaEdgeSchema.getSourceNodePkName();
         String srcPk = config.srcKey;
+        String dstPkName = nebulaEdgeSchema.getTargetNodePkName();
         String dstPk = config.dstKey;
+
+        if (properties.get(srcPk) == null) {
+            log.error(">>>>> record {} has null value for source node primary key", srcPk);
+            return null;
+        }
+        if (nebulaEdgeSchema.getSourceNodePkType().equals("INT64")
+                && !NebulaUtils.isNumeric(properties.get(srcPk).toString())) {
+            log.error(">>>>> record {} value {} is not INT64 for source node primary key", srcPk, properties.get(srcPk));
+            return null;
+        }
+
+        if (properties.get(dstPk) == null) {
+            log.error(">>>>> record {} has null value for target node primary key", dstPk);
+            return null;
+        }
+        if (nebulaEdgeSchema.getTargetNodePkType().equals("INT64")
+                && !NebulaUtils.isNumeric(properties.get(dstPk).toString())) {
+            log.error(">>>>> record {} value {} is not INT64 for target node primary key", dstPk, properties.get(dstPk));
+            return null;
+        }
 
         Map<String, Object> edgeProperties = new HashMap<>();
 
@@ -196,8 +235,8 @@ public class NebulaWriter {
             edgeProperties.put(nebulaEdgePropertyNames.get(index),
                     properties.get(edgePropertyNames.get(index)));
         }
-        NebulaEdge edge = new NebulaEdge(String.valueOf(properties.get(srcPk)),
-                String.valueOf(properties.get(dstPk)), edgeProperties);
+        NebulaEdge edge = new NebulaEdge(srcPkName, String.valueOf(properties.get(srcPk)),
+                dstPkName, String.valueOf(properties.get(dstPk)), edgeProperties);
         return edge;
     }
 
