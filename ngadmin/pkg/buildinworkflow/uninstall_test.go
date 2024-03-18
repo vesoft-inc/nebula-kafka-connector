@@ -5,22 +5,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
 func TestUninstall(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test uninstall")
-	err = job.Run("uninstall", map[string]any{
+	err := job.Run("uninstall", map[string]any{
 		"drain":     true,
 		"kill-wait": "10s",
 	}, spec)
@@ -35,13 +29,10 @@ func TestUninstall(t *testing.T) {
 }
 func TestUninstallCluster(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/cluster.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
+	delete(spec.UtilsProcesses, "license-manager")
 	job := runner.NewJob("test uninstall")
-	err = job.Run("uninstall", map[string]any{
+	err := job.Run("uninstall", map[string]any{
 		"drain":     true,
 		"kill-wait": "10s",
 	}, spec)
@@ -57,14 +48,10 @@ func TestUninstallCluster(t *testing.T) {
 
 func TestUninstallUtils(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Spec.Metad = nil
 	job := runner.NewJob("test uninstall")
-	err = job.Run("uninstall", map[string]any{
+	err := job.Run("uninstall", map[string]any{
 		"drain":     true,
 		"kill-wait": "10s",
 	}, spec)
@@ -80,11 +67,7 @@ func TestUninstallUtils(t *testing.T) {
 
 func TestUninstallUtilsSystemd(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Spec.Metad = nil
 	lm, ok := spec.UtilsProcesses["LicenseManager"]
 	if !ok {
@@ -92,7 +75,7 @@ func TestUninstallUtilsSystemd(t *testing.T) {
 	}
 	lm.StartType = "systemd"
 	job := runner.NewJob("test uninstall")
-	err = job.Run("uninstall", map[string]any{
+	err := job.Run("uninstall", map[string]any{
 		"drain":     true,
 		"kill-wait": "10s",
 	}, spec)

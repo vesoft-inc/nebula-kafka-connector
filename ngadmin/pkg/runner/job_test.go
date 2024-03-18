@@ -45,7 +45,11 @@ func TestRunTask(t *testing.T) {
 
 func TestAgent(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
+	executor.SetCertConfig(executor.CertConfig{
+		CAFile:  "../../certs/ca.crt",
+		KeyFile: "../../certs/ngadmin.key",
+		CrtFile: "../../certs/ngadmin.crt",
+	})
 	job := NewJob("test")
 
 	workflow := &types.WorkflowSpec{
@@ -68,7 +72,11 @@ func TestAgent(t *testing.T) {
 
 func TestUpload(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
+	executor.SetCertConfig(executor.CertConfig{
+		CAFile:  "../../certs/ca.crt",
+		KeyFile: "../../certs/ngadmin.key",
+		CrtFile: "../../certs/ngadmin.crt",
+	})
 	job := NewJob("test")
 	workflow := &types.WorkflowSpec{
 		Tasks: []*types.TaskSpec{

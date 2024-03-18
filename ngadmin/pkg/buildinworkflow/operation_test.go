@@ -5,22 +5,16 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
 func TestStop(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
-	err = job.Run("operation", map[string]any{
+	err := job.Run("operation", map[string]any{
 		"operation": "stop",
 		"component": "all",
 		"host":      "",
@@ -38,13 +32,9 @@ func TestStop(t *testing.T) {
 
 func TestStopUtil(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
-	err = job.Run("operation", map[string]any{
+	err := job.Run("operation", map[string]any{
 		"operation": "stop",
 		"component": "license-manager",
 		"host":      "",
@@ -61,14 +51,10 @@ func TestStopUtil(t *testing.T) {
 
 func TestStart(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Rollback = false
 	job := runner.NewJob("test start")
-	err = job.Run("operation", map[string]any{
+	err := job.Run("operation", map[string]any{
 		"operation": "start",
 		"component": "all",
 	}, spec)
@@ -85,13 +71,9 @@ func TestStart(t *testing.T) {
 
 func TestStopWithHostComponent(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
-	err = job.Run("operation", map[string]any{
+	err := job.Run("operation", map[string]any{
 		"operation": "stop",
 		"component": "graphd",
 		"host":      "192.168.8.240",

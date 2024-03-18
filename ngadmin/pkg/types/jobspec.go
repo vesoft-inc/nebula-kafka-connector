@@ -5,8 +5,11 @@ type JobSpec struct {
 	Version        string     `yaml:"version,omitempty"`
 	Rollback       bool       `yaml:"rollback,omitempty"`
 	InstallPath    string     `yaml:"installPath,omitempty"`
-	CertsPath      string     `yaml:"certsPath,omitempty"`
+	CertFile       string     `yaml:"certFile,omitempty"`
+	KeyFile        string     `yaml:"keyFile,omitempty"`
+	CAFile         string     `yaml:"caFile,omitempty"`
 	Spec           ProcessMap `yaml:"spec,omitempty"`
+	Info           any        `yaml:"info,omitempty"` //for some thing else just save it
 	UtilsProcesses map[string]*Process
 }
 
@@ -36,12 +39,11 @@ type Agent struct {
 }
 
 type Cluster struct {
-	ZoneList  []string `yaml:"zoneList,omitempty"`
-	Name      string   `yaml:"name,omitempty"`
-	Partition int      `yaml:"partition,omitempty"`
-	Replica   int      `yaml:"replica,omitempty"`
-	Graphd    Process  `yaml:"graphd,omitempty"`
-	Storaged  Process  `yaml:"storaged,omitempty"`
+	ZoneList []string `yaml:"zoneList,omitempty"`
+	Name     string   `yaml:"name,omitempty"`
+	Replica  int      `yaml:"replica,omitempty"`
+	Graphd   Process  `yaml:"graphd,omitempty"`
+	Storaged Process  `yaml:"storaged,omitempty"`
 }
 
 type StatusItem struct {

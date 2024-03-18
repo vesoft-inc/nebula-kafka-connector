@@ -35,9 +35,11 @@ func NewJob(name string) *Job {
 }
 
 func (j *Job) Run(cmd string, args map[string]any, spec *types.JobSpec) error {
-	if spec.CertsPath != "" {
-		executor.SetCertPath(spec.CertsPath)
-	}
+	executor.SetCertConfig(executor.CertConfig{
+		CrtFile: spec.CertFile,
+		KeyFile: spec.KeyFile,
+		CAFile:  spec.CAFile,
+	})
 	workflow, err := buildinworkflow.GetBuildinWorkflow(cmd, args, spec)
 	if workflow == nil || err != nil {
 		return fmt.Errorf("workflow %s build err:%s", cmd, err.Error())

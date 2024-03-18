@@ -6,23 +6,17 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/buildinworkflow"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
 func TestInstall(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
 	args := map[string]interface{}{
 		"force": true,
 	}
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Rollback = false
 	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
 	lm, ok := spec.UtilsProcesses["LicenseManager"]
@@ -45,14 +39,12 @@ func TestInstall(t *testing.T) {
 
 func TestClusterInstall(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
+
 	args := map[string]interface{}{
 		"force": true,
 	}
-	spec, err := yamlparser.ParseYamlByPath("../../examples/cluster.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
+	delete(spec.UtilsProcesses, "license-manager")
 	spec.Rollback = true
 	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
 	workflow, err := buildinworkflow.Install(args, spec)
@@ -71,14 +63,11 @@ func TestClusterInstall(t *testing.T) {
 
 func TestUtilsInstall(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
+
 	args := map[string]interface{}{
 		"force": true,
 	}
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Rollback = false
 	spec.Spec.Metad = nil
 	lm := spec.UtilsProcesses["license-manager"]
@@ -99,14 +88,11 @@ func TestUtilsInstall(t *testing.T) {
 
 func TestUtilsInstallSystemd(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
+
 	args := map[string]interface{}{
 		"force": true,
 	}
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Rollback = false
 	spec.Spec.Metad = nil
 	lm := spec.UtilsProcesses["LicenseManager"]

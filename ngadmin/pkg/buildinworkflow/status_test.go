@@ -6,22 +6,16 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/cmd"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/tasks"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
 func TestStatus(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
-	err = job.Run("status", map[string]any{
+	err := job.Run("status", map[string]any{
 		"component": "all",
 	}, spec)
 	assert.NoError(t, err)
@@ -36,14 +30,10 @@ func TestStatus(t *testing.T) {
 
 func TestUtilsStatus(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	spec.Spec.Metad = nil
 	job := runner.NewJob("test stop")
-	err = job.Run("status", map[string]any{
+	err := job.Run("status", map[string]any{
 		"component": "all",
 	}, spec)
 	assert.NoError(t, err)
@@ -58,18 +48,14 @@ func TestUtilsStatus(t *testing.T) {
 
 func TestSystemdStatus(t *testing.T) {
 	tasks.Init()
-	executor.SetCertPath("../../certs")
-	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
-	if err != nil {
-		t.Error(err)
-	}
+	spec := GetNebulaYaml(t)
 	lm, ok := spec.UtilsProcesses["license-manager"]
 	if !ok {
 		log.Fatal("LicenseManager not found")
 	}
 	lm.StartType = "systemd"
 	job := runner.NewJob("test stop")
-	err = job.Run("status", map[string]any{
+	err := job.Run("status", map[string]any{
 		"component": "all",
 	}, spec)
 	assert.NoError(t, err)

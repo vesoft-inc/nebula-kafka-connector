@@ -58,8 +58,11 @@ func TestShell(t *testing.T) {
 			},
 		},
 	}
-
-	executor.SetCertPath("../../certs")
+	executor.SetCertConfig(executor.CertConfig{
+		CAFile:  "../../certs/ca.crt",
+		KeyFile: "../../certs/ngadmin.key",
+		CrtFile: "../../certs/ngadmin.crt",
+	})
 	jobContext := NewJobContext()
 	task, err := NewSerial(taskSpec, jobContext)
 	assert.NoError(t, err)

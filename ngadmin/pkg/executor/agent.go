@@ -40,17 +40,20 @@ type AgentData struct {
 	Err    string `json:"err"`
 }
 
-var certPath string
+type CertConfig struct {
+	CAFile  string
+	CrtFile string
+	KeyFile string
+}
 
-func SetCertPath(path string) {
-	certPath = path
+var cert CertConfig
+
+func SetCertConfig(certConfig CertConfig) {
+	cert = certConfig
 }
 
 func NewAgentExecuter(host string, timeout int) (*AgentExecutor, error) {
-	if certPath == "" {
-		certPath = "certs"
-	}
-	tlsConfig, err := GetTLSConfig(certPath)
+	tlsConfig, err := GetTLSConfig(cert.CrtFile, cert.KeyFile, cert.CAFile)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +62,6 @@ func NewAgentExecuter(host string, timeout int) (*AgentExecutor, error) {
 
 	agent := &AgentExecutor{
 		Host:      host,
-		CertPath:  certPath,
 		client:    c,
 		timeout:   timeout,
 		tlsConfig: tlsConfig,
@@ -169,13 +171,13 @@ func (a *AgentExecutor) Download(src string, dest string) (stdout string, stderr
 	return "", "", nil
 }
 
-func GetTLSConfig(certPath string) (*tls.Config, error) {
-	cert, err := tls.LoadX509KeyPair(certPath+"/client.crt", certPath+"/client.key")
+func GetTLSConfig(crtPath string, keyPath string, caPath string) (*tls.Config, error) {
+	cert, err := tls.LoadX509KeyPair(crtPath, keyPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to load client cert and key: %v", err)
 	}
 
-	caCert, err := os.ReadFile(certPath + "/ca.crt")
+	caCert, err := os.ReadFile(caPath)
 	if err != nil {
 		return nil, fmt.Errorf("unable to read ca cert: %v", err)
 	}

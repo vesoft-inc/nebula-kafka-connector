@@ -2,6 +2,9 @@ version: 1.0
 kind: NebulaCluster
 rollback: true
 installPath: "/home/vesoft/nebula5.x"
+CertFile: certs/ngadmin.crt
+KeyFile: certs/ngadmin.key
+CAFile: certs/ca.crt
 spec:
   metad:
     packagePath: "./bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
@@ -16,7 +19,6 @@ spec:
       - zoneList: [zone1]
         name: cluster_mizy_test
         replica: 1
-        partition: 1
         graphd:
           config:
             port: 9669
@@ -30,7 +32,6 @@ spec:
       - zoneList: [zone2]
         name: cluster_mizy_test2
         replica: 1
-        partition: 1
         graphd:
           config:
             port: 9669
