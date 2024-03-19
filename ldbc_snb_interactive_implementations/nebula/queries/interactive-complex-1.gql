@@ -31,7 +31,7 @@ RETURN collect(
 ORDER BY
   distance ASC,
   friend.lastName ASC,
-  toInteger(friend.id) ASC
+  friend.id ASC
 LIMIT 20
 NEXT USE $graphName
 RETURN
