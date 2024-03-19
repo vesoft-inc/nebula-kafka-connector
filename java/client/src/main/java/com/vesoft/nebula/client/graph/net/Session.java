@@ -34,7 +34,6 @@ public class Session implements Serializable {
     private GrpcConnection connection;
     private final long requestTimeout;
     private final LoadBalancer loadBalancer;
-    private final Boolean retryConnect;
 
     /**
      * Constructor
@@ -42,17 +41,14 @@ public class Session implements Serializable {
      * @param connection   the connection from the pool
      * @param authResult   the auth result from graph service
      * @param loadBalancer the loadBalancer
-     * @param retryConnect whether to retry after the connection is disconnected
      */
     protected Session(GrpcConnection connection,
                       long requestTimeout,
                       AuthResult authResult,
-                      Boolean retryConnect,
                       LoadBalancer loadBalancer) {
         this.connection = connection;
         this.sessionID = authResult.getSessionId();
         this.loadBalancer = loadBalancer;
-        this.retryConnect = retryConnect;
         this.requestTimeout = requestTimeout;
     }
 

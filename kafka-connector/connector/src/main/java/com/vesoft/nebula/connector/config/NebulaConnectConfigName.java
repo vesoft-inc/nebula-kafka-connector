@@ -21,12 +21,10 @@ public class NebulaConnectConfigName {
     public static final String CONNECT_NEBULA_NODE_PROPERTIES = CONNECT_PREFIX + "node.property.names";
     public static final String CONNECT_KAFKA_EDGE_PROPERTIES = "kafka.edge.property.names";
     public static final String CONNECT_NEBULA_EDGE_PROPERTIES = CONNECT_PREFIX + "edge.property.names";
-    public static final String CONNECT_CONNECT_TIMEOUT = CONNECT_PREFIX + "connect.timeout";
     public static final String CONNECT_REQUEST_TIMEOUT = CONNECT_PREFIX + "request.timeout";
     public static final String CONNECT_SINK_RETRY_TIMES = CONNECT_PREFIX + "sink.retry.times";
     public static final String CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY = CONNECT_PREFIX +
             "sink.interval.time.mills";
-    public static final String CONNECT_SINK_RECONNECT = CONNECT_PREFIX + "sink.reconnect";
     public static final String CONNECT_SINK_PARTITION = CONNECT_PREFIX + "sink.partitions";
     public static final String CONNECT_SINK_MODE = CONNECT_PREFIX + "sink.mode";
     public static final String CONNECT_HEALTH_CHECK_TIME = CONNECT_PREFIX + "healthCheckTime";

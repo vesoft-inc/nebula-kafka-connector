@@ -45,7 +45,7 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
                 connection.open(loadBalancer.getAddress(), sessionPoolConfig.getRequestTimeout());
                 break;
             } catch (Exception e) {
-                if (tryConnect == 0 || !sessionPoolConfig.isReconnect()) {
+                if (tryConnect == 0) {
                     throw e;
                 } else {
                     log.warn("connect failed, " + e.getMessage());
@@ -62,7 +62,7 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
         }
 
         Session session = new Session(connection, sessionPoolConfig.getRequestTimeout(),
-                authResult, sessionPoolConfig.isReconnect(), loadBalancer);
+                authResult, loadBalancer);
         return session;
     }
 

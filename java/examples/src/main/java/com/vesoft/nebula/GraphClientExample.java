@@ -43,7 +43,6 @@ public class GraphClientExample {
                     .setMinSessionSize(1)
                     .setRetryTimes(3)
                     .setIntervalTimeMills(1000)
-                    .setReconnect(true)
                     .setBlockWhenExhausted(true)
                     .setMaxWaitMills(1000)
                     .setStrictlyServerHealthy(true)

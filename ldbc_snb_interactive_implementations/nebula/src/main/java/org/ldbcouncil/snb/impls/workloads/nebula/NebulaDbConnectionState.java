@@ -48,7 +48,6 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
                         .setMinSessionSize(maxSessionSize)
                         .setRetryTimes(retryTimes)
                         .setIntervalTimeMills(intervalTimeBetweenRetrys * 1000)
-                        .setReconnect(true)
                         .setBlockWhenExhausted(true)
                         .setMaxWaitMills(maxSessionWaitTime * 1000L)
                         .setStrictlyServerHealthy(true)

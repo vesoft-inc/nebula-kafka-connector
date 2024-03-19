@@ -40,7 +40,6 @@ public class NebulaGraphProvider implements Serializable {
                     .setMinSessionSize(1)
                     .setRetryTimes(config.retryTimes)
                     .setIntervalTimeMills(config.intervalTimeMill)
-                    .setReconnect(config.reconnect)
                     .setBlockWhenExhausted(true)
                     .setMaxWaitMills(Integer.MAX_VALUE)
                     .setStrictlyServerHealthy(true)

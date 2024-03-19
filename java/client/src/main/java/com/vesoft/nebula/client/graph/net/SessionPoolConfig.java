@@ -22,9 +22,6 @@ public class SessionPoolConfig implements Serializable {
     // The max connections in pool for all addresses
     private int maxSessionSize = 10;
 
-    // Socket connection timeout, unit: millisecond. 0 means never timeout
-    private int connTimeout = 0;
-
     // Socket request timeout, unit: millisecond. 0 means never timeout
     private long requestTimeout = 0;
 
@@ -37,9 +34,6 @@ public class SessionPoolConfig implements Serializable {
 
     // interval time for retry, unit ms
     private int intervalTime = 0;
-
-    // whether reconnect when create session using a broken graphd server
-    private boolean reconnect = false;
 
     // if block when session is exhausted, if false, throw exception.
     private boolean blockWhenExhausted = false;
@@ -104,18 +98,6 @@ public class SessionPoolConfig implements Serializable {
         return this;
     }
 
-    public int getConnTimeout() {
-        return connTimeout;
-    }
-
-    public SessionPoolConfig setConnTimeout(int connTimeout) {
-        if (connTimeout < 0) {
-            throw new IllegalArgumentException("connect timeout cannot be less than 0.");
-        }
-        this.connTimeout = connTimeout;
-        return this;
-    }
-
     public long getRequestTimeout() {
         return requestTimeout;
     }
@@ -164,15 +146,6 @@ public class SessionPoolConfig implements Serializable {
         return this;
     }
 
-    public boolean isReconnect() {
-        return reconnect;
-    }
-
-    public SessionPoolConfig setReconnect(boolean reconnect) {
-        this.reconnect = reconnect;
-        return this;
-    }
-
     public boolean isBlockWhenExhausted() {
         return blockWhenExhausted;
     }
@@ -218,12 +191,10 @@ public class SessionPoolConfig implements Serializable {
                 + ", password='" + password + '\''
                 + ", minSessionSize=" + minSessionSize
                 + ", maxSessionSize=" + maxSessionSize
-                + ", connTimeout=" + connTimeout
                 + ", requestTimeout=" + requestTimeout
                 + ", healthCheckTime=" + healthCheckTime
                 + ", retryTimes=" + retryTimes
                 + ", intervalTime=" + intervalTime
-                + ", reconnect=" + reconnect
                 + ", blockWhenExhausted=" + blockWhenExhausted
                 + ", maxWaitMills=" + maxWaitMills
                 + ", idleEvictScheduleMills=" + idleEvictScheduleMills

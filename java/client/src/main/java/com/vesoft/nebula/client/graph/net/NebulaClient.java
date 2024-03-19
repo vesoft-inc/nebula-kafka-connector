@@ -80,7 +80,6 @@ public class NebulaClient implements Serializable {
                 .setRequestTimeout(this.timeoutMs)
                 .setRetryTimes(this.retryTimes)
                 .setIntervalTime(this.intervalTime)
-                .setReconnect(builder.reconnect)
                 .setHealthCheckTime(builder.healthCheckTime)
                 .setBlockWhenExhausted(builder.blockWhenExhausted)
                 .setMaxWaitMills(this.maxWaitMills)
@@ -672,9 +671,6 @@ public class NebulaClient implements Serializable {
         // interval time for retry, unit: millisecond
         private int intervalTime = 0;
 
-        // if reconnect for broken graphd server or network jitter
-        private boolean reconnect = false;
-
         // The healthCheckTime for schedule check the health of session, unit: millisecond
         private int healthCheckTime = 300000;
 
@@ -744,11 +740,6 @@ public class NebulaClient implements Serializable {
                 throw new IllegalArgumentException("intervalTime cannot be less than 0.");
             }
             this.intervalTime = intervalTime;
-            return this;
-        }
-
-        public Builder setReconnect(boolean reconnect) {
-            this.reconnect = reconnect;
             return this;
         }
 

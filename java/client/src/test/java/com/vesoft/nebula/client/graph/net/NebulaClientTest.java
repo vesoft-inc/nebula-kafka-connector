@@ -32,7 +32,6 @@ public class NebulaClientTest {
                     .setMaxSessionSize(1)
                     .setMinSessionSize(0)
                     .setHealthCheckTimeMills(5000)
-                    .setReconnect(true)
                     .build();
             ResultSet resultSet = client.execute("return 1");
             Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);

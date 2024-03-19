@@ -7,7 +7,6 @@ package com.vesoft.nebula.connector.config;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BLOCK_WHEN_EXHAUSTED;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_KEY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE;
@@ -27,7 +26,6 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_MODE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RECONNECT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_KEY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_STRICTLY_SERVER_HEALTHY;
@@ -85,11 +83,9 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
     public List<String> nebulaNodePropertyNames = new ArrayList<>();
     public List<String> kafkaEdgePropertyNames = new ArrayList<>();
     public List<String> nebulaEdgePropertyNames = new ArrayList<>();
-    public final int connectTimeout;
     public final int requestTimeout;
     public final int retryTimes;
     public final int intervalTimeMill;
-    public final boolean reconnect;
     public final int healthCheckTime;
     public final boolean blockWithExhausted;
     public final int maxWaitTimeWhenSessionExhausted;
@@ -120,11 +116,9 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         kafkaEdgePropertyNames = getList(CONNECT_KAFKA_EDGE_PROPERTIES);
         nebulaNodePropertyNames = getList(CONNECT_NEBULA_NODE_PROPERTIES);
         nebulaEdgePropertyNames = getList(CONNECT_NEBULA_EDGE_PROPERTIES);
-        connectTimeout = getInt(CONNECT_CONNECT_TIMEOUT);
         requestTimeout = getInt(CONNECT_REQUEST_TIMEOUT);
         retryTimes = getInt(CONNECT_SINK_RETRY_TIMES);
         intervalTimeMill = getInt(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY);
-        reconnect = getBoolean(CONNECT_SINK_RECONNECT);
         healthCheckTime = getInt(CONNECT_HEALTH_CHECK_TIME);
         blockWithExhausted = getBoolean(CONNECT_BLOCK_WHEN_EXHAUSTED);
         maxWaitTimeWhenSessionExhausted = getInt(CONNECT_MAX_WAIT_TIME);
@@ -216,11 +210,6 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         null,
                         ConfigDef.Importance.HIGH,
                         "property name list for node type in Nebula")
-                .define(CONNECT_CONNECT_TIMEOUT,
-                        ConfigDef.Type.INT,
-                        DEFAULT_SINK_CONNECT_TIMEOUT,
-                        ConfigDef.Importance.LOW,
-                        "connect timeout for connection between client and server")
                 .define(CONNECT_REQUEST_TIMEOUT,
                         ConfigDef.Type.INT,
                         DEFAULT_SINK_REQUEST_TIMEOUT,
@@ -243,12 +232,6 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         ConfigDef.Importance.LOW,
                         "interval time between each retry execution, default is " +
                                 DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY)
-                .define(CONNECT_SINK_RECONNECT,
-                        ConfigDef.Type.BOOLEAN,
-                        DEFAULT_SINK_CONNECT_RECONNECT,
-                        ConfigDef.Importance.MEDIUM,
-                        "whether reconnect when session or connection is broken, default is " +
-                                DEFAULT_SINK_CONNECT_RECONNECT)
                 .define(CONNECT_HEALTH_CHECK_TIME,
                         ConfigDef.Type.INT,
                         3000,
