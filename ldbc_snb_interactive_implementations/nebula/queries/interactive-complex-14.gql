@@ -5,32 +5,21 @@
   14 AS person1Id,
   27 AS person2Id
 }
+
 USE $graphName
-MATCH path0 = ALL SHORTEST PATH (person1:Person {id : $person1Id})-[:KNOWS]-{1,15}(person2:Person {id : $person2Id})
+MATCH path0 = ALL SHORTEST PATH (person1:Person {id:$person1Id})<-[:KNOWS]->*(person2:Person {id:$person2Id})
 LET pathNodes = nodes(path0)
-RETURN
-  List[n IN pathNodes | n.id] AS personIdsInPath,
-  reduce(
-      weight=0.0, idx IN range(1,size(pathNodes)-1) |
-      List[prev IN List[pathNodes[idx-1]] |
-          List[curr IN List[pathNodes[idx]] |
-              weight + size(VALUE {
-                  USE $graphName
-                  MATCH p = (curr)<-[:HAS_CREATOR]-(:`Comment`)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(prev)
-                  RETURN p
-              })*1.0 + size(VALUE {
-                  USE $graphName
-                  MATCH p = (prev)<-[:HAS_CREATOR]-(:`Comment`)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(curr)
-                  RETURN p
-              })*1.0 + size(VALUE {
-                  USE $graphName
-                  MATCH p = (prev)-[:HAS_CREATOR]-(:`Comment`)-[:REPLY_OF]-(:`Comment`)-[:HAS_CREATOR]-(curr)
-                  RETURN p
-              })*0.5
-          ]
-      ][0][0]
-  ) AS pathWight
+LET numNodes = CAST(size(pathNodes)-1 AS INT64)
+FOR i IN range(1, numNodes)
+LET prev = pathNodes[i-1], curr = pathNodes[i]
+RETURN 1.0 * VALUE {MATCH (curr)<-[:HAS_CREATOR]-(:Comment)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(prev) RETURN COUNT(*) AS a GROUP BY ()}
+    + 1.0 * VALUE {MATCH (prev)<-[:HAS_CREATOR]-(:Comment)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(curr) RETURN COUNT(*) AS b GROUP BY ()}
+    + 0.5 * VALUE {MATCH (prev)<-[:HAS_CREATOR]-(:Comment)<-[:REPLY_OF]->(:Comment)-[:HAS_CREATOR]->(curr) RETURN COUNT(*) AS c GROUP BY ()}
+    AS weight, pathNodes, numNodes
 NEXT
-USE $graphName
-ORDER BY pathWight DESC
-RETURN pathWight
+RETURN pathNodes, numNodes, SUM(weight) AS pathWeight GROUP BY pathNodes, numNodes
+ORDER BY pathWeight DESC
+NEXT
+FOR i IN range(0, numNodes)
+LET pathNode = pathNodes[i]
+RETURN COLLECT(pathNode.id) AS personIdsInPath, pathWeight GROUP BY pathNodes, pathWeight
