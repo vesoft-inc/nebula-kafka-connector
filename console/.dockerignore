@@ -1,9 +1,0 @@
-nebula-console
-LICENSE
-.gitignore
-.editorconfig
-*.md
-*.nGQL
-
-ci/
-.github/

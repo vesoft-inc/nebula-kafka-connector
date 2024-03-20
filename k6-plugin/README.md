@@ -233,7 +233,7 @@ It can also use `k6` for batch insert testing.
 ```bash
 # create schema
 cd example
-nebula-console -addr 192.168.8.61 -port 9669 -u root -p nebula -f schema.ngql
+ngql -addr 192.168.8.61 -port 9669 -u root -p nebula -f schema.ngql
 
 # run testing
 ../k6 run nebula-test-insert.js -vu 10 -d 30s 

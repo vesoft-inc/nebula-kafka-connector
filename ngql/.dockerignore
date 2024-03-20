@@ -1,0 +1,10 @@
+LICENSE
+.gitignore
+.editorconfig
+*.md
+*.nGQL
+
+ci/
+.github/
+
+ngql

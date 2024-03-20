@@ -172,16 +172,16 @@ services:
       - ./logs/graphd2:/logs
   
   console:
-    image: ${IMAGE_GROUP}/meta-ctl:${IMAGE_VERSION}
+    image: ${IMAGE_GROUP}/ngctl:${IMAGE_VERSION}
     entrypoint: ""
     command: 
       - sh
       - -c
       - |
         sleep 5;
-        meta-ctl login -H metad0 -P 9559;
+        ngctl login -H metad0 -P 9559;
         for i in `seq 1 60`;do
-          var=`meta-ctl cluster create --cluster my_cluster1 --replica 3 --zones zh_sh,zh_bj,zh_hz`;
+          var=`ngctl cluster create --cluster my_cluster1 --replica 3 --zones zh_sh,zh_bj,zh_hz`;
           if [[ $$? == 0 ]];then
             break;
           fi;
@@ -189,8 +189,8 @@ services:
           echo "retry to connect metad0";
         done ;
         for i in `seq 0 2`;do
-          meta-ctl service add --type graphd -H graphd$${i} --port 9669 --cluster my_cluster1
-          meta-ctl service add --type storaged -H storaged$${i} --port 9559 --cluster my_cluster1
+          ngctl service add --type graphd -H graphd$${i} --port 9669 --cluster my_cluster1
+          ngctl service add --type storaged -H storaged$${i} --port 9559 --cluster my_cluster1
         done;
         tail -f /dev/null;
 

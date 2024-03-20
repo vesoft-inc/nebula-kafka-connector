@@ -29,12 +29,15 @@ jobs:
       - name: NebulaGo Unit tests
         run: make test
         working-directory: golang
-      - name: console build
+      - name: ngql build
         run: make build
-        working-directory: console
-      - name: ngadmin build
+        working-directory: ngql
+      - name: ngctl build
         run: make build
-        working-directory: ngadmin
+        working-directory: ngctl
+      - name: ngadm build
+        run: make build
+        working-directory: ngadm
       - name: k6-plugin build
         run: make build-dev
         working-directory: k6-plugin

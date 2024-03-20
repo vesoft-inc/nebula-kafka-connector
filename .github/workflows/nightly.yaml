@@ -29,21 +29,21 @@ jobs:
           password: ${{ secrets.HARBOR_PASSWORD }}
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Build and push Docker images - meta-ctl
+      - name: Build and push Docker images - ngctl
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-          tags: reg.vesoft-inc.com/vesoft-ng/meta-ctl:ngihtly
+          tags: reg.vesoft-inc.com/vesoft-ng/ngctl:ngihtly
           push: true
           context: .
-          file: ./console/Dockerfile
-          target: meta-ctl
-      - name: Build and push Docker images - nebula-console
+          file: ./ngctl/Dockerfile
+          target: ngctl
+      - name: Build and push Docker images - ngql
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-          tags: reg.vesoft-inc.com/vesoft-ng/nebula-console:nightly
+          tags: reg.vesoft-inc.com/vesoft-ng/ngql:nightly
           push: true
           context: .
-          file: ./console/Dockerfile
-          target: nebula-console
+          file: ./ngql/Dockerfile
+          target: ngql

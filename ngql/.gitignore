@@ -1,0 +1,33 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of debug
+__debug_bin
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Output of local command
+*.dot
+*.csv
+
+# Dependency directories (remove the comment below to include it)
+vendor/
+
+.vscode/
+
+# TODO(Aiee) Keep the binary in the git repository for simplicity
+ngql
+
+# Auto generated code by `go generate`
+box/blob.go
+
+
+*.DS_Store
