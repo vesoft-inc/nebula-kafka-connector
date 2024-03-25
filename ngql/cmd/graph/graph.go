@@ -356,7 +356,6 @@ func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (
 
 	extraInfo := res.ExtraInfo()
 	if extraInfo != nil {
-		fmt.Println()
 		extraInfoPrinter.PrintMutationInfo(extraInfo)
 	}
 	fmt.Println()
@@ -401,16 +400,13 @@ func loop(c cli.Cli) error {
 			start := time.Now()
 			res, err := client.Execute(line)
 			if err != nil {
-				fmt.Printf("[ERROR]: %s", err.Error())
+				fmt.Printf("[ERROR]: %s\n", err.Error())
 				if res != nil {
 					extraInfo := res.ExtraInfo()
 					if extraInfo != nil {
-						fmt.Println()
-						fmt.Println()
 						extraInfoPrinter.PrintMutationInfo(extraInfo)
 					}
 				}
-				fmt.Println()
 				fmt.Println()
 				break
 			}

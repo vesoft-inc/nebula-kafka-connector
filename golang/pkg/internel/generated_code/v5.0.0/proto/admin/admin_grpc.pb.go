@@ -29,6 +29,10 @@ const (
 	AdminService_CreateCluster_FullMethodName = "/nebula.proto.admin.AdminService/CreateCluster"
 	AdminService_ShowCluster_FullMethodName   = "/nebula.proto.admin.AdminService/ShowCluster"
 	AdminService_InitStorage_FullMethodName   = "/nebula.proto.admin.AdminService/InitStorage"
+	AdminService_CreateBackup_FullMethodName  = "/nebula.proto.admin.AdminService/CreateBackup"
+	AdminService_Restore_FullMethodName       = "/nebula.proto.admin.AdminService/Restore"
+	AdminService_ListClusters_FullMethodName  = "/nebula.proto.admin.AdminService/ListClusters"
+	AdminService_DropBackup_FullMethodName    = "/nebula.proto.admin.AdminService/DropBackup"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -41,6 +45,10 @@ type AdminServiceClient interface {
 	CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error)
 	ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error)
 	InitStorage(ctx context.Context, in *InitStorageRequest, opts ...grpc.CallOption) (*InitStorageResponse, error)
+	CreateBackup(ctx context.Context, in *CreateBackupRequest, opts ...grpc.CallOption) (*CreateBackupResponse, error)
+	Restore(ctx context.Context, in *RestoreRequest, opts ...grpc.CallOption) (*RestoreResponse, error)
+	ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error)
+	DropBackup(ctx context.Context, in *DropBackupRequest, opts ...grpc.CallOption) (*DropBackupResponse, error)
 }
 
 type adminServiceClient struct {
@@ -105,6 +113,42 @@ func (c *adminServiceClient) InitStorage(ctx context.Context, in *InitStorageReq
 	return out, nil
 }
 
+func (c *adminServiceClient) CreateBackup(ctx context.Context, in *CreateBackupRequest, opts ...grpc.CallOption) (*CreateBackupResponse, error) {
+	out := new(CreateBackupResponse)
+	err := c.cc.Invoke(ctx, AdminService_CreateBackup_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) Restore(ctx context.Context, in *RestoreRequest, opts ...grpc.CallOption) (*RestoreResponse, error) {
+	out := new(RestoreResponse)
+	err := c.cc.Invoke(ctx, AdminService_Restore_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error) {
+	out := new(ListClustersResponse)
+	err := c.cc.Invoke(ctx, AdminService_ListClusters_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) DropBackup(ctx context.Context, in *DropBackupRequest, opts ...grpc.CallOption) (*DropBackupResponse, error) {
+	out := new(DropBackupResponse)
+	err := c.cc.Invoke(ctx, AdminService_DropBackup_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServiceServer is the server API for AdminService service.
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility
@@ -115,6 +159,10 @@ type AdminServiceServer interface {
 	CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error)
 	ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error)
 	InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error)
+	CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error)
+	Restore(context.Context, *RestoreRequest) (*RestoreResponse, error)
+	ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error)
+	DropBackup(context.Context, *DropBackupRequest) (*DropBackupResponse, error)
 	mustEmbedUnimplementedAdminServiceServer()
 }
 
@@ -139,6 +187,18 @@ func (UnimplementedAdminServiceServer) ShowCluster(context.Context, *ShowCluster
 }
 func (UnimplementedAdminServiceServer) InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitStorage not implemented")
+}
+func (UnimplementedAdminServiceServer) CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateBackup not implemented")
+}
+func (UnimplementedAdminServiceServer) Restore(context.Context, *RestoreRequest) (*RestoreResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Restore not implemented")
+}
+func (UnimplementedAdminServiceServer) ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListClusters not implemented")
+}
+func (UnimplementedAdminServiceServer) DropBackup(context.Context, *DropBackupRequest) (*DropBackupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropBackup not implemented")
 }
 func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
 
@@ -261,6 +321,78 @@ func _AdminService_InitStorage_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminService_CreateBackup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateBackupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).CreateBackup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_CreateBackup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).CreateBackup(ctx, req.(*CreateBackupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_Restore_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RestoreRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).Restore(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_Restore_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).Restore(ctx, req.(*RestoreRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_ListClusters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListClustersRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ListClusters(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ListClusters_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ListClusters(ctx, req.(*ListClustersRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_DropBackup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropBackupRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).DropBackup(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_DropBackup_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).DropBackup(ctx, req.(*DropBackupRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminService_ServiceDesc is the grpc.ServiceDesc for AdminService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -291,6 +423,22 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitStorage",
 			Handler:    _AdminService_InitStorage_Handler,
+		},
+		{
+			MethodName: "CreateBackup",
+			Handler:    _AdminService_CreateBackup_Handler,
+		},
+		{
+			MethodName: "Restore",
+			Handler:    _AdminService_Restore_Handler,
+		},
+		{
+			MethodName: "ListClusters",
+			Handler:    _AdminService_ListClusters_Handler,
+		},
+		{
+			MethodName: "DropBackup",
+			Handler:    _AdminService_DropBackup_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

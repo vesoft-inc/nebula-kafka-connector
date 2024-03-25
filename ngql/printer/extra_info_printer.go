@@ -15,15 +15,16 @@ import (
 type ExtraInfoPrinter struct{}
 
 func (ExtraInfoPrinter) PrintMutationInfo(extraInfo nebula.ExtraInfo) {
-	affectedNodes, ok := extraInfo.GetValueByName("affected_nodes")
+	affectedNodes, ok := extraInfo.AffectedNodes()
 	if ok != nil {
 		return
 	}
-	affectedForwardEdges, okFor := extraInfo.GetValueByName("affected_forward_edges")
-	affectedReverseEdges, okRev := extraInfo.GetValueByName("affected_reverse_edges")
+	affectedForwardEdges, okFor := extraInfo.AffectedForwardEdges()
+	affectedReverseEdges, okRev := extraInfo.AffectedReverseEdges()
 	if okFor != nil || okRev != nil {
 		log.Fatal("affected_nodes, affected_forward_edges and affected_reverse_edges should be sent together.")
 	}
-	fmt.Printf("Affected: %s nodes, %s forward edges, %s reverse edges\n",
-		affectedNodes.String(), affectedForwardEdges.String(), affectedReverseEdges.String())
+	fmt.Println()
+	fmt.Printf("Affected: %d nodes, %d forward edges, %d reverse edges\n",
+		affectedNodes, affectedForwardEdges, affectedReverseEdges)
 }

@@ -27,7 +27,10 @@ type (
 	}
 
 	ExtraInfo interface {
-		GetValueByName(name string) (Value, error)
+		Cursor() (string, error)
+		AffectedNodes() (int, error)
+		AffectedForwardEdges() (int, error)
+		AffectedReverseEdges() (int, error)
 	}
 
 	// an internel interface to get the connection

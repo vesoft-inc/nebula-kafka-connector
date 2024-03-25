@@ -28,21 +28,19 @@ type connection struct {
 	timeout     time.Duration
 }
 
+type extraInfoType map[graph.ExtraInfoKind]Value
+
 type resultSet struct {
 	index     int
 	latency   uint64
 	result    *graph.ResultTable
 	planDesc  []byte
-	extraInfo map[string]*graph.Value
+	extraInfo []*graph.ExtraInfoElement
 }
 
 type rowData struct {
 	resultSet *resultSet
 	values    []Value
-}
-
-type extraInfoData struct {
-	extraInfo map[string]Value
 }
 
 func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Conn, error) {
@@ -243,16 +241,11 @@ func (rs *resultSet) PlanDesc() []byte {
 }
 
 func (rs *resultSet) ExtraInfo() ExtraInfo {
-	if rs.extraInfo == nil {
-		return nil
+	extr := make(extraInfoType, len(rs.extraInfo))
+	for _, e := range rs.extraInfo {
+		extr[e.GetKind()] = &grpcValue{data: e.GetValue()}
 	}
-	var res = &extraInfoData{
-		extraInfo: make(map[string]Value, len(rs.extraInfo)),
-	}
-	for key, val := range rs.extraInfo {
-		res.extraInfo[key] = &grpcValue{data: val}
-	}
-	return res
+	return extr
 }
 
 func (rd *rowData) Values() []Value {
@@ -281,10 +274,57 @@ func (rd *rowData) GetValueByIndex(index int) (Value, error) {
 	return rd.values[index], nil
 }
 
-func (ed *extraInfoData) GetValueByName(name string) (Value, error) {
-	value, ok := ed.extraInfo[name]
+func (ed extraInfoType) get(key graph.ExtraInfoKind) (Value, error) {
+	v, ok := ed[key]
 	if !ok {
-		return nil, errInternel(fmt.Sprintf("ExtraInfo %s not found", name))
+		return nil, errInternel(fmt.Sprintf("key %d not found", key))
 	}
-	return value, nil
+	return v, nil
+}
+
+func (ed extraInfoType) Cursor() (string, error) {
+	v, err := ed.get(graph.ExtraInfoKind_kCursor)
+	if err != nil {
+		return "", err
+	}
+	s, err := v.AsString()
+	if err != nil {
+		return "", err
+	}
+	return string(s), nil
+}
+
+func (ed extraInfoType) AffectedNodes() (int, error) {
+	v, err := ed.get(graph.ExtraInfoKind_kAffectedNodes)
+	if err != nil {
+		return 0, err
+	}
+	s, err := v.AsUInt64()
+	if err != nil {
+		return 0, err
+	}
+	return int(s), nil
+}
+
+func (ed extraInfoType) AffectedForwardEdges() (int, error) {
+	v, err := ed.get(graph.ExtraInfoKind_kAffectedForwardEdges)
+	if err != nil {
+		return 0, err
+	}
+	s, err := v.AsUInt64()
+	if err != nil {
+		return 0, err
+	}
+	return int(s), nil
+}
+func (ed extraInfoType) AffectedReverseEdges() (int, error) {
+	v, err := ed.get(graph.ExtraInfoKind_kAffectedReverseEdges)
+	if err != nil {
+		return 0, err
+	}
+	s, err := v.AsUInt64()
+	if err != nil {
+		return 0, err
+	}
+	return int(s), nil
 }
