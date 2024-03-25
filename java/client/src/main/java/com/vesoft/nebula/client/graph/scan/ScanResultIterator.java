@@ -5,9 +5,12 @@
 
 package com.vesoft.nebula.client.graph.scan;
 
+import com.vesoft.nebula.client.graph.data.ExtraInfo;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.net.Session;
+import com.vesoft.nebula.proto.graph.ExtraInfoElement;
+import com.vesoft.nebula.proto.graph.ExtraInfoKind;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -20,7 +23,6 @@ import org.slf4j.LoggerFactory;
 public class ScanResultIterator implements Serializable {
     private static final Logger LOGGER = LoggerFactory.getLogger(ScanResultIterator.class);
 
-    protected static final String CURSOR_NAME = "__cursor__";
     protected boolean hasNext = true;
 
     protected final Map<Integer, String> partCursor = new HashMap<>();
@@ -111,10 +113,10 @@ public class ScanResultIterator implements Serializable {
     }
 
     protected String getCursor(ResultSet resultSet) {
-        Map<String, ValueWrapper> extraInfo = resultSet.getExtraInfo();
-        if (!extraInfo.containsKey("cursor")) {
+        ExtraInfo extraInfo = resultSet.getExtraInfo();
+        if (extraInfo.getCursor() == null) {
             throw new RuntimeException("result does not contain cursor in extra info.");
         }
-        return extraInfo.get("cursor").asString();
+        return extraInfo.getCursor();
     }
 }

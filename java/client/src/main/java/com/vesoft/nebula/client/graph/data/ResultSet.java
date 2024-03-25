@@ -9,6 +9,8 @@ import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
+import com.vesoft.nebula.proto.graph.ExtraInfoElement;
+import com.vesoft.nebula.proto.graph.ExtraInfoKind;
 import com.vesoft.nebula.proto.graph.Row;
 import com.vesoft.nebula.proto.graph.Value;
 import java.nio.charset.Charset;
@@ -284,16 +286,34 @@ public class ResultSet {
      *
      * @return map for extra info
      */
-    public Map<String, ValueWrapper> getExtraInfo() {
+    public ExtraInfo getExtraInfo() {
         if (!response.hasExecutionOutcome()) {
-            return new HashMap<>();
+            return new ExtraInfo();
         }
-        Map<String, Value> extraInfos = response.getExecutionOutcome().getExtraInfoMap();
-        Map<String, ValueWrapper> extraInfoMap = new HashMap<>();
-        for (Map.Entry<String, Value> info : extraInfos.entrySet()) {
-            extraInfoMap.put(info.getKey(), new ValueWrapper(info.getValue()));
+        ExtraInfo extraInfo = new ExtraInfo();
+        List<ExtraInfoElement> extraInfos = response.getExecutionOutcome().getExtraInfoList();
+        for (ExtraInfoElement info : extraInfos) {
+            switch (info.getKind()) {
+                case kCursor: {
+                    extraInfo.setCursor((new ValueWrapper(info.getValue())).asString());
+                    continue;
+                }
+                case kAffectedNodes: {
+                    extraInfo.setAffectedNodes(new ValueWrapper(info.getValue()).asLong());
+                    continue;
+                }
+                case kAffectedForwardEdges: {
+                    extraInfo.setAffectedForwardEdges(new ValueWrapper(info.getValue()).asLong());
+                    continue;
+                }
+                case kAffectedReverseEdges: {
+                    extraInfo.setAffectedReverseEdges(new ValueWrapper(info.getValue()).asLong());
+                    continue;
+                }
+                default:
+            }
         }
-        return extraInfoMap;
+        return extraInfo;
     }
 
     @Override

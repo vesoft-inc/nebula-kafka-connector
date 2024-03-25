@@ -218,11 +218,23 @@ message GQLStatus {
     bytes               message                 = 2;
 }
 
+enum ExtraInfoKind {
+    kCursor                 = 0;
+    kAffectedNodes          = 1;
+    kAffectedForwardEdges   = 2;
+    kAffectedReverseEdges   = 3;
+}
+
+message ExtraInfoElement {
+    ExtraInfoKind   kind    = 1;
+    Value           value   = 2;
+}
+
 message ExecutionOutcome {
     GQLStatus                   gql_status      = 1;
     ResultTable                 result          = 2;
     bytes                       plan_desc       = 3;
-    map<string, Value>          extra_info      = 4;
+    repeated ExtraInfoElement   extra_info      = 4;
 }
 
 message ExecuteRequest {
