@@ -8,6 +8,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/buildinworkflow"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
@@ -108,6 +109,33 @@ func TestUtilsInstallSystemd(t *testing.T) {
 	log.Println(string(yamls))
 	job := runner.NewJob("test")
 	err = job.Run("install", args, spec)
+	assert.NoError(t, err)
+	// Add more assertions for the workflow.Tasks if needed
+}
+
+func TestAgentInstallSystemd(t *testing.T) {
+	tasks.Init()
+	args := map[string]interface{}{
+		"force": true,
+	}
+	spec, err := yamlparser.ParseYamlByPath("../../examples/agent.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+	spec.CAFile = "../../certs/ca.crt"
+	spec.KeyFile = "../../certs/client.key"
+	spec.CertFile = "../../certs/client.crt"
+	spec.ServerCertFile = "../../certs/server.crt"
+	spec.ServerKeyFile = "../../certs/server.key"
+	spec.Rollback = false
+	spec.Spec.Metad = nil
+
+	agent := spec.UtilsProcesses["agent"]
+	agent.StartType = "shell"
+	agent.PackagePath = "../../bin/agent.tar.gz"
+	job := runner.NewJob("test")
+
+	err = job.Run("install-agent", args, spec)
 	assert.NoError(t, err)
 	// Add more assertions for the workflow.Tasks if needed
 }

@@ -67,6 +67,7 @@ func (j *Job) RunWorkflow(workflow *types.WorkflowSpec) error {
 	}
 	j.ListenSafeExit()
 	defer j.UnListenSafeExit()
+	defer executor.CleanClient() // clean client after job done
 	_, err := j.RunTask(taskSpec)
 	if err != nil {
 		if workflow.Rollback {

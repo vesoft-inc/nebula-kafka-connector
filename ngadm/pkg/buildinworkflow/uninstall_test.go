@@ -7,6 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
@@ -87,4 +88,27 @@ func TestUninstallUtilsSystemd(t *testing.T) {
 		log.Println(string(yamls))
 	}
 	assert.NoError(t, err)
+}
+
+func TestUninstallAgent(t *testing.T) {
+	tasks.Init()
+	spec, err := yamlparser.ParseYamlByPath("../../examples/agent.yaml")
+	if err != nil {
+		t.Error(err)
+	}
+	spec.CAFile = "../../certs/ca.crt"
+	spec.KeyFile = "../../certs/client.key"
+	spec.CertFile = "../../certs/client.crt"
+	job := runner.NewJob("test uninstall")
+	err = job.Run("uninstall", map[string]any{
+		"drain":     true,
+		"kill-wait": "10s",
+	}, spec)
+	if err != nil {
+		yamls, err := yaml.Marshal(job.WorkflowSpec)
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(string(yamls))
+	}
 }

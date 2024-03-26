@@ -2,12 +2,12 @@ version: 1.0
 kind: NebulaCluster
 rollback: true
 installPath: "/home/vesoft/nebula5.x"
-CertFile: certs/ngadmin.crt
-KeyFile: certs/ngadmin.key
-CAFile: certs/ca.crt
+certFile: certs/client.crt
+keyFile: certs/client.key
+caFile: certs/ca.crt
 spec:
   metad:
-    packagePath: "./bin/nebula-graph-2024.03.10-nightly-x86_64-glibc-2.17.sh"
+    packagePath: "./bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
     config:
       port: 9559
     hosts:

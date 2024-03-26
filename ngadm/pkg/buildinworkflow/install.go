@@ -51,6 +51,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	}
 	allNeedHosts := GetMetadAllNeedHosts(spec)
 	for _, agent := range allNeedHosts {
+		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -58,28 +59,29 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 				{
 					Type: "connect",
 					Params: &tasks.ConnectParams{
-						Host: agent.Host,
+						Host:      agent.Host,
+						SSHConfig: agent.SSHConfig,
 					},
 				},
 				{
 					Type: "check_dir",
 					Params: &tasks.CheckDirParams{
 						Host:  agent.Host,
-						Path:  utils.GetClusterPath(spec.InstallPath),
+						Path:  installPath,
 						Force: force,
 					},
 				},
 			},
 		})
 		//2.upload
-		dstPath := path.Join(utils.GetDownloadPath(spec.InstallPath), path.Base(metaCluster.PackagePath))
+		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaCluster.PackagePath))
 		uploadTasks = append(uploadTasks, &types.TaskSpec{
 			Type: "serial",
 			SubTasks: []*types.TaskSpec{
 				{
 					Type: "upload",
 					Params: &tasks.UploadParams{
-						SrcPath: metaCluster.PackagePath,
+						SrcPath: utils.GetUserPackagePath(metaCluster.PackagePath, agent.PackagePath),
 						DstPath: dstPath,
 						Host:    agent.Host,
 					},
@@ -88,7 +90,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					Type: "extract",
 					Params: &tasks.ExtractParams{
 						Host:        agent.Host,
-						ExtractPath: utils.GetClusterPath(spec.InstallPath),
+						ExtractPath: installPath,
 						PkgPath:     dstPath,
 					},
 				},
@@ -110,7 +112,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 							"local_ip":          utils.GetHostIP(agent.Host),
 							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 						}),
-						Dst: path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-metad.conf"),
+						Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath), "etc/nebula-metad.conf"),
 					},
 				},
 				{
@@ -120,7 +122,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 						Operation:    "start",
 						Component:    "metad",
 						NeedRollback: true,
-						Path:         utils.GetClusterPath(spec.InstallPath),
+						Path:         utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath),
 					},
 				},
 			},
@@ -141,7 +143,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 								"local_ip":          utils.GetHostIP(agent.Host),
 								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 							}),
-							Dst: path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-graphd.conf"),
+							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath), "etc/nebula-graphd.conf"),
 						},
 					},
 					{
@@ -150,7 +152,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 							Host:      agent.Host,
 							Operation: "start",
 							Component: "graphd",
-							Path:      utils.GetClusterPath(spec.InstallPath),
+							Path:      utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath),
 						},
 					},
 				},
@@ -170,7 +172,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 								"local_ip":          utils.GetHostIP(agent.Host),
 								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 							}),
-							Dst: path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-storaged.conf"),
+							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath), "etc/nebula-storaged.conf"),
 						},
 					},
 					{
@@ -180,7 +182,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 							Operation:    "start",
 							Component:    "storaged",
 							NeedRollback: true,
-							Path:         utils.GetClusterPath(spec.InstallPath),
+							Path:         utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath),
 						},
 					},
 				},

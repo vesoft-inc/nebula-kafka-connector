@@ -47,8 +47,8 @@ func TestAgent(t *testing.T) {
 	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
-		KeyFile: "../../certs/ngadmin.key",
-		CrtFile: "../../certs/ngadmin.crt",
+		KeyFile: "../../certs/client.key",
+		CrtFile: "../../certs/client.crt",
 	})
 	job := NewJob("test")
 
@@ -70,12 +70,41 @@ func TestAgent(t *testing.T) {
 	log.Print(job.Context.ValueMap["lscmd"])
 }
 
+func TestSSH(t *testing.T) {
+	tasks.Init()
+	job := NewJob("test")
+	workflow := &types.WorkflowSpec{
+		Tasks: []*types.TaskSpec{
+			{Type: "connect", Params: &tasks.ConnectParams{
+				Host: "192.168.8.240",
+				SSHConfig: &types.SSHConfig{
+					Host:     "192.168.8.240",
+					Port:     22,
+					User:     "vesoft",
+					Password: "nebula",
+				},
+			}},
+			{Type: "shell", Params: &tasks.ShellParams{
+				Host:    "192.168.8.240",
+				Command: "ls",
+				Sudo:    false,
+				CmdID:   "lscmd",
+			}},
+		},
+	}
+	err := job.RunWorkflow(workflow)
+	if err != nil {
+		t.Errorf("RunTask failed: %v", err)
+	}
+	log.Print(job.Context.ValueMap["lscmd"])
+}
+
 func TestUpload(t *testing.T) {
 	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
-		KeyFile: "../../certs/ngadmin.key",
-		CrtFile: "../../certs/ngadmin.crt",
+		KeyFile: "../../certs/client.key",
+		CrtFile: "../../certs/client.crt",
 	})
 	job := NewJob("test")
 	workflow := &types.WorkflowSpec{

@@ -24,9 +24,7 @@ func (s *commonService) UploadFile(req *types.UploadFileReq) (*types.UploadFileR
 	}
 
 	if err := httpReq.ParseMultipartForm(500 << 20); err != nil {
-		if err != nil {
-			return nil, err
-		}
+		return nil, err
 	}
 
 	file, header, err := httpReq.FormFile("file")

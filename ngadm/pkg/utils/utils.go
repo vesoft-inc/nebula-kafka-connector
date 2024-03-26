@@ -10,18 +10,43 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
 
-func GetClusterPath(installPath string) string {
+func GetUserClusterPath(installPath string, agentPath string) string {
+	if agentPath != "" {
+		return path.Join(agentPath)
+	}
 	return path.Join(installPath, "cluster/")
 }
 
+func GetClusterPath(installPath string) string {
+	return path.Join(installPath, "cluster/")
+}
 func GetDownloadPath(installPath string) string {
 	return path.Join(installPath, "download/")
+}
+func GetUserDownloadPath(installPath string, downloadPath string) string {
+	if downloadPath != "" {
+		return path.Join(downloadPath)
+	}
+	return path.Join(installPath, "download/")
+}
+
+func GetUserPackagePath(packagePath string, agentPackagePath string) string {
+	if agentPackagePath != "" {
+		return agentPackagePath
+	}
+	return packagePath
 }
 
 func GetUtilPath(installPath, utilName string) string {
 	return path.Join(installPath, utilName)
 }
 
+func GetUserUtilPath(installPath, agentPath, utilName string) string {
+	if agentPath != "" {
+		return agentPath
+	}
+	return path.Join(installPath, utilName)
+}
 func GetMetaAddressListString(metaHosts []types.Agent, port string) string {
 	if port == "" {
 		port = "9559"
@@ -93,4 +118,46 @@ func GetConfigPort(config map[string]any) string {
 		return fmt.Sprintf("%v", configPort)
 	}
 	return ""
+}
+
+// map component name
+func GetAllUtilsProcess(spec *types.JobSpec) []*types.Process {
+	allUtils := []*types.Process{}
+
+	for _, process := range spec.UtilsProcesses {
+		if process.Config == nil {
+			process.Config = map[string]any{}
+		}
+		allUtils = append(allUtils, process)
+	}
+	return allUtils
+}
+
+func GetAllAgents(spec *types.JobSpec) []*types.Agent {
+	allAgents := make(map[string]*types.Agent)
+	allHosts := []types.Agent{}
+	if spec.Spec.Metad != nil {
+		allHosts = append(allHosts, spec.Spec.Metad.Hosts...)
+		for _, cluster := range spec.Spec.Metad.Clusters {
+			allHosts = append(allHosts, cluster.Graphd.Hosts...)
+			allHosts = append(allHosts, cluster.Storaged.Hosts...)
+		}
+	}
+	for _, process := range spec.UtilsProcesses {
+		allHosts = append(allHosts, process.Hosts...)
+	}
+	for _, agent := range allHosts {
+		if _, ok := allAgents[agent.Host]; !ok {
+			allAgents[agent.Host] = &agent
+		} else {
+			if agent.SSHConfig != nil {
+				allAgents[agent.Host].SSHConfig = agent.SSHConfig
+			}
+		}
+	}
+	var agents []*types.Agent
+	for _, agent := range allAgents {
+		agents = append(agents, agent)
+	}
+	return agents
 }

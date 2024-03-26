@@ -56,7 +56,7 @@ func Operation(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, e
 }
 
 func OperateUtils(spec *types.JobSpec, component, operation, host string) (*types.TaskSpec, error) {
-	allUitils := GetAllUtilsProcess(spec)
+	allUitils := utils.GetAllUtilsProcess(spec)
 	operateTasks := []*types.TaskSpec{}
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUitils {
@@ -67,7 +67,8 @@ func OperateUtils(spec *types.JobSpec, component, operation, host string) (*type
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host: agent.Host,
+					Host:      agent.Host,
+					SSHConfig: agent.SSHConfig,
 				},
 			})
 
@@ -146,6 +147,7 @@ func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait 
 	}
 	metaHosts := spec.Spec.Metad.Hosts
 	allNeedOperations := make(map[string]map[types.NebulaServiceComponent]bool, 0)
+	allAgents := utils.GetAllAgents(spec)
 	for _, agent := range metaHosts {
 		addNeedOperation(&allNeedOperations, types.Metad, componentType, agent.Host, host)
 	}
@@ -161,19 +163,25 @@ func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait 
 	connectTasks := []*types.TaskSpec{}
 	operationTasks := []*types.TaskSpec{}
 	//1. connect
-	//2. operation
-	for host, components := range allNeedOperations {
+	agentsMap := make(map[string]*types.Agent)
+	for _, agent := range allAgents {
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type:   "connect",
-			Params: &tasks.ConnectParams{Host: host},
+			Params: &tasks.ConnectParams{Host: agent.Host, SSHConfig: agent.SSHConfig},
 		})
+		agentsMap[agent.Host] = agent
+	}
+	//2. operation
+	for host, components := range allNeedOperations {
+		installPath := utils.GetUserClusterPath(spec.InstallPath, agentsMap[host].InstallPath)
 		// aggregate operation task
 		if (components[types.Metad] && components[types.Graphd] && components[types.Storaged]) || components[types.AllNebulaSerivce] {
 			operationTasks = append(operationTasks, &types.TaskSpec{
 				Type: "nebula_operation",
 				Params: &tasks.NebulaOperationParams{Operation: operation, Component: types.AllNebulaSerivce, Host: host,
 					KillWait: KillWait,
-					Path:     utils.GetClusterPath(spec.InstallPath)},
+					Path:     installPath,
+				},
 			})
 			continue
 		}
@@ -182,7 +190,8 @@ func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait 
 				Type: "nebula_operation",
 				Params: &tasks.NebulaOperationParams{Operation: operation, Component: component, Host: host,
 					KillWait: KillWait,
-					Path:     utils.GetClusterPath(spec.InstallPath)},
+					Path:     installPath,
+				},
 			})
 		}
 	}

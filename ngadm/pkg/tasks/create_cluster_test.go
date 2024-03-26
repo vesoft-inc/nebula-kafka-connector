@@ -14,8 +14,8 @@ func TestCreateCluster(t *testing.T) {
 	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
-		KeyFile: "../../certs/ngadmin.key",
-		CrtFile: "../../certs/ngadmin.crt",
+		KeyFile: "../../certs/client.key",
+		CrtFile: "../../certs/client.crt",
 	})
 	spec, err := yamlparser.ParseYamlByPath("../../examples/nebula.yaml")
 	if err != nil {

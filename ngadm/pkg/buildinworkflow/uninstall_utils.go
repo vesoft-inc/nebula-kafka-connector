@@ -8,8 +8,9 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
+// todo: support remove specific util
 func UninstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
-	allUtils := GetAllUtilsProcess(spec)
+	allUtils := utils.GetAllUtilsProcess(spec)
 	//1. connect all need hosts
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
@@ -17,7 +18,8 @@ func UninstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host: agent.Host,
+					Host:      agent.Host,
+					SSHConfig: agent.SSHConfig,
 				},
 			})
 		}
@@ -30,8 +32,9 @@ func UninstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 				Type:     "serial",
 				SubTasks: []*types.TaskSpec{},
 			}
+			installPath := utils.GetUserUtilPath(spec.InstallPath, agent.InstallPath, process.Name)
 			if process.StartType == "shell" {
-				scriptPath := path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ExecShellPath)
+				scriptPath := path.Join(installPath, process.ExecShellPath)
 				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
 					Type: "operate",
 					Params: &tasks.OperateParams{
@@ -54,7 +57,7 @@ func UninstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 				Type: "rm",
 				Params: &tasks.RMParams{
 					Host: agent.Host,
-					Path: utils.GetUtilPath(spec.InstallPath, process.Name),
+					Path: installPath,
 				},
 			})
 			task.SubTasks = append(task.SubTasks, &types.TaskSpec{

@@ -72,7 +72,7 @@ func (d *Systemd) Operate(operate string) error {
 	if executor == nil {
 		return fmt.Errorf("executor not found for host: %s", d.host)
 	}
-	cmd := fmt.Sprintf("systemctl %s %s", operate, d.name)
+	cmd := fmt.Sprintf("systemctl --user %s %s", operate, d.name)
 	stdout, stderr, err := executor.Shell(cmd, true)
 	if err != nil || len(stderr) > 0 {
 		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
@@ -139,6 +139,91 @@ func (d *Systemd) Status() error {
 		return fmt.Errorf("executor not found for host: %s", d.host)
 	}
 	cmd := fmt.Sprintf("systemctl --user status %s", d.name)
+	stdout, stderr, err := executor.Shell(cmd, false)
+	if err != nil {
+		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
+	}
+	status := "unknown"
+	if !strings.Contains(stdout, "failed") {
+		status = "running"
+	} else if len(stderr) > 0 {
+		status = "exited"
+	}
+	d.JobContext.SetValue("status-"+utils.GetHostIP(d.host)+"-"+d.name+"-"+d.port, types.StatusItem{
+		Product: d.name,
+		Service: d.name,
+		Host:    utils.GetHostIP(d.host),
+		Port:    d.port,
+		Status:  status,
+	})
+	return nil
+}
+
+func (d *Systemd) OperateRoot(operate string) error {
+	executor := d.JobContext.GetExecuter(d.host)
+	if executor == nil {
+		return fmt.Errorf("executor not found for host: %s", d.host)
+	}
+	cmd := fmt.Sprintf("systemctl %s %s", operate, d.name)
+	stdout, stderr, err := executor.Shell(cmd, true)
+	if err != nil || len(stderr) > 0 {
+		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
+	}
+	return nil
+}
+
+func (d *Systemd) InstallRoot() error {
+	executor := d.JobContext.GetExecuter(d.host)
+	if executor == nil {
+		return fmt.Errorf("executor not found for host: %s", d.host)
+	}
+	serviceFileContent := fmt.Sprintf(`
+[Unit]
+Description=%s
+[Service]
+Type=simple
+ExecStart=%s
+WorkingDirectory=%s
+Restart=always
+[Install]
+WantedBy=multi-user.target`, d.name, d.execStartPath, d.workingDirectory)
+
+	cmd := fmt.Sprintf("cat <<EOF > /etc/systemd/system/%s.service \n %s\nEOF", d.name, serviceFileContent)
+	stdout, stderr, err := executor.Shell(cmd, true)
+	if err != nil || len(stderr) > 0 {
+		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
+	}
+	cmd = fmt.Sprintf("systemctl enable %s", d.name)
+	stdout, stderr, err = executor.Shell(cmd, true)
+	if err != nil || (len(stderr) > 0 && !strings.Contains("Created symlink", stderr)) {
+		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
+	}
+	return nil
+}
+
+func (d *Systemd) UninstallRoot() error {
+	executor := d.JobContext.GetExecuter(d.host)
+	if executor == nil {
+		return fmt.Errorf("executor not found for host: %s", d.host)
+	}
+	cmd := fmt.Sprintf("systemctl stop %s", d.name)
+	executor.Shell(cmd, true)
+	cmd = fmt.Sprintf("systemctl disable %s", d.name)
+	executor.Shell(cmd, true)
+	cmd = fmt.Sprintf("rm -f /etc/systemd/system/%s.service", d.name)
+	stdout, stderr, err := executor.Shell(cmd, true)
+	if err != nil || len(stderr) > 0 {
+		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)
+	}
+	return nil
+}
+
+func (d *Systemd) StatusRoot() error {
+	executor := d.JobContext.GetExecuter(d.host)
+	if executor == nil {
+		return fmt.Errorf("executor not found for host: %s", d.host)
+	}
+	cmd := fmt.Sprintf("systemctl status %s", d.name)
 	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil {
 		return fmt.Errorf("failed to execute cmd: %s, err: %s, stdout: %s, stderr: %s", cmd, err, stdout, stderr)

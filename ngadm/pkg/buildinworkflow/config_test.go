@@ -20,8 +20,8 @@ func GetNebulaYaml(t *testing.T) *types.JobSpec {
 		t.Error(err)
 	}
 	spec.CAFile = "../../certs/ca.crt"
-	spec.KeyFile = "../../certs/ngadm.key"
-	spec.CertFile = "../../certs/ngadm.crt"
+	spec.KeyFile = "../../certs/client.key"
+	spec.CertFile = "../../certs/client.crt"
 	return spec
 }
 

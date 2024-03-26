@@ -9,7 +9,7 @@ import (
 )
 
 func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
-	allUtils := GetAllUtilsProcess(spec)
+	allUtils := utils.GetAllUtilsProcess(spec)
 	//1. connect all need hosts
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
@@ -17,7 +17,8 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host: agent.Host,
+					Host:      agent.Host,
+					SSHConfig: agent.SSHConfig,
 				},
 			})
 		}
@@ -98,17 +99,4 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 			},
 		},
 	}, nil
-}
-
-// map component name
-func GetAllUtilsProcess(spec *types.JobSpec) []*types.Process {
-	allUtils := []*types.Process{}
-
-	for _, process := range spec.UtilsProcesses {
-		if process.Config == nil {
-			process.Config = map[string]any{}
-		}
-		allUtils = append(allUtils, process)
-	}
-	return allUtils
 }

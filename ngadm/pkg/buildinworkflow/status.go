@@ -42,6 +42,7 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 	if spec.Spec.Metad == nil {
 		return nil, nil
 	}
+	allAgents := utils.GetAllAgents(spec)
 	metaHosts := spec.Spec.Metad.Hosts
 	allNeedOperations := make(map[string]map[types.NebulaServiceComponent]bool, 0)
 	for _, agent := range metaHosts {
@@ -59,12 +60,17 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 	connectTasks := []*types.TaskSpec{}
 	statusTasks := []*types.TaskSpec{}
 	//1. connect
-	//2. status
-	for host, components := range allNeedOperations {
+	agentsMap := make(map[string]*types.Agent)
+	for _, agent := range allAgents {
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type:   "connect",
-			Params: &tasks.ConnectParams{Host: host},
+			Params: &tasks.ConnectParams{Host: agent.Host, SSHConfig: agent.SSHConfig},
 		})
+		agentsMap[agent.Host] = agent
+	}
+	//2. status
+	for host, components := range allNeedOperations {
+		installPath := utils.GetUserClusterPath(spec.InstallPath, agentsMap[host].InstallPath)
 		// aggregate status task
 		if (components[types.Metad] && components[types.Graphd] && components[types.Storaged]) || components[types.AllNebulaSerivce] {
 			statusTasks = append(statusTasks, &types.TaskSpec{
@@ -72,7 +78,7 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 				Params: &tasks.NebulaStatusParams{
 					Component: types.AllNebulaSerivce,
 					Host:      host,
-					Path:      utils.GetClusterPath(spec.InstallPath)},
+					Path:      installPath},
 			})
 			continue
 		}
@@ -80,7 +86,7 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 			statusTasks = append(statusTasks, &types.TaskSpec{
 				Type: "nebula_status",
 				Params: &tasks.NebulaStatusParams{Component: component, Host: host,
-					Path: utils.GetClusterPath(spec.InstallPath)},
+					Path: installPath},
 			})
 		}
 	}

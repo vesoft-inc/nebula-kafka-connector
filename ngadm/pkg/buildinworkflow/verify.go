@@ -47,7 +47,7 @@ func VerifyAgents(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type:   "connect",
-			Params: &tasks.ConnectParams{Host: agent.Host},
+			Params: &tasks.ConnectParams{Host: agent.Host, SSHConfig: agent.SSHConfig},
 		})
 	}
 	return &types.TaskSpec{

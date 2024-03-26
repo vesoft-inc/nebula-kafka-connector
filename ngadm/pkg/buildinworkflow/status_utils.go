@@ -9,7 +9,7 @@ import (
 )
 
 func StatusUtils(spec *types.JobSpec, component string) (*types.TaskSpec, error) {
-	allUtils := GetAllUtilsProcess(spec)
+	allUtils := utils.GetAllUtilsProcess(spec)
 	connectTasks := []*types.TaskSpec{}
 	statusTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
@@ -17,7 +17,7 @@ func StatusUtils(spec *types.JobSpec, component string) (*types.TaskSpec, error)
 			for _, host := range process.Hosts {
 				connectTasks = append(connectTasks, &types.TaskSpec{
 					Type:   "connect",
-					Params: &tasks.ConnectParams{Host: host.Host},
+					Params: &tasks.ConnectParams{Host: host.Host, SSHConfig: host.SSHConfig},
 				})
 			}
 

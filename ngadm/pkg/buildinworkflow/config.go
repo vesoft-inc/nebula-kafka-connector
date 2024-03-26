@@ -46,7 +46,8 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 				{
 					Type: "connect",
 					Params: &tasks.ConnectParams{
-						Host: agent.Host,
+						Host:      agent.Host,
+						SSHConfig: agent.SSHConfig,
 					},
 				},
 			},
@@ -124,7 +125,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 }
 
 func ConfigUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
-	allUtils := GetAllUtilsProcess(spec)
+	allUtils := utils.GetAllUtilsProcess(spec)
 	//1. connect all need hosts
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
@@ -132,7 +133,8 @@ func ConfigUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, err
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host: agent.Host,
+					Host:      agent.Host,
+					SSHConfig: agent.SSHConfig,
 				},
 			})
 		}

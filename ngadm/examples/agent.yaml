@@ -1,0 +1,27 @@
+version: 1.0
+kind: NebulaCluster
+rollback: true
+installPath: "/home/vesoft/nebula5.x"
+certFile: certs/client.crt
+keyFile: certs/client.key
+caFile: certs/ca.crt
+serverCertFile: certs/server.crt
+serverKeyFile: certs/server.key
+spec:
+  agent:
+    packagePath: "../agent/api/agent/bin/agent"
+    startType: "shell"
+    config:
+      port: 6688
+      test: "test"
+    hosts:
+      - host: "192.168.8.240"
+        sshConfig:
+          port: 22
+          user: vesoft
+          password: nebula
+      - host: "192.168.8.131"
+        sshConfig:
+          port: 22
+          user: vesoft
+          password: nebula
