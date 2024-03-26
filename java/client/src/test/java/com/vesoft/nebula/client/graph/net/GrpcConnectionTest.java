@@ -7,6 +7,8 @@ package com.vesoft.nebula.client.graph.net;
 
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -20,10 +22,12 @@ public class GrpcConnectionTest {
         try {
             // Test open
             GrpcConnection connection = new GrpcConnection();
-            connection.open(new HostAddress("127.0.0.1", 20584),  1000);
+            connection.open(new HostAddress("127.0.0.1", 20584), 1000);
 
             // Test authenticate
-            AuthResult authResult = connection.authenticate("root", "nebula");
+            Map<String, Object> authInfo = new HashMap<>();
+            authInfo.put("password", "nebula");
+            AuthResult authResult = connection.authenticate("root", authInfo);
             LOGGER.info(authResult.toString());
 
             Assert.assertNotEquals(0, authResult.getSessionId());

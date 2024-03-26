@@ -20,7 +20,9 @@ import java.net.UnknownHostException;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -74,7 +76,7 @@ public class NebulaClient implements Serializable {
         }
 
         sessionPoolConfig = new SessionPoolConfig(builder.address, builder.userName,
-                builder.password)
+                builder.authOptions)
                 .setMaxSessionSize(builder.maxSessionSize)
                 .setMinSessionSize(builder.minSessionSize)
                 .setRequestTimeout(this.timeoutMs)
@@ -654,6 +656,8 @@ public class NebulaClient implements Serializable {
         private final List<HostAddress> address;
         private final String userName;
         private final String password;
+
+        private Map<String, Object> authOptions = new HashMap<>();
         // define default value
 
         // The max sessions in pool
@@ -701,6 +705,20 @@ public class NebulaClient implements Serializable {
             this.address = validateAddress(address);
             this.userName = userName;
             this.password = password;
+        }
+
+        public Builder(String address, String userName)
+                throws UnknownHostException {
+            this.address = validateAddress(address);
+            this.userName = userName;
+            this.password = null;
+        }
+
+        public Builder setAuthOptions(Map<String, Object> authOptions) {
+            if (authOptions != null) {
+                this.authOptions.putAll(authOptions);
+            }
+            return this;
         }
 
         public Builder setMaxSessionSize(int maxSessionSize) {
@@ -798,6 +816,9 @@ public class NebulaClient implements Serializable {
          */
         public NebulaClient build() throws IOErrorException {
             check();
+            if (password != null) {
+                this.authOptions.put("password", password);
+            }
             return new NebulaClient(this);
         }
 

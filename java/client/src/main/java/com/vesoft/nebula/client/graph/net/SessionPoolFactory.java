@@ -55,7 +55,7 @@ public class SessionPoolFactory extends BasePooledObjectFactory<Session> impleme
         AuthResult authResult;
         try {
             authResult = connection.authenticate(sessionPoolConfig.getUsername(),
-                    sessionPoolConfig.getPassword());
+                    sessionPoolConfig.getAuthOptions());
         } catch (AuthFailedException e) {
             log.error(e.getMessage());
             throw e;

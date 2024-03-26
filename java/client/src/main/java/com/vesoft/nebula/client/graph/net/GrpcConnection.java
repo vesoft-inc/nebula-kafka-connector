@@ -1,5 +1,6 @@
 package com.vesoft.nebula.client.graph.net;
 
+import com.alibaba.fastjson.JSON;
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
@@ -16,6 +17,7 @@ import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import java.nio.charset.Charset;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -83,11 +85,13 @@ public class GrpcConnection extends Connection {
                 response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
     }
 
-    public AuthResult authenticate(String user, String password) throws AuthFailedException {
+    public AuthResult authenticate(String user, Map<String, Object> authOptions)
+            throws AuthFailedException {
         try {
+            String authInfoString = JSON.toJSONString(authOptions);
             AuthRequest authReq = AuthRequest.newBuilder()
                     .setUsername(ByteString.copyFrom(user, charset))
-                    .setPassword(ByteString.copyFrom(password, charset))
+                    .setAuthInfo(ByteString.copyFrom(authInfoString, charset))
                     .setClientType(ByteString.copyFrom("java", charset))
                     .setClientVersion(ByteString.copyFrom("v5.0.0", charset))
                     .build();

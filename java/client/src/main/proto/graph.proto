@@ -249,7 +249,7 @@ message ExecuteResponse {
 
 message AuthRequest {
     bytes               username                = 1;
-    bytes               password                = 2;
+    bytes               auth_info               = 2;
     bytes               client_type             = 3;
     bytes               client_version          = 4;
 }

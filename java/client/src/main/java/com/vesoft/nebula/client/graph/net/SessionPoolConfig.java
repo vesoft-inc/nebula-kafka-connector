@@ -8,13 +8,14 @@ package com.vesoft.nebula.client.graph.net;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import java.io.Serializable;
 import java.util.List;
+import java.util.Map;
 
 public class SessionPoolConfig implements Serializable {
 
     private final List<HostAddress> graphAddressList;
 
     private final String username;
-    private final String password;
+    private final Map<String,Object> authOptions;
 
     // The min connections in pool for all addresses
     private int minSessionSize = 1;
@@ -56,18 +57,18 @@ public class SessionPoolConfig implements Serializable {
 
     public SessionPoolConfig(List<HostAddress> addresses,
                              String username,
-                             String password) {
+                             Map<String,Object> authOptions) {
         this.graphAddressList = addresses;
         this.username = username;
-        this.password = password;
+        this.authOptions = authOptions;
     }
 
     public String getUsername() {
         return username;
     }
 
-    public String getPassword() {
-        return password;
+    public Map<String, Object> getAuthOptions() {
+        return authOptions;
     }
 
     public List<HostAddress> getGraphAddressList() {
@@ -188,7 +189,7 @@ public class SessionPoolConfig implements Serializable {
         return "SessionPoolConfig{"
                 + "graphAddressList=" + graphAddressList
                 + ", username='" + username + '\''
-                + ", password='" + password + '\''
+                + ", authOptions='" + authOptions + '\''
                 + ", minSessionSize=" + minSessionSize
                 + ", maxSessionSize=" + maxSessionSize
                 + ", requestTimeout=" + requestTimeout
