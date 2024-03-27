@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngql/printer"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
 )
 
 type clusterFlagsType struct {
@@ -125,7 +125,7 @@ var showClusterCmd = &cobra.Command{
 			return data[i][0] < data[j][0]
 		})
 		// printer.FormatTable(headers []string, data [][]string)
-		fmt.Fprintln(metaOutput, printer.FormatTable(header, data))
+		fmt.Fprintln(metaOutput, ngctl.FormatTable(header, data))
 		return nil
 	},
 }

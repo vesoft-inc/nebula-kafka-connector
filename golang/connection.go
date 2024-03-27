@@ -3,12 +3,13 @@ package nebula_ng
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
-	"io"
 	"math"
 	"sync"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
@@ -26,21 +27,6 @@ type connection struct {
 	clientConn  *grpc.ClientConn
 	sessionId   int64
 	timeout     time.Duration
-}
-
-type extraInfoType map[graph.ExtraInfoKind]Value
-
-type resultSet struct {
-	index     int
-	latency   uint64
-	result    *graph.ResultTable
-	planDesc  []byte
-	extraInfo []*graph.ExtraInfoElement
-}
-
-type rowData struct {
-	resultSet *resultSet
-	values    []Value
 }
 
 func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Conn, error) {
@@ -85,9 +71,18 @@ func (cn *connection) open(host string, port int, timeout time.Duration, sslConf
 }
 
 func (cn *connection) authenticate(username, password string) error {
+	// TODO just simple auth with password
+	authInfo := make(map[string]string)
+	authInfo["password"] = password
+	bs, err := json.Marshal(authInfo)
+	if err != nil {
+		return err
+	}
 	in := graph.AuthRequest{
-		Username: []byte(username),
-		Password: []byte(password),
+		Username:      []byte(username),
+		AuthInfo:      bs,
+		ClientType:    []byte("Go"),
+		ClientVersion: common.PROTOCOL_VERSION,
 	}
 	resp, err := cn.graphClient.Authenticate(context.Background(), &in)
 	if err != nil {
@@ -181,150 +176,4 @@ func (cn *connection) Close() error {
 	_, _ = cn.graphClient.Execute(ctx, in)
 	_ = cn.clientConn.Close()
 	return nil
-}
-
-func (rs *resultSet) HasNext() bool {
-	if rs.result == nil {
-		return false
-	}
-	return rs.index < len(rs.result.Records)
-}
-
-func (rs *resultSet) Next() (Row, error) {
-	if !rs.HasNext() {
-		return nil, io.EOF
-	}
-
-	values := rs.result.GetRecords()[rs.index].Values
-	row := &rowData{
-		resultSet: rs,
-		values:    make([]Value, 0, len(values)),
-	}
-
-	for _, v := range values {
-		row.values = append(row.values, &grpcValue{data: v})
-	}
-
-	rs.index++
-	return row, nil
-}
-
-func (rs *resultSet) RowSize() int {
-	if rs.result == nil {
-		return 0
-	}
-	return len(rs.result.GetRecords())
-}
-
-func (rs *resultSet) Latency() int64 {
-	return int64(rs.latency)
-}
-
-func (rs *resultSet) Columns() []string {
-	if rs.result == nil {
-		return nil
-	}
-	names := rs.result.ColumnNames
-	var cols []string
-	for _, name := range names {
-		cols = append(cols, string(name))
-	}
-	return cols
-}
-
-func (rs *resultSet) ColumnTypes() []ColumnType {
-	return nil
-}
-
-func (rs *resultSet) PlanDesc() []byte {
-	return rs.planDesc
-}
-
-func (rs *resultSet) ExtraInfo() ExtraInfo {
-	extr := make(extraInfoType, len(rs.extraInfo))
-	for _, e := range rs.extraInfo {
-		extr[e.GetKind()] = &grpcValue{data: e.GetValue()}
-	}
-	return extr
-}
-
-func (rd *rowData) Values() []Value {
-	return rd.values
-}
-
-func (rd *rowData) GetValueByName(name string) (Value, error) {
-	names := rd.resultSet.Columns()
-	var index int = -1
-	for i, n := range names {
-		if string(n) == name {
-			index = i
-			break
-		}
-	}
-	if index == -1 {
-		return nil, errInternel(fmt.Sprintf("column %s not found", name))
-	}
-	return rd.values[index], nil
-}
-
-func (rd *rowData) GetValueByIndex(index int) (Value, error) {
-	if index < 0 || index >= len(rd.values) {
-		return nil, errInternel(fmt.Sprintf("index out of range"))
-	}
-	return rd.values[index], nil
-}
-
-func (ed extraInfoType) get(key graph.ExtraInfoKind) (Value, error) {
-	v, ok := ed[key]
-	if !ok {
-		return nil, errInternel(fmt.Sprintf("key %d not found", key))
-	}
-	return v, nil
-}
-
-func (ed extraInfoType) Cursor() (string, error) {
-	v, err := ed.get(graph.ExtraInfoKind_kCursor)
-	if err != nil {
-		return "", err
-	}
-	s, err := v.AsString()
-	if err != nil {
-		return "", err
-	}
-	return string(s), nil
-}
-
-func (ed extraInfoType) AffectedNodes() (int, error) {
-	v, err := ed.get(graph.ExtraInfoKind_kAffectedNodes)
-	if err != nil {
-		return 0, err
-	}
-	s, err := v.AsUInt64()
-	if err != nil {
-		return 0, err
-	}
-	return int(s), nil
-}
-
-func (ed extraInfoType) AffectedForwardEdges() (int, error) {
-	v, err := ed.get(graph.ExtraInfoKind_kAffectedForwardEdges)
-	if err != nil {
-		return 0, err
-	}
-	s, err := v.AsUInt64()
-	if err != nil {
-		return 0, err
-	}
-	return int(s), nil
-}
-func (ed extraInfoType) AffectedReverseEdges() (int, error) {
-	v, err := ed.get(graph.ExtraInfoKind_kAffectedReverseEdges)
-	if err != nil {
-		return 0, err
-	}
-	s, err := v.AsUInt64()
-	if err != nil {
-		return 0, err
-	}
-	return int(s), nil
 }

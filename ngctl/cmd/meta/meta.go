@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngql/cache"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
 )
 
 var (
@@ -18,11 +18,11 @@ func metaClientInit() error {
 	if metaClient != nil {
 		return nil
 	}
-	cacheSession, err := cache.LoadMetaSession()
-	if err != nil {
-		return fmt.Errorf("load meta session failed: %s", err)
+	cacheToken, err := ngctl.LoadMetaToken()
+	if err != nil || cacheToken == nil {
+		return fmt.Errorf("load meta session failed, please login first.")
 	}
-	metaClient, err = meta.NewMetaClient(cacheSession.Address)
+	metaClient, err = meta.NewMetaClient(cacheToken.Address, meta.WithToken(cacheToken.Token))
 	if err != nil {
 		return err
 	}

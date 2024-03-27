@@ -1,18 +1,18 @@
-package cache
+package ngctl
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"path/filepath"
 )
 
-type MetaSession struct {
+type MetaToken struct {
 	Address string
+	Token   []byte
 }
 
-func cachePath() string {
+func CachePath() string {
 	cacheHome := os.Getenv("HOME")
 	if cacheHome == "" {
 		ex, err := os.Executable()
@@ -21,34 +21,38 @@ func cachePath() string {
 		}
 		cacheHome = filepath.Dir(ex) // Set to executable folder
 	}
-	cacheFile := filepath.Join(cacheHome, ".nebula_meta_session")
+	cacheFile := filepath.Join(cacheHome, ".nebula_meta_token")
 	return cacheFile
 }
 
-func SaveMetaSession(addr string) error {
-	data, err := json.Marshal(MetaSession{Address: addr})
+func SaveMetaToken(addr string, token []byte) error {
+	data, err := json.Marshal(MetaToken{Address: addr, Token: token})
 	if err != nil {
 		return err
 	}
-	cacheFile := cachePath()
+	cacheFile := CachePath()
 	err = os.WriteFile(cacheFile, data, 0644)
 	if err != nil {
-		fmt.Println("Save meta session failed: ", err.Error())
 		return err
 	}
 	return nil
 }
 
-func LoadMetaSession() (*MetaSession, error) {
-	cachePath := cachePath()
+func LoadMetaToken() (*MetaToken, error) {
+	cachePath := CachePath()
 	data, err := os.ReadFile(cachePath)
 	if err != nil {
 		return nil, err
 	}
-	var metaSession MetaSession
+	var metaSession MetaToken
 	err = json.Unmarshal(data, &metaSession)
 	if err != nil {
 		return nil, err
 	}
 	return &metaSession, nil
+}
+
+func ClearMetaToken() error {
+	cachePath := CachePath()
+	return os.Remove(cachePath)
 }

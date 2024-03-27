@@ -3,6 +3,7 @@ package meta
 import (
 	"context"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"math"
 	"strconv"
@@ -22,6 +23,8 @@ var defaultRequestTimeout = 10 * time.Second
 type (
 	Client interface {
 		Close()
+		Logout() error
+		GetToken() []byte
 		ClusterClient
 	}
 
@@ -40,6 +43,9 @@ type (
 		clientConn *grpc.ClientConn
 		retryTimes int
 		timeout    time.Duration
+		token      []byte
+		user       string
+		password   string
 	}
 
 	responseHeader interface {
@@ -58,6 +64,19 @@ func WithTimeout(timeout time.Duration) WithOption {
 func WithRetryTimes(retryTimes int) WithOption {
 	return func(client *metaClient) {
 		client.retryTimes = retryTimes
+	}
+}
+
+func WithUserPassword(user, password string) WithOption {
+	return func(client *metaClient) {
+		client.user = user
+		client.password = password
+	}
+}
+
+func WithToken(token []byte) WithOption {
+	return func(client *metaClient) {
+		client.token = token
 	}
 }
 
@@ -94,8 +113,17 @@ func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
 			opt(client)
 		}
 		err = client.open(host, port, defaultConnectTimeout, nil)
-		if err == nil {
-			break
+		if err != nil {
+			continue
+		}
+		if client.token == nil {
+			if client.user == "" || client.password == "" {
+				return nil, fmt.Errorf("user and password are required")
+			}
+			client.token, err = client.authWithPassword(client.user, client.password)
+			if err != nil {
+				continue
+			}
 		}
 	}
 	if err != nil {
@@ -124,6 +152,43 @@ func (c *metaClient) open(host string, port int, timeout time.Duration, sslConfi
 	c.clientConn = conn
 	c.client = admin.NewAdminServiceClient(conn)
 	return nil
+}
+
+func (c *metaClient) authWithPassword(user string, password string) ([]byte, error) {
+	info := make(map[string]interface{})
+	info["password"] = password
+	return c.auth(user, info)
+}
+
+func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	bs, err := json.Marshal(authInfo)
+	if err != nil {
+		return nil, err
+	}
+	in := &admin.LoginRequest{
+		Username:      []byte(user),
+		AuthInfo:      bs,
+		ClientVersion: common.PROTOCOL_VERSION,
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.Login(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	response, ok := resp.(*admin.LoginResponse)
+	if !ok {
+		return nil, fmt.Errorf("invalid response")
+	}
+	if !response.Header.Ok {
+		return nil, fmt.Errorf(string(response.Header.GetMessage()))
+	}
+	if response.Token == nil {
+		return nil, fmt.Errorf("invalid token")
+	}
+	return response.Token, nil
 }
 
 func (c *metaClient) Close() {
@@ -189,6 +254,25 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 	return result, nil
 }
 
+func (c *metaClient) GetToken() []byte {
+	return c.token
+}
+
+func (c *metaClient) Logout() error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.LogoutRequest{
+		Header: &admin.AdminRequestHeader{Token: c.token},
+	}
+	_, err := c.retry(func() (responseHeader, error) {
+		return c.client.Logout(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (c *metaClient) CreateCluster(req *CreateClusterReq) (*CreateClusterResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
@@ -197,7 +281,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) (*CreateClusterResp, e
 		zones = append(zones, []byte(z))
 	}
 	in := &admin.CreateClusterRequest{
-		Header: &common.RequestHeader{},
+		Header: &admin.AdminRequestHeader{Token: c.token},
 		ClusterDesc: &admin.ClusterDesc{
 			ClusterName:   []byte(req.clusterName),
 			ReplicaFactor: uint32(req.replica),
@@ -227,7 +311,7 @@ func (c *metaClient) AddService(req *AddServiceReq) (*AddServiceResp, error) {
 	defer cancel()
 
 	in := &admin.AddServiceRequest{
-		Header:      &common.RequestHeader{},
+		Header:      &admin.AdminRequestHeader{Token: c.token},
 		Host:        []byte(req.host),
 		Port:        req.port,
 		Type:        common.ServiceType(req.serviceType),
@@ -255,7 +339,7 @@ func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 	in := &admin.ShowServiceRequest{
-		Header:      &common.RequestHeader{},
+		Header:      &admin.AdminRequestHeader{Token: c.token},
 		ClusterName: []byte(req.clusterName),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -293,7 +377,7 @@ func (c *metaClient) InitCluster(req *InitClusterReq) (*InitClusterResp, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 	in := &admin.InitStorageRequest{
-		Header:      &common.RequestHeader{},
+		Header:      &admin.AdminRequestHeader{Token: c.token},
 		ClusterName: []byte(req.clustername),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -319,7 +403,7 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 	in := &admin.ShowClusterRequest{
-		Header:      &common.RequestHeader{},
+		Header:      &admin.AdminRequestHeader{Token: c.token},
 		ClusterName: []byte(req.clusterName),
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
@@ -359,7 +443,7 @@ func (c *metaClient) DropService(req *DropServiceReq) (*DropServiceResp, error) 
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 	in := &admin.DropServiceRequest{
-		Header:  &common.RequestHeader{},
+		Header:  &admin.AdminRequestHeader{Token: c.token},
 		Name:    []byte(req.host),
 		Port:    req.port,
 		Type:    common.ServiceType(req.serviceType),

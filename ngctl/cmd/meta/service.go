@@ -6,7 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngql/printer"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
 )
 
 type serviceFlagsType struct {
@@ -153,7 +153,7 @@ var showServiceCmd = &cobra.Command{
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
-		fmt.Fprintln(metaOutput, printer.FormatTable(header, data))
+		fmt.Fprintln(metaOutput, ngctl.FormatTable(header, data))
 		return nil
 	},
 }

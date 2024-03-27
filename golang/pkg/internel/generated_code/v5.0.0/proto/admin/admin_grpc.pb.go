@@ -33,6 +33,11 @@ const (
 	AdminService_Restore_FullMethodName       = "/nebula.proto.admin.AdminService/Restore"
 	AdminService_ListClusters_FullMethodName  = "/nebula.proto.admin.AdminService/ListClusters"
 	AdminService_DropBackup_FullMethodName    = "/nebula.proto.admin.AdminService/DropBackup"
+	AdminService_CreateUser_FullMethodName    = "/nebula.proto.admin.AdminService/CreateUser"
+	AdminService_DropUser_FullMethodName      = "/nebula.proto.admin.AdminService/DropUser"
+	AdminService_AlterUser_FullMethodName     = "/nebula.proto.admin.AdminService/AlterUser"
+	AdminService_Login_FullMethodName         = "/nebula.proto.admin.AdminService/Login"
+	AdminService_Logout_FullMethodName        = "/nebula.proto.admin.AdminService/Logout"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -49,6 +54,13 @@ type AdminServiceClient interface {
 	Restore(ctx context.Context, in *RestoreRequest, opts ...grpc.CallOption) (*RestoreResponse, error)
 	ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error)
 	DropBackup(ctx context.Context, in *DropBackupRequest, opts ...grpc.CallOption) (*DropBackupResponse, error)
+	// user
+	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
+	DropUser(ctx context.Context, in *DropUserRequest, opts ...grpc.CallOption) (*DropUserResponse, error)
+	AlterUser(ctx context.Context, in *AlterUserRequest, opts ...grpc.CallOption) (*AlterUserResponse, error)
+	// login only for root
+	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
+	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
 }
 
 type adminServiceClient struct {
@@ -149,6 +161,51 @@ func (c *adminServiceClient) DropBackup(ctx context.Context, in *DropBackupReque
 	return out, nil
 }
 
+func (c *adminServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
+	out := new(CreateUserResponse)
+	err := c.cc.Invoke(ctx, AdminService_CreateUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) DropUser(ctx context.Context, in *DropUserRequest, opts ...grpc.CallOption) (*DropUserResponse, error) {
+	out := new(DropUserResponse)
+	err := c.cc.Invoke(ctx, AdminService_DropUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) AlterUser(ctx context.Context, in *AlterUserRequest, opts ...grpc.CallOption) (*AlterUserResponse, error) {
+	out := new(AlterUserResponse)
+	err := c.cc.Invoke(ctx, AdminService_AlterUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
+	out := new(LoginResponse)
+	err := c.cc.Invoke(ctx, AdminService_Login_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error) {
+	out := new(LogoutResponse)
+	err := c.cc.Invoke(ctx, AdminService_Logout_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServiceServer is the server API for AdminService service.
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility
@@ -163,6 +220,13 @@ type AdminServiceServer interface {
 	Restore(context.Context, *RestoreRequest) (*RestoreResponse, error)
 	ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error)
 	DropBackup(context.Context, *DropBackupRequest) (*DropBackupResponse, error)
+	// user
+	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
+	DropUser(context.Context, *DropUserRequest) (*DropUserResponse, error)
+	AlterUser(context.Context, *AlterUserRequest) (*AlterUserResponse, error)
+	// login only for root
+	Login(context.Context, *LoginRequest) (*LoginResponse, error)
+	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
 	mustEmbedUnimplementedAdminServiceServer()
 }
 
@@ -199,6 +263,21 @@ func (UnimplementedAdminServiceServer) ListClusters(context.Context, *ListCluste
 }
 func (UnimplementedAdminServiceServer) DropBackup(context.Context, *DropBackupRequest) (*DropBackupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropBackup not implemented")
+}
+func (UnimplementedAdminServiceServer) CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUser not implemented")
+}
+func (UnimplementedAdminServiceServer) DropUser(context.Context, *DropUserRequest) (*DropUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropUser not implemented")
+}
+func (UnimplementedAdminServiceServer) AlterUser(context.Context, *AlterUserRequest) (*AlterUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AlterUser not implemented")
+}
+func (UnimplementedAdminServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
+}
+func (UnimplementedAdminServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
 }
 func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
 
@@ -393,6 +472,96 @@ func _AdminService_DropBackup_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminService_CreateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).CreateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_CreateUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).CreateUser(ctx, req.(*CreateUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_DropUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).DropUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_DropUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).DropUser(ctx, req.(*DropUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_AlterUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AlterUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).AlterUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_AlterUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).AlterUser(ctx, req.(*AlterUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LoginRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).Login(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_Login_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).Login(ctx, req.(*LoginRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_Logout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LogoutRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).Logout(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_Logout_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).Logout(ctx, req.(*LogoutRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminService_ServiceDesc is the grpc.ServiceDesc for AdminService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -439,6 +608,26 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "DropBackup",
 			Handler:    _AdminService_DropBackup_Handler,
+		},
+		{
+			MethodName: "CreateUser",
+			Handler:    _AdminService_CreateUser_Handler,
+		},
+		{
+			MethodName: "DropUser",
+			Handler:    _AdminService_DropUser_Handler,
+		},
+		{
+			MethodName: "AlterUser",
+			Handler:    _AdminService_AlterUser_Handler,
+		},
+		{
+			MethodName: "Login",
+			Handler:    _AdminService_Login_Handler,
+		},
+		{
+			MethodName: "Logout",
+			Handler:    _AdminService_Logout_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
