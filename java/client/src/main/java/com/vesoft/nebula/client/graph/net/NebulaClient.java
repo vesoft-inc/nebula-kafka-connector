@@ -153,19 +153,13 @@ public class NebulaClient implements Serializable {
                 if (resultSet.getErrorCode().isSessionError()) {
                     isBadSession = true;
                 }
-                log.warn(String.format("execute error for times %s,  message: %s", tryTimes + 1,
-                        resultSet.getErrorMessage()));
                 if (tryTimes <= retryTimes) {
                     log.info("now retry the execute...");
                 }
             } catch (IOErrorException e) {
                 isBadSession = true;
                 loadBalancer.updateServersStatus();
-                // still has retry time.
-                if (tryTimes <= retryTimes) {
-                    log.warn(String.format("execute failed for IOErrorException, "
-                            + "message: %s, tryTime: %d", e.getMessage(), tryTimes));
-                } else {
+                if (tryTimes > retryTimes) {
                     // retry time is exhausted
                     throw e;
                 }

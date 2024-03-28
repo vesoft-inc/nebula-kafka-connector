@@ -1,10 +1,10 @@
-{"src":12345,"dst":23456,"degree":34, "descr": "aaa","timep": "2020-01-01"}
-{"src":11111,"dst":22222,"degree":33, "descr": "aaa","timep": "2020-01-01"}
-{"src":11111,"dst":33333,"degree":32, "descr": "a\baa","timep": "2020-01-01"}
-{"src":11111,"dst":44444,"degree":31, "descr": "aaa","timep": "2020-01-01"}
-{"src":22222,"dst":55555,"degree":30, "descr": "a\naa","timep": "2020-01-01"}
-{"src":33333,"dst":44444,"degree":29, "descr": "aaa","timep": "2020-01-01"}
-{"src":33333,"dst":55555,"degree":28, "descr": "aa\ta","timep": "2020-01-01"}
-{"src":44444,"dst":22222,"degree":27, "descr": "aaa","timep": "2020-01-01"}
-{"src":44444,"dst":55555,"degree":26, "descr": "aaa","timep": "2020-01-01"}
-{"src":22222,"dst":66666,"degree":25, "descr": "aaa","timep": "2020-01-01"}
+{"src":12345,"dst":23456,"followness":34, "likeness": 1.0}
+{"src":11111,"dst":22222,"followness":33, "likeness": 2.0}
+{"src":11111,"dst":33333,"followness":32, "likeness": 3.0}
+{"src":11111,"dst":44444,"followness":31, "likeness": 4.0}
+{"src":22222,"dst":55555,"followness":30, "likeness": 5.0}
+{"src":33333,"dst":44444,"followness":29, "likeness": 6.0}
+{"src":33333,"dst":55555,"followness":28, "likeness": 7.0}
+{"src":44444,"dst":22222,"followness":27, "likeness": 8.0}
+{"src":44444,"dst":55555,"followness":26, "likeness": 9.0}
+{"src":22222,"dst":66666,"followness":25, "likeness": 1.1}

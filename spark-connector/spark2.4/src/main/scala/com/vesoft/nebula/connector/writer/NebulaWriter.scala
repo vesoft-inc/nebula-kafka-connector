@@ -28,7 +28,7 @@ class NebulaWriter(nebulaOptions: NebulaOptions) extends Serializable {
 
   def submit(exec: String): ResultSet = {
     @transient val rateLimiter = RateLimiter.create(nebulaOptions.rateLimit)
-    if (rateLimiter.tryAcquire(Long.MaxValue, TimeUnit.SECONDS)) {
+    if (rateLimiter.tryAcquire(30, TimeUnit.MINUTES)) {
       val result = graphProvider.submit(exec)
       result
     } else {

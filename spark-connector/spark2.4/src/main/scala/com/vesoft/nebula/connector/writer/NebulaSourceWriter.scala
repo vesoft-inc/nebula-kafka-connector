@@ -47,7 +47,8 @@ class NebulaEdgeWriterFactory(nebulaOptions: NebulaOptions,
     val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
     val dataFrameFields = new ListBuffer[String]
     schema.fields.toList.foreach(field => {
-      if (!field.name.equals(nebulaOptions.srcPkField) || nebulaOptions.srcPkAsProp) {
+      if ((!field.name.equals(nebulaOptions.srcPkField) || nebulaOptions.srcPkAsProp)
+        && (!field.name.equals(nebulaOptions.dstPkField) || nebulaOptions.dstPkAsProp)) {
         dataFrameFields.append(field.name)
       }
     })

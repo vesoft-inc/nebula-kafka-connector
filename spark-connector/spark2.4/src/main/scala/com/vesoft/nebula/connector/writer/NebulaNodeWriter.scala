@@ -5,10 +5,11 @@
 
 package com.vesoft.nebula.connector.writer
 
+import com.vesoft.nebula.client.graph.ErrorCode
 import com.vesoft.nebula.spark.common.exception.IllegalOptionException
 import com.vesoft.nebula.spark.common.nebula.VidType
 import com.vesoft.nebula.spark.common.writer.NebulaExecutor
-import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaNode, NebulaNodes, WriteMode}
+import com.vesoft.nebula.spark.common.{NebulaNode, NebulaNodes, NebulaOptions, WriteMode}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.writer.{DataWriter, WriterCommitMessage}
 import org.apache.spark.sql.types.StructType
@@ -74,13 +75,19 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
           s"batch write for ${nebulaOptions.label} succeed. batch size(${vertices.size}, latency(${result.getLatency}))")
       }
     } else {
+      if (vertices.size == 1
+        && result.getErrorCode != ErrorCode.LEADER_CHANGED
+        && !result.getErrorCode.isRpcError
+        && !result.getErrorCode.isRaftError) {
+        failedExecs.append(exec)
+        LOG.error(s"write edge ${nebulaOptions.label} failed: ${result.getErrorMessage}.")
+        return
+      }
       // re-execute the vertices one by one
       LOG.warn(
-        s"write node ${nebulaOptions.label} failed error message: ${result.getErrorMessage}, " +
-          s"mow retry writing one by one.\n ${exec}")
-      vertices.par.foreach { node =>
-        writeNode(node)
-      }
+        s"write node ${nebulaOptions.label} failed: ${result.getErrorMessage}, " +
+          s"now retry writing one by one.")
+      vertices.par.foreach { node => writeNode(node) }
     }
   }
 
@@ -93,30 +100,30 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
       }
       return
     }
-    if (result.getErrorCode.equals("ND002")) {
+    if (result.getErrorCode == ErrorCode.NODE_ALREADY_EXIST) {
       LOG.warn(
-        s"write ${nebulaOptions.label} failed, the node already exists. node: ${node.toString}")
+        s"write ${nebulaOptions.label} failed, the node already exists. ")
       return
     }
     // retry the write execution for RPC_ERROR(NN), LEADER_CHANGED(ND005), RAFT_ERROR(NA)
     var executeResult = result
     var retry = 0
     while (retry < nebulaOptions.executionRetry &&
-      (executeResult.getErrorCode.contains("NN")
-        || executeResult.getErrorCode.equals("ND005")
-        || executeResult.getErrorCode.contains("NA"))) {
+      (executeResult.getErrorCode.isRpcError
+        || executeResult.getErrorCode == ErrorCode.LEADER_CHANGED
+        || executeResult.getErrorCode.isRaftError)) {
       retry += 1
       Thread.sleep(nebulaOptions.executionRetryInterval)
       executeResult = submit(exec)
       if (executeResult.isSucceeded) {
         if (!nebulaOptions.disableWriteLog) {
           LOG.info(
-            s"write ${nebulaOptions.label}, batch size(1), latency(${executeResult.getLatency}ms)")
+            s"write node ${nebulaOptions.label}, batch size(1), latency(${executeResult.getLatency}ms)")
         }
         return
       }
     }
-    LOG.error(s"write node failed for ${executeResult.getErrorMessage}, statement:\n ${exec}")
+    LOG.error(s"write node ${nebulaOptions.label} failed: ${executeResult.getErrorMessage}.")
     failedExecs.append(exec)
   }
 

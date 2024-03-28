@@ -30,7 +30,7 @@ object NebulaSparkWriterExample {
   private def getNebulaConnectionConfig: NebulaConnectionConfig = {
     NebulaConnectionConfig
       .builder()
-      .withGraphAddress("192.168.8.6:3713")
+      .withGraphAddress("192.168.8.6:3820")
       .withUser("root")
       .withPasswd("nebula")
       .build()
@@ -48,30 +48,30 @@ object NebulaSparkWriterExample {
       .withGraphName("nba")
       .withNodeType("node_type_player")
       .withWriteMode(WriteMode.INSERT)
-      .withBatchSize(1)
+      .withBatchSize(10)
       .build()
     df.write.nebula(getNebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()
   }
 
   /**
-    * for this example, your nebula edge schema should have property names: descr, timp
+    * for this example, your nebula edge schema should have property names: followness, linkeness
     * if your withSrcAsProperty is true, then edge schema also should have property name: src
     * if your withDstAsProperty is true, then edge schema also should have property name: dst
     */
   private def writeEdge(spark: SparkSession): Unit = {
-    val df = spark.read.json("spark-connector/example/src/main/resources/vertex")
+    val df = spark.read.json("spark-connector/example/src/main/resources/edge")
     df.show()
     df.persist(StorageLevel.MEMORY_AND_DISK_SER)
 
     val nebulaWriteEdgeConfig: WriteNebulaEdgeConfig = WriteNebulaEdgeConfig
       .builder()
-      .withGraphName("test")
-      .withEdge("friend")
+      .withGraphName("nba")
+      .withEdge("edge_type_follow")
       .withSrcPkField("src")
       .withDstPkField("dst")
       .withSrcPkAsProperty(false)
       .withDstPkAsProperty(false)
-      .withBatchSize(1000)
+      .withBatchSize(10)
       .build()
     df.write.nebula(getNebulaConnectionConfig, nebulaWriteEdgeConfig).writeEdges()
   }

@@ -5,12 +5,14 @@
 
 package com.vesoft.nebula.spark.common.nebula
 
+import com.vesoft.nebula.client.graph.data.ResultSet.Record
 import com.vesoft.nebula.client.graph.data.{ResultSet, ValueWrapper}
 import com.vesoft.nebula.client.graph.net.NebulaClient
 import com.vesoft.nebula.client.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
 import org.slf4j.LoggerFactory
 
 import java.util
+import java.util.regex.Pattern
 import java.util.{ArrayList, List}
 import scala.collection.JavaConverters.{asScalaBufferConverter, mapAsScalaMapConverter}
 import scala.collection.{breakOut, mutable}
@@ -28,7 +30,10 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     .setRetryTimes(0)
     .setMaxSessionSize(1)
     .setMinSessionSize(1)
-    .setReconnect(true)
+    .setHealthCheckTimeMills(0)
+    .setRetryTimes(0)
+    .setBlockWhenExhausted(true)
+    .setMaxWaitMills(60000)
     .build()
 
   /**
@@ -130,31 +135,26 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $nodeType does not exist in $graphName.")
     }
-    val properties = result.next().get("properties").asList()
-    for (prop <- properties.asScala) {
-      val kv = prop.asString().split(":")
-      schema += (kv(0) -> kv(1).trim)
-    }
 
     // for now, the pk is one property, composite pk is not support yet.
-    val pks = result.next().get("primary_keys").asList().asScala.toList
-    if (pks.isEmpty) {
+    var pk: String = null
+    var pkDataType: String = null
+
+    while (result.hasNext) {
+      val record = result.next();
+      schema += (record.get("property_name").asString() -> record.get("data_type").asString())
+      if ("Y".equals(record.get("primary_key").asString())) {
+        pk = record.get("property_name").asString()
+        pkDataType = record.get("data_type").asString()
+      }
+    }
+
+    if (pk == null) {
       LOG.error(s"node type $nodeType has no primary key.")
       throw new RuntimeException(s"node type $nodeType has no primary key")
     }
-    val pk: String = pks.head.asString()
+    val idDataType: VidType.Value = VidType.withName(pkDataType)
 
-    var flag = true
-    var idDataType: VidType.Value = null
-    for (entry <- schema if flag) {
-      if (entry._1.equals(pk)) {
-        idDataType = VidType.withName(entry._2.trim)
-        flag = false
-      }
-    }
-    if (idDataType == null) {
-      throw new RuntimeException(s"can not get the pk $pk for $nodeType")
-    }
     NodeDesc(nodeType, pk, idDataType, schema.toMap)
   }
 
@@ -169,22 +169,46 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     val graphType = getGraphType(graphName)
 
-    val descEdgeType = s"DESCRIBE EDGE TYPE $edgeType OF $graphType"
+    val descEdgeType =
+      s"call describe_graph_type('$graphType') filter type_name='$edgeType' return type_pattern next call describe_edge_type('$graphType', '$edgeType') return *"
+
     val result = client.execute(descEdgeType)
     if (!result.isSucceeded || result.isEmpty) {
       LOG.error(s"get 'describe' of $edgeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"edge type $edgeType does not exist in $graphName.")
     }
 
-    val types = result.next().get("types").asList()
-    // the 'Types' in result for DESCRIBE EDGE TYPE should contain 'src node type', 'edge type', 'dst node type'
-    if (types.size() < 3) {
-      LOG.error(s"types size is less than 3 for edge type $edgeType")
-      throw new RuntimeException(
-        s"edge type $edgeType has unexpected 'Types', the types size is less than 3.")
+    var edgeTypePattern: String = null
+    while (result.hasNext) {
+      val record = result.next()
+      if (edgeTypePattern == null) {
+        edgeTypePattern = record.get("type_pattern").asString()
+      }
+      schema += (record.get("property_name").asString()-> record.get("data_type").asString())
     }
-    val srcNodeType = types.get(0).asString()
-    val dstNodeType = types.get(2).asString()
+
+    var srcNodeType: String = null
+    var dstNodeType: String = null
+    // regularly match two types of edge:()-[]->() or ()~[]~() to get the srcNodeType and dstNodeType.
+    val edgeDirectionPattern = """\((.*?)\)-\[.*?\]->\((.*?)\)"""
+    val edgeUnDirectionPattern = """\((.*?)\)~\[.*?\]~\((.*?)\)"""
+    val regexWithEdgeDirection = edgeDirectionPattern.r
+    val regexWithoutEdgeDirection = edgeUnDirectionPattern.r
+    if (edgeTypePattern.matches(edgeDirectionPattern)) {
+      edgeTypePattern match {
+        case regexWithEdgeDirection(start, end) =>
+          srcNodeType = start
+          dstNodeType = end
+      }
+    } else if (edgeTypePattern.matches(edgeUnDirectionPattern)) {
+      edgeTypePattern match {
+        case regexWithoutEdgeDirection(start, end) =>
+          srcNodeType = start
+          dstNodeType = end
+      }
+    } else {
+      throw new RuntimeException("can not parse the edge type pattern.")
+    }
 
     val srcNodeIdDataType = getIdType(graphName, srcNodeType)
     val dstNodeIdDataType = getIdType(graphName, dstNodeType)
@@ -192,11 +216,6 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     val srcNodePkName = getNodeDesc(graphName, srcNodeType).nodePkName
     val dstNodePkName = getNodeDesc(graphName, dstNodeType).nodePkName
 
-    val properties = result.next().get("properties").asList()
-    for (prop <- properties.asScala) {
-      val kv = prop.asString().split(":")
-      schema += (kv(0) -> kv(1))
-    }
 
     EdgeDesc(edgeType, srcNodeType, srcNodePkName, srcNodeIdDataType, dstNodeType, dstNodePkName, dstNodeIdDataType, schema.toMap)
   }

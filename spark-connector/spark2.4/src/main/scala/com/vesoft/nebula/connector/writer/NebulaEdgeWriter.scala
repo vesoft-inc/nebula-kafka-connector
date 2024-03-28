@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.connector.writer
 
+import com.vesoft.nebula.client.graph.ErrorCode
 import com.vesoft.nebula.spark.common.nebula.VidType
 import com.vesoft.nebula.spark.common.writer.NebulaExecutor
 import com.vesoft.nebula.spark.common.{NebulaEdge, NebulaEdges, NebulaOptions, WriteMode}
@@ -19,10 +20,10 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
                        srcIndex: Int,
                        dstIndex: Int,
                        schema: StructType)
-    extends NebulaWriter(nebulaOptions)
+  extends NebulaWriter(nebulaOptions)
     with DataWriter[InternalRow] {
 
-  private val LOG      = LoggerFactory.getLogger(this.getClass)
+  private val LOG = LoggerFactory.getLogger(this.getClass)
   private val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
 
   val fieldTypeMap: Map[String, String] = edgeDesc.properties
@@ -34,11 +35,11 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   private val isTargetIdStringType = edgeDesc.dstNodePkDataType == VidType.STRING
 
   /**
-    * write one edge record to buffer
-    */
+   * write one edge record to buffer
+   */
   override def write(row: InternalRow): Unit = {
     val srcId = NebulaExecutor.extraID(schema, row, srcIndex, isSourceIdStringType)
-    if(srcId == null){
+    if (srcId == null) {
       LOG.warn(s">>>> record has null value at index $srcIndex for primary key, ignore it. record:$row")
       return
     }
@@ -54,12 +55,12 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
         Map[String, String]()
       } else {
         NebulaExecutor.assignEdgeValues(schema,
-                                        row,
-                                        srcIndex,
-                                        dstIndex,
-                                        nebulaOptions.srcPkAsProp,
-                                        nebulaOptions.dstPkAsProp,
-                                        fieldTypeMap)
+          row,
+          srcIndex,
+          dstIndex,
+          nebulaOptions.srcPkAsProp,
+          nebulaOptions.dstPkAsProp,
+          fieldTypeMap)
       }
     val nebulaEdge = NebulaEdge(edgeDesc.srcNodePkName, srcId, edgeDesc.dstNodePkName, dstId, values)
     edges.append(nebulaEdge)
@@ -69,15 +70,15 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   }
 
   /**
-    * submit buffer edges to nebula
-    */
+   * submit buffer edges to nebula
+   */
   def execute(): Unit = {
     writeEdges(edges)
     edges.clear()
   }
 
   def writeEdges(edges: ListBuffer[NebulaEdge]): Unit = {
-    val exec   = getGql(edges.toList)
+    val exec = getGql(edges.toList)
     val result = submit(exec)
     if (result.isSucceeded) {
       if (!nebulaOptions.disableWriteLog) {
@@ -85,18 +86,24 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
           s"batch write for ${nebulaOptions.label} succeed. batch size(${edges.size}), latency(${result.getLatency})")
       }
     } else {
+      if (edges.size == 1
+        && result.getErrorCode != ErrorCode.LEADER_CHANGED
+        && !result.getErrorCode.isRpcError
+        && !result.getErrorCode.isRaftError) {
+        failedExecs.append(exec)
+        LOG.error(s"write edge ${nebulaOptions.label} failed: ${result.getErrorMessage}.")
+        return
+      }
       // re-execute the vertices one by one
       LOG.warn(
-        s"write edge ${nebulaOptions.label} failed error message: ${result.getErrorMessage}, " +
-          s"mow retry writing one by one.\n ${exec}")
-      edges.par.foreach { edge =>
-        writeEdge(edge)
-      }
+        s"write edge ${nebulaOptions.label} failed: ${result.getErrorMessage}, " +
+          s"now retry writing one by one.")
+      edges.par.foreach { edge => writeEdge(edge) }
     }
   }
 
   def writeEdge(edge: NebulaEdge): Unit = {
-    val exec   = getGql(List(edge))
+    val exec = getGql(List(edge))
     val result = submit(exec)
     if (result.isSucceeded) {
       if (!nebulaOptions.disableWriteLog) {
@@ -106,23 +113,23 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     }
     // retry the write execution for RPC_ERROR(NN), LEADER_CHANGED(ND005), RAFT_ERROR(NA)
     var executeResult = result
-    var retry         = 0
+    var retry = 0
     while (retry < nebulaOptions.executionRetry &&
-           (executeResult.getErrorCode.contains("NN")
-           || executeResult.getErrorCode.equals("ND005")
-           || executeResult.getErrorCode.contains("NA"))) {
+      (executeResult.getErrorCode.isRpcError
+        || executeResult.getErrorCode == ErrorCode.LEADER_CHANGED
+        || executeResult.getErrorCode.isRaftError)) {
       retry += 1
       Thread.sleep(nebulaOptions.executionRetryInterval)
       executeResult = submit(exec)
       if (executeResult.isSucceeded) {
         if (!nebulaOptions.disableWriteLog) {
           LOG.info(
-            s"write ${nebulaOptions.label}, batch size(1), latency(${executeResult.getLatency}ms)")
+            s"write edge ${nebulaOptions.label}, batch size(1), latency(${executeResult.getLatency}ms)")
         }
         return
       }
     }
-    LOG.error(s"write edge failed for ${executeResult.getErrorMessage}, statement:\n ${exec}")
+    LOG.error(s"write edge ${nebulaOptions.label} failed: ${executeResult.getErrorMessage}.")
     failedExecs.append(exec)
   }
 
