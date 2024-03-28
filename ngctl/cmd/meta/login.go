@@ -61,6 +61,6 @@ func init() {
 	loginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "127.0.0.1", "meta server host")
 	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
 	loginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "root", "user name")
-	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "NebulaGraph01", "password")
+	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "nebula", "password")
 	loginCmd.Flags().BoolVarP(&loginFlags.promptPassword, "prompt-password", "i", false, "prompt password")
 }
