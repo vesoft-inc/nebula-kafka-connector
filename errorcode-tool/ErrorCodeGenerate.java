@@ -112,6 +112,12 @@ public class ErrorCodeGenerate {
                 return "NE";
             case "UNSUPPORTED":
                 return "NT";
+            case "AUTHENTICATE_ERROR":
+                return "NH";
+            case "JOB_ERROR":
+                return "NJ";
+            case "LICENSE_ERROR":
+                return "NL";
             /* internal errors */
             /*
              * case "METADATA_ERROR":

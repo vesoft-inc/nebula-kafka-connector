@@ -11,6 +11,7 @@ import (
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"google.golang.org/grpc"
@@ -23,7 +24,9 @@ var defaultRequestTimeout = 10 * time.Second
 type (
 	Client interface {
 		Close()
+		Login() error
 		Logout() error
+		ChangePassword(user, currentPw, newPw string) error
 		GetToken() []byte
 		ClusterClient
 	}
@@ -116,15 +119,6 @@ func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
 		if err != nil {
 			continue
 		}
-		if client.token == nil {
-			if client.user == "" || client.password == "" {
-				return nil, fmt.Errorf("user and password are required")
-			}
-			client.token, err = client.authWithPassword(client.user, client.password)
-			if err != nil {
-				continue
-			}
-		}
 	}
 	if err != nil {
 		return nil, err
@@ -154,6 +148,19 @@ func (c *metaClient) open(host string, port int, timeout time.Duration, sslConfi
 	return nil
 }
 
+func (c *metaClient) Login() error {
+	if c.user == "" || c.password == "" {
+		return fmt.Errorf("user and password are required")
+	}
+	token, err := c.authWithPassword(c.user, c.password)
+	if err != nil {
+		return err
+	}
+	c.token = token
+	return nil
+
+}
+
 func (c *metaClient) authWithPassword(user string, password string) ([]byte, error) {
 	info := make(map[string]interface{})
 	info["password"] = password
@@ -170,7 +177,7 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 	in := &admin.LoginRequest{
 		Username:      []byte(user),
 		AuthInfo:      bs,
-		ClientVersion: common.PROTOCOL_VERSION,
+		ClientVersion: proto.PROTOCOL_VERSION,
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
 		return c.client.Login(ctx, in)
@@ -183,7 +190,10 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 		return nil, fmt.Errorf("invalid response")
 	}
 	if !response.Header.Ok {
-		return nil, fmt.Errorf(string(response.Header.GetMessage()))
+		return nil, nebula.NewNebulaError(
+			nebula.ErrorFromInt(response.Header.Code),
+			string(response.Header.Message),
+		)
 	}
 	if response.Token == nil {
 		return nil, fmt.Errorf("invalid token")
@@ -256,6 +266,34 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 
 func (c *metaClient) GetToken() []byte {
 	return c.token
+}
+
+func (c *metaClient) ChangePassword(user, currentPw, newPw string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.ChangePasswordRequest{
+		Username:    []byte(user),
+		OldPassword: []byte(currentPw),
+		NewPassword: []byte(newPw),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.ChangePassword(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	response, ok := resp.(*admin.ChangePasswordResponse)
+	if !ok {
+		return fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return err
+	}
+	if !responseHeader.OK {
+		return fmt.Errorf(responseHeader.Msg)
+	}
+	return nil
 }
 
 func (c *metaClient) Logout() error {

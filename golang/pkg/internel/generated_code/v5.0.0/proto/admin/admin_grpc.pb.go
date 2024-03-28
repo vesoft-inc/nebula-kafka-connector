@@ -23,21 +23,23 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AdminService_AddService_FullMethodName    = "/nebula.proto.admin.AdminService/AddService"
-	AdminService_DropService_FullMethodName   = "/nebula.proto.admin.AdminService/DropService"
-	AdminService_ShowService_FullMethodName   = "/nebula.proto.admin.AdminService/ShowService"
-	AdminService_CreateCluster_FullMethodName = "/nebula.proto.admin.AdminService/CreateCluster"
-	AdminService_ShowCluster_FullMethodName   = "/nebula.proto.admin.AdminService/ShowCluster"
-	AdminService_InitStorage_FullMethodName   = "/nebula.proto.admin.AdminService/InitStorage"
-	AdminService_CreateBackup_FullMethodName  = "/nebula.proto.admin.AdminService/CreateBackup"
-	AdminService_Restore_FullMethodName       = "/nebula.proto.admin.AdminService/Restore"
-	AdminService_ListClusters_FullMethodName  = "/nebula.proto.admin.AdminService/ListClusters"
-	AdminService_DropBackup_FullMethodName    = "/nebula.proto.admin.AdminService/DropBackup"
-	AdminService_CreateUser_FullMethodName    = "/nebula.proto.admin.AdminService/CreateUser"
-	AdminService_DropUser_FullMethodName      = "/nebula.proto.admin.AdminService/DropUser"
-	AdminService_AlterUser_FullMethodName     = "/nebula.proto.admin.AdminService/AlterUser"
-	AdminService_Login_FullMethodName         = "/nebula.proto.admin.AdminService/Login"
-	AdminService_Logout_FullMethodName        = "/nebula.proto.admin.AdminService/Logout"
+	AdminService_AddService_FullMethodName     = "/nebula.proto.admin.AdminService/AddService"
+	AdminService_DropService_FullMethodName    = "/nebula.proto.admin.AdminService/DropService"
+	AdminService_ShowService_FullMethodName    = "/nebula.proto.admin.AdminService/ShowService"
+	AdminService_CreateCluster_FullMethodName  = "/nebula.proto.admin.AdminService/CreateCluster"
+	AdminService_ShowCluster_FullMethodName    = "/nebula.proto.admin.AdminService/ShowCluster"
+	AdminService_InitStorage_FullMethodName    = "/nebula.proto.admin.AdminService/InitStorage"
+	AdminService_DropCluster_FullMethodName    = "/nebula.proto.admin.AdminService/DropCluster"
+	AdminService_CreateBackup_FullMethodName   = "/nebula.proto.admin.AdminService/CreateBackup"
+	AdminService_Restore_FullMethodName        = "/nebula.proto.admin.AdminService/Restore"
+	AdminService_ListClusters_FullMethodName   = "/nebula.proto.admin.AdminService/ListClusters"
+	AdminService_DropBackup_FullMethodName     = "/nebula.proto.admin.AdminService/DropBackup"
+	AdminService_CreateUser_FullMethodName     = "/nebula.proto.admin.AdminService/CreateUser"
+	AdminService_DropUser_FullMethodName       = "/nebula.proto.admin.AdminService/DropUser"
+	AdminService_AlterUser_FullMethodName      = "/nebula.proto.admin.AdminService/AlterUser"
+	AdminService_Login_FullMethodName          = "/nebula.proto.admin.AdminService/Login"
+	AdminService_Logout_FullMethodName         = "/nebula.proto.admin.AdminService/Logout"
+	AdminService_ChangePassword_FullMethodName = "/nebula.proto.admin.AdminService/ChangePassword"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -50,6 +52,7 @@ type AdminServiceClient interface {
 	CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error)
 	ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error)
 	InitStorage(ctx context.Context, in *InitStorageRequest, opts ...grpc.CallOption) (*InitStorageResponse, error)
+	DropCluster(ctx context.Context, in *DropClusterRequest, opts ...grpc.CallOption) (*DropClusterResponse, error)
 	CreateBackup(ctx context.Context, in *CreateBackupRequest, opts ...grpc.CallOption) (*CreateBackupResponse, error)
 	Restore(ctx context.Context, in *RestoreRequest, opts ...grpc.CallOption) (*RestoreResponse, error)
 	ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error)
@@ -61,6 +64,7 @@ type AdminServiceClient interface {
 	// login only for root
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
+	ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error)
 }
 
 type adminServiceClient struct {
@@ -119,6 +123,15 @@ func (c *adminServiceClient) ShowCluster(ctx context.Context, in *ShowClusterReq
 func (c *adminServiceClient) InitStorage(ctx context.Context, in *InitStorageRequest, opts ...grpc.CallOption) (*InitStorageResponse, error) {
 	out := new(InitStorageResponse)
 	err := c.cc.Invoke(ctx, AdminService_InitStorage_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) DropCluster(ctx context.Context, in *DropClusterRequest, opts ...grpc.CallOption) (*DropClusterResponse, error) {
+	out := new(DropClusterResponse)
+	err := c.cc.Invoke(ctx, AdminService_DropCluster_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -206,6 +219,15 @@ func (c *adminServiceClient) Logout(ctx context.Context, in *LogoutRequest, opts
 	return out, nil
 }
 
+func (c *adminServiceClient) ChangePassword(ctx context.Context, in *ChangePasswordRequest, opts ...grpc.CallOption) (*ChangePasswordResponse, error) {
+	out := new(ChangePasswordResponse)
+	err := c.cc.Invoke(ctx, AdminService_ChangePassword_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // AdminServiceServer is the server API for AdminService service.
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility
@@ -216,6 +238,7 @@ type AdminServiceServer interface {
 	CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error)
 	ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error)
 	InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error)
+	DropCluster(context.Context, *DropClusterRequest) (*DropClusterResponse, error)
 	CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error)
 	Restore(context.Context, *RestoreRequest) (*RestoreResponse, error)
 	ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error)
@@ -227,6 +250,7 @@ type AdminServiceServer interface {
 	// login only for root
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
+	ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error)
 	mustEmbedUnimplementedAdminServiceServer()
 }
 
@@ -251,6 +275,9 @@ func (UnimplementedAdminServiceServer) ShowCluster(context.Context, *ShowCluster
 }
 func (UnimplementedAdminServiceServer) InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitStorage not implemented")
+}
+func (UnimplementedAdminServiceServer) DropCluster(context.Context, *DropClusterRequest) (*DropClusterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropCluster not implemented")
 }
 func (UnimplementedAdminServiceServer) CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBackup not implemented")
@@ -278,6 +305,9 @@ func (UnimplementedAdminServiceServer) Login(context.Context, *LoginRequest) (*L
 }
 func (UnimplementedAdminServiceServer) Logout(context.Context, *LogoutRequest) (*LogoutResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Logout not implemented")
+}
+func (UnimplementedAdminServiceServer) ChangePassword(context.Context, *ChangePasswordRequest) (*ChangePasswordResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
 }
 func (UnimplementedAdminServiceServer) mustEmbedUnimplementedAdminServiceServer() {}
 
@@ -396,6 +426,24 @@ func _AdminService_InitStorage_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminServiceServer).InitStorage(ctx, req.(*InitStorageRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_DropCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).DropCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_DropCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).DropCluster(ctx, req.(*DropClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -562,6 +610,24 @@ func _AdminService_Logout_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminService_ChangePassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ChangePasswordRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ChangePassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ChangePassword_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ChangePassword(ctx, req.(*ChangePasswordRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // AdminService_ServiceDesc is the grpc.ServiceDesc for AdminService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -592,6 +658,10 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "InitStorage",
 			Handler:    _AdminService_InitStorage_Handler,
+		},
+		{
+			MethodName: "DropCluster",
+			Handler:    _AdminService_DropCluster_Handler,
 		},
 		{
 			MethodName: "CreateBackup",
@@ -628,6 +698,10 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Logout",
 			Handler:    _AdminService_Logout_Handler,
+		},
+		{
+			MethodName: "ChangePassword",
+			Handler:    _AdminService_ChangePassword_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

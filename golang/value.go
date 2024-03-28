@@ -166,6 +166,14 @@ func (vt ValueType) String() string {
 		return "INT32"
 	case ValueTypeInt64:
 		return "INT64"
+	case ValueTypeUInt8:
+		return "UINT8"
+	case ValueTypeUInt16:
+		return "UINT16"
+	case ValueTypeUInt32:
+		return "UINT32"
+	case ValueTypeUInt64:
+		return "UINT64"
 	case ValueTypeFloat:
 		return "FLOAT"
 	case ValueTypeDouble:

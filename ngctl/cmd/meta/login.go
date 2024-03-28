@@ -5,6 +5,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
 )
@@ -42,8 +43,23 @@ var loginCmd = &cobra.Command{
 		address = fmt.Sprintf("%s:%d", loginFlags.host, loginFlags.port)
 		c, err := meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, loginFlags.password))
 		if err != nil {
-			return metaConsoleError(fmt.Sprintf("cannot login to %s", address), err.Error())
-
+			return metaConsoleError(fmt.Sprintf("cannot create client to %s", address), err.Error())
+		}
+		if err := c.Login(); err != nil {
+			//should reset password for first login
+			if e, ok := err.(*nebula.NebulaError); ok {
+				if e.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
+					return err
+				}
+				fmt.Fprintln(metaOutput, "Please reset the password for the first login.")
+				if err := resetPassword(c); err != nil {
+					return metaConsoleError("cannot reset password", err.Error())
+				}
+				fmt.Fprintf(metaOutput, "Reset password succeeded for %s.\n", loginFlags.user)
+				return nil
+			} else {
+				return err
+			}
 		}
 		if err := ngctl.SaveMetaToken(address, c.GetToken()); err != nil {
 			return metaConsoleError("save meta session failed", err.Error())
@@ -54,6 +70,43 @@ var loginCmd = &cobra.Command{
 
 		return nil
 	},
+}
+
+func resetPassword(c meta.Client) error {
+	currentPassword := promptui.Prompt{
+		Label:     "Current password:",
+		AllowEdit: true,
+		Mask:      rune('*'),
+	}
+	currentPasswordStr, err := currentPassword.Run()
+	if err != nil {
+		return err
+	}
+	newPassword := promptui.Prompt{
+		Label:     "New password:",
+		AllowEdit: true,
+		Mask:      rune('*'),
+	}
+	newPasswordStr, err := newPassword.Run()
+	if err != nil {
+		return err
+	}
+	confirmPassword := promptui.Prompt{
+		Label:     "Retype new password:",
+		AllowEdit: true,
+		Mask:      rune('*'),
+	}
+	confirmPasswordStr, err := confirmPassword.Run()
+	if err != nil {
+		return err
+	}
+	if newPasswordStr != confirmPasswordStr {
+		return fmt.Errorf("Sorry, the passwords you entered do not match.")
+	}
+	if err := c.ChangePassword(loginFlags.user, currentPasswordStr, newPasswordStr); err != nil {
+		return err
+	}
+	return nil
 }
 
 func init() {
