@@ -7,12 +7,14 @@ import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.utils.VersionParse;
 import com.vesoft.nebula.proto.graph.AuthRequest;
 import com.vesoft.nebula.proto.graph.AuthResponse;
 import com.vesoft.nebula.proto.graph.ExecuteRequest;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
 import com.vesoft.nebula.proto.graph.SignoutRequest;
+import com.vesoft.nebula.proto.version.Version;
 import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -93,7 +95,7 @@ public class GrpcConnection extends Connection {
                     .setUsername(ByteString.copyFrom(user, charset))
                     .setAuthInfo(ByteString.copyFrom(authInfoString, charset))
                     .setClientType(ByteString.copyFrom("java", charset))
-                    .setClientVersion(ByteString.copyFrom("v5.0.0", charset))
+                    .setClientVersion(VersionParse.getProtoVersion())
                     .build();
             getChannel();
             AuthResponse resp = stub

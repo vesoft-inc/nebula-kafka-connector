@@ -1,0 +1,18 @@
+// Copyright (c) 2024 vesoft inc. All rights reserved.
+
+// gRPC requires the proto3 syntax
+syntax = "proto3";
+
+package nebula.proto.version;
+option go_package = "./proto/version";
+option java_package = "com.vesoft.nebula.proto.version";
+option java_multiple_files = true;
+option optimize_for = SPEED;
+
+import "google/protobuf/descriptor.proto";
+
+extend google.protobuf.FileOptions {
+  bytes protocol_version = 9559;
+}
+
+option (protocol_version) = "5.0.0";

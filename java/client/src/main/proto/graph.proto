@@ -22,6 +22,8 @@
 // gRPC requires the proto3 syntax
 syntax = "proto3";
 
+import "version.proto";
+
 /**
  * Data structures defined in this file is mainly for data exchanging.
  * On the server side, the compute engine has its own data representations,
