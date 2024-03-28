@@ -258,7 +258,7 @@ public class GraphClientExample {
         String graphName = "nba";
         String nodeType = "node_type_player";
 
-        ScanNodeResultIterator iterator = client.scanNode(graphName, nodeType, 3, 10);
+        ScanNodeResultIterator iterator = client.scanNode(graphName, nodeType);
         boolean hasPrintPropNames = false;
         while (iterator.hasNext()) {
             ScanNodeResult result = iterator.next();
@@ -269,7 +269,6 @@ public class GraphClientExample {
             if (result.isEmpty()) {
                 continue;
             }
-            System.out.println(result.getPropNames());
             List<TableRow> tableRows = result.getTableRows();
             for (TableRow row : tableRows) {
                 System.out.println(row.getValues());
@@ -283,7 +282,7 @@ public class GraphClientExample {
         String graphName = "nba";
         String edgeType = "edge_type_follow";
 
-        ScanEdgeResultIterator iterator = client.scanEdge(graphName, edgeType, 2, 10);
+        ScanEdgeResultIterator iterator = client.scanEdge(graphName, edgeType);
         boolean hasPrintPropNames = false;
         while (iterator.hasNext()) {
             ScanEdgeResult result = iterator.next();

@@ -89,13 +89,17 @@ public class ScanNodeResultIterator extends ScanResultIterator {
         }
 
         hasNext = false;
+        List<Integer> partKeyNeedToRemove = new ArrayList<>();
         for (Map.Entry<Integer, String> partCur : partCursor.entrySet()) {
             if (!"".equals(partCur.getValue())) {
                 hasNext = true;
                 break;
             } else {
-                partCursor.remove(partCur.getKey());
+                partKeyNeedToRemove.add(partCur.getKey());
             }
+        }
+        for (Integer part : partKeyNeedToRemove) {
+            partCursor.remove(part);
         }
         return new ScanNodeResult(results, propNames);
     }

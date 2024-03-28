@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
@@ -482,23 +483,28 @@ public class NebulaClient implements Serializable {
                     nodeType, graphName));
         }
 
-        List<ValueWrapper> pks = resultSet.next().get("primary_keys").asList();
+        List<String> pks = new ArrayList<>();
+        List<String> propNames = new ArrayList<>();
+        while (resultSet.hasNext()) {
+            ResultSet.Record record = resultSet.next();
+            propNames.add(record.get("property_name").asString());
+            if ("Y".equals(record.get("primary_key").asString())) {
+                pks.add(record.get("property_name").asString());
+            }
+        }
+
         if (pks.isEmpty()) {
             log.error("node type " + nodeType + " has no primary key.");
             throw new RuntimeException("node type " + nodeType + " has no primary key");
         }
-        String pk = pks.get(0).asString();
 
         // define the property name list, and put the pk on the head of list.
-        List<String> propertyNames = new ArrayList<>();
-        propertyNames.add(pk);
-        List<ValueWrapper> properties = resultSet.next().get("properties").asList();
-        for (ValueWrapper property : properties) {
-            String propertyName = property.asString().split(":")[0];
-            if (pk.equals(propertyName)) {
+        List<String> propertyNames = new ArrayList<>(pks);
+        for (String property : propNames) {
+            if (pks.contains(property)) {
                 continue;
             }
-            propertyNames.add(propertyName);
+            propertyNames.add(property);
         }
         return propertyNames;
     }
@@ -516,7 +522,9 @@ public class NebulaClient implements Serializable {
 
         String graphType = getGraphType(graphName);
 
-        String descEdgeType = String.format("DESCRIBE EDGE TYPE %s OF %s", edgeType, graphType);
+        String descEdgeType = String.format(
+                "CALL describe_graph_type(\"%s\") FILTER type_name=\"%s\" return properties",
+                graphType, edgeType);
         ResultSet resultSet = execute(descEdgeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             log.error(String.format("get description of %s failed for %s", edgeType,
@@ -526,12 +534,7 @@ public class NebulaClient implements Serializable {
         }
 
         List<ValueWrapper> properties = resultSet.next().get("properties").asList();
-        List<String> propertyNames = new ArrayList<>();
-        for (ValueWrapper property : properties) {
-            String propertyName = property.asString().split(":")[0];
-            propertyNames.add(propertyName);
-        }
-        return propertyNames;
+        return properties.stream().map(ValueWrapper::asString).collect(Collectors.toList());
     }
 
 
