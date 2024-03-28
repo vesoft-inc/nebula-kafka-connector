@@ -249,10 +249,19 @@ message ExecuteResponse {
     uint64              latency_in_us           = 2;
 }
 
+enum ClientType {
+    UNKNOWN = 0;
+    CPP     = 1;
+    GO      = 2;
+    JAVA    = 3;
+    PYTHON  = 4;
+    NODE    = 5;
+}
+
 message AuthRequest {
     bytes               username                = 1;
     bytes               auth_info               = 2;
-    bytes               client_type             = 3;
+    ClientType          client_type             = 3;
     bytes               client_version          = 4;
 }
 
