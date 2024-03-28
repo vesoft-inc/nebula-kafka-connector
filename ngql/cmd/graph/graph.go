@@ -98,8 +98,13 @@ func printConsoleResp(msg string) {
 }
 
 func playData(data string) error {
+	execPath, err := os.Executable()
+	if err != nil {
+		return fmt.Errorf("get executable path failed: %s", err.Error())
+	}
+	execPath = filepath.Dir(execPath)
 	boxfilePath := "/" + data + ".ngql"
-	posixfilePath := "./data/" + data + ".ngql"
+	posixfilePath := execPath + "./data/" + data + ".ngql"
 	var c cli.Cli
 	// First find it in directory ./data/. If not found, then find it in the embedded box
 	if fd, err := os.Open(posixfilePath); err == nil {
@@ -114,13 +119,9 @@ func playData(data string) error {
 	c.PlayingData(true)
 	defer c.PlayingData(false)
 	fmt.Printf("Start loading dataset %s...\n", data)
-	err := loop(c)
-	if err != nil {
-		return err
-	}
-	respErr := c.GetRespError()
-	if respErr != "" {
-		return fmt.Errorf(respErr)
+	loopErr := loop(c)
+	if loopErr != nil {
+		return loopErr
 	}
 	return nil
 }
@@ -408,6 +409,9 @@ func loop(c cli.Cli) error {
 					}
 				}
 				fmt.Println()
+				if c.IsPlayingData() {
+					return err
+				}
 				break
 			}
 
