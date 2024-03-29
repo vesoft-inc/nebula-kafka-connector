@@ -3,6 +3,7 @@ module github.com/vesoft-inc/nebula-ng-tools/golang
 go 1.19
 
 require (
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/sync v0.6.0
 	google.golang.org/grpc v1.60.1

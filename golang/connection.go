@@ -81,7 +81,7 @@ func (cn *connection) authenticate(username, password string) error {
 	in := graph.AuthRequest{
 		Username:      []byte(username),
 		AuthInfo:      bs,
-		ClientType:    []byte("Go"),
+		ClientType:    graph.ClientType_GO,
 		ClientVersion: proto.PROTOCOL_VERSION,
 	}
 	resp, err := cn.graphClient.Authenticate(context.Background(), &in)
