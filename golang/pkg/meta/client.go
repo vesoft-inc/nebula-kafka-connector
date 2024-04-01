@@ -189,7 +189,8 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
-	if !response.Header.Ok {
+	nebulaErr := nebula.ErrorFromInt(response.Header.Code)
+	if nebulaErr != nebula.ERROR_SUCCESSFUL_COMPLETION {
 		return nil, nebula.NewNebulaError(
 			nebula.ErrorFromInt(response.Header.Code),
 			string(response.Header.Message),
@@ -218,7 +219,7 @@ func (c *metaClient) retry(fn func() (responseHeader, error)) (responseHeader, e
 			continue
 		}
 		header := resp.GetHeader()
-		if header.GetOk() {
+		if nebula.ErrorFromInt(header.GetCode()) == nebula.ERROR_SUCCESSFUL_COMPLETION {
 			return resp, nil
 		}
 		// if the error is not leader change, then return and do not retry
@@ -250,7 +251,7 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 	leader := header.GetLeader()
 	errorCode := nebula.ErrorFromInt(header.GetCode())
 	result := &HeaderResponse{
-		OK:   header.GetOk(),
+		OK:   errorCode == nebula.ERROR_SUCCESSFUL_COMPLETION,
 		Code: errorCode,
 		Msg:  string(header.GetMessage()),
 	}
