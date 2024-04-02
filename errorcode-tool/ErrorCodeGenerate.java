@@ -33,7 +33,7 @@ public class ErrorCodeGenerate {
         while ((line = br.readLine()) != null) {
             String error = line.trim();
             if (error.isEmpty() || error.startsWith("//")) {
-                System.out.println();
+                // System.out.println();
                 continue;
             }
 
