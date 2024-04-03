@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"sort"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
@@ -13,7 +12,6 @@ import (
 type clusterFlagsType struct {
 	clusterName string
 	replicas    int
-	zones       []string
 }
 
 var clusterFlags clusterFlagsType
@@ -30,7 +28,7 @@ var clusterCmd = &cobra.Command{
 var createClusterCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create cluster in meta server.",
-	Long:  `ngctl cluster create --cluster [clustername] --replica [replica] --zones [zone1,zone2,...]`,
+	Long:  `ngctl cluster create --cluster [clustername] --replica [replica]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -45,7 +43,8 @@ var createClusterCmd = &cobra.Command{
 		if clusterFlags.replicas == 0 {
 			return metaConsoleError("Replica number is invalid", "")
 		}
-		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replicas, clusterFlags.zones)
+		// donot need to specify zones
+		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replicas, nil)
 		resp, err := metaClient.CreateCluster(req)
 		if err != nil {
 			return metaConsoleError("Create cluster failed", err.Error())
@@ -109,14 +108,13 @@ var showClusterCmd = &cobra.Command{
 		if !resp.IsSucceeded() {
 			return metaConsoleError("Show cluster failed", resp.GetErrorMsg())
 		}
-		header := []string{"cluster id", "cluster name", "replica", "zones"}
+		header := []string{"cluster id", "cluster name", "replica"}
 		data := make([][]string, 0)
 		for _, s := range resp.Clusters {
 			row := make([]string, 0)
 			row = append(row, fmt.Sprintf("%d", s.ClusterId))
 			row = append(row, fmt.Sprintf("%s", s.ClusterName))
 			row = append(row, fmt.Sprintf("%d", s.Replica))
-			row = append(row, fmt.Sprintf("%s", strings.Join(s.Zones, ",")))
 			data = append(data, row)
 		}
 
@@ -137,5 +135,4 @@ func init() {
 	clusterCmd.AddCommand(initClusterCmd)
 	clusterCmd.AddCommand(showClusterCmd)
 	createClusterCmd.Flags().IntVarP(&clusterFlags.replicas, "replica-factor", "r", 3, "replica number, default: 3")
-	createClusterCmd.Flags().StringArrayVarP(&clusterFlags.zones, "zones", "z", []string{}, "zones")
 }

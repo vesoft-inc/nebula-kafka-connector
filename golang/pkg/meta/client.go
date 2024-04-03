@@ -251,7 +251,6 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 	leader := header.GetLeader()
 	errorCode := nebula.ErrorFromInt(header.GetCode())
 	result := &HeaderResponse{
-		OK:   errorCode == nebula.ERROR_SUCCESSFUL_COMPLETION,
 		Code: errorCode,
 		Msg:  string(header.GetMessage()),
 	}
@@ -291,8 +290,8 @@ func (c *metaClient) ChangePassword(user, currentPw, newPw string) error {
 	if err != nil {
 		return err
 	}
-	if !responseHeader.OK {
-		return fmt.Errorf(responseHeader.Msg)
+	if !responseHeader.IsSucceeded() {
+		return responseHeader.GetError()
 	}
 	return nil
 }
