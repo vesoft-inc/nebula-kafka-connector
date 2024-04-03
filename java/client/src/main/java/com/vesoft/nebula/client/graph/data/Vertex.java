@@ -131,9 +131,12 @@ public class Vertex extends BaseDataObject {
         Map<String, ValueWrapper> props = getProperties();
         List<String> propStrs = new ArrayList<>();
         for (String propName : props.keySet()) {
-            propStrs.add(propName + ": " + props.get(propName).toString());
+            propStrs.add(propName + ":" + props.get(propName).toString());
         }
-        return String.format("(%d:%s {%s})",
-                getId(), getType(), String.join(", ", propStrs));
+        return String.format("(%d@%s:%s{%s})",
+                getId(),
+                getType(),
+                String.join("&", getLabels()),
+                String.join(",", propStrs));
     }
 }

@@ -40,7 +40,7 @@ public class DataTest {
         try {
             Vertex vertex = new Vertex(getNode(1L));
             assert Objects.equals(vertex.getId(), 1L);
-            assert (vertex.toString().startsWith("(1:person"));
+            assert (vertex.toString().startsWith("(1@person"));
 
 
             List<String> names = Arrays.asList("prop0", "prop1", "prop2", "prop3", "prop4");
@@ -205,10 +205,10 @@ public class DataTest {
             // test node
             ValueWrapper valueWrapper = new ValueWrapper(Value
                     .newBuilder()
-                    .setNodeValue(getSimpleNode())
+                    .setNodeValue(getSimpleNode(1))
                     .build());
             String expectString =
-                    "(1:person {prop: Bob})";
+                    "(1@person:teacher{prop:Bob})";
 
             Assert.assertEquals(expectString, valueWrapper.asNode().toString());
             // test relationship
@@ -216,14 +216,14 @@ public class DataTest {
                     .newBuilder()
                     .setEdgeValue(getSimpleEdge(false, 1, 2))
                     .build());
-            expectString = "(1)-[:knows{edge_prop: 100}]->(2)";
+            expectString = "(1)-[10@knows:knows1&knows2{edge_prop:100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             valueWrapper = new ValueWrapper(Value
                     .newBuilder()
                     .setEdgeValue(getSimpleEdge(true, 1, 2))
                     .build());
-            expectString = "(1)-[:knows{edge_prop: 100}]->(2)";
+            expectString = "(1)-[10@knows:knows1&knows2{edge_prop:100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             // test local time
@@ -259,8 +259,25 @@ public class DataTest {
     public void testPath() {
         ValueWrapper valueWrapper = new ValueWrapper(
                 Value.newBuilder().setPathValue(getPath()).build());
-        String expectString = "1-[:knows{edge_prop:100}]->2"
-                + "-[:knows{edge_prop:100}]->3";
+        String expectString = "(1@person:teacher{prop:Bob})-[10@knows:knows1&knows2{edge_prop:100}]"
+                + "->(2@person:teacher{prop:Bob})"
+                + "-[10@knows:knows1&knows2{edge_prop:100}]->(3@person:teacher{prop:Bob})";
+        Assert.assertEquals(expectString, valueWrapper.asPath().toString());
+
+        NPath path = valueWrapper.asPath();
+        Assert.assertEquals(3, path.nodes().size());
+        Assert.assertEquals(2, path.relationships().size());
+        Assert.assertEquals(5, path.values().size());
+    }
+
+    @Test
+    public void testReversePath() {
+        ValueWrapper valueWrapper = new ValueWrapper(
+                Value.newBuilder().setPathValue(getReversePath()).build());
+        String expectString = "(1@person:teacher{prop:Bob})"
+                + "<-[10@knows:knows1&knows2{edge_prop:100}]"
+                + "-(2@person:teacher{prop:Bob})"
+                + "<-[10@knows:knows1&knows2{edge_prop:100}]-(3@person:teacher{prop:Bob})";
         Assert.assertEquals(expectString, valueWrapper.asPath().toString());
 
         NPath path = valueWrapper.asPath();
@@ -372,11 +389,10 @@ public class DataTest {
         return builder.build();
     }
 
-    private Node getSimpleNode() {
+    private Node getSimpleNode(long nodeId) {
         Map<String, Value> props = new HashMap<>();
         props.put("prop", Value.newBuilder()
                 .setStringValue(ByteString.copyFrom("Bob", Charsets.UTF_8)).build());
-        long nodeId = 1;
         String nodeType = "person";
 
         Node node = Node.newBuilder()
@@ -397,6 +413,8 @@ public class DataTest {
 
         return Edge.newBuilder()
                 .setType(edgeType)
+                .addLabels("knows1")
+                .addLabels("knows2")
                 .setSrcId(srcId)
                 .setDstId(dstId)
                 .setRank(rank)
@@ -406,11 +424,21 @@ public class DataTest {
 
     private Path getPath() {
         Path.Builder builder = Path.newBuilder();
-        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode()));
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(1)));
         builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 1, 2)).build());
-        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode()).build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(2)).build());
         builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 2, 3)).build());
-        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode()).build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(3)).build());
+        return builder.build();
+    }
+
+    private Path getReversePath() {
+        Path.Builder builder = Path.newBuilder();
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(1)));
+        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 2, 1)).build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(2)).build());
+        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 3, 2)).build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(3)).build());
         return builder.build();
     }
 
@@ -421,7 +449,7 @@ public class DataTest {
         values.put("prop3", Value.newBuilder()
                 .setStringValue(ByteString.copyFrom("Tom", Charsets.UTF_8)).build());
         values.put("prop4", Value.newBuilder().setBoolValue(true).build());
-        values.put("prop5", Value.newBuilder().setNodeValue(getSimpleNode()).build());
+        values.put("prop5", Value.newBuilder().setNodeValue(getSimpleNode(1)).build());
         values.put("prop6", Value.newBuilder().setDoubleValue(20.1).build());
 
         return Record.newBuilder().putAllValues(values).build();
@@ -474,7 +502,7 @@ public class DataTest {
                         .setStringValue(ByteString.copyFrom("value1", Charsets.UTF_8))
                         .build(),
                 Value.newBuilder().setListValue(getList()).build(),
-                Value.newBuilder().setNodeValue(getSimpleNode()).build(),
+                Value.newBuilder().setNodeValue(getSimpleNode(1)).build(),
                 Value.newBuilder().setEdgeValue(getSimpleEdge(false, 1, 2)).build());
 
         Row row = Row.newBuilder().addAllValues(values).build();

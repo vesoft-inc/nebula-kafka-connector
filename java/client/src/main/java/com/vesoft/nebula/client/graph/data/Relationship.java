@@ -159,14 +159,24 @@ public class Relationship extends BaseDataObject {
         List<String> propStrs = new ArrayList<>();
         Map<String, ValueWrapper> props = getProperties();
         for (String key : props.keySet()) {
-            propStrs.add(key + ": " + props.get(key).toString());
+            propStrs.add(key + ":" + props.get(key).toString());
         }
         if (edge.getDirection() == Direction.DIRECTED) {
-            return String.format("(%d)-[:%s{%s}]->(%d)",
-                    getSrcId(), getType(), String.join(", ", propStrs), getDstId());
+            return String.format("(%d)-[%d@%s:%s{%s}]->(%d)",
+                    getSrcId(),
+                    getRank(),
+                    getType(),
+                    String.join("&", getLabels()),
+                    String.join(",", propStrs),
+                    getDstId());
         } else {
-            return String.format("(%d)-[:%s{%s}]-(%d)",
-                    getSrcId(), getType(), String.join(", ", propStrs), getDstId());
+            return String.format("(%d)-[%d@%s:%s{%s}]-(%d)",
+                    getSrcId(),
+                    getRank(),
+                    getType(),
+                    String.join("&", getLabels()),
+                    String.join(", ", propStrs),
+                    getDstId());
         }
 
     }

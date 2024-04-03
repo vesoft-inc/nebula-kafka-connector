@@ -68,35 +68,6 @@ public class NPath {
     }
 
     @Override
-    public String toString() {
-        List<String> edgeStrs = new ArrayList<>();
-        for (int i = 0; i < relationships.size(); i++) {
-            Relationship relationship = relationships.get(i);
-            List<String> propStrs = new ArrayList<>();
-            Map<String, ValueWrapper> props = relationship.getProperties();
-            for (String key : props.keySet()) {
-                propStrs.add(key + ":" + props.get(key).toString());
-            }
-            String template;
-            if (i == 0) {
-                template = "%s-[:%s{%s}]->%s";
-                edgeStrs.add(String.format(template,
-                        relationship.getSrcId(),
-                        relationship.getType(),
-                        String.join(",", propStrs),
-                        relationship.getDstId()));
-            } else {
-                template = "-[:%s{%s}]->%s";
-                edgeStrs.add(String.format(template,
-                        relationship.getType(),
-                        String.join(",", propStrs),
-                        relationship.getDstId()));
-            }
-        }
-        return String.join("", edgeStrs);
-    }
-
-    @Override
     public boolean equals(Object obj) {
         if (this == obj) {
             return true;
@@ -111,5 +82,75 @@ public class NPath {
     @Override
     public int hashCode() {
         return values.hashCode();
+    }
+
+    public String toString() {
+        List<String> edgeStrs = new ArrayList<>();
+        for (int i = 0; i < relationships.size(); i++) {
+            Relationship relationship = relationships.get(i);
+
+            List<String> edgePropStrs = new ArrayList<>();
+            Map<String, ValueWrapper> props = relationship.getProperties();
+            for (String key : props.keySet()) {
+                edgePropStrs.add(key + ":" + props.get(key).toString());
+            }
+
+            Vertex prefixNode = nodes.get(i);
+            List<String> prefixNodePropStrs = new ArrayList<>();
+            Map<String, ValueWrapper> prefixNodeProps = prefixNode.getProperties();
+            for (String key : prefixNodeProps.keySet()) {
+                prefixNodePropStrs.add(key + ":" + prefixNodeProps.get(key).toString());
+            }
+
+            Vertex suffixNode = nodes.get(i + 1);
+            List<String> suffixNodePropStrs = new ArrayList<>();
+            Map<String, ValueWrapper> suffixNodeProps = suffixNode.getProperties();
+            for (String key : suffixNodeProps.keySet()) {
+                suffixNodePropStrs.add(key + ":" + suffixNodeProps.get(key).toString());
+            }
+
+            String template;
+            if (i == 0) {
+                template = "(%d@%s:%s{%s})-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
+                if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
+                    template = "(%d@%s:%s{%s})-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
+                }
+                if (relationship.isDirected() && relationship.getSrcId() != prefixNode.getId()) {
+                    template = "(%d@%s:%s{%s})<-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
+                }
+
+                edgeStrs.add(String.format(template,
+                        prefixNode.getId(),
+                        prefixNode.getType(),
+                        String.join("&", prefixNode.getLabels()),
+                        String.join(",", prefixNodePropStrs),
+                        relationship.getRank(),
+                        relationship.getType(),
+                        String.join("&", relationship.getLabels()),
+                        String.join(",", edgePropStrs),
+                        suffixNode.getId(),
+                        suffixNode.getType(),
+                        String.join("&", suffixNode.getLabels()),
+                        String.join(",", suffixNodePropStrs)));
+            } else {
+                template = "-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
+                if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
+                    template = "-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
+                }
+                if (relationship.isDirected() && relationship.getSrcId() != prefixNode.getId()) {
+                    template = "<-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
+                }
+                edgeStrs.add(String.format(template,
+                        relationship.getRank(),
+                        relationship.getType(),
+                        String.join("&", relationship.getLabels()),
+                        String.join(",", edgePropStrs),
+                        suffixNode.getId(),
+                        suffixNode.getType(),
+                        String.join("&", suffixNode.getLabels()),
+                        String.join(",", suffixNodePropStrs)));
+            }
+        }
+        return String.join("", edgeStrs);
     }
 }
