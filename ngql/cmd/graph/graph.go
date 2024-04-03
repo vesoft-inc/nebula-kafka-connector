@@ -50,10 +50,9 @@ const (
 	PlayData  = 1
 	Sleep     = 2
 	ExportCsv = 3
-	ExportDot = 4
-	Repeat    = 5
-	Param     = 6
-	Params    = 7
+	Repeat    = 4
+	Param     = 5
+	Params    = 6
 )
 
 type ParameterMap map[string]interface{}
@@ -63,7 +62,7 @@ var parameterMap ParameterMap
 var dataSetPrinter = printer.NewDataSetPrinter()
 var dataSetVerticalPrinter = printer.NewDataSetVerticalPrinter()
 
-var planDescPrinter = printer.NewPlanDescPrinter()
+var summaryPrinter = printer.NewSummaryPrinter()
 
 var extraInfoPrinter printer.ExtraInfoPrinter
 
@@ -261,15 +260,6 @@ func isConsoleCmd(cmd string) (isLocal bool, localCmd int, args []string) {
 				args = []string{""}
 			}
 		}
-	case "dot":
-		{
-			localCmd = ExportDot
-			if len(words) > 1 {
-				args = []string{words[1]}
-			} else {
-				args = []string{""}
-			}
-		}
 	case "param":
 		{
 			localCmd = Param
@@ -289,8 +279,6 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 	case ExportCsv:
 		dataSetPrinter.ExportCsv(args[0])
 		dataSetVerticalPrinter.ExportCsv(args[0])
-	case ExportDot:
-		planDescPrinter.ExportDot(args[0])
 	case PlayData:
 		err := playData(args[0])
 		if err != nil {
@@ -332,9 +320,9 @@ func executeConsoleCmd(c cli.Cli, cmd int, args []string) {
 func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (duration time.Duration) {
 	// Show table
 	if isVertical {
-		dataSetVerticalPrinter.PrintDataSet(res)
+		dataSetVerticalPrinter.Print(res)
 	} else {
-		dataSetPrinter.PrintDataSet(res)
+		dataSetPrinter.Print(res)
 	}
 	if res.RowSize() > 0 {
 		numRows := res.RowSize()
@@ -345,14 +333,9 @@ func printResultSet(res nebulago.Result, startTime time.Time, isVertical bool) (
 		fmt.Printf("Execution succeeded (time spent %v/%v)\n", time.Duration(res.Latency()*1000), duration)
 	}
 
-	if res.PlanDesc() != nil {
+	if res.Summary() != nil {
 		fmt.Println()
-		p, err := printer.NewPlan(res.PlanDesc())
-		if err != nil {
-			fmt.Println("Error: ", err.Error())
-			return
-		}
-		planDescPrinter.PrintPlanDesc(p)
+		summaryPrinter.Print(res.Summary())
 	}
 
 	extraInfo := res.ExtraInfo()
@@ -533,7 +516,7 @@ func handleGraphCmd() error {
 
 	// Check if flags are valid
 	validateFlags()
-	planDescPrinter.WidthMax = widthMax
+	summaryPrinter.WidthMax = widthMax
 
 	interactive := script == "" && file == ""
 

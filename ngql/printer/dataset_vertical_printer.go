@@ -45,7 +45,7 @@ func (p *DataSetVerticalPrinter) closeFile() {
 	}
 }
 
-func (p *DataSetVerticalPrinter) PrintDataSet(res nebula.Result) {
+func (p *DataSetVerticalPrinter) Print(res nebula.Result) {
 	if res.RowSize() == 0 {
 		return
 	}

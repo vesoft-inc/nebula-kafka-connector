@@ -136,7 +136,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		index:     0,
 		latency:   (resp.LatencyInUs),
 		result:    resp.ExecutionOutcome.Result,
-		planDesc:  resp.ExecutionOutcome.PlanDesc,
+		summary:   resp.ExecutionOutcome.Summary,
 		extraInfo: resp.ExecutionOutcome.ExtraInfo,
 	}
 

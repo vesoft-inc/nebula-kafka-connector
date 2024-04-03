@@ -56,7 +56,7 @@ func (p *DataSetPrinter) closeFile() {
 	}
 }
 
-func (p *DataSetPrinter) PrintDataSet(res nebula.Result) {
+func (p *DataSetPrinter) Print(res nebula.Result) {
 	p.writer.ResetHeaders()
 	p.writer.ResetRows()
 	var header []interface{}

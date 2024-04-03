@@ -11,7 +11,7 @@ type resultSet struct {
 	index     int
 	latency   uint64
 	result    *graph.ResultTable
-	planDesc  []byte
+	summary   *graph.Summary
 	extraInfo []*graph.ExtraInfoElement
 }
 
@@ -59,8 +59,8 @@ func (rs *resultSet) ColumnTypes() []ColumnType {
 	return nil
 }
 
-func (rs *resultSet) PlanDesc() []byte {
-	return rs.planDesc
+func (rs *resultSet) Summary() *graph.Summary {
+	return rs.summary
 }
 
 func (rs *resultSet) ExtraInfo() ExtraInfo {

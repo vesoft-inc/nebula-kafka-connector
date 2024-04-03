@@ -6,6 +6,8 @@ import (
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 )
 
 type (
@@ -16,7 +18,7 @@ type (
 		Columns() []string
 		ColumnTypes() []ColumnType //not support yet
 		RowSize() int
-		PlanDesc() []byte
+		Summary() *graph.Summary
 		ExtraInfo() ExtraInfo
 	}
 
