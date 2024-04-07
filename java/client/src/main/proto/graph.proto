@@ -230,10 +230,36 @@ message ExtraInfoElement {
     Value           value   = 2;
 }
 
+message Summary {
+    int64       build_time_us       = 1;
+    int64       optimize_time_us    = 2;
+    int64       latency_us          = 3;
+    bytes       preamble            = 4;
+    PlanInfo    plan_info           = 5;
+}
+
+message PlanInfo {
+    bytes                   id                  = 1;
+    bytes                   name                = 2;
+    bytes                   details             = 3;
+    double                  time_ms             = 4;
+    int64                   rows                = 5;
+    double                  memory_kib          = 6;
+    double                  blocked_ms          = 7;
+    double                  queued_ms           = 8;
+    double                  consume_ms          = 9;
+    double                  produce_ms          = 10;
+    double                  finish_ms           = 11;
+    int64                   batches             = 12;
+    int64                   concurrency         = 13;
+    bytes                   other_stats_json    = 14;
+    repeated PlanInfo       children            = 15;
+}
+
 message ExecutionOutcome {
     GQLStatus                   gql_status      = 1;
     ResultTable                 result          = 2;
-    bytes                       plan_desc       = 3;
+    Summary                     summary         = 3;
     repeated ExtraInfoElement   extra_info      = 4;
 }
 

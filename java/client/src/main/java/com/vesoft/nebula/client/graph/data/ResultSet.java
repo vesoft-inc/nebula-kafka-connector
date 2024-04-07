@@ -212,8 +212,8 @@ public class ResultSet {
      *
      * @return string
      */
-    public String getPlanDesc() {
-        return response.getExecutionOutcome().getPlanDesc().toString(charset);
+    public PlanInfoNode getPlanDesc() {
+        return new PlanInfoNode(response.getExecutionOutcome().getSummary().getPlanInfo());
     }
 
     /**

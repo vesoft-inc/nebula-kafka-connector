@@ -145,7 +145,6 @@ public class DataTest {
             assert resultSet.getErrorCode() == ErrorCode.SUCCESSFUL_COMPLETION;
             assert !resultSet.isEmpty();
             Assert.assertEquals(1000, resultSet.getLatency());
-            assert resultSet.getPlanDesc().equals("");
             List<String> expectColNames = Arrays.asList("col0_empty", "col1_bool", "col2_int64",
                     "col3_int32", "col4_int16", "col5_int8", "col6_float", "col7_double",
                     "col8_string", "col9_list", "col10_vertex", "col11_edge");
