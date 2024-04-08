@@ -170,7 +170,7 @@ public class Relationship extends BaseDataObject {
                     String.join(",", propStrs),
                     getDstId());
         } else {
-            return String.format("(%d)-[%d@%s:%s{%s}]-(%d)",
+            return String.format("(%d)~[%d@%s:%s{%s}]~(%d)",
                     getSrcId(),
                     getRank(),
                     getType(),

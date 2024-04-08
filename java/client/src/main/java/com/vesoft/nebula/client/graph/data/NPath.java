@@ -111,7 +111,7 @@ public class NPath {
 
             String template;
             if (i == 0) {
-                template = "(%d@%s:%s{%s})-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
+                template = "(%d@%s:%s{%s})~[%d@%s:%s{%s}]~(%d@%s:%s{%s})";
                 if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
                     template = "(%d@%s:%s{%s})-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
                 }
@@ -133,7 +133,7 @@ public class NPath {
                         String.join("&", suffixNode.getLabels()),
                         String.join(",", suffixNodePropStrs)));
             } else {
-                template = "-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
+                template = "~[%d@%s:%s{%s}]~(%d@%s:%s{%s})";
                 if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
                     template = "-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
                 }
