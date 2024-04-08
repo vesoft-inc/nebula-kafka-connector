@@ -4,13 +4,16 @@ go 1.19
 
 require (
 	github.com/c-bata/go-prompt v0.2.6
+	github.com/go-playground/assert/v2 v2.2.0
 	github.com/jedib0t/go-pretty/v6 v6.0.5
 	github.com/jievince/liner v1.2.4-0.20211229025353-9af8863139ef
+	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.7.0
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0
 )
 
 require (
+	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

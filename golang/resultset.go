@@ -59,11 +59,17 @@ func (rs *resultSet) ColumnTypes() []ColumnType {
 	return nil
 }
 
-func (rs *resultSet) Summary() *graph.Summary {
-	return rs.summary
+func (rs *resultSet) Summary() Summary {
+	if rs.summary == nil {
+		return nil
+	}
+	return &summary{summary: rs.summary}
 }
 
 func (rs *resultSet) ExtraInfo() ExtraInfo {
+	if rs.extraInfo == nil || len(rs.extraInfo) == 0 {
+		return nil
+	}
 	extr := make(extraInfoType, len(rs.extraInfo))
 	for _, e := range rs.extraInfo {
 		extr[e.GetKind()] = &grpcValue{data: e.GetValue()}

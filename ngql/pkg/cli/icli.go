@@ -117,3 +117,7 @@ func (l *iCli) Close() {
 	defer f.Close()
 	l.terminal.WriteHistory(f)
 }
+
+func (l *iCli) GetPrompt() string {
+	return l.status.nebulaPrompt()
+}

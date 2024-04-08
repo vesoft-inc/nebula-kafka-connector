@@ -11,16 +11,9 @@ import (
 )
 
 type Cli interface {
-	Output() bool
 	ReadLine() (line string, exit bool, err error)
-	Interactive() bool
-	SetRespError(msg string)
-	GetRespError() string
-	SetSpace(string)
-	GetSpace() string
-	PlayingData(bool)
-	IsPlayingData() bool
 	Close()
+	GetPrompt() string
 }
 
 type status struct {

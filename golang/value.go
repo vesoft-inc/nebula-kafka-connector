@@ -2,6 +2,8 @@ package nebula_ng
 
 import (
 	"fmt"
+	"sort"
+	"strings"
 	"time"
 )
 
@@ -123,6 +125,8 @@ type (
 		String() string
 		GetValues() []Value
 	}
+
+	mapValue map[string]Value
 )
 
 const (
@@ -336,5 +340,22 @@ func (s *String) String() string {
 			idx++
 		}
 	}
-	return fmt.Sprintf(`"%s"`, string(outputBytes))
+	return fmt.Sprintf(`%s`, string(outputBytes))
+}
+
+func (m mapValue) string() string {
+	var kvStr []string = make([]string, 0, len(m))
+	var keys []string = make([]string, 0, len(m))
+	for key := range m {
+		keys = append(keys, key)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i] < keys[j]
+	})
+	for _, k := range keys {
+		v := m[k]
+		kvTemp := fmt.Sprintf(`%s:%s`, k, v)
+		kvStr = append(kvStr, kvTemp)
+	}
+	return strings.Join(kvStr, ",")
 }

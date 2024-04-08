@@ -6,8 +6,6 @@ import (
 	"math"
 	"math/rand"
 	"time"
-
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 )
 
 type (
@@ -18,7 +16,7 @@ type (
 		Columns() []string
 		ColumnTypes() []ColumnType //not support yet
 		RowSize() int
-		Summary() *graph.Summary
+		Summary() Summary
 		ExtraInfo() ExtraInfo
 	}
 
@@ -33,6 +31,30 @@ type (
 		AffectedNodes() (int, error)
 		AffectedForwardEdges() (int, error)
 		AffectedReverseEdges() (int, error)
+	}
+	Summary interface {
+		BuildTimeUs() int64
+		OptimizeTimeUs() int64
+		LatencyUs() int64
+		Preamble() []byte
+		PlanInfo() PlanInfo
+	}
+	PlanInfo interface {
+		Id() []byte
+		Name() []byte
+		Details() []byte
+		TimeMs() float64
+		Rows() int64
+		MemoryKib() float64
+		BlockedMs() float64
+		QueuedMs() float64
+		ConsumeMs() float64
+		ProduceMs() float64
+		FinishMs() float64
+		Batches() int64
+		Concurrency() int64
+		OtherStatsJson() []byte
+		Children() []PlanInfo
 	}
 
 	// an internel interface to get the connection

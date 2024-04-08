@@ -1,8 +1,8 @@
 package nebula_ng
 
 import (
+	"bytes"
 	"fmt"
-	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -316,7 +316,7 @@ func (l *grpcList) String() string {
 	for _, v := range l.GetValues() {
 		valuesStr = append(valuesStr, v.String())
 	}
-	return fmt.Sprintf("[%s]", strings.Join(valuesStr, ", "))
+	return fmt.Sprintf("[%s]", strings.Join(valuesStr, ","))
 }
 
 func (v *grpcValue) AsLocalDatetime() (LocalDatetime, error) {
@@ -367,21 +367,8 @@ func (l *grpcList) Size() int {
 }
 
 func (r *grpcRecord) String() string {
-	var kvStr []string = make([]string, 0, len(r.data.Values))
-	var keys []string = make([]string, 0, len(r.data.Values))
-	for key := range r.data.Values {
-		keys = append(keys, key)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
-
-	for _, key := range keys {
-		v := grpcValue{data: r.data.GetValues()[key]}
-		kvTemp := fmt.Sprintf(`"%s":%s`, key, v.String())
-		kvStr = append(kvStr, kvTemp)
-	}
-	return fmt.Sprintf("{%s}", strings.Join(kvStr, ","))
+	mv := mapValue(r.GetValues())
+	return fmt.Sprintf("{%s}", mv.string())
 }
 
 func (r *grpcRecord) GetValues() map[string]Value {
@@ -392,23 +379,15 @@ func (r *grpcRecord) GetValues() map[string]Value {
 	return values
 }
 
+// (288314845273522179@City:City&Place{id:32,name:Norway,url:http://dbpedia.org/resource/Norway})
 func (n *grpcNode) String() string {
-	var kvStr []string = make([]string, 0, len(n.data.Properties))
-	var keys []string = make([]string, 0, len(n.data.Properties))
-	for key := range n.data.Properties {
-		keys = append(keys, key)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
-	for _, key := range keys {
-		v := grpcValue{data: n.data.Properties[key]}
-		kvTemp := fmt.Sprintf(`"%s":%s`, key, v.String())
-		kvStr = append(kvStr, kvTemp)
-	}
-	//TODO, should verify if we print the internal id
-	// return fmt.Sprintf("(%d :{%s})", n.data.NodeID, strings.Join(kvStr, ","))
-	return fmt.Sprintf("({%s})", strings.Join(kvStr, ","))
+	mv := mapValue(n.GetProperties())
+	return fmt.Sprintf("(%d@%s:%s{%s})",
+		n.GetId(),
+		n.GetType(),
+		strings.Join(n.GetLabels(), "&"),
+		mv.string(),
+	)
 }
 
 func (n *grpcNode) GetProperties() map[string]Value {
@@ -435,21 +414,32 @@ func (n *grpcNode) GetLabels() []string {
 	return n.data.Labels
 }
 
+// (288314845273522179)<-[288314845273522179@connected_Sub_Load:
+// connected_Sub_Load{cid:115967690673232363}]-(288314982712475649)
 func (e *grpcEdge) String() string {
-	var kvStr []string = make([]string, 0, len(e.data.Properties))
-	var keys []string = make([]string, 0, len(e.data.Properties))
-	for key := range e.data.Properties {
-		keys = append(keys, key)
+	mv := mapValue(e.GetProperties())
+	var (
+		leftBracket  string
+		rightBracket string
+	)
+	if e.IsDirected() {
+		leftBracket = "-"
+		rightBracket = "->"
+	} else {
+		leftBracket = "~"
+		rightBracket = "~"
 	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
-	for _, key := range keys {
-		v := grpcValue{data: e.data.Properties[key]}
-		kvTemp := fmt.Sprintf(`"%s":%s`, key, v.String())
-		kvStr = append(kvStr, kvTemp)
-	}
-	return fmt.Sprintf("[{%s}]", strings.Join(kvStr, ","))
+
+	return fmt.Sprintf("(%d)%s[%d@%s:%s{%s}]%s(%d)",
+		e.GetSrcId(),
+		leftBracket,
+		e.GetRank(),
+		e.GetType(),
+		strings.Join(e.GetLabels(), "&"),
+		mv.string(),
+		rightBracket,
+		e.GetDstId(),
+	)
 }
 
 func (e *grpcEdge) GetProperties() map[string]Value {
@@ -488,12 +478,49 @@ func (e *grpcEdge) IsDirected() bool {
 	return e.data.Direction == graph.Direction_DIRECTED
 }
 
+// (288314845273522179@City:City&Place{id:3,kind:3,name:org3,url:https://org3.com})-[288314845273522179@connected_Sub_Load:connected_Sub_Load{}]-(288315214640709633@City:City&Place{id:3,kind:city,name:Hangzhou,url:https://hangzhou.com})
+// -[288315214640709633@connected_Sub_Load:connected_Sub_Load{}]
+// -(288315309129990145@City:City&Place{id:6,kind:city,name:Shenzhen,url:https://shenzhen.com})
 func (p *grpcPath) String() string {
-	var valuesStr []string
-	for _, v := range p.GetValues() {
-		valuesStr = append(valuesStr, v.String())
+	values := p.GetValues()
+	buf := bytes.NewBuffer(nil)
+	defer buf.Reset()
+	var preN Node
+	var isPre bool = false
+	for _, v := range values {
+		if v.GetType() == ValueTypeNode {
+			n, _ := v.AsNode()
+			if isPre {
+			} else {
+				preN = n
+			}
+			isPre = !isPre
+			buf.WriteString(n.String())
+		} else if v.GetType() == ValueTypeEdge {
+			e, _ := v.AsEdge()
+			mv := mapValue(e.GetProperties())
+			estr := fmt.Sprintf("[%d@%s:%s{%s}]",
+				e.GetRank(),
+				e.GetType(),
+				strings.Join(e.GetLabels(), "&"),
+				mv.string(),
+			)
+
+			if e.IsDirected() {
+				if e.GetSrcId() == preN.GetId() {
+					buf.WriteString(fmt.Sprintf("-%s->", estr))
+				} else {
+					buf.WriteString(fmt.Sprintf("<-%s-", estr))
+				}
+			} else {
+				buf.WriteString(fmt.Sprintf("~%s~", estr))
+			}
+		} else {
+			//no other type
+		}
 	}
-	return fmt.Sprintf("[%s]", strings.Join(valuesStr, " "))
+	return buf.String()
+
 }
 
 func (p *grpcPath) GetValues() []Value {

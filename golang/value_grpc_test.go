@@ -41,11 +41,11 @@ func TestGRPCString(t *testing.T) {
 		},
 		{
 			value:  &graph.Value{Data: &graph.Value_StringValue{[]byte("string")}},
-			expect: `"string"`,
+			expect: `string`,
 		},
 		{
 			value:  &graph.Value{Data: &graph.Value_StringValue{[]byte("abc\rde")}},
-			expect: `"dec"`,
+			expect: `dec`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_ListValue{
@@ -55,7 +55,7 @@ func TestGRPCString(t *testing.T) {
 						{Data: &graph.Value_StringValue{[]byte("dec")}},
 					}},
 			}},
-			expect: `[8, "dec"]`,
+			expect: `[8,dec]`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_RecordValue{
@@ -66,7 +66,7 @@ func TestGRPCString(t *testing.T) {
 					},
 				},
 			}},
-			expect: `{"int":8,"str":"dec"}`,
+			expect: `{int:8,str:dec}`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_NodeValue{
@@ -76,9 +76,11 @@ func TestGRPCString(t *testing.T) {
 						"int": {Data: &graph.Value_Int8Value{8}},
 						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 					},
+					Type:   "node",
+					Labels: []string{"label1", "label2"},
 				},
 			}},
-			expect: `({"int":8,"str":"dec"})`,
+			expect: `(1@node:label1&label2{int:8,str:dec})`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_EdgeValue{
@@ -89,9 +91,29 @@ func TestGRPCString(t *testing.T) {
 						"int": {Data: &graph.Value_Int8Value{8}},
 						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
 					},
+					Type:   "edge",
+					Labels: []string{"label3", "label4"},
+					Rank:   123456,
 				},
 			}},
-			expect: `[{"int":8,"str":"dec"}]`,
+			expect: `(1)-[123456@edge:label3&label4{int:8,str:dec}]->(2)`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_EdgeValue{
+				&graph.Edge{
+					SrcId: 1,
+					DstId: 2,
+					Properties: map[string]*graph.Value{
+						"int": {Data: &graph.Value_Int8Value{8}},
+						"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
+					},
+					Type:      "edge",
+					Labels:    []string{"label3", "label4"},
+					Rank:      123456,
+					Direction: graph.Direction_UNDIRECTED,
+				},
+			}},
+			expect: `(1)~[123456@edge:label3&label4{int:8,str:dec}]~(2)`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_PathValue{
@@ -103,7 +125,10 @@ func TestGRPCString(t *testing.T) {
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{8}},
 									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
-								}},
+								},
+								Type:   "node1",
+								Labels: []string{"label1", "label2"},
+							},
 						}},
 						{Data: &graph.Value_EdgeValue{
 							&graph.Edge{
@@ -112,19 +137,68 @@ func TestGRPCString(t *testing.T) {
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{8}},
 									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
-								}},
+								},
+								Rank:   123456,
+								Type:   "edge",
+								Labels: []string{"label3", "label4"},
+							},
 						}},
 						{Data: &graph.Value_NodeValue{
 							&graph.Node{
 								NodeId: 2,
-								Type:   "name",
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{9}},
 									"str": {Data: &graph.Value_StringValue{[]byte("abc")}},
-								}},
+								},
+								Type:   "node2",
+								Labels: []string{"label5", "label6"},
+							},
 						}},
 					}}}},
-			expect: `[({"int":8,"str":"dec"}) [{"int":8,"str":"dec"}] ({"int":9,"str":"abc"})]`,
+			expect: `(1@node1:label1&label2{int:8,str:dec})-[123456@edge:label3&label4{int:8,str:dec}]->(2@node2:label5&label6{int:9,str:abc})`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_PathValue{
+				&graph.Path{
+					Values: []*graph.Value{
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
+								NodeId: 2,
+								Properties: map[string]*graph.Value{
+									"int": {Data: &graph.Value_Int8Value{8}},
+									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
+								},
+								Type:   "node1",
+								Labels: []string{"label1", "label2"},
+							},
+						}},
+						{Data: &graph.Value_EdgeValue{
+							&graph.Edge{
+								SrcId: 1,
+								DstId: 2,
+								Properties: map[string]*graph.Value{
+									"int": {Data: &graph.Value_Int8Value{8}},
+									"str": {Data: &graph.Value_StringValue{[]byte("dec")}},
+								},
+								Rank:      123456,
+								Type:      "edge",
+								Labels:    []string{"label3", "label4"},
+								Direction: graph.Direction_DIRECTED,
+							},
+						}},
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
+								NodeId: 1,
+								Properties: map[string]*graph.Value{
+									"int": {Data: &graph.Value_Int8Value{9}},
+									"str": {Data: &graph.Value_StringValue{[]byte("abc")}},
+								},
+								Type:   "node2",
+								Labels: []string{"label5", "label6"},
+							},
+						}},
+					}}}},
+			expect: `(2@node1:label1&label2{int:8,str:dec})<-[123456@edge:label3&label4{int:8,str:dec}]-(1@node2:label5&label6{int:9,str:abc})`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_LocalTimeValue{

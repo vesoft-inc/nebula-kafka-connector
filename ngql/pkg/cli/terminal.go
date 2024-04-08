@@ -14,7 +14,7 @@ import (
 
 	"github.com/c-bata/go-prompt"
 	"github.com/jievince/liner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngql/completer"
+	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/completer"
 )
 
 type Terminal interface {

@@ -11,17 +11,15 @@ import (
 	"io"
 )
 
-type Cleanup func()
-
 // non-interactive
 type nCli struct {
 	status
-	io      *bufio.Reader
-	output  bool
-	cleanup Cleanup
+	buf    *bufio.Reader
+	io     io.ReadCloser
+	output bool
 }
 
-func NewnCli(i io.Reader, output bool, user string, cleanup Cleanup) Cli {
+func NewnCli(i io.ReadCloser, output bool, user string) Cli {
 	return &nCli{
 		status: status{
 			user:                 user,
@@ -34,9 +32,9 @@ func NewnCli(i io.Reader, output bool, user string, cleanup Cleanup) Cli {
 			joinedByTripleQuotes: false,
 			joinedByBackSlash:    false,
 		},
-		io:      bufio.NewReader(i),
-		output:  output,
-		cleanup: cleanup,
+		io:     i,
+		buf:    bufio.NewReader(i),
+		output: output,
 	}
 }
 
@@ -59,7 +57,7 @@ func (l *nCli) Output() bool {
 
 func (l *nCli) ReadLine() (string, bool, error) {
 	for {
-		input, err := readln(l.io)
+		input, err := readln(l.buf)
 		if err == nil {
 			if l.output {
 				fmt.Print(l.status.nebulaPrompt())
@@ -112,7 +110,9 @@ func (l nCli) IsPlayingData() bool {
 }
 
 func (l *nCli) Close() {
-	if l.cleanup != nil {
-		l.cleanup()
-	}
+	l.io.Close()
+}
+
+func (l *nCli) GetPrompt() string {
+	return l.status.nebulaPrompt()
 }
