@@ -54,7 +54,7 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 					Type: "config",
 					Params: &tasks.ConfigParams{
 						Host:   agent.Host,
-						Config: process.Config,
+						Config: utils.MergeAgentConfig(agent.Config, process.Config),
 						Dst:    path.Join(installPath, process.ConfigPath),
 						Type:   "yaml",
 					},

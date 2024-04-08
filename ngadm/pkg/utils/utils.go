@@ -86,6 +86,17 @@ func GetHostIP(host string) string {
 	}
 	return hostArr[0]
 }
+func GetHostPort(host string) int {
+	hostArr := strings.Split(host, ":")
+	if len(hostArr) == 1 {
+		return 0
+	}
+	port, err := GetUint32Port(hostArr[1])
+	if err != nil {
+		return 0
+	}
+	return int(port)
+}
 
 func GetHttpsHost(host string) string {
 	if len(host) < 8 || host[:8] != "https://" {
@@ -160,4 +171,11 @@ func GetAllAgents(spec *types.JobSpec) []*types.Agent {
 		agents = append(agents, agent)
 	}
 	return agents
+}
+
+func MergeAgentConfig(agentConfig map[string]any, newConfig map[string]any) map[string]any {
+	for k, v := range newConfig {
+		(agentConfig)[k] = v
+	}
+	return agentConfig
 }

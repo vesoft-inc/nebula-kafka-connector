@@ -5,6 +5,7 @@ import (
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/executor"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
 type ConnectParams struct {
@@ -43,10 +44,14 @@ func (d *Connect) Execute() error { // Change (d *Debug) to (d *Debug)
 	var err error
 	if d.typ == "ssh" {
 		if d.sshConfig.Host == "" {
-			d.sshConfig.Host = d.host
+			d.sshConfig.Host = utils.GetHostIP(d.host)
 		}
 		if d.sshConfig.Port == 0 {
-			d.sshConfig.Port = 22
+			if utils.GetHostPort(d.host) != 0 {
+				d.sshConfig.Port = utils.GetHostPort(d.host)
+			} else {
+				d.sshConfig.Port = 22
+			}
 		}
 		instance, err = executor.NewSSHExecuter(d.sshConfig)
 		if err != nil {

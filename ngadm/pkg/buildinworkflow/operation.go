@@ -126,7 +126,7 @@ func addNeedOperation(allNeedOperations *map[string]map[types.NebulaServiceCompo
 	} else {
 		flag = false
 	}
-	if newHost == "" || utils.GetHostIP(nowHost) == utils.GetHostIP(newHost) {
+	if flag && (newHost == "" || utils.GetHostIP(nowHost) == utils.GetHostIP(newHost)) {
 		flag = true
 	} else {
 		flag = false

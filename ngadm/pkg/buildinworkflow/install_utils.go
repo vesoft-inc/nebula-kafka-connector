@@ -52,7 +52,7 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 						Type: "config",
 						Params: &tasks.ConfigParams{
 							Host:   agent.Host,
-							Config: process.Config,
+							Config: utils.MergeAgentConfig(agent.Config, process.Config),
 							Dst:    path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ConfigPath),
 							Type:   "yaml",
 						},

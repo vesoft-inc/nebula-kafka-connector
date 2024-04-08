@@ -53,10 +53,11 @@ type MetadSpec struct {
 }
 
 type Agent struct {
-	Host        string     `yaml:"host,omitempty"`
-	SSHConfig   *SSHConfig `yaml:"sshConfig,omitempty"`
-	InstallPath string     `yaml:"installPath,omitempty"`
-	PackagePath string     `yaml:"packagePath,omitempty"`
+	Host        string         `yaml:"host,omitempty"`
+	SSHConfig   *SSHConfig     `yaml:"sshConfig,omitempty"`
+	InstallPath string         `yaml:"installPath,omitempty"`
+	PackagePath string         `yaml:"packagePath,omitempty"`
+	Config      map[string]any `yaml:"config,omitempty"`
 }
 
 type Cluster struct {

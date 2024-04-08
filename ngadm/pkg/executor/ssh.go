@@ -91,7 +91,6 @@ func (e *SSHExecutor) Shell(cmd string, sudo bool) (stdout string, stderr string
 		return "", "", err
 	}
 	defer session.Close()
-
 	if err := session.Start(cmd); err != nil {
 		return "", "", fmt.Errorf("failed to execute command: %s", err)
 	}

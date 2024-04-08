@@ -16,7 +16,7 @@ func TestStop(t *testing.T) {
 	job := runner.NewJob("test stop")
 	err := job.Run("operation", map[string]any{
 		"operation": "stop",
-		"component": "all",
+		"component": "nebulagraph",
 		"host":      "",
 		"kill-wait": "",
 	}, spec)
@@ -56,7 +56,7 @@ func TestStart(t *testing.T) {
 	job := runner.NewJob("test start")
 	err := job.Run("operation", map[string]any{
 		"operation": "start",
-		"component": "all",
+		"component": "nebulagraph",
 	}, spec)
 
 	if err != nil {
