@@ -7,9 +7,11 @@ import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.utils.ClientVersion;
 import com.vesoft.nebula.proto.graph.AuthRequest;
 import com.vesoft.nebula.proto.graph.AuthResponse;
-import com.vesoft.nebula.proto.graph.ClientType;
+import com.vesoft.nebula.proto.graph.ClientInfo;
+import com.vesoft.nebula.proto.graph.ClientLanguage;
 import com.vesoft.nebula.proto.graph.ExecuteRequest;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
@@ -90,15 +92,19 @@ public class GrpcConnection extends Connection {
     public AuthResult authenticate(String user, Map<String, Object> authOptions)
             throws AuthFailedException {
         try {
+            ClientInfo clientInfo = ClientInfo.newBuilder()
+                    .setClientLang(ClientLanguage.JAVA)
+                    .setProtocolVersion(Version
+                            .getDescriptor()
+                            .getOptions()
+                            .getExtension(Version.protocolVersion))
+                    .setClientVersion(ByteString.copyFrom(ClientVersion.clientVersion, charset))
+                    .build();
             String authInfoString = JSON.toJSONString(authOptions);
             AuthRequest authReq = AuthRequest.newBuilder()
                     .setUsername(ByteString.copyFrom(user, charset))
                     .setAuthInfo(ByteString.copyFrom(authInfoString, charset))
-                    .setClientType(ClientType.JAVA)
-                    .setClientVersion(Version
-                            .getDescriptor()
-                            .getOptions()
-                            .getExtension(Version.protocolVersion))
+                    .setClientInfo(clientInfo)
                     .build();
             getChannel();
             AuthResponse resp = stub
