@@ -174,10 +174,16 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 	if err != nil {
 		return nil, err
 	}
-	in := &admin.LoginRequest{
-		Username:      []byte(user),
-		AuthInfo:      bs,
+	clientInfo := &common.ClientInfo{
+		ClientLang:      common.ClientInfo_GO,
+		ProtocolVersion: proto.PROTOCOL_VERSION,
+		// TODO(yee): set client version to nebula-go version
 		ClientVersion: proto.PROTOCOL_VERSION,
+	}
+	in := &admin.LoginRequest{
+		Username:   []byte(user),
+		AuthInfo:   bs,
+		ClientInfo: clientInfo,
 	}
 	resp, err := c.retry(func() (responseHeader, error) {
 		return c.client.Login(ctx, in)

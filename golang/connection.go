@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
@@ -78,11 +79,16 @@ func (cn *connection) authenticate(username, password string) error {
 	if err != nil {
 		return err
 	}
-	in := graph.AuthRequest{
-		Username:      []byte(username),
-		AuthInfo:      bs,
-		ClientType:    graph.ClientType_GO,
+	clientInfo := &common.ClientInfo{
+		ClientLang:      common.ClientInfo_GO,
+		ProtocolVersion: proto.PROTOCOL_VERSION,
+		// TODO(yee): set client version to nebula-go version
 		ClientVersion: proto.PROTOCOL_VERSION,
+	}
+	in := graph.AuthRequest{
+		Username:   []byte(username),
+		AuthInfo:   bs,
+		ClientInfo: clientInfo,
 	}
 	resp, err := cn.graphClient.Authenticate(context.Background(), &in)
 	if err != nil {
