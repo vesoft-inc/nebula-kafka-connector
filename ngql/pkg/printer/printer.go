@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"reflect"
+	"strings"
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
@@ -82,7 +83,7 @@ func (p *defaultPrinter) PrintResultVertical(w io.Writer, res nebula.Result) {
 func (p *defaultPrinter) PrintPlanDesc(w io.Writer, summary nebula.Summary) {
 	s := p.renderPlanInfo(summary.PlanInfo(), string(summary.Preamble()))
 	fmt.Fprintln(w, s)
-	fmt.Fprintf(w, "Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side.\n\n",
+	fmt.Fprintf(w, "Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side.\n",
 		summary.BuildTimeUs(),
 		summary.OptimizeTimeUs())
 }
@@ -212,6 +213,7 @@ func (p *defaultPrinter) renderPlanInfo(plan nebula.PlanInfo, preamble string) s
 		"id":          "Id",
 		"name":        "Name",
 		"details":     "Details",
+		"columns":     "Columns",
 		"time(ms)":    "TimeMs",
 		"rows":        "Rows",
 		"memory(KiB)": "MemoryKib",
@@ -228,11 +230,15 @@ func (p *defaultPrinter) renderPlanInfo(plan nebula.PlanInfo, preamble string) s
 	switch preamble {
 	case "explain":
 		columns = append(columns, "details")
+	case "explain_verbose":
+		columns = append(columns, "details", "columns")
 	case "profile":
 		columns = append(columns, "details", "time(ms)", "rows", "memory(KiB)", "blocked(ms)")
 	case "profile_verbose":
 		columns = append(columns, "details", "time(ms)", "rows", "memory(KiB)", "blocked(ms)",
 			"queued(ms)", "consume(ms)", "produce(ms)", "finish(ms)", "batches", "concurrency", "others")
+	default:
+		panic(fmt.Sprintf("unknown preamble %s", preamble))
 	}
 
 	fields := []string{}
@@ -352,6 +358,8 @@ func formattedValue(value interface{}) string {
 			return string(v)
 		}
 		return string(v)
+	case []string:
+		return fmt.Sprintf("[%s]", strings.Join(v, ", "))
 	default:
 		return fmt.Sprintf("%v", v)
 	}

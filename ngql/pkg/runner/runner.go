@@ -219,9 +219,6 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 		return false, nil
 	}
 
-	if resp.Summary() != nil {
-		r.printer.PrintPlanDesc(r.combinOutput, resp.Summary())
-	}
 	if isVertical {
 		r.printer.PrintResultVertical(r.combinOutput, resp)
 	} else {
@@ -230,15 +227,18 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 	duration := time.Since(start)
 	if resp.RowSize() > 0 {
 		numRows := resp.RowSize()
-		r.printBoth(fmt.Sprintf("Got %d rows (time spent %v/%v)\n",
+		r.printBoth(fmt.Sprintf("Got %d rows (time spent %v/%v)\n\n",
 			numRows, time.Duration(resp.Latency()*1000), duration),
 		)
 	} else {
-		r.printBoth(fmt.Sprintf("Execution succeeded (time spent %v/%v)\n",
+		r.printBoth(fmt.Sprintf("Execution succeeded (time spent %v/%v)\n\n",
 			time.Duration(resp.Latency()*1000), duration),
 		)
 	}
-	r.printBoth(fmt.Sprintf("\n%s\n", time.Now().In(time.Local).Format(time.RFC1123)))
+	if resp.Summary() != nil {
+		r.printer.PrintPlanDesc(r.combinOutput, resp.Summary())
+	}
+	r.printBoth(fmt.Sprintf("\n%s\n\n", time.Now().In(time.Local).Format(time.RFC1123)))
 
 	return false, nil
 }

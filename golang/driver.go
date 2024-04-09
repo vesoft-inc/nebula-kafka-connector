@@ -43,6 +43,7 @@ type (
 		Id() []byte
 		Name() []byte
 		Details() []byte
+		Columns() []string
 		TimeMs() float64
 		Rows() int64
 		MemoryKib() float64

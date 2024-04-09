@@ -43,6 +43,14 @@ func (p *planInfo) Details() []byte {
 	return p.planInfo.Details
 }
 
+func (p *planInfo) Columns() []string {
+	columnsVec := make([]string, 0, len(p.planInfo.Columns))
+	for _, column := range p.planInfo.Columns {
+		columnsVec = append(columnsVec, string(column))
+	}
+	return columnsVec
+}
+
 func (p *planInfo) TimeMs() float64 {
 	return p.planInfo.TimeMs
 }
