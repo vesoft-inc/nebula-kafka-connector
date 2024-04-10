@@ -1,15 +1,18 @@
 package meta
 
+import (
+	"context"
+	"fmt"
+
+	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
+	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
+)
+
 type (
 	CreateClusterReq struct {
 		clusterName string
 		replica     int
 		zones       []string
-	}
-
-	CreateClusterResp struct {
-		*HeaderResponse
-		ClusterId int64
 	}
 
 	AddServiceReq struct {
@@ -19,18 +22,11 @@ type (
 		clustername string
 	}
 
-	AddServiceResp struct {
-		*HeaderResponse
-	}
-
 	DropServiceReq struct {
 		host        string
 		port        uint32
 		serviceType ServiceType
 		clustername string
-	}
-	DropServiceResp struct {
-		*HeaderResponse
 	}
 
 	ServiceType int8
@@ -69,10 +65,6 @@ type (
 
 	InitClusterReq struct {
 		clustername string
-	}
-
-	InitClusterResp struct {
-		*HeaderResponse
 	}
 )
 
@@ -125,4 +117,209 @@ func NewDropServiceReq(host string, port uint32, serviceType ServiceType, cluste
 		serviceType: serviceType,
 		clustername: clusterName,
 	}
+}
+
+func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	zones := make([][]byte, 0)
+	for _, z := range req.zones {
+		zones = append(zones, []byte(z))
+	}
+	in := &admin.CreateClusterRequest{
+		Header: &admin.AdminRequestHeader{Token: c.token},
+		ClusterDesc: &admin.ClusterDesc{
+			ClusterName:   []byte(req.clusterName),
+			ReplicaFactor: uint32(req.replica),
+			Zones:         zones,
+		},
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.CreateCluster(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	response, ok := resp.(*admin.CreateClusterResponse)
+	if !ok {
+		return fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return err
+	}
+	if !responseHeader.IsSucceeded() {
+		return responseHeader.GetError()
+	}
+	return nil
+}
+
+func (c *metaClient) AddService(req *AddServiceReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	in := &admin.AddServiceRequest{
+		Header:      &admin.AdminRequestHeader{Token: c.token},
+		Host:        []byte(req.host),
+		Port:        req.port,
+		Type:        common.ServiceType(req.serviceType),
+		ClusterName: []byte(req.clustername),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.AddService(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	response, ok := resp.(*admin.AddServiceResponse)
+	if !ok {
+		return fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return err
+	}
+	if !responseHeader.IsSucceeded() {
+		return responseHeader.GetError()
+	}
+	return nil
+}
+func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.ShowServiceRequest{
+		Header:      &admin.AdminRequestHeader{Token: c.token},
+		ClusterName: []byte(req.clusterName),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.ShowService(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	response, ok := resp.(*admin.ShowServiceResponse)
+	if !ok {
+		return nil, fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return nil, err
+	}
+	services := make([]*ServiceInfo, 0)
+	for _, s := range response.Services {
+		addr := s.Address
+		host := addr.GetHost()
+		port := addr.GetPort()
+		services = append(services, &ServiceInfo{
+			ServiceId:   s.ServiceId,
+			ServiceType: ServiceType(s.Type),
+			Host:        string(host),
+			Port:        port,
+		})
+	}
+	if !responseHeader.IsSucceeded() {
+		return nil, responseHeader.GetError()
+	}
+	return &ShowServiceResp{
+		HeaderResponse: responseHeader,
+		Services:       services,
+	}, nil
+}
+func (c *metaClient) InitCluster(req *InitClusterReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.InitStorageRequest{
+		Header:      &admin.AdminRequestHeader{Token: c.token},
+		ClusterName: []byte(req.clustername),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.InitStorage(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	response, ok := resp.(*admin.InitStorageResponse)
+	if !ok {
+		return fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return err
+	}
+	if !responseHeader.IsSucceeded() {
+		return responseHeader.GetError()
+	}
+	return nil
+}
+func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.ShowClusterRequest{
+		Header:      &admin.AdminRequestHeader{Token: c.token},
+		ClusterName: []byte(req.clusterName),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.ShowCluster(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	response, ok := resp.(*admin.ShowClusterResponse)
+	if !ok {
+		return nil, fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return nil, err
+	}
+	if !responseHeader.IsSucceeded() {
+		return nil, responseHeader.GetError()
+	}
+	clusters := make([]*ClusterInfo, 0)
+	for _, c := range response.Clusters {
+		cluster := &ClusterInfo{
+			ClusterId:   c.ClusterId,
+			ClusterName: string(c.Desc.ClusterName),
+			Replica:     c.Desc.ReplicaFactor,
+			Zones:       make([]string, 0),
+		}
+		for _, z := range c.Desc.Zones {
+			cluster.Zones = append(cluster.Zones, string(z))
+		}
+		clusters = append(clusters, cluster)
+	}
+	return &ShowClusterResp{
+		HeaderResponse: responseHeader,
+		Clusters:       clusters,
+	}, nil
+}
+
+func (c *metaClient) DropService(req *DropServiceReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.DropServiceRequest{
+		Header:  &admin.AdminRequestHeader{Token: c.token},
+		Name:    []byte(req.host),
+		Port:    req.port,
+		Type:    common.ServiceType(req.serviceType),
+		Cluster: []byte(req.clustername),
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.DropService(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	response, ok := resp.(*admin.DropServiceResponse)
+	if !ok {
+		return fmt.Errorf("invalid response")
+	}
+	responseHeader, err := getResponseHeader(response)
+	if err != nil {
+		return err
+	}
+	if !responseHeader.IsSucceeded() {
+		return responseHeader.GetError()
+	}
+	return nil
 }

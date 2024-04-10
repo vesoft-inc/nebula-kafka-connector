@@ -42,14 +42,13 @@ func (d *CreateCluster) Execute() error {
 	defer metaClient.Close()
 	//2. create cluster
 	req := meta.NewCreateClusterReq(d.clusterSpec.Name, d.clusterSpec.Replica, d.clusterSpec.ZoneList)
-	resp, err := metaClient.CreateCluster(req)
-	if err != nil {
+	if err := metaClient.CreateCluster(req); err != nil {
 		return fmt.Errorf("create cluster failed: %s", err)
 	}
 	if d.ifExited() {
 		return fmt.Errorf("exited signal received")
 	}
-	d.JobContext.Logger.Info("create cluster success: " + d.clusterSpec.Name + " " + resp.Msg)
+	d.JobContext.Logger.Info("create cluster success: " + d.clusterSpec.Name)
 	//3. add graphd & storaged
 	for _, host := range d.clusterSpec.Graphd.Hosts {
 		if d.ifExited() {
@@ -60,11 +59,10 @@ func (d *CreateCluster) Execute() error {
 			return fmt.Errorf("get graphd port failed: %s", err)
 		}
 		req := meta.NewAddServiceReq(utils.GetHostIP(host.Host), port, meta.ServiceTypeGraphd, d.clusterSpec.Name)
-		resp, err := metaClient.AddService(req)
-		if err != nil {
+		if err := metaClient.AddService(req); err != nil {
 			return fmt.Errorf("add host failed: %s", err)
 		}
-		d.JobContext.Logger.Info("add host success: " + host.Host + " " + resp.Msg)
+		d.JobContext.Logger.Info("add host success: " + host.Host)
 	}
 	for _, host := range d.clusterSpec.Storaged.Hosts {
 		if d.ifExited() {
@@ -75,22 +73,20 @@ func (d *CreateCluster) Execute() error {
 			return fmt.Errorf("get storaged port failed: %s", err)
 		}
 		req := meta.NewAddServiceReq(utils.GetHostIP(host.Host), port, meta.ServiceTypeStoraged, d.clusterSpec.Name)
-		resp, err := metaClient.AddService(req)
-		if err != nil {
+		if err := metaClient.AddService(req); err != nil {
 			return fmt.Errorf("add host failed: %s", err)
 		}
-		d.JobContext.Logger.Info("add host success: " + host.Host + " " + resp.Msg)
+		d.JobContext.Logger.Info("add host success: " + host.Host)
 	}
 	if d.ifExited() {
 		return fmt.Errorf("exited signal received")
 	}
 	//4. init cluster
 	initReq := meta.NewInitClusterReq(d.clusterSpec.Name)
-	initResp, err := metaClient.InitCluster(initReq)
-	if err != nil {
+	if err := metaClient.InitCluster(initReq); err != nil {
 		return fmt.Errorf("init cluster failed: %s", err)
 	}
-	d.JobContext.Logger.Info("init cluster success: " + d.clusterSpec.Name + " " + initResp.Msg)
+	d.JobContext.Logger.Info("init cluster success: " + d.clusterSpec.Name)
 	return nil
 }
 

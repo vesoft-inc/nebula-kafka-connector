@@ -1,9 +1,6 @@
 package main
 
 import (
-	"fmt"
-
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
 
@@ -13,12 +10,10 @@ func main() {
 		panic(err)
 	}
 	req := meta.NewCreateClusterReq("root", 3, nil)
-	resp, err := c.CreateCluster(req)
+	err = c.CreateCluster(req)
 	if err != nil {
 		panic(err)
 	}
 	defer c.Close()
-	if resp.Code == nebula.ERROR_META_CLUSTER_ALREADY_EXISTS {
-		panic(fmt.Sprintf("msg:%s, code:%s", resp.GetErrorMsg(), resp.GetErrorCode()))
-	}
+
 }

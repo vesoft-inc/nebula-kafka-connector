@@ -45,12 +45,8 @@ var createClusterCmd = &cobra.Command{
 		}
 		// donot need to specify zones
 		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replicas, nil)
-		resp, err := metaClient.CreateCluster(req)
-		if err != nil {
+		if err := metaClient.CreateCluster(req); err != nil {
 			return metaConsoleError("Create cluster failed", err.Error())
-		}
-		if !resp.IsSucceeded() {
-			return metaConsoleError("Create cluster failed", resp.GetErrorMsg())
 		}
 		fmt.Fprintln(metaOutput, "Create cluster successfully.")
 		return nil
@@ -75,12 +71,8 @@ var initClusterCmd = &cobra.Command{
 		}
 		req := meta.NewInitClusterReq(cluster)
 
-		resp, err := metaClient.InitCluster(req)
-		if err != nil {
+		if err := metaClient.InitCluster(req); err != nil {
 			return metaConsoleError("Init cluster failed", err.Error())
-		}
-		if !resp.IsSucceeded() {
-			return metaConsoleError("Init cluster failed", resp.GetErrorMsg())
 		}
 		fmt.Fprintln(metaOutput, "Init cluster successfully.")
 		return nil

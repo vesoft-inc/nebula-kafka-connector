@@ -12,6 +12,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -82,8 +83,7 @@ func (cn *connection) authenticate(username, password string) error {
 	clientInfo := &common.ClientInfo{
 		ClientLang:      common.ClientInfo_GO,
 		ProtocolVersion: proto.PROTOCOL_VERSION,
-		// TODO(yee): set client version to nebula-go version
-		ClientVersion: proto.PROTOCOL_VERSION,
+		ClientVersion:   []byte(version.ClientVersion),
 	}
 	in := graph.AuthRequest{
 		Username:   []byte(username),
@@ -96,7 +96,7 @@ func (cn *connection) authenticate(username, password string) error {
 		return err
 	}
 	if string(resp.GetGqlStatus().GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
-		return errServerResponse(string(resp.GetGqlStatus().GetCode()), resp.GetGqlStatus().String())
+		return errServerResponse(string(resp.GetGqlStatus().GetCode()), string(resp.GetGqlStatus().GetMessage()))
 	}
 	cn.sessionId = resp.GetSessionId()
 	return nil

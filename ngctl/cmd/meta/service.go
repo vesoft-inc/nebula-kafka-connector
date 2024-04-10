@@ -56,12 +56,8 @@ var addServiceCmd = &cobra.Command{
 			return metaConsoleError("cluster name is empty", "")
 		}
 		req := meta.NewAddServiceReq(flags.host, flags.port, serviceType, flags.clusterName)
-		resp, err := metaClient.AddService(req)
-		if err != nil {
+		if err := metaClient.AddService(req); err != nil {
 			return metaConsoleError("Add service failed", err.Error())
-		}
-		if !resp.IsSucceeded() {
-			return metaConsoleError("Add service failed", resp.GetErrorMsg())
 		}
 		fmt.Fprintln(metaOutput, "Add service successfully.")
 		return nil
@@ -97,12 +93,8 @@ var dropServiceCmd = &cobra.Command{
 			return metaConsoleError("cluster name is empty", "")
 		}
 		req := meta.NewDropServiceReq(flags.host, flags.port, serviceType, flags.clusterName)
-		resp, err := metaClient.DropService(req)
-		if err != nil {
+		if err := metaClient.DropService(req); err != nil {
 			return metaConsoleError("Drop service failed", err.Error())
-		}
-		if !resp.IsSucceeded() {
-			return metaConsoleError("Drop service failed", resp.GetErrorMsg())
 		}
 		fmt.Fprintln(metaOutput, "Drop service successfully.")
 		return nil

@@ -103,7 +103,12 @@ func resetPassword(c meta.Client) error {
 	if newPasswordStr != confirmPasswordStr {
 		return fmt.Errorf("Sorry, the passwords you entered do not match.")
 	}
-	if err := c.ChangePassword(loginFlags.user, currentPasswordStr, newPasswordStr); err != nil {
+	req := meta.NewChangePasswordReq(
+		loginFlags.user,
+		currentPasswordStr,
+		newPasswordStr,
+	)
+	if err := c.ChangePassword(req); err != nil {
 		return err
 	}
 	return nil

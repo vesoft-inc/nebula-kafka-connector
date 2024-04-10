@@ -83,7 +83,7 @@ func (p *defaultPrinter) PrintResultVertical(w io.Writer, res nebula.Result) {
 func (p *defaultPrinter) PrintPlanDesc(w io.Writer, summary nebula.Summary) {
 	s := p.renderPlanInfo(summary.PlanInfo(), string(summary.Preamble()))
 	fmt.Fprintln(w, s)
-	fmt.Fprintf(w, "Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side.\n",
+	fmt.Fprintf(w, "Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side.\n\n",
 		summary.BuildTimeUs(),
 		summary.OptimizeTimeUs())
 }
@@ -145,15 +145,21 @@ func (p *defaultPrinter) getResultCsvString(res nebula.Result) string {
 }
 
 func (p *defaultPrinter) getExtraString(res nebula.Result) string {
-	// TODO should use const instead of string "affected_nodes"
 	var s string
 	if res.ExtraInfo() != nil {
 		extraInfo := res.ExtraInfo()
+		cusor, err := extraInfo.Cursor()
+		// do not print if cursor is not empty
+		if err == nil && cusor != "" {
+			return ""
+		}
 		affectedNodes, okNode := extraInfo.AffectedNodes()
 		affectedEdges, okFor := extraInfo.AffectedForwardEdges()
 
+		// if there's no affected_nodes or affected_edges, return directly.
+		// e.g. call cursor_node_scan() return cursor only.
 		if okNode != nil || okFor != nil {
-			return "Error: affected_nodes, affected_edges should be sent together.\n"
+			return ""
 		}
 		extra := fmt.Sprintf("Affected: ")
 		if affectedNodes <= 1 {
