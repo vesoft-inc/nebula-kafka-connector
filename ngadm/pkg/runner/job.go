@@ -73,7 +73,7 @@ func (j *Job) RunWorkflow(workflow *types.WorkflowSpec) error {
 		if workflow.Rollback {
 			rollbackErr := j.Rollback()
 			if rollbackErr != nil {
-				j.Context.Logger.Error(err.Error())
+				j.Context.Logger.Error(fmt.Sprintf("rollback failed: %v", rollbackErr))
 				return fmt.Errorf("run task faild: %v \n rollback failed: %v", err, rollbackErr)
 			}
 		}
@@ -103,12 +103,16 @@ func (j *Job) UnListenSafeExit() {
 }
 
 func (j *Job) Rollback() error {
+	var errs []error
 	for i := len(j.Context.TasksTree) - 1; i >= 0; i-- {
 		task := j.Context.TasksTree[i]
 		err := task.Rollback()
 		if err != nil {
-			return err
+			errs = append(errs, err)
 		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("rollback failed: %v", errs)
 	}
 	return nil
 }

@@ -56,12 +56,16 @@ func (d *Serial) Execute() error {
 }
 
 func (d *Serial) Rollback() error {
+	var errs []error
 	for i := len(d.tasks) - 1; i >= 0; i-- {
 		task := d.tasks[i]
 		err := task.Rollback()
 		if err != nil {
-			return err
+			errs = append(errs, err)
 		}
+	}
+	if len(errs) > 0 {
+		return fmt.Errorf("rollback failed: %v", errs)
 	}
 	return nil
 }

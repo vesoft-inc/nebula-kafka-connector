@@ -12,7 +12,7 @@ import (
 
 func GetUserClusterPath(installPath string, agentPath string) string {
 	if agentPath != "" {
-		return path.Join(agentPath)
+		return path.Join(agentPath, "cluster/")
 	}
 	return path.Join(installPath, "cluster/")
 }
@@ -25,7 +25,7 @@ func GetDownloadPath(installPath string) string {
 }
 func GetUserDownloadPath(installPath string, downloadPath string) string {
 	if downloadPath != "" {
-		return path.Join(downloadPath)
+		return path.Join(downloadPath, "download/")
 	}
 	return path.Join(installPath, "download/")
 }
@@ -43,7 +43,7 @@ func GetUtilPath(installPath, utilName string) string {
 
 func GetUserUtilPath(installPath, agentPath, utilName string) string {
 	if agentPath != "" {
-		return agentPath
+		return path.Join(agentPath, utilName)
 	}
 	return path.Join(installPath, utilName)
 }
