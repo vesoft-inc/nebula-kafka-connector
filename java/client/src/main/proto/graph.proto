@@ -5,22 +5,24 @@
  * between the client SDKs and the server of NebulaGraph
  */
 
-/**
- *             === Some Key Notes About Protobuf ===
- * 1. Field Presence
- *     - `required' is removed from proto3 while `optional' kept.
- *     - Without `optional', the user cannot distinguish the situation.
- *       that a field was not set from being set to its default value.
- *     - With `optional' specified the field will have the NULL semantic(via `has_xxx')
- * 2. Compatibility
- *     - Never change a field number.
- *     - Reserve the field number of deleted fields with `reserved'.
- *     - Some field types can be changed without breaking the compatibility.
- *       Please refer to the official documents for details.
- */
+ /**
+  *             === Some Key Notes About Protobuf ===
+  * 1. Field Presence
+  *     - `required' is removed from proto3 while `optional' kept.
+  *     - Without `optional', the user cannot distinguish the situation.
+  *       that a field was not set from being set to its default value.
+  *     - With `optional' specified the field will have the NULL semantic(via `has_xxx')
+  * 2. Compatibility
+  *     - Never change a field number.
+  *     - Reserve the field number of deleted fields with `reserved'.
+  *     - Some field types can be changed without breaking the compatibility.
+  *       Please refer to the official documents for details.
+  */
 
 // gRPC requires the proto3 syntax
 syntax = "proto3";
+
+import "common.proto";
 
 /**
  * Data structures defined in this file is mainly for data exchanging.
@@ -242,25 +244,26 @@ message PlanInfo {
     bytes                   id                  = 1;
     bytes                   name                = 2;
     bytes                   details             = 3;
-    double                  time_ms             = 4;
-    int64                   rows                = 5;
-    double                  memory_kib          = 6;
-    double                  blocked_ms          = 7;
-    double                  queued_ms           = 8;
-    double                  consume_ms          = 9;
-    double                  produce_ms          = 10;
-    double                  finish_ms           = 11;
-    int64                   batches             = 12;
-    int64                   concurrency         = 13;
-    bytes                   other_stats_json    = 14;
-    repeated PlanInfo       children            = 15;
+    repeated bytes          columns             = 4;
+    double                  time_ms             = 5;
+    int64                   rows                = 6;
+    double                  memory_kib          = 7;
+    double                  blocked_ms          = 8;
+    double                  queued_ms           = 9;
+    double                  consume_ms          = 10;
+    double                  produce_ms          = 11;
+    double                  finish_ms           = 12;
+    int64                   batches             = 13;
+    int64                   concurrency         = 14;
+    bytes                   other_stats_json    = 15;
+    repeated PlanInfo       children            = 16;
 }
 
 message ExecutionOutcome {
-    GQLStatus                   gql_status      = 1;
-    ResultTable                 result          = 2;
-    Summary                     summary         = 3;
-    repeated ExtraInfoElement   extra_info      = 4;
+    GQLStatus                   gql_status              = 1;
+    ResultTable                 result                  = 2;
+    Summary                     summary                 = 3;
+    repeated ExtraInfoElement   extra_info              = 4;
 }
 
 message ExecuteRequest {
@@ -273,25 +276,10 @@ message ExecuteResponse {
     uint64              latency_in_us           = 2;
 }
 
-enum ClientLanguage {
-    UNKNOWN        = 0;
-    CPP            = 1;
-    GO             = 2;
-    JAVA           = 3;
-    PYTHON         = 4;
-    NODE           = 5;
-}
-
-message ClientInfo {
-    ClientLanguage      client_lang             = 1;
-    bytes               protocol_version        = 2;
-    bytes               client_version          = 3;
-}
-
 message AuthRequest {
     bytes               username                = 1;
     bytes               auth_info               = 2;
-    ClientInfo          client_info             = 3;
+    nebula.proto.common.ClientInfo client_info  = 3;
 }
 
 message AuthResponse {

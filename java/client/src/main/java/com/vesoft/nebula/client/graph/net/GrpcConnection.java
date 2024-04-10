@@ -8,10 +8,9 @@ import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.utils.ClientVersion;
+import com.vesoft.nebula.proto.common.ClientInfo;
 import com.vesoft.nebula.proto.graph.AuthRequest;
 import com.vesoft.nebula.proto.graph.AuthResponse;
-import com.vesoft.nebula.proto.graph.ClientInfo;
-import com.vesoft.nebula.proto.graph.ClientLanguage;
 import com.vesoft.nebula.proto.graph.ExecuteRequest;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
@@ -93,7 +92,7 @@ public class GrpcConnection extends Connection {
             throws AuthFailedException {
         try {
             ClientInfo clientInfo = ClientInfo.newBuilder()
-                    .setClientLang(ClientLanguage.JAVA)
+                    .setClientLang(ClientInfo.Language.JAVA)
                     .setProtocolVersion(Version
                             .getDescriptor()
                             .getOptions()

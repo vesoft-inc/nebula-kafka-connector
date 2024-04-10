@@ -1,0 +1,57 @@
+// Copyright (c) 2024 vesoft inc. All rights reserved.
+
+// gRPC requires the proto3 syntax
+syntax = "proto3";
+
+package nebula.proto.common;
+option go_package ="github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common";
+option java_package = "com.vesoft.nebula.proto.common";
+option java_multiple_files = true;
+option optimize_for = SPEED;
+
+message HostAddress {
+    bytes host = 1;
+    uint32 port = 2;
+}
+
+enum ServiceType {
+    UNKNOWN = 0;
+    STORAGE = 1;
+    GRAPH = 2;
+    META = 3;
+    ALL = 4;
+}
+
+message RequestHeader {
+    int64 cluster_id = 1;
+}
+
+message Error {
+    uint64 code = 1;
+    bytes message = 2;
+}
+
+message ResponseHeader {
+    Error error = 1;
+    HostAddress leader = 2;
+}
+
+message DirInfo {
+    bytes install_path = 1;
+    repeated bytes data_paths = 2;
+}
+
+message ClientInfo {
+    enum Language {
+        UNKNOWN        = 0;
+        CPP            = 1;
+        GO             = 2;
+        JAVA           = 3;
+        PYTHON         = 4;
+        JAVASCRIPT     = 5;
+    }
+
+    Language            client_lang             = 1;
+    bytes               protocol_version        = 2;
+    bytes               client_version          = 3;
+}
