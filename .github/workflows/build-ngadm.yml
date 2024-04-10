@@ -41,6 +41,7 @@ jobs:
           mkdir build
           cp -r ./api/agent/etc build/
           cp ./api/agent/bin/agent build/
+          cp -r ./api/agent/scripts build/
           cp ../ngadm/build/ngadm build/
           cp -r ../ngadm/examples/ build/
         working-directory: agent

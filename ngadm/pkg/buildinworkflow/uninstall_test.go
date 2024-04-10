@@ -31,6 +31,7 @@ func TestUninstall(t *testing.T) {
 func TestUninstallCluster(t *testing.T) {
 	tasks.Init()
 	spec := GetNebulaYaml(t)
+	// spec.Spec.Metad.Clusters = []types.Cluster{} // remove all clusters for only uninstall metad
 	delete(spec.UtilsProcesses, "license-manager")
 	job := runner.NewJob("test uninstall")
 	err := job.Run("uninstall", map[string]any{
