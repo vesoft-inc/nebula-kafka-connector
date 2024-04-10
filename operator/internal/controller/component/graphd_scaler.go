@@ -18,7 +18,6 @@ package component
 
 import (
 	"fmt"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -39,30 +38,25 @@ func NewGraphScaler(clientSet kube.ClientSet) ScaleManager {
 	return &graphScaler{clientSet: clientSet}
 }
 
-func (s *graphScaler) Scale(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
+func (s *graphScaler) Scale(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
 	oldReplicas := pointer.Int32Deref(oldSts.Spec.Replicas, 0)
 	newReplicas := pointer.Int32Deref(newSts.Spec.Replicas, 0)
 
 	if newReplicas < oldReplicas || nc.Status.Graphd.Phase == v2alpha1.ScaleInPhase {
-		return s.ScaleIn(nc, oldReplicas, newReplicas)
+		return s.ScaleIn(metaClient, nc, oldReplicas, newReplicas)
 	}
 
 	if newReplicas > oldReplicas || nc.Status.Graphd.Phase == v2alpha1.ScaleOutPhase {
-		return s.ScaleOut(nc, oldReplicas, newReplicas)
+		return s.ScaleOut(metaClient, nc, oldReplicas, newReplicas)
 	}
 
 	return nil
 }
 
-func (s *graphScaler) ScaleOut(nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
+func (s *graphScaler) ScaleOut(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.GraphdComponent().GetName()
-	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
-	if err != nil {
-		return err
-	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
-	if err := addGraphdServices(nc, metadEndpoints, oldReplicas, newReplicas); err != nil {
+	if err := addGraphdServices(metaClient, nc, oldReplicas, newReplicas); err != nil {
 		klog.Errorf("add graphd services failed: %v", err)
 		return err
 	}
@@ -70,7 +64,7 @@ func (s *graphScaler) ScaleOut(nc *v2alpha1.NebulaCluster, oldReplicas, newRepli
 	return nil
 }
 
-func (s *graphScaler) ScaleIn(nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
+func (s *graphScaler) ScaleIn(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.GraphdComponent().GetName()
 	nc.Status.Graphd.Phase = v2alpha1.ScaleInPhase
@@ -78,31 +72,13 @@ func (s *graphScaler) ScaleIn(nc *v2alpha1.NebulaCluster, oldReplicas, newReplic
 		return err
 	}
 
-	metad, err := s.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
-	if err != nil {
-		return err
-	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
-
-	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		metaClient.Close()
-	}()
-
 	port := nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameGRPC)
 	if oldReplicas-newReplicas > 0 {
 		for i := oldReplicas - 1; i >= newReplicas; i-- {
 			host := nc.GraphdComponent().GetPodFQDN(i)
 			req := meta.NewDropServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
-			resp, err := metaClient.DropService(req)
-			if err != nil {
-				return err
-			}
-			if !resp.OK {
-				return fmt.Errorf("drop graphd service failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
+			if err := metaClient.DropService(req); err != nil {
+				return fmt.Errorf("drop graphd service failed: %v", err)
 			}
 		}
 	}
@@ -115,7 +91,7 @@ func (s *graphScaler) ScaleIn(nc *v2alpha1.NebulaCluster, oldReplicas, newReplic
 	deleted := true
 	pvcNames := ordinalPVCNames(nc.GraphdComponent().ComponentType(), nc.GraphdComponent().GetName(), newReplicas)
 	for _, pvcName := range pvcNames {
-		if _, err = s.clientSet.PVC().GetPVC(nc.GetNamespace(), pvcName); err != nil {
+		if _, err := s.clientSet.PVC().GetPVC(nc.GetNamespace(), pvcName); err != nil {
 			if !apierrors.IsNotFound(err) {
 				deleted = false
 				break

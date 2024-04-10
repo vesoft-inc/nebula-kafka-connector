@@ -49,8 +49,7 @@ var _ ControlInterface = &defaultNebulaClusterControl{}
 
 func NewDefaultNebulaClusterControl(
 	client client.Client,
-	nebulaClient kube.NebulaCluster,
-	metadClient kube.NebulaMetad,
+	clientSet kube.ClientSet,
 	graphdCluster component.ReconcileManager,
 	storagedCluster component.ReconcileManager,
 	metaReconciler component.MetaReconcileManager,
@@ -59,8 +58,7 @@ func NewDefaultNebulaClusterControl(
 ) ControlInterface {
 	return &defaultNebulaClusterControl{
 		client:           client,
-		nebulaClient:     nebulaClient,
-		metadClient:      metadClient,
+		clientSet:        clientSet,
 		graphdCluster:    graphdCluster,
 		storagedCluster:  storagedCluster,
 		metaReconciler:   metaReconciler,
@@ -71,8 +69,7 @@ func NewDefaultNebulaClusterControl(
 
 type defaultNebulaClusterControl struct {
 	client           client.Client
-	nebulaClient     kube.NebulaCluster
-	metadClient      kube.NebulaMetad
+	clientSet        kube.ClientSet
 	graphdCluster    component.ReconcileManager
 	storagedCluster  component.ReconcileManager
 	metaReconciler   component.MetaReconcileManager
@@ -90,7 +87,7 @@ func (c *defaultNebulaClusterControl) UpdateNebulaCluster(nc *v2alpha1.NebulaClu
 
 	c.conditionUpdater.Update(nc)
 	nc.Status.ObservedGeneration = nc.Generation
-	if err := c.nebulaClient.UpdateNebulaClusterStatus(nc.DeepCopy()); err != nil {
+	if err := c.clientSet.NebulaCluster().UpdateNebulaClusterStatus(nc.DeepCopy()); err != nil {
 		errs = append(errs, err)
 	}
 
@@ -133,7 +130,7 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 		return component.ErrorMetadReferenceIsNil
 	}
 
-	metad, err := c.metadClient.GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
+	metad, err := c.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
 	if err != nil {
 		klog.Errorf("failed to get metad cluster: %v", err)
 		return err
@@ -141,28 +138,43 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 	if !metad.MetadComponent().IsReady() {
 		return fmt.Errorf("metad [%s/%s] is not ready", metad.Namespace, metad.Name)
 	}
+
+	username, password, err := kube.GetCredential(c.clientSet, nc.Namespace, nc.Spec.CredentialSecret)
+	if err != nil {
+		return err
+	}
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
+	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","), meta.WithUserPassword(username, password))
+	if err != nil {
+		return err
+	}
+	if err := metaClient.Login(); err != nil {
+		klog.Errorf("login metad failed: %v", err)
+		return err
+	}
+	defer func() {
+		metaClient.Close()
+	}()
+
 	if !nc.Status.CreatedDone {
-		metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
-		mc, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
-		if err != nil {
-			return err
+		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.ReplicaFactor), nc.Spec.Zones)
+		if err := metaClient.CreateCluster(req); err != nil {
+			if ne, ok := err.(*nebula.NebulaError); ok {
+				if ne.Code() != nebula.ERROR_META_CLUSTER_ALREADY_EXISTS {
+					klog.Errorf("create cluster failed: %v", err)
+					return err
+				}
+			}
 		}
-		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.Replica), nc.Spec.Zones)
-		resp, err := mc.CreateCluster(req)
-		if err != nil {
-			return err
-		}
-		if !resp.OK && resp.Code != nebula.ErrorClusterExisted {
-			return fmt.Errorf("create cluster failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
-		}
+		nc.Status.CreatedDone = true
 	}
 
-	if err := c.storagedCluster.Reconcile(nc); err != nil {
+	if err := c.storagedCluster.Reconcile(metaClient, nc); err != nil {
 		klog.Errorf("reconcile storaged cluster failed: %v", err)
 		return err
 	}
 
-	if err := c.graphdCluster.Reconcile(nc); err != nil {
+	if err := c.graphdCluster.Reconcile(metaClient, nc); err != nil {
 		klog.Errorf("reconcile graphd cluster failed: %v", err)
 		return err
 	}

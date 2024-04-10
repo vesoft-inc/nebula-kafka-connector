@@ -19,7 +19,6 @@ package component
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -28,7 +27,6 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
@@ -51,7 +49,7 @@ func NewGraphdCluster(clientSet kube.ClientSet, sm ScaleManager, um UpdateManage
 		eventRecorder: recorder}
 }
 
-func (g *graphdCluster) Reconcile(nc *v2alpha1.NebulaCluster) error {
+func (g *graphdCluster) Reconcile(metaClient meta.Client, nc *v2alpha1.NebulaCluster) error {
 	if nc.Spec.Graphd == nil {
 		return nil
 	}
@@ -61,7 +59,7 @@ func (g *graphdCluster) Reconcile(nc *v2alpha1.NebulaCluster) error {
 	if err := g.syncGraphdService(nc); err != nil {
 		return err
 	}
-	return g.syncGraphdWorkload(nc)
+	return g.syncGraphdWorkload(metaClient, nc)
 }
 
 func (g *graphdCluster) syncGraphdService(nc *v2alpha1.NebulaCluster) error {
@@ -82,7 +80,7 @@ func (g *graphdCluster) syncGraphdHeadlessService(nc *v2alpha1.NebulaCluster) er
 	return syncService(newSvc, g.clientSet.Service())
 }
 
-func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
+func (g *graphdCluster) syncGraphdWorkload(metaClient meta.Client, nc *v2alpha1.NebulaCluster) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.GraphdComponent().GetName()
 
@@ -131,14 +129,14 @@ func (g *graphdCluster) syncGraphdWorkload(nc *v2alpha1.NebulaCluster) error {
 	}
 
 	if !nc.Status.Graphd.ServicesAdded {
-		if err := addGraphdServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
+		if err := addGraphdServices(metaClient, nc, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
 			return err
 		}
 		klog.Infof("graphd cluster [%s/%s] add services succeed", namespace, componentName)
 		nc.Status.Graphd.ServicesAdded = true
 	}
 
-	if err := g.scaleManager.Scale(nc, oldSts, newSts); err != nil {
+	if err := g.scaleManager.Scale(metaClient, nc, oldSts, newSts); err != nil {
 		klog.Errorf("scale graphd cluster [%s/%s] failed: %v", namespace, componentName, err)
 		return err
 	}
@@ -233,15 +231,7 @@ func (g *graphdCluster) Delete(nc *v2alpha1.NebulaCluster) error {
 	return g.clientSet.Workload().DeleteWorkload(workload)
 }
 
-func addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
-	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		metaClient.Close()
-	}()
-
+func addGraphdServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	var start int32
 	if newReplicas > oldReplicas {
 		start = oldReplicas
@@ -251,12 +241,8 @@ func addGraphdServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldR
 	for i := start; i < newReplicas; i++ {
 		host := nc.GraphdComponent().GetPodFQDN(i)
 		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
-		resp, err := metaClient.AddService(req)
-		if err != nil {
-			return err
-		}
-		if !resp.OK && resp.Code != nebula.ErrServiceStaticPortExists {
-			return fmt.Errorf("add graphd service failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
+		if err := metaClient.AddService(req); err != nil {
+			return fmt.Errorf("add graphd service failed: %v", err)
 		}
 	}
 

@@ -21,15 +21,15 @@ spec:
       name: READY
       type: string
     - description: The desired number of metad pods.
-      jsonPath: .spec.metad.replicas
+      jsonPath: .spec.replicas
       name: METAD-DESIRED
       type: string
     - description: The number of metad pods ready.
-      jsonPath: .status.metad.workload.readyReplicas
+      jsonPath: .status.workload.readyReplicas
       name: METAD-READY
       type: string
     - description: The managed clusters of this metad.
-      jsonPath: .status.metad.managedClusters
+      jsonPath: .status.managedClusters
       name: MANAGED-CLUSTERS
       type: string
     - description: CreationTimestamp is a timestamp representing the server time when
@@ -422,6 +422,8 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              credentialSecret:
+                type: string
               dataVolumeClaim:
                 properties:
                   resources:

@@ -18,7 +18,6 @@ package component
 
 import (
 	"fmt"
-	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -50,14 +49,14 @@ func NewStoragedCluster(clientSet kube.ClientSet, sm ScaleManager, um UpdateMana
 	}
 }
 
-func (s *storagedCluster) Reconcile(nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) Reconcile(metaClient meta.Client, nc *v2alpha1.NebulaCluster) error {
 	if nc.Spec.Storaged == nil {
 		return nil
 	}
 	if err := s.syncStoragedHeadlessService(nc); err != nil {
 		return err
 	}
-	return s.syncStoragedWorkload(nc)
+	return s.syncStoragedWorkload(metaClient, nc)
 }
 
 func (s *storagedCluster) syncStoragedHeadlessService(nc *v2alpha1.NebulaCluster) error {
@@ -69,7 +68,7 @@ func (s *storagedCluster) syncStoragedHeadlessService(nc *v2alpha1.NebulaCluster
 	return syncService(newSvc, s.clientSet.Service())
 }
 
-func (s *storagedCluster) syncStoragedWorkload(nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alpha1.NebulaCluster) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.StoragedComponent().GetName()
 
@@ -118,21 +117,21 @@ func (s *storagedCluster) syncStoragedWorkload(nc *v2alpha1.NebulaCluster) error
 	}
 
 	if !nc.Status.Storaged.ServicesAdded {
-		if err := addStorageServices(nc, metadEndpoints, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
+		if err := addStorageServices(metaClient, nc, *oldSts.Spec.Replicas, *newSts.Spec.Replicas); err != nil {
 			return err
 		}
 		klog.Infof("storaged cluster [%s/%s] add services succeed", namespace, componentName)
 		nc.Status.Storaged.ServicesAdded = true
 	}
 	if !nc.Status.Storaged.InitPartitionDone {
-		if err := s.initCluster(nc.Name, metadEndpoints); err != nil {
+		if err := s.initCluster(metaClient, nc.Name); err != nil {
 			return err
 		}
 		klog.Infof("init storaged cluster [%s/%s] partitions succeed", namespace, componentName)
 		nc.Status.Storaged.InitPartitionDone = true
 	}
 
-	if err := s.scaleManager.Scale(nc, oldSts, newSts); err != nil {
+	if err := s.scaleManager.Scale(metaClient, nc, oldSts, newSts); err != nil {
 		klog.Errorf("scale storaged cluster [%s/%s] failed: %v", namespace, componentName, err)
 		return err
 	}
@@ -191,22 +190,15 @@ func (s *storagedCluster) syncStoragedPVC(nc *v2alpha1.NebulaCluster) error {
 	return syncPVC(nc.StoragedComponent(), s.clientSet.PVC())
 }
 
-func (s *storagedCluster) initCluster(clusterName string, metadEndpoints []string) error {
-	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		metaClient.Close()
-	}()
-
+func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string) error {
 	req := meta.NewInitClusterReq(clusterName)
-	resp, err := metaClient.InitCluster(req)
-	if err != nil {
-		return err
-	}
-	if !resp.OK {
-		return fmt.Errorf("init cluster failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
+	if err := metaClient.InitCluster(req); err != nil {
+		if ne, ok := err.(*nebula.NebulaError); ok {
+			// TODO [NM007]: Part already inited
+			if ne.Code() != "NM007" {
+				return fmt.Errorf("init cluster failed, %v", err)
+			}
+		}
 	}
 	return nil
 }
@@ -228,15 +220,7 @@ func (s *storagedCluster) Delete(nc *v2alpha1.NebulaCluster) error {
 	return s.clientSet.Workload().DeleteWorkload(workload)
 }
 
-func addStorageServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, oldReplicas, newReplicas int32) error {
-	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","))
-	if err != nil {
-		return err
-	}
-	defer func() {
-		metaClient.Close()
-	}()
-
+func addStorageServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	var start int32
 	if newReplicas > oldReplicas {
 		start = oldReplicas
@@ -246,12 +230,13 @@ func addStorageServices(nc *v2alpha1.NebulaCluster, metadEndpoints []string, old
 	for i := start; i < newReplicas; i++ {
 		host := nc.StoragedComponent().GetPodFQDN(i)
 		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)
-		resp, err := metaClient.AddService(req)
-		if err != nil {
-			return err
-		}
-		if !resp.OK && resp.Code != nebula.ErrServiceStaticPortExists {
-			return fmt.Errorf("add storaged service failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
+		if err := metaClient.AddService(req); err != nil {
+			if ne, ok := err.(*nebula.NebulaError); ok {
+				// TODO [NM019]: Service with static port already exists
+				if ne.Code() != "NM019" {
+					return fmt.Errorf("add storaged service failed: %v", err)
+				}
+			}
 		}
 	}
 

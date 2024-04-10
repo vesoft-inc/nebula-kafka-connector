@@ -420,15 +420,8 @@ spec:
                 type: object
               alpineImage:
                 type: string
-              credential:
-                properties:
-                  password:
-                    default: nebula
-                    type: string
-                  username:
-                    default: root
-                    type: string
-                type: object
+              credentialSecret:
+                type: string
               enablePVReclaim:
                 type: boolean
               graphd:
@@ -3220,7 +3213,7 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
-              replica:
+              replicaFactor:
                 default: 1
                 format: int32
                 type: integer

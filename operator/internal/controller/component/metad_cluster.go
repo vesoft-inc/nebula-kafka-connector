@@ -18,7 +18,7 @@ import (
 )
 
 type MetadReconcileManager interface {
-	// Reconcile reconciles the  Metad metad desired state
+	// Reconcile reconciles the metad desired state
 	Reconcile(metad *v2alpha1.NebulaMetad) error
 
 	// Delete deletes the metad
@@ -132,9 +132,17 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 	}
 
 	if equal && nm.MetadComponent().IsReady() {
-		endpoints := []string{nm.GetMetadThriftConnAddress()}
-		metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","))
+		username, password, err := kube.GetCredential(c.clientSet, nm.Namespace, nm.Spec.CredentialSecret)
 		if err != nil {
+			return err
+		}
+		endpoints := []string{nm.GetMetadThriftConnAddress()}
+		metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, password))
+		if err != nil {
+			return err
+		}
+		if err := metaClient.Login(); err != nil {
+			klog.Errorf("login metad failed: %v", err)
 			return err
 		}
 		defer func() {
@@ -184,7 +192,7 @@ func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v2alpha1.NebulaMe
 	if err != nil {
 		return err
 	}
-	if !resp.OK {
+	if !resp.IsSucceeded() {
 		return fmt.Errorf("show cluster failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
 	}
 	nm.Status.ManagedClusters = int32(len(resp.Clusters))

@@ -33,6 +33,9 @@ const (
 type NebulaMetadSpec struct {
 	ComponentSpec `json:",inline"`
 
+	// CredentialSecret contains user login info.
+	CredentialSecret string `json:"credentialSecret,omitempty"`
+
 	// +kubebuilder:default=Always
 	ImagePullPolicy *corev1.PullPolicy `json:"imagePullPolicy,omitempty"`
 

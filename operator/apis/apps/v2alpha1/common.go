@@ -199,13 +199,16 @@ func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *co
 		for i := 1; i < volumes; i++ {
 			dataPath += fmt.Sprintf(",data%d/storage", i)
 		}
+	} else if c.ComponentType() == MetadComponentType {
+		dataPath = " --data_path=data/meta"
 	}
 
 	metadAddress := strings.Join(metadEndpoints, ",")
 	cmd := []string{"/bin/sh", "-ecx"}
 	flags := " --meta_server_addrs=" + metadAddress +
 		" --local_ip=$(hostname)." + c.GetServiceFQDN() +
-		" --daemonize=false" + dataPath
+		" --daemonize=false" + dataPath +
+		" --log_dir=logs"
 	cmd = append(cmd, fmt.Sprintf("exec /usr/local/nebula/bin/nebula-%s", componentType)+
 		fmt.Sprintf(" --flagfile=/usr/local/nebula/etc/nebula-%s.conf", componentType)+flags)
 

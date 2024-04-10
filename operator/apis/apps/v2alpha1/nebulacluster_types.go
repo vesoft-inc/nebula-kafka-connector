@@ -38,11 +38,12 @@ type NebulaClusterSpec struct {
 	MetadRef *NamespacedObjectReference `json:"metadRef"`
 
 	// +kubebuilder:default=1
-	Replica int32 `json:"replica,omitempty"`
+	ReplicaFactor int32 `json:"replicaFactor,omitempty"`
 
 	Zones []string `json:"zones,omitempty"`
 
-	Credential *Credential `json:"credential,omitempty"`
+	// CredentialSecret contains user login info.
+	CredentialSecret string `json:"credentialSecret,omitempty"`
 
 	// +kubebuilder:default=default-scheduler
 	// +optional
@@ -110,17 +111,6 @@ type StoragedSpec struct {
 	// Flag to enable/disable auto balance data and leader while the nebula storaged scale out, default false
 	// +optional
 	EnableAutoBalance *bool `json:"enableAutoBalance,omitempty"`
-}
-
-// Credential defines details of user login info
-type Credential struct {
-	// +kubebuilder:default=root
-	// +optional
-	Username string `json:"username,omitempty"`
-
-	// +kubebuilder:default=nebula
-	// +optional
-	Password string `json:"password,omitempty"`
 }
 
 // StorageClaim contains details of storage

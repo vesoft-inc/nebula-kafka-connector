@@ -19,9 +19,11 @@ package kube
 import (
 	"context"
 	"fmt"
+	"os"
 	"regexp"
 	"strconv"
 
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apimachinery/pkg/version"
 	"k8s.io/client-go/util/retry"
@@ -34,6 +36,11 @@ type FinalizerOpType string
 const (
 	AddFinalizerOpType    FinalizerOpType = "Add"
 	RemoveFinalizerOpType FinalizerOpType = "Remove"
+
+	UsernameKey    = "username"
+	PasswordKey    = "password"
+	UsernameKeyEnv = "USERNAME"
+	PasswordKeyEnv = "PASSWORD"
 )
 
 func UpdateFinalizer(ctx context.Context, c client.Client, object client.Object, op FinalizerOpType, finalizer string) error {
@@ -83,4 +90,22 @@ func ValidVersion(ver *version.Info) (bool, error) {
 		return false, err
 	}
 	return major >= 1 && minor >= 18, nil
+}
+
+func GetCredential(clientSet ClientSet, namespace, secretName string) (username string, password string, err error) {
+	if os.Getenv(UsernameKeyEnv) != "" && os.Getenv(PasswordKeyEnv) != "" {
+		username = os.Getenv(UsernameKeyEnv)
+		password = os.Getenv(PasswordKeyEnv)
+		return
+	}
+
+	var secret *corev1.Secret
+	secret, err = clientSet.Secret().GetSecret(namespace, secretName)
+	if err != nil {
+		return
+	}
+	username = string(secret.Data[UsernameKey])
+	password = string(secret.Data[PasswordKey])
+
+	return
 }

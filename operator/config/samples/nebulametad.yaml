@@ -3,6 +3,7 @@ kind: NebulaMetad
 metadata:
   name: metad-sample
 spec:
+  credentialSecret: "nebula"
   enablePVReclaim: true
   resources:
     requests:

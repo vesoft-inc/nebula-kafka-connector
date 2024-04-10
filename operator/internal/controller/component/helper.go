@@ -202,6 +202,7 @@ func setPartition(sts *appsv1.StatefulSet, upgradeOrdinal int32) {
 func getNextUpdatePod(component v2alpha1.NebulaComponent, replicas int32, podClient kube.Pod) (int32, error) {
 	namespace := component.GetNamespace()
 	updateRevision := component.GetUpdateRevision()
+	// for index := replicas -1; index >= 0; index -= RollingUpdateCount
 	for index := replicas - 1; index >= 0; index-- {
 		podName := component.GetPodName(index)
 		pod, err := podClient.GetPod(namespace, podName)

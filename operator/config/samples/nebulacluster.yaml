@@ -3,13 +3,14 @@ kind: NebulaCluster
 metadata:
   name: nebula-sample
 spec:
-  replica: 3
+  replicaFactor: 3
   zones:
   - az1
   - az2
   - az3
   metadRef:
     name: metad-sample
+  credentialSecret: "nebula"
   graphd:
     resources:
       requests:
