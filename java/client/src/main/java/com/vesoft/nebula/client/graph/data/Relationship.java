@@ -5,9 +5,8 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.graph.Direction;
-import com.vesoft.nebula.proto.graph.Edge;
-import com.vesoft.nebula.proto.graph.Value;
+import com.vesoft.nebula.proto.common.Edge;
+import com.vesoft.nebula.proto.common.Value;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -53,7 +52,7 @@ public class Relationship extends BaseDataObject {
      * @return true if edge is directed
      */
     public boolean isDirected() {
-        return edge.getDirection() == Direction.DIRECTED;
+        return edge.getDirection() == Edge.Direction.DIRECTED;
     }
 
     /**
@@ -136,7 +135,7 @@ public class Relationship extends BaseDataObject {
             return false;
         }
         Relationship that = (Relationship) o;
-        if (edge.getDirection() == Direction.DIRECTED) {
+        if (edge.getDirection() == Edge.Direction.DIRECTED) {
             return getRank() == that.getRank()
                     && getSrcId() == that.getSrcId()
                     && getDstId() == that.getDstId()
@@ -161,7 +160,7 @@ public class Relationship extends BaseDataObject {
         for (String key : props.keySet()) {
             propStrs.add(key + ":" + props.get(key).toString());
         }
-        if (edge.getDirection() == Direction.DIRECTED) {
+        if (edge.getDirection() == Edge.Direction.DIRECTED) {
             return String.format("(%d)-[%d@%s:%s{%s}]->(%d)",
                     getSrcId(),
                     getRank(),

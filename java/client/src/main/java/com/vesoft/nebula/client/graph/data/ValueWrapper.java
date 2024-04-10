@@ -7,7 +7,7 @@ package com.vesoft.nebula.client.graph.data;
 
 import com.google.common.base.Charsets;
 import com.vesoft.nebula.client.graph.exception.InvalidValueException;
-import com.vesoft.nebula.proto.graph.Value;
+import com.vesoft.nebula.proto.common.Value;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;

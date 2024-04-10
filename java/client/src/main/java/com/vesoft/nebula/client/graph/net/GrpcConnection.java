@@ -9,13 +9,13 @@ import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.utils.ClientVersion;
 import com.vesoft.nebula.proto.common.ClientInfo;
+import com.vesoft.nebula.proto.common.Common;
 import com.vesoft.nebula.proto.graph.AuthRequest;
 import com.vesoft.nebula.proto.graph.AuthResponse;
 import com.vesoft.nebula.proto.graph.ExecuteRequest;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
 import com.vesoft.nebula.proto.graph.SignoutRequest;
-import com.vesoft.nebula.proto.version.Version;
 import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -92,12 +92,12 @@ public class GrpcConnection extends Connection {
             throws AuthFailedException {
         try {
             ClientInfo clientInfo = ClientInfo.newBuilder()
-                    .setClientLang(ClientInfo.Language.JAVA)
-                    .setProtocolVersion(Version
+                    .setLang(ClientInfo.Language.JAVA)
+                    .setProtocolVersion(Common
                             .getDescriptor()
                             .getOptions()
-                            .getExtension(Version.protocolVersion))
-                    .setClientVersion(ByteString.copyFrom(ClientVersion.clientVersion, charset))
+                            .getExtension(Common.protocolVersion))
+                    .setVersion(ByteString.copyFrom(ClientVersion.clientVersion, charset))
                     .build();
             String authInfoString = JSON.toJSONString(authOptions);
             AuthRequest authReq = AuthRequest.newBuilder()

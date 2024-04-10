@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.graph.Duration;
+import com.vesoft.nebula.proto.common.Duration;
 import java.util.Objects;
 
 public class NDuration {

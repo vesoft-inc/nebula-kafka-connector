@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.graph.Date;
+import com.vesoft.nebula.proto.common.Date;
 import java.util.Objects;
 
 public class NDate {

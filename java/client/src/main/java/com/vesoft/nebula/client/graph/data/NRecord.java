@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.graph.Record;
-import com.vesoft.nebula.proto.graph.Value;
+import com.vesoft.nebula.proto.common.Record;
+import com.vesoft.nebula.proto.common.Value;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;

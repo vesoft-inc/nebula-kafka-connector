@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.graph.Node;
-import com.vesoft.nebula.proto.graph.Value;
+import com.vesoft.nebula.proto.common.Node;
+import com.vesoft.nebula.proto.common.Value;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;

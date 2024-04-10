@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-import com.vesoft.nebula.proto.graph.LocalTime;
+import com.vesoft.nebula.proto.common.LocalTime;
 import java.util.Objects;
 
 public class NTime {
