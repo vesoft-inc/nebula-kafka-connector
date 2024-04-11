@@ -179,3 +179,20 @@ type NamespacedObjectReference struct {
 	// +optional
 	Namespace string `json:"namespace,omitempty"`
 }
+
+// VolumeStatus describes the observed state of volumes.
+type VolumeStatus struct {
+	ProvisionedVolumes map[string]ProvisionedVolume `json:"provisionedVolumes,omitempty"`
+
+	// All volumes have been provisioned with the desired resources.
+	ProvisionedDone bool `json:"provisionedDone"`
+}
+
+// ProvisionedVolume describes the status of a specified PVC.
+type ProvisionedVolume struct {
+	VolumeName string `json:"volumeName"`
+
+	StorageClass string `json:"storageClass"`
+
+	Capacity string `json:"capacity"`
+}

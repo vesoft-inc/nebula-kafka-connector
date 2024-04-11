@@ -243,3 +243,7 @@ func (c *graphdComponent) UpdateComponentStatus(status *ComponentStatus) {
 func (c *graphdComponent) SetWorkloadStatus(status *WorkloadStatus) {
 	c.nc.Status.Graphd.Workload = status
 }
+
+func (c *graphdComponent) SetVolumeStatus(status *VolumeStatus) {
+	c.nc.Status.Graphd.Volume = status
+}

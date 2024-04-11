@@ -20,6 +20,11 @@ spec:
       requests:
         storage: 5Gi
     storageClassName: local-path
+  logVolumeClaim:
+    resources:
+      requests:
+        storage: 1Gi
+    storageClassName: local-path
   schedulerName: default-scheduler
   imagePullPolicy: Always
   imagePullSecrets:

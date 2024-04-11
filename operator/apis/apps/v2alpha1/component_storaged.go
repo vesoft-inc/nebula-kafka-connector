@@ -289,6 +289,10 @@ func (c *storagedComponent) UpdateComponentStatus(status *ComponentStatus) {
 	c.nc.Status.Storaged.ComponentStatus = *status
 }
 
+func (c *storagedComponent) SetVolumeStatus(status *VolumeStatus) {
+	c.nc.Status.Storaged.Volume = status
+}
+
 func (c *storagedComponent) SetWorkloadStatus(status *WorkloadStatus) {
 	c.nc.Status.Storaged.Workload = status
 }

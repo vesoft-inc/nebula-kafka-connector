@@ -226,6 +226,7 @@ type KObjectAccessor interface {
 	IsReady() bool
 	GetUpdateRevision() string
 	UpdateComponentStatus(status *ComponentStatus)
+	SetVolumeStatus(status *VolumeStatus)
 }
 
 // NebulaComponent is the interface for nebula component

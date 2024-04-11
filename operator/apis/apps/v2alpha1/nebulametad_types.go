@@ -68,6 +68,7 @@ type NebulaMetadStatus struct {
 	ObservedGeneration int64              `json:"observedGeneration,omitempty"`
 	ManagedClusters    int32              `json:"managedClusters,omitempty"`
 	Conditions         []metav1.Condition `json:"conditions,omitempty"`
+	Volume             *VolumeStatus      `json:"volume,omitempty"`
 }
 
 // +genclient

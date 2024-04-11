@@ -46,6 +46,11 @@ spec:
         requests:
           storage: 10Gi
       storageClassName: local-path
+    logVolumeClaim:
+      resources:
+        requests:
+          storage: 1Gi
+      storageClassName: local-path
   enablePVReclaim: true
   schedulerName: default-scheduler
   imagePullPolicy: Always

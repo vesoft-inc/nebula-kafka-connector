@@ -205,5 +205,10 @@ func (c *metadCluster) setVersion(mc meta.Client, nm *v2alpha1.NebulaMetad) erro
 }
 
 func (c *metadCluster) syncMetadPVC(nm *v2alpha1.NebulaMetad) error {
-	return syncPVC(nm.MetadComponent(), c.clientSet.PVC())
+	volumeStatus, err := syncPVC(nm.MetadComponent(), c.clientSet.StorageClass(), c.clientSet.PVC())
+	if err != nil {
+		return nil
+	}
+	nm.MetadComponent().SetVolumeStatus(volumeStatus)
+	return nil
 }

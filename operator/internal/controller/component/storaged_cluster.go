@@ -187,7 +187,12 @@ func (s *storagedCluster) syncStoragedConfigMap(nc *v2alpha1.NebulaCluster) (*co
 }
 
 func (s *storagedCluster) syncStoragedPVC(nc *v2alpha1.NebulaCluster) error {
-	return syncPVC(nc.StoragedComponent(), s.clientSet.PVC())
+	volumeStatus, err := syncPVC(nc.StoragedComponent(), s.clientSet.StorageClass(), s.clientSet.PVC())
+	if err != nil {
+		return err
+	}
+	nc.StoragedComponent().SetVolumeStatus(volumeStatus)
+	return nil
 }
 
 func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string) error {

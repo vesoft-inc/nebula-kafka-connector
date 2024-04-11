@@ -211,7 +211,12 @@ func (g *graphdCluster) syncGraphdConfigMap(nc *v2alpha1.NebulaCluster) (*corev1
 }
 
 func (g *graphdCluster) syncGraphdPVC(nc *v2alpha1.NebulaCluster) error {
-	return syncPVC(nc.GraphdComponent(), g.clientSet.PVC())
+	volumeStatus, err := syncPVC(nc.GraphdComponent(), g.clientSet.StorageClass(), g.clientSet.PVC())
+	if err != nil {
+		return err
+	}
+	nc.GraphdComponent().SetVolumeStatus(volumeStatus)
+	return nil
 }
 
 func (g *graphdCluster) Delete(nc *v2alpha1.NebulaCluster) error {

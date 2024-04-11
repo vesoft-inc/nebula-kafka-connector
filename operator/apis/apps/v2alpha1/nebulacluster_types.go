@@ -150,14 +150,16 @@ type NebulaClusterStatus struct {
 // StoragedStatus describes the status and version of nebula storaged.
 type StoragedStatus struct {
 	ComponentStatus   `json:",inline"`
-	ServicesAdded     bool `json:"servicesAdded,omitempty"`
-	InitPartitionDone bool `json:"initPartitionDone,omitempty"`
+	ServicesAdded     bool          `json:"servicesAdded,omitempty"`
+	InitPartitionDone bool          `json:"initPartitionDone,omitempty"`
+	Volume            *VolumeStatus `json:"volume,omitempty"`
 }
 
 // GraphdStatus describes the status and version of nebula graphd.
 type GraphdStatus struct {
 	ComponentStatus `json:",inline"`
-	ServicesAdded   bool `json:"servicesAdded,omitempty"`
+	ServicesAdded   bool          `json:"servicesAdded,omitempty"`
+	Volume          *VolumeStatus `json:"volume,omitempty"`
 }
 
 // ComponentStatus is the status and version of a nebula component.

@@ -28,6 +28,7 @@ type ClientSet interface {
 	ConfigMap() ConfigMap
 	PV() PersistentVolume
 	PVC() PersistentVolumeClaim
+	StorageClass() StorageClass
 	Pod() Pod
 	Service() Service
 	Workload() Workload
@@ -41,6 +42,7 @@ type clientSet struct {
 	cmClient       ConfigMap
 	pvClient       PersistentVolume
 	pvcClient      PersistentVolumeClaim
+	scClient       StorageClass
 	podClient      Pod
 	svcClient      Service
 	workloadClient Workload
@@ -49,21 +51,22 @@ type clientSet struct {
 }
 
 func NewClientSet(config *rest.Config) (ClientSet, error) {
-	cli, err := client.New(config, client.Options{})
+	c, err := client.New(config, client.Options{})
 	if err != nil {
 		return nil, errors.Errorf("error building runtime client: %v", err)
 	}
 	return &clientSet{
-		nodeClient:     NewNode(cli),
-		secretClient:   NewSecret(cli),
-		cmClient:       NewConfigMap(cli),
-		pvClient:       NewPV(cli),
-		pvcClient:      NewPVC(cli),
-		podClient:      NewPod(cli),
-		svcClient:      NewService(cli),
-		workloadClient: NewWorkload(cli),
-		nebulaClient:   NewNebulaCluster(cli),
-		metadClient:    NewNebulaMetad(cli),
+		nodeClient:     NewNode(c),
+		secretClient:   NewSecret(c),
+		cmClient:       NewConfigMap(c),
+		pvClient:       NewPV(c),
+		pvcClient:      NewPVC(c),
+		scClient:       NewStorageClass(c),
+		podClient:      NewPod(c),
+		svcClient:      NewService(c),
+		workloadClient: NewWorkload(c),
+		nebulaClient:   NewNebulaCluster(c),
+		metadClient:    NewNebulaMetad(c),
 	}, nil
 }
 
@@ -85,6 +88,10 @@ func (c *clientSet) PV() PersistentVolume {
 
 func (c *clientSet) PVC() PersistentVolumeClaim {
 	return c.pvcClient
+}
+
+func (c *clientSet) StorageClass() StorageClass {
+	return c.scClient
 }
 
 func (c *clientSet) Pod() Pod {

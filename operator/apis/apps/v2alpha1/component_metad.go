@@ -330,3 +330,7 @@ func (m *metadComponent) GetUpdateRevision() string {
 func (m *metadComponent) UpdateComponentStatus(status *ComponentStatus) {
 	m.nm.Status.ComponentStatus = *status
 }
+
+func (m *metadComponent) SetVolumeStatus(status *VolumeStatus) {
+	m.nm.Status.Volume = status
+}
