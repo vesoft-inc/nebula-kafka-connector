@@ -3,6 +3,9 @@ kind: NebulaCluster
 metadata:
   name: nebula-sample
 spec:
+  console:
+    image: reg.vesoft-inc.com/vesoft-ng/ngql
+    version: nightly
   replicaFactor: 3
   zones:
   - az1

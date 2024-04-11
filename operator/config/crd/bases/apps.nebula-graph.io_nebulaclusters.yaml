@@ -420,6 +420,17 @@ spec:
                 type: object
               alpineImage:
                 type: string
+              console:
+                properties:
+                  image:
+                    type: string
+                  nodeSelector:
+                    additionalProperties:
+                      type: string
+                    type: object
+                  version:
+                    type: string
+                type: object
               credentialSecret:
                 type: string
               enablePVReclaim:

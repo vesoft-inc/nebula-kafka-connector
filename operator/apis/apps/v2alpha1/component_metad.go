@@ -155,6 +155,10 @@ func (m *metadComponent) GetPodFQDN(ordinal int32) string {
 	return getPodFQDN(m.GetPodName(ordinal), m.GetServiceFQDN(), true)
 }
 
+func (m *metadComponent) GetGrpcPort() int32 {
+	return getPort(m.GenerateContainerPorts(), MetadPortNameGRPC)
+}
+
 func (m *metadComponent) GetPort(portName string) int32 {
 	return getPort(m.GenerateContainerPorts(), portName)
 }
@@ -175,7 +179,7 @@ func (m *metadComponent) GenerateLabels() map[string]string {
 }
 
 func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {
-	thriftPort, err := parseCustomPort(defaultMetadPortGRPC, m.GetConfig()["port"])
+	grpcPort, err := parseCustomPort(defaultMetadPortGRPC, m.GetConfig()["port"])
 	if err != nil {
 		return nil
 	}
@@ -188,7 +192,7 @@ func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {
 	return []corev1.ContainerPort{
 		{
 			Name:          MetadPortNameGRPC,
-			ContainerPort: thriftPort,
+			ContainerPort: grpcPort,
 		},
 		{
 			Name:          MetadPortNameHTTP,

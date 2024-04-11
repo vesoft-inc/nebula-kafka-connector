@@ -27,6 +27,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
@@ -247,7 +248,16 @@ func addGraphdServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldRe
 		host := nc.GraphdComponent().GetPodFQDN(i)
 		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
 		if err := metaClient.AddService(req); err != nil {
-			return fmt.Errorf("add graphd service failed: %v", err)
+			if ne, ok := err.(*nebula.NebulaError); ok {
+				// TODO [NM019]: Service with static port already exists
+				if ne.Code() != "NM019" {
+					klog.Errorf("add graphd service failed: %v", err)
+					return err
+				}
+			} else {
+				klog.Errorf("add graphd service got unkonw error: %v", err)
+				return err
+			}
 		}
 	}
 

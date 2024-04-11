@@ -72,7 +72,24 @@ type NebulaClusterSpec struct {
 	Tolerations []corev1.Toleration `json:"tolerations,omitempty"`
 
 	// +optional
+	Console *ConsoleSpec `json:"console,omitempty"`
+
+	// +optional
 	AlpineImage *string `json:"alpineImage,omitempty"`
+}
+
+type ConsoleSpec struct {
+	// Container image.
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// Version tag for container image.
+	// +optional
+	Version string `json:"version,omitempty"`
+
+	// K8S nodeSelector.
+	// +optional
+	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
 }
 
 type GraphdSpec struct {

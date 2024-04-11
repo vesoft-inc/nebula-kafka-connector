@@ -107,6 +107,10 @@ func (c *graphdComponent) GetPodFQDN(ordinal int32) string {
 	return getPodFQDN(c.GetPodName(ordinal), c.GetServiceFQDN(), true)
 }
 
+func (c *graphdComponent) GetGrpcPort() int32 {
+	return getPort(c.GenerateContainerPorts(), GraphdPortNameGRPC)
+}
+
 func (c *graphdComponent) GetPort(portName string) int32 {
 	return getPort(c.GenerateContainerPorts(), portName)
 }
@@ -135,7 +139,7 @@ func (c *graphdComponent) GenerateLabels() map[string]string {
 }
 
 func (c *graphdComponent) GenerateContainerPorts() []corev1.ContainerPort {
-	thriftPort, err := parseCustomPort(defaultGraphdPortGRPC, c.GetConfig()["port"])
+	grpcPort, err := parseCustomPort(defaultGraphdPortGRPC, c.GetConfig()["port"])
 	if err != nil {
 		return nil
 	}
@@ -148,7 +152,7 @@ func (c *graphdComponent) GenerateContainerPorts() []corev1.ContainerPort {
 	return []corev1.ContainerPort{
 		{
 			Name:          GraphdPortNameGRPC,
-			ContainerPort: thriftPort,
+			ContainerPort: grpcPort,
 		},
 		{
 			Name:          GraphdPortNameHTTP,

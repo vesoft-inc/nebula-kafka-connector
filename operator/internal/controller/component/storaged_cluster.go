@@ -247,7 +247,7 @@ func addStorageServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldR
 					return err
 				}
 			} else {
-				klog.Errorf("add service got unkonw error: %v", err)
+				klog.Errorf("add storaged service got unkonw error: %v", err)
 				return err
 			}
 		}

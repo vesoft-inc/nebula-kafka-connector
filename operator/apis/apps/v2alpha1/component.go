@@ -209,6 +209,7 @@ type KObjectAccessor interface {
 	GetHeadlessServiceName() string
 	GetServiceFQDN() string
 	GetPodFQDN(ordinal int32) string
+	GetGrpcPort() int32
 	GetPort(portName string) int32
 	GetConnAddress(portName string) string
 	GetEndpoints(portName string) []string

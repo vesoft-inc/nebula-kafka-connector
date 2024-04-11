@@ -527,3 +527,54 @@ func isVolumeExpansionSupported(sc *storagev1.StorageClass) bool {
 	}
 	return *sc.AllowVolumeExpansion
 }
+
+func setPodLastAppliedConfigAnnotation(pod *corev1.Pod) error {
+	b, err := json.Marshal(pod.Spec)
+	if err != nil {
+		return err
+	}
+	if pod.Annotations == nil {
+		pod.Annotations = map[string]string{}
+	}
+	pod.Annotations[annotation.AnnLastAppliedConfigKey] = string(b)
+	return nil
+}
+
+func podEqual(newPod, oldPod *corev1.Pod) bool {
+	tmpAnno := map[string]string{}
+	for k, v := range oldPod.Annotations {
+		if k != annotation.AnnLastAppliedConfigKey && k != annotation.AnnLastSyncTimestampKey {
+			tmpAnno[k] = v
+		}
+	}
+
+	if !apiequality.Semantic.DeepEqual(newPod.Annotations, tmpAnno) {
+		return false
+	}
+	oldConfig := corev1.PodSpec{}
+	if lastAppliedConfig, ok := oldPod.Annotations[annotation.AnnLastAppliedConfigKey]; ok {
+		err := json.Unmarshal([]byte(lastAppliedConfig), &oldConfig)
+		if err != nil {
+			return false
+		}
+		return apiequality.Semantic.DeepEqual(oldConfig, newPod.Spec)
+	}
+	return false
+}
+
+func updateSinglePod(clientSet kube.ClientSet, newPod, oldPod *corev1.Pod) error {
+	isOrphan := metav1.GetControllerOf(oldPod) == nil
+	if podEqual(newPod, oldPod) && !isOrphan {
+		return nil
+	}
+
+	if err := setPodLastAppliedConfigAnnotation(newPod); err != nil {
+		return err
+	}
+
+	if err := clientSet.Pod().DeletePod(oldPod.Namespace, oldPod.Name, false); err != nil {
+		return err
+	}
+
+	return clientSet.Pod().CreatePod(newPod)
+}
