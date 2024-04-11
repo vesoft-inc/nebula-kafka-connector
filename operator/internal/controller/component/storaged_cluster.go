@@ -196,8 +196,12 @@ func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string
 		if ne, ok := err.(*nebula.NebulaError); ok {
 			// TODO [NM007]: Part already inited
 			if ne.Code() != "NM007" {
-				return fmt.Errorf("init cluster failed, %v", err)
+				klog.Errorf("init cluster failed: %v", err)
+				return err
 			}
+		} else {
+			klog.Errorf("init cluster got unkonw error: %v", err)
+			return err
 		}
 	}
 	return nil
@@ -234,8 +238,12 @@ func addStorageServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldR
 			if ne, ok := err.(*nebula.NebulaError); ok {
 				// TODO [NM019]: Service with static port already exists
 				if ne.Code() != "NM019" {
-					return fmt.Errorf("add storaged service failed: %v", err)
+					klog.Errorf("add storaged service failed: %v", err)
+					return err
 				}
+			} else {
+				klog.Errorf("add service got unkonw error: %v", err)
+				return err
 			}
 		}
 	}

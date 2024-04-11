@@ -153,7 +153,7 @@ func (c *storagedComponent) GenerateContainerPorts() []corev1.ContainerPort {
 		return nil
 	}
 
-	httpPort, err := parseCustomPort(defaultStoragedPortHTTP, c.GetConfig()["ws_http_port"])
+	httpPort, err := parseCustomPort(defaultStoragedPortHTTP, c.GetConfig()["http_port"])
 	if err != nil {
 		return nil
 	}

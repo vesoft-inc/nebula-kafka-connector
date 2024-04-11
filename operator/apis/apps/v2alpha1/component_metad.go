@@ -180,7 +180,7 @@ func (m *metadComponent) GenerateContainerPorts() []corev1.ContainerPort {
 		return nil
 	}
 
-	httpPort, err := parseCustomPort(defaultMetadPortHTTP, m.GetConfig()["ws_http_port"])
+	httpPort, err := parseCustomPort(defaultMetadPortHTTP, m.GetConfig()["http_port"])
 	if err != nil {
 		return nil
 	}

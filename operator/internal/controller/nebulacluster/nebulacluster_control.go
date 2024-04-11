@@ -164,6 +164,9 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 					klog.Errorf("create cluster failed: %v", err)
 					return err
 				}
+			} else {
+				klog.Errorf("create cluster got unkonw error: %v", err)
+				return err
 			}
 		}
 		nc.Status.CreatedDone = true

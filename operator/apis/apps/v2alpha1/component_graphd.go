@@ -140,7 +140,7 @@ func (c *graphdComponent) GenerateContainerPorts() []corev1.ContainerPort {
 		return nil
 	}
 
-	httpPort, err := parseCustomPort(defaultGraphdPortHTTP, c.GetConfig()["ws_http_port"])
+	httpPort, err := parseCustomPort(defaultGraphdPortHTTP, c.GetConfig()["http_port"])
 	if err != nil {
 		return nil
 	}
