@@ -12,12 +12,11 @@ type (
 	Result interface {
 		HasNext() bool
 		Next() (Row, error)
-		Latency() int64 // in us
 		Columns() []string
 		ColumnTypes() []ColumnType //not support yet
 		RowSize() int
 		Summary() Summary
-		ExtraInfo() ExtraInfo
+		Cursor() []byte
 	}
 
 	Row interface {
@@ -26,23 +25,18 @@ type (
 		GetValueByIndex(index int) (Value, error)
 	}
 
-	ExtraInfo interface {
-		Cursor() (string, error)
-		AffectedNodes() (int, error)
-		AffectedForwardEdges() (int, error)
-		AffectedReverseEdges() (int, error)
-	}
 	Summary interface {
 		BuildTimeUs() int64
 		OptimizeTimeUs() int64
-		LatencyUs() int64
-		Preamble() []byte
+		TotalServerTimeUs() int64
+		ExplainType() string
 		PlanInfo() PlanInfo
+		QueryStats() QueryStats
 	}
 	PlanInfo interface {
-		Id() []byte
-		Name() []byte
-		Details() []byte
+		Id() string
+		Name() string
+		Details() string
 		Columns() []string
 		TimeMs() float64
 		Rows() int64
@@ -56,6 +50,10 @@ type (
 		Concurrency() int64
 		OtherStatsJson() []byte
 		Children() []PlanInfo
+	}
+	QueryStats interface {
+		NumAffectedNodes() int64
+		NumAffectedEdges() int64
 	}
 
 	// an internel interface to get the connection

@@ -257,7 +257,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		*gc = *newClient
 	} else {
 		rows = int32(resp.RowSize())
-		latency = resp.Latency()
+		latency = resp.Summary().TotalServerTimeUs()
 	}
 
 	responseTime := int32(time.Since(start) / 1000)
@@ -313,7 +313,7 @@ func (r *Response) IsSucceed() bool {
 
 func (r *Response) GetLatency() int64 {
 	if r.ResultSet != nil {
-		return r.ResultSet.Latency()
+		return r.ResultSet.Summary().TotalServerTimeUs()
 	}
 	return 0
 }

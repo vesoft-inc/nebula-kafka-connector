@@ -25,7 +25,7 @@ type Printer interface {
 	// export the result to csv format
 	ExportResultCsv(io.Writer, nebula.Result)
 	PrintResultVertical(io.Writer, nebula.Result)
-	PrintPlanDesc(w io.Writer, summary nebula.Summary)
+	PrintPlanInfo(w io.Writer, summary nebula.Summary)
 }
 
 type defaultPrinter struct {
@@ -60,9 +60,9 @@ func (p *defaultPrinter) SetFormat(format string) {
 func (p *defaultPrinter) PrintResult(w io.Writer, res nebula.Result) {
 	var s string
 	s += p.getResultString(res)
-	if p.getExtraString(res) != "" {
+	if p.getQueryStatsString(res) != "" {
 		s += "\n"
-		s += p.getExtraString(res)
+		s += p.getQueryStatsString(res)
 	}
 	fmt.Fprintln(w, s)
 }
@@ -74,14 +74,14 @@ func (p *defaultPrinter) ExportResultCsv(w io.Writer, res nebula.Result) {
 func (p *defaultPrinter) PrintResultVertical(w io.Writer, res nebula.Result) {
 	var s string
 	s += p.getResultVerticalString(res)
-	if p.getExtraString(res) != "" {
-		s += p.getExtraString(res)
+	if p.getQueryStatsString(res) != "" {
+		s += p.getQueryStatsString(res)
 	}
 	fmt.Fprintln(w, s)
 }
 
-func (p *defaultPrinter) PrintPlanDesc(w io.Writer, summary nebula.Summary) {
-	s := p.renderPlanInfo(summary.PlanInfo(), string(summary.Preamble()))
+func (p *defaultPrinter) PrintPlanInfo(w io.Writer, summary nebula.Summary) {
+	s := p.renderPlanInfo(summary.PlanInfo(), string(summary.ExplainType()))
 	fmt.Fprintln(w, s)
 	fmt.Fprintf(w, "Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side.\n\n",
 		summary.BuildTimeUs(),
@@ -91,7 +91,6 @@ func (p *defaultPrinter) PrintPlanDesc(w io.Writer, summary nebula.Summary) {
 // use the console string() format
 func (p *defaultPrinter) getResultString(res nebula.Result) string {
 	var s string
-
 	if len(res.Columns()) != 0 {
 		p.tableWrite.ResetHeaders()
 		p.tableWrite.ResetRows()
@@ -144,36 +143,16 @@ func (p *defaultPrinter) getResultCsvString(res nebula.Result) string {
 	return s
 }
 
-func (p *defaultPrinter) getExtraString(res nebula.Result) string {
+func (p *defaultPrinter) getQueryStatsString(res nebula.Result) string {
 	var s string
-	if res.ExtraInfo() != nil {
-		extraInfo := res.ExtraInfo()
-		cusor, err := extraInfo.Cursor()
-		// do not print if cursor is not empty
-		if err == nil && cusor != "" {
-			return ""
-		}
-		affectedNodes, okNode := extraInfo.AffectedNodes()
-		affectedEdges, okFor := extraInfo.AffectedForwardEdges()
-
-		// if there's no affected_nodes or affected_edges, return directly.
-		// e.g. call cursor_node_scan() return cursor only.
-		if okNode != nil || okFor != nil {
-			return ""
-		}
-		extra := fmt.Sprintf("Affected: ")
-		if affectedNodes <= 1 {
-			extra += fmt.Sprintf("%d node, ", affectedNodes)
-		} else {
-			extra += fmt.Sprintf("%d nodes, ", affectedNodes)
-		}
-		if affectedEdges <= 1 {
-			extra += fmt.Sprintf("%d edge.\n", affectedEdges)
-		} else {
-			extra += fmt.Sprintf("%d edges.\n", affectedEdges)
-		}
-
-		s = extra
+	stats := res.Summary().QueryStats()
+	// TODO(jie): Add a QueryType field to Summary to specify if the query is a DML.
+	// Only print the mentioned stats for DML queries.
+	if stats.NumAffectedNodes() > 0 {
+		s += fmt.Sprintf("Affected nodes: %d\n", stats.NumAffectedNodes())
+	}
+	if stats.NumAffectedEdges() > 0 {
+		s += fmt.Sprintf("Affected edges: %d\n", stats.NumAffectedEdges())
 	}
 	return s
 }
@@ -212,7 +191,7 @@ func (p *defaultPrinter) getResultVerticalString(res nebula.Result) string {
 
 }
 
-func (p *defaultPrinter) renderPlanInfo(plan nebula.PlanInfo, preamble string) string {
+func (p *defaultPrinter) renderPlanInfo(plan nebula.PlanInfo, explainType string) string {
 	p.tableWrite.ResetHeaders()
 	p.tableWrite.ResetRows()
 	columnToFieldMap := map[string]string{
@@ -232,19 +211,30 @@ func (p *defaultPrinter) renderPlanInfo(plan nebula.PlanInfo, preamble string) s
 		"concurrency": "Concurrency",
 		"others":      "OtherStatsJson",
 	}
+	isVerbose := false
 	columns := []string{}
-	switch preamble {
+	switch explainType {
 	case "explain":
 		columns = append(columns, "details")
 	case "explain_verbose":
+		isVerbose = true
 		columns = append(columns, "details", "columns")
 	case "profile":
 		columns = append(columns, "details", "time(ms)", "rows", "memory(KiB)", "blocked(ms)")
 	case "profile_verbose":
+		isVerbose = true
 		columns = append(columns, "details", "time(ms)", "rows", "memory(KiB)", "blocked(ms)",
 			"queued(ms)", "consume(ms)", "produce(ms)", "finish(ms)", "batches", "concurrency", "others")
 	default:
-		panic(fmt.Sprintf("unknown preamble %s", preamble))
+		if explainType != "" {
+			panic(fmt.Sprintf("unknown explainType: %s", explainType))
+		}
+	}
+
+	widthMax := p.widthMax
+	if isVerbose {
+		// If the verbose mode is enabled, we will not truncate the columns when printing the plan info.
+		widthMax = 0
 	}
 
 	fields := []string{}
@@ -275,11 +265,11 @@ func (p *defaultPrinter) renderPlanInfo(plan nebula.PlanInfo, preamble string) s
 		columnConfigs = append(columnConfigs, table.ColumnConfig{
 			Name:     column,
 			Align:    align,
-			WidthMax: p.widthMax,
+			WidthMax: widthMax,
 			Transformer: func(val interface{}) string {
 				if v, ok := val.(string); ok {
-					if p.widthMax != 0 && len(v) > p.widthMax {
-						return v[:p.widthMax-3] + "..."
+					if widthMax != 0 && len(v) > p.widthMax {
+						return v[:widthMax-3] + "..."
 					}
 				}
 				return fmt.Sprint(val)

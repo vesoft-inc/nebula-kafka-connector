@@ -225,24 +225,25 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 		r.printer.PrintResult(r.combinOutput, resp)
 	}
 	duration := time.Since(start)
+	lantencyInMs := resp.Summary().TotalServerTimeUs() * 1000
 	if err != nil {
 		r.printBoth(fmt.Sprintf("Execution failed (time spent %v/%v)\n\n",
-			time.Duration(resp.Latency()*1000), duration),
+			time.Duration(lantencyInMs), duration),
 		)
 	} else {
 		if resp.RowSize() > 0 {
 			numRows := resp.RowSize()
 			r.printBoth(fmt.Sprintf("Got %d rows (time spent %v/%v)\n\n",
-				numRows, time.Duration(resp.Latency()*1000), duration),
+				numRows, time.Duration(lantencyInMs), duration),
 			)
 		} else {
 			r.printBoth(fmt.Sprintf("Execution succeeded (time spent %v/%v)\n\n",
-				time.Duration(resp.Latency()*1000), duration),
+				time.Duration(lantencyInMs), duration),
 			)
 		}
-	}
-	if resp.Summary() != nil {
-		r.printer.PrintPlanDesc(r.combinOutput, resp.Summary())
+		if resp.Summary().ExplainType() != "" {
+			r.printer.PrintPlanInfo(r.combinOutput, resp.Summary())
+		}
 	}
 	r.printBoth(fmt.Sprintf("%s\n\n", time.Now().In(time.Local).Format(time.RFC1123)))
 

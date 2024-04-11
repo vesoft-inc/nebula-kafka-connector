@@ -95,8 +95,9 @@ func (cn *connection) authenticate(username, password string) error {
 		_ = cn.Close()
 		return err
 	}
-	if string(resp.GetGqlStatus().GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
-		return errServerResponse(string(resp.GetGqlStatus().GetCode()), string(resp.GetGqlStatus().GetMessage()))
+	respErr := resp.GetError()
+	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
+		return errServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
 	cn.sessionId = resp.GetSessionId()
 	return nil
@@ -134,22 +135,19 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		}
 		return nil, err
 	}
-	if resp.ExecutionOutcome == nil {
-		return nil, errInternel("execute failed, response is nil")
-	}
 
 	resultResp := resultSet{
 		index:     0,
-		latency:   (resp.LatencyInUs),
-		result:    resp.ExecutionOutcome.Result,
-		summary:   resp.ExecutionOutcome.Summary,
-		extraInfo: resp.ExecutionOutcome.ExtraInfo,
+		result:    resp.Result,
+		summary:   resp.Summary,
+		cursor:    resp.Cursor,
 	}
 
-	if string(resp.ExecutionOutcome.GetGqlStatus().GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
+	respErr := resp.GetError()
+	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
 		return &resultResp, errServerResponse(
-			string(resp.ExecutionOutcome.GetGqlStatus().GetCode()),
-			(string(resp.GetExecutionOutcome().GetGqlStatus().GetMessage())))
+			string(respErr.GetCode()),
+			(string(respErr.GetMessage())))
 	}
 
 	return &resultResp, nil

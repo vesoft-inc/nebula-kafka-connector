@@ -9,6 +9,9 @@ type (
 	planInfo struct {
 		planInfo *graph.PlanInfo
 	}
+	queryStats struct {
+		queryStats *graph.QueryStats
+	}
 )
 
 func (s *summary) BuildTimeUs() int64 {
@@ -19,28 +22,32 @@ func (s *summary) OptimizeTimeUs() int64 {
 	return s.summary.OptimizeTimeUs
 }
 
-func (s *summary) LatencyUs() int64 {
-	return s.summary.LatencyUs
+func (s *summary) TotalServerTimeUs() int64 {
+	return s.summary.TotalServerTimeUs
 }
 
-func (s *summary) Preamble() []byte {
-	return s.summary.Preamble
+func (s *summary) ExplainType() string {
+	return string(s.summary.ExplainType)
 }
 
 func (s *summary) PlanInfo() PlanInfo {
 	return &planInfo{s.summary.GetPlanInfo()}
 }
 
-func (p *planInfo) Id() []byte {
-	return p.planInfo.Id
+func (s * summary) QueryStats() QueryStats {
+	return &queryStats{s.summary.GetQueryStats()}
 }
 
-func (p *planInfo) Name() []byte {
-	return p.planInfo.Name
+func (p *planInfo) Id() string {
+	return string(p.planInfo.Id)
 }
 
-func (p *planInfo) Details() []byte {
-	return p.planInfo.Details
+func (p *planInfo) Name() string {
+	return string(p.planInfo.Name)
+}
+
+func (p *planInfo) Details() string {
+	return string(p.planInfo.Details)
 }
 
 func (p *planInfo) Columns() []string {
@@ -101,4 +108,12 @@ func (p *planInfo) Children() []PlanInfo {
 		children = append(children, &planInfo{planInfo: child})
 	}
 	return children
+}
+
+func (q *queryStats) NumAffectedNodes() int64 {
+	return q.queryStats.NumAffectedNodes
+}
+
+func (q *queryStats) NumAffectedEdges() int64 {
+	return q.queryStats.NumAffectedEdges
 }
