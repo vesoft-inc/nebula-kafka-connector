@@ -21,7 +21,6 @@ var (
 	port                  int
 	username              string
 	password              string
-	promptPassword        bool
 	timeout               int
 	script                string
 	file                  string
@@ -45,9 +44,6 @@ func validateFlags() {
 	}
 	if len(username) == 0 {
 		log.Panicf("Error: argument username is empty!")
-	}
-	if len(password) == 0 {
-		log.Panicf("Error: argument password is empty!")
 	}
 
 	if widthMax < 0 || (widthMax > 0 && widthMax <= 3) {
@@ -130,12 +126,12 @@ var rootCmd = &cobra.Command{
 	Short: "Run ngql to connect to nebula-graphd by default.",
 	Long:  `Use ngql --host [host] --port [port] -u [user] -p [password] to connect to nebula-graphd.`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if promptPassword {
+		if password == "" {
 			var err error
 			pw := promptui.Prompt{
 				Label:       "Password",
 				AllowEdit:   true,
-				Mask:        rune('*'),
+				Mask:        rune(' '),
 				HideEntered: true,
 			}
 			password, err = pw.Run()
@@ -158,12 +154,11 @@ func init() {
 	rootCmd.Flags().StringVarP(&host, "host", "H", "127.0.0.1", "Nebula Graph host")
 	rootCmd.Flags().IntVarP(&port, "port", "P", 9669, "The Nebula Graph port")
 	rootCmd.Flags().StringVarP(&username, "user", "u", "root", "The Nebula Graph login user name")
-	rootCmd.Flags().StringVarP(&password, "password", "p", "nebula", "The Nebula Graph login password")
+	rootCmd.Flags().StringVarP(&password, "password", "p", "", "The Nebula Graph login password")
 	rootCmd.Flags().IntVarP(&timeout, "timeout", "t", 0, "The Nebula Graph client connection timeout in seconds, 0 means never timeout")
 	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The GQL directly")
 	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The GQL script file name")
 	rootCmd.Flags().IntVarP(&widthMax, "width-max", "", 100, "The max width of the column of the execution plan")
-	rootCmd.Flags().BoolVarP(&promptPassword, "prompt-password", "i", false, "prompt password")
 }
 
 func main() {

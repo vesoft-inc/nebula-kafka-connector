@@ -33,7 +33,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           platforms: linux/amd64,linux/arm64
-          tags: reg.vesoft-inc.com/vesoft-ng/ngctl:ngihtly
+          tags: reg.vesoft-inc.com/vesoft-ng/ngctl:nightly
           push: true
           context: .
           file: ./ngctl/Dockerfile

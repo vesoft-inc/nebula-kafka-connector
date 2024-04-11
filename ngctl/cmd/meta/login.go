@@ -11,11 +11,10 @@ import (
 )
 
 type loginFlagsType struct {
-	host           string
-	port           uint32
-	user           string
-	password       string
-	promptPassword bool
+	host     string
+	port     uint32
+	user     string
+	password string
 }
 
 var loginFlags loginFlagsType
@@ -25,12 +24,12 @@ var loginCmd = &cobra.Command{
 	Short: "Login meta server.",
 	Long:  `login meta server --host [host] --port [port] --user [user] --password [password]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if loginFlags.promptPassword {
+		if loginFlags.password == "" {
 			var err error
 			pw := promptui.Prompt{
 				Label:       "Password",
 				AllowEdit:   true,
-				Mask:        rune('*'),
+				Mask:        rune(' '),
 				HideEntered: true,
 			}
 			loginFlags.password, err = pw.Run()
@@ -76,7 +75,7 @@ func resetPassword(c meta.Client) error {
 	currentPassword := promptui.Prompt{
 		Label:     "Current password:",
 		AllowEdit: true,
-		Mask:      rune('*'),
+		Mask:      rune(' '),
 	}
 	currentPasswordStr, err := currentPassword.Run()
 	if err != nil {
@@ -85,7 +84,7 @@ func resetPassword(c meta.Client) error {
 	newPassword := promptui.Prompt{
 		Label:     "New password:",
 		AllowEdit: true,
-		Mask:      rune('*'),
+		Mask:      rune(' '),
 	}
 	newPasswordStr, err := newPassword.Run()
 	if err != nil {
@@ -94,7 +93,7 @@ func resetPassword(c meta.Client) error {
 	confirmPassword := promptui.Prompt{
 		Label:     "Retype new password:",
 		AllowEdit: true,
-		Mask:      rune('*'),
+		Mask:      rune(' '),
 	}
 	confirmPasswordStr, err := confirmPassword.Run()
 	if err != nil {
@@ -119,6 +118,5 @@ func init() {
 	loginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "127.0.0.1", "meta server host")
 	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
 	loginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "root", "user name")
-	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "nebula", "password")
-	loginCmd.Flags().BoolVarP(&loginFlags.promptPassword, "prompt-password", "i", false, "prompt password")
+	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "", "password")
 }
