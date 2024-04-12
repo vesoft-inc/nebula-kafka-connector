@@ -25,6 +25,11 @@ const (
 	_ = protoimpl.EnforceVersion(protoimpl.MaxVersion - 20)
 )
 
+// reference: https://github.com/protocolbuffers/protobuf/issues/3520
+// Each client should use the following version to communicate with the
+// server:
+//
+//	nebula.proto.version.DESCRIPTOR.GetOptions().Extensions[nebula.proto.version.protocol_version]
 type AdminRequestHeader struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -32,11 +37,7 @@ type AdminRequestHeader struct {
 
 	ClusterId int64  `protobuf:"varint,1,opt,name=cluster_id,json=clusterId,proto3" json:"cluster_id,omitempty"`
 	Token     []byte `protobuf:"bytes,2,opt,name=token,proto3" json:"token,omitempty"`
-	// reference: https://github.com/protocolbuffers/protobuf/issues/3520
-	// Each client should use the following version to communicate with the server:
-	//
-	//	nebula.proto.version.DESCRIPTOR.GetOptions().Extensions[nebula.proto.version.protocol_version]
-	Version []byte `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
+	Version   []byte `protobuf:"bytes,3,opt,name=version,proto3" json:"version,omitempty"`
 }
 
 func (x *AdminRequestHeader) Reset() {

@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
@@ -19,9 +20,11 @@ type (
 		stdout       io.Writer
 		file         io.WriteCloser
 		client       nebula.Client
+		sessionId    int64
 		cli          cli.Cli
 		printer      printer.Printer
 		combinOutput io.Writer
+		running      bool
 	}
 
 	combinOutput struct {
@@ -40,6 +43,7 @@ type (
 		timeoutSec     int
 		failFast       bool //if true, stop loop for error
 		widthMax       int
+		signalChan     <-chan os.Signal
 	}
 
 	runnerOptionsFn func(*runnerOption)
@@ -66,6 +70,10 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	if err != nil {
 		return nil, err
 	}
+	if r.client.GetSessionId() == 0 {
+		return nil, fmt.Errorf("get session id failed")
+	}
+	r.sessionId = r.client.GetSessionId()
 	r.client.SetRequestTimeout(time.Duration(r.option.timeoutSec) * time.Second)
 	if err := r.client.Ping(); err != nil {
 		return nil, err
@@ -137,6 +145,11 @@ func WithFailFast(failFast bool) runnerOptionsFn {
 		o.failFast = failFast
 	}
 }
+func WithSignalChan(signalChan <-chan os.Signal) runnerOptionsFn {
+	return func(o *runnerOption) {
+		o.signalChan = signalChan
+	}
+}
 
 func (r *Runner) welcome() {
 	if !r.option.interactive {
@@ -171,7 +184,9 @@ func (r *Runner) loop() error {
 		line = strings.TrimSpace(line)
 		// record in file
 		r.printFile(fmt.Sprintf("%s%s\n", r.cli.GetPrompt(), line))
+		r.running = true
 		exit, err = r.execute(line)
+		r.running = false
 		if err != nil {
 			r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
 			if r.option.failFast {
@@ -255,11 +270,45 @@ func (r *Runner) Run() error {
 		r.welcome()
 		defer r.bye()
 	}
-	if err := r.loop(); err != nil {
-		r.printBoth(fmt.Sprintf("Error: %s\n", err))
+	loopErr := make(chan error)
+	killed := make(chan struct{})
+	// when receive ctrl+C, if the runner is executing, would kill query
+	go func() {
+		for {
+			select {
+			case signal := <-r.option.signalChan:
+				switch signal {
+				case os.Interrupt:
+					if r.running {
+						if err := r.killQuery(); err != nil {
+							r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
+						}
+					}
+				case syscall.SIGTERM:
+					if r.running {
+						if err := r.killQuery(); err != nil {
+							r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
+						}
+					}
+					killed <- struct{}{}
+				}
+			}
+		}
+	}()
+	go func() {
+		if err := r.loop(); err != nil {
+			r.printBoth(fmt.Sprintf("Error: %s\n", err))
+			loopErr <- err
+		} else {
+			loopErr <- nil
+		}
+	}()
+	select {
+	case <-killed:
+		return nil
+	case err := <-loopErr:
 		return err
 	}
-	return nil
 }
 
 func (r *Runner) Close() {
@@ -287,6 +336,39 @@ func (r *Runner) printFile(s string) {
 func (r *Runner) printBoth(s string) {
 	r.printFile(s)
 	r.printStdout(s)
+}
+
+func (r *Runner) killQuery() error {
+	killSession, err := nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password)
+	if err != nil {
+		return err
+	}
+	defer killSession.Close()
+	killSession.SetRequestTimeout(time.Duration(r.option.timeoutSec) * time.Second)
+	showQueryStmt := fmt.Sprintf("call show_queries() filter where session_id = %d return query_id", r.sessionId)
+	resp, err := killSession.Execute(showQueryStmt)
+	if err != nil {
+		return err
+	}
+	// sometimes the query is not in query list, should wait for a while
+	if resp.RowSize() == 0 {
+		return fmt.Errorf("no query to kill")
+	}
+	row, err := resp.Next()
+	if err != nil {
+		return err
+	}
+	query_id, err := row.GetValueByIndex(0)
+	if err != nil {
+		return err
+	}
+	killQueryStmt := fmt.Sprintf("call kill_query(\"%s\") return 1", query_id.String())
+	resp, err = killSession.Execute(killQueryStmt)
+	if err != nil {
+		return err
+	}
+	return nil
+
 }
 
 func (o *combinOutput) Write(p []byte) (n int, err error) {

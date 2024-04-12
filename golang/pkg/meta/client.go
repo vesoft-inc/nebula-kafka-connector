@@ -181,9 +181,9 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 		return nil, err
 	}
 	clientInfo := &common.ClientInfo{
-		ClientLang:      common.ClientInfo_GO,
+		Lang:            common.ClientInfo_GO,
 		ProtocolVersion: proto.PROTOCOL_VERSION,
-		ClientVersion:   []byte(version.ClientVersion),
+		Version:         []byte(version.ClientVersion),
 	}
 	in := &admin.LoginRequest{
 		Username:   []byte(user),

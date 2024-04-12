@@ -12,7 +12,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
-	 "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
 	grpcstatus "google.golang.org/grpc/status"
@@ -81,9 +81,9 @@ func (cn *connection) authenticate(username, password string) error {
 		return err
 	}
 	clientInfo := &common.ClientInfo{
-		ClientLang:      common.ClientInfo_GO,
+		Lang:            common.ClientInfo_GO,
 		ProtocolVersion: proto.PROTOCOL_VERSION,
-		ClientVersion:   []byte(version.ClientVersion),
+		Version:         []byte(version.ClientVersion),
 	}
 	in := graph.AuthRequest{
 		Username:   []byte(username),
@@ -137,10 +137,10 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 	}
 
 	resultResp := resultSet{
-		index:     0,
-		result:    resp.Result,
-		summary:   resp.Summary,
-		cursor:    resp.Cursor,
+		index:   0,
+		result:  resp.Result,
+		summary: resp.Summary,
+		cursor:  resp.Cursor,
 	}
 
 	respErr := resp.GetError()
@@ -180,4 +180,8 @@ func (cn *connection) Close() error {
 	_, _ = cn.graphClient.Execute(ctx, in)
 	_ = cn.clientConn.Close()
 	return nil
+}
+
+func (cn *connection) GetSessionId() int64 {
+	return cn.sessionId
 }

@@ -3,7 +3,7 @@ package nebula_ng
 import (
 	"testing"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	graph "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 )
 
 func TestGRPCString(t *testing.T) {
@@ -110,7 +110,7 @@ func TestGRPCString(t *testing.T) {
 					Type:      "edge",
 					Labels:    []string{"label3", "label4"},
 					Rank:      123456,
-					Direction: graph.Direction_UNDIRECTED,
+					Direction: graph.Edge_UNDIRECTED,
 				},
 			}},
 			expect: `(1)~[123456@edge:label3&label4{int:8,str:dec}]~(2)`,
@@ -183,7 +183,7 @@ func TestGRPCString(t *testing.T) {
 								Rank:      123456,
 								Type:      "edge",
 								Labels:    []string{"label3", "label4"},
-								Direction: graph.Direction_DIRECTED,
+								Direction: graph.Edge_DIRECTED,
 							},
 						}},
 						{Data: &graph.Value_NodeValue{

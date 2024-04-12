@@ -10,7 +10,8 @@
 //     - `required' is removed from proto3 while `optional' kept.
 //     - Without `optional', the user cannot distinguish the situation.
 //       that a field was not set from being set to its default value.
-//     - With `optional' specified the field will have the NULL semantic(via `has_xxx')
+//     - With `optional' specified the field will have the NULL semantic(via
+// `has_xxx')
 // 2. Compatibility
 //     - Never change a field number.
 //     - Reserve the field number of deleted fields with `reserved'.
@@ -31,7 +32,8 @@
 // which is more performant and memory efficient.
 // On the client side, for the sake of ease, we will provide wrappers over the
 // data structures anyway.
-// So we put the generated code into the a separate namespace or package, i.e. `proto'
+// So we put the generated code into the a separate namespace or package, i.e.
+// `proto'
 
 package graph
 

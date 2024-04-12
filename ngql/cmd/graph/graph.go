@@ -7,8 +7,10 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
@@ -99,6 +101,8 @@ func handleGraphCmd() error {
 		}
 		historyHome = filepath.Dir(ex) // Set to executable folder
 	}
+	c := make(chan os.Signal)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 	runner, err := runner.NewRunner(
 		runner.WithInteractive(interactive),
 		runner.WithNebula(address, username, password),
@@ -108,6 +112,7 @@ func handleGraphCmd() error {
 		runner.WithGoPrompt(goPrompt),
 		runner.WithOutput(output),
 		runner.WithWidthMax(widthMax),
+		runner.WithSignalChan(c),
 	)
 	if err != nil {
 		return err

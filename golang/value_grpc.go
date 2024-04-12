@@ -7,45 +7,45 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 )
 
 type (
 	grpcValue struct {
-		data *graph.Value
+		data *common.Value
 	}
 	grpcLocalTime struct {
-		data *graph.LocalTime
+		data *common.LocalTime
 	}
 	grpcLocalDatetime struct {
-		data *graph.LocalDatetime
+		data *common.LocalDatetime
 	}
 	grpcZonedTime struct {
-		data *graph.ZonedTime
+		data *common.ZonedTime
 	}
 	grpcZonedDatetime struct {
-		data *graph.ZonedDatetime
+		data *common.ZonedDatetime
 	}
 	grpcDuration struct {
-		data *graph.Duration
+		data *common.Duration
 	}
 	grpcDate struct {
-		data *graph.Date
+		data *common.Date
 	}
 	grpcList struct {
-		data *graph.List
+		data *common.List
 	}
 	grpcRecord struct {
-		data *graph.Record
+		data *common.Record
 	}
 	grpcNode struct {
-		data *graph.Node
+		data *common.Node
 	}
 	grpcEdge struct {
-		data *graph.Edge
+		data *common.Edge
 	}
 	grpcPath struct {
-		data *graph.Path
+		data *common.Path
 	}
 )
 
@@ -130,51 +130,51 @@ func (v *grpcValue) GetType() ValueType {
 		return ValueTypeNull
 	}
 	switch v.data.Data.(type) {
-	case *graph.Value_BoolValue:
+	case *common.Value_BoolValue:
 		return ValueTypeBool
-	case *graph.Value_Int8Value:
+	case *common.Value_Int8Value:
 		return ValueTypeInt8
-	case *graph.Value_Int16Value:
+	case *common.Value_Int16Value:
 		return ValueTypeInt16
-	case *graph.Value_Int32Value:
+	case *common.Value_Int32Value:
 		return ValueTypeInt32
-	case *graph.Value_Int64Value:
+	case *common.Value_Int64Value:
 		return ValueTypeInt64
-	case *graph.Value_Uint8Value:
+	case *common.Value_Uint8Value:
 		return ValueTypeUInt8
-	case *graph.Value_Uint16Value:
+	case *common.Value_Uint16Value:
 		return ValueTypeUInt16
-	case *graph.Value_Uint32Value:
+	case *common.Value_Uint32Value:
 		return ValueTypeUInt32
-	case *graph.Value_Uint64Value:
+	case *common.Value_Uint64Value:
 		return ValueTypeUInt64
-	case *graph.Value_FloatValue:
+	case *common.Value_FloatValue:
 		return ValueTypeFloat
-	case *graph.Value_DoubleValue:
+	case *common.Value_DoubleValue:
 		return ValueTypeDouble
-	case *graph.Value_StringValue:
+	case *common.Value_StringValue:
 		return ValueTypeString
-	case *graph.Value_DurationValue:
+	case *common.Value_DurationValue:
 		return ValueTypeDuration
-	case *graph.Value_LocalTimeValue:
+	case *common.Value_LocalTimeValue:
 		return ValueTypeLocalTime
-	case *graph.Value_LocalDatetimeValue:
+	case *common.Value_LocalDatetimeValue:
 		return ValueTypeLocalDateTime
-	case *graph.Value_ZonedTimeValue:
+	case *common.Value_ZonedTimeValue:
 		return ValueTypeZonedTime
-	case *graph.Value_ZonedDatetimeValue:
+	case *common.Value_ZonedDatetimeValue:
 		return ValueTypeZonedDateTime
-	case *graph.Value_DateValue:
+	case *common.Value_DateValue:
 		return ValueTypeDate
-	case *graph.Value_ListValue:
+	case *common.Value_ListValue:
 		return ValueTypeList
-	case *graph.Value_RecordValue:
+	case *common.Value_RecordValue:
 		return ValueTypeRecord
-	case *graph.Value_NodeValue:
+	case *common.Value_NodeValue:
 		return ValueTypeNode
-	case *graph.Value_EdgeValue:
+	case *common.Value_EdgeValue:
 		return ValueTypeEdge
-	case *graph.Value_PathValue:
+	case *common.Value_PathValue:
 		return ValueTypePath
 	default:
 		return ValueTypeNull
@@ -475,7 +475,7 @@ func (e *grpcEdge) GetRank() int64 {
 }
 
 func (e *grpcEdge) IsDirected() bool {
-	return e.data.Direction == graph.Direction_DIRECTED
+	return e.data.Direction == common.Edge_DIRECTED
 }
 
 // (288314845273522179@City:City&Place{id:3,kind:3,name:org3,url:https://org3.com})-[288314845273522179@connected_Sub_Load:connected_Sub_Load{}]-(288315214640709633@City:City&Place{id:3,kind:city,name:Hangzhou,url:https://hangzhou.com})

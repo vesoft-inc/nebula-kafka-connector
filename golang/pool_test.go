@@ -30,6 +30,10 @@ func (d *dummyConn) ExecuteContext(ctx context.Context, stmt string) (Result, er
 func (d *dummyConn) Ping() error {
 	return nil
 }
+
+func (d *dummyConn) GetSessionId() int64 {
+	return 0
+}
 func (d *dummyConn) Close() error {
 	return nil
 }
