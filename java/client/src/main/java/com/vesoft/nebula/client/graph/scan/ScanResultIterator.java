@@ -7,10 +7,7 @@ package com.vesoft.nebula.client.graph.scan;
 
 import com.vesoft.nebula.client.graph.data.ExtraInfo;
 import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.data.ValueWrapper;
 import com.vesoft.nebula.client.graph.net.Session;
-import com.vesoft.nebula.proto.graph.ExtraInfoElement;
-import com.vesoft.nebula.proto.graph.ExtraInfoKind;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;

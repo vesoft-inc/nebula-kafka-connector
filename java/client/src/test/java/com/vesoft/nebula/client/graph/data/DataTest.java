@@ -17,11 +17,11 @@ import com.vesoft.nebula.proto.common.Node;
 import com.vesoft.nebula.proto.common.Path;
 import com.vesoft.nebula.proto.common.Record;
 import com.vesoft.nebula.proto.common.Value;
+import com.vesoft.nebula.proto.graph.Error;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
-import com.vesoft.nebula.proto.graph.ExecutionOutcome;
-import com.vesoft.nebula.proto.graph.GQLStatus;
 import com.vesoft.nebula.proto.graph.ResultTable;
 import com.vesoft.nebula.proto.graph.Row;
+import com.vesoft.nebula.proto.graph.Summary;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -128,19 +128,16 @@ public class DataTest {
     public void testResult() {
         try {
             ResultTable resultTable = getDateset();
-            ExecutionOutcome outcome = ExecutionOutcome
+            ExecuteResponse response = ExecuteResponse
                     .newBuilder()
                     .setResult(resultTable)
-                    .setGqlStatus(GQLStatus.newBuilder()
+                    .setSummary(Summary.newBuilder()
+                            .setTotalServerTimeUs(1000).build())
+                    .setError(Error.newBuilder()
                             .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build())
                     .build();
-            ExecuteResponse resp = ExecuteResponse
-                    .newBuilder()
-                    .setExecutionOutcome(outcome)
-                    .setLatencyInUs(1000)
-                    .build();
 
-            ResultSet resultSet = new ResultSet(resp);
+            ResultSet resultSet = new ResultSet(response);
             assert resultSet.isSucceeded();
             assert resultSet.getErrorCode() == ErrorCode.SUCCESSFUL_COMPLETION;
             assert !resultSet.isEmpty();

@@ -15,15 +15,13 @@ public class ExtraInfo {
     // the number of affected nodes
     private long affectedNodes;
     // the number of affected forward edges
-    private long affectedForwardEdges;
+    private long affectedEdges;
     // the number of affected reverse edges
-    private long affectedReverseEdges;
 
     public ExtraInfo() {
         this.cursor = null;
         affectedNodes = 0;
-        affectedForwardEdges = 0;
-        affectedReverseEdges = 0;
+        affectedEdges = 0;
     }
 
     public void setCursor(String cursor) {
@@ -34,12 +32,8 @@ public class ExtraInfo {
         this.affectedNodes = affectedNodes;
     }
 
-    public void setAffectedForwardEdges(long affectedForwardEdges) {
-        this.affectedForwardEdges = affectedForwardEdges;
-    }
-
-    public void setAffectedReverseEdges(long affectedReverseEdges) {
-        this.affectedReverseEdges = affectedReverseEdges;
+    public void setAffectedEdges(long affectedEdges) {
+        this.affectedEdges = affectedEdges;
     }
 
     public String getCursor() {
@@ -50,12 +44,8 @@ public class ExtraInfo {
         return this.affectedNodes;
     }
 
-    public long getAffectedForwardEdges() {
-        return this.affectedForwardEdges;
-    }
-
-    public long getAffectedReverseEdges() {
-        return this.affectedReverseEdges;
+    public long getAffectedEdges() {
+        return this.affectedEdges;
     }
 
     @Override
@@ -64,14 +54,12 @@ public class ExtraInfo {
             return "ExtraInfo{"
                     + "cursor='" + cursor + '\''
                     + ", affectedNodes=" + affectedNodes
-                    + ", affectedForwardEdges=" + affectedForwardEdges
-                    + ", affectedReverseEdges=" + affectedReverseEdges
+                    + ", affectedForwardEdges=" + affectedEdges
                     + '}';
         } else {
             return "ExtraInfo{"
                     + ", affectedNodes=" + affectedNodes
-                    + ", affectedForwardEdges=" + affectedForwardEdges
-                    + ", affectedReverseEdges=" + affectedReverseEdges
+                    + ", affectedForwardEdges=" + affectedEdges
                     + '}';
         }
     }

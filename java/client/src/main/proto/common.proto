@@ -6,26 +6,27 @@ syntax = "proto3";
 import "google/protobuf/descriptor.proto";
 
 package nebula.proto.common;
-option go_package ="github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common";
+
+option go_package   = "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common";
 option java_package = "com.vesoft.nebula.proto.common";
 option java_multiple_files = true;
-option optimize_for = SPEED;
+option optimize_for        = SPEED;
 
-// ********** version **********
+//*********************** version ***********************
 
 extend google.protobuf.FileOptions {
-    bytes protocol_version = 9559;
+    bytes          protocol_version   = 9559;
     repeated bytes supported_versions = 9560;
 }
 
 option (protocol_version) = "5.0.0";
-// The supported_versions field is used to store the supported versions of the protocol.
-// multiple versions are defined in same option repeatedly, such as:
+// The supported_versions field is used to store the supported versions of the
+// protocol. multiple versions are defined in same option repeatedly, such as:
 //   option (supported_versions) = "5.0.0";
 //   option (supported_versions) = "5.1.0";
 option (supported_versions) = "5.0.0";
 
-// ********** values **********
+//*********************** values ***********************
 
 /**
  * Only 4 and 8 byte integers are supported by protobuf.
@@ -34,93 +35,92 @@ option (supported_versions) = "5.0.0";
  * own codec scheme for some of messages like `Duration' and `Date'.
  */
 message Duration {
-    uint64              seconds                 = 1;
-    uint32              microseconds            = 2;
-    uint32              months                  = 3;
+    uint64 seconds      = 1;
+    uint32 microseconds = 2;
+    uint32 months       = 3;
 }
 
 message Date {
-    int32               year                    = 1;
-    uint32              month                   = 2;
-    uint32              day                     = 3;
+    int32  year  = 1;
+    uint32 month = 2;
+    uint32 day   = 3;
 }
 
 message LocalTime {
-    uint32              hour                    = 1;
-    uint32              minute                  = 2;
-    uint32              sec                     = 3;
-    uint32              microsec                = 4;
+    uint32 hour     = 1;
+    uint32 minute   = 2;
+    uint32 sec      = 3;
+    uint32 microsec = 4;
 }
 
 message ZonedTime {
-    uint32              hour                    = 1;
-    uint32              minute                  = 2;
-    uint32              sec                     = 3;
-    uint32              microsec                = 4;
-    int32               offset                  = 5;
+    uint32 hour     = 1;
+    uint32 minute   = 2;
+    uint32 sec      = 3;
+    uint32 microsec = 4;
+    int32  offset   = 5;
 }
 
 message LocalDatetime {
-    int32               year                    = 1;
-    uint32              month                   = 2;
-    uint32              day                     = 3;
-    uint32              hour                    = 4;
-    uint32              minute                  = 5;
-    uint32              sec                     = 6;
-    uint32              microsec                = 7;
+    int32  year     = 1;
+    uint32 month    = 2;
+    uint32 day      = 3;
+    uint32 hour     = 4;
+    uint32 minute   = 5;
+    uint32 sec      = 6;
+    uint32 microsec = 7;
 }
 
 message ZonedDatetime {
-    int32               year                    = 1;
-    uint32              month                   = 2;
-    uint32              day                     = 3;
-    uint32              hour                    = 4;
-    uint32              minute                  = 5;
-    uint32              sec                     = 6;
-    uint32              microsec                = 7;
-    int32               offset                  = 8;
+    int32  year     = 1;
+    uint32 month    = 2;
+    uint32 day      = 3;
+    uint32 hour     = 4;
+    uint32 minute   = 5;
+    uint32 sec      = 6;
+    uint32 microsec = 7;
+    int32  offset   = 8;
 }
 
 message List {
-    repeated Value      values                  = 1;
+    repeated Value values = 1;
 }
 
 message Record {
-    map<string, Value>  values                  = 1;
+    map<string, Value> values = 1;
 }
 
 message Node {
-    int64               node_id                 = 1;
-    string              graph                   = 2;
-    string              type                    = 3;
-    repeated string     labels                  = 4;
-    map<string, Value>  properties              = 5;
+    int64              node_id    = 1;
+    string             graph      = 2;
+    string             type       = 3;
+    repeated string    labels     = 4;
+    map<string, Value> properties = 5;
 }
-
 
 message Edge {
     enum Direction {
-        DIRECTED                                = 0;
-        UNDIRECTED                              = 1;
+        DIRECTED   = 0;
+        UNDIRECTED = 1;
     }
 
-    int64               src_id                  = 1;
-    int64               dst_id                  = 2;
-    Direction           direction               = 3;
-    string              graph                   = 4;
-    string              type                    = 5;
-    repeated string     labels                  = 6;
-    int64               rank                    = 7;
-    map<string, Value>  properties              = 8;
+    int64              src_id     = 1;
+    int64              dst_id     = 2;
+    Direction          direction  = 3;
+    string             graph      = 4;
+    string             type       = 5;
+    repeated string    labels     = 6;
+    int64              rank       = 7;
+    map<string, Value> properties = 8;
 }
 
 message Path {
-    repeated Value      values                  = 1;
+    repeated Value values = 1;
 }
 
 message Ref {
-    uint32              code                    = 1;
-    uint32              offset                  = 2;
+    uint32 code   = 1;
+    uint32 offset = 2;
 }
 
 /**
@@ -128,78 +128,77 @@ message Ref {
  *  - There is no (u)int8 or (u)int16 in protobuf, we use (u)int32 instead.
  *  - We use `bytes' for the `string' type, because the latter is subject to
  *    the UTF8 checking in the protobuf's encoding.
- *  -
  */
 message Value {
     enum Type {
-        kNull               = 0;
-        kBool               = 1;
-        kInt8               = 2;
-        kUInt8              = 3;
-        kInt16              = 4;
-        kUInt16             = 5;
-        kInt32              = 6;
-        kUInt32             = 7;
-        kInt64              = 8;
-        kUInt64             = 9;
-        kFloat              = 10;
-        kDouble             = 11;
-        kString             = 12;
-        kList               = 13;
-        kRecord             = 14;
-        kNode               = 15;
-        kEdge               = 16;
-        kPath               = 17;
-        kDuration           = 18;
-        kLocalTime          = 19;
-        kZonedTime          = 20;
-        kDate               = 21;
-        kLocalDatetime      = 22;
-        kZonedDatetime      = 23;
-        kRef                = 24;
+        kNull          = 0;
+        kBool          = 1;
+        kInt8          = 2;
+        kUInt8         = 3;
+        kInt16         = 4;
+        kUInt16        = 5;
+        kInt32         = 6;
+        kUInt32        = 7;
+        kInt64         = 8;
+        kUInt64        = 9;
+        kFloat         = 10;
+        kDouble        = 11;
+        kString        = 12;
+        kList          = 13;
+        kRecord        = 14;
+        kNode          = 15;
+        kEdge          = 16;
+        kPath          = 17;
+        kDuration      = 18;
+        kLocalTime     = 19;
+        kZonedTime     = 20;
+        kDate          = 21;
+        kLocalDatetime = 22;
+        kZonedDatetime = 23;
+        kRef           = 24;
     }
 
     oneof data {
-        bool            bool_value              = 1;
-        int32           int8_value              = 2;
-        uint32          uint8_value             = 3;
-        int32           int16_value             = 4;
-        uint32          uint16_value            = 5;
-        int32           int32_value             = 6;
-        uint32          uint32_value            = 7;
-        int64           int64_value             = 8;
-        uint64          uint64_value            = 9;
-        float           float_value             = 10;
-        double          double_value            = 11;
-        bytes           string_value            = 12;
-        List            list_value              = 13;
-        Record          record_value            = 14;
-        Node            node_value              = 15;
-        Edge            edge_value              = 16;
-        Path            path_value              = 17;
-        Duration        duration_value          = 18;
-        LocalTime       local_time_value        = 19;
-        ZonedTime       zoned_time_value        = 20;
-        Date            date_value              = 21;
-        LocalDatetime   local_datetime_value    = 22;
-        ZonedDatetime   zoned_datetime_value    = 23;
-        Ref             ref_value               = 24;
+        bool          bool_value           = 1;
+        int32         int8_value           = 2;
+        uint32        uint8_value          = 3;
+        int32         int16_value          = 4;
+        uint32        uint16_value         = 5;
+        int32         int32_value          = 6;
+        uint32        uint32_value         = 7;
+        int64         int64_value          = 8;
+        uint64        uint64_value         = 9;
+        float         float_value          = 10;
+        double        double_value         = 11;
+        bytes         string_value         = 12;
+        List          list_value           = 13;
+        Record        record_value         = 14;
+        Node          node_value           = 15;
+        Edge          edge_value           = 16;
+        Path          path_value           = 17;
+        Duration      duration_value       = 18;
+        LocalTime     local_time_value     = 19;
+        ZonedTime     zoned_time_value     = 20;
+        Date          date_value           = 21;
+        LocalDatetime local_datetime_value = 22;
+        ZonedDatetime zoned_datetime_value = 23;
+        Ref           ref_value            = 24;
     }
 }
 
-// ********** commons **********
+//*********************** commons ***********************
 
 message HostAddress {
-    bytes host = 1;
+    bytes  host = 1;
     uint32 port = 2;
 }
 
 enum ServiceType {
     UNKNOWN = 0;
     STORAGE = 1;
-    GRAPH = 2;
-    META = 3;
-    ALL = 4;
+    GRAPH   = 2;
+    META    = 3;
+    ALL     = 4;
 }
 
 message RequestHeader {
@@ -207,33 +206,33 @@ message RequestHeader {
 }
 
 message Error {
-    uint64 code = 1;
-    bytes message = 2;
+    int32  code    = 1;
+    bytes  message = 2;
 }
 
 message ResponseHeader {
-    Error error = 1;
+    Error       error  = 1;
     HostAddress leader = 2;
 }
 
 message DirInfo {
-    bytes install_path = 1;
-    repeated bytes data_paths = 2;
+    bytes          install_path = 1;
+    repeated bytes data_paths   = 2;
 }
 
-// ********** client **********
+//*********************** client ***********************
 
 message ClientInfo {
     enum Language {
-        UNKNOWN        = 0;
-        CPP            = 1;
-        GO             = 2;
-        JAVA           = 3;
-        PYTHON         = 4;
-        JAVASCRIPT     = 5;
+        UNKNOWN    = 0;
+        CPP        = 1;
+        GO         = 2;
+        JAVA       = 3;
+        PYTHON     = 4;
+        JAVASCRIPT = 5;
     }
 
-    Language            lang                    = 1;
-    bytes               protocol_version        = 2;
-    bytes               version                 = 3;
+    Language lang             = 1;
+    bytes    protocol_version = 2;
+    bytes    version          = 3;
 }

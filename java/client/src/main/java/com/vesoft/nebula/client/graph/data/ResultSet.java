@@ -10,7 +10,7 @@ import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.proto.common.Value;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
-import com.vesoft.nebula.proto.graph.ExtraInfoElement;
+import com.vesoft.nebula.proto.graph.QueryStats;
 import com.vesoft.nebula.proto.graph.Row;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class ResultSet {
                 valueStr.add(v.toString());
             }
             return String.format("ColumnName: %s, Values: %s",
-                    columnNames.toString(), valueStr.toString());
+                columnNames.toString(), valueStr.toString());
         }
 
         /**
@@ -87,7 +87,7 @@ public class ResultSet {
         public ValueWrapper get(int index) {
             if (index >= columnNames.size()) {
                 throw new IllegalArgumentException(
-                        String.format("Cannot get field because the key '%d' out of range", index));
+                    String.format("Cannot get field because the key '%d' out of range", index));
             }
             return this.colValues.get(index);
         }
@@ -102,8 +102,8 @@ public class ResultSet {
             int index = columnNames.indexOf(columnName);
             if (index == -1) {
                 throw new IllegalArgumentException(
-                        "Cannot get field because the columnName '"
-                                + columnName + "' is not exists");
+                    "Cannot get field because the columnName '"
+                        + columnName + "' is not exists");
             }
             return this.colValues.get(index);
         }
@@ -139,18 +139,17 @@ public class ResultSet {
     }
 
     public ResultSet(ExecuteResponse resp) {
-        if (resp == null || !resp.hasExecutionOutcome()) {
+        if (resp == null || !resp.hasResult()) {
             throw new RuntimeException("got null object for server's response");
         }
         this.response = resp;
-        if (!resp.getExecutionOutcome().hasResult()
-                || resp.getExecutionOutcome().getResult().getRecordsList().isEmpty()) {
+        if (resp.getResult().getRecordsList().isEmpty()) {
             isEmpty = true;
             size = 0;
         } else {
-            size = resp.getExecutionOutcome().getResult().getRecordsCount();
+            size = resp.getResult().getRecordsCount();
         }
-        for (ByteString column : resp.getExecutionOutcome().getResult().getColumnNamesList()) {
+        for (ByteString column : resp.getResult().getColumnNamesList()) {
             this.columnNames.add(column.toString(charset));
         }
     }
@@ -162,7 +161,7 @@ public class ResultSet {
      */
     public boolean isSucceeded() {
         return ErrorCode.SUCCESSFUL_COMPLETION.code.equals(
-                response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
+            response.getError().getCode().toString(charset));
     }
 
     /**
@@ -182,7 +181,7 @@ public class ResultSet {
      */
     public ErrorCode getErrorCode() {
         return ErrorCode.find(
-                response.getExecutionOutcome().getGqlStatus().getCode().toString(charset));
+            response.getError().getCode().toString(charset));
     }
 
     /**
@@ -191,7 +190,7 @@ public class ResultSet {
      * @return String
      */
     public String getErrorMessage() {
-        return response.getExecutionOutcome().getGqlStatus().getMessage().toString(charset);
+        return response.getError().getMessage().toString(charset);
     }
 
 
@@ -201,7 +200,7 @@ public class ResultSet {
      * @return int
      */
     public long getLatency() {
-        return response.getLatencyInUs();
+        return response.getSummary().getTotalServerTimeUs();
     }
 
     /**
@@ -210,7 +209,7 @@ public class ResultSet {
      * @return string
      */
     public PlanInfoNode getPlanDesc() {
-        return new PlanInfoNode(response.getExecutionOutcome().getSummary().getPlanInfo());
+        return new PlanInfoNode(response.getSummary().getPlanInfo());
     }
 
     /**
@@ -251,7 +250,7 @@ public class ResultSet {
         if (!hasNext()) {
             throw new NoSuchElementException("no more row record data");
         }
-        Row row = response.getExecutionOutcome().getResult().getRecords(index.getAndIncrement());
+        Row row = response.getResult().getRecords(index.getAndIncrement());
         return new Record(columnNames, row);
     }
 
@@ -270,7 +269,7 @@ public class ResultSet {
             throw new ArrayIndexOutOfBoundsException();
         }
         List<ValueWrapper> values = new ArrayList<>();
-        List<Row> records = response.getExecutionOutcome().getResult().getRecordsList();
+        List<Row> records = response.getResult().getRecordsList();
         for (int i = 0; i < records.size(); i++) {
             values.add(new ValueWrapper(records.get(i).getValues(index)));
         }
@@ -284,39 +283,21 @@ public class ResultSet {
      * @return map for extra info
      */
     public ExtraInfo getExtraInfo() {
-        if (!response.hasExecutionOutcome()) {
+        if (!response.hasSummary()) {
             return new ExtraInfo();
         }
         ExtraInfo extraInfo = new ExtraInfo();
-        List<ExtraInfoElement> extraInfos = response.getExecutionOutcome().getExtraInfoList();
-        for (ExtraInfoElement info : extraInfos) {
-            switch (info.getKind()) {
-                case kCursor: {
-                    extraInfo.setCursor((new ValueWrapper(info.getValue())).asString());
-                    continue;
-                }
-                case kAffectedNodes: {
-                    extraInfo.setAffectedNodes(new ValueWrapper(info.getValue()).asLong());
-                    continue;
-                }
-                case kAffectedForwardEdges: {
-                    extraInfo.setAffectedForwardEdges(new ValueWrapper(info.getValue()).asLong());
-                    continue;
-                }
-                case kAffectedReverseEdges: {
-                    extraInfo.setAffectedReverseEdges(new ValueWrapper(info.getValue()).asLong());
-                    continue;
-                }
-                default:
-            }
-        }
+        QueryStats queryStats = response.getSummary().getQueryStats();
+        extraInfo.setAffectedNodes(queryStats.getNumAffectedNodes());
+        extraInfo.setAffectedEdges(queryStats.getNumAffectedEdges());
+        extraInfo.setCursor(response.getCursor().toString(charset));
         return extraInfo;
     }
 
     @Override
     public String toString() {
         if (!isSucceeded()) {
-            return response.getExecutionOutcome().getGqlStatus().getMessage().toString(charset);
+            return response.getError().getMessage().toString(charset);
         }
         List<String> rowStrs = new ArrayList<>();
         while (hasNext()) {
@@ -328,6 +309,6 @@ public class ResultSet {
             rowStrs.add(values);
         }
         return String.format("ColumnName: %s,\n Rows: %s",
-                columnNames.toString(), rowStrs.toString());
+            columnNames.toString(), rowStrs.toString());
     }
 }
