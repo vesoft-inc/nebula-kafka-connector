@@ -39,6 +39,12 @@ const (
 
 	// AnnHaModeVal is annotation value to indicate whether in HA mode
 	AnnHaModeVal = "true"
+
+	// AnnDeleteProtection is an annotation key used to prevent the deletion of a nebula cluster that has been annotated by this key
+	AnnDeleteProtection = "nebula-graph.io/delete-protection"
+
+	// AnnDeleteProtectionVal is annotation value to indicate whether nebula cluster is protected
+	AnnDeleteProtectionVal = "true"
 )
 
 // IsInHaMode check whether in HA mode
@@ -61,4 +67,14 @@ func CopyAnnotations(src map[string]string) map[string]string {
 		dst[k] = v
 	}
 	return dst
+}
+
+func IsDeleteProtected(ann map[string]string) bool {
+	if ann != nil {
+		val, ok := ann[AnnDeleteProtection]
+		if ok && val == AnnDeleteProtectionVal {
+			return true
+		}
+	}
+	return false
 }

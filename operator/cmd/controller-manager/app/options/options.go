@@ -25,6 +25,7 @@ import (
 	cbc "k8s.io/component-base/config"
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/flag/profile"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/flag/webhook"
 )
 
 const (
@@ -73,7 +74,11 @@ type Options struct {
 	// allowed to sync concurrently.
 	ConcurrentNebulaMetadSyncs int
 
+	// EnableAdmissionWebhook enable admission webhook for controller manager.
+	EnableAdmissionWebhook bool
+
 	ProfileOpts profile.Options
+	WebhookOpts webhook.Options
 }
 
 func NewOptions() *Options {
@@ -113,4 +118,5 @@ func (o *Options) AddFlags(flags *pflag.FlagSet) {
 	flags.IntVar(&o.ConcurrentNebulaMetadSyncs, "concurrent-nebulametad-syncs", 5, "The number of NebulaMetad objects that are allowed to sync concurrently.")
 
 	o.ProfileOpts.AddFlags(flags)
+	o.WebhookOpts.AddFlags(flags)
 }

@@ -19,6 +19,7 @@ package app
 import (
 	"context"
 	"flag"
+	"net/http"
 
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/labels"
@@ -34,6 +35,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	ms "sigs.k8s.io/controller-runtime/pkg/metrics/server"
+	"sigs.k8s.io/controller-runtime/pkg/webhook"
+	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/cmd/controller-manager/app/options"
@@ -44,6 +47,8 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/discovery"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/version"
+	ncwebhook "github.com/vesoft-inc/nebula-ng-tools/operator/internal/webhook/nebulacluster"
+	nmwebhook "github.com/vesoft-inc/nebula-ng-tools/operator/internal/webhook/nebulametad"
 )
 
 var (
@@ -182,6 +187,17 @@ func Run(ctx context.Context, opts *options.Options) error {
 	if err := metadReconciler.SetupWithManager(mgr); err != nil {
 		klog.Errorf("failed to set up NebulaMetad controller: %v", err)
 		return err
+	}
+
+	if opts.EnableAdmissionWebhook {
+		decoder := admission.NewDecoder(mgr.GetScheme())
+		klog.Info("Registering webhooks to nebula-controller-manager")
+		hookServer := mgr.GetWebhookServer()
+		hookServer.Register("/validate-nebulacluster",
+			&webhook.Admission{Handler: &ncwebhook.ValidatingAdmission{Decoder: decoder}})
+		hookServer.Register("/validate-nebulametad",
+			&webhook.Admission{Handler: &nmwebhook.ValidatingAdmission{Decoder: decoder}})
+		hookServer.WebhookMux().Handle("/readyz/", http.StripPrefix("/readyz/", &healthz.Handler{}))
 	}
 
 	if err := mgr.AddHealthzCheck("ping", healthz.Ping); err != nil {
