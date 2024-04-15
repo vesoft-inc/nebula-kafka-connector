@@ -75,6 +75,10 @@ func (nc *NebulaCluster) GenerateOwnerReferences() []metav1.OwnerReference {
 	}
 }
 
+func (nc *NebulaCluster) IsSuspendEnabled() bool {
+	return pointer.BoolDeref(nc.Spec.Suspend, false)
+}
+
 func (nc *NebulaCluster) IsPVReclaimEnabled() bool {
 	return pointer.BoolDeref(nc.Spec.EnablePVReclaim, false)
 }

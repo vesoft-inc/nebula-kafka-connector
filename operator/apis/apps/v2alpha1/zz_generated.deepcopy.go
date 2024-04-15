@@ -368,6 +368,11 @@ func (in *NebulaClusterSpec) DeepCopyInto(out *NebulaClusterSpec) {
 		*out = make([]TopologySpreadConstraint, len(*in))
 		copy(*out, *in)
 	}
+	if in.Suspend != nil {
+		in, out := &in.Suspend, &out.Suspend
+		*out = new(bool)
+		**out = **in
+	}
 	if in.EnablePVReclaim != nil {
 		in, out := &in.EnablePVReclaim, &out.EnablePVReclaim
 		*out = new(bool)

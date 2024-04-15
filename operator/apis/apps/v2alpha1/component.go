@@ -225,9 +225,14 @@ type KObjectAccessor interface {
 	GenerateConfigMap() *corev1.ConfigMap
 
 	IsReady() bool
+	IsSuspending() bool
+	IsSuspended() bool
+	GetPhase() ComponentPhase
 	GetUpdateRevision() string
-	UpdateComponentStatus(status *ComponentStatus)
+	SetPhase(phase ComponentPhase)
+	SetWorkloadStatus(status *WorkloadStatus)
 	SetVolumeStatus(status *VolumeStatus)
+	UpdateComponentStatus(status *ComponentStatus)
 }
 
 // NebulaComponent is the interface for nebula component

@@ -81,6 +81,15 @@ func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alp
 	notExist := apierrors.IsNotFound(err)
 	oldSts := oldWorkloadTemp.DeepCopy()
 
+	needSuspend, err := suspendComponent(s.clientSet.Workload(), nc.StoragedComponent(), oldSts)
+	if err != nil {
+		return fmt.Errorf("suspend storaged cluster %s failed: %v", componentName, err)
+	}
+	if needSuspend {
+		klog.Infof("storaged cluster %s is suspended, skip reconciling", componentName)
+		return nil
+	}
+
 	cm, cmHash, err := s.syncStoragedConfigMap(nc.DeepCopy())
 	if err != nil {
 		return err

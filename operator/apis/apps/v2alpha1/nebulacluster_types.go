@@ -52,6 +52,9 @@ type NebulaClusterSpec struct {
 	// TopologySpreadConstraints specifies how to spread matching pods among the given topology.
 	TopologySpreadConstraints []TopologySpreadConstraint `json:"topologySpreadConstraints,omitempty"`
 
+	// +optional
+	Suspend *bool `json:"suspend,omitempty"`
+
 	// Flag to enable/disable PV reclaim while the nebula cluster deleted, default false
 	// +optional
 	EnablePVReclaim *bool `json:"enablePVReclaim,omitempty"`

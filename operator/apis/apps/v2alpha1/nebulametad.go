@@ -33,6 +33,10 @@ func (nm *NebulaMetad) GetMetadThriftConnAddress() string {
 	return nm.MetadComponent().GetConnAddress(MetadPortNameGRPC)
 }
 
+func (nm *NebulaMetad) IsSuspendEnabled() bool {
+	return false
+}
+
 func (nm *NebulaMetad) IsPVReclaimEnabled() bool {
 	return pointer.BoolDeref(nm.Spec.EnablePVReclaim, false)
 }

@@ -324,6 +324,24 @@ func (m *metadComponent) IsReady() bool {
 		rollingUpdateDone(m.nm.Status.Workload)
 }
 
+func (m *metadComponent) IsSuspending() bool {
+	return m.nm.Status.Phase == SuspendPhase
+}
+
+func (m *metadComponent) IsSuspended() bool {
+	if !m.IsSuspending() {
+		return false
+	}
+	if m.nm.IsSuspendEnabled() && m.nm.Status.Workload != nil {
+		return false
+	}
+	return true
+}
+
+func (m *metadComponent) GetPhase() ComponentPhase {
+	return m.nm.Status.Phase
+}
+
 func (m *metadComponent) GetUpdateRevision() string {
 	if m.nm.Status.Workload == nil {
 		return ""
@@ -331,10 +349,18 @@ func (m *metadComponent) GetUpdateRevision() string {
 	return m.nm.Status.Workload.UpdateRevision
 }
 
-func (m *metadComponent) UpdateComponentStatus(status *ComponentStatus) {
-	m.nm.Status.ComponentStatus = *status
+func (m *metadComponent) SetPhase(phase ComponentPhase) {
+	m.nm.Status.Phase = phase
+}
+
+func (m *metadComponent) SetWorkloadStatus(status *WorkloadStatus) {
+	m.nm.Status.Workload = status
 }
 
 func (m *metadComponent) SetVolumeStatus(status *VolumeStatus) {
 	m.nm.Status.Volume = status
+}
+
+func (m *metadComponent) UpdateComponentStatus(status *ComponentStatus) {
+	m.nm.Status.ComponentStatus = *status
 }

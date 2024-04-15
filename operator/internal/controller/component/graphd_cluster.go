@@ -94,6 +94,15 @@ func (g *graphdCluster) syncGraphdWorkload(metaClient meta.Client, nc *v2alpha1.
 	notExist := apierrors.IsNotFound(err)
 	oldSts := oldWorkloadTemp.DeepCopy()
 
+	needSuspend, err := suspendComponent(g.clientSet.Workload(), nc.GraphdComponent(), oldSts)
+	if err != nil {
+		return fmt.Errorf("suspend graphd cluster %s failed: %v", componentName, err)
+	}
+	if needSuspend {
+		klog.Infof("graphd cluster %s is suspended, skip reconciling", componentName)
+		return nil
+	}
+
 	cm, cmHash, err := g.syncGraphdConfigMap(nc.DeepCopy())
 	if err != nil {
 		return err

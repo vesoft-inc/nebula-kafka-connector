@@ -6032,6 +6032,8 @@ spec:
                 required:
                 - image
                 type: object
+              suspend:
+                type: boolean
               tolerations:
                 items:
                   properties:

@@ -51,13 +51,6 @@ type graphdComponent struct {
 	cluster
 }
 
-func (c *graphdComponent) GetUpdateRevision() string {
-	if c.nc.Status.Graphd.Workload == nil {
-		return ""
-	}
-	return c.nc.Status.Graphd.Workload.UpdateRevision
-}
-
 func (c *graphdComponent) GetConfig() map[string]string {
 	return c.nc.Spec.Graphd.Config
 }
@@ -124,14 +117,6 @@ func (c *graphdComponent) GetEndpoints(portName string) []string {
 		c.GetConnAddress(portName),
 		c.GetName(),
 		c.ComponentSpec().Replicas())
-}
-
-func (c *graphdComponent) IsReady() bool {
-	if c.nc.Status.Graphd.Workload == nil {
-		return false
-	}
-	return *c.nc.Spec.Graphd.Replicas == c.nc.Status.Graphd.Workload.ReadyReplicas &&
-		rollingUpdateDone(c.nc.Status.Graphd.Workload)
 }
 
 func (c *graphdComponent) GenerateLabels() map[string]string {
@@ -240,8 +225,41 @@ func (c *graphdComponent) GenerateConfigMap() *corev1.ConfigMap {
 	return cm
 }
 
-func (c *graphdComponent) UpdateComponentStatus(status *ComponentStatus) {
-	c.nc.Status.Graphd.ComponentStatus = *status
+func (c *graphdComponent) IsReady() bool {
+	if c.nc.Status.Graphd.Workload == nil {
+		return false
+	}
+	return *c.nc.Spec.Graphd.Replicas == c.nc.Status.Graphd.Workload.ReadyReplicas &&
+		rollingUpdateDone(c.nc.Status.Graphd.Workload)
+}
+
+func (c *graphdComponent) IsSuspending() bool {
+	return c.nc.Status.Graphd.Phase == SuspendPhase
+}
+
+func (c *graphdComponent) IsSuspended() bool {
+	if !c.IsSuspending() {
+		return false
+	}
+	if c.nc.IsSuspendEnabled() && c.nc.Status.Graphd.Workload != nil {
+		return false
+	}
+	return true
+}
+
+func (c *graphdComponent) GetPhase() ComponentPhase {
+	return c.nc.Status.Graphd.Phase
+}
+
+func (c *graphdComponent) GetUpdateRevision() string {
+	if c.nc.Status.Graphd.Workload == nil {
+		return ""
+	}
+	return c.nc.Status.Graphd.Workload.UpdateRevision
+}
+
+func (c *graphdComponent) SetPhase(phase ComponentPhase) {
+	c.nc.Status.Graphd.Phase = phase
 }
 
 func (c *graphdComponent) SetWorkloadStatus(status *WorkloadStatus) {
@@ -250,4 +268,8 @@ func (c *graphdComponent) SetWorkloadStatus(status *WorkloadStatus) {
 
 func (c *graphdComponent) SetVolumeStatus(status *VolumeStatus) {
 	c.nc.Status.Graphd.Volume = status
+}
+
+func (c *graphdComponent) UpdateComponentStatus(status *ComponentStatus) {
+	c.nc.Status.Graphd.ComponentStatus = *status
 }

@@ -49,6 +49,11 @@ var (
 	ErrorMetadReferenceIsNil = errors.New("metad reference is nil")
 )
 
+var suspendOrder = []v2alpha1.ComponentType{
+	v2alpha1.GraphdComponentType,
+	v2alpha1.StoragedComponentType,
+}
+
 const (
 	SyncVolumeConcurrency = 5
 )
@@ -577,4 +582,55 @@ func updateSinglePod(clientSet kube.ClientSet, newPod, oldPod *corev1.Pod) error
 	}
 
 	return clientSet.Pod().CreatePod(newPod)
+}
+
+func suspendComponent(
+	workloadClient kube.Workload,
+	component v2alpha1.NebulaComponent,
+	workload *appsv1.StatefulSet) (bool, error) {
+	nc := component.GetCluster()
+	suspending := component.IsSuspending()
+	if !nc.IsSuspendEnabled() {
+		if suspending {
+			component.SetPhase(v2alpha1.RunningPhase)
+			return true, nil
+		}
+		klog.V(4).Infof("component %s is not needed to be suspended", component.GetName())
+		return false, nil
+	}
+	if !suspending {
+		if s, reason := canSuspendComponent(component); !s {
+			klog.Warningf("component %s can not be suspended: %s", component.GetName(), reason)
+			return false, nil
+		}
+		component.SetPhase(v2alpha1.SuspendPhase)
+		return true, nil
+	}
+	if workload != nil {
+		if err := workloadClient.DeleteWorkload(workload); err != nil {
+			return false, err
+		}
+	}
+	component.SetWorkloadStatus(nil)
+	return true, nil
+}
+
+func canSuspendComponent(component v2alpha1.NebulaComponent) (bool, string) {
+	nc := component.GetCluster()
+	if component.GetPhase() != v2alpha1.RunningPhase && component.GetPhase() != v2alpha1.SuspendPhase {
+		return false, "component phase is not Running or Suspend"
+	}
+	for _, ct := range suspendOrder {
+		if ct == component.ComponentType() {
+			break
+		}
+		c, err := nc.ComponentByType(ct)
+		if err != nil {
+			return false, err.Error()
+		}
+		if !c.IsSuspended() {
+			return false, fmt.Sprintf("waiting for component %s to be suspended", ct)
+		}
+	}
+	return true, ""
 }
