@@ -34,20 +34,22 @@ type ClientSet interface {
 	Workload() Workload
 	NebulaCluster() NebulaCluster
 	NebulaMetad() NebulaMetad
+	NebulaAutoscaler() NebulaAutoscaler
 }
 
 type clientSet struct {
-	nodeClient     Node
-	secretClient   Secret
-	cmClient       ConfigMap
-	pvClient       PersistentVolume
-	pvcClient      PersistentVolumeClaim
-	scClient       StorageClass
-	podClient      Pod
-	svcClient      Service
-	workloadClient Workload
-	nebulaClient   NebulaCluster
-	metadClient    NebulaMetad
+	nodeClient       Node
+	secretClient     Secret
+	cmClient         ConfigMap
+	pvClient         PersistentVolume
+	pvcClient        PersistentVolumeClaim
+	scClient         StorageClass
+	podClient        Pod
+	svcClient        Service
+	workloadClient   Workload
+	nebulaClient     NebulaCluster
+	metadClient      NebulaMetad
+	autoscalerClient NebulaAutoscaler
 }
 
 func NewClientSet(config *rest.Config) (ClientSet, error) {
@@ -56,17 +58,18 @@ func NewClientSet(config *rest.Config) (ClientSet, error) {
 		return nil, errors.Errorf("error building runtime client: %v", err)
 	}
 	return &clientSet{
-		nodeClient:     NewNode(c),
-		secretClient:   NewSecret(c),
-		cmClient:       NewConfigMap(c),
-		pvClient:       NewPV(c),
-		pvcClient:      NewPVC(c),
-		scClient:       NewStorageClass(c),
-		podClient:      NewPod(c),
-		svcClient:      NewService(c),
-		workloadClient: NewWorkload(c),
-		nebulaClient:   NewNebulaCluster(c),
-		metadClient:    NewNebulaMetad(c),
+		nodeClient:       NewNode(c),
+		secretClient:     NewSecret(c),
+		cmClient:         NewConfigMap(c),
+		pvClient:         NewPV(c),
+		pvcClient:        NewPVC(c),
+		scClient:         NewStorageClass(c),
+		podClient:        NewPod(c),
+		svcClient:        NewService(c),
+		workloadClient:   NewWorkload(c),
+		nebulaClient:     NewNebulaCluster(c),
+		metadClient:      NewNebulaMetad(c),
+		autoscalerClient: NewNebulaAutoscaler(c),
 	}, nil
 }
 
@@ -112,4 +115,8 @@ func (c *clientSet) NebulaCluster() NebulaCluster {
 
 func (c *clientSet) NebulaMetad() NebulaMetad {
 	return c.metadClient
+}
+
+func (c *clientSet) NebulaAutoscaler() NebulaAutoscaler {
+	return c.autoscalerClient
 }

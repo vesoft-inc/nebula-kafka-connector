@@ -14,7 +14,9 @@ require (
 	k8s.io/client-go v0.28.3
 	k8s.io/component-base v0.28.3
 	k8s.io/klog/v2 v2.100.1
+	k8s.io/kube-controller-manager v0.28.3
 	k8s.io/kubernetes v1.28.3
+	k8s.io/metrics v0.28.3
 	k8s.io/utils v0.0.0-20230406110748-d93618cff8a2
 	sigs.k8s.io/controller-runtime v0.16.3
 )
@@ -111,9 +113,9 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	k8s.io/apiextensions-apiserver v0.28.3 // indirect
 	k8s.io/apiserver v0.28.3 // indirect
-	k8s.io/cloud-provider v0.27.4 // indirect
-	k8s.io/component-helpers v0.27.4 // indirect
-	k8s.io/controller-manager v0.27.4 // indirect
+	k8s.io/cloud-provider v0.28.3 // indirect
+	k8s.io/component-helpers v0.28.3 // indirect
+	k8s.io/controller-manager v0.28.3 // indirect
 	k8s.io/csi-translation-lib v0.28.3 // indirect
 	k8s.io/dynamic-resource-allocation v0.28.3 // indirect
 	k8s.io/kms v0.28.3 // indirect
