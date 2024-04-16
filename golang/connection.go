@@ -95,7 +95,7 @@ func (cn *connection) authenticate(username, password string) error {
 		_ = cn.Close()
 		return err
 	}
-	respErr := resp.GetError()
+	respErr := resp.GetStatus()
 	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
 		return errServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
@@ -143,7 +143,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		cursor:  resp.Cursor,
 	}
 
-	respErr := resp.GetError()
+	respErr := resp.GetStatus()
 	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
 		return &resultResp, errServerResponse(
 			string(respErr.GetCode()),

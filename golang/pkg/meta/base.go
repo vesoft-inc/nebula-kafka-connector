@@ -16,7 +16,7 @@ type (
 	}
 )
 
-func (h *HeaderResponse) GetError() error {
+func (h *HeaderResponse) GetStatus() error {
 	return nebula.NewNebulaError(h.Code, h.Msg)
 }
 
@@ -25,7 +25,7 @@ func (h *HeaderResponse) GetErrorCode() nebula.ErrorCode {
 }
 
 func (h *HeaderResponse) GetErrorMsg() string {
-	return h.GetError().Error()
+	return h.GetStatus().Error()
 }
 
 func (h *HeaderResponse) IsSucceeded() bool {

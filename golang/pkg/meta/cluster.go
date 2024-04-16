@@ -149,7 +149,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 		return err
 	}
 	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetError()
+		return responseHeader.GetStatus()
 	}
 	return nil
 }
@@ -180,7 +180,7 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 		return err
 	}
 	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetError()
+		return responseHeader.GetStatus()
 	}
 	return nil
 }
@@ -218,7 +218,7 @@ func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) 
 		})
 	}
 	if !responseHeader.IsSucceeded() {
-		return nil, responseHeader.GetError()
+		return nil, responseHeader.GetStatus()
 	}
 	return &ShowServiceResp{
 		HeaderResponse: responseHeader,
@@ -247,7 +247,7 @@ func (c *metaClient) InitCluster(req *InitClusterReq) error {
 		return err
 	}
 	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetError()
+		return responseHeader.GetStatus()
 	}
 	return nil
 }
@@ -273,7 +273,7 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 		return nil, err
 	}
 	if !responseHeader.IsSucceeded() {
-		return nil, responseHeader.GetError()
+		return nil, responseHeader.GetStatus()
 	}
 	clusters := make([]*ClusterInfo, 0)
 	for _, c := range response.Clusters {
@@ -319,7 +319,7 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 		return err
 	}
 	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetError()
+		return responseHeader.GetStatus()
 	}
 	return nil
 }

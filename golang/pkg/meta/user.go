@@ -46,7 +46,7 @@ func (c *metaClient) ChangePassword(req *ChangePasswordReq) error {
 		return err
 	}
 	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetError()
+		return responseHeader.GetStatus()
 	}
 	return nil
 }

@@ -200,11 +200,11 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
-	nebulaErr := nebula.ErrorFromInt(response.Header.Error.Code)
+	nebulaErr := nebula.ErrorFromBytes(response.Header.GetStatus().GetCode())
 	if nebulaErr != nebula.ERROR_SUCCESSFUL_COMPLETION {
 		return nil, nebula.NewNebulaError(
-			nebula.ErrorFromInt(response.Header.GetError().GetCode()),
-			string(response.Header.GetError().GetMessage()),
+			nebula.ErrorFromBytes(response.Header.GetStatus().GetCode()),
+			string(response.Header.GetStatus().GetMessage()),
 		)
 	}
 	if response.Token == nil {
@@ -230,11 +230,11 @@ func (c *metaClient) retry(fn func() (responseHeader, error)) (responseHeader, e
 			continue
 		}
 		header := resp.GetHeader()
-		if nebula.ErrorFromInt(header.GetError().GetCode()) == nebula.ERROR_SUCCESSFUL_COMPLETION {
+		if nebula.ErrorFromBytes(header.GetStatus().GetCode()) == nebula.ERROR_SUCCESSFUL_COMPLETION {
 			return resp, nil
 		}
 		// if the error is not leader change, then return and do not retry
-		if nebula.ErrorFromInt(header.GetError().GetCode()) != nebula.ERROR_LEADER_CHANGED {
+		if nebula.ErrorFromBytes(header.GetStatus().GetCode()) != nebula.ERROR_LEADER_CHANGED {
 			return resp, nil
 		}
 		newLeader := header.GetLeader()
@@ -260,10 +260,10 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 		return nil, fmt.Errorf("invalid response")
 	}
 	leader := header.GetLeader()
-	errorCode := nebula.ErrorFromInt(header.GetError().GetCode())
+	errorCode := nebula.ErrorFromBytes(header.GetStatus().GetCode())
 	result := &HeaderResponse{
 		Code: errorCode,
-		Msg:  string(header.GetError().GetMessage()),
+		Msg:  string(header.GetStatus().GetMessage()),
 	}
 	if leader == nil {
 		result.NewHost = ""

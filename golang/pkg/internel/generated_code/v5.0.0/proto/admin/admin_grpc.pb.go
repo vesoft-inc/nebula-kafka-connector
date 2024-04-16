@@ -37,6 +37,7 @@ const (
 	AdminService_CreateUser_FullMethodName     = "/nebula.proto.admin.AdminService/CreateUser"
 	AdminService_DropUser_FullMethodName       = "/nebula.proto.admin.AdminService/DropUser"
 	AdminService_AlterUser_FullMethodName      = "/nebula.proto.admin.AdminService/AlterUser"
+	AdminService_ListUser_FullMethodName       = "/nebula.proto.admin.AdminService/ListUser"
 	AdminService_Login_FullMethodName          = "/nebula.proto.admin.AdminService/Login"
 	AdminService_Logout_FullMethodName         = "/nebula.proto.admin.AdminService/Logout"
 	AdminService_ChangePassword_FullMethodName = "/nebula.proto.admin.AdminService/ChangePassword"
@@ -61,6 +62,7 @@ type AdminServiceClient interface {
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
 	DropUser(ctx context.Context, in *DropUserRequest, opts ...grpc.CallOption) (*DropUserResponse, error)
 	AlterUser(ctx context.Context, in *AlterUserRequest, opts ...grpc.CallOption) (*AlterUserResponse, error)
+	ListUser(ctx context.Context, in *ListUserRequest, opts ...grpc.CallOption) (*ListUserResponse, error)
 	// login only for root
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*LogoutResponse, error)
@@ -201,6 +203,15 @@ func (c *adminServiceClient) AlterUser(ctx context.Context, in *AlterUserRequest
 	return out, nil
 }
 
+func (c *adminServiceClient) ListUser(ctx context.Context, in *ListUserRequest, opts ...grpc.CallOption) (*ListUserResponse, error) {
+	out := new(ListUserResponse)
+	err := c.cc.Invoke(ctx, AdminService_ListUser_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *adminServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
 	err := c.cc.Invoke(ctx, AdminService_Login_FullMethodName, in, out, opts...)
@@ -247,6 +258,7 @@ type AdminServiceServer interface {
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
 	DropUser(context.Context, *DropUserRequest) (*DropUserResponse, error)
 	AlterUser(context.Context, *AlterUserRequest) (*AlterUserResponse, error)
+	ListUser(context.Context, *ListUserRequest) (*ListUserResponse, error)
 	// login only for root
 	Login(context.Context, *LoginRequest) (*LoginResponse, error)
 	Logout(context.Context, *LogoutRequest) (*LogoutResponse, error)
@@ -299,6 +311,9 @@ func (UnimplementedAdminServiceServer) DropUser(context.Context, *DropUserReques
 }
 func (UnimplementedAdminServiceServer) AlterUser(context.Context, *AlterUserRequest) (*AlterUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AlterUser not implemented")
+}
+func (UnimplementedAdminServiceServer) ListUser(context.Context, *ListUserRequest) (*ListUserResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListUser not implemented")
 }
 func (UnimplementedAdminServiceServer) Login(context.Context, *LoginRequest) (*LoginResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Login not implemented")
@@ -574,6 +589,24 @@ func _AdminService_AlterUser_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
+func _AdminService_ListUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListUserRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ListUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ListUser_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ListUser(ctx, req.(*ListUserRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _AdminService_Login_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(LoginRequest)
 	if err := dec(in); err != nil {
@@ -690,6 +723,10 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AlterUser",
 			Handler:    _AdminService_AlterUser_Handler,
+		},
+		{
+			MethodName: "ListUser",
+			Handler:    _AdminService_ListUser_Handler,
 		},
 		{
 			MethodName: "Login",

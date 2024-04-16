@@ -553,18 +553,6 @@ func errServerResponse(code string, msg string) error {
 	}
 }
 
-func ErrorFromInt(c uint64) ErrorCode {
-	encodeSubClass := c >> 16
-	encodeClass := c & 0x0000FFFF
-	class := string([]byte{byte(encodeClass), byte(encodeClass >> 8)})
-	subClass := string([]byte{byte(encodeSubClass), byte(encodeSubClass >> 8),
-		byte(encodeSubClass >> 16)})
-	return ErrorCode(class + subClass)
-}
-
-func (e ErrorCode) codeInt() uint64 {
-	class, subClass := e[0:2], e[2:5]
-	encodeClass := uint64(class[1])<<8 | uint64(class[0])
-	encodeSubClass := uint64(subClass[2])<<16 | uint64(subClass[1])<<8 | uint64(subClass[0])
-	return encodeSubClass<<16 | encodeClass
+func ErrorFromBytes(c []byte) ErrorCode {
+	return ErrorCode(c)
 }
