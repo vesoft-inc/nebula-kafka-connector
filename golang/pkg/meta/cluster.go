@@ -38,12 +38,11 @@ type (
 		Zones       []string
 	}
 
-	ShowClusterReq struct {
+	ListClustersReq struct {
 		clusterName string
 	}
 
-	ShowClusterResp struct {
-		*HeaderResponse
+	ListClustersResp struct {
 		Clusters []*ClusterInfo
 	}
 
@@ -54,17 +53,21 @@ type (
 		Port        uint32
 	}
 
-	ShowServiceReq struct {
+	ListServicesReq struct {
 		clusterName string
 	}
 
-	ShowServiceResp struct {
-		*HeaderResponse
+	ListServicesResp struct {
 		Services []*ServiceInfo
 	}
 
 	InitClusterReq struct {
 		clustername string
+	}
+
+	DropClusterReq struct {
+		clustername string
+		force       bool
 	}
 )
 
@@ -92,8 +95,8 @@ func NewAddServiceReq(host string, port uint32, serviceType ServiceType, cluster
 	}
 }
 
-func NewShowClusterReq(clusterName string) *ShowClusterReq {
-	return &ShowClusterReq{
+func NewListClustersReq(clusterName string) *ListClustersReq {
+	return &ListClustersReq{
 		clusterName: clusterName,
 	}
 }
@@ -104,8 +107,8 @@ func NewInitClusterReq(clusterName string) *InitClusterReq {
 	}
 }
 
-func NewShowServiceReq(clusterName string) *ShowServiceReq {
-	return &ShowServiceReq{
+func NewListServicesReq(clusterName string) *ListServicesReq {
+	return &ListServicesReq{
 		clusterName: clusterName,
 	}
 }
@@ -140,18 +143,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 	if err != nil {
 		return err
 	}
-	response, ok := resp.(*admin.CreateClusterResponse)
-	if !ok {
-		return fmt.Errorf("invalid response")
-	}
-	responseHeader, err := getResponseHeader(response)
-	if err != nil {
-		return err
-	}
-	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetStatus()
-	}
-	return nil
+	return responseIsErr(resp)
 }
 
 func (c *metaClient) AddService(req *AddServiceReq) error {
@@ -171,20 +163,9 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 	if err != nil {
 		return err
 	}
-	response, ok := resp.(*admin.AddServiceResponse)
-	if !ok {
-		return fmt.Errorf("invalid response")
-	}
-	responseHeader, err := getResponseHeader(response)
-	if err != nil {
-		return err
-	}
-	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetStatus()
-	}
-	return nil
+	return responseIsErr(resp)
 }
-func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) {
+func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 	in := &admin.ShowServiceRequest{
@@ -197,13 +178,13 @@ func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	if err := responseIsErr(resp); err != nil {
+		return nil, err
+	}
 	response, ok := resp.(*admin.ShowServiceResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
-	}
-	responseHeader, err := getResponseHeader(response)
-	if err != nil {
-		return nil, err
 	}
 	services := make([]*ServiceInfo, 0)
 	for _, s := range response.Services {
@@ -217,12 +198,8 @@ func (c *metaClient) ShowService(req *ShowServiceReq) (*ShowServiceResp, error) 
 			Port:        port,
 		})
 	}
-	if !responseHeader.IsSucceeded() {
-		return nil, responseHeader.GetStatus()
-	}
-	return &ShowServiceResp{
-		HeaderResponse: responseHeader,
-		Services:       services,
+	return &ListServicesResp{
+		Services: services,
 	}, nil
 }
 func (c *metaClient) InitCluster(req *InitClusterReq) error {
@@ -238,20 +215,9 @@ func (c *metaClient) InitCluster(req *InitClusterReq) error {
 	if err != nil {
 		return err
 	}
-	response, ok := resp.(*admin.InitStorageResponse)
-	if !ok {
-		return fmt.Errorf("invalid response")
-	}
-	responseHeader, err := getResponseHeader(response)
-	if err != nil {
-		return err
-	}
-	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetStatus()
-	}
-	return nil
+	return responseIsErr(resp)
 }
-func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) {
+func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
 	defer cancel()
 	in := &admin.ShowClusterRequest{
@@ -264,16 +230,12 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 	if err != nil {
 		return nil, err
 	}
+	if err := responseIsErr(resp); err != nil {
+		return nil, err
+	}
 	response, ok := resp.(*admin.ShowClusterResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
-	}
-	responseHeader, err := getResponseHeader(response)
-	if err != nil {
-		return nil, err
-	}
-	if !responseHeader.IsSucceeded() {
-		return nil, responseHeader.GetStatus()
 	}
 	clusters := make([]*ClusterInfo, 0)
 	for _, c := range response.Clusters {
@@ -288,9 +250,8 @@ func (c *metaClient) ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error) 
 		}
 		clusters = append(clusters, cluster)
 	}
-	return &ShowClusterResp{
-		HeaderResponse: responseHeader,
-		Clusters:       clusters,
+	return &ListClustersResp{
+		Clusters: clusters,
 	}, nil
 }
 
@@ -310,16 +271,29 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 	if err != nil {
 		return err
 	}
-	response, ok := resp.(*admin.DropServiceResponse)
-	if !ok {
-		return fmt.Errorf("invalid response")
+	return responseIsErr(resp)
+}
+
+func NewDropClusterReq(clusterName string, force bool) *DropClusterReq {
+	return &DropClusterReq{
+		clustername: clusterName,
+		force:       force,
 	}
-	responseHeader, err := getResponseHeader(response)
+}
+
+func (c *metaClient) DropCluster(req *DropClusterReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+	in := &admin.DropClusterRequest{
+		Header:  &admin.AdminRequestHeader{Token: c.token},
+		Cluster: []byte(req.clustername),
+		Force:   req.force,
+	}
+	resp, err := c.retry(func() (responseHeader, error) {
+		return c.client.DropCluster(ctx, in)
+	})
 	if err != nil {
 		return err
 	}
-	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetStatus()
-	}
-	return nil
+	return responseIsErr(resp)
 }

@@ -12,6 +12,7 @@ import (
 type clusterFlagsType struct {
 	clusterName string
 	replicas    int
+	force       bool
 }
 
 var clusterFlags clusterFlagsType
@@ -92,15 +93,13 @@ var showClusterCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cluster := clusterFlags.clusterName
-		req := meta.NewShowClusterReq(cluster)
-		resp, err := metaClient.ShowCluster(req)
+		req := meta.NewListClustersReq(cluster)
+		resp, err := metaClient.ListClusters(req)
 		if err != nil {
 			return metaConsoleError("Show cluster failed", err.Error())
 		}
-		if !resp.IsSucceeded() {
-			return metaConsoleError("Show cluster failed", resp.GetErrorMsg())
-		}
-		header := []string{"cluster id", "cluster name", "replica"}
+
+		header := []string{"Id", "Name", "Replica"}
 		data := make([][]string, 0)
 		for _, s := range resp.Clusters {
 			row := make([]string, 0)
@@ -120,6 +119,33 @@ var showClusterCmd = &cobra.Command{
 	},
 }
 
+var dropClusterCmd = &cobra.Command{
+	Use:   "drop",
+	Short: "drop cluster storage part.",
+	Long:  `ngctl cluster drop --cluster [clustername]`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return metaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		metaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cluster := clusterFlags.clusterName
+		force := clusterFlags.force
+		if cluster == "" {
+			return metaConsoleError("cluster name is empty", "")
+		}
+
+		req := meta.NewDropClusterReq(cluster, force)
+		if err := metaClient.DropCluster(req); err != nil {
+			return metaConsoleError("Init cluster failed", err.Error())
+		}
+		fmt.Fprintln(metaOutput, "Drop cluster successfully.")
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(clusterCmd)
 	clusterCmd.PersistentFlags().StringVarP(&clusterFlags.clusterName, "cluster", "c", "", "Cluster name")
@@ -127,4 +153,8 @@ func init() {
 	clusterCmd.AddCommand(initClusterCmd)
 	clusterCmd.AddCommand(showClusterCmd)
 	createClusterCmd.Flags().IntVarP(&clusterFlags.replicas, "replica-factor", "r", 3, "replica number, default: 3")
+
+	clusterCmd.AddCommand(dropClusterCmd)
+	dropClusterCmd.Flags().BoolVarP(&clusterFlags.force, "force", "f", false, "force drop cluster")
+
 }

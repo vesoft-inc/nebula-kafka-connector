@@ -31,8 +31,8 @@ func (d *dummyConn) Ping() error {
 	return nil
 }
 
-func (d *dummyConn) GetSessionId() int64 {
-	return 0
+func (d *dummyConn) GetSessionId() (int64, error) {
+	return 0, nil
 }
 func (d *dummyConn) Close() error {
 	return nil

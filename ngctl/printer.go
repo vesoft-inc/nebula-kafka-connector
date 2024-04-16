@@ -1,32 +1,30 @@
 package ngctl
 
 import (
-	"bytes"
-	"fmt"
+	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/jedib0t/go-pretty/v6/text"
 )
 
 func FormatTable(headers []string, data [][]string) string {
-	var buf bytes.Buffer
+	writer := table.NewWriter()
+	writer.Style().Format.Header = text.FormatTitle
+	writer.Style().Options.DrawBorder = false
+	writer.Style().Options.SeparateColumns = false
+	writer.Style().Options.SeparateHeader = false
 
-	// print header
-	for _, header := range headers {
-		fmt.Fprintf(&buf, "%-20s", header)
+	writer.ResetHeaders()
+	writer.ResetRows()
+	header := make([]interface{}, 0)
+	for _, h := range headers {
+		header = append(header, h)
 	}
-	fmt.Fprintln(&buf)
-
-	// print split line
-	for i := 0; i < len(headers)*20; i++ {
-		fmt.Fprint(&buf, "-")
-	}
-	fmt.Fprintln(&buf)
-
-	// print data
-	for _, row := range data {
-		for _, cell := range row {
-			fmt.Fprintf(&buf, "%-20s", cell)
+	writer.AppendHeader(header)
+	for _, d := range data {
+		var values []interface{}
+		for _, val := range d {
+			values = append(values, val)
 		}
-		fmt.Fprintln(&buf)
+		writer.AppendRow(values)
 	}
-
-	return buf.String()
+	return writer.Render()
 }

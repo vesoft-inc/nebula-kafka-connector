@@ -182,6 +182,6 @@ func (cn *connection) Close() error {
 	return nil
 }
 
-func (cn *connection) GetSessionId() int64 {
-	return cn.sessionId
+func (cn *connection) GetSessionId() (int64, error) {
+	return cn.sessionId, nil
 }

@@ -70,11 +70,12 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	if err != nil {
 		return nil, err
 	}
-	if r.client.GetSessionId() == 0 {
-		return nil, fmt.Errorf("get session id failed")
-	}
-	r.sessionId = r.client.GetSessionId()
 	r.client.SetRequestTimeout(time.Duration(r.option.timeoutSec) * time.Second)
+	id, err := r.client.GetSessionId()
+	if err != nil {
+		return nil, err
+	}
+	r.sessionId = id
 	if err := r.client.Ping(); err != nil {
 		return nil, err
 	}

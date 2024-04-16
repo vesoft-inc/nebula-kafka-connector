@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 )
 
@@ -712,18 +713,7 @@ func (zdt *grpcZonedDatetime) GetOffset() int {
 }
 
 func (zdt *grpcZonedDatetime) Time() *time.Time {
-	timezone := time.FixedZone("", zdt.GetOffset())
-	t := time.Date(
-		int(zdt.data.Year),
-		time.Month(zdt.data.Month),
-		int(zdt.data.Day),
-		int(zdt.data.Hour),
-		int(zdt.data.Minute),
-		int(zdt.data.Sec),
-		int(zdt.data.Microsec)*int(time.Microsecond),
-		timezone,
-	)
-	return &t
+	return proto.ConvertZonedTime(zdt.data)
 }
 
 func (zdt *grpcZonedDatetime) GetYear() int32 {

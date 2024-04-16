@@ -81,7 +81,7 @@ type (
 		ExecuteContext(ctx context.Context, stmt string) (Result, error)
 		Ping() error
 		Close() error
-		GetSessionId() int64
+		GetSessionId() (int64, error)
 	}
 
 	Pool interface {
@@ -145,11 +145,6 @@ func NewNebulaClient(addresses, username, password string) (Client, error) {
 		connector:     defaultConnector,
 		cfg:           cfg,
 	}
-	conn, err := dc.newDirect()
-	if err != nil {
-		return nil, err
-	}
-	dc.conn = conn
 
 	return dc, nil
 }
@@ -352,9 +347,13 @@ func (dc *driverConn) replaceFromPool() error {
 	return nil
 }
 
-func (dc *driverConn) GetSessionId() int64 {
-	if dc.conn == nil {
-		return 0
+func (dc *driverConn) GetSessionId() (int64, error) {
+	if dc.pool == nil && dc.conn == nil {
+		conn, err := dc.newDirect()
+		if err != nil {
+			return 0, err
+		}
+		dc.conn = conn
 	}
 	return dc.conn.GetSessionId()
 }

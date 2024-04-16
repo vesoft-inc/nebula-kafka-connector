@@ -35,15 +35,21 @@ type (
 	UserClient interface {
 		// change the password of the root with the current password and the new password
 		ChangePassword(req *ChangePasswordReq) error
+		CreateUser(req *CreateUserReq) error
+		AlterUser(req *AlterUserReq) error
+		//if the user list is empty, would show all the users
+		ListUsers(req *ListUsersReq) (*ListUsersResp, error)
+		DropUser(req *DropUserReq) error
 	}
 
 	ClusterClient interface {
 		CreateCluster(req *CreateClusterReq) error
 		AddService(req *AddServiceReq) error
 		DropService(req *DropServiceReq) error
-		ShowService(req *ShowServiceReq) (*ShowServiceResp, error)
+		ListServices(req *ListServicesReq) (*ListServicesResp, error)
 		InitCluster(req *InitClusterReq) error
-		ShowCluster(req *ShowClusterReq) (*ShowClusterResp, error)
+		ListClusters(req *ListClustersReq) (*ListClustersResp, error)
+		DropCluster(req *DropClusterReq) error
 	}
 
 	metaClient struct {
@@ -273,6 +279,17 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 		result.NewPort = leader.GetPort()
 	}
 	return result, nil
+}
+
+func responseIsErr(resp responseHeader) error {
+	responseHeader, err := getResponseHeader(resp)
+	if err != nil {
+		return err
+	}
+	if !responseHeader.IsSucceeded() {
+		return responseHeader.GetStatus()
+	}
+	return nil
 }
 
 func (c *metaClient) GetToken() []byte {

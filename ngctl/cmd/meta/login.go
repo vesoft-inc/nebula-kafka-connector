@@ -46,22 +46,32 @@ var loginCmd = &cobra.Command{
 		}
 		if err := c.Login(); err != nil {
 			//should reset password for first login
-			if e, ok := err.(*nebula.NebulaError); ok {
-				if e.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
-					return err
-				}
-				fmt.Fprintln(metaOutput, "Please reset the password for the first login.")
-				if err := resetPassword(c); err != nil {
-					return metaConsoleError("cannot reset password", err.Error())
-				}
-				fmt.Fprintf(metaOutput, "Reset password succeeded for %s.\n", loginFlags.user)
-				return nil
-			} else {
+			e, ok := err.(*nebula.NebulaError)
+			if !ok {
+				return metaConsoleError("Login failed", err.Error())
+			}
+			if e.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
+				return metaConsoleError("Login failed", err.Error())
+			}
+			// reset password and re-login
+			fmt.Fprintln(metaOutput, "Please reset the password for the first login.")
+			var newPassword string
+			newPassword, err = resetPassword(c)
+			if err != nil {
+				return metaConsoleError("Cannot reset password", err.Error())
+			}
+			fmt.Fprintf(metaOutput, "Reset password succeeded for %s, re-login with the new password.\n", loginFlags.user)
+			c.Close()
+			c, err = meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, newPassword))
+			if err != nil {
 				return err
+			}
+			if err := c.Login(); err != nil {
+				return metaConsoleError("Login failed", err.Error())
 			}
 		}
 		if err := ngctl.SaveMetaToken(address, c.GetToken()); err != nil {
-			return metaConsoleError("save meta session failed", err.Error())
+			return metaConsoleError("Save meta session failed", err.Error())
 		}
 
 		fmt.Fprintln(metaOutput, "Login succeeded.")
@@ -71,7 +81,7 @@ var loginCmd = &cobra.Command{
 	},
 }
 
-func resetPassword(c meta.Client) error {
+func resetPassword(c meta.Client) (string, error) {
 	currentPassword := promptui.Prompt{
 		Label:     "Current password:",
 		AllowEdit: true,
@@ -79,7 +89,7 @@ func resetPassword(c meta.Client) error {
 	}
 	currentPasswordStr, err := currentPassword.Run()
 	if err != nil {
-		return err
+		return "", err
 	}
 	newPassword := promptui.Prompt{
 		Label:     "New password:",
@@ -88,7 +98,7 @@ func resetPassword(c meta.Client) error {
 	}
 	newPasswordStr, err := newPassword.Run()
 	if err != nil {
-		return err
+		return "", err
 	}
 	confirmPassword := promptui.Prompt{
 		Label:     "Retype new password:",
@@ -97,10 +107,10 @@ func resetPassword(c meta.Client) error {
 	}
 	confirmPasswordStr, err := confirmPassword.Run()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if newPasswordStr != confirmPasswordStr {
-		return fmt.Errorf("Sorry, the passwords you entered do not match.")
+		return "", fmt.Errorf("Sorry, the passwords you entered do not match.")
 	}
 	req := meta.NewChangePasswordReq(
 		loginFlags.user,
@@ -108,9 +118,9 @@ func resetPassword(c meta.Client) error {
 		newPasswordStr,
 	)
 	if err := c.ChangePassword(req); err != nil {
-		return err
+		return "", err
 	}
-	return nil
+	return newPasswordStr, nil
 }
 
 func init() {

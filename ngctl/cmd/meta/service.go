@@ -117,16 +117,14 @@ var showServiceCmd = &cobra.Command{
 		if cluster == "" {
 			return metaConsoleError("cluster name is empty", "")
 		}
-		req := meta.NewShowServiceReq(cluster)
+		req := meta.NewListServicesReq(cluster)
 
-		resp, err := metaClient.ShowService(req)
+		resp, err := metaClient.ListServices(req)
 		if err != nil {
 			return metaConsoleError("Show service failed", err.Error())
 		}
-		if !resp.IsSucceeded() {
-			return metaConsoleError("Show service failed", resp.GetErrorMsg())
-		}
-		header := []string{"service id", "service type", "host", "port"}
+
+		header := []string{"Id", "Type", "Host", "Port"}
 		data := make([][]string, 0)
 		for _, s := range resp.Services {
 			row := make([]string, 0)
