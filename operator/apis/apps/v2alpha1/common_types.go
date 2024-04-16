@@ -24,7 +24,7 @@ import (
 type ComponentPhase string
 
 const (
-	// RunningPhase represents normal state of nebula cluster.
+	// RunningPhase represents running state of nebula cluster.
 	RunningPhase ComponentPhase = "Running"
 	// ScaleInPhase represents the scaling state of nebula cluster.
 	ScaleInPhase ComponentPhase = "ScaleIn"
@@ -39,7 +39,7 @@ const (
 // ComponentSpec is a common set of k8s resource configs for nebula components.
 type ComponentSpec struct {
 	// K8S deployment replicas setting.
-	// +kubebuilder:validation:Minimum=0
+	// +kubebuilder:validation:Minimum=1
 	Replicas *int32 `json:"replicas,omitempty"`
 
 	// K8S resources settings.
@@ -195,4 +195,53 @@ type ProvisionedVolume struct {
 	StorageClass string `json:"storageClass"`
 
 	Capacity string `json:"capacity"`
+}
+
+type SSLCertsSpec struct {
+	// Name of the server cert secret
+	ServerSecret string `json:"serverSecret,omitempty"`
+	// The key to server PEM encoded public key certificate
+	// +optional
+	ServerCert string `json:"serverCert,omitempty"`
+	// The key to server private key associated with given certificate
+	// +optional
+	ServerKey string `json:"serverKey,omitempty"`
+
+	// Name of the client cert secret
+	ClientSecret string `json:"clientSecret,omitempty"`
+	// The key to client PEM encoded public key certificate
+	// +optional
+	ClientCert string `json:"clientCert,omitempty"`
+	// The key to client private key associated with given certificate
+	// +optional
+	ClientKey string `json:"clientKey,omitempty"`
+
+	// Name of the CA cert secret
+	CASecret string `json:"caSecret,omitempty"`
+	// The key to CA PEM encoded public key certificate
+	// +optional
+	CACert string `json:"caCert,omitempty"`
+
+	// Name of the client CA cert secret
+	ClientCASecret string `json:"clientCASecret,omitempty"`
+	// The key to Client CA PEM encoded public key certificate
+	// +optional
+	ClientCACert string `json:"clientCACert,omitempty"`
+
+	// InsecureSkipVerify controls whether a client verifies the server's
+	// certificate chain and host name.
+	// +optional
+	InsecureSkipVerify *bool `json:"insecureSkipVerify,omitempty"`
+
+	// ServerName is used to verify the hostname on the returned
+	// certificates unless InsecureSkipVerify is given. It is also included
+	// in the client's handshake to support virtual hosting unless it is
+	// an IP address.
+	// +optional
+	ServerName string `json:"serverName,omitempty"`
+
+	// AutoMountServerCerts controls whether operator mounts server's
+	// certificate from secret.
+	// +optional
+	AutoMountServerCerts *bool `json:"autoMountServerCerts,omitempty"`
 }
