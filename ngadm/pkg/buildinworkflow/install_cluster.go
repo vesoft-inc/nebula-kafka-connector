@@ -9,31 +9,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
-func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {
-	workflow := &types.WorkflowSpec{
-		Type:     "serial",
-		Rollback: spec.Rollback,
-		Tasks:    []*types.TaskSpec{},
-	}
-	installTask, err := InstallMetaCluster(args, spec)
-	if err != nil {
-		return nil, err
-	}
-	if installTask != nil {
-		workflow.Tasks = append(workflow.Tasks, installTask)
-	}
-	installUtilsTask, err := InstallUtils(args, spec)
-	if err != nil {
-		return nil, err
-	}
-	if installUtilsTask != nil {
-		workflow.Tasks = append(workflow.Tasks, installUtilsTask)
-	}
-
-	return workflow, nil
-}
-
-func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func InstallCluster(args map[string]any, spec *types.JobSpec, username, password string) (*types.TaskSpec, error) {
 	if args == nil {
 		args = map[string]any{}
 	}
@@ -42,6 +18,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	}
 	metaCluster := spec.Spec.Metad
 	metaHosts := spec.Spec.Metad.Hosts
+	metaServerAddress := utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config))
 
 	uploadTasks := []*types.TaskSpec{}
 	connectTasks := []*types.TaskSpec{}
@@ -49,8 +26,24 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	if !ok {
 		force = false
 	}
-	allNeedHosts := GetMetadAllNeedHosts(spec)
-	for _, agent := range allNeedHosts {
+	needHosts := GetClusterNeedHosts(spec)
+	for _, agent := range needHosts {
+		if agent.SSHConfig == nil {
+			connectTasks = append(connectTasks, &types.TaskSpec{
+				Type: "serial",
+				SubTasks: []*types.TaskSpec{
+					{
+						Type: "connect",
+						Params: &tasks.ConnectParams{
+							Host: agent.Host,
+						},
+					},
+				},
+			})
+			continue
+		}
+
+		// TODO: check if the host already has nebula installed
 		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
@@ -99,37 +92,8 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	}
 	//3. config and start needed processes
 	startNeededProcessesTask := []*types.TaskSpec{}
-	for _, agent := range metaHosts {
-		startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
-			Type:        "serial",
-			Description: "start metad",
-			SubTasks: []*types.TaskSpec{
-				{
-					Type: "init_config",
-					Params: &tasks.InitConfigParams{
-						Host: agent.Host,
-						ChangeMap: utils.MergeNebulaConfigMap(metaCluster.Config, map[string]string{
-							"local_ip":          utils.GetHostIP(agent.Host),
-							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
-						}),
-						Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath), "etc/nebula-metad.conf"),
-					},
-				},
-				{
-					Type: "nebula_operation",
-					Params: &tasks.NebulaOperationParams{
-						Host:         agent.Host,
-						Operation:    "start",
-						Component:    "metad",
-						NeedRollback: true,
-						Path:         utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath),
-					},
-				},
-			},
-		})
-	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		// 4.1 start graphd
+		// 3.1 start graphd
 		for _, agent := range cluster.Graphd.Hosts {
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
@@ -141,9 +105,9 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 							Host: agent.Host,
 							ChangeMap: utils.MergeNebulaConfigMap(cluster.Graphd.Config, map[string]string{
 								"local_ip":          utils.GetHostIP(agent.Host),
-								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
+								"meta_server_addrs": metaServerAddress,
 							}),
-							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath), "etc/nebula-graphd.conf"),
+							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath), "etc/nebula-graphd.conf"),
 						},
 					},
 					{
@@ -152,13 +116,13 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 							Host:      agent.Host,
 							Operation: "start",
 							Component: "graphd",
-							Path:      utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath),
+							Path:      utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath),
 						},
 					},
 				},
 			})
 		}
-		// 4.2 start storaged
+		// .2 start storaged
 		for _, agent := range cluster.Storaged.Hosts {
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
@@ -170,9 +134,9 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 							Host: agent.Host,
 							ChangeMap: utils.MergeNebulaConfigMap(cluster.Storaged.Config, map[string]string{
 								"local_ip":          utils.GetHostIP(agent.Host),
-								"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
+								"meta_server_addrs": metaServerAddress,
 							}),
-							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath), "etc/nebula-storaged.conf"),
+							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath), "etc/nebula-storaged.conf"),
 						},
 					},
 					{
@@ -182,7 +146,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 							Operation:    "start",
 							Component:    "storaged",
 							NeedRollback: true,
-							Path:         utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath),
+							Path:         utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath),
 						},
 					},
 				},
@@ -196,8 +160,11 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 		createClusterTasks = append(createClusterTasks, &types.TaskSpec{
 			Type: "create_cluster",
 			Params: &tasks.CreateClusterParams{
-				ClusterSpec: &cluster,
-				MetaSpec:    metaCluster,
+				ClusterSpec:       &cluster,
+				MetaSpec:          metaCluster,
+				MetaServerAddress: metaServerAddress,
+				Username:          username,
+				Password:          password,
 			},
 		})
 	}
@@ -234,7 +201,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	}, nil
 }
 
-func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
+func GetClusterNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	allNeedHosts := make(map[string]*types.Agent, 0)
 	for _, agent := range spec.Spec.Metad.Hosts {
 		agentCopy := agent

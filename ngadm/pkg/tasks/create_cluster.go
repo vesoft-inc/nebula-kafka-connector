@@ -9,8 +9,11 @@ import (
 )
 
 type CreateClusterParams struct {
-	ClusterSpec *types.Cluster
-	MetaSpec    *types.MetadSpec
+	ClusterSpec       *types.Cluster
+	MetaSpec          *types.MetadSpec
+	MetaServerAddress string
+	Username          string
+	Password          string
 }
 
 func NewCreateCluster(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
@@ -18,11 +21,23 @@ func NewCreateCluster(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, 
 	if !ok {
 		return nil, fmt.Errorf("unexpected type for params: %T", taskSpec.Params)
 	}
+
+	client, err := meta.NewMetaClient(params.MetaServerAddress, meta.WithUserPassword(params.Username, params.Password))
+	if err != nil {
+		return nil, fmt.Errorf("create meta client failed: %s", err)
+	}
+	defer client.Close()
+
+	if err = client.Login(); err != nil {
+		return nil, fmt.Errorf("login meta server failed: %s", err)
+	}
+
 	return &CreateCluster{
 		JobContext:  taskContext,
 		taskSpec:    taskSpec,
 		clusterSpec: params.ClusterSpec,
 		metaSpec:    params.MetaSpec,
+		metaClient:  client,
 	}, nil
 }
 
@@ -31,25 +46,24 @@ type CreateCluster struct {
 	taskSpec    *types.TaskSpec
 	clusterSpec *types.Cluster
 	metaSpec    *types.MetadSpec
+	metaClient  meta.Client
 }
 
 func (d *CreateCluster) Execute() error {
-	//1. meta client init & login
-	metaClient, err := meta.NewMetaClient(utils.GetMetaAddressListString(d.metaSpec.Hosts, utils.GetConfigPort(d.metaSpec.Config)))
-	if err != nil {
-		return fmt.Errorf("create meta client failed: %s", err)
+	if d.metaClient == nil {
+		return fmt.Errorf("meta client is nil")
 	}
-	defer metaClient.Close()
-	//2. create cluster
+
+	//1. create cluster
 	req := meta.NewCreateClusterReq(d.clusterSpec.Name, d.clusterSpec.Replica, d.clusterSpec.ZoneList)
-	if err := metaClient.CreateCluster(req); err != nil {
+	if err := d.metaClient.CreateCluster(req); err != nil {
 		return fmt.Errorf("create cluster failed: %s", err)
 	}
 	if d.ifExited() {
 		return fmt.Errorf("exited signal received")
 	}
 	d.JobContext.Logger.Info("create cluster success: " + d.clusterSpec.Name)
-	//3. add graphd & storaged
+	//2. add graphd & storaged
 	for _, host := range d.clusterSpec.Graphd.Hosts {
 		if d.ifExited() {
 			return fmt.Errorf("exited signal received")
@@ -59,7 +73,7 @@ func (d *CreateCluster) Execute() error {
 			return fmt.Errorf("get graphd port failed: %s", err)
 		}
 		req := meta.NewAddServiceReq(utils.GetHostIP(host.Host), port, meta.ServiceTypeGraphd, d.clusterSpec.Name)
-		if err := metaClient.AddService(req); err != nil {
+		if err := d.metaClient.AddService(req); err != nil {
 			return fmt.Errorf("add host failed: %s", err)
 		}
 		d.JobContext.Logger.Info("add host success: " + host.Host)
@@ -73,7 +87,7 @@ func (d *CreateCluster) Execute() error {
 			return fmt.Errorf("get storaged port failed: %s", err)
 		}
 		req := meta.NewAddServiceReq(utils.GetHostIP(host.Host), port, meta.ServiceTypeStoraged, d.clusterSpec.Name)
-		if err := metaClient.AddService(req); err != nil {
+		if err := d.metaClient.AddService(req); err != nil {
 			return fmt.Errorf("add host failed: %s", err)
 		}
 		d.JobContext.Logger.Info("add host success: " + host.Host)
@@ -81,9 +95,9 @@ func (d *CreateCluster) Execute() error {
 	if d.ifExited() {
 		return fmt.Errorf("exited signal received")
 	}
-	//4. init cluster
+	//3. init cluster
 	initReq := meta.NewInitClusterReq(d.clusterSpec.Name)
-	if err := metaClient.InitCluster(initReq); err != nil {
+	if err := d.metaClient.InitCluster(initReq); err != nil {
 		return fmt.Errorf("init cluster failed: %s", err)
 	}
 	d.JobContext.Logger.Info("init cluster success: " + d.clusterSpec.Name)
