@@ -5,17 +5,14 @@
 
 package com.vesoft.nebula.spark.common.nebula
 
-import com.vesoft.nebula.client.graph.data.ResultSet.Record
 import com.vesoft.nebula.client.graph.data.{ResultSet, ValueWrapper}
 import com.vesoft.nebula.client.graph.net.NebulaClient
 import com.vesoft.nebula.client.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
 import org.slf4j.LoggerFactory
 
 import java.util
-import java.util.regex.Pattern
-import java.util.{ArrayList, List}
-import scala.collection.JavaConverters.{asScalaBufferConverter, mapAsScalaMapConverter}
-import scala.collection.{breakOut, mutable}
+import java.util.List
+import scala.collection.mutable
 
 /**
  * GraphProvider for Nebula Graph Service
@@ -28,12 +25,6 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
     .builder(addresses, user, password)
     .setRequestTimeoutMills(timeout * 1000)
     .setRetryTimes(0)
-    .setMaxSessionSize(1)
-    .setMinSessionSize(1)
-    .setHealthCheckTimeMills(0)
-    .setRetryTimes(0)
-    .setBlockWhenExhausted(true)
-    .setMaxWaitMills(60000)
     .build()
 
   /**
@@ -184,7 +175,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       if (edgeTypePattern == null) {
         edgeTypePattern = record.get("type_pattern").asString()
       }
-      schema += (record.get("property_name").asString()-> record.get("data_type").asString())
+      schema += (record.get("property_name").asString() -> record.get("data_type").asString())
     }
 
     var srcNodeType: String = null

@@ -17,6 +17,7 @@ import com.vesoft.nebula.client.graph.scan.ScanEdgeResultIterator;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResult;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.client.graph.scan.TableRow;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -38,14 +39,10 @@ public class GraphClientExample {
         try {
             // init the NebulaPool and get session
             client = NebulaClient.builder(host, user, passwd)
+                    .setAuthOptions(Collections.emptyMap())
                     .setRequestTimeoutMills(3000)
-                    .setMaxSessionSize(200)
-                    .setMinSessionSize(1)
                     .setRetryTimes(3)
                     .setIntervalTimeMills(1000)
-                    .setBlockWhenExhausted(true)
-                    .setMaxWaitMills(1000)
-                    .setStrictlyServerHealthy(true)
                     .build();
             createGraphType(client);
             createGraph(client);
@@ -230,8 +227,6 @@ public class GraphClientExample {
                     System.out.printf("%15s |", valueWrapper.asLocalTime());
                 } else if (valueWrapper.isLocalDateTime()) {
                     System.out.printf("%15s |", valueWrapper.asLocalDateTime());
-                } else if (valueWrapper.isDuration()) {
-                    System.out.printf("%15s |", valueWrapper.asDuration());
                 } else if (valueWrapper.isList()) {
                     System.out.printf("%15s |", valueWrapper.asList());
                 } else if (valueWrapper.isRecord()) {

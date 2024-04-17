@@ -1,12 +1,7 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.exception.AuthFailedException;
-import com.vesoft.nebula.client.graph.exception.ClientServerIncompatibleException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
-import com.vesoft.nebula.client.graph.net.NebulaClient;
-import com.vesoft.nebula.client.graph.net.Session;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -46,7 +41,7 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
             final ResultSet resultSet = client.getClient().execute(query);
             resultReporter.report( 0, LdbcNoResult.INSTANCE, operation );
 
-        } catch (NoValidSessionException | IOErrorException e) {
+        } catch (IOErrorException e) {
             throw new DbException(e);
         }
     }

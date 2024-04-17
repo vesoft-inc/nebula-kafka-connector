@@ -7,6 +7,7 @@ package com.vesoft.nebula.client.graph.net;
 
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import java.net.UnknownHostException;
@@ -20,7 +21,7 @@ import org.junit.Test;
 public class NebulaClientTest {
     String addresses = "192.168.8.6:3820";
     String user = "root";
-    String passwd = "nebula";
+    String passwd = "Nebula123";
 
     @Test()
     public void testBuildNebulaClient() {
@@ -29,13 +30,10 @@ public class NebulaClientTest {
             NebulaClient client = NebulaClient.builder(addresses, user, passwd)
                     .setRequestTimeoutMills(3000)
                     .setRetryTimes(3)
-                    .setMaxSessionSize(1)
-                    .setMinSessionSize(0)
-                    .setHealthCheckTimeMills(5000)
                     .build();
             ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);
-        } catch (UnknownHostException | IOErrorException | NoValidSessionException e) {
+            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION);
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -48,10 +46,10 @@ public class NebulaClientTest {
         try {
             NebulaClient client = NebulaClient.builder(illegalAddress, user, passwd).build();
             client.close();
-        } catch (UnknownHostException | IOErrorException e) {
+        } catch (AuthFailedException | IOErrorException e) {
             Assert.fail(e.getMessage());
         } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
+            assert true;
         }
 
         // config illegal, host name is not exist
@@ -59,10 +57,11 @@ public class NebulaClientTest {
         try {
             NebulaClient client = NebulaClient.builder(illegalHostName, user, passwd).build();
             client.close();
-        } catch (UnknownHostException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
-            ;
-        } catch (IOErrorException | IllegalArgumentException e) {
+        } catch (RuntimeException e) {
+            if (e.getMessage().contains("UnknownHostException")) {
+                Assert.assertTrue("expect reach here:" + e.getMessage(), true);
+            }
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
 
@@ -71,62 +70,29 @@ public class NebulaClientTest {
         NebulaClient.Builder builder = null;
         try {
             builder = NebulaClient.builder(addresses, user, passwd);
-        } catch (UnknownHostException e) {
+        } catch (RuntimeException e) {
             Assert.fail(e.getMessage());
-        }
-
-        // config illegal, illegal maxSessionSize
-        try {
-            builder.setMaxSessionSize(0).build();
-        } catch (IOErrorException e) {
-            Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
-        }
-
-        // config illegal, illegal minSessionSize
-        try {
-            builder.setMinSessionSize(-1).build();
-        } catch (IOErrorException e) {
-            Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
         }
 
         // config illegal, illegal requestTimeout
         try {
             builder.setRequestTimeoutMills(-1).build();
-        } catch (IOErrorException e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
         }
 
-        // config illegal, illegal healthCheckTime
-        try {
-            builder.setHealthCheckTimeMills(-1).build();
-        } catch (IOErrorException e) {
-            Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
-        }
-
-        // config illegal, illegal retry times
+        // config retry times
         try {
             builder.setRetryTimes(-1).build();
-        } catch (IOErrorException e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
         }
 
-        // config illegal, illegal interval time
+        // config interval time
         try {
             builder.setIntervalTimeMills(-1).build();
-        } catch (IOErrorException e) {
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
-        } catch (IllegalArgumentException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(), true);
         }
 
     }
@@ -138,22 +104,19 @@ public class NebulaClientTest {
         String address = "127.0.0.1:9669,127.0.0.1:9670,127.0.0.1:9671";
         try {
             NebulaClient client = NebulaClient.builder(address, user, passwd)
-                    .setStrictlyServerHealthy(false)
                     .build();
             ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);
+            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION);
             client.close();
-        } catch (UnknownHostException | IOErrorException | NoValidSessionException e) {
+        } catch (AuthFailedException | IOErrorException e) {
             Assert.fail(e.getMessage());
         }
 
         try {
-            NebulaClient.builder(address, user, passwd)
-                    .setStrictlyServerHealthy(true)
-                    .build();
+            NebulaClient.builder(address, user, passwd).build();
             Assert.fail("client build should failed, strictlyServerHealthy is true, "
                     + "graphd servers are not all ok.");
-        } catch (UnknownHostException e) {
+        } catch (AuthFailedException e) {
             Assert.fail(e.getMessage());
         } catch (IOErrorException e) {
             Assert.assertTrue("expect here:" + e.getMessage(),
@@ -164,74 +127,13 @@ public class NebulaClientTest {
     }
 
     @Test
-    public void testSessionPool() {
-        System.out.println("<==== testSessionPool ====>");
-        // borrow maxSessionSize sessions, and test the pool status
-        NebulaClient client = null;
-        try {
-            client = NebulaClient.builder(addresses, user, passwd)
-                    .setMaxSessionSize(10)
-                    .setMinSessionSize(1)
-                    .setMaxWaitMills(1000)
-                    .build();
-        } catch (IOErrorException | UnknownHostException e) {
-            Assert.fail(e.getMessage());
-        }
-
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        NebulaClient finalClient = client;
-        for (int i = 0; i < client.getConfig().getMaxSessionSize(); i++) {
-            executorService.submit(() -> {
-                try {
-                    ResultSet resultSet = finalClient.execute("RETURN 10");
-                    System.out.println(resultSet.getErrorMessage());
-                    Assert.assertEquals(ErrorCode.SUCCESSFUL_COMPLETION.code,
-                            resultSet.getErrorCode());
-                } catch (IOErrorException | NoValidSessionException e) {
-                    Assert.fail(e.getMessage());
-                }
-            });
-        }
-        Assert.assertEquals(finalClient.getActiveSessions(), 0);
-        Assert.assertEquals(finalClient.getIdleSessions(), client.getConfig().getMaxSessionSize());
-        Assert.assertEquals(finalClient.getWaiters(), 0);
-
-        // test no available idle session.
-        // All sessions are used, then execute will failed after waiting for maxWaitMills.
-        long beginTime = System.currentTimeMillis();
-        try {
-            client.execute("RETURN 1");
-        } catch (NoValidSessionException e) {
-            Assert.assertTrue("expect reach here:" + e.getMessage(),
-                    e.getMessage().contains("get session from pool failed"));
-            long waitTimeForAvailableSession = System.currentTimeMillis() - beginTime;
-            Assert.assertTrue(waitTimeForAvailableSession >= client.getConfig().getMaxWaitMills());
-        } catch (IOErrorException e) {
-            Assert.fail(e.getMessage());
-        } finally {
-            client.close();
-        }
-
-        // wait for 5 seconds, all sessions should be returned to pool
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            Assert.fail(e.getMessage());
-        }
-
-        Assert.assertEquals(client.getActiveSessions(), 0);
-        Assert.assertEquals(client.getIdleSessions(), client.getConfig().getMaxSessionSize());
-        Assert.assertEquals(client.getWaiters(), 0);
-    }
-
-    @Test
     public void testCloseNebulaClient() {
         System.out.println("<==== testCloseNebulaClient ====>");
         NebulaClient client = null;
         try {
             client = NebulaClient.builder(addresses, user, passwd)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
         client.close();
@@ -243,7 +145,7 @@ public class NebulaClientTest {
             client.execute("RETURN 1");
         } catch (RuntimeException e) {
             Assert.assertEquals(e.getMessage(), "NebulaClient has closed. Couldn't use again.");
-        } catch (IOErrorException | NoValidSessionException e) {
+        } catch (IOErrorException e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -258,7 +160,7 @@ public class NebulaClientTest {
                     .setRetryTimes(50)
                     .setIntervalTimeMills(5000)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
 
@@ -302,16 +204,15 @@ public class NebulaClientTest {
             client = NebulaClient.builder(addresses, user, passwd)
                     .setRetryTimes(50)
                     .setIntervalTimeMills(2000)
-                    .setMinSessionSize(1)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
         try {
             Thread.sleep(3000);
             ResultSet resultSet = client.execute("RETURN 1");
             assert (resultSet.isSucceeded());
-        } catch (IOErrorException | NoValidSessionException | InterruptedException e) {
+        } catch (IOErrorException | InterruptedException e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -326,7 +227,7 @@ public class NebulaClientTest {
                     .setRetryTimes(50)
                     .setIntervalTimeMills(2000)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
 
@@ -369,7 +270,7 @@ public class NebulaClientTest {
                     .setRetryTimes(50)
                     .setIntervalTimeMills(2000)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (AuthFailedException | IOErrorException e) {
             Assert.fail(e.getMessage());
         }
         // TODO stop all graphd servers
@@ -380,7 +281,7 @@ public class NebulaClientTest {
             try {
                 ResultSet resultSet = finalClient.execute("RETURN 1");
                 Assert.assertTrue(resultSet.isSucceeded());
-            } catch (IOErrorException | NoValidSessionException e) {
+            } catch (IOErrorException e) {
                 Assert.fail(e.getMessage());
             }
             Assert.assertTrue((System.currentTimeMillis() - beginTime) >= 2000);
@@ -394,11 +295,10 @@ public class NebulaClientTest {
         NebulaClient nebulaClient = null;
         try {
             nebulaClient = NebulaClient.builder(addresses, user, passwd)
-                    .setMinSessionSize(6)
                     .setRetryTimes(50)
                     .setIntervalTimeMills(2000)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
         // TODO close one graphd server
@@ -414,7 +314,7 @@ public class NebulaClientTest {
         NebulaClient client = null;
         try {
             client = NebulaClient.builder(goodAddresss, user, passwd).build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
@@ -423,7 +323,7 @@ public class NebulaClientTest {
             ResultSet resultSet = client.execute("show sessions");
             assert (resultSet.isSucceeded());
             assert (resultSet.rowSize() == 1);
-        } catch (IOErrorException | NoValidSessionException e) {
+        } catch (IOErrorException e) {
             Assert.fail(e.getMessage());
         }
     }
@@ -434,12 +334,10 @@ public class NebulaClientTest {
         NebulaClient nebulaClient = null;
         try {
             nebulaClient = NebulaClient.builder(addresses, user, passwd)
-                    .setMinSessionSize(6)
                     .setRetryTimes(50)
                     .setIntervalTimeMills(2000)
-                    .setHealthCheckTimeMills(10000)
                     .build();
-        } catch (IOErrorException | UnknownHostException e) {
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
@@ -448,7 +346,7 @@ public class NebulaClientTest {
         while ((System.currentTimeMillis() - start) < 20000) {
             try {
                 nebulaClient.execute("RETURN 1");
-            } catch (IOErrorException | NoValidSessionException e) {
+            } catch (IOErrorException e) {
                 Assert.fail(e.getMessage());
             }
         }

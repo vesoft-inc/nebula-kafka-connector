@@ -1,7 +1,6 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -48,8 +47,7 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
                 results.add(toResult(record));
             }
             resultReporter.report(results.size(), results, operation);
-        } catch (NoValidSessionException | IOErrorException | ParseException |
-                 UnsupportedEncodingException e) {
+        } catch (IOErrorException | ParseException | UnsupportedEncodingException e) {
             throw new DbException(e);
         }
     }

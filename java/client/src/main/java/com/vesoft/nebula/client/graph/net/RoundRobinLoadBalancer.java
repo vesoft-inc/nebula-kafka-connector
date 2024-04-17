@@ -1,7 +1,6 @@
 package com.vesoft.nebula.client.graph.net;
 
 import com.vesoft.nebula.client.graph.data.HostAddress;
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,24 +14,31 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(RoundRobinLoadBalancer.class);
+    private static final Logger logger = LoggerFactory.getLogger(RoundRobinLoadBalancer.class);
     private static final int S_OK = 0;
     private static final int S_BAD = 1;
     private final List<HostAddress> addresses = new ArrayList<>();
     private final Map<HostAddress, Integer> serversStatus = new ConcurrentHashMap<>();
     private final boolean strictlyServerHealthy;
-    private final long requestTimeout;
+
+    private final String userName;
+    private final Map<String, Object> authOptions;
+
     private final AtomicInteger pos = new AtomicInteger(0);
     private ScheduledExecutorService schedule;
 
-    public RoundRobinLoadBalancer(List<HostAddress> addresses, long requestTimeout,
-                                  boolean strictlyServerHealthy, int healthCheckTime) {
-        this.requestTimeout = requestTimeout;
+    public RoundRobinLoadBalancer(List<HostAddress> addresses,
+                                  String userName,
+                                  Map<String, Object> authOptions,
+                                  boolean strictlyServerHealthy,
+                                  long healthCheckTime) {
         for (HostAddress addr : addresses) {
             this.addresses.add(addr);
             this.serversStatus.put(addr, S_BAD);
         }
         this.strictlyServerHealthy = strictlyServerHealthy;
+        this.userName = userName;
+        this.authOptions = authOptions;
 
         if (healthCheckTime > 0) {
             schedule = Executors.newScheduledThreadPool(1);
@@ -86,12 +92,14 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
 
     public boolean ping(HostAddress addr) {
         try {
-            Connection connection = new GrpcConnection();
-            connection.open(addr, this.requestTimeout);
-            connection = null;
+            NebulaClient client = NebulaClient
+                    .builder(addr.toString(), userName)
+                    .setAuthOptions(authOptions)
+                    .build();
+            client.close();
             return true;
-        } catch (IOErrorException e) {
-            LOGGER.error("ping failed, ", e);
+        } catch (Exception e) {
+            logger.error("ping failed, ", e);
             return false;
         }
     }

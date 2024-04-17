@@ -1,11 +1,9 @@
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 
 import com.vesoft.nebula.client.graph.net.NebulaClient;
-import com.vesoft.nebula.client.graph.net.Session;
 import org.ldbcouncil.snb.impls.workloads.BaseDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.QueryStore;
 
@@ -18,10 +16,20 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends BaseDbConnectionState<TDbQueryStore> {
-    private List<NebulaNewClient> clients = new ArrayList<>();
+
+    private final ThreadLocal<List<NebulaNewClient>> threadLocal = new ThreadLocal<>();
     private Map<Integer, Integer> requestTypeAndClientIndex = new HashMap<>();
     private AtomicInteger clientIndex = new AtomicInteger(0);
     private final String graphName;
+
+    final String[] graphAddresses;
+    final String userName;
+    final String password;
+    final long requestTimeout;
+    final int retryTimes;
+    final long intervalTimeBetweenRetrys;
+
+    private final int graphServerSize;
 
     public String getGraphName() {
         return graphName;
@@ -31,32 +39,14 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         super(properties, store);
 
         final String endpointURI = properties.get("endpoint");
-        final String username = properties.get("user");
-        final String password = properties.get("password");
-        final int requestTimeout = Integer.parseInt(properties.get("requestTimeout"));
-        final int maxSessionSize = Integer.parseInt(properties.get("maxSessionSize"));
-        final int maxSessionWaitTime = Integer.parseInt(properties.get("maxSessionWaitTime"));
-        final int retryTimes = Integer.parseInt(properties.get("retryTimes"));
-        final int intervalTimeBetweenRetrys = Integer.parseInt(properties.get("intervalTimeBetweenRetrys"));
+        userName = properties.get("user");
+        password = properties.get("password");
+        requestTimeout = Integer.parseInt(properties.get("requestTimeout")) * 1000L;
+        retryTimes = Integer.parseInt(properties.get("retryTimes"));
+        intervalTimeBetweenRetrys = Integer.parseInt(properties.get("intervalTimeBetweenRetrys")) * 1000L;
         graphName = properties.get("graphName");
-        String[] graphAddresses = endpointURI.split(",");
-        try {
-            for (String addr : graphAddresses) {
-                NebulaClient client = NebulaClient.builder(addr, username, password)
-                        .setRequestTimeoutMills(requestTimeout * 1000)
-                        .setMaxSessionSize(maxSessionSize)
-                        .setMinSessionSize(maxSessionSize)
-                        .setRetryTimes(retryTimes)
-                        .setIntervalTimeMills(intervalTimeBetweenRetrys * 1000)
-                        .setBlockWhenExhausted(true)
-                        .setMaxWaitMills(maxSessionWaitTime * 1000L)
-                        .setStrictlyServerHealthy(true)
-                        .build();
-                clients.add(new NebulaNewClient(client, addr));
-            }
-        } catch (UnknownHostException | IOErrorException e) {
-            throw new RuntimeException(e);
-        }
+        graphAddresses = endpointURI.split(",");
+        graphServerSize = graphAddresses.length;
         // we just balance the graphd for query operation types: LdbcQyery1 to LdbcQuery14
         // see org.ldbcouncil.snb.driver.Operation.type
         for (int i = 1; i < 15; i++) {
@@ -65,19 +55,41 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
     }
 
     public NebulaNewClient getClient(int requestType) {
+        if (threadLocal.get() == null) {
+            List<NebulaNewClient> clients = new ArrayList<>();
+            try {
+                for (String addr : graphAddresses) {
+                    NebulaClient client = NebulaClient.builder(addr, userName, password)
+                            .setRequestTimeoutMills(requestTimeout * 1000L)
+                            .setRetryTimes(retryTimes)
+                            .setIntervalTimeMills(intervalTimeBetweenRetrys * 1000L)
+                            .build();
+                    clients.add(new NebulaNewClient(client, addr));
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            threadLocal.set(clients);
+        }
+
         if (requestType < 15) {
-            int index = requestTypeAndClientIndex.get(requestType);
-            int newIndex = (index + 1) % clients.size();
-            requestTypeAndClientIndex.put(requestType, newIndex);
-            return clients.get(index);
+            int currentClientIndex = requestTypeAndClientIndex.get(requestType);
+            int nextClientIndex = (currentClientIndex + 1) % graphServerSize;
+            requestTypeAndClientIndex.put(requestType, nextClientIndex);
+            return threadLocal.get().get(currentClientIndex);
         }
         // if operation is not query, then just balance the graphd through the requests.
-        return clients.get(clientIndex.getAndIncrement() % clients.size());
+        return threadLocal.get().get(clientIndex.getAndIncrement() % graphServerSize);
+
     }
 
     @Override
     public void close() {
-        for (NebulaNewClient client : clients) {
+        if(threadLocal.get().isEmpty()){
+            return;
+        }
+
+        for (NebulaNewClient client : threadLocal.get()) {
             client.getClient().close();
         }
     }

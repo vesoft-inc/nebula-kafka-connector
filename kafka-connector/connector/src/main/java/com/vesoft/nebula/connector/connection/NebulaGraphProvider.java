@@ -6,6 +6,7 @@
 package com.vesoft.nebula.connector.connection;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
@@ -15,7 +16,6 @@ import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,20 +36,14 @@ public class NebulaGraphProvider implements Serializable {
         try {
             client = NebulaClient.builder(host, user, passwd)
                     .setRequestTimeoutMills(config.requestTimeout)
-                    .setMaxSessionSize(config.sinkPartition)
-                    .setMinSessionSize(1)
                     .setRetryTimes(config.retryTimes)
                     .setIntervalTimeMills(config.intervalTimeMill)
-                    .setBlockWhenExhausted(true)
-                    .setMaxWaitMills(Integer.MAX_VALUE)
-                    .setStrictlyServerHealthy(true)
                     .build();
+        } catch (AuthFailedException e) {
+            throw new RuntimeException("auth failed, please check your user and passwd");
         } catch (IOErrorException e) {
             throw new RuntimeException("connect to NebulaGraph server failed, please check " +
                     "the connectivity between client and server.", e);
-        } catch (UnknownHostException e) {
-            throw new IllegalArgumentException(String.format("wrong graph server config %s",
-                    config.graphServers), e);
         }
     }
 

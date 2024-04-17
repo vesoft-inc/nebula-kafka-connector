@@ -1,21 +1,25 @@
-/* Copyright (c) 2023 vesoft inc. All rights reserved.
+/* Copyright (c) 2024 vesoft inc. All rights reserved.
  *
  * This source code is licensed under Apache 2.0 License.
  */
 
 package com.vesoft.nebula.client.graph.net;
 
-import com.google.common.net.InetAddresses;
-import com.google.common.net.InternetDomainName;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BATCH_SIZE;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_INTERVAL_TIME_MS;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_RETRY_TIMES;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
+
 import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.data.ValueWrapper;
+import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.scan.ScanEdgeResultIterator;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
+import com.vesoft.nebula.client.graph.utils.AddressUtil;
 import java.io.Serializable;
-import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.time.ZoneId;
 import java.util.ArrayList;
@@ -23,118 +27,97 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
-import org.apache.commons.pool2.impl.GenericObjectPool;
-import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ *
+ */
 public class NebulaClient implements Serializable {
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
+    private List<HostAddress> servers;
+    private long requestTimeout;
+    private final String userName;
+    private final Map<String, Object> authOptions;
+    private final int retryTimes;
+    private HostAddress host;
+    private GrpcConnection connection;
+    private long sessionId;
 
-    private final Logger log = LoggerFactory.getLogger(this.getClass());
+    private long intervalTimeMills;
 
-    private SessionPoolConfig sessionPoolConfig;
-    private GenericObjectPool<Session> pool;
-    private LoadBalancer loadBalancer;
+    private String workingGraph = null;
+    private ZoneId timeZone = null;
 
-    private final AtomicBoolean hasInit = new AtomicBoolean(false);
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
-    private int retryTimes;
-    private int intervalTime;
-    private long maxWaitMills;
-    private long timeoutMs;
-
-    private ZoneId zoneId;
-
-    // the default batch size for scan data, config for scan
-    private final int defaultBatchSize = 10;
-
-    // the default parallel for scan data, config for scan
     private int scanParallel;
 
-    private ExecutorService threadPool = null;
+    private AtomicBoolean isClosed = new AtomicBoolean(false);
 
-    private NebulaClient(Builder builder) throws IOErrorException {
-        if (hasInit.get()) {
-            return;
-        }
-        this.retryTimes = builder.retryTimes;
-        this.intervalTime = builder.intervalTime;
-        this.maxWaitMills = builder.maxWaitMills < 0 ? Long.MAX_VALUE : builder.maxWaitMills;
-        this.timeoutMs = builder.requestTimeout <= 0 ? Long.MAX_VALUE : builder.requestTimeout;
-        this.scanParallel = builder.maxSessionSize;
-        this.zoneId = builder.zoneId;
-
-        this.loadBalancer = new RoundRobinLoadBalancer(builder.address, this.timeoutMs,
-                builder.strictlyServerHealthy, builder.healthCheckTime);
-        if (!loadBalancer.isServersOK()) {
-            loadBalancer.close();
-            log.error("servers status is not ok, please check the server status or network.");
-            throw new IOErrorException(IOErrorException.E_SERVER_BAD, "Servers status is not ok.");
-        }
-
-        sessionPoolConfig = new SessionPoolConfig(builder.address, builder.userName,
-                builder.authOptions)
-                .setMaxSessionSize(builder.maxSessionSize)
-                .setMinSessionSize(builder.minSessionSize)
-                .setRequestTimeout(this.timeoutMs)
-                .setRetryTimes(this.retryTimes)
-                .setIntervalTime(this.intervalTime)
-                .setHealthCheckTime(builder.healthCheckTime)
-                .setBlockWhenExhausted(builder.blockWhenExhausted)
-                .setMaxWaitMills(this.maxWaitMills)
-                .setIdleEvictScheduleMills(builder.idleEvictScheduleMills)
-                .setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis)
-                .setStrictlyServerHealthy(builder.strictlyServerHealthy);
-        // pool config
-        GenericObjectPoolConfig objConfig = new GenericObjectPoolConfig();
-        objConfig.setMaxIdle(builder.maxSessionSize);
-        objConfig.setMinIdle(builder.minSessionSize);
-        objConfig.setMaxTotal(builder.maxSessionSize);
-        objConfig.setBlockWhenExhausted(builder.blockWhenExhausted);
-        objConfig.setMaxWaitMillis(this.maxWaitMills);
-        objConfig.setTimeBetweenEvictionRunsMillis(builder.idleEvictScheduleMills);
-        objConfig.setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis);
-        // just test the validation when session is idle. When session execute failed,
-        // there's retry mechanism to get new Session, so no need to test when borrow or return.
-        if (builder.healthCheckTime > 0) {
-            objConfig.setTestWhileIdle(true);
-            objConfig.setTimeBetweenEvictionRunsMillis(builder.healthCheckTime);
-        }
-
-        SessionPoolFactory factory = new SessionPoolFactory(sessionPoolConfig, loadBalancer);
-        pool = new GenericObjectPool<>(factory, objConfig);
-        hasInit.compareAndSet(false, true);
+    public static Builder builder(String addresses, String userName, String password) {
+        return new Builder(addresses, userName, password);
     }
 
+    public static Builder builder(String addresses, String userName) {
+        return new Builder(addresses, userName, null);
+    }
 
-    public ResultSet execute(String stmt) throws IOErrorException, NoValidSessionException {
-        return execute(stmt, this.timeoutMs);
+    private NebulaClient(NebulaClient.Builder builder)
+            throws AuthFailedException, IOErrorException {
+        this.servers = builder.address;
+        this.userName = builder.userName;
+        this.authOptions = builder.authOptions;
+        this.requestTimeout = builder.requestTimeoutMills;
+        this.intervalTimeMills = builder.intervalTimeMills;
+        this.retryTimes = builder.retryTimes;
+        this.workingGraph = builder.workingGraph;
+        this.timeZone = builder.timeZone;
+        this.scanParallel = builder.scanParallel;
+        initClient();
     }
 
     /**
-     * execute the graph statement
-     * There are four cases for execution result:
-     * 1. execution succeed or execution failed with the syntax and semantics error,
-     * then the session will be put back into the pool and the result will be returned.
-     * 2. execution failed with SESSION error, then the session will be invalidated
-     * and retried the execution.
-     * 3. execution failed with other type error, then the session will be put
-     * back into the pool and tried the execution.
-     * 4. execution exception for IOException, then the session will be invalidated
-     * and retried the execution.
+     * set working graph for Client SESSION
      *
-     * @param stmt graph statement
-     * @return {@link ResultSet}
+     * @param graphName graph name
+     * @return true if set succeed
      */
-    public ResultSet execute(String stmt, long timeoutMs)
-            throws IOErrorException, NoValidSessionException {
-        checkClosed();
+    public boolean setGraph(String graphName) {
+        try {
+            connection.execute(sessionId, "SESSION SET GRAPH `" + graphName + "`");
+        } catch (IOErrorException e) {
+            logger.error("set working graph failed", e);
+            return false;
+        }
+        this.workingGraph = graphName;
+        return true;
+    }
+
+
+    /**
+     * set time zone for Client Session
+     *
+     * @param zoneId time zone
+     * @return true if set succeed
+     */
+    public boolean setTimeZone(ZoneId zoneId) {
+        try {
+            connection.execute(sessionId, "SESSION SET TIME ZONE \"" + zoneId.getId() + "\"");
+        } catch (IOErrorException e) {
+            logger.error("set time zone failed", e);
+            return false;
+        }
+        this.timeZone = zoneId;
+        return true;
+    }
+
+    public ResultSet execute(String gql) throws IOErrorException {
+        return execute(gql, requestTimeout);
+    }
+
+    public synchronized ResultSet execute(String gql, long requestTimeout) throws IOErrorException {
         int tryTimes = 0;
-        boolean isBadSession = false;
         ResultSet resultSet = null;
 
         // execute times will be (retryTimes + 1)
@@ -142,46 +125,142 @@ public class NebulaClient implements Serializable {
             if (tryTimes > 1) {
                 sleep();
             }
-            Session session = getSession();
             try {
-                resultSet = session.execute(stmt, timeoutMs);
-                if (resultSet.isSucceeded()
-                        || resultSet.getErrorCode().isSemanticError()
-                        || resultSet.getErrorCode().isSyntaxError()) {
+                resultSet = new ResultSet(connection.execute(sessionId, gql, requestTimeout));
+                if (resultSet.isSucceeded() || !resultSet.getErrorCode().isRetryable()) {
                     return resultSet;
                 }
                 if (resultSet.getErrorCode().isSessionError()) {
-                    isBadSession = true;
+                    // when auth failed, just ignore it and return the last execution result.
+                    try {
+                        initClient();
+                    } catch (AuthFailedException e) {
+                        return resultSet;
+                    }
                 }
                 if (tryTimes <= retryTimes) {
-                    log.info("now retry the execute...");
+                    logger.info("retry the execute...");
                 }
             } catch (IOErrorException e) {
-                isBadSession = true;
-                loadBalancer.updateServersStatus();
                 if (tryTimes > retryTimes) {
                     // retry time is exhausted
                     throw e;
-                }
-            } finally {
-                if (isBadSession) {
-                    try {
-                        pool.invalidateObject(session);
-                    } catch (Exception e) {
-                        log.warn("invalidate session failed", e);
-                    }
-                } else {
-                    pool.returnObject(session);
                 }
             }
         }
         return resultSet;
     }
 
-    // not implemented.
+    /**
+     * get the SessionId of the Client
+     *
+     * @return session id
+     */
+    public long getSessionId() {
+        return sessionId;
+    }
+
+    /**
+     * get the NebulaGraph host address that this client is connecting to.
+     *
+     * @return NebulaGraph server host.
+     */
+    public String getHost() {
+        return host.toString();
+    }
+
+    /**
+     * get the Session Zone of the Client
+     *
+     * @return time zone
+     */
+    public ZoneId getTimeZone() {
+        return timeZone;
+    }
+
+    /**
+     * get the working graph of the Client
+     *
+     * @return working graph name
+     */
+    public String getWorkingGraph() {
+        return workingGraph;
+    }
+
+    /**
+     * ping the NebulaGraph server
+     *
+     * @return true when client can ping server succeed.
+     */
+    public boolean ping() {
+        try {
+            return connection.ping(sessionId);
+        } catch (IOErrorException e) {
+            logger.error("ping error for host {}", getHost(), e);
+            return false;
+        }
+    }
+
+    /**
+     * release and close the connection with NebulaGraph server.
+     */
+    public void close() {
+        if (isClosed.compareAndSet(false, true)) {
+            if (connection != null) {
+                connection.signout(sessionId);
+                connection.close();
+                connection = null;
+            }
+        }
+    }
+
+
+    private void initClient() throws AuthFailedException, IOErrorException {
+        // create connection with NebulaGraph Server
+        connection = new GrpcConnection();
+        int tryConnectTimes = servers.size();
+        while (tryConnectTimes-- > 0) {
+            try {
+                // TODO polling the address when retry.
+                Collections.shuffle(servers);
+                host = servers.get(tryConnectTimes);
+                connection.open(host, requestTimeout);
+                break;
+            } catch (Exception e) {
+                if (tryConnectTimes == 0) {
+                    logger.error("create NebulaClient failed.", e);
+                    throw e;
+                }
+            }
+        }
+
+        // auth for user
+        AuthResult authResult;
+        try {
+            authResult = connection.authenticate(userName, authOptions);
+        } catch (AuthFailedException e) {
+            logger.error("create NebulaClient failed.", e);
+            throw e;
+        }
+        sessionId = authResult.getSessionId();
+
+        // set the working graph and time zone
+        StringBuilder sessionSetStatement = new StringBuilder();
+        if (workingGraph != null) {
+            sessionSetStatement.append("SESSION SET GRAPH `").append(workingGraph).append("` ");
+        }
+        if (timeZone != null) {
+            sessionSetStatement.append("SESSION SET TIME ZONE \"").append(timeZone).append("\"");
+        }
+        if (!sessionSetStatement.toString().isEmpty()) {
+            connection.execute(sessionId, sessionSetStatement.toString());
+        }
+    }
+
+
     public ScanNodeResultIterator scanNode(String graphName, String nodeType) {
         List<Integer> parts = getAllParts();
-        return scanNode(graphName, nodeType, new ArrayList<>(), true, parts, defaultBatchSize);
+        return scanNode(graphName, nodeType, new ArrayList<>(), true, parts, DEFAULT_BATCH_SIZE);
     }
 
     /**
@@ -227,6 +306,7 @@ public class NebulaClient implements Serializable {
                 Collections.singletonList(part), batchSize);
     }
 
+
     /**
      * scan the data of specific nodeType
      * the result will contain primary key and specific return properties.
@@ -253,6 +333,7 @@ public class NebulaClient implements Serializable {
         return scanNode(graphName, nodeType, returnProperties, allProperties, parts, batchSize);
     }
 
+
     /**
      * scan the data of specific nodeType
      * the result will contain primary key and specific return properties.
@@ -274,13 +355,12 @@ public class NebulaClient implements Serializable {
                                             boolean allProperties,
                                             List<Integer> parts,
                                             int batchSize) {
-        initScanThreadPool();
         // get node type's all property names
         List<String> nodeProperties = null;
         try {
             nodeProperties = getNodeProperties(graphName, nodeType);
-        } catch (IOErrorException | NoValidSessionException e) {
-            log.error("get node schema failed.", e);
+        } catch (IOErrorException e) {
+            logger.error("get node schema failed.", e);
             throw new RuntimeException(e);
         }
 
@@ -300,15 +380,14 @@ public class NebulaClient implements Serializable {
             }
         }
 
-        return new ScanNodeResultIterator(pool, graphName, nodeType, propertyList,
-                parts, batchSize, threadPool, retryTimes, intervalTime, timeoutMs);
+        return new ScanNodeResultIterator(graphName, nodeType, propertyList,
+                parts, batchSize, scanParallel, servers, userName, authOptions, requestTimeout);
     }
 
 
-    // not implemented.
     public ScanEdgeResultIterator scanEdge(String graphName, String edgeType) {
         List<Integer> parts = getAllParts();
-        return scanEdge(graphName, edgeType, new ArrayList<>(), true, parts, defaultBatchSize);
+        return scanEdge(graphName, edgeType, new ArrayList<>(), true, parts, DEFAULT_BATCH_SIZE);
     }
 
 
@@ -355,7 +434,11 @@ public class NebulaClient implements Serializable {
         if (returnProperties == null) {
             allProperties = true;
         }
-        return scanEdge(graphName, edgeType, returnProperties, allProperties,
+        return scanEdge(
+                graphName,
+                edgeType,
+                returnProperties,
+                allProperties,
                 Collections.singletonList(part),
                 batchSize);
     }
@@ -379,7 +462,6 @@ public class NebulaClient implements Serializable {
                                            List<String> returnProperties,
                                            List<Integer> parts,
                                            int batchSize) {
-        initScanThreadPool();
         boolean allProperties = false;
         if (returnProperties == null) {
             allProperties = true;
@@ -408,13 +490,12 @@ public class NebulaClient implements Serializable {
                                             boolean allProperties,
                                             List<Integer> parts,
                                             int batchSize) {
-        initScanThreadPool();
         // get edge type's all property names
         List<String> edgeProperties = null;
         try {
             edgeProperties = getEdgeProperties(graphName, edgeType);
-        } catch (IOErrorException | NoValidSessionException e) {
-            log.error("get node schema failed.", e);
+        } catch (IOErrorException e) {
+            logger.error("get node schema failed.", e);
             throw new RuntimeException(e);
         }
 
@@ -425,8 +506,8 @@ public class NebulaClient implements Serializable {
         } else {
             propertyList.addAll(returnProperties);
         }
-        return new ScanEdgeResultIterator(pool, graphName, edgeType, propertyList,
-                parts, batchSize, threadPool, retryTimes, intervalTime, timeoutMs);
+        return new ScanEdgeResultIterator(graphName, edgeType, propertyList,
+                parts, batchSize, scanParallel, servers, userName, authOptions, requestTimeout);
     }
 
 
@@ -441,11 +522,11 @@ public class NebulaClient implements Serializable {
         try {
             resultSet = execute(showPartitions);
         } catch (Exception e) {
-            log.error("get all partitions error", e);
+            logger.error("get all partitions error", e);
             throw new RuntimeException("get all partitions error", e);
         }
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
-            log.error("get all partitions failed for {}", resultSet.getErrorMessage());
+            logger.error("get all partitions failed for {}", resultSet.getErrorMessage());
             throw new RuntimeException(
                     "get all partitions failed for " + resultSet.getErrorMessage());
         }
@@ -466,12 +547,12 @@ public class NebulaClient implements Serializable {
      * @return List of property name
      */
     private List<String> getNodeProperties(String graphName, String nodeType)
-            throws IOErrorException, NoValidSessionException {
+            throws IOErrorException {
         String graphType = getGraphType(graphName);
         String descNodeType = String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType);
         ResultSet resultSet = execute(descNodeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
-            log.error(String.format("get description of %s failed for %s", nodeType,
+            logger.error(String.format("get description of %s failed for %s", nodeType,
                     resultSet.getErrorMessage()));
             throw new IllegalArgumentException(String.format("node type %s does not exist in %s",
                     nodeType, graphName));
@@ -488,7 +569,7 @@ public class NebulaClient implements Serializable {
         }
 
         if (pks.isEmpty()) {
-            log.error("node type " + nodeType + " has no primary key.");
+            logger.error("node type " + nodeType + " has no primary key.");
             throw new RuntimeException("node type " + nodeType + " has no primary key");
         }
 
@@ -512,7 +593,7 @@ public class NebulaClient implements Serializable {
      * @return List of property name
      */
     private List<String> getEdgeProperties(String graphName, String edgeType)
-            throws IOErrorException, NoValidSessionException {
+            throws IOErrorException {
 
         String graphType = getGraphType(graphName);
 
@@ -521,7 +602,7 @@ public class NebulaClient implements Serializable {
                 graphType, edgeType);
         ResultSet resultSet = execute(descEdgeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
-            log.error(String.format("get description of %s failed for %s", edgeType,
+            logger.error(String.format("get description of %s failed for %s", edgeType,
                     resultSet.getErrorMessage()));
             throw new IllegalArgumentException(String.format("edge type %s does not exist in %s",
                     edgeType, graphName));
@@ -539,8 +620,7 @@ public class NebulaClient implements Serializable {
      * @param graphName NebulaGraph name
      * @return String
      */
-    private String getGraphType(String graphName) throws IOErrorException,
-            NoValidSessionException {
+    private String getGraphType(String graphName) throws IOErrorException {
         ResultSet resultSet = execute(String.format("DESCRIBE GRAPH %s", graphName));
         String graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
@@ -552,163 +632,41 @@ public class NebulaClient implements Serializable {
     }
 
     /**
-     * init the thread pool for scan.
-     * The max thread size is the value of maxSessionSize for pool
-     * When the number of parts to be scanned is greater than maxSessionSize, the maximum
-     * concurrency will be the maximum number of sessions that can be executed concurrently.
-     * When the number of parts is less than maxSessionSize, the upper limit of the thread pool is
-     * maxSessionSize. Threads will only be created when a task is submitted, so in the pool,
-     * Only parts number of threads will be created.
-     */
-    private void initScanThreadPool() {
-        if (threadPool == null) {
-            synchronized (this) {
-                if (threadPool == null) {
-                    threadPool = Executors.newFixedThreadPool(scanParallel);
-                }
-            }
-        }
-    }
-
-    /**
-     * close the client
-     */
-    public void close() {
-        if (!isClosed.get() && isClosed.compareAndSet(false, true)) {
-            loadBalancer.close();
-            if (pool != null && !pool.isClosed()) {
-                pool.close();
-            }
-
-            GrpcConnection.closeChannel();
-            if (threadPool != null && !threadPool.isShutdown()) {
-                threadPool.shutdown();
-            }
-        }
-    }
-
-    /**
-     * get available session
-     *
-     * @return Session
-     */
-    private Session getSession() throws NoValidSessionException {
-        checkClosed();
-        try {
-            Session session = pool.borrowObject(maxWaitMills);
-            if (zoneId != null) {
-                ResultSet resultSet = session.execute(
-                        "SESSION SET TIME ZONE \"" + zoneId + "\"", this.timeoutMs);
-                if (!resultSet.isSucceeded()) {
-                    log.error("failed to set time zone for {}", resultSet.getErrorMessage());
-                    throw new RuntimeException("failed to set timezone for "
-                            + resultSet.getErrorMessage());
-                }
-            }
-            return session;
-        } catch (Exception e) {
-            log.error("get session from pool failed.", e);
-            throw new NoValidSessionException(e.getMessage());
-        }
-    }
-
-    /**
-     * invalid broken session
-     */
-    private void invalidSession(Session session) {
-        try {
-            pool.invalidateObject(session);
-        } catch (Exception e) {
-            log.warn("set session to invalidate object failed.", e);
-        }
-    }
-
-
-    /**
      * sleep interval time
      */
     private void sleep() {
         try {
-            Thread.sleep(intervalTime);
+            Thread.sleep(intervalTimeMills);
         } catch (InterruptedException e) {
             // ignore
         }
     }
 
-    /**
-     * check if the client has been closed
-     *
-     * @throws RuntimeException if client has been closed.
-     */
-    private void checkClosed() {
-        if (isClosed.get()) {
-            throw new RuntimeException("NebulaClient has closed. Couldn't use again.");
-        }
-    }
-
-    /**
-     * internal class to build a {@link NebulaClient}
-     */
     public static class Builder {
         private final List<HostAddress> address;
         private final String userName;
         private final String password;
-
         private Map<String, Object> authOptions = new HashMap<>();
-        // define default value
-
-        // The max sessions in pool
-        private int maxSessionSize = 10;
-
-        // The min sessions in pool
-        private int minSessionSize = 1;
-
-        // socket timeout for request, unit: millisecond
-        private int requestTimeout = 0;
-
+        private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
         // retry times for failed execute
-        private int retryTimes = 0;
+        private int retryTimes = DEFAULT_RETRY_TIMES;
 
-        // interval time for retry, unit: millisecond
-        private int intervalTime = 0;
+        // interval time between retries
+        private long intervalTimeMills = DEFAULT_INTERVAL_TIME_MS;
 
-        // The healthCheckTime for schedule check the health of session, unit: millisecond
-        private int healthCheckTime = 300000;
+        private int scanParallel = DEFAULT_SCAN_PARALLEL;
 
-        // if block when session is exhausted, if false, throw exception.
-        private boolean blockWhenExhausted = false;
+        private String workingGraph = null;
+        private ZoneId timeZone = null;
 
-        // the max wait time if blockWhenExhausted is true. if value is less than 0, always wait.
-        // unit: millisecond
-        private long maxWaitMills = -1;
-
-        // the schedule time for test the idle session and evict it. if value is less than 0,
-        // never evict the idle sessions.
-        private long idleEvictScheduleMills = -1;
-
-        // the min idle time for idle session
-        private long minEvictableIdleTimeMillis = 1000L * 60L * 30L;
-
-        // if need all servers are strictly healthy.
-        // if true, all addresses must be available, if false, at least one address is available.
-        private boolean strictlyServerHealthy = false;
-
-        // the time zone, used to parse ZonedTime and ZonedDatetime
-        private ZoneId zoneId = null;
-
-
-        public Builder(String address, String userName, String password)
-                throws UnknownHostException {
-            this.address = validateAddress(address);
+        public Builder(String addresses, String userName, String password) {
+            try {
+                this.address = AddressUtil.validateAddress(addresses);
+            } catch (UnknownHostException e) {
+                throw new RuntimeException(e);
+            }
             this.userName = userName;
             this.password = password;
-        }
-
-        public Builder(String address, String userName)
-                throws UnknownHostException {
-            this.address = validateAddress(address);
-            this.userName = userName;
-            this.password = null;
         }
 
         public Builder setAuthOptions(Map<String, Object> authOptions) {
@@ -718,81 +676,34 @@ public class NebulaClient implements Serializable {
             return this;
         }
 
-        public Builder setMaxSessionSize(int maxSessionSize) {
-            if (maxSessionSize < 1) {
-                throw new IllegalArgumentException("maxSessionSize cannot be less than 1.");
-            }
-            this.maxSessionSize = maxSessionSize;
-            return this;
-        }
-
-        public Builder setMinSessionSize(int minSessionSize) {
-            if (minSessionSize < 0) {
-                throw new IllegalArgumentException("minSessionSize cannot be less than 0.");
-            }
-            this.minSessionSize = minSessionSize;
-            return this;
-        }
-
-        public Builder setRequestTimeoutMills(int requestTimeout) {
-            if (requestTimeout < 0) {
-                throw new IllegalArgumentException("request timeout cannot be less than 0.");
-            }
-            this.requestTimeout = requestTimeout;
+        public Builder setRequestTimeoutMills(long requestTimeoutMills) {
+            this.requestTimeoutMills =
+                    requestTimeoutMills < 0 ? Long.MAX_VALUE : requestTimeoutMills;
             return this;
         }
 
         public Builder setRetryTimes(int retryTimes) {
-            if (retryTimes < 0) {
-                throw new IllegalArgumentException("retryTimes cannot be less than 0.");
-            }
-            this.retryTimes = retryTimes;
+            this.retryTimes = Math.max(retryTimes, 0);
             return this;
         }
 
-        public Builder setIntervalTimeMills(int intervalTime) {
-            if (intervalTime < 0) {
-                throw new IllegalArgumentException("intervalTime cannot be less than 0.");
-            }
-            this.intervalTime = intervalTime;
+        public Builder setIntervalTimeMills(long intervalTimeMills) {
+            this.intervalTimeMills = Math.max(intervalTimeMills, 0);
             return this;
         }
 
-        public Builder setHealthCheckTimeMills(int healthCheckTime) {
-            if (healthCheckTime < 0) {
-                throw new IllegalArgumentException("healthCheckTime cannot be less than 0.");
-            }
-            this.healthCheckTime = healthCheckTime;
+        public Builder setScanParallel(int parallel) {
+            this.scanParallel = parallel;
             return this;
         }
 
-        public Builder setBlockWhenExhausted(boolean blockWhenExhausted) {
-            this.blockWhenExhausted = blockWhenExhausted;
-            return this;
-        }
-
-        public Builder setMaxWaitMills(long maxWaitMills) {
-            this.maxWaitMills = maxWaitMills;
-            return this;
-        }
-
-        public Builder setIdleEvictScheduleMills(long idleEvictScheduleMills) {
-            this.idleEvictScheduleMills = idleEvictScheduleMills;
-            return this;
-        }
-
-        public Builder setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
-            this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
-            return this;
-        }
-
-        public Builder setStrictlyServerHealthy(boolean strictlyServerHealthy) {
-            this.strictlyServerHealthy = strictlyServerHealthy;
+        public Builder setWorkingGraph(String graphName) {
+            this.workingGraph = graphName;
             return this;
         }
 
         public Builder setTimeZone(ZoneId zoneId) {
-            this.zoneId = zoneId;
+            this.timeZone = zoneId;
             return this;
         }
 
@@ -801,97 +712,21 @@ public class NebulaClient implements Serializable {
                 throw new IllegalArgumentException("Graph addresses cannot be empty.");
             }
             if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("user name cannot be blank.");
+                throw new IllegalArgumentException("user name cannot be empty.");
             }
-            if (password == null || password.trim().isEmpty()) {
-                throw new IllegalArgumentException("password cannot be blank.");
+            if (authOptions.isEmpty() && (password == null || password.trim().isEmpty())) {
+                throw new IllegalArgumentException(
+                        "auth options and password cannot be empty at the same time.");
             }
         }
 
-        /**
-         * construct a NebulaClient with configs
-         */
-        public NebulaClient build() throws IOErrorException {
+        public NebulaClient build() throws AuthFailedException, IOErrorException {
             check();
             if (password != null) {
-                this.authOptions.put("password", password);
+                authOptions.put("password", password);
             }
             return new NebulaClient(this);
         }
 
-        /**
-         * validate the graph addresses
-         *
-         * @param addresses graph server addresses, multiple addresses are split by comma
-         * @return List of HostAddress
-         * @throws IllegalArgumentException if address id not split by comma or port is beyond range
-         * @throws UnknownHostException     if address host is wrong
-         */
-        private List<HostAddress> validateAddress(String addresses) throws UnknownHostException {
-            List<HostAddress> newAddrs = new ArrayList<>();
-            for (String addr : addresses.split(",")) {
-                String[] hostAndPort = addr.split(":");
-                if (hostAndPort.length < 2) {
-                    throw new IllegalArgumentException("wrong server address " + addr);
-                }
-                String host = hostAndPort[0];
-                int port = Integer.parseInt(hostAndPort[1]);
-
-                // get all host name
-                InetAddress[] inetAddresses = InetAddress.getAllByName(host);
-                for (InetAddress inetAddress : inetAddresses) {
-                    String ip = inetAddress.getHostAddress();
-                    if (!(InetAddresses.isInetAddress(ip)
-                            || InetAddresses.isUriInetAddress(ip)
-                            || InternetDomainName.isValid(ip))
-                            || (port <= 0 || port >= 65535)) {
-                        throw new IllegalArgumentException(
-                                String.format("host %s and port %d is illegal.", ip, port));
-                    }
-                    newAddrs.add(new HostAddress(ip, port));
-                }
-            }
-            return newAddrs;
-        }
-    }
-
-    public static Builder builder(String address, String userName, String password)
-            throws UnknownHostException {
-        return new Builder(address, userName, password);
-    }
-
-
-    /**
-     * get configs of NebulaClient
-     */
-    public SessionPoolConfig getConfig() {
-        return sessionPoolConfig;
-    }
-
-    /**
-     * get the active sessions of NebulaClient
-     *
-     * @return number of sessions which are being used
-     */
-    public int getActiveSessions() {
-        return pool.getNumActive();
-    }
-
-    /**
-     * get the idle sessions of NebulaClient
-     *
-     * @return number of sessions which are idle
-     */
-    public int getIdleSessions() {
-        return pool.getNumIdle();
-    }
-
-    /**
-     * get the execute requests waiting to get session
-     *
-     * @return number of execute requests waiting to get session
-     */
-    public int getWaiters() {
-        return pool.getNumWaiters();
     }
 }

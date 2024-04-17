@@ -373,6 +373,10 @@ public enum ErrorCode {
         }
     }
 
+    public boolean isRetryable() {
+        return isSessionError() || isRpcError() || isRaftError();
+    }
+
     public boolean isSemanticError() {
         return code.startsWith("NS");
     }

@@ -7,6 +7,7 @@ package com.vesoft.nebula.client.scan;
 
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
@@ -36,13 +37,10 @@ public class ScanTest {
             client = NebulaClient.builder(addresses, user, passwd)
                     .setRequestTimeoutMills(3000)
                     .setRetryTimes(3)
-                    .setMaxSessionSize(1)
-                    .setMinSessionSize(0)
-                    .setHealthCheckTimeMills(5000)
                     .build();
             ResultSet resultSet = client.execute("return 1");
             Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);
-        } catch (UnknownHostException | IOErrorException | NoValidSessionException e) {
+        } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
         // MockGraph.mockGraphData();

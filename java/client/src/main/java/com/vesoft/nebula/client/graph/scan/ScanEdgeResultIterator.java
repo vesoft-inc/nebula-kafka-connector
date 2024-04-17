@@ -5,33 +5,35 @@
 
 package com.vesoft.nebula.client.graph.scan;
 
+import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.data.ValueWrapper;
-import com.vesoft.nebula.client.graph.net.Session;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import org.apache.commons.pool2.impl.GenericObjectPool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ScanEdgeResultIterator extends ScanResultIterator {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScanNodeResultIterator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScanNodeResultIterator.class);
 
     private static final String SCAN_EDGE_TEMPLATE =
-            "USE %s CALL cursor_edge_scan(\"%s\",\"%s\",%s,%d,\"%s\", %d) return *";
+        "USE %s CALL cursor_edge_scan(\"%s\",\"%s\",%s,%d,\"%s\", %d) return *";
 
-    public ScanEdgeResultIterator(GenericObjectPool<Session> pool, String graphName,
-                                  String label, List<String> propNames, List<Integer> parts,
-                                  int batchSize, ExecutorService threadPool, int retryTimes,
-                                  int intervalTime, long timeoutMs) {
-        super(pool, graphName, label, propNames, parts, batchSize, threadPool, retryTimes,
-                intervalTime, timeoutMs);
+    public ScanEdgeResultIterator(String graphName,
+                                  String label,
+                                  List<String> propNames,
+                                  List<Integer> parts,
+                                  int batchSize,
+                                  int parallel,
+                                  List<HostAddress> servers,
+                                  String userName,
+                                  Map<String, Object> authOptions,
+                                  long requestTimeoutMs) {
+        super(graphName, label, propNames, parts, batchSize,
+            parallel, servers, userName, authOptions, requestTimeoutMs);
     }
 
 
@@ -40,9 +42,9 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
             throw new NoSuchElementException("iterator has no more data");
         }
         final List<ResultSet> results =
-                Collections.synchronizedList(new ArrayList<>(partCursor.size()));
+            Collections.synchronizedList(new ArrayList<>(partCursor.size()));
         List<Exception> exceptions =
-                Collections.synchronizedList(new ArrayList<>(partCursor.size()));
+            Collections.synchronizedList(new ArrayList<>(partCursor.size()));
         CountDownLatch countDownLatch = new CountDownLatch(partCursor.size());
         for (Map.Entry<Integer, String> partCur : partCursor.entrySet()) {
             threadPool.submit(() -> {
@@ -54,18 +56,18 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
                         partCursor.put(partCur.getKey(), cursor);
                         results.add(result);
                     } else {
-                        LOGGER.error(String.format("Scan part %d of edge %s failed for %s, "
-                                        + "scan again in the next next()",
-                                partCur.getKey(),
-                                labelName,
-                                result.getErrorMessage()));
+                        logger.error(String.format("Scan part %d of edge %s failed for %s, "
+                                + "scan again in the next next()",
+                            partCur.getKey(),
+                            labelName,
+                            result.getErrorMessage()));
                         exceptions.add(new Exception(String.format("part %d of %s scan error: %s",
-                                partCur.getKey(), labelName, result.getErrorMessage())));
+                            partCur.getKey(), labelName, result.getErrorMessage())));
                     }
                 } catch (Exception e) {
-                    LOGGER.error(String.format("Scan node error for %s", e.getMessage()), e);
+                    logger.error(String.format("Scan node error for %s", e.getMessage()), e);
                     exceptions.add(new Exception(String.format("part %d of %s scan failed: %s",
-                            partCur.getKey(), labelName, e.getMessage()), e));
+                        partCur.getKey(), labelName, e.getMessage()), e));
                 } finally {
                     countDownLatch.countDown();
                 }
@@ -75,7 +77,7 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
         try {
             countDownLatch.await();
         } catch (InterruptedException interruptedException) {
-            LOGGER.error("scan interrupted:", interruptedException);
+            logger.error("scan interrupted:", interruptedException);
             throw new RuntimeException("scan interrupted", interruptedException);
         }
 

@@ -6,19 +6,26 @@
 package com.vesoft.nebula.client.graph.scan;
 
 import com.vesoft.nebula.client.graph.data.ExtraInfo;
+import com.vesoft.nebula.client.graph.data.HostAddress;
 import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.net.Session;
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
-import org.apache.commons.pool2.impl.GenericObjectPool;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class ScanResultIterator implements Serializable {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ScanResultIterator.class);
+    private static final Logger logger = LoggerFactory.getLogger(ScanResultIterator.class);
+
+    String serversAddress;
+    String userName;
+    Map<String, Object> authOptions;
+    long requestTimeout;
 
     protected boolean hasNext = true;
 
@@ -26,35 +33,35 @@ public class ScanResultIterator implements Serializable {
 
     protected final String graphName;
     protected final String labelName;
-
-
-    protected final GenericObjectPool<Session> pool;
-
     protected List<String> propNames;
     protected int batchSize;
-
     protected final ExecutorService threadPool;
 
-    protected final int retryTimes;
-    protected final int intervalTime;
-    protected final long timeoutMs;
-
-    protected ScanResultIterator(GenericObjectPool<Session> pool, String graphName,
-                                 String labelName, List<String> propNames, List<Integer> parts,
-                                 int batchSize, ExecutorService threadPool, int retryTimes,
-                                 int intervalTime, long timeoutMs) {
+    protected ScanResultIterator(String graphName,
+                                 String labelName,
+                                 List<String> propNames,
+                                 List<Integer> parts,
+                                 int batchSize,
+                                 int parallel,
+                                 List<HostAddress> servers,
+                                 String userName,
+                                 Map<String, Object> authOptions,
+                                 long requestTimeout) {
         this.graphName = graphName;
         this.labelName = labelName;
-        this.pool = pool;
         this.propNames = propNames;
         this.batchSize = batchSize;
         for (int part : parts) {
             partCursor.put(part, "");
         }
-        this.threadPool = threadPool;
-        this.retryTimes = retryTimes;
-        this.intervalTime = intervalTime;
-        this.timeoutMs = timeoutMs;
+        this.threadPool = Executors.newFixedThreadPool(parallel);
+        this.serversAddress = servers
+                .stream()
+                .map(HostAddress::toString)
+                .collect(Collectors.joining(","));
+        this.userName = userName;
+        this.authOptions = authOptions;
+        this.requestTimeout = requestTimeout;
     }
 
     /**
@@ -89,23 +96,15 @@ public class ScanResultIterator implements Serializable {
         // construct the scan producer
         String producer = String.format(scanTemplate, graphName, graphName, labelName,
                 getPropertyListString(), partCur.getKey(), partCur.getValue(), batchSize);
-        Session session = null;
+        NebulaClient client = null;
         ResultSet result;
-        try {
-            session = pool.borrowObject(Long.MAX_VALUE);
-            result = session.execute(producer, timeoutMs);
-            int retry = retryTimes;
-            while (retry > 0) {
-                retry--;
-                Thread.sleep(intervalTime);
-                result = session.execute(producer, timeoutMs);
-                if (result.isSucceeded()) {
-                    break;
-                }
-            }
-        } finally {
-            pool.returnObject(session);
-        }
+        client = NebulaClient
+                .builder(serversAddress, userName)
+                .setAuthOptions(authOptions)
+                .setRequestTimeoutMills(requestTimeout)
+                .setRetryTimes(0)
+                .build();
+        result = client.execute(producer);
         return result;
     }
 
