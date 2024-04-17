@@ -75,7 +75,7 @@ public class ResultSet {
                 valueStr.add(v.toString());
             }
             return String.format("ColumnName: %s, Values: %s",
-                columnNames.toString(), valueStr.toString());
+                    columnNames.toString(), valueStr.toString());
         }
 
         /**
@@ -87,7 +87,7 @@ public class ResultSet {
         public ValueWrapper get(int index) {
             if (index >= columnNames.size()) {
                 throw new IllegalArgumentException(
-                    String.format("Cannot get field because the key '%d' out of range", index));
+                        String.format("Cannot get field because the key '%d' out of range", index));
             }
             return this.colValues.get(index);
         }
@@ -102,8 +102,8 @@ public class ResultSet {
             int index = columnNames.indexOf(columnName);
             if (index == -1) {
                 throw new IllegalArgumentException(
-                    "Cannot get field because the columnName '"
-                        + columnName + "' is not exists");
+                        "Cannot get field because the columnName '"
+                                + columnName + "' is not exists");
             }
             return this.colValues.get(index);
         }
@@ -161,7 +161,7 @@ public class ResultSet {
      */
     public boolean isSucceeded() {
         return ErrorCode.SUCCESSFUL_COMPLETION.code.equals(
-            response.getError().getCode().toString(charset));
+                response.getStatus().getCode().toString(charset));
     }
 
     /**
@@ -181,7 +181,7 @@ public class ResultSet {
      */
     public ErrorCode getErrorCode() {
         return ErrorCode.find(
-            response.getError().getCode().toString(charset));
+                response.getStatus().getCode().toString(charset));
     }
 
     /**
@@ -190,7 +190,7 @@ public class ResultSet {
      * @return String
      */
     public String getErrorMessage() {
-        return response.getError().getMessage().toString(charset);
+        return response.getStatus().getMessage().toString(charset);
     }
 
 
@@ -297,7 +297,7 @@ public class ResultSet {
     @Override
     public String toString() {
         if (!isSucceeded()) {
-            return response.getError().getMessage().toString(charset);
+            return response.getStatus().getMessage().toString(charset);
         }
         List<String> rowStrs = new ArrayList<>();
         while (hasNext()) {
@@ -308,7 +308,6 @@ public class ResultSet {
             String values = "[" + String.join(",", valueStrs) + "]";
             rowStrs.add(values);
         }
-        return String.format("ColumnName: %s,\n Rows: %s",
-            columnNames.toString(), rowStrs.toString());
+        return String.format("ColumnName: %s,\n Rows: %s", columnNames, rowStrs);
     }
 }

@@ -205,13 +205,13 @@ message RequestHeader {
     int64 cluster_id = 1;
 }
 
-message Error {
-    int32  code    = 1;
-    bytes  message = 2;
+message Status {
+    bytes code    = 1;
+    bytes message = 2;
 }
 
 message ResponseHeader {
-    Error       error  = 1;
+    Status      status = 1;
     HostAddress leader = 2;
 }
 

@@ -83,7 +83,7 @@ public class GrpcConnection extends Connection {
     public boolean ping(long sessionID) throws IOErrorException {
         ExecuteResponse response = execute(sessionID, "RETURN 1");
         return ErrorCode.SUCCESSFUL_COMPLETION.code
-            .equals(response.getError().getCode().toString(charset));
+            .equals(response.getStatus().getCode().toString(charset));
     }
 
     public AuthResult authenticate(String user, Map<String, Object> authOptions)
@@ -107,9 +107,9 @@ public class GrpcConnection extends Connection {
             AuthResponse resp = stub
                 .withDeadlineAfter(requestTimeout, TimeUnit.MILLISECONDS)
                 .authenticate(authReq);
-            String code = resp.getError().getCode().toString(charset);
+            String code = resp.getStatus().getCode().toString(charset);
             if (!ErrorCode.SUCCESSFUL_COMPLETION.code.equals(code)) {
-                throw new AuthFailedException(resp.getError().getMessage().toString(charset));
+                throw new AuthFailedException(resp.getStatus().getMessage().toString(charset));
             }
             return new AuthResult(resp.getSessionId());
         } catch (Exception e) {

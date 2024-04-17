@@ -24,7 +24,6 @@
 syntax = "proto3";
 
 import "common.proto";
-
 /**
  * Data structures defined in this file is mainly for data exchanging.
  * On the server side, the compute engine has its own data representations,
@@ -56,11 +55,6 @@ message Row {
 message ResultTable {
     repeated bytes column_names = 1;
     repeated Row   records      = 2;
-}
-
-message Error {
-    bytes code    = 1;
-    bytes message = 2;
 }
 
 message QueryStats {
@@ -102,10 +96,10 @@ message ExecuteRequest {
 }
 
 message ExecuteResponse {
-    Error       error   = 1;
-    ResultTable result  = 2;
-    Summary     summary = 3;
-    bytes       cursor  = 4;
+    nebula.proto.common.Status status  = 1;
+    ResultTable                result  = 2;
+    Summary                    summary = 3;
+    bytes                      cursor  = 4;
 }
 
 message AuthRequest {
@@ -115,8 +109,8 @@ message AuthRequest {
 }
 
 message AuthResponse {
-    Error error      = 1;
-    int64 session_id = 2;
+    nebula.proto.common.Status status     = 1;
+    int64                      session_id = 2;
 }
 
 message SignoutRequest {
