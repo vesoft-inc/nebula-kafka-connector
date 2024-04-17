@@ -8,6 +8,7 @@ Use `ngctl [command] [flag]` to execute meta command.
 
 ```bash
 Execute meta command in cli mode. Use 'ngctl -h' to see usage.
+	**Notice:** You should login meta server first
 
 Usage:
   ngctl [flags]
@@ -18,7 +19,10 @@ Available Commands:
   completion  Generate the autocompletion script for the specified shell
   help        Help about any command
   login       Login meta server.
+  logout      Logout meta server.
+  passwd      Change the password of the user.
   service     Process service command
+  user        Process user management command
 ```
 
 ## 连接Meta
@@ -58,6 +62,7 @@ Usage:
 
 Available Commands:
   create      Create cluster in meta server.
+  drop        drop cluster storage part.
   init        Init cluster storage part.
   show        Show cluster, show all if no cluster name specified.
 ```
@@ -113,7 +118,7 @@ ngctl cluster show -c test_cluster
 添加 storaged 后，需要初始化集群，主要是初始化 partition 分布
 
 ```bash
-meta-console cluster init --cluster [clustername]
+ngctl cluster init --cluster [clustername]
 
 Usage:
   ngctl cluster init [flags]
@@ -125,15 +130,33 @@ Global Flags:
   -c, --cluster string   Cluster name
 ```
 
+示例
+
 ```bash
 ngctl cluster init -c testcluster
 ```
 
 ### 删除集群
 
-（待实现）
+```bash
+ngctl cluster drop --cluster [clustername]
 
-*TODO*
+Usage:
+  ngctl cluster drop [flags]
+
+Flags:
+  -f, --force   force drop cluster
+  -h, --help    help for drop
+
+Global Flags:
+  -c, --cluster string   Cluster name
+```
+
+示例
+
+```bash
+ngctl cluster drop -c testcluster
+```
 
 ## 服务
 
@@ -222,3 +245,32 @@ Global Flags:
 ```bash
 ngctl service show -c testcluster
 ```
+
+## 用户操作
+
+```bash
+Execute user management in cli mode.
+
+Usage:
+  ngctl user [flags]
+  ngctl user [command]
+
+Available Commands:
+  alter       Alter user in meta server.
+  create      Create user in meta server.
+  disable     disable user in meta server.
+  drop        Drop user in meta server.
+  enable      enable user in meta server.
+  show        show user in meta server.
+```
+
+### 创建用户
+
+可以用 password 创建，也可以制定 plugin 的方式创建。（目前只有一种 password 的 plugin）
+
+```bash
+./ngctl login -H 192.168.8.6 -P 2285 -p NebulaGraph01
+ngctl user create -u harris2 --auth-type password --auth-info '{"password":"NebulaGraph01"}'
+```
+
+其他用户操作，参考 -h。

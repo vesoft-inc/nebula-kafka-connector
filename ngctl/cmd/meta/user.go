@@ -16,7 +16,6 @@ type userFlagsType struct {
 	password string
 	authType string
 	authInfo string
-	disable  bool
 }
 
 var userFlags = userFlagsType{}
@@ -34,7 +33,7 @@ var createUserCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create user in meta server.",
 	Long: `ngctl user create --user [username] --password [password] or 
-ngctl user create --user [username] --authType [authType] --authInfo [authInfo]`,
+ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -90,8 +89,8 @@ var dropUserCmd = &cobra.Command{
 var alterUserCmd = &cobra.Command{
 	Use:   "alter",
 	Short: "Alter user in meta server.",
-	Long: `ngctl user alter --user [username] --authInfo [authInfo] or
-ngctl user alter --user [username] --disable
+	Long: `ngctl user alter --user [username] --auth-info [authInfo] or
+ngctl user alter --user [username] --password [password]
 	`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
@@ -101,9 +100,6 @@ ngctl user alter --user [username] --disable
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if userFlags.password != "" && userFlags.authInfo != "" {
-			return fmt.Errorf("password and authInfo are mutually exclusive")
-		}
 		if userFlags.password != "" {
 			m := make(map[string]string)
 			m["password"] = userFlags.password
@@ -114,13 +110,10 @@ ngctl user alter --user [username] --disable
 			userFlags.authType = "password"
 			userFlags.authInfo = string(bs)
 		}
-		if userFlags.authInfo == "" {
-			userFlags.authInfo = "{}"
-		}
 		req := meta.NewAlterUserReq(
 			userFlags.user,
 			userFlags.authInfo,
-			!userFlags.disable,
+			true, //always active for alter user
 		)
 		if err := metaClient.AlterUser(req); err != nil {
 			return err
@@ -152,7 +145,7 @@ var showUserCmd = &cobra.Command{
 		if err != nil {
 			return err
 		}
-		header := []string{"Name", "Active", "Auth Type", "Created Time", "Last Updated Time", "Last Login Time"}
+		header := []string{"Name", "Active", "Auth Type", "Auth Info", "Created Time", "Last Updated Time", "Last Login Time", "Disabled Time"}
 		data := make([][]string, 0)
 		for _, u := range resp.Users {
 			row := make([]string, 0)
@@ -160,12 +153,14 @@ var showUserCmd = &cobra.Command{
 			if u.Active {
 				row = append(row, "Y")
 			} else {
-				row = append(row, fmt.Sprintf("%s/%s", "N", formatTime(u.DisabledTime)))
+				row = append(row, "N")
 			}
 			row = append(row, u.AuthType)
+			row = append(row, u.AuthInfo)
 			row = append(row, fmt.Sprintf("%s", formatTime(u.CreatedTime)))
 			row = append(row, fmt.Sprintf("%s", formatTime(u.LastUpdatedTime)))
 			row = append(row, fmt.Sprintf("%s", formatTime(u.LastLoginTime)))
+			row = append(row, fmt.Sprintf("%s", formatTime(u.DisabledTime)))
 			data = append(data, row)
 		}
 		// order by user name
@@ -177,12 +172,60 @@ var showUserCmd = &cobra.Command{
 	},
 }
 
+var disableUserCmd = &cobra.Command{
+	Use:   "disable",
+	Short: "disable user in meta server.",
+	Long:  `ngctl user disable --user aa`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return metaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		metaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+
+		req := meta.NewAlterUserReq(userFlags.user, "", false)
+		if err := metaClient.AlterUser(req); err != nil {
+			return err
+		}
+
+		fmt.Fprintln(metaOutput, "disable user successfully")
+		return nil
+	},
+}
+
+var enableUserCmd = &cobra.Command{
+	Use:   "enable",
+	Short: "enable user in meta server.",
+	Long:  `ngctl user enable --user aa`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return metaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		metaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+
+		req := meta.NewAlterUserReq(userFlags.user, "", true)
+		if err := metaClient.AlterUser(req); err != nil {
+			return err
+		}
+
+		fmt.Fprintln(metaOutput, "enable user successfully")
+		return nil
+	},
+}
+
 func init() {
 	rootCmd.AddCommand(userCmd)
 	userCmd.AddCommand(createUserCmd)
 	userCmd.AddCommand(dropUserCmd)
 	userCmd.AddCommand(alterUserCmd)
 	userCmd.AddCommand(showUserCmd)
+	userCmd.AddCommand(disableUserCmd)
+	userCmd.AddCommand(enableUserCmd)
 
 	createUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	createUserCmd.Flags().StringVarP(&userFlags.password, "password", "p", "", "User password")
@@ -198,8 +241,14 @@ func init() {
 	alterUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	alterUserCmd.Flags().StringVarP(&userFlags.password, "password", "p", "", "User password")
 	alterUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
-	alterUserCmd.Flags().BoolVar(&userFlags.disable, "disable", false, "User disable")
 	alterUserCmd.MarkFlagRequired("user")
+	alterUserCmd.MarkFlagsMutuallyExclusive("password", "auth-info")
 
 	showUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "Users, e.g. 'aa,bb'")
+
+	disableUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
+	disableUserCmd.MarkFlagRequired("user")
+
+	enableUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
+	enableUserCmd.MarkFlagRequired("user")
 }

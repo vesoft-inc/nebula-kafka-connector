@@ -1,22 +1,22 @@
 package nebula_ng
 
 import (
+	"net"
 	"strconv"
 	"strings"
 )
 
 func parseHostPort(address string) (string, int, error) {
-	hostPort := strings.Split(address, ":")
-	if len(hostPort) != 2 {
-		return "", 0, errAddressNotValid(address, "")
-	}
-	host := hostPort[0]
-	port := hostPort[1]
-	pInt, err := strconv.Atoi(port)
+	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return "", 0, errAddressNotValid(address, "port is not valid")
+		return "", 0, errAddressNotValid(address, err.Error())
 	}
-	return host, pInt, nil
+	p, err := strconv.Atoi(port)
+	if err != nil {
+		return "", 0, errAddressNotValid(address, err.Error())
+	}
+
+	return host, p, nil
 }
 
 func parseAddresses(addresses string) ([]*hostAddress, error) {

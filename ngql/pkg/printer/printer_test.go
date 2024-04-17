@@ -11,15 +11,15 @@ type dummyPlan struct{}
 
 var _ nebula.PlanInfo = &dummyPlan{}
 
-func (d *dummyPlan) Id() []byte {
+func (d *dummyPlan) Id() string {
 	panic("not implemented")
 }
 
-func (d *dummyPlan) Name() []byte {
-	return []byte("dummy")
+func (d *dummyPlan) Name() string {
+	return "dummy"
 }
 
-func (d *dummyPlan) Details() []byte {
+func (d *dummyPlan) Details() string {
 	panic("not implemented")
 }
 
@@ -78,6 +78,6 @@ func (d *dummyPlan) Children() []nebula.PlanInfo {
 func TestGetField(t *testing.T) {
 	p := &dummyPlan{}
 	v := fieldValue(p, "Name")
-	assert.Equal(t, []byte("dummy"), v)
+	assert.Equal(t, "dummy", v)
 
 }

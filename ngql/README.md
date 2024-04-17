@@ -74,7 +74,7 @@ Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="
 
     - try `./ngql` in interactive mode directly.
 
-    - And try `./ngql -e 'show hosts'` for the direct script mode.
+    - And try `./ngql -e 'show graphs'` for the direct script mode.
 
     - And try `./ngql -f demo.nGQL` for the script file mode.
 
