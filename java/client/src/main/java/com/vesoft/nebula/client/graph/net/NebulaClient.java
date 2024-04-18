@@ -6,9 +6,7 @@
 package com.vesoft.nebula.client.graph.net;
 
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BATCH_SIZE;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_INTERVAL_TIME_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_RETRY_TIMES;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
 
 import com.vesoft.nebula.client.graph.data.HostAddress;
@@ -21,7 +19,6 @@ import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.client.graph.utils.AddressUtil;
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -41,15 +38,9 @@ public class NebulaClient implements Serializable {
     private long requestTimeout;
     private final String userName;
     private final Map<String, Object> authOptions;
-    private final int retryTimes;
     private HostAddress host;
     private GrpcConnection connection;
     private long sessionId;
-
-    private long intervalTimeMills;
-
-    private String workingGraph = null;
-    private ZoneId timeZone = null;
 
     private int scanParallel;
 
@@ -69,86 +60,18 @@ public class NebulaClient implements Serializable {
         this.userName = builder.userName;
         this.authOptions = builder.authOptions;
         this.requestTimeout = builder.requestTimeoutMills;
-        this.intervalTimeMills = builder.intervalTimeMills;
-        this.retryTimes = builder.retryTimes;
-        this.workingGraph = builder.workingGraph;
-        this.timeZone = builder.timeZone;
         this.scanParallel = builder.scanParallel;
         initClient();
     }
 
-    /**
-     * set working graph for Client SESSION
-     *
-     * @param graphName graph name
-     * @return true if set succeed
-     */
-    public boolean setGraph(String graphName) {
-        try {
-            connection.execute(sessionId, "SESSION SET GRAPH `" + graphName + "`");
-        } catch (IOErrorException e) {
-            logger.error("set working graph failed", e);
-            return false;
-        }
-        this.workingGraph = graphName;
-        return true;
-    }
-
-
-    /**
-     * set time zone for Client Session
-     *
-     * @param zoneId time zone
-     * @return true if set succeed
-     */
-    public boolean setTimeZone(ZoneId zoneId) {
-        try {
-            connection.execute(sessionId, "SESSION SET TIME ZONE \"" + zoneId.getId() + "\"");
-        } catch (IOErrorException e) {
-            logger.error("set time zone failed", e);
-            return false;
-        }
-        this.timeZone = zoneId;
-        return true;
-    }
 
     public ResultSet execute(String gql) throws IOErrorException {
         return execute(gql, requestTimeout);
     }
 
     public synchronized ResultSet execute(String gql, long requestTimeout) throws IOErrorException {
-        int tryTimes = 0;
-        ResultSet resultSet = null;
-
-        // execute times will be (retryTimes + 1)
-        while (tryTimes++ < retryTimes + 1) {
-            if (tryTimes > 1) {
-                sleep();
-            }
-            try {
-                resultSet = new ResultSet(connection.execute(sessionId, gql, requestTimeout));
-                if (resultSet.isSucceeded() || !resultSet.getErrorCode().isRetryable()) {
-                    return resultSet;
-                }
-                if (resultSet.getErrorCode().isSessionError()) {
-                    // when auth failed, just ignore it and return the last execution result.
-                    try {
-                        initClient();
-                    } catch (AuthFailedException e) {
-                        return resultSet;
-                    }
-                }
-                if (tryTimes <= retryTimes) {
-                    logger.info("retry the execute...");
-                }
-            } catch (IOErrorException e) {
-                if (tryTimes > retryTimes) {
-                    // retry time is exhausted
-                    throw e;
-                }
-            }
-        }
-        return resultSet;
+        checkClosed();
+        return new ResultSet(connection.execute(sessionId, gql, requestTimeout));
     }
 
     /**
@@ -170,29 +93,12 @@ public class NebulaClient implements Serializable {
     }
 
     /**
-     * get the Session Zone of the Client
-     *
-     * @return time zone
-     */
-    public ZoneId getTimeZone() {
-        return timeZone;
-    }
-
-    /**
-     * get the working graph of the Client
-     *
-     * @return working graph name
-     */
-    public String getWorkingGraph() {
-        return workingGraph;
-    }
-
-    /**
      * ping the NebulaGraph server
      *
      * @return true when client can ping server succeed.
      */
-    public boolean ping() {
+    public synchronized boolean ping() {
+        checkClosed();
         try {
             return connection.ping(sessionId);
         } catch (IOErrorException e) {
@@ -207,21 +113,35 @@ public class NebulaClient implements Serializable {
     public void close() {
         if (isClosed.compareAndSet(false, true)) {
             if (connection != null) {
-                connection.signout(sessionId);
+                try {
+                    execute("SESSION CLOSE");
+                } catch (Exception e) {
+                    logger.warn("signout failed,", e);
+                }
                 connection.close();
                 connection = null;
             }
         }
     }
 
+    /**
+     * check if the client already closed
+     *
+     * @throws RuntimeException if the client is closed.
+     */
+    private void checkClosed() {
+        if (isClosed.get()) {
+            throw new RuntimeException("The NebulaClient already closed.");
+        }
+    }
 
-    private void initClient() throws AuthFailedException, IOErrorException {
+    private void initClient() throws AuthFailedException {
         // create connection with NebulaGraph Server
         connection = new GrpcConnection();
         int tryConnectTimes = servers.size();
         while (tryConnectTimes-- > 0) {
             try {
-                // TODO polling the address when retry.
+                // TODO polling the address
                 Collections.shuffle(servers);
                 host = servers.get(tryConnectTimes);
                 connection.open(host, requestTimeout);
@@ -243,18 +163,6 @@ public class NebulaClient implements Serializable {
             throw e;
         }
         sessionId = authResult.getSessionId();
-
-        // set the working graph and time zone
-        StringBuilder sessionSetStatement = new StringBuilder();
-        if (workingGraph != null) {
-            sessionSetStatement.append("SESSION SET GRAPH `").append(workingGraph).append("` ");
-        }
-        if (timeZone != null) {
-            sessionSetStatement.append("SESSION SET TIME ZONE \"").append(timeZone).append("\"");
-        }
-        if (!sessionSetStatement.toString().isEmpty()) {
-            connection.execute(sessionId, sessionSetStatement.toString());
-        }
     }
 
 
@@ -631,33 +539,13 @@ public class NebulaClient implements Serializable {
         return graphType;
     }
 
-    /**
-     * sleep interval time
-     */
-    private void sleep() {
-        try {
-            Thread.sleep(intervalTimeMills);
-        } catch (InterruptedException e) {
-            // ignore
-        }
-    }
-
     public static class Builder {
         private final List<HostAddress> address;
         private final String userName;
         private final String password;
         private Map<String, Object> authOptions = new HashMap<>();
         private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
-        // retry times for failed execute
-        private int retryTimes = DEFAULT_RETRY_TIMES;
-
-        // interval time between retries
-        private long intervalTimeMills = DEFAULT_INTERVAL_TIME_MS;
-
         private int scanParallel = DEFAULT_SCAN_PARALLEL;
-
-        private String workingGraph = null;
-        private ZoneId timeZone = null;
 
         public Builder(String addresses, String userName, String password) {
             try {
@@ -669,41 +557,21 @@ public class NebulaClient implements Serializable {
             this.password = password;
         }
 
-        public Builder setAuthOptions(Map<String, Object> authOptions) {
+        public Builder withAuthOptions(Map<String, Object> authOptions) {
             if (authOptions != null) {
                 this.authOptions.putAll(authOptions);
             }
             return this;
         }
 
-        public Builder setRequestTimeoutMills(long requestTimeoutMills) {
+        public Builder withRequestTimeoutMills(long requestTimeoutMills) {
             this.requestTimeoutMills =
                     requestTimeoutMills < 0 ? Long.MAX_VALUE : requestTimeoutMills;
             return this;
         }
 
-        public Builder setRetryTimes(int retryTimes) {
-            this.retryTimes = Math.max(retryTimes, 0);
-            return this;
-        }
-
-        public Builder setIntervalTimeMills(long intervalTimeMills) {
-            this.intervalTimeMills = Math.max(intervalTimeMills, 0);
-            return this;
-        }
-
-        public Builder setScanParallel(int parallel) {
+        public Builder withScanParallel(int parallel) {
             this.scanParallel = parallel;
-            return this;
-        }
-
-        public Builder setWorkingGraph(String graphName) {
-            this.workingGraph = graphName;
-            return this;
-        }
-
-        public Builder setTimeZone(ZoneId zoneId) {
-            this.timeZone = zoneId;
             return this;
         }
 

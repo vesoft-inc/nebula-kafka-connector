@@ -94,7 +94,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
         try {
             NebulaClient client = NebulaClient
                     .builder(addr.toString(), userName)
-                    .setAuthOptions(authOptions)
+                    .withAuthOptions(authOptions)
                     .build();
             client.close();
             return true;

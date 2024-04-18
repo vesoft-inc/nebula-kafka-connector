@@ -5,17 +5,14 @@
 
 package com.vesoft.nebula.client.graph.net;
 
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BATCH_SIZE;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BLOCK_WHEN_EXHAUSTED;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_HEALTH_CHECK_TIME_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_IDLE_EVICT_SCHEDULE_MS;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_INTERVAL_TIME_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_CLIENT_SIZE;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_WAIT_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MIN_CLIENT_SIZE;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_RETRY_TIMES;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_STRICT_SERVER_HEALTHY;
 
@@ -43,8 +40,6 @@ public class NebulaPool implements Serializable {
     private final AtomicBoolean hasInit = new AtomicBoolean(false);
     private final AtomicBoolean isClosed = new AtomicBoolean(false);
     private long maxWaitMills;
-    private String workingGraph;
-    private ZoneId timeZone;
 
 
     public static NebulaPool.Builder builder(String addresses, String userName) {
@@ -60,8 +55,6 @@ public class NebulaPool implements Serializable {
             return;
         }
         this.maxWaitMills = builder.maxWaitMills;
-        this.workingGraph = builder.workingGraph;
-        this.timeZone = builder.timeZone;
 
         this.loadBalancer = new RoundRobinLoadBalancer(
                 builder.address,
@@ -84,8 +77,7 @@ public class NebulaPool implements Serializable {
         objConfig.setMaxWaitMillis(builder.maxWaitMills);
         objConfig.setTimeBetweenEvictionRunsMillis(builder.idleEvictScheduleMills);
         objConfig.setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis);
-        // just test the validation when session is idle. When session execute failed,
-        // there's retry mechanism to get new Session, so no need to test when borrow or return.
+        // just test the validation when session is idle.
         if (builder.healthCheckTimeMills > 0) {
             objConfig.setTestWhileIdle(true);
             objConfig.setTimeBetweenEvictionRunsMillis(builder.healthCheckTimeMills);
@@ -96,9 +88,6 @@ public class NebulaPool implements Serializable {
                 builder.userName,
                 builder.authOptions,
                 builder.requestTimeoutMills,
-                builder.retryTimes,
-                builder.intervalTimeMills,
-                builder.batchSize,
                 builder.scanParallel,
                 builder.workingGraph,
                 builder.timeZone);
@@ -120,16 +109,6 @@ public class NebulaPool implements Serializable {
      * @param client NebulaClient
      */
     public void returnClient(NebulaClient client) {
-        if (this.workingGraph != null && !this.workingGraph.equals(client.getWorkingGraph())) {
-            if (!client.setGraph(this.workingGraph)) {
-                logger.warn("re-set working graph failed.");
-            }
-        }
-        if (this.timeZone != null && this.timeZone != client.getTimeZone()) {
-            if (client.setTimeZone(this.timeZone)) {
-                logger.warn("re-set time zone failed.");
-            }
-        }
         pool.returnObject(client);
     }
 
@@ -176,11 +155,6 @@ public class NebulaPool implements Serializable {
         private int maxClientSize = DEFAULT_MAX_CLIENT_SIZE;
         private int minClientSize = DEFAULT_MIN_CLIENT_SIZE;
         private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
-        // retry times for failed execute
-        private int retryTimes = DEFAULT_RETRY_TIMES;
-
-        // interval time for retry, unit: millisecond
-        private long intervalTimeMills = DEFAULT_INTERVAL_TIME_MS;
 
         // The healthCheckTime for schedule check the health of session, unit: millisecond
         private long healthCheckTimeMills = DEFAULT_HEALTH_CHECK_TIME_MS;
@@ -207,8 +181,6 @@ public class NebulaPool implements Serializable {
 
         // the time zone, used to parse ZonedTime and ZonedDatetime
         private ZoneId timeZone = null;
-
-        private int batchSize = DEFAULT_BATCH_SIZE;
         private int scanParallel = DEFAULT_SCAN_PARALLEL;
 
         public Builder(String addresses, String userName, String password) {
@@ -221,14 +193,14 @@ public class NebulaPool implements Serializable {
             this.password = password;
         }
 
-        public Builder setAuthOptions(Map<String, Object> authOptions) {
+        public Builder withAuthOptions(Map<String, Object> authOptions) {
             if (authOptions != null) {
                 this.authOptions.putAll(authOptions);
             }
             return this;
         }
 
-        public Builder setMaxClientSize(int maxClientSize) {
+        public Builder withMaxClientSize(int maxClientSize) {
             if (maxClientSize < 1) {
                 throw new IllegalArgumentException("maxClientSize cannot be less than 1.");
             }
@@ -236,7 +208,7 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
-        public Builder setMinClientSize(int minClientSize) {
+        public Builder withMinClientSize(int minClientSize) {
             if (minClientSize < 0) {
                 throw new IllegalArgumentException("minClientSize cannot be less than 0.");
             }
@@ -244,64 +216,49 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
-        public Builder setRequestTimeoutMills(long requestTimeoutMills) {
+        public Builder withRequestTimeoutMills(long requestTimeoutMills) {
             this.requestTimeoutMills =
                     requestTimeoutMills < 0 ? Long.MAX_VALUE : requestTimeoutMills;
             return this;
         }
 
-        public Builder setRetryTimes(int retryTimes) {
-            this.retryTimes = Math.max(retryTimes, 0);
-            return this;
-        }
-
-        public Builder setIntervalTimeMills(long intervalTimeMills) {
-            this.intervalTimeMills = Math.max(intervalTimeMills, 0);
-            return this;
-        }
-
-        public Builder setHealthCheckTimeMills(long healthCheckTimeMills) {
+        public Builder withHealthCheckTimeMills(long healthCheckTimeMills) {
             this.healthCheckTimeMills = Math.max(healthCheckTimeMills, 0);
             return this;
         }
 
-        public Builder setBlockWhenExhausted(boolean blockWhenExhausted) {
+        public Builder withBlockWhenExhausted(boolean blockWhenExhausted) {
             this.blockWhenExhausted = blockWhenExhausted;
             return this;
         }
 
-        public Builder setMaxWaitMills(long maxWaitMills) {
+        public Builder withMaxWaitMills(long maxWaitMills) {
             this.maxWaitMills = maxWaitMills < 0 ? Long.MAX_VALUE : maxWaitMills;
             return this;
         }
 
-        public Builder setIdleEvictScheduleMills(long idleEvictScheduleMills) {
+        public Builder withIdleEvictScheduleMills(long idleEvictScheduleMills) {
             this.idleEvictScheduleMills = idleEvictScheduleMills;
             return this;
         }
 
-        public Builder setMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
+        public Builder withMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
             this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
             return this;
         }
 
-        public Builder setStrictlyServerHealthy(boolean strictlyServerHealthy) {
+        public Builder withStrictlyServerHealthy(boolean strictlyServerHealthy) {
             this.strictlyServerHealthy = strictlyServerHealthy;
             return this;
         }
 
-        public Builder setWorkingGraph(String graphName) {
+        public Builder withWorkingGraph(String graphName) {
             this.workingGraph = workingGraph;
             return this;
         }
 
-        public Builder setTimeZone(ZoneId zoneId) {
+        public Builder withTimeZone(ZoneId zoneId) {
             this.timeZone = zoneId;
-            return this;
-        }
-
-        public Builder setBatchSize(int batchSize) {
-            this.batchSize = batchSize;
             return this;
         }
 

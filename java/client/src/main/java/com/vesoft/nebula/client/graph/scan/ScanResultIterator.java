@@ -100,9 +100,8 @@ public class ScanResultIterator implements Serializable {
         ResultSet result;
         client = NebulaClient
                 .builder(serversAddress, userName)
-                .setAuthOptions(authOptions)
-                .setRequestTimeoutMills(requestTimeout)
-                .setRetryTimes(0)
+                .withAuthOptions(authOptions)
+                .withRequestTimeoutMills(requestTimeout)
                 .build();
         result = client.execute(producer);
         return result;

@@ -32,17 +32,15 @@ public class GraphClientExample {
     private static final Logger log = LoggerFactory.getLogger(GraphClientExample.class);
     static String host = "192.168.8.6:3820";
     static String user = "root";
-    static String passwd = "nebula";
+    static String passwd = "Nebula123";
 
     public static void main(String[] args) {
         NebulaClient client = null;
         try {
             // init the NebulaPool and get session
             client = NebulaClient.builder(host, user, passwd)
-                    .setAuthOptions(Collections.emptyMap())
-                    .setRequestTimeoutMills(3000)
-                    .setRetryTimes(3)
-                    .setIntervalTimeMills(1000)
+                    .withAuthOptions(Collections.emptyMap())
+                    .withRequestTimeoutMills(3000)
                     .build();
             createGraphType(client);
             createGraph(client);

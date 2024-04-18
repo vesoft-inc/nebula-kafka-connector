@@ -14,7 +14,6 @@ import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
 import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
 import java.io.Serializable;
-import java.net.UnknownHostException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -35,9 +34,7 @@ public class NebulaGraphProvider implements Serializable {
         this.passwd = config.passwd;
         try {
             client = NebulaClient.builder(host, user, passwd)
-                    .setRequestTimeoutMills(config.requestTimeout)
-                    .setRetryTimes(config.retryTimes)
-                    .setIntervalTimeMills(config.intervalTimeMill)
+                    .withRequestTimeoutMills(config.requestTimeout)
                     .build();
         } catch (AuthFailedException e) {
             throw new RuntimeException("auth failed, please check your user and passwd");

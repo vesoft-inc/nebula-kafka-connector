@@ -9,12 +9,10 @@ import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResult;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.client.graph.scan.TableRow;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -35,8 +33,7 @@ public class ScanTest {
     public void setup() {
         try {
             client = NebulaClient.builder(addresses, user, passwd)
-                    .setRequestTimeoutMills(3000)
-                    .setRetryTimes(3)
+                    .withRequestTimeoutMills(3000)
                     .build();
             ResultSet resultSet = client.execute("return 1");
             Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);

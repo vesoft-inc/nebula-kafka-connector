@@ -23,8 +23,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
   @transient private[this] lazy val LOG = LoggerFactory.getLogger(this.getClass)
   @transient val client: NebulaClient = NebulaClient
     .builder(addresses, user, password)
-    .setRequestTimeoutMills(timeout * 1000)
-    .setRetryTimes(0)
+    .withRequestTimeoutMills(timeout * 1000)
     .build()
 
   /**

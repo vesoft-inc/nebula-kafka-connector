@@ -26,21 +26,15 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
     private String userName;
     private Map<String, Object> authOptions;
     private long requestTimeout;
-    private int retryTimes;
-    private long intervalTimeMs;
-    private int batchSize;
     private int scanParallel;
     private String workingGraph;
-    private ZoneId zoneId;
+    private ZoneId timeZone;
 
     public ClientPoolFactory(
             LoadBalancer loadBalancer,
             String userName,
             Map<String, Object> authOptions,
             long requestTimeoutMs,
-            int retryTimes,
-            long intervalTimeMs,
-            int batchSize,
             int scanParallel,
             String workingGraph,
             ZoneId zoneId) {
@@ -48,12 +42,9 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         this.userName = userName;
         this.authOptions = authOptions;
         this.requestTimeout = requestTimeoutMs;
-        this.retryTimes = retryTimes;
-        this.intervalTimeMs = intervalTimeMs;
-        this.batchSize = batchSize;
         this.scanParallel = scanParallel;
         this.workingGraph = workingGraph;
-        this.zoneId = zoneId;
+        this.timeZone = zoneId;
     }
 
 
@@ -66,38 +57,24 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
                     + "server is connected.");
         }
 
-        GrpcConnection connection = new GrpcConnection();
-        int tryConnect = goodHosts.size();
-        while (tryConnect-- > 0) {
-            try {
-                connection.open(loadBalancer.getAddress(), requestTimeout);
-                break;
-            } catch (Exception e) {
-                if (tryConnect == 0) {
-                    throw e;
-                } else {
-                    logger.warn("connect failed, " + e.getMessage());
-                }
-            }
-        }
-        AuthResult authResult;
-        try {
-            authResult = connection.authenticate(userName, authOptions);
-        } catch (AuthFailedException e) {
-            logger.error(e.getMessage());
-            throw e;
-        }
-
         NebulaClient client = NebulaClient
                 .builder(goodHosts.toString(), userName)
-                .setAuthOptions(authOptions)
-                .setRequestTimeoutMills(requestTimeout)
-                .setRetryTimes(retryTimes)
-                .setIntervalTimeMills(intervalTimeMs)
-                .setScanParallel(scanParallel)
-                .setWorkingGraph(workingGraph)
-                .setTimeZone(zoneId)
+                .withAuthOptions(authOptions)
+                .withRequestTimeoutMills(requestTimeout)
+                .withScanParallel(scanParallel)
                 .build();
+
+        // set the working graph and time zone
+        StringBuilder sessionSetStatement = new StringBuilder();
+        if (workingGraph != null) {
+            sessionSetStatement.append("SESSION SET GRAPH `").append(workingGraph).append("` ");
+        }
+        if (timeZone != null) {
+            sessionSetStatement.append("SESSION SET TIME ZONE \"").append(timeZone).append("\"");
+        }
+        if (!sessionSetStatement.toString().isEmpty()) {
+            client.execute(sessionSetStatement.toString());
+        }
         return client;
     }
 

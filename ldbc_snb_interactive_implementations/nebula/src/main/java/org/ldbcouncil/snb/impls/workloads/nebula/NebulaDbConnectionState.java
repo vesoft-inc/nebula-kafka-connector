@@ -1,6 +1,5 @@
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
-import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 
 import com.vesoft.nebula.client.graph.net.NebulaClient;
@@ -26,8 +25,6 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
     final String userName;
     final String password;
     final long requestTimeout;
-    final int retryTimes;
-    final long intervalTimeBetweenRetrys;
 
     private final int graphServerSize;
 
@@ -42,8 +39,6 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         userName = properties.get("user");
         password = properties.get("password");
         requestTimeout = Integer.parseInt(properties.get("requestTimeout")) * 1000L;
-        retryTimes = Integer.parseInt(properties.get("retryTimes"));
-        intervalTimeBetweenRetrys = Integer.parseInt(properties.get("intervalTimeBetweenRetrys")) * 1000L;
         graphName = properties.get("graphName");
         graphAddresses = endpointURI.split(",");
         graphServerSize = graphAddresses.length;
@@ -60,9 +55,7 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
             try {
                 for (String addr : graphAddresses) {
                     NebulaClient client = NebulaClient.builder(addr, userName, password)
-                            .setRequestTimeoutMills(requestTimeout * 1000L)
-                            .setRetryTimes(retryTimes)
-                            .setIntervalTimeMills(intervalTimeBetweenRetrys * 1000L)
+                            .withRequestTimeoutMills(requestTimeout * 1000L)
                             .build();
                     clients.add(new NebulaNewClient(client, addr));
                 }

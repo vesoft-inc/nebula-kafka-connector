@@ -10,8 +10,6 @@ public class Constants {
     static final int DEFAULT_MAX_CLIENT_SIZE = 10;
     static final int DEFAULT_MIN_CLIENT_SIZE = 1;
     static final long DEFAULT_REQUEST_TIMEOUT = 0;
-    static final int DEFAULT_RETRY_TIMES = 0;
-    static final long DEFAULT_INTERVAL_TIME_MS = 0;
     static final long DEFAULT_HEALTH_CHECK_TIME_MS = 5 * 60 * 1000;
     static final boolean DEFAULT_BLOCK_WHEN_EXHAUSTED = false;
     static final long DEFAULT_MAX_WAIT_MS = Long.MAX_VALUE;

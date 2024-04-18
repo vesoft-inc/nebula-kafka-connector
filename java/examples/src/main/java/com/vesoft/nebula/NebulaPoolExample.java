@@ -26,13 +26,11 @@ public class NebulaPoolExample {
         try {
             pool = NebulaPool
                     .builder(addresses, userName, password)
-                    .setMaxClientSize(10)
-                    .setMinClientSize(1)
-                    .setRequestTimeoutMills(30000)
-                    .setRetryTimes(3)
-                    .setIntervalTimeMills(10000)
-                    .setBlockWhenExhausted(true)
-                    .setMaxWaitMills(Long.MAX_VALUE)
+                    .withMaxClientSize(10)
+                    .withMinClientSize(1)
+                    .withRequestTimeoutMills(30000)
+                    .withBlockWhenExhausted(true)
+                    .withMaxWaitMills(Long.MAX_VALUE)
                     .build();
 
         } catch (Exception e) {
