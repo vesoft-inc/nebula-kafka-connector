@@ -156,7 +156,7 @@ func (r *Runner) welcome() {
 	if !r.option.interactive {
 		return
 	}
-	r.printStdout("Welcome to Nebula Graph!\n")
+	r.printStdout("Welcome to NebulaGraph 5.0, the distributed graph database offering native GQL support!\n")
 	r.printStdout(":help for help.\n")
 	r.printStdout("\n")
 }
