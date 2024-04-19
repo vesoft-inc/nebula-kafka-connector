@@ -202,7 +202,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 		})
 	}
 
-	return &types.TaskSpec{
+	mainTask := &types.TaskSpec{
 		Type: "serial",
 		SubTasks: []*types.TaskSpec{
 			{
@@ -219,19 +219,21 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 				Description: "start needed processes",
 				SubTasks:    startNeededProcessesTask,
 			},
-			{
-				Type: "delay",
-				Params: &tasks.DelayParams{
-					Duration: 5 * time.Second,
-				},
-				Description: "wait for nebula service start",
-			},
-			{
-				Type:     "serial",
-				SubTasks: createClusterTasks,
-			},
 		},
-	}, nil
+	}
+	if len(createClusterTasks) == 0 {
+		mainTask.SubTasks = append(mainTask.SubTasks, &types.TaskSpec{
+			Type: "delay",
+			Params: &tasks.DelayParams{
+				Duration: 5 * time.Second,
+			},
+			Description: "wait for nebula service start",
+		}, &types.TaskSpec{
+			Type:     "serial",
+			SubTasks: createClusterTasks,
+		})
+	}
+	return mainTask, nil
 }
 
 func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {

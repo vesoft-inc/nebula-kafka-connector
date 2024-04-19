@@ -51,7 +51,7 @@ func (d *CheckDir) Execute() error {
 	cmd := fmt.Sprintf("test -d %s && ls %s", d.path, d.path)
 	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil {
-		return fmt.Errorf("check dir failed %s, %s, %w", stdout, stderr, err)
+		return fmt.Errorf("check dir failed %s, %s, %v", stdout, stderr, err)
 	}
 	if len(stdout) > 0 {
 		return fmt.Errorf("dir %s:%s is not empty", d.host, d.path)

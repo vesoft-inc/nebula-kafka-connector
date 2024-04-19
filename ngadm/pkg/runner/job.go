@@ -73,7 +73,6 @@ func (j *Job) RunWorkflow(workflow *types.WorkflowSpec) error {
 		if workflow.Rollback {
 			rollbackErr := j.Rollback()
 			if rollbackErr != nil {
-				j.Context.Logger.Error(fmt.Sprintf("rollback failed: %v", rollbackErr))
 				return fmt.Errorf("run task faild: %v \n rollback failed: %v", err, rollbackErr)
 			}
 		}

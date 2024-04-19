@@ -2,7 +2,6 @@ package tasks
 
 import (
 	"fmt"
-	"path"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
@@ -64,7 +63,7 @@ func (d *Operate) Rollback() error {
 	if d.operation == "start" { //now only install will be rollback
 		rollbackOperation = "stop"
 	}
-	cmd := fmt.Sprintf("%s %s %s", path.Join(d.execPath, "scripts/nebula.service"), rollbackOperation, d.component)
+	cmd := fmt.Sprintf("%s %s %s", d.execPath, rollbackOperation, d.component)
 	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil || len(stderr) > 0 {
 		return fmt.Errorf("execute command failed: %s, %s, %s", cmd, stdout, stderr)
