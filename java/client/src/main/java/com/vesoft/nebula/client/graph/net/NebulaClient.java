@@ -125,6 +125,15 @@ public class NebulaClient implements Serializable {
     }
 
     /**
+     * get the Client status
+     *
+     * @reuturn true if client is closed
+     */
+    public boolean isClosed() {
+        return isClosed.get();
+    }
+
+    /**
      * check if the client already closed
      *
      * @throws RuntimeException if the client is closed.

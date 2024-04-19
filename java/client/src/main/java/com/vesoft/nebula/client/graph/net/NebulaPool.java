@@ -109,7 +109,15 @@ public class NebulaPool implements Serializable {
      * @param client NebulaClient
      */
     public void returnClient(NebulaClient client) {
-        pool.returnObject(client);
+        if (client.isClosed()) {
+            try {
+                pool.invalidateObject(client);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            pool.returnObject(client);
+        }
     }
 
 
