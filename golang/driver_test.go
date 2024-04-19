@@ -23,7 +23,7 @@ type connWithErr struct {
 	err         error
 }
 
-func (c *connetorWithErr) connect(host *hostAddress, cfg *connConfig) (Conn, error) {
+func (c *connetorWithErr) connect(host *hostAddress, cfg *connConfig) (Client, error) {
 	c.connectTimes++
 	return &connWithErr{executeTime: c.executeTime, err: c.err}, nil
 }
@@ -43,21 +43,23 @@ func TestClientRetry(t *testing.T) {
 		executionErr error
 		err          error
 	}{
-		{2, timeoutCtx, 150 * time.Millisecond, errConnBroken("", 0), timeoutCtx.Err()},
+		{1, timeoutCtx, 150 * time.Millisecond, errConnBroken("", 0), timeoutCtx.Err()},
 		{1, context.Background(), 15 * time.Millisecond, nil, nil},
-		{3, context.Background(), 15 * time.Millisecond, errConnBroken("", 0), errConnBroken("", 0)},
+		{1, context.Background(), 15 * time.Millisecond, errConnBroken("", 0), errConnBroken("", 0)},
 		{1, context.Background(), 15 * time.Millisecond, fmt.Errorf("not connnection error"), fmt.Errorf("not connnection error")},
 	}
 	for _, tc := range testcases {
-		client := newDriverConn([]*hostAddress{{"127.0.0.1", 9669}}, nil)
 		connector := &connetorWithErr{
 			connectTime: 3 * time.Millisecond,
 			executeTime: 20 * time.Millisecond,
 			err:         tc.executionErr,
 		}
-		client.connector = connector
-		client.maxLifeTime = tc.maxLifeTime
-		_, err := client.ExecuteContext(tc.ctx, "")
+		client, err := NewNebulaClient("127.0.0.1:9669", "", "", withClientConnector(connector))
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = client.ExecuteContext(tc.ctx, "")
 		if tc.err != nil {
 			assert.EqualError(t, err, tc.err.Error())
 		}
@@ -78,19 +80,24 @@ func TestPoolRetry(t *testing.T) {
 		err          error
 	}{
 		// timeout is 25ms, connectTime is 3ms, executeTime is 20ms
-		{3, timeoutCtx, 150 * time.Millisecond, errConnBroken("", 0), timeoutCtx.Err()},
+		{1, timeoutCtx, 150 * time.Millisecond, errConnBroken("", 0), timeoutCtx.Err()},
 		{1, context.Background(), 15 * time.Millisecond, nil, nil},
-		{4, context.Background(), 15 * time.Millisecond, errConnBroken("", 0), errConnBroken("", 0)},
+		{1, context.Background(), 15 * time.Millisecond, errConnBroken("", 0), errConnBroken("", 0)},
 		{1, context.Background(), 15 * time.Millisecond, fmt.Errorf("not connnection error"), fmt.Errorf("not connnection error")},
 	}
+
 	for _, tc := range testcases {
-		pool := newDriverPool([]*hostAddress{{"127.0.0.1", 9669}}, nil)
 		connector := &connetorWithErr{
 			connectTime: 3 * time.Millisecond,
 			executeTime: 20 * time.Millisecond,
 			err:         tc.executionErr,
 		}
-		pool.connector = connector
+		p, err := NewNebulaPool("127.0.0.1:9669", "", "", withPoolConnector(connector))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer p.Close()
+		pool, _ := p.(*driverPool)
 		pool.connMaxLifeTime = tc.maxLifeTime
 		pool.minOpen = 0
 		pool.connCfg = &connConfig{
@@ -113,8 +120,12 @@ func TestPoolRetry(t *testing.T) {
 // after retry, the connection should be put back to pool
 // verify the broken connection would be removed from pool
 func TestPoolRetry2(t *testing.T) {
-	pool := newDriverPool([]*hostAddress{{"127.0.0.1", 9669}}, nil)
-	defer pool.Close()
+	p, err := NewNebulaPool("127.0.0.1:9669", "", "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.Close()
+	pool, _ := p.(*driverPool)
 	connector := &connetorWithErr{
 		connectTime: 3 * time.Millisecond,
 		executeTime: 20 * time.Millisecond,
@@ -137,7 +148,7 @@ func TestPoolRetry2(t *testing.T) {
 	assert.Equal(t, 1, len(pool.connMap))
 	assert.Equal(t, 1, len(pool.freeConn))
 	for _, conn := range pool.freeConn {
-		c := conn.conn
+		c := conn
 		if _, ok := pool.connMap[c]; !ok {
 			t.Fatal("conn not in connMap")
 		}

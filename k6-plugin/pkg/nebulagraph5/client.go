@@ -30,7 +30,7 @@ type (
 		graphOption       *common.GraphOption
 	}
 
-	graphClientGetter func(endpoint, username, password string) (nebula.Client, error)
+	graphClientGetter func(endpoint, username, password string, timeout time.Duration) (nebula.Client, error)
 
 	// GraphClient a wrapper for nebula client, could read data from DataCh
 	GraphClient struct {
@@ -99,8 +99,9 @@ var outputHeader []string = []string{
 // NewNebulaGraph New for k6 initialization.
 func NewNebulaGraph() *GraphPool {
 	return &GraphPool{
-		clientGetter: func(endpoint string, username, password string) (nebula.Client, error) {
-			conn, err := nebula.NewNebulaClient(endpoint, username, password)
+		clientGetter: func(endpoint string, username, password string, timeout time.Duration) (nebula.Client, error) {
+			conn, err := nebula.NewNebulaClient(endpoint, username, password,
+				nebula.WithClientRequestTimeout(timeout))
 			if err != nil {
 				return nil, err
 			}
@@ -199,12 +200,12 @@ func (gp *GraphPool) GetSession() (common.IGraphClient, error) {
 		gp.Hosts[index],
 		gp.graphOption.Username,
 		gp.graphOption.Password,
+		time.Duration(gp.graphOption.TimeoutUs)*time.Microsecond,
 	)
 
 	if err != nil {
 		return nil, err
 	}
-	client.SetRequestTimeout(time.Duration(gp.graphOption.TimeoutUs))
 	// client.SetGraph(gp.graphOption.Space)
 	s := &GraphClient{Session: client, Pool: gp, DataCh: gp.DataCh}
 	gp.clients = append(gp.clients, s)

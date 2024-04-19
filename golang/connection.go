@@ -15,6 +15,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
+	"google.golang.org/grpc/connectivity"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
@@ -29,10 +30,15 @@ type connection struct {
 	clientConn  *grpc.ClientConn
 	sessionId   int64
 	timeout     time.Duration
+	host        string
+	port        int
 }
 
-func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Conn, error) {
-	cn := &connection{}
+func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+	cn := &connection{
+		host: host.host,
+		port: host.port,
+	}
 	start := time.Now()
 	if err := cn.open(host.host, host.port, cfg.connectTimeout, nil); err != nil {
 		return nil, err
@@ -131,7 +137,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		}
 		switch rpcErr.Code() {
 		case grpccodes.DeadlineExceeded, grpccodes.Canceled:
-			return nil, errConnRequestTimeout("", 0)
+			return nil, errConnRequestTimeout(cn.host, cn.port)
 		}
 		return nil, err
 	}
@@ -170,6 +176,10 @@ func (cn *connection) Ping() error {
 func (cn *connection) Close() error {
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
+
+	if cn.IsClosed() {
+		return nil
+	}
 	// logout via statment, ignore the logout error
 	in := &graph.ExecuteRequest{
 		SessionId: cn.sessionId,
@@ -177,11 +187,21 @@ func (cn *connection) Close() error {
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), cn.timeout)
 	defer cancel()
-	_, _ = cn.graphClient.Execute(ctx, in)
-	_ = cn.clientConn.Close()
+	_, err := cn.graphClient.Execute(ctx, in)
+	if err != nil {
+		return err
+	}
+
+	if err := cn.clientConn.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 
 func (cn *connection) GetSessionId() (int64, error) {
 	return cn.sessionId, nil
+}
+
+func (cn *connection) IsClosed() bool {
+	return cn.clientConn.GetState() == connectivity.Shutdown
 }

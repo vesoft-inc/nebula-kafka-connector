@@ -16,7 +16,7 @@ type dummyConn struct {
 	id int
 }
 
-func (c *dummyConnector) connect(host *hostAddress, cfg *connConfig) (Conn, error) {
+func (c *dummyConnector) connect(host *hostAddress, cfg *connConfig) (Client, error) {
 	return &dummyConn{}, nil
 }
 
@@ -37,46 +37,49 @@ func (d *dummyConn) GetSessionId() (int64, error) {
 func (d *dummyConn) Close() error {
 	return nil
 }
+func (d *dummyConn) IsClosed() bool {
+	return false
+}
 
 func TestCleanIdle(t *testing.T) {
 	testcases := []struct {
 		maxIdle  int
-		conns    []*driverConn
+		conns    []Client
 		expected int
 	}{
 		{5,
-			[]*driverConn{
-				{conn: &dummyConn{0}},
-				{conn: &dummyConn{1}},
-				{conn: &dummyConn{2}},
-				{conn: &dummyConn{3}},
-				{conn: &dummyConn{4}},
+			[]Client{
+				&dummyConn{0},
+				&dummyConn{1},
+				&dummyConn{2},
+				&dummyConn{3},
+				&dummyConn{4},
 			},
 			5,
 		},
 		{4,
-			[]*driverConn{
-				{conn: &dummyConn{0}},
-				{conn: &dummyConn{1}},
-				{conn: &dummyConn{2}},
-				{conn: &dummyConn{3}},
-				{conn: &dummyConn{4}},
+			[]Client{
+				&dummyConn{0},
+				&dummyConn{1},
+				&dummyConn{2},
+				&dummyConn{3},
+				&dummyConn{4},
 			},
 			4,
 		},
 		{2,
-			[]*driverConn{
-				{conn: &dummyConn{0}},
-				{conn: &dummyConn{1}},
+			[]Client{
+				&dummyConn{0},
+				&dummyConn{1},
 			},
 			2,
 		},
 	}
 
 	for _, tc := range testcases {
-		connMap := make(map[Conn]struct{})
+		connMap := make(map[Client]struct{})
 		for _, conn := range tc.conns {
-			c := conn.conn
+			c := conn
 			connMap[c] = struct{}{}
 		}
 		pool := &driverPool{
@@ -92,16 +95,22 @@ func TestCleanIdle(t *testing.T) {
 
 func TestPool(t *testing.T) {
 	var (
-		maxOpen = 10
-		minOpen = 5
-		maxIdle = 6
+		maxOpen = 100
+		maxIdle = 50
+		minIdle = 10
 	)
-	pool := newDriverPool([]*hostAddress{{"127.0.0.1", 9669}}, nil)
+	p, err := NewNebulaPool("127.0.0.1:9669", "", "",
+		WithPoolMaxOpenConns(maxOpen),
+		WithPoolMaxIdleConns(maxIdle),
+		WithPoolMinOpenConns(minIdle),
+		withPoolConnector(&dummyConnector{}),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.Close()
+	pool, _ := p.(*driverPool)
 	defer pool.Close()
-	pool.connector = &dummyConnector{}
-	pool.SetMaxOpenConnections(maxOpen)
-	pool.SetMinOpenConnections(minOpen)
-	pool.SetMaxIdleConnections(maxIdle)
 	pool.tickerDuration = 100 * time.Millisecond
 	pool.connCfg = &connConfig{
 		requestTimeout: 10 * time.Second,
@@ -128,7 +137,7 @@ func TestPool(t *testing.T) {
 			if err != nil {
 				t.Log(err)
 			}
-			<-time.After(10 * time.Millisecond)
+			<-time.After(30 * time.Millisecond)
 			err = pool.PutClient(c)
 			if err != nil {
 				t.Log(err)
@@ -142,7 +151,7 @@ func TestPool(t *testing.T) {
 	assert.Equal(t, maxOpen, len(pool.freeConn))
 	pool.mu.Unlock()
 	//test idle conn
-	<-time.After(200 * time.Millisecond)
+	<-time.After(150 * time.Millisecond)
 
 	pool.mu.Lock()
 	assert.Equal(t, maxIdle, len(pool.freeConn))
@@ -161,7 +170,12 @@ func TestPoolPut(t *testing.T) {
 		{false, true, ""},
 	}
 	for _, tc := range testcases {
-		pool := newDriverPool([]*hostAddress{{"127.0.0.1", 9669}}, nil)
+		p, err := NewNebulaPool("127.0.0.1:9669", "", "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer p.Close()
+		pool, _ := p.(*driverPool)
 		pool.connector = &dummyConnector{}
 		pool.minOpen = 0
 		pool.connCfg = &connConfig{
@@ -205,7 +219,12 @@ func TestPoolGet(t *testing.T) {
 		{10, 30, 20},
 	}
 	for _, tc := range testcases {
-		pool := newDriverPool([]*hostAddress{{"127.0.0.1", 9669}}, nil)
+		p, err := NewNebulaPool("127.0.0.1:9669", "", "")
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer p.Close()
+		pool, _ := p.(*driverPool)
 		pool.connector = &dummyConnector{}
 		pool.minOpen = 0
 		pool.maxOpen = tc.maxOpen

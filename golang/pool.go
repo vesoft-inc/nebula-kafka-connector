@@ -12,13 +12,13 @@ type (
 	driverPool struct {
 		ctx      context.Context
 		mu       sync.Mutex
-		freeConn []*driverConn
+		freeConn []Client
 		// When driverConn.ExecuteContext is called, it will retry to get a connection.
 		// The connMap key is the connection.
-		connMap map[Conn]struct{}
+		connMap map[Client]struct{}
 		// if the max open connection is full, would block
 		// and wait for a free connection
-		requestConnChan map[uint64]chan Conn
+		requestConnChan map[uint64]chan Client
 		requestCount    uint64
 		// open connection channel
 		openerCh        chan struct{}
@@ -32,7 +32,6 @@ type (
 		connCfg         *connConfig
 		hostIndex       int
 		tickerDuration  time.Duration
-		connRetryTimes  int
 		connMaxLifeTime time.Duration
 		log             Logger
 	}
@@ -48,88 +47,8 @@ const (
 	openConnChannelSize    = 10000
 )
 
-var _ Conn = &connection{}
+var _ Client = &connection{}
 var _ Result = &resultSet{}
-
-func newDriverPool(hostAddresses []*hostAddress, cfg *connConfig) *driverPool {
-	ctx, cancel := context.WithCancel(context.Background())
-	pool := &driverPool{
-		ctx:             ctx,
-		stop:            cancel,
-		hostAddresses:   hostAddresses,
-		connCfg:         cfg,
-		connMap:         make(map[Conn]struct{}),
-		requestConnChan: make(map[uint64]chan Conn),
-		requestCount:    0,
-		openerCh:        make(chan struct{}, openConnChannelSize),
-		connector:       defaultConnector,
-		connMaxLifeTime: defaultMaxLieTime,
-		connRetryTimes:  defaultRetryTimes,
-		maxOpen:         defaultMaxOpenConns,
-		minOpen:         defaultMinOpenConns,
-		maxIdle:         defaultMaxIdleConns,
-		tickerDuration:  defaultPoolTicker,
-		log:             DefaultLogger,
-	}
-	go pool.connectionOpener(ctx)
-	return pool
-}
-
-func (dp *driverPool) SetLogger(logger Logger) {
-	dp.log = logger
-}
-
-func (dp *driverPool) SetMinOpenConnections(min int) {
-	if min > dp.maxOpen {
-		min = dp.maxOpen
-	}
-	dp.minOpen = min
-}
-
-func (dp *driverPool) SetMaxOpenConnections(max int) {
-	dp.maxOpen = max
-}
-
-func (dp *driverPool) SetMaxIdleConnections(max int) {
-	dp.maxIdle = max
-}
-
-func (dp *driverPool) OnOpenClient(fn func(ConnSetter)) {
-	fn(dp)
-}
-
-func (dp *driverPool) SetRequestTimeout(timeout time.Duration) {
-	if timeout <= 0 {
-		timeout = math.MaxInt64
-	}
-	dp.connCfg.requestTimeout = timeout
-}
-
-func (dp *driverPool) SetConnectTimeout(timeout time.Duration) {
-	if timeout <= 0 {
-		timeout = math.MaxInt64
-	}
-	dp.connCfg.connectTimeout = timeout
-}
-
-func (dp *driverPool) SetMaxLifeTime(timeout time.Duration) {
-	if timeout <= 0 {
-		timeout = math.MaxInt64
-	}
-	dp.connMaxLifeTime = timeout
-}
-
-func (dp *driverPool) SetGraph(graph string) {
-	dp.connCfg.graph = graph
-}
-
-func (dp *driverPool) SetRetryTimes(times int) {
-	dp.connRetryTimes = times
-}
-
-func (dp *driverPool) SetTimeZone(timezone string) {
-	dp.connCfg.timezone = timezone
-}
 
 func (dp *driverPool) Close() error {
 	dp.mu.Lock()
@@ -143,29 +62,21 @@ func (dp *driverPool) Close() error {
 	return nil
 }
 
-func (dp *driverPool) openNewConnLocked() (*driverConn, error) {
+func (dp *driverPool) openNewConnLocked() (Client, error) {
 	hostAddress := dp.hostAddresses[dp.getHostIndexLocked()]
-	conn, err := dp.connector.connect(hostAddress, dp.connCfg)
+
+	address := fmt.Sprintf("%s:%d", hostAddress.host, hostAddress.port)
+	dc, err := NewNebulaClient(address, dp.connCfg.username, dp.connCfg.password,
+		WithClientConnectTimeout(dp.connCfg.connectTimeout),
+		WithClientRequestTimeout(dp.connCfg.requestTimeout),
+		WithClientLogger(dp.log),
+		withClientConnector(dp.connector),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	dc := newDriverConn(nil, dp.connCfg)
-	dc.pool = dp
-	dc.currentHost = hostAddress
-	dc.conn = conn
-	dc.maxLifeTime = dp.connMaxLifeTime
-	dc.retryTimes = dp.connRetryTimes
-	dc.createAt = time.Now()
-	// init session context
-	if dc.cfg.timezone != "" {
-		_, err = conn.Execute(fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dc.cfg.timezone))
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	dp.connMap[conn] = struct{}{}
+	dp.connMap[dc] = struct{}{}
 	return dc, nil
 }
 
@@ -190,6 +101,7 @@ func (dp *driverPool) ticker(ctx context.Context) {
 	}
 	// immediately run the first time
 	dp.clearIdleConn()
+	//TODO clean max life conn
 	dp.openMinConn()
 
 	ticker := time.NewTicker(dp.tickerDuration)
@@ -220,7 +132,7 @@ func (dp *driverPool) clearIdleConn() {
 	}
 	for i := 0; i < index; i++ {
 		_ = dp.freeConn[i].Close()
-		delete(dp.connMap, dp.freeConn[i].conn)
+		delete(dp.connMap, dp.freeConn[i])
 	}
 	dp.freeConn = dp.freeConn[index:]
 }
@@ -240,9 +152,9 @@ func (dp *driverPool) openMinConn() {
 	}
 }
 
-func (dp *driverPool) GetClient() (Conn, error) {
+func (dp *driverPool) GetClient() (Client, error) {
 	var (
-		dc *driverConn
+		dc Client
 	)
 	timeout, cancel := context.WithTimeout(context.Background(), dp.connCfg.requestTimeout)
 	defer cancel()
@@ -252,7 +164,7 @@ func (dp *driverPool) GetClient() (Conn, error) {
 			dp.openerCh <- struct{}{}
 		}
 
-		req := make(chan Conn, 1)
+		req := make(chan Client, 1)
 		if dp.requestCount == math.MaxUint64 {
 			dp.requestCount = 0
 		} else {
@@ -282,7 +194,7 @@ func (dp *driverPool) GetClient() (Conn, error) {
 	return dc, nil
 }
 
-func (dp *driverPool) PutClient(c Conn) error {
+func (dp *driverPool) PutClient(c Client) error {
 	if c == nil {
 		return errInternel("connection is nil")
 	}
@@ -299,34 +211,40 @@ func (dp *driverPool) PutClient(c Conn) error {
 
 }
 
-func (dp *driverPool) putConnLocked(dc *driverConn) error {
-	if dc.isClosed {
-		delete(dp.connMap, dc.conn)
+func (dp *driverPool) putConnLocked(client Client) error {
+	dc, ok := client.(*driverConn)
+	if !ok {
+		return errInternel("invalid client type")
+	}
+	// if client is closed by user, remove from pool,
+	// and then raise an error.
+	if dc.IsClosed() {
+		delete(dp.connMap, client)
 		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 
-	if dc.maxLifeTime > 0 && time.Since(dc.createAt) > dc.maxLifeTime {
-		_ = dc.Close()
-		delete(dp.connMap, dc.conn)
+	if dp.connMaxLifeTime > 0 && time.Since(dc.createAt) > dp.connMaxLifeTime {
+		_ = client.Close()
+		delete(dp.connMap, client)
 		return nil
 	}
 
 	if len(dp.connMap) > dp.maxOpen {
-		_ = dc.Close()
-		delete(dp.connMap, dc.conn)
+		_ = client.Close()
+		delete(dp.connMap, client)
 		return nil
 	}
 	// if there's a conn request, do not put to freeConn
 	if len(dp.requestConnChan) > 0 {
 		var index uint64
 		for i, ch := range dp.requestConnChan {
-			ch <- dc
+			ch <- client
 			index = i
 			break
 		}
 		delete(dp.requestConnChan, index)
 	} else {
-		dp.freeConn = append(dp.freeConn, dc)
+		dp.freeConn = append(dp.freeConn, client)
 	}
 	return nil
 }

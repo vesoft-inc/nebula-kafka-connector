@@ -2,8 +2,6 @@ package nebula_ng
 
 import (
 	"context"
-	"fmt"
-	"math"
 	"math/rand"
 	"time"
 )
@@ -58,40 +56,21 @@ type (
 
 	// an internel interface to get the connection
 	connector interface {
-		connect(host *hostAddress, cfg *connConfig) (Conn, error)
+		connect(host *hostAddress, cfg *connConfig) (Client, error)
 	}
 
 	Client interface {
-		Conn
-		ConnSetter
-		SetLogger(logger Logger)
-	}
-
-	ConnSetter interface {
-		SetRequestTimeout(timeout time.Duration)
-		SetConnectTimeout(timeout time.Duration)
-		SetMaxLifeTime(timeout time.Duration)
-		SetRetryTimes(times int)
-		SetGraph(graph string)
-		SetTimeZone(timezone string)
-	}
-
-	Conn interface {
 		Execute(stmt string) (Result, error)
 		ExecuteContext(ctx context.Context, stmt string) (Result, error)
 		Ping() error
+		IsClosed() bool
 		Close() error
 		GetSessionId() (int64, error)
 	}
 
 	Pool interface {
-		GetClient() (Conn, error)
-		SetMinOpenConnections(min int)
-		SetMaxOpenConnections(max int)
-		SetMaxIdleConnections(max int)
-		SetLogger(logger Logger)
-		PutClient(Conn) error
-		OnOpenClient(func(ConnSetter))
+		GetClient() (Client, error)
+		PutClient(Client) error
 		Close() error
 	}
 
@@ -107,7 +86,6 @@ type (
 	ColumnType int
 
 	// driverConn is a client wrapper
-	// support reconnect, timeout, etc.
 	driverConn struct {
 		cfg           *connConfig
 		hostAddresses []*hostAddress
@@ -115,9 +93,7 @@ type (
 		connector     connector
 		pool          *driverPool
 		createAt      time.Time
-		maxLifeTime   time.Duration
-		retryTimes    int
-		conn          Conn
+		conn          Client
 		isClosed      bool
 		log           Logger
 	}
@@ -128,13 +104,12 @@ const (
 	defaultMinOpenConns   = 1
 	defaultMaxIdleConns   = 5
 	defaultMaxLieTime     = 30 * time.Minute
-	defaultRetryTimes     = 2
 	defaultRequestTimeout = 1 * time.Minute
 	defaultConnetTimeout  = 3 * time.Second
 	defaultPoolTicker     = 5 * time.Second
 )
 
-func NewNebulaClient(addresses, username, password string) (Client, error) {
+func NewNebulaClient(addresses, username, password string, opts ...clientOptionsFn) (Client, error) {
 	hostAddresses, err := parseAddresses(addresses)
 	if err != nil {
 		return nil, err
@@ -145,18 +120,45 @@ func NewNebulaClient(addresses, username, password string) (Client, error) {
 		connector:     defaultConnector,
 		cfg:           cfg,
 	}
+	for _, o := range opts {
+		o(dc)
+	}
+	if err := dc.open(); err != nil {
+		return nil, err
+	}
 
 	return dc, nil
 }
 
-func NewNebulaPool(addresses, username, password string) (Pool, error) {
+func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) (Pool, error) {
 	hostAddresses, err := parseAddresses(addresses)
 	if err != nil {
 		return nil, err
 	}
 	connCfg := newConnConfig(username, password)
-
-	return newDriverPool(hostAddresses, connCfg), nil
+	ctx, cancel := context.WithCancel(context.Background())
+	pool := &driverPool{
+		ctx:             ctx,
+		stop:            cancel,
+		hostAddresses:   hostAddresses,
+		connCfg:         connCfg,
+		connMap:         make(map[Client]struct{}),
+		requestConnChan: make(map[uint64]chan Client),
+		requestCount:    0,
+		openerCh:        make(chan struct{}, openConnChannelSize),
+		connector:       defaultConnector,
+		connMaxLifeTime: defaultMaxLieTime,
+		maxOpen:         defaultMaxOpenConns,
+		minOpen:         defaultMinOpenConns,
+		maxIdle:         defaultMaxIdleConns,
+		tickerDuration:  defaultPoolTicker,
+		log:             DefaultLogger,
+	}
+	for _, o := range opts {
+		o(pool)
+	}
+	go pool.connectionOpener(ctx)
+	return pool, nil
 }
 
 func newConnConfig(username, password string) *connConfig {
@@ -168,18 +170,6 @@ func newConnConfig(username, password string) *connConfig {
 	}
 }
 
-func newDriverConn(hostAddresses []*hostAddress, cfg *connConfig) *driverConn {
-	return &driverConn{
-		hostAddresses: hostAddresses,
-		cfg:           cfg,
-		connector:     defaultConnector,
-		maxLifeTime:   defaultMaxLieTime,
-		retryTimes:    defaultRetryTimes,
-		createAt:      time.Now(),
-		log:           DefaultLogger,
-	}
-}
-
 func (dc *driverConn) Execute(stmt string) (Result, error) {
 	return dc.ExecuteContext(context.Background(), stmt)
 }
@@ -188,75 +178,26 @@ func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (Result, 
 	if dc.isClosed {
 		return nil, errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
-	return dc.retryExecuteLocked(ctx, stmt)
-}
-
-func (dc *driverConn) retryExecuteLocked(ctx context.Context, stmt string) (Result, error) {
-	var (
-		result Result
-		err    error
-		conn   Conn
-	)
-
-	for i := 0; i < dc.retryTimes+1; i++ {
-		if ctx.Err() != nil {
-			return nil, ctx.Err()
-		}
-
-		if dc.pool == nil && dc.conn == nil {
-			conn, err = dc.newDirect()
-			if err != nil {
-				// TODO warning
-				continue
-			}
-			dc.conn = conn
-		}
-
-		if dc.maxLifeTime > 0 && time.Since(dc.createAt) > dc.maxLifeTime {
-			if dc.pool == nil {
-				_ = dc.Close()
-				dc.conn = nil
-			} else {
-				_ = dc.Close()
-				_ = dc.replaceFromPool()
-			}
-			continue
-		}
-
-		result, err = dc.conn.ExecuteContext(ctx, stmt)
-		if err == nil {
-			return result, nil
-		}
-		if !isConnectionError(err) {
-			break
-		}
-		if dc.pool == nil {
-			_ = dc.conn.Close()
-			dc.conn = nil
-		} else {
-			_ = dc.Close()
-			_ = dc.replaceFromPool()
-		}
+	if ctx.Err() != nil {
+		return nil, ctx.Err()
 	}
-	return result, err
+	result, err := dc.conn.ExecuteContext(ctx, stmt)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (dc *driverConn) Ping() error {
-	if dc.pool == nil && dc.conn == nil {
-		conn, err := dc.newDirect()
-		if err != nil {
-			return err
-		}
-		dc.conn = conn
+	if dc.IsClosed() {
+		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	return dc.conn.Ping()
 }
 
 func (dc *driverConn) Close() error {
-	if dc.isClosed {
-		return nil
-	}
-	if dc.conn == nil {
+	if dc.IsClosed() {
 		return nil
 	}
 	err := dc.conn.Close()
@@ -264,64 +205,25 @@ func (dc *driverConn) Close() error {
 		return err
 	}
 	dc.isClosed = true
+	dc.conn = nil
 	return nil
 }
 
-func (dc *driverConn) SetLogger(logger Logger) {
-	dc.log = logger
-}
-
-func (dc *driverConn) SetRequestTimeout(timeout time.Duration) {
-	if timeout <= 0 {
-		timeout = math.MaxInt64
-	}
-	dc.cfg.requestTimeout = timeout
-}
-
-func (dc *driverConn) SetConnectTimeout(timeout time.Duration) {
-	if timeout <= 0 {
-		timeout = math.MaxInt64
-	}
-	dc.cfg.connectTimeout = timeout
-}
-
-func (dc *driverConn) SetTimeZone(timezone string) {
-	dc.cfg.timezone = timezone
-}
-
-func (dc *driverConn) SetMaxLifeTime(timeout time.Duration) {
-	if timeout <= 0 {
-		timeout = math.MaxInt64
-	}
-	dc.maxLifeTime = timeout
-}
-
-func (dc *driverConn) SetGraph(graph string) {
-	dc.cfg.graph = graph
-}
-
-func (dc *driverConn) SetRetryTimes(times int) {
-	dc.retryTimes = times
-}
-
-func (dc *driverConn) newDirect() (Conn, error) {
+func (dc *driverConn) open() error {
 	// random select one host
-	rand.Seed(time.Now().UnixNano())
-	hostIndex := rand.Intn(len(dc.hostAddresses))
-	dc.currentHost = dc.hostAddresses[hostIndex]
+	if dc.currentHost == nil {
+		rand.Seed(time.Now().UnixNano())
+		hostIndex := rand.Intn(len(dc.hostAddresses))
+		dc.currentHost = dc.hostAddresses[hostIndex]
+	}
+
 	conn, err := dc.connector.connect(dc.currentHost, dc.cfg)
 	if err != nil {
-		return nil, err
+		return err
 	}
 	dc.createAt = time.Now()
-	// init session context
-	if dc.cfg != nil && dc.cfg.timezone != "" {
-		_, err = conn.Execute(fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dc.cfg.timezone))
-		if err != nil {
-			return nil, err
-		}
-	}
-	return conn, nil
+	dc.conn = conn
+	return nil
 }
 
 func (dc *driverConn) replaceFromPool() error {
@@ -348,12 +250,13 @@ func (dc *driverConn) replaceFromPool() error {
 }
 
 func (dc *driverConn) GetSessionId() (int64, error) {
-	if dc.pool == nil && dc.conn == nil {
-		conn, err := dc.newDirect()
-		if err != nil {
-			return 0, err
-		}
-		dc.conn = conn
+	if dc.IsClosed() {
+		return 0, errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
+
 	return dc.conn.GetSessionId()
+}
+
+func (dc *driverConn) IsClosed() bool {
+	return dc.conn == nil || dc.isClosed
 }

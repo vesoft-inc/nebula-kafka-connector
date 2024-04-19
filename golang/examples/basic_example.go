@@ -41,7 +41,7 @@ func printResult(res nebula.Result) error {
 	return nil
 }
 
-func runQuery(client nebula.Conn, query string) error {
+func runQuery(client nebula.Client, query string) error {
 	resp, err := client.Execute(query)
 	if err != nil {
 		return err
@@ -90,12 +90,12 @@ func main() {
 	log.Info("Execution response received")
 
 	// run from pool
-	pool, err := nebula.NewNebulaPool(addresses, username, password)
+	pool, err := nebula.NewNebulaPool(addresses, username, password,
+		nebula.WithPoolConnectTime(10*time.Second),
+		nebula.WithPoolRequestTimeout(10*time.Second),
+	)
 	defer pool.Close()
-	pool.OnOpenClient(func(conn nebula.ConnSetter) {
-		conn.SetRequestTimeout(10 * time.Second)
-		conn.SetConnectTimeout(10 * time.Second)
-	})
+
 	client2, err := pool.GetClient()
 	defer pool.PutClient(client2)
 	if err != nil {

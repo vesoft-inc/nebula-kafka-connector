@@ -66,11 +66,12 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 		r.stdout = io.Discard
 	}
 
-	r.client, err = nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password)
+	r.client, err = nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password,
+		nebula.WithClientRequestTimeout(time.Duration(r.option.timeoutSec)*time.Second),
+	)
 	if err != nil {
 		return nil, err
 	}
-	r.client.SetRequestTimeout(time.Duration(r.option.timeoutSec) * time.Second)
 	id, err := r.client.GetSessionId()
 	if err != nil {
 		return nil, err
@@ -340,12 +341,13 @@ func (r *Runner) printBoth(s string) {
 }
 
 func (r *Runner) killQuery() error {
-	killSession, err := nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password)
+	killSession, err := nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password,
+		nebula.WithClientRequestTimeout(time.Duration(r.option.timeoutSec)*time.Second),
+	)
 	if err != nil {
 		return err
 	}
 	defer killSession.Close()
-	killSession.SetRequestTimeout(time.Duration(r.option.timeoutSec) * time.Second)
 	showQueryStmt := fmt.Sprintf("call show_queries() filter where session_id = %d return query_id", r.sessionId)
 	resp, err := killSession.Execute(showQueryStmt)
 	if err != nil {
