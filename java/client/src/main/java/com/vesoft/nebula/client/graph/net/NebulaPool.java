@@ -6,6 +6,7 @@
 package com.vesoft.nebula.client.graph.net;
 
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BLOCK_WHEN_EXHAUSTED;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_HEALTH_CHECK_TIME_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_IDLE_EVICT_SCHEDULE_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_CLIENT_SIZE;
@@ -87,6 +88,7 @@ public class NebulaPool implements Serializable {
                 loadBalancer,
                 builder.userName,
                 builder.authOptions,
+                builder.connectTimeoutMills,
                 builder.requestTimeoutMills,
                 builder.scanParallel,
                 builder.workingGraph,
@@ -162,6 +164,8 @@ public class NebulaPool implements Serializable {
 
         private int maxClientSize = DEFAULT_MAX_CLIENT_SIZE;
         private int minClientSize = DEFAULT_MIN_CLIENT_SIZE;
+
+        private long connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT;
         private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
 
         // The healthCheckTime for schedule check the health of session, unit: millisecond
@@ -224,9 +228,15 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
+        public Builder withConnectTimeoutMills(long connectTimeoutMills) {
+            this.connectTimeoutMills =
+                    connectTimeoutMills <= 0 ? Long.MAX_VALUE : connectTimeoutMills;
+            return this;
+        }
+
         public Builder withRequestTimeoutMills(long requestTimeoutMills) {
             this.requestTimeoutMills =
-                    requestTimeoutMills < 0 ? Long.MAX_VALUE : requestTimeoutMills;
+                    requestTimeoutMills <= 0 ? Long.MAX_VALUE : requestTimeoutMills;
             return this;
         }
 
@@ -241,7 +251,7 @@ public class NebulaPool implements Serializable {
         }
 
         public Builder withMaxWaitMills(long maxWaitMills) {
-            this.maxWaitMills = maxWaitMills < 0 ? Long.MAX_VALUE : maxWaitMills;
+            this.maxWaitMills = maxWaitMills <= 0 ? Long.MAX_VALUE : maxWaitMills;
             return this;
         }
 

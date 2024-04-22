@@ -22,11 +22,11 @@ public class GrpcConnectionTest {
         try {
             // Test open
             GrpcConnection connection = new GrpcConnection();
-            connection.open(new HostAddress("127.0.0.1", 20584), 1000);
+            connection.open(new HostAddress("192.168.8.6", 3820), 1000, 1000);
 
             // Test authenticate
             Map<String, Object> authInfo = new HashMap<>();
-            authInfo.put("password", "nebula");
+            authInfo.put("password", "Nebula123");
             AuthResult authResult = connection.authenticate("root", authInfo);
             LOGGER.info(authResult.toString());
 

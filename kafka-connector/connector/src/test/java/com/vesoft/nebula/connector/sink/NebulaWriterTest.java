@@ -27,13 +27,11 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.vesoft.nebula.proto.common.Status;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
-import com.vesoft.nebula.proto.graph.ExecutionOutcome;
-import com.vesoft.nebula.proto.graph.GQLStatus;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -89,11 +87,10 @@ public class NebulaWriterTest {
 
     @Test
     public void testWrite() {
-        ExecutionOutcome outcome = ExecutionOutcome
+        ExecuteResponse response = ExecuteResponse
                 .newBuilder()
-                .setGqlStatus(GQLStatus.newBuilder()
+                .setStatus(Status.newBuilder()
                         .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build()).build();
-        ExecuteResponse response = ExecuteResponse.newBuilder().setExecutionOutcome(outcome).build();
         ResultSet result = new ResultSet(response);
         try {
             PowerMockito.when(mockProvider.execute(anyString())).thenReturn(result);

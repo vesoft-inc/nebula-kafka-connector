@@ -25,6 +25,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
     private final LoadBalancer loadBalancer;
     private String userName;
     private Map<String, Object> authOptions;
+    private long connectTimeoutMs;
     private long requestTimeout;
     private int scanParallel;
     private String workingGraph;
@@ -34,6 +35,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
             LoadBalancer loadBalancer,
             String userName,
             Map<String, Object> authOptions,
+            long connectTimeoutMs,
             long requestTimeoutMs,
             int scanParallel,
             String workingGraph,
@@ -41,6 +43,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         this.loadBalancer = loadBalancer;
         this.userName = userName;
         this.authOptions = authOptions;
+        this.connectTimeoutMs = connectTimeoutMs;
         this.requestTimeout = requestTimeoutMs;
         this.scanParallel = scanParallel;
         this.workingGraph = workingGraph;
@@ -60,6 +63,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         NebulaClient client = NebulaClient
                 .builder(goodHosts.toString(), userName)
                 .withAuthOptions(authOptions)
+                .withConnectTimeoutMills(connectTimeoutMs)
                 .withRequestTimeoutMills(requestTimeout)
                 .withScanParallel(scanParallel)
                 .build();

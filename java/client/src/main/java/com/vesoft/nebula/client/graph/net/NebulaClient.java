@@ -6,6 +6,7 @@
 package com.vesoft.nebula.client.graph.net;
 
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BATCH_SIZE;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
 
@@ -35,6 +36,7 @@ import org.slf4j.LoggerFactory;
 public class NebulaClient implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
     private List<HostAddress> servers;
+    private long connectTimeout;
     private long requestTimeout;
     private final String userName;
     private final Map<String, Object> authOptions;
@@ -54,11 +56,11 @@ public class NebulaClient implements Serializable {
         return new Builder(addresses, userName, null);
     }
 
-    private NebulaClient(NebulaClient.Builder builder)
-            throws AuthFailedException, IOErrorException {
+    private NebulaClient(NebulaClient.Builder builder) throws AuthFailedException {
         this.servers = builder.address;
         this.userName = builder.userName;
         this.authOptions = builder.authOptions;
+        this.connectTimeout = builder.connectTimeoutMills;
         this.requestTimeout = builder.requestTimeoutMills;
         this.scanParallel = builder.scanParallel;
         initClient();
@@ -153,7 +155,7 @@ public class NebulaClient implements Serializable {
                 // TODO polling the address
                 Collections.shuffle(servers);
                 host = servers.get(tryConnectTimes);
-                connection.open(host, requestTimeout);
+                connection.open(host, connectTimeout, requestTimeout);
                 break;
             } catch (Exception e) {
                 if (tryConnectTimes == 0) {
@@ -553,6 +555,7 @@ public class NebulaClient implements Serializable {
         private final String userName;
         private final String password;
         private Map<String, Object> authOptions = new HashMap<>();
+        private long connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT;
         private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
         private int scanParallel = DEFAULT_SCAN_PARALLEL;
 
@@ -573,9 +576,15 @@ public class NebulaClient implements Serializable {
             return this;
         }
 
+        public Builder withConnectTimeoutMills(long connectTimeoutMills) {
+            this.connectTimeoutMills =
+                    connectTimeoutMills <= 0 ? Long.MAX_VALUE : connectTimeoutMills;
+            return this;
+        }
+
         public Builder withRequestTimeoutMills(long requestTimeoutMills) {
             this.requestTimeoutMills =
-                    requestTimeoutMills < 0 ? Long.MAX_VALUE : requestTimeoutMills;
+                    requestTimeoutMills <= 0 ? Long.MAX_VALUE : requestTimeoutMills;
             return this;
         }
 

@@ -28,6 +28,7 @@ public class NebulaPoolExample {
                     .builder(addresses, userName, password)
                     .withMaxClientSize(10)
                     .withMinClientSize(1)
+                    .withConnectTimeoutMills(1000)
                     .withRequestTimeoutMills(30000)
                     .withBlockWhenExhausted(true)
                     .withMaxWaitMills(Long.MAX_VALUE)
