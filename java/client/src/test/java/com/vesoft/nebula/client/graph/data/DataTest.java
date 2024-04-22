@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.client.graph.data;
 
-
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
@@ -31,7 +30,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import org.junit.Assert;
 import org.junit.Test;
-
 
 public class DataTest {
 

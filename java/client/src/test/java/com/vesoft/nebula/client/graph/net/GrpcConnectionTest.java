@@ -48,7 +48,7 @@ public class GrpcConnectionTest {
             LOGGER.info(resp.toString());
 
             // Test sign out
-            connection.signout(authResult.getSessionId());
+            connection.execute(authResult.getSessionId(), "SESSION CLOSE");
 
         } catch (Exception e) {
             e.printStackTrace();

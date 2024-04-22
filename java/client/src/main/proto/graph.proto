@@ -43,7 +43,6 @@ option optimize_for        = SPEED;
 // Interface definition
 service GraphService {
     rpc Authenticate(AuthRequest) returns (AuthResponse) {}
-    rpc Signout(SignoutRequest) returns (SignoutResponse) {}
     rpc Execute(ExecuteRequest) returns (ExecuteResponse) {}
     rpc StreamingExecute(ExecuteRequest) returns (stream ExecuteResponse) {}
 }
@@ -112,9 +111,3 @@ message AuthResponse {
     nebula.proto.common.Status status     = 1;
     int64                      session_id = 2;
 }
-
-message SignoutRequest {
-    int64 session_id = 1;
-}
-
-message SignoutResponse {}

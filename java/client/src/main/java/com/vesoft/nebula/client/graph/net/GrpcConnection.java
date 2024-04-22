@@ -15,7 +15,6 @@ import com.vesoft.nebula.proto.graph.AuthResponse;
 import com.vesoft.nebula.proto.graph.ExecuteRequest;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
-import com.vesoft.nebula.proto.graph.SignoutRequest;
 import io.grpc.Deadline;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
@@ -139,12 +138,6 @@ public class GrpcConnection extends Connection {
     public ExecuteResponse execute(long sessionID, String stmt) throws IOErrorException {
         return execute(sessionID, stmt, this.requestTimeout);
     }
-
-    public void signout(long sessionID) {
-        SignoutRequest request = SignoutRequest.newBuilder().setSessionId(sessionID).build();
-        stub.withDeadlineAfter(requestTimeout, TimeUnit.MILLISECONDS).signout(request);
-    }
-
 
     private void getChannel() {
         try {
