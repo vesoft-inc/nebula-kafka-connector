@@ -183,7 +183,7 @@ func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (Result, 
 	}
 	result, err := dc.conn.ExecuteContext(ctx, stmt)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
 	return result, nil

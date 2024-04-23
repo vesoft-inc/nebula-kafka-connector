@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"syscall"
@@ -13,6 +14,10 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/cli"
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/printer"
 )
+
+var default_pager = true
+var default_pagerLimit = 200
+var default_pagerCommand = "less"
 
 type (
 	Runner struct {
@@ -44,6 +49,9 @@ type (
 		failFast       bool //if true, stop loop for error
 		widthMax       int
 		signalChan     <-chan os.Signal
+		pager          bool
+		pagerLimit     int
+		pagerCommand   string
 	}
 
 	runnerOptionsFn func(*runnerOption)
@@ -52,9 +60,12 @@ type (
 func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	var err error
 	r := &Runner{
-		stdout:  os.Stdout,
-		option:  &runnerOption{},
-		printer: printer.NewPrinter("default", 100),
+		stdout: os.Stdout,
+		option: &runnerOption{
+			pager:        default_pager,
+			pagerLimit:   default_pagerLimit,
+			pagerCommand: default_pagerCommand,
+		},
 	}
 	r.combinOutput = &combinOutput{
 		runner: r,
@@ -62,6 +73,8 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	for _, opt := range opts {
 		opt(r.option)
 	}
+
+	r.printer = printer.NewPrinter("default", r.option.widthMax)
 	if !r.option.enableOutput {
 		r.stdout = io.Discard
 	}
@@ -212,7 +225,7 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 		if err := cmd.execute(); err != nil {
 			return false, err
 		}
-		if cmd.cmd == commandExit {
+		if cmd.cmd == commandExit || cmd.cmd == commandQuit {
 			return true, nil
 		} else {
 			return false, nil
@@ -232,16 +245,34 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 		// do not exit, and continue to execute next statement
 		r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
 	}
+	duration := time.Since(start)
 	if resp == nil {
 		return false, nil
 	}
-
+	var out io.WriteCloser
+	var execCmd *exec.Cmd
+	if r.option.pager && resp.RowSize() >= r.option.pagerLimit {
+		execCmd = exec.Command(r.option.pagerCommand)
+		out, err = execCmd.StdinPipe()
+		if err != nil {
+			return false, err
+		}
+		execCmd.Stdout = os.Stdout
+		if err := execCmd.Start(); err != nil {
+			return false, err
+		}
+		r.stdout = out
+	}
 	if isVertical {
 		r.printer.PrintResultVertical(r.combinOutput, resp)
 	} else {
 		r.printer.PrintResult(r.combinOutput, resp)
 	}
-	duration := time.Since(start)
+	if r.option.pager && resp.RowSize() >= r.option.pagerLimit {
+		out.Close()
+		execCmd.Wait()
+		r.stdout = os.Stdout
+	}
 	lantencyInMs := resp.Summary().TotalServerTimeUs() * 1000
 	if err != nil {
 		r.printBoth(fmt.Sprintf("Execution failed (time spent %v/%v)\n\n",

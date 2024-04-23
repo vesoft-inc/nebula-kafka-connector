@@ -22,24 +22,28 @@ type command struct {
 	cmd    string
 	desc   string
 	usage  string
+	alias  string
 }
 
 const (
-	commandSleep  = "sleep"
-	commandPlay   = "play"
-	commandRepeat = "repeat"
-	commandFormat = "format"
-	commandExit   = "exit"
-	commandHelp   = "help"
-	commnadTee    = "tee"
-	commnadNoTee  = "notee"
+	commandSleep   = "sleep"
+	commandPlay    = "play"
+	commandRepeat  = "repeat"
+	commandFormat  = "format"
+	commandExit    = "exit"
+	commandQuit    = "quit"
+	commandHelp    = "help"
+	commnadTee     = "tee"
+	commnadNoTee   = "notee"
+	commandPager   = "pager"
+	commandNoPager = "nopager"
 )
 
 type commandFn func(r *Runner, args []string) error
 
 // name for commands, used for help
 var commandNames []string
-var commands map[string]command
+var commands map[string]*command
 
 func (c *command) setArgs(args []string) {
 	c.args = args
@@ -52,19 +56,25 @@ func (c *command) execute() error {
 	return c.fn(c.runner, c.args)
 }
 
-func registerCommand(cmd string, usage, desc string, fn commandFn) {
+func registerCommand(cmd string, usage, alias, desc string, fn commandFn) {
 	if commands == nil {
-		commands = make(map[string]command)
+		commands = make(map[string]*command)
 	}
 	if commandNames == nil {
 		commandNames = make([]string, 0)
 	}
 	commandNames = append(commandNames, cmd)
-	commands[cmd] = command{
+	c := &command{
 		cmd:   cmd,
+		alias: alias,
 		desc:  desc,
 		usage: usage,
 		fn:    fn,
+	}
+	commands[cmd] = c
+	if alias != "" {
+		a := strings.Trim(alias, ":")
+		commands[a] = c
 	}
 }
 
@@ -83,17 +93,17 @@ func getCommand(r *Runner, line string) (*command, error) {
 	args := words[1:]
 	c, ok := commands[cmd]
 	if !ok {
-		return nil, fmt.Errorf("command not found: %s", cmd)
+		return nil, fmt.Errorf("Command not found: %s", cmd)
 	}
 	c.setArgs(args)
 	c.setRunner(r)
-	return &c, nil
+	return c, nil
 
 }
 
 func sleepFn(r *Runner, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("sleep command needs an argument")
+		return fmt.Errorf("Sleep command needs an argument")
 	}
 	i, err := strconv.Atoi(args[0])
 	if err != nil {
@@ -108,10 +118,10 @@ func helpFn(r *Runner, args []string) error {
 	writer.Style().Options.SeparateRows = false
 	writer.ResetHeaders()
 	writer.ResetRows()
-	writer.AppendHeader(table.Row{"Command", "Usage", "Description"})
+	writer.AppendHeader(table.Row{"Command", "Alias", "Usage", "Description"})
 	for _, name := range commandNames {
 		c := commands[name]
-		writer.AppendRow(table.Row{c.cmd, c.usage, c.desc})
+		writer.AppendRow(table.Row{c.cmd, c.alias, c.usage, c.desc})
 	}
 	writer.Render()
 	fmt.Fprintf(r.stdout, writer.Render())
@@ -121,7 +131,7 @@ func helpFn(r *Runner, args []string) error {
 
 func playFn(r *Runner, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("play command needs an argument")
+		return fmt.Errorf("Play command needs an argument")
 	}
 	// TODO maybe we could download the file from oss.
 	// and then play the file.
@@ -167,21 +177,21 @@ func playFn(r *Runner, args []string) error {
 		}
 	}
 
-	return fmt.Errorf("play file not found: %s", args[0])
+	return fmt.Errorf("Play file not found: %s", args[0])
 }
 
 func formatFn(r *Runner, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("format command needs an argument")
+		return fmt.Errorf("Format command needs an argument")
 	}
-	r.printBoth(fmt.Sprintf("set format to %s\n", args[0]))
+	r.printBoth(fmt.Sprintf("Set format to %s\n", args[0]))
 	r.printer = printer.NewPrinter(args[0], r.option.widthMax)
 	return nil
 }
 
 func teeFn(r *Runner, args []string) error {
 	if len(args) == 0 {
-		return fmt.Errorf("tee command needs an argument")
+		return fmt.Errorf("Tee command needs an argument")
 	}
 	var overwrite bool
 	var filename string
@@ -191,7 +201,7 @@ func teeFn(r *Runner, args []string) error {
 		overwrite = true
 		filename = args[1]
 	} else {
-		return fmt.Errorf("invalid tee command, usage: tee [-o] filename")
+		return fmt.Errorf("Invalid tee command, usage: tee [-o] filename")
 	}
 	var (
 		file *os.File
@@ -217,14 +227,40 @@ func noteeFn(r *Runner, args []string) error {
 	return nil
 }
 
+func pagerFn(r *Runner, args []string) error {
+	if len(args) != 2 {
+		return fmt.Errorf("Pager command needs two arguments, e.g. :pager less 200")
+	}
+	i, err := strconv.Atoi(args[1])
+	if err != nil {
+		return err
+	}
+	r.option.pagerLimit = i
+	r.option.pagerCommand = args[0]
+	r.option.pager = true
+	r.printStdout(fmt.Sprintf("Pager set to %s with row limit %d\n", args[0], i))
+	return nil
+}
+
+func noPagerFn(r *Runner, args []string) error {
+	r.option.pager = false
+	r.printStdout("Pager disabled.\n")
+	return nil
+}
+
 func init() {
-	registerCommand(commandHelp, ":help", "Show this help.", helpFn)
-	registerCommand(commandSleep, ":sleep 5", "Sleep N seconds.", sleepFn)
-	registerCommand(commandPlay, ":play ldbc", "Playing the dateset", playFn)
-	registerCommand(commandFormat, ":format default", "Change the format for value. (default, tck)", formatFn)
-	registerCommand(commnadTee, ":tee [-o] filename", "Append all results to an output file (overwrite using -o).", teeFn)
-	registerCommand(commnadNoTee, ":notee", "Stop writing to the output file.", noteeFn)
-	registerCommand(commandExit, ":exit", "Exit.", func(r *Runner, args []string) error {
+	registerCommand(commandHelp, ":help", ":h", "Show this help.", helpFn)
+	registerCommand(commandSleep, ":sleep 5", "", "Sleep N seconds.", sleepFn)
+	registerCommand(commandPlay, ":play ldbc", "", "Playing the dateset", playFn)
+	registerCommand(commandFormat, ":format default", "", "Change the format for value. (default, tck)", formatFn)
+	registerCommand(commnadTee, ":tee [-o] <filename>", "", "Append all results to an output file (overwrite using -o).", teeFn)
+	registerCommand(commnadNoTee, ":notee", "", "Stop writing to the output file.", noteeFn)
+	registerCommand(commandPager, ":pager <commnad> <row_limit>", "", "Set pager for result, default: \":pager less 200\"", pagerFn)
+	registerCommand(commandNoPager, ":nopager", "", "No pager", noPagerFn)
+	registerCommand(commandExit, ":exit", ":e", "Exit.", func(r *Runner, args []string) error {
+		return nil
+	})
+	registerCommand(commandQuit, ":quit", ":q", "Quit.", func(r *Runner, args []string) error {
 		return nil
 	})
 

@@ -39,19 +39,13 @@ func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Client, er
 		host: host.host,
 		port: host.port,
 	}
-	start := time.Now()
+	ctx, cancel := context.WithTimeout(context.Background(), cfg.connectTimeout)
+	defer cancel()
 	if err := cn.open(host.host, host.port, cfg.connectTimeout, nil); err != nil {
 		return nil, err
 	}
-	if err := cn.authenticate(cfg.username, cfg.password); err != nil {
+	if err := cn.authenticate(ctx, cfg.username, cfg.password); err != nil {
 		return nil, err
-	}
-	if cfg.connectTimeout > 0 && time.Since(start) > cfg.connectTimeout {
-		return nil, errConnConnectTimeout(host.host, host.port)
-	}
-
-	if cfg.graph != "" {
-		// TODO set graph
 	}
 	cn.timeout = cfg.requestTimeout
 	return cn, nil
@@ -78,7 +72,7 @@ func (cn *connection) open(host string, port int, timeout time.Duration, sslConf
 	return nil
 }
 
-func (cn *connection) authenticate(username, password string) error {
+func (cn *connection) authenticate(ctx context.Context, username, password string) error {
 	// TODO just simple auth with password
 	authInfo := make(map[string]string)
 	authInfo["password"] = password
@@ -96,7 +90,7 @@ func (cn *connection) authenticate(username, password string) error {
 		AuthInfo:   bs,
 		ClientInfo: clientInfo,
 	}
-	resp, err := cn.graphClient.Authenticate(context.Background(), &in)
+	resp, err := cn.graphClient.Authenticate(ctx, &in)
 	if err != nil {
 		_ = cn.Close()
 		return err

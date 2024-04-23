@@ -35,15 +35,15 @@ type defaultPrinter struct {
 	widthMax   int
 }
 
-func configTableWriter(writer *table.Writer, separateRows bool) {
-	(*writer).Style().Format.Header = text.FormatDefault
-	(*writer).Style().Options.SeparateRows = separateRows
+func configTableWriter(writer table.Writer, separateRows bool) {
+	writer.Style().Format.Header = text.FormatDefault
+	writer.Style().Options.SeparateRows = separateRows
 }
 
 func NewPrinter(format string, widthMax int) Printer {
 	writer := table.NewWriter()
 	stringer := newValueStringer(format)
-	configTableWriter(&writer, false)
+	configTableWriter(writer, false)
 	return &defaultPrinter{
 		format:     format,
 		tableWrite: writer,

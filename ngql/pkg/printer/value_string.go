@@ -31,34 +31,6 @@ func newValueStringer(format string) valueStringer {
 	}
 }
 
-// used for string value only. e.g.
-// return "abc\n" should print abc\n
-func (s *defaultStringer) strString(str string) string {
-	runes := []rune(str)
-	buf := make([]byte, 0)
-	for _, r := range runes {
-		switch r {
-		case '\a':
-			buf = append(buf, `\a`...)
-		case '\b':
-			buf = append(buf, `\b`...)
-		case '\f':
-			buf = append(buf, `\f`...)
-		case '\n':
-			buf = append(buf, `\n`...)
-		case '\r':
-			buf = append(buf, `\r`...)
-		case '\t':
-			buf = append(buf, `\t`...)
-		case '\v':
-			buf = append(buf, `\v`...)
-		default:
-			buf = append(buf, string(r)...)
-		}
-	}
-	return string(buf)
-}
-
 // used for record value
 // if the value is string and contain special character, should quote it
 func (s *defaultStringer) strQuoteSpecial(str string) string {
@@ -112,7 +84,7 @@ func (s *defaultStringer) String(v nebula.Value) string {
 	switch v.GetType() {
 	case nebula.ValueTypeString:
 		d, _ := v.AsString()
-		return s.strString(string(d))
+		return d.String()
 	case nebula.ValueTypeList, nebula.ValueTypeRecord, nebula.ValueTypeNode, nebula.ValueTypeEdge, nebula.ValueTypePath:
 		return s.complexString(v, false, s.String)
 	default:
@@ -127,7 +99,12 @@ func (s *defaultStringer) complexString(v nebula.Value, strWithQuote bool, strFn
 		buf := make([]string, 0)
 		for _, v := range d.GetValues() {
 			if v.GetType() == nebula.ValueTypeString {
-				buf = append(buf, s.strQuoteSpecial(v.String()))
+				if strWithQuote {
+					buf = append(buf, strconv.Quote(v.String()))
+				} else {
+					buf = append(buf, s.strQuoteSpecial(v.String()))
+				}
+
 			} else {
 				buf = append(buf, strFn(v))
 			}
