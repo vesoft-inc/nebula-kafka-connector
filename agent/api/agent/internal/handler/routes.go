@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	common "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/common"
+	config "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/config"
 	health "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/health"
 	storage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/handler/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/svc"
@@ -74,6 +75,21 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/v1/storage/hdfs/upload",
 				Handler: storage.HdfsUploadHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/api/v1/component-config",
+				Handler: config.GetComponentConfigHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/component-config",
+				Handler: config.SetComponentConfigHandler(serverCtx),
 			},
 		},
 	)

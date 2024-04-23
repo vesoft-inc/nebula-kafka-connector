@@ -111,3 +111,19 @@ type HDFSUploadReq struct {
 type HDFSUploadResp struct {
 	Data interface{} `json:"data"`
 }
+
+type GetComponentConfigReq struct {
+	Component string `form:"component"`
+}
+
+type GetComponentConfigResp struct {
+	Config map[string]interface{} `json:"config"`
+}
+
+type SetComponentConfigReq struct {
+	Component string                 `json:"component"`
+	Config    map[string]interface{} `json:"config"`
+}
+
+type SetComponentConfigResp struct {
+}
