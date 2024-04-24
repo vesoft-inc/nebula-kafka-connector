@@ -1,37 +1,37 @@
 """
-CREATE GRAPH TYPE IF NOT EXISTS tck_ldbc_type AS {
-(Place LABELS City&Country&Continent {id INT PRIMARY KEY, name STRING, url STRING, kind STRING}),
-(Forum LABEL Forum {id INT PRIMARY KEY, title STRING, creationDate LOCAL DATETIME}),
-(Comment LABELS Comment&Message {id INT PRIMARY KEY, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT}),
-(Person LABEL Person {id INT PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING}),
-(Tag LABEL Tag {id INT PRIMARY KEY, name STRING, url STRING}),
-(Post LABELS Post&Message {id INT PRIMARY KEY, imageFile STRING, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT, language STRING}),
-(TagClass LABEL TagClass {id INT PRIMARY KEY, name STRING, url STRING}),
-(Organisation LABELS University&Company {id INT PRIMARY KEY, kind STRING, name STRING, url STRING}),
-(Person)-[HAS_INTEREST:HAS_INTEREST]->(Tag),
-(Person)-[WORK_AT:WORK_AT{workFrom INT}]->(Organisation),
-(Person)-[IS_LOCATED_IN_1:IS_LOCATED_IN]->(Place),
-(Comment)-[IS_LOCATED_IN_2:IS_LOCATED_IN]->(Place),
-(Post)-[IS_LOCATED_IN_3:IS_LOCATED_IN]->(Place),
-(Organisation)-[IS_LOCATED_IN_4:IS_LOCATED_IN]->(Place),
-(Place)-[IS_PART_OF:IS_PART_OF]->(Place),
-(Tag)-[HAS_TYPE:HAS_TYPE]->(TagClass),
-(Comment)-[REPLY_OF_1:REPLY_OF]->(Post),
-(Comment)-[REPLY_OF_2:REPLY_OF]->(Comment),
-(Person)-[KNOWS:KNOWS{creationDate LOCAL DATETIME}]->(Person),
-(Person)-[FOLLOWS:FOLLOWS{src INT, dst INT}]->(Person),
-(Forum)-[CONTAINER_OF:CONTAINER_OF]->(Post),
-(Forum)-[HAS_MEMBER:HAS_MEMBER]->(Person),
-(Forum)-[HAS_MODERATOR:HAS_MODERATOR]->(Person),
-(Person)-[STUDY_AT:STUDY_AT{classYear INT}]->(Organisation),
-(TagClass)-[IS_SUBCLASS_OF:IS_SUBCLASS_OF]->(TagClass),
-(Forum)-[HAS_TAG_1:HAS_TAG]->(Tag),
-(Post)-[HAS_TAG_2:HAS_TAG]->(Tag),
-(Comment)-[HAS_TAG_3:HAS_TAG]->(Tag),
-(Post)-[HAS_CREATOR_1:HAS_CREATOR]->(Person),
-(Comment)-[HAS_CREATOR_2:HAS_CREATOR]->(Person),
-(Person)-[LIKES_1:LIKES{creationDate LOCAL DATETIME}]->(Post),
-(Person)-[LIKES_2:LIKES{creationDate LOCAL DATETIME}]->(Comment)}
+CREATE GRAPH TYPE IF NOT EXISTS ldbc_type AS {
+    NODE Place (:City&Country&Continent {id INT PRIMARY KEY, name STRING, url STRING, kind STRING}),
+    NODE Forum (:Forum {id INT PRIMARY KEY, title STRING, creationDate LOCAL DATETIME}),
+    NODE Comment (:Comment&Message {id INT PRIMARY KEY, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT}),
+    NODE Person (:Person {id INT PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING}),
+    NODE Tag (:Tag {id INT PRIMARY KEY, name STRING, url STRING}),
+    NODE Post (:Post&Message {id INT PRIMARY KEY, imageFile STRING, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT, language STRING}),
+    NODE TagClass (:TagClass {id INT PRIMARY KEY, name STRING, url STRING}),
+    NODE Organisation (:University&Company {id INT PRIMARY KEY, kind STRING, name STRING, url STRING}),
+    EDGE HAS_INTEREST (Person)-[:HAS_INTEREST]->(Tag),
+    EDGE WORK_AT (Person)-[:WORK_AT{workFrom INT}]->(Organisation),
+    EDGE IS_LOCATED_IN_1 (Person)-[:IS_LOCATED_IN]->(Place),
+    EDGE IS_LOCATED_IN_2 (Comment)-[:IS_LOCATED_IN]->(Place),
+    EDGE IS_LOCATED_IN_3 (Post)-[:IS_LOCATED_IN]->(Place),
+    EDGE IS_LOCATED_IN_4 (Organisation)-[:IS_LOCATED_IN]->(Place),
+    EDGE IS_PART_OF (Place)-[:IS_PART_OF]->(Place),
+    EDGE HAS_TYPE (Tag)-[:HAS_TYPE]->(TagClass),
+    EDGE REPLY_OF_1 (Comment)-[:REPLY_OF]->(Post),
+    EDGE REPLY_OF_2 (Comment)-[:REPLY_OF]->(Comment),
+    EDGE KNOWS (Person)-[:KNOWS{creationDate LOCAL DATETIME}]->(Person),
+    EDGE FOLLOWS (Person)-[:FOLLOWS{src INT, dst INT}]->(Person),
+    EDGE CONTAINER_OF (Forum)-[:CONTAINER_OF]->(Post),
+    EDGE HAS_MEMBER (Forum)-[:HAS_MEMBER]->(Person),
+    EDGE HAS_MODERATOR (Forum)-[:HAS_MODERATOR]->(Person),
+    EDGE STUDY_AT (Person)-[:STUDY_AT{classYear INT}]->(Organisation),
+    EDGE IS_SUBCLASS_OF (TagClass)-[:IS_SUBCLASS_OF]->(TagClass),
+    EDGE HAS_TAG_1 (Forum)-[:HAS_TAG]->(Tag),
+    EDGE HAS_TAG_2 (Post)-[:HAS_TAG]->(Tag),
+    EDGE HAS_TAG_3 (Comment)-[:HAS_TAG]->(Tag),
+    EDGE HAS_CREATOR_1 (Post)-[:HAS_CREATOR]->(Person),
+    EDGE HAS_CREATOR_2 (Comment)-[:HAS_CREATOR]->(Person),
+    EDGE LIKES_1 (Person)-[:LIKES{creationDate LOCAL DATETIME}]->(Post),
+    EDGE LIKES_2 (Person)-[:LIKES{creationDate LOCAL DATETIME}]->(Comment)}
 """
 
 """
@@ -39,7 +39,7 @@ CREATE GRAPH TYPE IF NOT EXISTS tck_ldbc_type AS {
 """
 
 """
-CREATE GRAPH ldbc TYPED tck_ldbc_type
+CREATE GRAPH ldbc :: ldbc_type
 """
 
 :sleep 10
