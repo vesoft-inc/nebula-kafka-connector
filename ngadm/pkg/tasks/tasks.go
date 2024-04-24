@@ -31,6 +31,8 @@ func Init() {
 		"rm":                 NewRM,
 		"status":             NewStatus,
 		"systemd":            NewSystemd,
+		"save-agent-config":  NewSaveAgent,
+		"get-agent-config":   NewGetAgent,
 	}
 
 }

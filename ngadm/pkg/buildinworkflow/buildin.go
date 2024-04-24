@@ -17,6 +17,7 @@ var BuildInWorkflowConverterMap = map[string]WorkflowConverter{
 	"status":        Status,
 	"config":        Config,
 	"install-agent": InstallAgent,
+	"install-host":  InstallHost,
 }
 
 func GetBuildinWorkflow(cmd string, args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {

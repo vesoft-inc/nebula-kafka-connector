@@ -18,14 +18,9 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 		[]rest.Route{
 			{
 				Method:  http.MethodGet,
-				Path:    "/health",
-				Handler: health.GetHandler(serverCtx),
+				Path:    "/api/v1/common/download",
+				Handler: common.DownloadFileHandler(serverCtx),
 			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
 			{
 				Method:  http.MethodPost,
 				Path:    "/api/v1/common/execute",
@@ -46,36 +41,6 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Path:    "/api/v1/common/upload",
 				Handler: common.UploadFileHandler(serverCtx),
 			},
-			{
-				Method:  http.MethodGet,
-				Path:    "/api/v1/common/download",
-				Handler: common.DownloadFileHandler(serverCtx),
-			},
-		},
-	)
-
-	server.AddRoutes(
-		[]rest.Route{
-			{
-				Method:  http.MethodPost,
-				Path:    "/api/v1/storage/s3/download",
-				Handler: storage.S3DownloadHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/api/v1/storage/s3/upload",
-				Handler: storage.S3UploadHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/api/v1/storage/hdfs/download",
-				Handler: storage.HdfsDownloadHandler(serverCtx),
-			},
-			{
-				Method:  http.MethodPost,
-				Path:    "/api/v1/storage/hdfs/upload",
-				Handler: storage.HdfsUploadHandler(serverCtx),
-			},
 		},
 	)
 
@@ -90,6 +55,41 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 				Method:  http.MethodPost,
 				Path:    "/api/v1/component-config",
 				Handler: config.SetComponentConfigHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodGet,
+				Path:    "/health",
+				Handler: health.GetHandler(serverCtx),
+			},
+		},
+	)
+
+	server.AddRoutes(
+		[]rest.Route{
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/hdfs/download",
+				Handler: storage.HdfsDownloadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/hdfs/upload",
+				Handler: storage.HdfsUploadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/s3/download",
+				Handler: storage.S3DownloadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/s3/upload",
+				Handler: storage.S3UploadHandler(serverCtx),
 			},
 		},
 	)

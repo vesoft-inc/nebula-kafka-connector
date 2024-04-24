@@ -6,12 +6,12 @@ type (
 	}
 )
 
-@server(
-	group: health  // is used to put related logic in the same package
+@server (
+	group: health // is used to put related logic in the same package
 )
-
 service agent-api {
 	@doc "Get health"
 	@handler Get
-	get /health returns (GetHealth);
+	get /health returns (GetHealth)
 }
+

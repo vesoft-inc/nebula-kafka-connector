@@ -114,7 +114,7 @@ func TestUtilsInstallSystemd(t *testing.T) {
 	// Add more assertions for the workflow.Tasks if needed
 }
 
-func TestAgentInstallSystemd(t *testing.T) {
+func TestAgentInstallShell(t *testing.T) {
 	tasks.Init()
 	args := map[string]interface{}{
 		"force": true,

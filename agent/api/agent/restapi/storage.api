@@ -13,7 +13,6 @@ type (
 	S3DownloadResp {
 		Data interface{} `json:"data"`
 	}
-
 	S3UploadReq {
 		Endpoint  string `json:"endpoint"`
 		Region    string `json:"region"`
@@ -26,7 +25,6 @@ type (
 	S3UploadResp {
 		Data interface{} `json:"data"`
 	}
-
 	KerberosConfig {
 		Enable                       bool   `json:"enable"`
 		Principle                    string `json:"principle"`
@@ -34,7 +32,6 @@ type (
 		ConfigFilePath               string `json:"configFilePath"`
 		KerberosServicePrincipleName string `json:"kerberosServicePrincipleName"`
 	}
-
 	HDFSDownloadReq {
 		Address   string         `json:"address"`
 		Username  string         `json:"username"`
@@ -45,7 +42,6 @@ type (
 	HDFSDownloadResp {
 		Data interface{} `json:"data"`
 	}
-
 	HDFSUploadReq {
 		Address   string         `json:"address"`
 		Username  string         `json:"username"`
@@ -58,24 +54,24 @@ type (
 	}
 )
 
-@server(
+@server (
 	group: storage
 )
-
 service agent-api {
 	@doc "S3 Download"
 	@handler s3Download
-	post /api/v1/storage/s3/download(S3DownloadReq) returns (S3DownloadResp)
-	
+	post /api/v1/storage/s3/download (S3DownloadReq) returns (S3DownloadResp)
+
 	@doc "S3 Upload"
 	@handler s3Upload
-	post /api/v1/storage/s3/upload(S3UploadReq) returns (S3UploadResp)
-	
+	post /api/v1/storage/s3/upload (S3UploadReq) returns (S3UploadResp)
+
 	@doc "HDFS Download"
 	@handler hdfsDownload
-	post /api/v1/storage/hdfs/download(HDFSDownloadReq) returns (HDFSDownloadResp)
-	
+	post /api/v1/storage/hdfs/download (HDFSDownloadReq) returns (HDFSDownloadResp)
+
 	@doc "HDFS Upload"
 	@handler hdfsUpload
-	post /api/v1/storage/hdfs/upload(HDFSUploadReq) returns (HDFSUploadResp)
+	post /api/v1/storage/hdfs/upload (HDFSUploadReq) returns (HDFSUploadResp)
 }
+

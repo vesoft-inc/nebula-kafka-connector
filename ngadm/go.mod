@@ -8,10 +8,9 @@ require (
 	github.com/stretchr/testify v1.8.4
 	github.com/unknwon/goconfig v1.0.0
 	github.com/vesoft-inc/go-pkg v0.0.0-20231117110005-307b542ecb31
-	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20240220091041-76ed2b026c91
+	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20240419063250-30a8128aa588
 	golang.org/x/crypto v0.17.0
 	golang.org/x/sync v0.6.0
-	gopkg.in/yaml.v2 v2.4.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 

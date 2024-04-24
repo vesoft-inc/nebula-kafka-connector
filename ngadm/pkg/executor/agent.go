@@ -21,6 +21,7 @@ var CmdExecuteAsyncPath = "/api/v1/common/execute-async"
 var CmdExecuteResultPath = "/api/v1/common/execute-async/"
 var UploadPath = "/api/v1/common/upload"
 var HealthPath = "/health"
+var AgentConfigPath = "/api/v1/component-config"
 
 type AgentExecutor struct {
 	Host      string
@@ -35,9 +36,10 @@ type AgentResponse struct {
 	Data    AgentData `json:"data"`
 }
 type AgentData struct {
-	Stdout string `json:"stdout"`
-	Stderr string `json:"stderr"`
-	Err    string `json:"err"`
+	Stdout string         `json:"stdout,omitempty"`
+	Stderr string         `json:"stderr,omitempty"`
+	Err    string         `json:"err,omitempty"`
+	Config map[string]any `json:"config,omitempty"`
 }
 
 type CertConfig struct {
@@ -82,6 +84,33 @@ func (a *AgentExecutor) Health() error {
 		return fmt.Errorf("get  %s health err ,code: %d, message: %s", a.Host, respBody.Code, respBody.Message)
 	}
 	return nil
+}
+
+func (a *AgentExecutor) SaveAgentConfig(component string, config map[string]any) error {
+	var respBody AgentResponse
+	err := a.client.Post(AgentConfigPath, map[string]any{
+		"component": component,
+		"config":    config,
+	}, &respBody)
+	if err != nil {
+		return fmt.Errorf("agent %s get config err: %w", a.Host, err)
+	}
+	if respBody.Code != 0 {
+		return fmt.Errorf("get  %s config err ,code: %d, message: %s", a.Host, respBody.Code, respBody.Message)
+	}
+	return nil
+}
+
+func (a *AgentExecutor) GetAgentConfigg(component string) (map[string]any, error) {
+	var respBody AgentResponse
+	err := a.client.Get(fmt.Sprintf("%s?component=%s", AgentConfigPath, component), &respBody)
+	if err != nil {
+		return nil, fmt.Errorf("agent %s get config err: %w", a.Host, err)
+	}
+	if respBody.Code != 0 {
+		return nil, fmt.Errorf("get  %s config err ,code: %d, message: %s", a.Host, respBody.Code, respBody.Message)
+	}
+	return respBody.Data.Config, nil
 }
 
 func (a *AgentExecutor) Shell(cmd string, sudo bool) (stdout string, stderr string, err error) {

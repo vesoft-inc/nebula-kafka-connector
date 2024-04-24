@@ -5,23 +5,19 @@ type (
 		Command string `json:"command"`
 		Timeout int    `json:"timeout,default=60"`
 	}
-
 	CmdExecuteResp {
 		Stdout string `json:"stdout"`
 		Stderr string `json:"stderr"`
 		Err    string `json:"err"`
 	}
-
 	CmdExecuteAsyncReq {
 		CmdId   string `json:"cmdId"`
 		Command string `json:"command"`
 		Timeout int    `json:"timeout,default=60"`
 	}
-
 	CmdExecuteAsyncResp {
 		Pid int `json:"pid"`
 	}
-
 	GetCmdExecuteAsyncStatusReq {
 		CmdId string `path:"cmdId"`
 	}
@@ -30,14 +26,12 @@ type (
 		Stdout string `json:"stdout"`
 		Stderr string `json:"stderr"`
 	}
-
 	UploadFileReq {
 		Path string `form:"path"`
 	}
 	UploadFileResp {
 		Data interface{} `json:"data"`
 	}
-
 	DownloadFileReq {
 		Path string `form:"path"`
 	}
@@ -46,28 +40,28 @@ type (
 	}
 )
 
-@server(
+@server (
 	group: common
 )
-
 service agent-api {
 	@doc "Cmd Execute"
 	@handler CmdExecute
-	post /api/v1/common/execute(CmdExecuteReq) returns(CmdExecuteResp)
-	
+	post /api/v1/common/execute (CmdExecuteReq) returns (CmdExecuteResp)
+
 	@doc "Cmd Execute Async"
 	@handler CmdExecuteAsync
-	post /api/v1/common/execute-async(CmdExecuteAsyncReq) returns(CmdExecuteAsyncResp)
-	
+	post /api/v1/common/execute-async (CmdExecuteAsyncReq) returns (CmdExecuteAsyncResp)
+
 	@doc "Get Cmd Execute Async Status"
 	@handler GetCmdExecuteAsyncStatus
-	get /api/v1/common/execute-async/:cmdId(GetCmdExecuteAsyncStatusReq) returns(GetCmdExecuteAsyncStatusResp)
-	
+	get /api/v1/common/execute-async/:cmdId (GetCmdExecuteAsyncStatusReq) returns (GetCmdExecuteAsyncStatusResp)
+
 	@doc "Upload File"
 	@handler UploadFile
-	post /api/v1/common/upload(UploadFileReq) returns(UploadFileResp)
-	
+	post /api/v1/common/upload (UploadFileReq) returns (UploadFileResp)
+
 	@doc "Download File"
 	@handler DownloadFile
-	get /api/v1/common/download(DownloadFileReq) returns(DownloadFileResp)
+	get /api/v1/common/download (DownloadFileReq) returns (DownloadFileResp)
 }
+

@@ -7,24 +7,23 @@ type (
 	GetComponentConfigResp {
 		Config map[string]interface{} `json:"config"`
 	}
-
 	SetComponentConfigReq {
 		Component string                 `json:"component"`
 		Config    map[string]interface{} `json:"config"`
 	}
-	SetComponentConfigResp struct{}
+	SetComponentConfigResp  {}
 )
 
-@server(
+@server (
 	group: config
 )
-
 service agent-api {
 	@doc "Get Component Config"
 	@handler GetComponentConfig
-	get /api/v1/component-config(GetComponentConfigReq) returns(GetComponentConfigResp)
-	
+	get /api/v1/component-config (GetComponentConfigReq) returns (GetComponentConfigResp)
+
 	@doc "Set Component Config"
 	@handler SetComponentConfig
-	post /api/v1/component-config(SetComponentConfigReq) returns(SetComponentConfigResp)
+	post /api/v1/component-config (SetComponentConfigReq) returns (SetComponentConfigResp)
 }
+

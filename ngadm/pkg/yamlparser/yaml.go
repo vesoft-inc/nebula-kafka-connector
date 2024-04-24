@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 type SpecMap struct {

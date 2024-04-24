@@ -1,6 +1,7 @@
 package buildinworkflow
 
 import (
+	"fmt"
 	"path"
 	"time"
 
@@ -9,13 +10,23 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
-func InstallCluster(args map[string]any, spec *types.JobSpec, username, password string) (*types.TaskSpec, error) {
+func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if args == nil {
 		args = map[string]any{}
 	}
+	// username, password string
 	if spec.Spec.Metad == nil {
 		return nil, nil
 	}
+	username, ok := args["username"].(string)
+	if !ok {
+		return nil, fmt.Errorf("username is required")
+	}
+	password, ok := args["password"].(string)
+	if !ok {
+		return nil, fmt.Errorf("password is required")
+	}
+
 	metaCluster := spec.Spec.Metad
 	metaHosts := spec.Spec.Metad.Hosts
 	metaServerAddress := utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config))
@@ -95,6 +106,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec, username, password
 	for _, cluster := range spec.Spec.Metad.Clusters {
 		// 3.1 start graphd
 		for _, agent := range cluster.Graphd.Hosts {
+			installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start graphd",
@@ -107,7 +119,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec, username, password
 								"local_ip":          utils.GetHostIP(agent.Host),
 								"meta_server_addrs": metaServerAddress,
 							}),
-							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath), "etc/nebula-graphd.conf"),
+							Dst: path.Join(installPath, "etc/nebula-graphd.conf"),
 						},
 					},
 					{
@@ -116,7 +128,18 @@ func InstallCluster(args map[string]any, spec *types.JobSpec, username, password
 							Host:      agent.Host,
 							Operation: "start",
 							Component: "graphd",
-							Path:      utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath),
+							Path:      installPath,
+						},
+					},
+					{
+						Type: "save-agent-config",
+						Params: &tasks.SaveAgentParams{
+							Component: "metad",
+							Config: map[string]any{
+								"installPath": installPath,
+								"host":        utils.GetHostIP(agent.Host),
+								"port":        utils.GetConfigPort(metaCluster.Config),
+							},
 						},
 					},
 				},
@@ -124,6 +147,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec, username, password
 		}
 		// .2 start storaged
 		for _, agent := range cluster.Storaged.Hosts {
+			installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start storaged",
@@ -136,7 +160,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec, username, password
 								"local_ip":          utils.GetHostIP(agent.Host),
 								"meta_server_addrs": metaServerAddress,
 							}),
-							Dst: path.Join(utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath), "etc/nebula-storaged.conf"),
+							Dst: path.Join(installPath, "etc/nebula-storaged.conf"),
 						},
 					},
 					{
@@ -146,7 +170,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec, username, password
 							Operation:    "start",
 							Component:    "storaged",
 							NeedRollback: true,
-							Path:         utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath),
+							Path:         installPath,
 						},
 					},
 				},

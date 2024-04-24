@@ -20,8 +20,8 @@ spec:
           port: 22
           user: vesoft
           password: nebula
-      - host: "192.168.8.131"
-        sshConfig:
-          port: 22
-          user: vesoft
-          password: nebula
+      # - host: "192.168.8.131"
+      #   sshConfig:
+      #     port: 22
+      #     user: vesoft
+      #     password: nebula

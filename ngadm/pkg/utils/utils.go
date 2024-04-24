@@ -174,6 +174,9 @@ func GetAllAgents(spec *types.JobSpec) []*types.Agent {
 }
 
 func MergeAgentConfig(agentConfig map[string]any, newConfig map[string]any) map[string]any {
+	if agentConfig == nil {
+		agentConfig = map[string]any{}
+	}
 	for k, v := range newConfig {
 		(agentConfig)[k] = v
 	}
