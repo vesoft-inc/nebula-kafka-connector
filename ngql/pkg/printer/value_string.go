@@ -55,7 +55,8 @@ func (s *defaultStringer) mapString(m map[string]nebula.Value, strWithQuote bool
 	sort.Slice(keys, func(i, j int) bool {
 		return keys[i] < keys[j]
 	})
-	for k, v := range m {
+	for _, k := range keys {
+		v := m[k]
 		var (
 			key   string
 			value string
