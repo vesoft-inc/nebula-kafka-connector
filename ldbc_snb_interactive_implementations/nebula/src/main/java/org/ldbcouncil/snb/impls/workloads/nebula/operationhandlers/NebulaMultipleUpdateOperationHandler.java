@@ -1,8 +1,9 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.*;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
-import org.ldbcouncil.snb.impls.workloads.nebula.NebulaNewClient;
+import org.ldbcouncil.snb.impls.workloads.nebula.NewNebulaPool;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.MultipleUpdateOperationHandler;
 import org.ldbcouncil.snb.driver.workloads.interactive.LdbcNoResult;
 import com.vesoft.nebula.client.graph.data.ResultSet;
@@ -18,20 +19,29 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
 
     @Override
     public void executeOperation(TOperation operation, NebulaDbConnectionState state, ResultReporter resultReporter) throws DbException {
+        NewNebulaPool newPool = null;
+        NebulaClient client = null;
         try {
-            NebulaNewClient client = state.getClient(operation.type());
+            newPool = state.getPool(operation.type());
+            client = newPool.getPool().getClient();
             List<String> queryStrings = getQueryString(state, operation);
             String graphName = state.getGraphName();
             for (String queryString : queryStrings) {
                 queryString = queryString.replace("$graphName", graphName);
                 state.logQuery(operation.getClass().getSimpleName(), queryString);
-                ResultSet result = client.getClient().execute(queryString);
-                if (!result.isSucceeded()) {
-                    System.out.println(result.getErrorMessage());
+                ResultSet resultSet = client.execute(queryString);
+                if (!resultSet.isSucceeded()) {
+                    LOGGER.error("execute {} failed, {}",
+                            operation.getClass().getSimpleName(),
+                            resultSet.getErrorMessage());
                 }
             }
         } catch (Exception e) {
             throw new DbException(e);
+        } finally {
+            if (newPool != null && client != null) {
+                newPool.getPool().returnClient(client);
+            }
         }
         resultReporter.report(0, LdbcNoResult.INSTANCE, operation);
     }

@@ -40,13 +40,12 @@ public class NebulaClient implements Serializable {
     private long requestTimeout;
     private final String userName;
     private final Map<String, Object> authOptions;
-    private HostAddress host;
     private GrpcConnection connection;
     private long sessionId;
 
     private int scanParallel;
 
-    private AtomicBoolean isClosed = new AtomicBoolean(false);
+    private boolean isClosed = false;
 
     public static Builder builder(String addresses, String userName, String password) {
         return new Builder(addresses, userName, password);
@@ -91,7 +90,7 @@ public class NebulaClient implements Serializable {
      * @return NebulaGraph server host.
      */
     public String getHost() {
-        return host.toString();
+        return connection.getServerAddress().toString();
     }
 
     /**
@@ -112,17 +111,17 @@ public class NebulaClient implements Serializable {
     /**
      * release and close the connection with NebulaGraph server.
      */
-    public void close() {
-        if (isClosed.compareAndSet(false, true)) {
+    public synchronized void close() {
+        if (!isClosed) {
+            isClosed = true;
             if (connection != null) {
                 try {
-                    execute("SESSION CLOSE");
+                    connection.execute(sessionId, "SESSION CLOSE");
                 } catch (Exception e) {
                     logger.warn("signout failed,", e);
                 }
-                connection.close();
-                connection = null;
             }
+            connection = null;
         }
     }
 
@@ -132,7 +131,7 @@ public class NebulaClient implements Serializable {
      * @reuturn true if client is closed
      */
     public boolean isClosed() {
-        return isClosed.get();
+        return isClosed;
     }
 
     /**
@@ -141,7 +140,7 @@ public class NebulaClient implements Serializable {
      * @throws RuntimeException if the client is closed.
      */
     private void checkClosed() {
-        if (isClosed.get()) {
+        if (isClosed) {
             throw new RuntimeException("The NebulaClient already closed.");
         }
     }
@@ -154,8 +153,7 @@ public class NebulaClient implements Serializable {
             try {
                 // TODO polling the address
                 Collections.shuffle(servers);
-                host = servers.get(tryConnectTimes);
-                connection.open(host, connectTimeout, requestTimeout);
+                connection.open(servers.get(tryConnectTimes), connectTimeout, requestTimeout);
                 break;
             } catch (Exception e) {
                 if (tryConnectTimes == 0) {

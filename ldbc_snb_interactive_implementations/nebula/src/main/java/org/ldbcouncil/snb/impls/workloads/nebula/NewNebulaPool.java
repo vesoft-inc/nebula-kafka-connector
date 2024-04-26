@@ -5,23 +5,23 @@
 
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
-import com.vesoft.nebula.client.graph.net.NebulaClient;
+import com.vesoft.nebula.client.graph.net.NebulaPool;
 
-public class NebulaNewClient {
-    private NebulaClient client;
+public class NewNebulaPool {
+    private NebulaPool pool;
     private String addr;
 
-    public NebulaNewClient(NebulaClient client, String  addr){
-        this.client = client;
+    public NewNebulaPool(NebulaPool pool, String  addr){
+        this.pool = pool;
         this.addr = addr;
     }
 
-    public NebulaClient getClient() {
-        return client;
+    public NebulaPool getPool() {
+        return pool;
     }
 
-    public void setClient(NebulaClient client) {
-        this.client = client;
+    public void setClient(NebulaPool pool) {
+        this.pool = pool;
     }
 
     public String getAddr() {

@@ -1,11 +1,11 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.client.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
-import org.ldbcouncil.snb.impls.workloads.nebula.NebulaNewClient;
+import org.ldbcouncil.snb.impls.workloads.nebula.NewNebulaPool;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.ListOperationHandler;
 
 import java.io.UnsupportedEncodingException;
@@ -30,8 +30,11 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
     @Override
     public void executeOperation(TOperation operation, NebulaDbConnectionState state,
                                  ResultReporter resultReporter) throws DbException {
+        NewNebulaPool newPool = null;
+        NebulaClient client = null;
         try {
-            NebulaNewClient client = state.getClient(operation.type());
+            newPool = state.getPool(operation.type());
+            client = newPool.getPool().getClient();
             String query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
@@ -40,15 +43,23 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
             state.logQuery(operation.getClass().getSimpleName(), query);
 
             final List<TOperationResult> results = new ArrayList<>();
-
-            final ResultSet resultSet = client.getClient().execute(query);
+            final ResultSet resultSet = client.execute(query);
+            if (!resultSet.isSucceeded()) {
+                LOGGER.error("execute {} failed, {}",
+                        operation.getClass().getSimpleName(),
+                        resultSet.getErrorMessage());
+            }
             while (resultSet.hasNext()) {
                 final ResultSet.Record record = resultSet.next();
                 results.add(toResult(record));
             }
             resultReporter.report(results.size(), results, operation);
-        } catch (IOErrorException | ParseException | UnsupportedEncodingException e) {
+        } catch (Exception e) {
             throw new DbException(e);
+        } finally {
+            if (newPool != null && client != null) {
+                newPool.getPool().returnClient(client);
+            }
         }
     }
 }

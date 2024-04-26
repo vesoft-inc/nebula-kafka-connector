@@ -139,19 +139,19 @@ public class ResultSet {
     }
 
     public ResultSet(ExecuteResponse resp) {
-        if (resp == null || !resp.hasResult()) {
+        if (resp == null) {
             throw new RuntimeException("got null object for server's response");
         }
         this.response = resp;
-        if (resp.getResult().getRecordsList().isEmpty()) {
-            isEmpty = true;
+        if (!resp.hasResult()) {
             size = 0;
         } else {
+            for (ByteString column : resp.getResult().getColumnNamesList()) {
+                this.columnNames.add(column.toString(charset));
+            }
             size = resp.getResult().getRecordsCount();
         }
-        for (ByteString column : resp.getResult().getColumnNamesList()) {
-            this.columnNames.add(column.toString(charset));
-        }
+        isEmpty = size == 0;
     }
 
     /**

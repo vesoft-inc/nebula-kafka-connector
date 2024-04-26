@@ -31,13 +31,13 @@ public class GrpcConnection extends Connection {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(GrpcConnection.class);
 
-    private static ConcurrentHashMap<HostAddress, ManagedChannel> channels =
+    private static final ConcurrentHashMap<HostAddress, ManagedChannel> channels =
             new ConcurrentHashMap<>();
     private GraphServiceGrpc.GraphServiceBlockingStub stub;
     private long connectTimeout = 0;
     private long requestTimeout = 0;
 
-    private Charset charset = Charsets.UTF_8;
+    private final Charset charset = Charsets.UTF_8;
 
     private static final ReadWriteLock lock = new ReentrantReadWriteLock();
 
@@ -55,28 +55,11 @@ public class GrpcConnection extends Connection {
         stub = GraphServiceGrpc.newBlockingStub(channels.get(serverAddr));
     }
 
-    public static void closeChannel() {
-        lock.writeLock().lock();
-        try {
-            LOGGER.info("cleaning the channel.");
-            for (ManagedChannel channel : channels.values()) {
-                if (channel != null && !channel.isShutdown()) {
-                    try {
-                        channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
-                    } catch (InterruptedException e) {
-                        LOGGER.warn("close grpc connection is interrupted.", e);
-                    }
-                }
-                channels.clear();
-            }
-        } finally {
-            lock.writeLock().unlock();
-        }
-    }
-
     @Override
     public void close() {
-        closeChannel();
+        if (!channels.isEmpty()) {
+            closeChannel();
+        }
         stub = null;
     }
 
@@ -104,6 +87,7 @@ public class GrpcConnection extends Connection {
                     .setAuthInfo(ByteString.copyFrom(authInfoString, charset))
                     .setClientInfo(clientInfo)
                     .build();
+
             getChannel();
             AuthResponse resp = stub
                     .withDeadlineAfter(connectTimeout, TimeUnit.MILLISECONDS)
@@ -140,11 +124,11 @@ public class GrpcConnection extends Connection {
     }
 
     private void getChannel() {
+        lock.readLock().lock();
         try {
-            lock.readLock().lock();
             channels.computeIfAbsent(serverAddr, key -> {
                 ManagedChannel channel = createChannel();
-                stub = GraphServiceGrpc.newBlockingStub(channels.get(serverAddr))
+                stub = GraphServiceGrpc.newBlockingStub(channel)
                         .withDeadline(Deadline.after(requestTimeout, TimeUnit.MILLISECONDS));
                 return channel;
             });
@@ -154,9 +138,26 @@ public class GrpcConnection extends Connection {
     }
 
     private ManagedChannel createChannel() {
-        ManagedChannel channel = ManagedChannelBuilder
+        return ManagedChannelBuilder
                 .forAddress(serverAddr.getHost(), serverAddr.getPort()).usePlaintext()
                 .build();
-        return channel;
+    }
+
+    private static void closeChannel() {
+        lock.writeLock().lock();
+        try {
+            for (ManagedChannel channel : channels.values()) {
+                if (channel != null && !channel.isShutdown()) {
+                    try {
+                        channel.shutdownNow().awaitTermination(5, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        LOGGER.warn("close grpc connection is interrupted.", e);
+                    }
+                }
+            }
+            channels.clear();
+        } finally {
+            lock.writeLock().unlock();
+        }
     }
 }

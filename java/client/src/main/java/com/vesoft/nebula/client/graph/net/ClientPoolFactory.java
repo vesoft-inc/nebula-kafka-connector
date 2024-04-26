@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.apache.commons.pool2.BasePooledObjectFactory;
 import org.apache.commons.pool2.PooledObject;
 import org.apache.commons.pool2.impl.DefaultPooledObject;
@@ -60,8 +61,12 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
                     + "server is connected.");
         }
 
+        String addrStr = goodHosts.stream()
+                .map(HostAddress::toString)
+                .collect(Collectors.joining(","));
+
         NebulaClient client = NebulaClient
-                .builder(goodHosts.toString(), userName)
+                .builder(addrStr, userName)
                 .withAuthOptions(authOptions)
                 .withConnectTimeoutMills(connectTimeoutMs)
                 .withRequestTimeoutMills(requestTimeout)
