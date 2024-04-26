@@ -44,7 +44,8 @@ var loginCmd = &cobra.Command{
 		if err != nil {
 			return metaConsoleError(fmt.Sprintf("cannot create client to %s", address), err.Error())
 		}
-		if err := c.Login(); err != nil {
+		resp, err := c.Login()
+		if err != nil {
 			//should reset password for first login
 			e, ok := err.(*nebula.NebulaError)
 			if !ok {
@@ -66,11 +67,12 @@ var loginCmd = &cobra.Command{
 			if err != nil {
 				return err
 			}
-			if err := c.Login(); err != nil {
+			resp, err = c.Login()
+			if err != nil {
 				return metaConsoleError("Login failed", err.Error())
 			}
 		}
-		if err := ngctl.SaveMetaToken(address, c.GetToken()); err != nil {
+		if err := ngctl.SaveMetaToken(address, resp.Leader, resp.Token); err != nil {
 			return metaConsoleError("Save meta session failed", err.Error())
 		}
 

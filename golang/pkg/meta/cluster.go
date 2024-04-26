@@ -32,10 +32,10 @@ type (
 	ServiceType int8
 
 	ClusterInfo struct {
-		ClusterId   int64
-		ClusterName string
-		Replica     uint32
-		Zones       []string
+		Id              int64    `json:"id"`
+		Name            string   `json:"name"`
+		ReplicaRefactor uint32   `json:"replica_refactor"`
+		Zones           []string `json:"zones"`
 	}
 
 	ListClustersReq struct {
@@ -43,14 +43,14 @@ type (
 	}
 
 	ListClustersResp struct {
-		Clusters []*ClusterInfo
+		Clusters []*ClusterInfo `json:"clusters"`
 	}
 
 	ServiceInfo struct {
-		ServiceId   int64
-		ServiceType ServiceType
-		Host        string
-		Port        uint32
+		Id   int64       `json:"id"`
+		Type ServiceType `json:"type"`
+		Host string      `json:"host"`
+		Port uint32      `json:"port"`
 	}
 
 	ListServicesReq struct {
@@ -58,7 +58,7 @@ type (
 	}
 
 	ListServicesResp struct {
-		Services []*ServiceInfo
+		Services []*ServiceInfo `json:"services"`
 	}
 
 	InitClusterReq struct {
@@ -123,7 +123,7 @@ func NewDropServiceReq(host string, port uint32, serviceType ServiceType, cluste
 }
 
 func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	zones := make([][]byte, 0)
 	for _, z := range req.zones {
@@ -137,7 +137,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 			Zones:         zones,
 		},
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.CreateCluster(ctx, in)
 	})
 	if err != nil {
@@ -147,7 +147,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 }
 
 func (c *metaClient) AddService(req *AddServiceReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 
 	in := &admin.AddServiceRequest{
@@ -157,7 +157,7 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 		Type:        common.ServiceType(req.serviceType),
 		ClusterName: []byte(req.clustername),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AddService(ctx, in)
 	})
 	if err != nil {
@@ -166,13 +166,13 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 	return responseIsErr(resp)
 }
 func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ShowServiceRequest{
 		Header:      &admin.AdminRequestHeader{Token: c.token},
 		ClusterName: []byte(req.clusterName),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ShowService(ctx, in)
 	})
 	if err != nil {
@@ -192,10 +192,10 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 		host := addr.GetHost()
 		port := addr.GetPort()
 		services = append(services, &ServiceInfo{
-			ServiceId:   s.ServiceId,
-			ServiceType: ServiceType(s.Type),
-			Host:        string(host),
-			Port:        port,
+			Id:   s.ServiceId,
+			Type: ServiceType(s.Type),
+			Host: string(host),
+			Port: port,
 		})
 	}
 	return &ListServicesResp{
@@ -203,13 +203,13 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 	}, nil
 }
 func (c *metaClient) InitCluster(req *InitClusterReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.InitStorageRequest{
 		Header:      &admin.AdminRequestHeader{Token: c.token},
 		ClusterName: []byte(req.clustername),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.InitStorage(ctx, in)
 	})
 	if err != nil {
@@ -218,13 +218,13 @@ func (c *metaClient) InitCluster(req *InitClusterReq) error {
 	return responseIsErr(resp)
 }
 func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ShowClusterRequest{
 		Header:      &admin.AdminRequestHeader{Token: c.token},
 		ClusterName: []byte(req.clusterName),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ShowCluster(ctx, in)
 	})
 	if err != nil {
@@ -240,10 +240,10 @@ func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, erro
 	clusters := make([]*ClusterInfo, 0)
 	for _, c := range response.Clusters {
 		cluster := &ClusterInfo{
-			ClusterId:   c.ClusterId,
-			ClusterName: string(c.Desc.ClusterName),
-			Replica:     c.Desc.ReplicaFactor,
-			Zones:       make([]string, 0),
+			Id:              c.ClusterId,
+			Name:            string(c.Desc.ClusterName),
+			ReplicaRefactor: c.Desc.ReplicaFactor,
+			Zones:           make([]string, 0),
 		}
 		for _, z := range c.Desc.Zones {
 			cluster.Zones = append(cluster.Zones, string(z))
@@ -256,7 +256,7 @@ func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, erro
 }
 
 func (c *metaClient) DropService(req *DropServiceReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropServiceRequest{
 		Header:  &admin.AdminRequestHeader{Token: c.token},
@@ -265,7 +265,7 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 		Type:    common.ServiceType(req.serviceType),
 		Cluster: []byte(req.clustername),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropService(ctx, in)
 	})
 	if err != nil {
@@ -282,14 +282,14 @@ func NewDropClusterReq(clusterName string, force bool) *DropClusterReq {
 }
 
 func (c *metaClient) DropCluster(req *DropClusterReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropClusterRequest{
 		Header:  &admin.AdminRequestHeader{Token: c.token},
 		Cluster: []byte(req.clustername),
 		Force:   req.force,
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropCluster(ctx, in)
 	})
 	if err != nil {

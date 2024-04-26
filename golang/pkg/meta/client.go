@@ -25,11 +25,16 @@ var defaultRequestTimeout = 10 * time.Second
 type (
 	Client interface {
 		Close()
-		Login() error
+		//if leader change, error is not nil, and return leader info in LoginResponse
+		Login() (*LoginResponse, error)
 		Logout() error
-		GetToken() []byte
 		UserClient
 		ClusterClient
+	}
+
+	LoginResponse struct {
+		Token  []byte `json:"token"`
+		Leader string `json:"leader"`
 	}
 
 	UserClient interface {
@@ -53,14 +58,14 @@ type (
 	}
 
 	metaClient struct {
-		address    string
-		client     admin.AdminServiceClient
-		clientConn *grpc.ClientConn
-		retryTimes int
-		timeout    time.Duration
-		token      []byte
-		user       string
-		password   string
+		address        string
+		client         admin.AdminServiceClient
+		clientConn     *grpc.ClientConn
+		requestTimeout time.Duration
+		connectTimeout time.Duration
+		token          []byte
+		user           string
+		password       string
 	}
 
 	responseHeader interface {
@@ -70,15 +75,15 @@ type (
 	WithOption func(*metaClient)
 )
 
-func WithTimeout(timeout time.Duration) WithOption {
+func WithRequestTimeout(timeout time.Duration) WithOption {
 	return func(client *metaClient) {
-		client.timeout = timeout
+		client.requestTimeout = timeout
 	}
 }
 
-func WithRetryTimes(retryTimes int) WithOption {
+func WithConnectTimeout(timeout time.Duration) WithOption {
 	return func(client *metaClient) {
-		client.retryTimes = retryTimes
+		client.connectTimeout = timeout
 	}
 }
 
@@ -120,14 +125,14 @@ func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
 			return nil, fmt.Errorf("invalid address")
 		}
 		client = &metaClient{
-			address:    addr,
-			retryTimes: 1,
-			timeout:    defaultRequestTimeout,
+			address:        addr,
+			requestTimeout: defaultRequestTimeout,
+			connectTimeout: defaultConnectTimeout,
 		}
 		for _, opt := range opts {
 			opt(client)
 		}
-		err = client.open(host, port, defaultConnectTimeout, nil)
+		err = client.open(host, port, client.requestTimeout, nil)
 		if err != nil {
 			continue
 		}
@@ -160,27 +165,26 @@ func (c *metaClient) open(host string, port int, timeout time.Duration, sslConfi
 	return nil
 }
 
-func (c *metaClient) Login() error {
+func (c *metaClient) Login() (*LoginResponse, error) {
 	if c.user == "" || c.password == "" {
-		return fmt.Errorf("user and password are required")
+		return nil, fmt.Errorf("user and password are required")
 	}
-	token, err := c.authWithPassword(c.user, c.password)
+	resp, err := c.authWithPassword(c.user, c.password)
 	if err != nil {
-		return err
+		return resp, err
 	}
-	c.token = token
-	return nil
+	return resp, nil
 
 }
 
-func (c *metaClient) authWithPassword(user string, password string) ([]byte, error) {
+func (c *metaClient) authWithPassword(user string, password string) (*LoginResponse, error) {
 	info := make(map[string]interface{})
 	info["password"] = password
 	return c.auth(user, info)
 }
 
-func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+func (c *metaClient) auth(user string, authInfo map[string]interface{}) (*LoginResponse, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 	bs, err := json.Marshal(authInfo)
 	if err != nil {
@@ -196,27 +200,47 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) ([]byte,
 		AuthInfo:   bs,
 		ClientInfo: clientInfo,
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
-		return c.client.Login(ctx, in)
-	})
+	response, err := c.client.Login(ctx, in)
 	if err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*admin.LoginResponse)
-	if !ok {
-		return nil, fmt.Errorf("invalid response")
-	}
-	nebulaErr := nebula.ErrorFromBytes(response.Header.GetStatus().GetCode())
-	if nebulaErr != nebula.ERROR_SUCCESSFUL_COMPLETION {
+
+	// retry for leader change
+	if nebula.ErrorCode(response.Header.GetStatus().GetCode()) == nebula.ERROR_LEADER_CHANGED {
+		leader := response.Header.GetLeader()
+		if leader == nil {
+			return nil, fmt.Errorf("invalid leader")
+		}
+		c.Close()
+		c.address = fmt.Sprintf("%s:%d", leader.GetHost(), leader.GetPort())
+		err := c.open(string(leader.GetHost()), int(leader.GetPort()), c.connectTimeout, nil)
+		if err != nil {
+			return nil, err
+		}
+		response, err = c.client.Login(ctx, in)
+		if err != nil {
+			return nil, err
+		}
+		if nebula.ErrorCode(response.Header.GetStatus().GetCode()) != nebula.ERROR_SUCCESSFUL_COMPLETION {
+			return nil, nebula.NewNebulaError(
+				nebula.ErrorCode(string(response.Header.GetStatus().GetCode())),
+				string(response.Header.GetStatus().GetMessage()),
+			)
+		}
+	} else if nebula.ErrorCode(response.Header.GetStatus().GetCode()) != nebula.ERROR_SUCCESSFUL_COMPLETION {
 		return nil, nebula.NewNebulaError(
-			nebula.ErrorFromBytes(response.Header.GetStatus().GetCode()),
+			nebula.ErrorCode(string(response.Header.GetStatus().GetCode())),
 			string(response.Header.GetStatus().GetMessage()),
 		)
 	}
 	if response.Token == nil {
 		return nil, fmt.Errorf("invalid token")
 	}
-	return response.Token, nil
+	r := &LoginResponse{
+		Token:  response.Token,
+		Leader: c.address,
+	}
+	return r, nil
 }
 
 func (c *metaClient) Close() {
@@ -225,39 +249,25 @@ func (c *metaClient) Close() {
 	}
 }
 
-func (c *metaClient) retry(fn func() (responseHeader, error)) (responseHeader, error) {
+// there's no need to retry, because the token is invalid after leader chanage.
+func (c *metaClient) execute(fn func() (responseHeader, error)) (responseHeader, error) {
 	var (
 		resp responseHeader
 		err  error
 	)
-	for i := 0; i < c.retryTimes+1; i++ {
-		resp, err = fn()
-		if err != nil {
-			continue
-		}
-		header := resp.GetHeader()
-		if nebula.ErrorFromBytes(header.GetStatus().GetCode()) == nebula.ERROR_SUCCESSFUL_COMPLETION {
-			return resp, nil
-		}
-		// if the error is not leader change, then return and do not retry
-		if nebula.ErrorFromBytes(header.GetStatus().GetCode()) != nebula.ERROR_LEADER_CHANGED {
-			return resp, nil
-		}
-		newLeader := header.GetLeader()
-		if newLeader == nil {
-			return nil, fmt.Errorf("invalid leader")
-		}
-		c.address = fmt.Sprintf("%s:%d", newLeader.GetHost(), newLeader.GetPort())
-		c.Close()
-		if err := c.open(string(newLeader.GetHost()), int(newLeader.GetPort()),
-			defaultConnectTimeout, nil); err != nil {
-			return nil, err
-		}
-	}
+	resp, err = fn()
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
+	header := resp.GetHeader()
+	if nebula.ErrorFromBytes(header.GetStatus().GetCode()) == nebula.ERROR_SUCCESSFUL_COMPLETION {
+		return resp, nil
+	} else {
+		return nil, nebula.NewNebulaError(
+			nebula.ErrorCode(string(header.GetStatus().GetCode())),
+			string(header.GetStatus().GetMessage()),
+		)
+	}
 }
 
 func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
@@ -297,12 +307,12 @@ func (c *metaClient) GetToken() []byte {
 }
 
 func (c *metaClient) Logout() error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.LogoutRequest{
 		Header: &admin.AdminRequestHeader{Token: c.token},
 	}
-	_, err := c.retry(func() (responseHeader, error) {
+	_, err := c.execute(func() (responseHeader, error) {
 		return c.client.Logout(ctx, in)
 	})
 	if err != nil {

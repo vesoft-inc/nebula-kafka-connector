@@ -128,8 +128,8 @@ var showServiceCmd = &cobra.Command{
 		data := make([][]string, 0)
 		for _, s := range resp.Services {
 			row := make([]string, 0)
-			row = append(row, fmt.Sprintf("%d", s.ServiceId))
-			if s.ServiceType == meta.ServiceTypeGraphd {
+			row = append(row, fmt.Sprintf("%d", s.Id))
+			if s.Type == meta.ServiceTypeGraphd {
 				row = append(row, "graphd")
 			} else {
 				row = append(row, "storaged")

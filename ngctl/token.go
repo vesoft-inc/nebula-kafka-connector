@@ -9,6 +9,7 @@ import (
 
 type MetaToken struct {
 	Address string
+	Leader  string
 	Token   []byte
 }
 
@@ -25,8 +26,8 @@ func CachePath() string {
 	return cacheFile
 }
 
-func SaveMetaToken(addr string, token []byte) error {
-	data, err := json.Marshal(MetaToken{Address: addr, Token: token})
+func SaveMetaToken(addr string, leader string, token []byte) error {
+	data, err := json.Marshal(MetaToken{Address: addr, Leader: leader, Token: token})
 	if err != nil {
 		return err
 	}

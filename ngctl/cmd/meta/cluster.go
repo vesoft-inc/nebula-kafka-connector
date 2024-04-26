@@ -103,9 +103,9 @@ var showClusterCmd = &cobra.Command{
 		data := make([][]string, 0)
 		for _, s := range resp.Clusters {
 			row := make([]string, 0)
-			row = append(row, fmt.Sprintf("%d", s.ClusterId))
-			row = append(row, fmt.Sprintf("%s", s.ClusterName))
-			row = append(row, fmt.Sprintf("%d", s.Replica))
+			row = append(row, fmt.Sprintf("%d", s.Id))
+			row = append(row, fmt.Sprintf("%s", s.Name))
+			row = append(row, fmt.Sprintf("%d", s.ReplicaRefactor))
 			data = append(data, row)
 		}
 

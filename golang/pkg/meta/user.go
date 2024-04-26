@@ -36,18 +36,18 @@ type (
 		user []string
 	}
 	UserInfo struct {
-		Name            string
-		Active          bool
-		AuthType        string
-		CreatedTime     *time.Time
-		LastLoginTime   *time.Time
-		LastUpdatedTime *time.Time
-		DisabledTime    *time.Time
-		AuthInfo        string
+		Name            string     `json:"name"`
+		Active          bool       `json:"active"`
+		AuthType        string     `json:"auth_type"`
+		CreatedTime     *time.Time `json:"created_time"`
+		LastLoginTime   *time.Time `json:"last_login_time"`
+		LastUpdatedTime *time.Time `json:"last_updated_time"`
+		DisabledTime    *time.Time `json:"disabled_time"`
+		AuthInfo        string     `json:"auth_info"`
 	}
 
 	ListUsersResp struct {
-		Users []*UserInfo
+		Users []*UserInfo `json:"users"`
 	}
 )
 
@@ -60,14 +60,14 @@ func NewChangePasswordReq(user, currentPassword, newPassword string) *ChangePass
 }
 
 func (c *metaClient) ChangePassword(req *ChangePasswordReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ChangePasswordRequest{
 		Username:    []byte(req.user),
 		OldPassword: []byte(req.currentPassword),
 		NewPassword: []byte(req.newPassword),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ChangePassword(ctx, in)
 	})
 	if err != nil {
@@ -96,7 +96,7 @@ func NewCreateUserReq(user string, authType string, authInfo string) *CreateUser
 }
 
 func (c *metaClient) CreateUser(req *CreateUserReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.CreateUserRequest{
 		Header:   &admin.AdminRequestHeader{Token: c.token},
@@ -104,7 +104,7 @@ func (c *metaClient) CreateUser(req *CreateUserReq) error {
 		AuthType: []byte(req.authType),
 		AuthInfo: []byte(req.authInfo),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.CreateUser(ctx, in)
 	})
 	if err != nil {
@@ -120,13 +120,13 @@ func NewDropUserReq(user string) *DropUserReq {
 }
 
 func (c *metaClient) DropUser(req *DropUserReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropUserRequest{
 		Header:   &admin.AdminRequestHeader{Token: c.token},
 		Username: []byte(req.user),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropUser(ctx, in)
 	})
 	if err != nil {
@@ -144,7 +144,7 @@ func NewAlterUserReq(user string, authInfo string, active bool) *AlterUserReq {
 }
 
 func (c *metaClient) AlterUser(req *AlterUserReq) error {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.AlterUserRequest{
 		Header:   &admin.AdminRequestHeader{Token: c.token},
@@ -152,7 +152,7 @@ func (c *metaClient) AlterUser(req *AlterUserReq) error {
 		AuthInfo: []byte(req.authInfo),
 		Active:   req.active,
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AlterUser(ctx, in)
 	})
 	if err != nil {
@@ -168,7 +168,7 @@ func NewListUsersReq(user []string) *ListUsersReq {
 }
 
 func (c *metaClient) ListUsers(req *ListUsersReq) (*ListUsersResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	users := make([][]byte, 0)
 	for _, u := range req.user {
@@ -178,7 +178,7 @@ func (c *metaClient) ListUsers(req *ListUsersReq) (*ListUsersResp, error) {
 		Header:    &admin.AdminRequestHeader{Token: c.token},
 		Usernames: users,
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ListUser(ctx, in)
 	})
 	if err != nil {

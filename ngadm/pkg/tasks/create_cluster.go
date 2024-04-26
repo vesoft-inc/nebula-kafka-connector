@@ -28,7 +28,7 @@ func NewCreateCluster(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, 
 	}
 	defer client.Close()
 
-	if err = client.Login(); err != nil {
+	if _, err = client.Login(); err != nil {
 		return nil, fmt.Errorf("login meta server failed: %s", err)
 	}
 
