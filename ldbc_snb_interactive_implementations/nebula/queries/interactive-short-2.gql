@@ -11,10 +11,7 @@ MATCH WALK (message:Message)-[:REPLY_OF]->*(post:Post)-[:HAS_CREATOR]->(person:P
 ORDER BY messageCreationDate DESC, messageId ASC
 RETURN
   messageId,
-  CASE WHEN message.content <> ""
-        THEN message.content
-        ELSE message.imageFile
-  END AS messageContent,
+  COALESCE(message.content, message.imageFile) AS messageContent,
   messageCreationDate,
   post.id AS postId,
   person.id AS personId,

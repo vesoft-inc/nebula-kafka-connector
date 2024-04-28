@@ -4,4 +4,4 @@ INSERT NODE Comment ({id: $commentId,
                       locationIP: $locationIP,
                       browserUsed: $browserUsed,
                       content: $content,
-                      extent: $length})
+                      `length`: $length})

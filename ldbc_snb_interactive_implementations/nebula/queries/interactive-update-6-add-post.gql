@@ -6,4 +6,4 @@ INSERT NODE Post({id: $postId,
                   language: $language,
                   content: $content,
                   imageFile: $imageFile,
-                  extent: $length})
+                  `length`: $length})

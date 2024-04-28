@@ -17,45 +17,44 @@ manager:
   hooks:
     before:
       - statements:
-          # TODO: add `` and rename extent -> length
           - |
             CREATE GRAPH TYPE IF NOT EXISTS ldbc_type AS {
-                (City LABELS City&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (Country LABELS Country&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (Continent LABELS Continent&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (University LABELS University&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (Company LABELS Company&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (Person LABEL Person {id INT64 PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, email STRING, speaks STRING }),
-                (Forum LABEL Forum {id INT64 PRIMARY KEY, title STRING, creationDate LOCALDATETIME}),
-                (Post LABELS Post&Message {id INT64 PRIMARY KEY, imageFile STRING, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, language STRING, content STRING, extent INT}),
-                (Comment LABELS Comment&Message {id INT64 PRIMARY KEY, creationDate LOCALDATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT32}),
-                (Tag LABEL Tag {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (TagClass LABEL TagClass {id INT64 PRIMARY KEY, name STRING, url STRING}),
-                (City)-[CITY_IS_PART_OF_COUNTRY:IS_PART_OF]->(Country),
-                (Country)-[COUNTRY_IS_PART_OF_CONTINENT:IS_PART_OF]->(Continent),
-                (University)-[UNIVERSITY_IS_LOCATED_IN_CITY:IS_LOCATED_IN]->(City),
-                (Company)-[COMPANY_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
-                (Person)-[PERSON_IS_LOCATED_IN_CITY:IS_LOCATED_IN]->(City),
-                (Person)-[PERSON_STUDY_AT_UNIVERSITY:STUDY_AT{classYear INT32}]->(University),
-                (Person)-[PERSON_WORK_AT_COMPANY:WORK_AT{workFrom INT32}]->(Company),
-                (Person)-[PERSON_LIKES_POST:LIKES{creationDate LOCALDATETIME}]->(Post),
-                (Person)-[PERSON_LIKES_COMMENT:LIKES{creationDate LOCALDATETIME}]->(Comment),
-                (Person)-[PERSON_HAS_INTEREST_TAG:HAS_INTEREST]->(Tag),
-                (Person)-[PERSON_KNOWS_PERSON:KNOWS{creationDate LOCALDATETIME}]->(Person),
-                (Post)-[POST_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
-                (Post)-[POST_HAS_CREATOR_PERSON:HAS_CREATOR]->(Person),
-                (Post)-[POST_HAS_TAG_TAG:HAS_TAG]->(Tag),
-                (Comment)-[COMMENT_IS_LOCATED_IN_COUNTRY:IS_LOCATED_IN]->(Country),
-                (Comment)-[COMMENT_HAS_CREATOR_PERSON:HAS_CREATOR]->(Person),
-                (Comment)-[COMMENT_HAS_TAG_TAG:HAS_TAG]->(Tag),
-                (Comment)-[COMMENT_REPLY_OF_POST:REPLY_OF]->(Post),
-                (Comment)-[COMMENT_REPLY_OF_COMMENT:REPLY_OF]->(Comment),
-                (Forum)-[FORUM_CONTAINER_OF_POST:CONTAINER_OF]->(Post),
-                (Forum)-[FORUM_HAS_MEMBER_PERSON:HAS_MEMBER{joinDate LOCALDATETIME}]->(Person),
-                (Forum)-[FORUM_HAS_MODERATOR_PERSON:HAS_MODERATOR]->(Person),
-                (Forum)-[FORUM_HAS_TAG_TAG:HAS_TAG]->(Tag),
-                (Tag)-[TAG_HAS_TYPE_TAGCLASS:HAS_TYPE]->(TagClass),
-                (TagClass)-[TAGCLASS_IS_SUBCLASS_OF_TAGCLASS:IS_SUBCLASS_OF]->(TagClass)
+                NODE City (LABELS City&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Country (LABELS Country&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Continent (LABELS Continent&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE University (LABELS University&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Company (LABELS Company&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Person (LABEL Person {id INT64 PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, email STRING, speaks STRING }),
+                NODE Forum (LABEL Forum {id INT64 PRIMARY KEY, title STRING, creationDate LOCAL DATETIME}),
+                NODE Post (LABELS Post&Message {id INT64 PRIMARY KEY, imageFile STRING, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, language STRING, content STRING, `length` INT32}),
+                NODE Comment (LABELS Comment&Message {id INT64 PRIMARY KEY, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING,`length` INT32}),
+                NODE Tag (LABEL Tag {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE TagClass (LABEL TagClass {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                EDGE CITY_IS_PART_OF_COUNTRY(City)-[:IS_PART_OF]->(Country),
+                EDGE COUNTRY_IS_PART_OF_CONTINENT(Country)-[:IS_PART_OF]->(Continent),
+                EDGE UNIVERSITY_IS_LOCATED_IN_CITY(University)-[:IS_LOCATED_IN]->(City),
+                EDGE COMPANY_IS_LOCATED_IN_COUNTRY(Company)-[:IS_LOCATED_IN]->(Country),
+                EDGE PERSON_IS_LOCATED_IN_CITY(Person)-[:IS_LOCATED_IN]->(City),
+                EDGE PERSON_STUDY_AT_UNIVERSITY(Person)-[:STUDY_AT{classYear INT16}]->(University),
+                EDGE PERSON_WORK_AT_COMPANY(Person)-[:WORK_AT{workFrom INT16}]->(Company),
+                EDGE PERSON_LIKES_POST(Person)-[:LIKES{creationDate LOCAL DATETIME}]->(Post),
+                EDGE PERSON_LIKES_COMMENT(Person)-[:LIKES{creationDate LOCAL DATETIME}]->(Comment),
+                EDGE PERSON_HAS_INTEREST_TAG(Person)-[:HAS_INTEREST]->(Tag),
+                EDGE PERSON_KNOWS_PERSON(Person)-[:KNOWS{creationDate LOCAL DATETIME}]->(Person),
+                EDGE POST_IS_LOCATED_IN_COUNTRY(Post)-[:IS_LOCATED_IN]->(Country),
+                EDGE POST_HAS_CREATOR_PERSON(Post)-[:HAS_CREATOR]->(Person),
+                EDGE POST_HAS_TAG_TAG(Post)-[:HAS_TAG]->(Tag),
+                EDGE COMMENT_IS_LOCATED_IN_COUNTRY(Comment)-[:IS_LOCATED_IN]->(Country),
+                EDGE COMMENT_HAS_CREATOR_PERSON(Comment)-[:HAS_CREATOR]->(Person),
+                EDGE COMMENT_HAS_TAG_TAG(Comment)-[:HAS_TAG]->(Tag),
+                EDGE COMMENT_REPLY_OF_POST(Comment)-[:REPLY_OF]->(Post),
+                EDGE COMMENT_REPLY_OF_COMMENT(Comment)-[:REPLY_OF]->(Comment),
+                EDGE FORUM_CONTAINER_OF_POST(Forum)-[:CONTAINER_OF]->(Post),
+                EDGE FORUM_HAS_MEMBER_PERSON(Forum)-[:HAS_MEMBER{joinDate LOCAL DATETIME}]->(Person),
+                EDGE FORUM_HAS_MODERATOR_PERSON(Forum)-[:HAS_MODERATOR]->(Person),
+                EDGE FORUM_HAS_TAG_TAG(Forum)-[:HAS_TAG]->(Tag),
+                EDGE TAG_HAS_TYPE_TAGCLASS(Tag)-[:HAS_TYPE]->(TagClass),
+                EDGE TAGCLASS_IS_SUBCLASS_OF_TAGCLASS(TagClass)-[:IS_SUBCLASS_OF]->(TagClass)
               }
         wait: 10s
       - statements:
@@ -215,6 +214,7 @@ sources:
         props:
           - name: 'imageFile'
             type: 'STRING'
+            nullable: true
             index: 1
           - name: 'creationDate'
             type: 'LOCALDATETIME'
@@ -231,7 +231,8 @@ sources:
           - name: 'content'
             type: 'STRING'
             index: 6
-          - name: 'extent'
+            nullable: true
+          - name: '`length`'
             type: 'INT'
             index: 7
 
@@ -256,8 +257,9 @@ sources:
             index: 3
           - name: 'content'
             type: 'STRING'
+            nullable: true
             index: 4
-          - name: 'extent'
+          - name: '`length`'
             type: 'INT'
             index: 5
 

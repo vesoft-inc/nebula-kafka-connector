@@ -5,6 +5,7 @@
   14 AS person1Id,
   27 AS person2Id
 }
+*/
 
 USE $graphName
 MATCH path0 = ALL SHORTEST PATH (person1:Person {id:$person1Id})<-[:KNOWS]->*(person2:Person {id:$person2Id})
