@@ -159,9 +159,11 @@ func init() {
 	addServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "service host")
 	addServiceCmd.Flags().Uint32VarP(&serviceFlags.port, "port", "P", 0, "service port")
 	addServiceCmd.Flags().StringVarP(&serviceFlags.clusterName, "cluster", "c", "", "cluster name")
+	addServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "cluster")
 
 	dropServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
 	dropServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "service host")
 	dropServiceCmd.Flags().Uint32VarP(&serviceFlags.port, "port", "P", 0, "service port")
 	dropServiceCmd.Flags().StringVarP(&serviceFlags.clusterName, "cluster", "c", "", "cluster name")
+	dropServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "cluster")
 }
