@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"io"
 	"os"
 	"path/filepath"
@@ -216,4 +217,76 @@ func (h *hdfsClient) Upload(ctx context.Context, externalUri, localPath string, 
 	} else {
 		return h.uploadToStorage(b.HDFS.Path, localPath)
 	}
+}
+
+func (h *hdfsClient) ExistDir(ctx context.Context, uri string) bool {
+	b := h.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		log.WithError(err).WithField("uri", uri).Error("check and set uri failed when test existDir")
+		return false
+	}
+
+	_, err = h.client.Stat(b.HDFS.Path)
+	if err != nil {
+		log.WithError(err).WithField("uri", uri).Error("check hdfs path not exist")
+		return false
+	}
+
+	return true
+}
+
+func (h *hdfsClient) EnsureDir(ctx context.Context, uri string, recursively bool) error {
+	b := h.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return fmt.Errorf("ensure dir, check and set hdfs uri %s failed: %w", uri, err)
+	}
+	return nil
+}
+
+func (h *hdfsClient) GetDir(ctx context.Context, uri string) (*Backend, error) {
+	b := h.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return nil, fmt.Errorf("get dir, check and set hdfs uri %s failed: %w", uri, err)
+	}
+
+	return b, nil
+}
+
+func (h *hdfsClient) ListDir(ctx context.Context, uri string) ([]string, error) {
+	b := h.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return nil, fmt.Errorf("list dir, check and set hdfs uri %s failed: %w", uri, err)
+	}
+
+	files, err := h.client.ReadDir(b.HDFS.Path)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read hdfs directory: %w", err)
+	}
+
+	dirs := make([]string, 0, len(files))
+	for _, f := range files {
+		if f.IsDir() {
+			dirs = append(dirs, f.Name())
+		}
+	}
+
+	return dirs, nil
+}
+
+func (h *hdfsClient) RemoveDir(ctx context.Context, uri string) error {
+	b := h.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return fmt.Errorf("remove dir, check and set hdfs uri %s failed: %w", uri, err)
+	}
+
+	if err = h.client.Remove(b.HDFS.Path); err != nil {
+		return fmt.Errorf("failed to remove hdfs path: %w", err)
+	}
+
+	return nil
 }

@@ -112,18 +112,37 @@ type S3UploadResp struct {
 	Data interface{} `json:"data"`
 }
 
-type SetComponentConfigReq struct {
-	Component string                 `json:"component"`
-	Config    map[string]interface{} `json:"config"`
-}
-
-type SetComponentConfigResp struct {
-}
-
 type UploadFileReq struct {
 	Path string `form:"path"`
 }
 
 type UploadFileResp struct {
+	Data interface{} `json:"data"`
+}
+
+type SetComponentConfigReq struct {
+	Component string                 `json:"component"`
+	Config    map[string]interface{} `json:"config"`
+}
+
+type SetComponentConfigResp struct {}
+
+type LocalUploadReq struct {
+	Path        string `json:"path"`
+	LocalPath   string `json:"localPath"`
+	Recursively bool   `json:"recursively"`
+}
+
+type LocalUploadResp struct {
+	Data interface{} `json:"data"`
+}
+
+type LocalDownloadReq struct {
+	Path        string `json:"path"`
+	LocalPath   string `json:"localPath"`
+	Recursively bool   `json:"recursively"`
+}
+
+type LocalDownloadResp struct {
 	Data interface{} `json:"data"`
 }

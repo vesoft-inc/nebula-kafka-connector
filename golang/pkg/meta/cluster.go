@@ -69,12 +69,18 @@ type (
 		clustername string
 		force       bool
 	}
+
+	ClusterServiceInfo struct {
+		ClusterId int64
+		Services  []*ServiceInfo
+	}
 )
 
 const (
 	ServiceTypeUnknown ServiceType = iota
 	ServiceTypeStoraged
 	ServiceTypeGraphd
+	ServiceTypeMetad
 	ServiceTypeSearch
 )
 

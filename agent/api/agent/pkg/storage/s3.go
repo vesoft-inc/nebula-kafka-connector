@@ -3,8 +3,10 @@ package storage
 import (
 	"context"
 	"fmt"
+	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/limiter"
 
@@ -241,4 +243,129 @@ func (s *s3Client) GetObjectSize(bucket, key string) (int64, error) {
 	}
 
 	return *resp.ContentLength, nil
+}
+
+func (s *s3Client) ExistDir(ctx context.Context, uri string) bool {
+	b := s.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		log.WithError(err).WithField("uri", uri).Error("Check and set uri failed when test ExistDir.")
+		return false
+	}
+
+	req := &s3.ListObjectsV2Input{
+		Bucket:  aws.String(b.S3.Bucket),
+		Prefix:  aws.String(b.S3.Path),
+		MaxKeys: aws.Int64(1),
+	}
+
+	exist := false
+	s.client.ListObjectsV2Pages(req, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
+		if len(p.Contents) != 0 {
+			exist = true
+		}
+		return false
+	})
+
+	log.WithField("uri", uri).Debugf("Test exist dir %s: %v.", uri, exist)
+	return exist
+}
+
+func (s *s3Client) EnsureDir(ctx context.Context, uri string, recursively bool) error {
+	b := s.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return fmt.Errorf("ensure dir, check and set s3 uri %s failed: %w", uri, err)
+	}
+
+	// there is no directory in s3 object store, then need do nothing
+	logx.Infof("Ensure %s successfully.", uri)
+	return nil
+}
+
+func (s *s3Client) GetDir(ctx context.Context, uri string) (*Backend, error) {
+	b := s.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return nil, fmt.Errorf("get dir, check and set s3 uri %s failed: %w", uri, err)
+	}
+
+	log.WithField("uri", uri).Debugf("Get backend for %s successfully.", uri)
+	return b, nil
+}
+
+func (s *s3Client) ListDir(ctx context.Context, uri string) ([]string, error) {
+	b := s.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return nil, fmt.Errorf("list dir, check and set s3 uri %s failed: %w.", uri, err)
+	}
+
+	prefix := b.S3.Path
+	// prefix can't start with "/"
+	if prefix != "" && !strings.HasSuffix(prefix, "/") {
+		// without "/",  we could only get current prefix
+		prefix += "/"
+	}
+	req := &s3.ListObjectsV2Input{
+		Bucket:    aws.String(s.backend.S3.Bucket),
+		Prefix:    aws.String(prefix),
+		Delimiter: aws.String("/"),
+	}
+
+	names := make([]string, 0)
+	s.client.ListObjectsV2Pages(req, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
+		for _, obj := range p.CommonPrefixes {
+			var name string
+			if prefix == "/" { // special case: backup root is the bucket root
+				name = *obj.Prefix
+			} else {
+				name, err = filepath.Rel(prefix, *obj.Prefix)
+				if err != nil {
+					log.WithError(err).WithField("key", *obj.Prefix).WithField("prefix", prefix).Error("Get relative path failed.")
+					return false
+				}
+			}
+			names = append(names, name)
+		}
+
+		return true
+	})
+
+	log.WithField("uri", uri).WithField("dirs", names).Debugf("List all dirs with prefix %s successfully.", uri)
+	return names, nil
+}
+
+func (s *s3Client) RemoveDir(ctx context.Context, uri string) error {
+	b := s.backend.DeepCopy()
+	err := b.SetUri(uri)
+	if err != nil {
+		return fmt.Errorf("remove dir, check and set s3 uri %s failed: %w", uri, err)
+	}
+
+	prefix := b.S3.Path
+	req := &s3.ListObjectsV2Input{
+		Bucket: aws.String(s.backend.S3.Bucket),
+		Prefix: aws.String(prefix),
+	}
+
+	s.client.ListObjectsV2Pages(req, func(p *s3.ListObjectsV2Output, lastPage bool) bool {
+		for _, obj := range p.Contents {
+			delReq := &s3.DeleteObjectInput{
+				Bucket: aws.String(s.backend.S3.Bucket),
+				Key:    obj.Key,
+			}
+
+			_, err = s.client.DeleteObject(delReq)
+			if err != nil {
+				log.WithError(err).WithField("key", *obj.Key).Errorf("Delete object %s failed.", *obj.Key)
+				return false
+			}
+		}
+
+		return true
+	})
+
+	log.WithField("uri", uri).Debugf("Remove all files with prefix %s successfully.", uri)
+	return nil
 }

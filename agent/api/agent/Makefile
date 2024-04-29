@@ -49,7 +49,7 @@ lint: $(GOBIN)/golangci-lint
 	$(GOBIN)/golangci-lint run
 
 build:
-	$(GO_BUILD) -ldflags '$(LDFLAGS)' -o bin/agent agent.go
+	$(GO_BUILD) -ldflags '-s -w $(LDFLAGS)' -o bin/agent agent.go
 
 run:
 	go build -ldflags '$(LDFLAGS)' -o bin/agent agent.go

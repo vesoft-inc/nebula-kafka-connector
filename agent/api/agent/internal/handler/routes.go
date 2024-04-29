@@ -83,6 +83,16 @@ func RegisterHandlers(server *rest.Server, serverCtx *svc.ServiceContext) {
 			},
 			{
 				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/local/upload",
+				Handler: storage.LocalUploadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
+				Path:    "/api/v1/storage/local/download",
+				Handler: storage.LocalDownloadHandler(serverCtx),
+			},
+			{
+				Method:  http.MethodPost,
 				Path:    "/api/v1/storage/s3/download",
 				Handler: storage.S3DownloadHandler(serverCtx),
 			},

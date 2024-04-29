@@ -7,13 +7,15 @@ import (
 )
 
 type Backend struct {
-	S3   *S3Config
-	HDFS *HDFSConfig
+	S3    *S3Config
+	HDFS  *HDFSConfig
+	Local *LocalConfig
 }
 
 const (
-	S3Prefix   = "s3://"
-	HDFSPrefix = "hdfs://"
+	S3Prefix    = "s3://"
+	HDFSPrefix  = "hdfs://"
+	LocalPrefix = "local://"
 )
 
 type BackendType int
@@ -21,6 +23,7 @@ type BackendType int
 const (
 	S3Type BackendType = iota
 	HDFSType
+	LocalType
 )
 
 func (t BackendType) String() string {
@@ -29,6 +32,8 @@ func (t BackendType) String() string {
 		return "s3"
 	case HDFSType:
 		return "hdfs"
+	case LocalType:
+		return "local"
 	default:
 		return "unknown"
 	}
@@ -40,6 +45,9 @@ func ParseType(uri string) BackendType {
 	}
 	if strings.HasPrefix(uri, HDFSPrefix) {
 		return HDFSType
+	}
+	if strings.HasPrefix(uri, LocalPrefix) {
+		return LocalType
 	}
 
 	return -1
@@ -56,6 +64,9 @@ func (b *Backend) Uri() string {
 	}
 	if b.HDFS != nil {
 		return HDFSPrefix + b.HDFS.Path
+	}
+	if b.Local != nil {
+		return LocalPrefix + b.Local.Path
 	}
 
 	return "nil path"
@@ -81,8 +92,13 @@ func (b *Backend) SetUri(uri string) error {
 			b.HDFS = &HDFSConfig{}
 		}
 		if strings.HasPrefix(uri, HDFSPrefix) {
-			b.HDFS.Path = uri[len(HDFSPrefix):]
+			b.HDFS.Path = strings.TrimPrefix(uri, HDFSPrefix)
 		}
+	case LocalType:
+		if b.Local == nil {
+			b.Local = &LocalConfig{}
+		}
+		b.Local.Path = strings.TrimPrefix(uri, LocalPrefix)
 	default:
 		return fmt.Errorf("unknow storage backend type")
 	}
@@ -99,6 +115,11 @@ func (b *Backend) DeepCopy() *Backend {
 	case HDFSType:
 		if b.HDFS != nil {
 			cp.HDFS = b.HDFS.DeepCopy()
+		}
+	case LocalType:
+		if b.Local != nil {
+			cp.Local = b.Local.DeepCopy()
+
 		}
 	}
 	return cp

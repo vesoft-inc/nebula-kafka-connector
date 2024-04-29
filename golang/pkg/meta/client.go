@@ -55,6 +55,10 @@ type (
 		InitCluster(req *InitClusterReq) error
 		ListClusters(req *ListClustersReq) (*ListClustersResp, error)
 		DropCluster(req *DropClusterReq) error
+		CreateBackup(req *CreateBackupReq) (*CreateBackupResp, error)
+		DropBackup(req *DropBackupReq) (*DropBackupResp, error)
+		Restore(req *RestoreReq) (*RestoreResp, error)
+		ShowMeta() (*ShowMetaResp, error)
 	}
 
 	metaClient struct {

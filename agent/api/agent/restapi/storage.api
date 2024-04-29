@@ -52,6 +52,24 @@ type (
 	HDFSUploadResp {
 		Data interface{} `json:"data"`
 	}
+
+	LocalUploadReq {
+		Path        string `json:"path"`
+		LocalPath   string `json:"localPath"`
+		Recursively bool   `json:"recursively"`
+	}
+	LocalUploadResp {
+		Data interface{} `json:"data"`
+	}
+
+	LocalDownloadReq {
+		Path        string `json:"path"`
+		LocalPath   string `json:"localPath"`
+		Recursively bool   `json:"recursively"`
+	}
+	LocalDownloadResp {
+		Data interface{} `json:"data"`
+	}
 )
 
 @server (
@@ -72,6 +90,13 @@ service agent-api {
 
 	@doc "HDFS Upload"
 	@handler hdfsUpload
-	post /api/v1/storage/hdfs/upload (HDFSUploadReq) returns (HDFSUploadResp)
+	post /api/v1/storage/hdfs/upload(HDFSUploadReq) returns (HDFSUploadResp)
+	
+	@doc "Local Upload"
+	@handler localUpload
+	post /api/v1/storage/local/upload(LocalUploadReq) returns (LocalUploadResp)
+	
+	@doc "Local Download"
+	@handler localDownload
+	post /api/v1/storage/local/download(LocalDownloadReq) returns (LocalDownloadResp)
 }
-

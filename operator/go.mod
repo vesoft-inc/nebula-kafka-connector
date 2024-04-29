@@ -130,3 +130,4 @@ require (
 )
 
 replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
+replace k8s.io/kubernetes v1.28.3 => k8s.io/client-go v0.28.3

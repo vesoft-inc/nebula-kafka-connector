@@ -21,11 +21,24 @@ type Uploader interface {
 	Upload(ctx context.Context, externalUri, localPath string, recursively bool) error
 }
 
+// Dir means we treat the storage organized as tree hierarchy
+type Dir interface {
+	ExistDir(ctx context.Context, uri string) bool
+	EnsureDir(ctx context.Context, uri string, recursively bool) error
+	// GetDir return Backend with specified uri and authentication information stored in storage
+	GetDir(ctx context.Context, uri string) (*Backend, error)
+	// ListDir only list get dir names in given dir, not recursively
+	ListDir(ctx context.Context, uri string) ([]string, error)
+	// RemoveDir remove all files recursively
+	RemoveDir(ctx context.Context, uri string) error
+}
+
 // ExternalStorage will keep the authentication information and other configuration for the storage
 // Then the functions only need uri as the parameter
 type ExternalStorage interface {
 	Downloader
 	Uploader
+	Dir
 }
 
 func New(b *Backend) (ExternalStorage, error) {

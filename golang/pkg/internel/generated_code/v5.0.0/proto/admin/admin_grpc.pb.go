@@ -23,6 +23,11 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
+	AdminService_SetMetaAgent_FullMethodName   = "/nebula.proto.admin.AdminService/SetMetaAgent"
+	AdminService_ShowMetaInfo_FullMethodName   = "/nebula.proto.admin.AdminService/ShowMetaInfo"
+	AdminService_AddHost_FullMethodName        = "/nebula.proto.admin.AdminService/AddHost"
+	AdminService_RemoveHost_FullMethodName     = "/nebula.proto.admin.AdminService/RemoveHost"
+	AdminService_ListHosts_FullMethodName      = "/nebula.proto.admin.AdminService/ListHosts"
 	AdminService_AddService_FullMethodName     = "/nebula.proto.admin.AdminService/AddService"
 	AdminService_DropService_FullMethodName    = "/nebula.proto.admin.AdminService/DropService"
 	AdminService_ShowService_FullMethodName    = "/nebula.proto.admin.AdminService/ShowService"
@@ -32,7 +37,6 @@ const (
 	AdminService_DropCluster_FullMethodName    = "/nebula.proto.admin.AdminService/DropCluster"
 	AdminService_CreateBackup_FullMethodName   = "/nebula.proto.admin.AdminService/CreateBackup"
 	AdminService_Restore_FullMethodName        = "/nebula.proto.admin.AdminService/Restore"
-	AdminService_ListClusters_FullMethodName   = "/nebula.proto.admin.AdminService/ListClusters"
 	AdminService_DropBackup_FullMethodName     = "/nebula.proto.admin.AdminService/DropBackup"
 	AdminService_CreateUser_FullMethodName     = "/nebula.proto.admin.AdminService/CreateUser"
 	AdminService_DropUser_FullMethodName       = "/nebula.proto.admin.AdminService/DropUser"
@@ -47,6 +51,11 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AdminServiceClient interface {
+	SetMetaAgent(ctx context.Context, in *SetMetaAgentRequest, opts ...grpc.CallOption) (*SetMetaAgentResponse, error)
+	ShowMetaInfo(ctx context.Context, in *ShowMetaRequest, opts ...grpc.CallOption) (*ShowMetaResponse, error)
+	AddHost(ctx context.Context, in *AddHostRequest, opts ...grpc.CallOption) (*AddHostResponse, error)
+	RemoveHost(ctx context.Context, in *RemoveHostRequest, opts ...grpc.CallOption) (*RemoveHostResponse, error)
+	ListHosts(ctx context.Context, in *ListHostsRequest, opts ...grpc.CallOption) (*ListHostsResponse, error)
 	AddService(ctx context.Context, in *AddServiceRequest, opts ...grpc.CallOption) (*AddServiceResponse, error)
 	DropService(ctx context.Context, in *DropServiceRequest, opts ...grpc.CallOption) (*DropServiceResponse, error)
 	ShowService(ctx context.Context, in *ShowServiceRequest, opts ...grpc.CallOption) (*ShowServiceResponse, error)
@@ -54,9 +63,9 @@ type AdminServiceClient interface {
 	ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error)
 	InitStorage(ctx context.Context, in *InitStorageRequest, opts ...grpc.CallOption) (*InitStorageResponse, error)
 	DropCluster(ctx context.Context, in *DropClusterRequest, opts ...grpc.CallOption) (*DropClusterResponse, error)
+	// backup
 	CreateBackup(ctx context.Context, in *CreateBackupRequest, opts ...grpc.CallOption) (*CreateBackupResponse, error)
 	Restore(ctx context.Context, in *RestoreRequest, opts ...grpc.CallOption) (*RestoreResponse, error)
-	ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error)
 	DropBackup(ctx context.Context, in *DropBackupRequest, opts ...grpc.CallOption) (*DropBackupResponse, error)
 	// user
 	CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error)
@@ -75,6 +84,51 @@ type adminServiceClient struct {
 
 func NewAdminServiceClient(cc grpc.ClientConnInterface) AdminServiceClient {
 	return &adminServiceClient{cc}
+}
+
+func (c *adminServiceClient) SetMetaAgent(ctx context.Context, in *SetMetaAgentRequest, opts ...grpc.CallOption) (*SetMetaAgentResponse, error) {
+	out := new(SetMetaAgentResponse)
+	err := c.cc.Invoke(ctx, AdminService_SetMetaAgent_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) ShowMetaInfo(ctx context.Context, in *ShowMetaRequest, opts ...grpc.CallOption) (*ShowMetaResponse, error) {
+	out := new(ShowMetaResponse)
+	err := c.cc.Invoke(ctx, AdminService_ShowMetaInfo_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) AddHost(ctx context.Context, in *AddHostRequest, opts ...grpc.CallOption) (*AddHostResponse, error) {
+	out := new(AddHostResponse)
+	err := c.cc.Invoke(ctx, AdminService_AddHost_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) RemoveHost(ctx context.Context, in *RemoveHostRequest, opts ...grpc.CallOption) (*RemoveHostResponse, error) {
+	out := new(RemoveHostResponse)
+	err := c.cc.Invoke(ctx, AdminService_RemoveHost_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) ListHosts(ctx context.Context, in *ListHostsRequest, opts ...grpc.CallOption) (*ListHostsResponse, error) {
+	out := new(ListHostsResponse)
+	err := c.cc.Invoke(ctx, AdminService_ListHosts_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
 }
 
 func (c *adminServiceClient) AddService(ctx context.Context, in *AddServiceRequest, opts ...grpc.CallOption) (*AddServiceResponse, error) {
@@ -158,15 +212,6 @@ func (c *adminServiceClient) Restore(ctx context.Context, in *RestoreRequest, op
 	return out, nil
 }
 
-func (c *adminServiceClient) ListClusters(ctx context.Context, in *ListClustersRequest, opts ...grpc.CallOption) (*ListClustersResponse, error) {
-	out := new(ListClustersResponse)
-	err := c.cc.Invoke(ctx, AdminService_ListClusters_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 func (c *adminServiceClient) DropBackup(ctx context.Context, in *DropBackupRequest, opts ...grpc.CallOption) (*DropBackupResponse, error) {
 	out := new(DropBackupResponse)
 	err := c.cc.Invoke(ctx, AdminService_DropBackup_FullMethodName, in, out, opts...)
@@ -243,6 +288,11 @@ func (c *adminServiceClient) ChangePassword(ctx context.Context, in *ChangePassw
 // All implementations must embed UnimplementedAdminServiceServer
 // for forward compatibility
 type AdminServiceServer interface {
+	SetMetaAgent(context.Context, *SetMetaAgentRequest) (*SetMetaAgentResponse, error)
+	ShowMetaInfo(context.Context, *ShowMetaRequest) (*ShowMetaResponse, error)
+	AddHost(context.Context, *AddHostRequest) (*AddHostResponse, error)
+	RemoveHost(context.Context, *RemoveHostRequest) (*RemoveHostResponse, error)
+	ListHosts(context.Context, *ListHostsRequest) (*ListHostsResponse, error)
 	AddService(context.Context, *AddServiceRequest) (*AddServiceResponse, error)
 	DropService(context.Context, *DropServiceRequest) (*DropServiceResponse, error)
 	ShowService(context.Context, *ShowServiceRequest) (*ShowServiceResponse, error)
@@ -250,9 +300,9 @@ type AdminServiceServer interface {
 	ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error)
 	InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error)
 	DropCluster(context.Context, *DropClusterRequest) (*DropClusterResponse, error)
+	// backup
 	CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error)
 	Restore(context.Context, *RestoreRequest) (*RestoreResponse, error)
-	ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error)
 	DropBackup(context.Context, *DropBackupRequest) (*DropBackupResponse, error)
 	// user
 	CreateUser(context.Context, *CreateUserRequest) (*CreateUserResponse, error)
@@ -270,6 +320,21 @@ type AdminServiceServer interface {
 type UnimplementedAdminServiceServer struct {
 }
 
+func (UnimplementedAdminServiceServer) SetMetaAgent(context.Context, *SetMetaAgentRequest) (*SetMetaAgentResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetMetaAgent not implemented")
+}
+func (UnimplementedAdminServiceServer) ShowMetaInfo(context.Context, *ShowMetaRequest) (*ShowMetaResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ShowMetaInfo not implemented")
+}
+func (UnimplementedAdminServiceServer) AddHost(context.Context, *AddHostRequest) (*AddHostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddHost not implemented")
+}
+func (UnimplementedAdminServiceServer) RemoveHost(context.Context, *RemoveHostRequest) (*RemoveHostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveHost not implemented")
+}
+func (UnimplementedAdminServiceServer) ListHosts(context.Context, *ListHostsRequest) (*ListHostsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListHosts not implemented")
+}
 func (UnimplementedAdminServiceServer) AddService(context.Context, *AddServiceRequest) (*AddServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddService not implemented")
 }
@@ -296,9 +361,6 @@ func (UnimplementedAdminServiceServer) CreateBackup(context.Context, *CreateBack
 }
 func (UnimplementedAdminServiceServer) Restore(context.Context, *RestoreRequest) (*RestoreResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Restore not implemented")
-}
-func (UnimplementedAdminServiceServer) ListClusters(context.Context, *ListClustersRequest) (*ListClustersResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ListClusters not implemented")
 }
 func (UnimplementedAdminServiceServer) DropBackup(context.Context, *DropBackupRequest) (*DropBackupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropBackup not implemented")
@@ -335,6 +397,96 @@ type UnsafeAdminServiceServer interface {
 
 func RegisterAdminServiceServer(s grpc.ServiceRegistrar, srv AdminServiceServer) {
 	s.RegisterService(&AdminService_ServiceDesc, srv)
+}
+
+func _AdminService_SetMetaAgent_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetMetaAgentRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).SetMetaAgent(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_SetMetaAgent_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).SetMetaAgent(ctx, req.(*SetMetaAgentRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_ShowMetaInfo_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShowMetaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ShowMetaInfo(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ShowMetaInfo_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ShowMetaInfo(ctx, req.(*ShowMetaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_AddHost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddHostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).AddHost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_AddHost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).AddHost(ctx, req.(*AddHostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_RemoveHost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RemoveHostRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).RemoveHost(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_RemoveHost_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).RemoveHost(ctx, req.(*RemoveHostRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_ListHosts_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListHostsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ListHosts(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ListHosts_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ListHosts(ctx, req.(*ListHostsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
 }
 
 func _AdminService_AddService_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -499,24 +651,6 @@ func _AdminService_Restore_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_ListClusters_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListClustersRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AdminServiceServer).ListClusters(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AdminService_ListClusters_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).ListClusters(ctx, req.(*ListClustersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 func _AdminService_DropBackup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(DropBackupRequest)
 	if err := dec(in); err != nil {
@@ -669,6 +803,26 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*AdminServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "SetMetaAgent",
+			Handler:    _AdminService_SetMetaAgent_Handler,
+		},
+		{
+			MethodName: "ShowMetaInfo",
+			Handler:    _AdminService_ShowMetaInfo_Handler,
+		},
+		{
+			MethodName: "AddHost",
+			Handler:    _AdminService_AddHost_Handler,
+		},
+		{
+			MethodName: "RemoveHost",
+			Handler:    _AdminService_RemoveHost_Handler,
+		},
+		{
+			MethodName: "ListHosts",
+			Handler:    _AdminService_ListHosts_Handler,
+		},
+		{
 			MethodName: "AddService",
 			Handler:    _AdminService_AddService_Handler,
 		},
@@ -703,10 +857,6 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Restore",
 			Handler:    _AdminService_Restore_Handler,
-		},
-		{
-			MethodName: "ListClusters",
-			Handler:    _AdminService_ListClusters_Handler,
 		},
 		{
 			MethodName: "DropBackup",
