@@ -70,7 +70,10 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}
-	r.clusters = utils.NewNebulaClusters(clusters, r.amg)
+	r.clusters, err = utils.NewNebulaClusters(clusters, r.amg)
+	if err != nil {
+		return nil, fmt.Errorf("new nebula clusters failed: %w", err)
+	}
 
 	return r, nil
 }

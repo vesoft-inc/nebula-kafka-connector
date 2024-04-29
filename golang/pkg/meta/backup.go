@@ -73,14 +73,14 @@ type (
 )
 
 func (c *metaClient) CreateBackup(req *CreateBackupReq) (*CreateBackupResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 	in := &admin.CreateBackupRequest{
 		Header:     &admin.AdminRequestHeader{Token: c.token},
 		BackupName: []byte(req.BackupName),
 		ClusterIds: req.ClusterIds,
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.CreateBackup(ctx, in)
 	})
 	if err != nil {
@@ -136,13 +136,13 @@ func (c *metaClient) CreateBackup(req *CreateBackupReq) (*CreateBackupResp, erro
 }
 
 func (c *metaClient) DropBackup(req *DropBackupReq) (*DropBackupResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 	in := &admin.DropBackupRequest{
 		Header:      &admin.AdminRequestHeader{Token: c.token},
 		BackupNames: stringsToBytes(req.BackupNames),
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropBackup(ctx, in)
 	})
 	if err != nil {
@@ -165,7 +165,7 @@ func (c *metaClient) DropBackup(req *DropBackupReq) (*DropBackupResp, error) {
 }
 
 func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 	in := &admin.RestoreRequest{
 		Header: &admin.AdminRequestHeader{Token: c.token},
@@ -173,7 +173,7 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 		ClusterMap: req.ClusterMap,
 		//ServiceMap:  req.ServiceMap,
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.Restore(ctx, in)
 	})
 	if err != nil {
@@ -197,12 +197,12 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 }
 
 func (c *metaClient) ShowMeta() (*ShowMetaResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 	in := &admin.ShowMetaRequest{
 		Header: &admin.AdminRequestHeader{Token: c.token},
 	}
-	resp, err := c.retry(func() (responseHeader, error) {
+	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ShowMetaInfo(ctx, in)
 	})
 	if err != nil {
@@ -223,9 +223,9 @@ func (c *metaClient) ShowMeta() (*ShowMetaResp, error) {
 	services := make([]*ServiceInfo, 0, len(response.Info.Peers))
 	for _, host := range response.Info.Peers {
 		services = append(services, &ServiceInfo{
-			Host:        string(host.GetHost()),
-			Port:        host.GetPort(),
-			ServiceType: ServiceType(common.ServiceType_META),
+			Host: string(host.GetHost()),
+			Port: host.GetPort(),
+			Type: ServiceType(common.ServiceType_META),
 		})
 	}
 

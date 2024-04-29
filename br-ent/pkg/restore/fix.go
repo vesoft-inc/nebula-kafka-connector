@@ -16,7 +16,7 @@ type Fix struct {
 	r           *Restore
 	amg         *clients.AgentManager
 	clusters    *utils.NebulaClusters
-	metaCluster []*meta.ServiceInfo
+	metaCluster []*clients.ServiceInfo
 	backSuffix  string
 }
 
@@ -33,13 +33,13 @@ func NewFixFrom(r *Restore) (*Fix, error) {
 	}, nil
 }
 
-func (f *Fix) fixServiceData(s *meta.ServiceInfo) error {
+func (f *Fix) fixServiceData(s *clients.ServiceInfo) error {
 	agent, err := f.amg.GetAgent(s.Host)
 	if err != nil {
 		return fmt.Errorf("get agent for %s failed: %w", s.Host, err)
 	}
 
-	for _, d := range s.DirInfo.DataPaths {
+	for _, d := range s.DataPaths {
 		opath := filepath.Join(d, "nebula")
 		bpath := fmt.Sprintf("%s%s", opath, f.backSuffix)
 
@@ -72,8 +72,8 @@ func (f *Fix) fixServiceData(s *meta.ServiceInfo) error {
 	return nil
 }
 
-func (f *Fix) getDead(services []*meta.ServiceInfo) ([]*meta.ServiceInfo, error) {
-	deadServices := make([]*meta.ServiceInfo, 0)
+func (f *Fix) getDead(services []*clients.ServiceInfo) ([]*clients.ServiceInfo, error) {
+	deadServices := make([]*clients.ServiceInfo, 0)
 
 	for _, service := range services {
 		logger := log.WithField("host", service.Host)
@@ -83,13 +83,13 @@ func (f *Fix) getDead(services []*meta.ServiceInfo) ([]*meta.ServiceInfo, error)
 			return nil, fmt.Errorf("get agent %s failed: %w", service.Host, err)
 		}
 
-		status, err := agent.ServiceStatus(service.ServiceType, service.DirInfo.InstallPath)
+		status, err := agent.ServiceStatus(service.ServiceType, service.InstallPath)
 		if err != nil {
 			return nil, fmt.Errorf("get service status in host %s failed: %w", service.Host, err)
 		}
 
 		if status == clients.ServiceStatusExited {
-			logger.WithField("dir", service.DirInfo.InstallPath).WithField("role", service.ServiceType).Debugf("%d:%s is dead.",
+			logger.WithField("dir", service.InstallPath).WithField("role", service.ServiceType).Debugf("%d:%s is dead.",
 				service.ServiceType, service.Host)
 			deadServices = append(deadServices, service)
 		}
@@ -98,14 +98,14 @@ func (f *Fix) getDead(services []*meta.ServiceInfo) ([]*meta.ServiceInfo, error)
 	return deadServices, nil
 }
 
-func (f *Fix) startServices(services []*meta.ServiceInfo) error {
+func (f *Fix) startServices(services []*clients.ServiceInfo) error {
 	for _, ds := range services {
 		name := fmt.Sprintf("%s[%s]", clients.ToName(ds.ServiceType), ds.Host)
 		agent, err := f.amg.GetAgent(ds.Host)
 		if err != nil {
 			return fmt.Errorf("get agent for %s failed: %w", ds.Host, err)
 		}
-		if err = agent.StartService(ds.ServiceType, ds.DirInfo.InstallPath); err != nil {
+		if err = agent.StartService(ds.ServiceType, ds.InstallPath); err != nil {
 			return fmt.Errorf("start %s by agent failed: %w", name, err)
 		}
 		log.WithField("addr", ds.Host).
@@ -114,14 +114,14 @@ func (f *Fix) startServices(services []*meta.ServiceInfo) error {
 	return nil
 }
 
-func (f *Fix) stopServices(services []*meta.ServiceInfo) error {
+func (f *Fix) stopServices(services []*clients.ServiceInfo) error {
 	for _, service := range services {
 		agent, err := f.amg.GetAgent(service.Host)
 		if err != nil {
 			return fmt.Errorf("get agent for %s failed: %w", service.Host, err)
 		}
 
-		if err = agent.StopService(service.ServiceType, service.DirInfo.InstallPath); err != nil {
+		if err = agent.StopService(service.ServiceType, service.InstallPath); err != nil {
 			return fmt.Errorf("stop service %s by agent failed: %w",
 				service.Host, err)
 		}
@@ -146,7 +146,7 @@ func retry(action func() error, aname string, times int) (err error) {
 	return
 }
 
-func (f *Fix) fixServices(services []*meta.ServiceInfo) error {
+func (f *Fix) fixServices(services []*clients.ServiceInfo) error {
 	if len(services) == 0 {
 		return nil
 	}
