@@ -1,5 +1,5 @@
 """
-CREATE GRAPH TYPE IF NOT EXISTS ldbc_type AS {
+CREATE GRAPH TYPE IF NOT EXISTS tck_ldbc_type AS {
     NODE Place (:City&Country&Continent {id INT PRIMARY KEY, name STRING, url STRING, kind STRING}),
     NODE Forum (:Forum {id INT PRIMARY KEY, title STRING, creationDate LOCAL DATETIME}),
     NODE Comment (:Comment&Message {id INT PRIMARY KEY, creationDate LOCAL DATETIME, locationIP STRING, browserUsed STRING, content STRING, extent INT}),
@@ -39,7 +39,7 @@ CREATE GRAPH TYPE IF NOT EXISTS ldbc_type AS {
 """
 
 """
-CREATE GRAPH ldbc :: ldbc_type
+CREATE GRAPH ldbc :: tck_ldbc_type
 """
 
 :sleep 10
