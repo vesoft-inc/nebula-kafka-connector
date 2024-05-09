@@ -127,19 +127,26 @@ func (s *defaultStringer) complexString(v nebula.Value, strWithQuote bool, strFn
 	case nebula.ValueTypeEdge:
 		d, _ := v.AsEdge()
 		properties := d.GetProperties()
-		var direction string
+		var (
+			leftBracket  string
+			rightBracket string
+		)
 		if d.IsDirected() {
-			direction = "->"
+			leftBracket = "-"
+			rightBracket = "->"
 		} else {
-			direction = "~"
+			leftBracket = "~"
+			rightBracket = "~"
 		}
-		return fmt.Sprintf("(%d)-[%d@%s:%s{%s}]%s(%d)",
+
+		return fmt.Sprintf("(%d)%s[%d@%s:%s{%s}]%s(%d)",
 			d.GetSrcId(),
+			leftBracket,
 			d.GetRank(),
 			d.GetType(),
 			strings.Join(d.GetLabels(), "&"),
 			s.mapString(properties, false, strFn),
-			direction,
+			rightBracket,
 			d.GetDstId(),
 		)
 	case nebula.ValueTypePath:
