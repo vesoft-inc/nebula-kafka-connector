@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -235,8 +236,15 @@ func pagerFn(r *Runner, args []string) error {
 	if err != nil {
 		return err
 	}
+	//check if the command is valid
+	c := args[0]
+	cmd := exec.Command(c)
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+
 	r.option.pagerLimit = i
-	r.option.pagerCommand = args[0]
+	r.option.pagerCommand = c
 	r.option.pager = true
 	r.printStdout(fmt.Sprintf("Pager set to %s with row limit %d\n", args[0], i))
 	return nil

@@ -59,13 +59,23 @@ type (
 
 func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	var err error
-	r := &Runner{
-		stdout: os.Stdout,
-		option: &runnerOption{
+	var runOpts runnerOption
+	// test less command
+	cmd := exec.Command(default_pagerCommand)
+	if err := cmd.Run(); err != nil {
+		runOpts = runnerOption{
+			pager: false,
+		}
+	} else {
+		runOpts = runnerOption{
 			pager:        default_pager,
 			pagerLimit:   default_pagerLimit,
 			pagerCommand: default_pagerCommand,
-		},
+		}
+	}
+	r := &Runner{
+		stdout: os.Stdout,
+		option: &runOpts,
 	}
 	r.combinOutput = &combinOutput{
 		runner: r,
