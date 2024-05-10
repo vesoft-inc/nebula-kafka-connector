@@ -51,7 +51,6 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	GraphService_Authenticate_FullMethodName     = "/nebula.proto.graph.GraphService/Authenticate"
-	GraphService_Signout_FullMethodName          = "/nebula.proto.graph.GraphService/Signout"
 	GraphService_Execute_FullMethodName          = "/nebula.proto.graph.GraphService/Execute"
 	GraphService_StreamingExecute_FullMethodName = "/nebula.proto.graph.GraphService/StreamingExecute"
 )
@@ -61,7 +60,6 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type GraphServiceClient interface {
 	Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error)
-	Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error)
 	Execute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (*ExecuteResponse, error)
 	StreamingExecute(ctx context.Context, in *ExecuteRequest, opts ...grpc.CallOption) (GraphService_StreamingExecuteClient, error)
 }
@@ -77,15 +75,6 @@ func NewGraphServiceClient(cc grpc.ClientConnInterface) GraphServiceClient {
 func (c *graphServiceClient) Authenticate(ctx context.Context, in *AuthRequest, opts ...grpc.CallOption) (*AuthResponse, error) {
 	out := new(AuthResponse)
 	err := c.cc.Invoke(ctx, GraphService_Authenticate_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *graphServiceClient) Signout(ctx context.Context, in *SignoutRequest, opts ...grpc.CallOption) (*SignoutResponse, error) {
-	out := new(SignoutResponse)
-	err := c.cc.Invoke(ctx, GraphService_Signout_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +127,6 @@ func (x *graphServiceStreamingExecuteClient) Recv() (*ExecuteResponse, error) {
 // for forward compatibility
 type GraphServiceServer interface {
 	Authenticate(context.Context, *AuthRequest) (*AuthResponse, error)
-	Signout(context.Context, *SignoutRequest) (*SignoutResponse, error)
 	Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error)
 	StreamingExecute(*ExecuteRequest, GraphService_StreamingExecuteServer) error
 	mustEmbedUnimplementedGraphServiceServer()
@@ -150,9 +138,6 @@ type UnimplementedGraphServiceServer struct {
 
 func (UnimplementedGraphServiceServer) Authenticate(context.Context, *AuthRequest) (*AuthResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Authenticate not implemented")
-}
-func (UnimplementedGraphServiceServer) Signout(context.Context, *SignoutRequest) (*SignoutResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Signout not implemented")
 }
 func (UnimplementedGraphServiceServer) Execute(context.Context, *ExecuteRequest) (*ExecuteResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Execute not implemented")
@@ -187,24 +172,6 @@ func _GraphService_Authenticate_Handler(srv interface{}, ctx context.Context, de
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(GraphServiceServer).Authenticate(ctx, req.(*AuthRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _GraphService_Signout_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SignoutRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(GraphServiceServer).Signout(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: GraphService_Signout_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(GraphServiceServer).Signout(ctx, req.(*SignoutRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -258,10 +225,6 @@ var GraphService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Authenticate",
 			Handler:    _GraphService_Authenticate_Handler,
-		},
-		{
-			MethodName: "Signout",
-			Handler:    _GraphService_Signout_Handler,
 		},
 		{
 			MethodName: "Execute",

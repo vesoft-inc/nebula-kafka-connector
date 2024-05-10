@@ -99,7 +99,7 @@ func (c *metaClient) CreateUser(req *CreateUserReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.CreateUserRequest{
-		Header:   &admin.AdminRequestHeader{Token: c.token},
+		Header:   &admin.RequestHeader{Token: c.token},
 		Username: []byte(req.user),
 		AuthType: []byte(req.authType),
 		AuthInfo: []byte(req.authInfo),
@@ -123,7 +123,7 @@ func (c *metaClient) DropUser(req *DropUserReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropUserRequest{
-		Header:   &admin.AdminRequestHeader{Token: c.token},
+		Header:   &admin.RequestHeader{Token: c.token},
 		Username: []byte(req.user),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
@@ -147,7 +147,7 @@ func (c *metaClient) AlterUser(req *AlterUserReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.AlterUserRequest{
-		Header:   &admin.AdminRequestHeader{Token: c.token},
+		Header:   &admin.RequestHeader{Token: c.token},
 		Username: []byte(req.user),
 		AuthInfo: []byte(req.authInfo),
 		Active:   req.active,
@@ -175,7 +175,7 @@ func (c *metaClient) ListUsers(req *ListUsersReq) (*ListUsersResp, error) {
 		users = append(users, []byte(u))
 	}
 	in := &admin.ListUserRequest{
-		Header:    &admin.AdminRequestHeader{Token: c.token},
+		Header:    &admin.RequestHeader{Token: c.token},
 		Usernames: users,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {

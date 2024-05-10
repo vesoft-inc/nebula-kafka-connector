@@ -73,7 +73,7 @@ type (
 	}
 
 	responseHeader interface {
-		GetHeader() *common.ResponseHeader
+		GetHeader() *admin.ResponseHeader
 	}
 
 	WithOption func(*metaClient)
@@ -314,7 +314,7 @@ func (c *metaClient) Logout() error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.LogoutRequest{
-		Header: &admin.AdminRequestHeader{Token: c.token},
+		Header: &admin.RequestHeader{Token: c.token},
 	}
 	_, err := c.execute(func() (responseHeader, error) {
 		return c.client.Logout(ctx, in)

@@ -136,7 +136,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 		zones = append(zones, []byte(z))
 	}
 	in := &admin.CreateClusterRequest{
-		Header: &admin.AdminRequestHeader{Token: c.token},
+		Header: &admin.RequestHeader{Token: c.token},
 		ClusterDesc: &admin.ClusterDesc{
 			ClusterName:   []byte(req.clusterName),
 			ReplicaFactor: uint32(req.replica),
@@ -157,7 +157,7 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 	defer cancel()
 
 	in := &admin.AddServiceRequest{
-		Header:      &admin.AdminRequestHeader{Token: c.token},
+		Header:      &admin.RequestHeader{Token: c.token},
 		Host:        []byte(req.host),
 		Port:        req.port,
 		Type:        common.ServiceType(req.serviceType),
@@ -175,7 +175,7 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ShowServiceRequest{
-		Header:      &admin.AdminRequestHeader{Token: c.token},
+		Header:      &admin.RequestHeader{Token: c.token},
 		ClusterName: []byte(req.clusterName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
@@ -212,7 +212,7 @@ func (c *metaClient) InitCluster(req *InitClusterReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.InitStorageRequest{
-		Header:      &admin.AdminRequestHeader{Token: c.token},
+		Header:      &admin.RequestHeader{Token: c.token},
 		ClusterName: []byte(req.clustername),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
@@ -227,7 +227,7 @@ func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, erro
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ShowClusterRequest{
-		Header:      &admin.AdminRequestHeader{Token: c.token},
+		Header:      &admin.RequestHeader{Token: c.token},
 		ClusterName: []byte(req.clusterName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
@@ -265,7 +265,7 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropServiceRequest{
-		Header:  &admin.AdminRequestHeader{Token: c.token},
+		Header:  &admin.RequestHeader{Token: c.token},
 		Name:    []byte(req.host),
 		Port:    req.port,
 		Type:    common.ServiceType(req.serviceType),
@@ -291,7 +291,7 @@ func (c *metaClient) DropCluster(req *DropClusterReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropClusterRequest{
-		Header:  &admin.AdminRequestHeader{Token: c.token},
+		Header:  &admin.RequestHeader{Token: c.token},
 		Cluster: []byte(req.clustername),
 		Force:   req.force,
 	}
