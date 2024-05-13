@@ -175,8 +175,9 @@ func (c *metaClient) Login() (*LoginResponse, error) {
 	}
 	resp, err := c.authWithPassword(c.user, c.password)
 	if err != nil {
-		return resp, err
+		return nil, err
 	}
+	c.token = resp.Token
 	return resp, nil
 
 }
