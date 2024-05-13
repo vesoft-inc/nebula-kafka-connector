@@ -37,7 +37,6 @@ public class GraphClientExample {
     public static void main(String[] args) {
         NebulaClient client = null;
         try {
-            // init the NebulaPool and get session
             client = NebulaClient.builder(host, user, passwd)
                     .withAuthOptions(Collections.emptyMap())
                     .withConnectTimeoutMills(1000)
