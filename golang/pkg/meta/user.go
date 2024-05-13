@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 )
@@ -67,24 +68,29 @@ func (c *metaClient) ChangePassword(req *ChangePasswordReq) error {
 		OldPassword: []byte(req.currentPassword),
 		NewPassword: []byte(req.newPassword),
 	}
-	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.ChangePassword(ctx, in)
-	})
+	resp, err := c.client.ChangePassword(ctx, in)
 	if err != nil {
 		return err
 	}
-	response, ok := resp.(*admin.ChangePasswordResponse)
-	if !ok {
-		return fmt.Errorf("invalid response")
+	// retry for change password
+	if nebula.ErrorCode(resp.Header.GetStatus().GetCode()) != nebula.ERROR_LEADER_CHANGED {
+		return responseIsErr(resp)
 	}
-	responseHeader, err := getResponseHeader(response)
+	leader := resp.Header.GetLeader()
+	if leader == nil {
+		return fmt.Errorf("invalid leader")
+	}
+	c.Close()
+	c.address = fmt.Sprintf("%s:%d", leader.GetHost(), leader.GetPort())
+	err = c.open(string(leader.GetHost()), int(leader.GetPort()), c.connectTimeout, nil)
 	if err != nil {
 		return err
 	}
-	if !responseHeader.IsSucceeded() {
-		return responseHeader.GetStatus()
+	resp, err = c.client.ChangePassword(ctx, in)
+	if err != nil {
+		return err
 	}
-	return nil
+	return responseIsErr(resp)
 }
 
 func NewCreateUserReq(user string, authType string, authInfo string) *CreateUserReq {
