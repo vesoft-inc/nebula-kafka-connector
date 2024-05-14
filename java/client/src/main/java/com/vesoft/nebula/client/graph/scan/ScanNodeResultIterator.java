@@ -103,6 +103,9 @@ public class ScanNodeResultIterator extends ScanResultIterator {
         for (Integer part : partKeyNeedToRemove) {
             partCursor.remove(part);
         }
+        if (!hasNext && !threadPool.isShutdown()) {
+            threadPool.shutdown();
+        }
         return new ScanNodeResult(results, propNames);
     }
 

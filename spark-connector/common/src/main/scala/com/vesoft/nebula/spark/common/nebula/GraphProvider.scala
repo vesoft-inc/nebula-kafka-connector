@@ -94,11 +94,9 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       LOG.error("get all partitions failed for {}", resultSet.getErrorMessage)
       throw new RuntimeException("get all partitions failed for " + resultSet.getErrorMessage)
     }
-    val partitionsValue: util.List[ValueWrapper] = resultSet.next().values.get(0).asList
     val partitions: util.List[Integer] = new util.ArrayList[Integer]
-    import scala.collection.JavaConversions._
-    for (part <- partitionsValue) {
-      partitions.add(part.asInt)
+    while(resultSet.hasNext){
+      partitions.add(resultSet.next().get("partition_id").asInt())
     }
     partitions
   }

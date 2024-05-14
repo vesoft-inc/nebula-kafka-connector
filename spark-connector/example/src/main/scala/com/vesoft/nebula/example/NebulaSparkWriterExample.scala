@@ -32,7 +32,7 @@ object NebulaSparkWriterExample {
       .builder()
       .withGraphAddress("192.168.8.6:3820")
       .withUser("root")
-      .withPasswd("nebula")
+      .withPasswd("Nebula123")
       .build()
   }
 

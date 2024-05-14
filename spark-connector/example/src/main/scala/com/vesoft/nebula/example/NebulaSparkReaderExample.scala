@@ -9,7 +9,7 @@ import com.vesoft.nebula.connector.NebulaDataFrameReader
 import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, ReadNebulaConfig}
 import org.apache.spark.sql.SparkSession
 
-class NebulaSparkReaderExample {
+object NebulaSparkReaderExample {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession
       .builder()
@@ -25,9 +25,9 @@ class NebulaSparkReaderExample {
   private def getNebulaConnectionConfig: NebulaConnectionConfig = {
     NebulaConnectionConfig
       .builder()
-      .withGraphAddress("192.168.8.6:3713")
+      .withGraphAddress("192.168.8.6:3820")
       .withUser("root")
-      .withPasswd("nebula")
+      .withPasswd("Nebula123")
       .build()
   }
 
@@ -36,9 +36,6 @@ class NebulaSparkReaderExample {
    * for this example, you can config the read config to read node
    */
   private def readNode(spark: SparkSession): Unit = {
-    val df = spark.read.json("spark-connector/example/src/main/resources/vertex")
-    df.show()
-
     val nebulaNodeReadConfig: ReadNebulaConfig = ReadNebulaConfig
       .builder()
       .withGraphName("nba")
@@ -47,7 +44,8 @@ class NebulaSparkReaderExample {
       .withBatchSize(10)
       .withPartitionNum(1)
       .build()
-      spark.read.nebula(getNebulaConnectionConfig, nebulaNodeReadConfig).loadNode()
+    val df = spark.read.nebula(getNebulaConnectionConfig, nebulaNodeReadConfig).loadNode()
+    df.show()
   }
 
   /**
@@ -56,12 +54,13 @@ class NebulaSparkReaderExample {
   private def readEdge(spark: SparkSession): Unit = {
     val nebulaReadEdgeConfig: ReadNebulaConfig = ReadNebulaConfig
       .builder()
-      .withGraphName("test")
-      .withTypeName("edge_follow")
-      .withReturnCols(List("degree"))
+      .withGraphName("nba")
+      .withTypeName("edge_type_follow")
+      .withReturnCols(List("likeness"))
       .withBatchSize(1000)
       .withPartitionNum(1)
       .build()
-    spark.read.nebula(getNebulaConnectionConfig, nebulaReadEdgeConfig).loadEdge()
+    val df = spark.read.nebula(getNebulaConnectionConfig, nebulaReadEdgeConfig).loadEdge()
+    df.show()
   }
 }
