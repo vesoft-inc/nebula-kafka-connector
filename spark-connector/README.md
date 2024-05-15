@@ -1,0 +1,73 @@
+# NebulaGraph Spark Connector
+
+## Introduction
+
+This repository is the NebulaGraph Connector for Apache Spark.
+
+## Building for Spark2.4
+
+1. Package NebulaGraph Spark Connector.
+
+    ```bash
+    $ git clone https://github.com/vesoft-inc/nebula-ng-tools.git
+    $ cd spark-connector
+    $ ./mvnw clean package -Dmaven.test.skip=true -Dgpg.skip -Dmaven.javadoc.skip=true 
+    ```
+   These commands will generate the corresponding targets:
+   ```agsl
+     spark-connector/spark2.4/target/spark-connector_spark2.4-5.0.0.jar
+   ```
+## Integration with Apache Spark Applications
+
+* Import nebula spark connector with maven
+  In your pom.xml, add:
+  ```agsl
+  <dependency>
+     <groupId>com.vesoft</groupId>
+     <artifactId>spark-connector_spark2.4</artifactId>
+     <version>5.0.0</version>
+  </dependency>
+  ```
+* Write DataFrame into NebulaGraph as Nodes:
+  ```agsl
+    val df = spark.read.json("spark-connector/example/src/main/resources/vertex")
+    df.show()
+
+    val nebulaConnectionConfig = NebulaConnectionConfig
+      .builder()
+      .withGraphAddress("192.168.8.6:3820")
+      .withUser("root")
+      .withPasswd("Nebula123")
+      .build()
+    val nebulaWriteNodeConfig: WriteNebulaNodeConfig = WriteNebulaNodeConfig
+      .builder()
+      .withGraphName("nba")
+      .withNodeType("node_type_player")
+      .withWriteMode(WriteMode.INSERT)
+      .withBatchSize(10)
+      .build()
+    df.write.nebula(nebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()
+  ```
+* Read DataFrame from NebulaGraph Node type:
+```agsl
+    val nebulaConnectionConfig = NebulaConnectionConfig
+      .builder()
+      .withGraphAddress("192.168.8.6:3820")
+      .withUser("root")
+      .withPasswd("Nebula123")
+      .build()
+    val nebulaNodeReadConfig: ReadNebulaConfig = ReadNebulaConfig
+      .builder()
+      .withGraphName("nba")
+      .withTypeName("node_type_player")
+      .withReturnCols(List("name"))
+      .withBatchSize(10)
+      .withPartitionNum(1)
+      .build()
+    val df = spark.read.nebula(nebulaConnectionConfig, nebulaNodeReadConfig).loadNode()
+    df.show()
+```
+
+for complete example, see https://github.com/vesoft-inc/nebula-ng-tools/tree/master/spark-connector/example/src/main/scala/com/vesoft/nebula/example
+
+for more configs, see https://github.com/vesoft-inc/nebula-ng-tools/blob/master/spark-connector/common/src/main/scala/com/vesoft/nebula/spark/common/NebulaConfig.scala
