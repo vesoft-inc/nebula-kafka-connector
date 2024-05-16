@@ -37,7 +37,7 @@ object NebulaConnectionConfig {
     protected var graphAddress: String = _
     protected var user: String = _
     protected var passwd: String = _
-    protected var timeout: Int = 6000
+    protected var timeout: Int = 5
     protected var executeRetry: Int = 3
     protected var executeRetryIntervalMs: Int = 0
 
@@ -458,7 +458,7 @@ object ReadNebulaConfig {
     private var graphName: String = _
     private var typeName: String = _
     private var returnCols: ListBuffer[String] = _
-    private var partitionNum: Int = 100
+    private var partitionNum: Int = 10
     private var batchSize: Int = 2000
 
     /**
@@ -493,7 +493,7 @@ object ReadNebulaConfig {
 
 
     /**
-     * config the partition num for spark, default is 100
+     * config the partition num for spark, default is 10
      */
     def withPartitionNum(partitionNum: Int): ReadConfigBuilder = {
       this.partitionNum = partitionNum
