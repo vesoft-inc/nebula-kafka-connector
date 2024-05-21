@@ -49,12 +49,16 @@ type (
 
 	ClusterClient interface {
 		CreateCluster(req *CreateClusterReq) error
+		AlterCluster(req *AlterClusterReq) error
+		DropCluster(req *DropClusterReq) error
+		InitCluster(req *InitClusterReq) error
+		ListClusters(req *ListClustersReq) (*ListClustersResp, error)
 		AddService(req *AddServiceReq) error
 		DropService(req *DropServiceReq) error
 		ListServices(req *ListServicesReq) (*ListServicesResp, error)
-		InitCluster(req *InitClusterReq) error
-		ListClusters(req *ListClustersReq) (*ListClustersResp, error)
-		DropCluster(req *DropClusterReq) error
+	}
+
+	BackupRestoreClient interface {
 		CreateBackup(req *CreateBackupReq) (*CreateBackupResp, error)
 		DropBackup(req *DropBackupReq) (*DropBackupResp, error)
 		Restore(req *RestoreReq) (*RestoreResp, error)

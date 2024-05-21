@@ -55,7 +55,8 @@ func (d *CreateCluster) Execute() error {
 	}
 
 	//1. create cluster
-	req := meta.NewCreateClusterReq(d.clusterSpec.Name, d.clusterSpec.Replica, d.clusterSpec.ZoneList)
+	// TODO should modify owner
+	req := meta.NewCreateClusterReq(d.clusterSpec.Name, d.clusterSpec.Replica, "", d.clusterSpec.ZoneList)
 	if err := d.metaClient.CreateCluster(req); err != nil {
 		return fmt.Errorf("create cluster failed: %s", err)
 	}

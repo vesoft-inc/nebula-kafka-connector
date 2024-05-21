@@ -13,6 +13,7 @@ type clusterFlagsType struct {
 	clusterName string
 	replicas    int
 	force       bool
+	owner       string
 }
 
 var clusterFlags clusterFlagsType
@@ -29,7 +30,7 @@ var clusterCmd = &cobra.Command{
 var createClusterCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create cluster in meta server.",
-	Long:  `ngctl cluster create --cluster [clustername] --replica [replica]`,
+	Long:  `ngctl cluster create --cluster [clustername] --replica [replica] --owner [owner]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -45,11 +46,40 @@ var createClusterCmd = &cobra.Command{
 			return metaConsoleError("Replica number is invalid", "")
 		}
 		// donot need to specify zones
-		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replicas, nil)
+		req := meta.NewCreateClusterReq(clusterFlags.clusterName, clusterFlags.replicas,
+			clusterFlags.owner, nil)
 		if err := metaClient.CreateCluster(req); err != nil {
 			return metaConsoleError("Create cluster failed", err.Error())
 		}
 		fmt.Fprintln(metaOutput, "Create cluster successfully.")
+		return nil
+	},
+}
+
+var alterClusterCmd = &cobra.Command{
+	Use:   "alter",
+	Short: "Alter cluster in meta server.",
+	Long:  `ngctl cluster alter --cluster [clustername] --owner [owner]`,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return metaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		metaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		if clusterFlags.clusterName == "" {
+			return metaConsoleError("Cluster name is empty", "")
+		}
+		if clusterFlags.owner == "" {
+			return metaConsoleError("Owner is invalid", "")
+		}
+		// donot need to specify zones
+		req := meta.NewAlterClusterReq(clusterFlags.clusterName, clusterFlags.owner)
+		if err := metaClient.AlterCluster(req); err != nil {
+			return metaConsoleError("Create cluster failed", err.Error())
+		}
+		fmt.Fprintln(metaOutput, "Alter cluster successfully.")
 		return nil
 	},
 }
@@ -99,13 +129,14 @@ var showClusterCmd = &cobra.Command{
 			return metaConsoleError("Show cluster failed", err.Error())
 		}
 
-		header := []string{"Id", "Name", "Replica"}
+		header := []string{"Id", "Name", "Replica", "Owner"}
 		data := make([][]string, 0)
 		for _, s := range resp.Clusters {
 			row := make([]string, 0)
 			row = append(row, fmt.Sprintf("%d", s.Id))
 			row = append(row, fmt.Sprintf("%s", s.Name))
 			row = append(row, fmt.Sprintf("%d", s.ReplicaRefactor))
+			row = append(row, fmt.Sprintf("%s", s.Owner))
 			data = append(data, row)
 		}
 
@@ -153,8 +184,11 @@ func init() {
 	clusterCmd.AddCommand(initClusterCmd)
 	clusterCmd.AddCommand(showClusterCmd)
 	createClusterCmd.Flags().IntVarP(&clusterFlags.replicas, "replica-factor", "r", 3, "replica number, default: 3")
+	createClusterCmd.Flags().StringVarP(&clusterFlags.owner, "owner", "o", "", "cluster owner")
 
 	clusterCmd.AddCommand(dropClusterCmd)
 	dropClusterCmd.Flags().BoolVarP(&clusterFlags.force, "force", "f", false, "force drop cluster")
 
+	clusterCmd.AddCommand(alterClusterCmd)
+	alterClusterCmd.Flags().StringVarP(&clusterFlags.owner, "owner", "o", "", "cluster owner")
 }

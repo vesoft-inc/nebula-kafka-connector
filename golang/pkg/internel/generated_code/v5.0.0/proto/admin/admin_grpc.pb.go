@@ -33,6 +33,7 @@ const (
 	AdminService_ShowService_FullMethodName    = "/nebula.proto.admin.AdminService/ShowService"
 	AdminService_CreateCluster_FullMethodName  = "/nebula.proto.admin.AdminService/CreateCluster"
 	AdminService_ShowCluster_FullMethodName    = "/nebula.proto.admin.AdminService/ShowCluster"
+	AdminService_AlterCluster_FullMethodName   = "/nebula.proto.admin.AdminService/AlterCluster"
 	AdminService_InitStorage_FullMethodName    = "/nebula.proto.admin.AdminService/InitStorage"
 	AdminService_DropCluster_FullMethodName    = "/nebula.proto.admin.AdminService/DropCluster"
 	AdminService_CreateBackup_FullMethodName   = "/nebula.proto.admin.AdminService/CreateBackup"
@@ -61,6 +62,7 @@ type AdminServiceClient interface {
 	ShowService(ctx context.Context, in *ShowServiceRequest, opts ...grpc.CallOption) (*ShowServiceResponse, error)
 	CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error)
 	ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error)
+	AlterCluster(ctx context.Context, in *AlterClusterRequest, opts ...grpc.CallOption) (*AlterClusterResponse, error)
 	InitStorage(ctx context.Context, in *InitStorageRequest, opts ...grpc.CallOption) (*InitStorageResponse, error)
 	DropCluster(ctx context.Context, in *DropClusterRequest, opts ...grpc.CallOption) (*DropClusterResponse, error)
 	// backup
@@ -170,6 +172,15 @@ func (c *adminServiceClient) CreateCluster(ctx context.Context, in *CreateCluste
 func (c *adminServiceClient) ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error) {
 	out := new(ShowClusterResponse)
 	err := c.cc.Invoke(ctx, AdminService_ShowCluster_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) AlterCluster(ctx context.Context, in *AlterClusterRequest, opts ...grpc.CallOption) (*AlterClusterResponse, error) {
+	out := new(AlterClusterResponse)
+	err := c.cc.Invoke(ctx, AdminService_AlterCluster_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -298,6 +309,7 @@ type AdminServiceServer interface {
 	ShowService(context.Context, *ShowServiceRequest) (*ShowServiceResponse, error)
 	CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error)
 	ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error)
+	AlterCluster(context.Context, *AlterClusterRequest) (*AlterClusterResponse, error)
 	InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error)
 	DropCluster(context.Context, *DropClusterRequest) (*DropClusterResponse, error)
 	// backup
@@ -349,6 +361,9 @@ func (UnimplementedAdminServiceServer) CreateCluster(context.Context, *CreateClu
 }
 func (UnimplementedAdminServiceServer) ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShowCluster not implemented")
+}
+func (UnimplementedAdminServiceServer) AlterCluster(context.Context, *AlterClusterRequest) (*AlterClusterResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AlterCluster not implemented")
 }
 func (UnimplementedAdminServiceServer) InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitStorage not implemented")
@@ -575,6 +590,24 @@ func _AdminService_ShowCluster_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminServiceServer).ShowCluster(ctx, req.(*ShowClusterRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_AlterCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AlterClusterRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).AlterCluster(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_AlterCluster_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).AlterCluster(ctx, req.(*AlterClusterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -841,6 +874,10 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ShowCluster",
 			Handler:    _AdminService_ShowCluster_Handler,
+		},
+		{
+			MethodName: "AlterCluster",
+			Handler:    _AdminService_AlterCluster_Handler,
 		},
 		{
 			MethodName: "InitStorage",

@@ -13,6 +13,12 @@ type (
 		clusterName string
 		replica     int
 		zones       []string
+		owner       string
+	}
+
+	AlterClusterReq struct {
+		clusterName string
+		owner       string
 	}
 
 	AddServiceReq struct {
@@ -36,6 +42,7 @@ type (
 		Name            string   `json:"name"`
 		ReplicaRefactor uint32   `json:"replica_refactor"`
 		Zones           []string `json:"zones"`
+		Owner           string   `json:"owner"`
 	}
 
 	ListClustersReq struct {
@@ -84,11 +91,19 @@ const (
 	ServiceTypeSearch
 )
 
-func NewCreateClusterReq(clusterName string, replic int, zones []string) *CreateClusterReq {
+func NewCreateClusterReq(clusterName string, replic int, owner string, zones []string) *CreateClusterReq {
 	return &CreateClusterReq{
 		clusterName: clusterName,
 		replica:     replic,
 		zones:       zones,
+		owner:       owner,
+	}
+}
+
+func NewAlterClusterReq(clusterName string, owner string) *AlterClusterReq {
+	return &AlterClusterReq{
+		clusterName: clusterName,
+		owner:       owner,
 	}
 }
 
@@ -141,6 +156,7 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 			ClusterName:   []byte(req.clusterName),
 			ReplicaFactor: uint32(req.replica),
 			Zones:         zones,
+			Owner:         []byte(req.owner),
 		},
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
@@ -208,6 +224,24 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 		Services: services,
 	}, nil
 }
+
+func (c *metaClient) AlterCluster(req *AlterClusterReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.AlterClusterRequest{
+		Header:      &admin.RequestHeader{Token: c.token},
+		ClusterName: []byte(req.clusterName),
+		Owner:       []byte(req.owner),
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.AlterCluster(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return responseIsErr(resp)
+}
+
 func (c *metaClient) InitCluster(req *InitClusterReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
@@ -250,6 +284,7 @@ func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, erro
 			Name:            string(c.Desc.ClusterName),
 			ReplicaRefactor: c.Desc.ReplicaFactor,
 			Zones:           make([]string, 0),
+			Owner:           string(c.Desc.Owner),
 		}
 		for _, z := range c.Desc.Zones {
 			cluster.Zones = append(cluster.Zones, string(z))
