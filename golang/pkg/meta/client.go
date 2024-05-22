@@ -30,6 +30,7 @@ type (
 		Logout() error
 		UserClient
 		ClusterClient
+		BackupRestoreClient
 	}
 
 	LoginResponse struct {
