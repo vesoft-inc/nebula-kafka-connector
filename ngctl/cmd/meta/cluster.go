@@ -77,7 +77,7 @@ var alterClusterCmd = &cobra.Command{
 		// donot need to specify zones
 		req := meta.NewAlterClusterReq(clusterFlags.clusterName, clusterFlags.owner)
 		if err := metaClient.AlterCluster(req); err != nil {
-			return metaConsoleError("Create cluster failed", err.Error())
+			return metaConsoleError("Alter cluster failed", err.Error())
 		}
 		fmt.Fprintln(metaOutput, "Alter cluster successfully.")
 		return nil

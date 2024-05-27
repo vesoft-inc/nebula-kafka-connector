@@ -61,10 +61,14 @@ type (
 	}
 
 	Duration interface {
+		IsMonthBased() bool
 		String() string
-		GetMonths() uint32
-		GetSeconds() uint64
-		GetMicroseconds() uint32
+		GetYear() int32
+		GetMonth() int32
+		GetDay() int32
+		GetMinute() int32
+		GetSecond() int32
+		GetMicrosecond() int32
 	}
 
 	LocalDatetime interface {

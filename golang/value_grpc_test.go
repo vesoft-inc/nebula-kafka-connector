@@ -235,26 +235,50 @@ func TestGRPCString(t *testing.T) {
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{
 				&graph.Duration{
-					Months: 12, Seconds: 23, Microseconds: 999999,
+					Sec: 23, Microsec: 999999,
 				},
 			}},
-			expect: `P1YT23.999999S`,
+			expect: `PT23.999999S`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{
 				&graph.Duration{
-					Months: 13, Seconds: 3600, Microseconds: 0,
+					Year: 1, Month: 1, Ismonth: 1,
 				},
 			}},
-			expect: `P1Y1MT1H`,
+			expect: `P1Y1M`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{
 				&graph.Duration{
-					Months: 0, Seconds: 3661, Microseconds: 0,
+					Sec: 59, Microsec: 0,
 				},
 			}},
-			expect: `PT1H1M1S`,
+			expect: `PT59S`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
+					Sec: -59, Microsec: -99,
+				},
+			}},
+			expect: `PT-59.000099S`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
+					Sec: 0, Microsec: -99,
+				},
+			}},
+			expect: `PT-0.000099S`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
+					Sec: 0, Microsec: 99,
+				},
+			}},
+			expect: `PT0.000099S`,
 		},
 	}
 	for _, c := range testcases {

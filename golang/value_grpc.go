@@ -605,50 +605,76 @@ func (t *grpcLocalTime) GetMicrosec() uint32 {
 }
 
 func (d *grpcDuration) String() string {
-	var prefix, suffix string
-	if d.GetMonths() > 0 {
-		y := d.GetMonths() / 12
-		m := d.GetMonths() % 12
-		if y > 0 {
-			prefix += fmt.Sprintf("%dY", y)
+	var prefix string = "P"
+	if d.IsMonthBased() {
+		if d.GetYear() != 0 {
+			prefix += fmt.Sprintf("%dY", d.GetYear())
 		}
-		if m > 0 {
-			prefix += fmt.Sprintf("%dM", m)
+		if d.GetMonth() != 0 {
+			prefix += fmt.Sprintf("%dM", d.GetMonth())
 		}
-	}
-	if d.GetSeconds() > 0 || d.GetMicroseconds() > 0 {
-		h, m, s := d.GetSeconds()/3600, (d.GetSeconds()%3600)/60, d.GetSeconds()%60
-		ms := d.GetMicroseconds()
-		ss := float64(s) + float64(ms)/1000000
-		if h > 0 {
-			suffix += fmt.Sprintf("%dH", h)
-		}
-		if m > 0 {
-			suffix += fmt.Sprintf("%dM", m)
-		}
-		if ms > 0 {
-			suffix += fmt.Sprintf("%fS", ss)
-		} else if s > 0 {
-			suffix += fmt.Sprintf("%dS", s)
-		}
-	}
-	if suffix == "" {
-		return fmt.Sprintf("P%s", prefix)
 	} else {
-		return fmt.Sprintf("P%sT%s", prefix, suffix)
+		if d.GetDay() != 0 {
+			prefix += fmt.Sprintf("%dD", d.GetDay())
+		}
+		prefix += "T"
+		if d.GetHour() != 0 {
+			prefix += fmt.Sprintf("%dH", d.GetHour())
+		}
+		if d.GetMinute() != 0 {
+			prefix += fmt.Sprintf("%dM", d.GetMinute())
+		}
+		if d.GetSecond() != 0 || d.GetMicrosecond() != 0 {
+			if d.GetMicrosecond() == 0 {
+				prefix += fmt.Sprintf("%dS", d.GetSecond())
+			} else {
+				ms := d.GetSecond()*1e6 + d.GetMicrosecond()
+				isMinus := d.GetSecond() < 0 || d.GetMicrosecond() < 0
+				if isMinus {
+					ms = -ms
+				}
+				s, ss := ms/1e6, ms%1e6
+				if isMinus {
+					prefix += fmt.Sprintf("-%d.%06dS", s, ss)
+				} else {
+					prefix += fmt.Sprintf("%d.%06dS", s, ss)
+				}
+			}
+		}
 	}
+	return prefix
 }
 
-func (d *grpcDuration) GetMonths() uint32 {
-	return d.data.Months
+func (d *grpcDuration) IsMonthBased() bool {
+	return d.data.Ismonth == 1
 }
 
-func (d *grpcDuration) GetSeconds() uint64 {
-	return d.data.Seconds
+func (d *grpcDuration) GetYear() int32 {
+	return d.data.GetYear()
 }
 
-func (d *grpcDuration) GetMicroseconds() uint32 {
-	return d.data.Microseconds
+func (d *grpcDuration) GetMonth() int32 {
+	return d.data.GetMonth()
+}
+
+func (d *grpcDuration) GetDay() int32 {
+	return d.data.GetDay()
+}
+
+func (d *grpcDuration) GetHour() int32 {
+	return d.data.GetHour()
+}
+
+func (d *grpcDuration) GetMinute() int32 {
+	return d.data.GetMinute()
+}
+
+func (d *grpcDuration) GetSecond() int32 {
+	return d.data.GetSec()
+}
+
+func (d *grpcDuration) GetMicrosecond() int32 {
+	return d.data.GetMicrosec()
 }
 
 func (zt *grpcZonedTime) String() string {
