@@ -447,10 +447,10 @@ public class NebulaClient implements Serializable {
             throw new RuntimeException(
                     "get all partitions failed for " + resultSet.getErrorMessage());
         }
-        List<ValueWrapper> partitionsValue = resultSet.next().values().get(0).asList();
+
         List<Integer> partitions = new ArrayList<>();
-        for (ValueWrapper part : partitionsValue) {
-            partitions.add(part.asInt());
+        while (resultSet.hasNext()) {
+            partitions.add(resultSet.next().get("partition_id").asInt());
         }
         return partitions;
     }

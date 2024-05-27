@@ -61,10 +61,10 @@ public class GraphClientExample {
 
     private static void createGraphType(NebulaClient client) throws IOErrorException,
             InterruptedException, NoValidSessionException {
-        String createSchema = "CREATE GRAPH TYPE graph_type_nba AS {"
-                + "(node_type_player LABEL player {id INT PRIMARY KEY, name STRING, "
-                + "score FLOAT, gender"
-                + " bool, rate DOUBLE}),(node_type_player)-[edge_type_follow LABEL follow "
+        String createSchema = "CREATE GRAPH TYPE IF NOT EXISTS graph_type_nba AS {"
+                + "NODE TYPE node_type_player (LABEL player {id INT PRIMARY KEY, name STRING, "
+                + "score FLOAT, gender bool, rate DOUBLE}),"
+                + "EDGE TYPE edge_type_follow(node_type_player)-[LABEL follow "
                 + "{followness INT, likeness FLOAT64}]->(node_type_player)}";
         ResultSet resp = client.execute(createSchema);
         if (!resp.isSucceeded()) {
@@ -79,8 +79,8 @@ public class GraphClientExample {
     }
 
     private static void createGraph(NebulaClient client) throws IOErrorException,
-            InterruptedException, NoValidSessionException {
-        String createGraph = "CREATE GRAPH nba graph_type_nba";
+            InterruptedException {
+        String createGraph = "CREATE GRAPH IF NOT EXISTS nba graph_type_nba";
         ResultSet resp = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,
