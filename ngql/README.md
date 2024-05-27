@@ -1,97 +1,101 @@
-# Nebula Graph Console
+# ngql
 
-This repository contains the Nebula Graph Console for Nebula Graph 5.0. Nebula Graph Console (Console for short) is a console for Nebula Graph. With Console, you can create a graph schema, import the demonstration `basketballplayer` dataset, and retrieve data.
+ngql is the NebulaGraph console for NebulaGraph 5.0. With ngql, you can create a graph schema, import the demonstration `movie` dataset, and retrieve data.
 
 ## Features
 
 - Supports interactive and non-interactive mode.
-- Supports viewing the history statements.
+- Supports searching the history statements.
 - Supports autocompletion.
 - Supports multiple OS and architecture (We recommend Linux/AMD64).
 
 ## How to Install
 
 ### From Source Code
+
 Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="github.com/vesoft-inc/*"` before building the source code
 
-1. Build Nebula Graph Console
+To build Nebula Graph Console, make sure that you have installed [Go](https://golang.org/doc/install).
 
-    To build Nebula Graph Console, make sure that you have installed [Go](https://golang.org/doc/install).
+> NOTE: Go version provided with apt on ubuntu is usually "outdated".
 
-    > NOTE: Go version provided with apt on ubuntu is usually "outdated".
+Run the following command to examine if Go is installed on your machine.
 
-    Run the following command to examine if Go is installed on your machine.
+```bash
+$ go version
+```
 
-    ```bash
-    $ go version
-    ```
+The version should be newer than 1.19.
 
-    The version should be newer than 1.19.
+Use Git to clone the source code of Nebula Graph Console to your host.
 
-    Use Git to clone the source code of Nebula Graph Console to your host.
+```bash
+$ git clone https://github.com/vesoft-inc/nebula-ng-tools
+```
 
-    ```bash
-    $ git clone https://github.com/vesoft-inc/nebula-ng-tools/ngql
-    ```
+Run the following command to build Nebula Graph Console.
 
-    Run the following command to build Nebula Graph Console.
+```bash
+$ cd ngql
+$ make
+```
 
-    ```bash
-    $ cd ngql
-    $ make
-    ```
-    You can find a binary named `ngql`.
-
-2. Connect to Nebula Graph
-
-    To connect to your Nebula Graph services, use the following command.
-
-    ```bash
-    $ ./ngql --host <host> --port <port> --user <username> --password <password>
-        [-t 120] [-e "nGQL_statement" | -f filename.nGQL]
-    ```
-
-    | Option                      | Description                                                                                                                                                             |
-    | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-    | `-h`                        | Shows the help menu.                                                                                                                                                    |
-    | `-H/--host`            | Sets the HOST address of the graphd service.                                                                                                                         |
-    | `-P/-port`                  | Sets the port number of the graphd service.                                                                                                                             |
-    | `-u/-user`                  | Sets the username of your Nebula Graph account. See [authentication](https://docs.nebula-graph.io/2.0/7.data-security/1.authentication/1.authentication/).              |
-    | `-p/-password`              | Sets the password of your Nebula Graph account.                                                                                                                         |
-    | `-t/-timeout`               | Sets an integer-type timeout threshold for the connection. The unit is second. The default value is 0.                                                                |
-    | `-e/-eval`                  | Sets a string-type nGQL statement. The nGQL statement is executed once the connection succeeds. The connection stops after the result is returned.                      |
-    | `-f/-file`                  | Sets the path of an nGQL file. The nGQL statements in the file are executed once the connection succeeds. You'll get the return messages and the connection stops then. |
-
-
-    E.g.,
-    ```bash
-    $./ngql -H 192.168.10.111 -P 9669 -u root -p nebula
-    2021/03/15 15:21:43 [INFO] connection pool is initialized successfully
-    Welcome to Nebula Graph!
-    ```
-
-    Check options for `./ngql -h`:
-
-    - try `./ngql` in interactive mode directly.
-
-    - And try `./ngql -e 'show graphs'` for the direct script mode.
-
-    - And try `./ngql -f demo.nGQL` for the script file mode.
+You can find a binary named `ngql`.
 
 ### From Binary
 
 - Download the binaries on the [Releases page](https://github.com/vesoft-inc/nebula-ng-tools/ngql/releases)
 
-- Add execute permissions to the binary
-
-- Connect to your Nebula Graph services:
+- Add execute permissions to the binary 
 
 ```bash
-$ ./<$YOUR_BINARY> -H <host> -P <port> -u <username> -p <password>
-        [-t 120] [-e "nGQL_statement" | -f filename.nGQL]
+chmod +x ./ngql
 ```
 
-### Docker
+## Usage
+
+### Connect to Nebula Graph
+
+To connect to your Nebula Graph services, use the following command.
+
+```bash
+$ ./ngql --host <host> --port <port> --user <username> --password <password>
+    [-t 120] [-e "nGQL_statement" | -f filename.nGQL]
+```
+
+Options
+
+```bash
+-e, --eval string       The GQL directly
+-f, --file string       The GQL script file name
+-h, --help              help for ngql
+-H, --host string       Nebula Graph host (default "127.0.0.1")
+-p, --password string   The Nebula Graph login password
+-P, --port int          The Nebula Graph port (default 9669)
+-t, --timeout int       The Nebula Graph client connection timeout in seconds, 0 means never timeout
+-u, --user string       The Nebula Graph login user name (default "root")
+--width-max int     The max width of the column of the execution plan (default 100)
+```
+
+E.g.,
+
+```bash
+./ngql -H 192.168.8.6 -P 17163 -u root -p NebulaGraph01
+Welcome to NebulaGraph 5.0, the distributed graph database offering native GQL support!
+:help for help.
+
+(root@nebula) [(none)]>
+```
+
+Check options for `./ngql -h`:
+
+- try `./ngql` in interactive mode directly.
+
+- And try `./ngql -e 'show graphs'` for the direct script mode.
+
+- And try `./ngql -f demo.nGQL` for the script file mode.
+
+## Docker
 
 Create a container:
 
@@ -131,65 +135,83 @@ nebula> show create graph ldbc \G
 create_graph_statement: "CREATE GRAPH IF NOT EXISTS `ldbc` TYPED `ldbc_type`"
 ```
 
-## Console side commands:
+## Console side commands
 
-> **NOTE**: The following commands are case insensitive.
+> **NOTE**:
+> The following commands are case insensitive.
+> You can show all commands by `:help`
 
-* Export the result of the following statement to a csv file:
+```
+(root@nebula) [(none)]> :help
++---------+-------+------------------------------+------------------------------------------------------------+
+| Command | Alias | Usage                        | Description                                                |
++---------+-------+------------------------------+------------------------------------------------------------+
+| help    | :h    | :help                        | Show this help.                                            |
+| sleep   |       | :sleep 5                     | Sleep N seconds.                                           |
+| play    |       | :play movie                  | Playing the dateset                                        |
+| tee     |       | :tee [-o] <filename>         | Append all results to an output file (overwrite using -o). |
+| notee   |       | :notee                       | Stop writing to the output file.                           |
+| pager   |       | :pager <commnad> <row_limit> | Set pager for result, default: ":pager less 200"           |
+| nopager |       | :nopager                     | No pager                                                   |
+| exit    | :e    | :exit                        | Exit.                                                      |
+| quit    | :q    | :quit                        | Quit.                                                      |
++---------+-------+------------------------------+------------------------------------------------------------+
+```
+
+### sleep
+
+Sleep N seconds
+
+### play
+
+Load the demonstration `movie` dataset
+
+```bash
+(root@nebula) [(none)]> :play movie
+Playing dataset: movie...
+Play dataset: movie done.
+(root@nebula) [(none)]>
+```
+
+### tee & notee
+
+Append all result to an output file
+
+### pager & nopage
+
+by default, use `less` command for pager if the execute result rows are more than 200.
+
+e.g.
+```bash
+(root@nebula) [(none)]> :pager less 2
+Pager set to less with row limit 2
+
+(root@nebula) [(none)]> use ldbc match(v) return v limit 3
+Got 3 rows (time spent 16.884ms/17.659322ms)
+
+Wed, 15 May 2024 11:46:46 CST
+
+```
+
+and in pager
+```bash
++--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| v                                                                                                                                                            |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+| (288232351836667905@Place:City&Continent&Country{id:6,kind:city,name:Shenzhen,url:https://shenzhen.com})                                                     |
+| (288415253018968065@Place:City&Continent&Country{id:5,kind:city,name:Chengdu,url:https://chengdu.com})                                                       |
+| (288826320043900931@Comment:Comment&Message{browserUsed:Chrome,content:comment1,creationDate:1991-01-01T10:00:40.213000,extent:8,id:1,locationIP:192.168.1}) |
++--------------------------------------------------------------------------------------------------------------------------------------------------------------+
+(END)
+```
+
+### exit & quit
 
 ```nGQL
-nebula> :csv a.csv
-```
-
-* Export the execution plan in graphviz format to a dot file when profiling a statement with format "dot" or "dot:struct":
-
-```nGQL
-nebula> :dot a.dot
-nebula> PROFILE FORMAT="dot" GO FROM "Tony Parker" OVER like;
-```
-You can paste the content in the dot file to `https://dreampuf.github.io/GraphvizOnline/` to show the execution plan.
-
-* Load the demonstration `basketballplayer` dataset:
-
-```ngql
-nebula> :play basketballplayer
-Start loading dataset basketballplayer...
-
-Load dataset succeeded!
-```
-
-* Repeat to execute a statement n times, the average execution time will also be printed:
-
-```ngql
-nebula> :repeat 3
-```
-
-* Sleep for some seconds, it's just used in `:play basketballplayer`:
-
-```nGQL
-nebula> :sleep 3
-```
-
-* Exit the console
-
-You can use `:EXIT` or `:QUIT` to disconnect from Nebula Graph. For convenience, ngql supports using these commands in lower case without the colon (":"), such as `quit`.
-
-```nGQL
-nebula> :QUIT
-
+(root@nebula) [(none)]> :q
 Bye root!
 
-nebula> :EXIT
-
-Bye root!
-
-nebula> quit
-
-Bye root!
-
-nebula> exit
-
-Bye root!
+Wed, 15 May 2024 11:48:09 CST
 ```
 
 ## Keyboard Shortcuts
@@ -218,8 +240,3 @@ Bye root!
 | <kbd>Ctrl-Y</kbd>                           | Paste from Yank buffer (Alt-Y to paste next yank instead)  |
 | <kbd>Tab</kbd>                              | Next completion                                            |
 | <kbd>Shift-Tab</kbd>                        | (after Tab) Previous completion                            |
-
-## TODO
-
-- CI/CD
-- batch process to reduce memory consumption and speed up IO

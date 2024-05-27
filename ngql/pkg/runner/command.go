@@ -17,13 +17,14 @@ import (
 )
 
 type command struct {
-	runner *Runner  // used for some command to change runner context
-	args   []string // e.g. []string{"1"}
-	fn     commandFn
-	cmd    string
-	desc   string
-	usage  string
-	alias  string
+	runner   *Runner  // used for some command to change runner context
+	args     []string // e.g. []string{"1"}
+	fn       commandFn
+	cmd      string
+	desc     string
+	usage    string
+	alias    string
+	showHelp bool
 }
 
 const (
@@ -41,6 +42,7 @@ const (
 )
 
 type commandFn func(r *Runner, args []string) error
+type commandOptionFn func(c *command)
 
 // name for commands, used for help
 var commandNames []string
@@ -57,7 +59,13 @@ func (c *command) execute() error {
 	return c.fn(c.runner, c.args)
 }
 
-func registerCommand(cmd string, usage, alias, desc string, fn commandFn) {
+func withShowHelp(showHelp bool) commandOptionFn {
+	return func(c *command) {
+		c.showHelp = showHelp
+	}
+}
+
+func registerCommand(cmd string, usage, alias, desc string, fn commandFn, options ...commandOptionFn) {
 	if commands == nil {
 		commands = make(map[string]*command)
 	}
@@ -66,12 +74,17 @@ func registerCommand(cmd string, usage, alias, desc string, fn commandFn) {
 	}
 	commandNames = append(commandNames, cmd)
 	c := &command{
-		cmd:   cmd,
-		alias: alias,
-		desc:  desc,
-		usage: usage,
-		fn:    fn,
+		cmd:      cmd,
+		alias:    alias,
+		desc:     desc,
+		usage:    usage,
+		fn:       fn,
+		showHelp: true, // show help by default
 	}
+	for _, option := range options {
+		option(c)
+	}
+
 	commands[cmd] = c
 	if alias != "" {
 		a := strings.Trim(alias, ":")
@@ -122,6 +135,9 @@ func helpFn(r *Runner, args []string) error {
 	writer.AppendHeader(table.Row{"Command", "Alias", "Usage", "Description"})
 	for _, name := range commandNames {
 		c := commands[name]
+		if !c.showHelp {
+			continue
+		}
 		writer.AppendRow(table.Row{c.cmd, c.alias, c.usage, c.desc})
 	}
 	writer.Render()
@@ -259,8 +275,8 @@ func noPagerFn(r *Runner, args []string) error {
 func init() {
 	registerCommand(commandHelp, ":help", ":h", "Show this help.", helpFn)
 	registerCommand(commandSleep, ":sleep 5", "", "Sleep N seconds.", sleepFn)
-	registerCommand(commandPlay, ":play ldbc", "", "Playing the dateset", playFn)
-	registerCommand(commandFormat, ":format default", "", "Change the format for value. (default, tck)", formatFn)
+	registerCommand(commandPlay, ":play movie", "", "Playing the dateset", playFn)
+	registerCommand(commandFormat, ":format default", "", "Change the format for value. (default, tck)", formatFn, withShowHelp(false))
 	registerCommand(commnadTee, ":tee [-o] <filename>", "", "Append all results to an output file (overwrite using -o).", teeFn)
 	registerCommand(commnadNoTee, ":notee", "", "Stop writing to the output file.", noteeFn)
 	registerCommand(commandPager, ":pager <commnad> <row_limit>", "", "Set pager for result, default: \":pager less 200\"", pagerFn)
