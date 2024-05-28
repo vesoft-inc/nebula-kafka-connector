@@ -71,9 +71,42 @@ object NebulaSparkWriterExample {
       .withDstPkField("dst")
       .withSrcPkAsProperty(false)
       .withDstPkAsProperty(false)
+      .withWriteMode(WriteMode.INSERT)
       .withBatchSize(10)
       .build()
     df.write.nebula(getNebulaConnectionConfig, nebulaWriteEdgeConfig).writeEdges()
   }
 
+
+  private def deleteNode(spark: SparkSession): Unit = {
+    val df = spark.read.json("spark-connector/example/src/main/resources/vertex")
+    df.show()
+
+    val nebulaWriteNodeConfig: WriteNebulaNodeConfig = WriteNebulaNodeConfig
+      .builder()
+      .withGraphName("nba")
+      .withNodeType("node_type_player")
+      .withWriteMode(WriteMode.DELETE)
+      .withBatchSize(10)
+      .build()
+    df.write.nebula(getNebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()
+  }
+
+
+  private def deleteEdge(spark: SparkSession): Unit = {
+    val df = spark.read.json("spark-connector/example/src/main/resources/edge")
+    df.show()
+    df.persist(StorageLevel.MEMORY_AND_DISK_SER)
+
+    val nebulaWriteEdgeConfig: WriteNebulaEdgeConfig = WriteNebulaEdgeConfig
+      .builder()
+      .withGraphName("nba")
+      .withEdge("edge_type_follow")
+      .withSrcPkField("src")
+      .withDstPkField("dst")
+      .withWriteMode(WriteMode.DELETE)
+      .withBatchSize(1)
+      .build()
+    df.write.nebula(getNebulaConnectionConfig, nebulaWriteEdgeConfig).writeEdges()
+  }
 }

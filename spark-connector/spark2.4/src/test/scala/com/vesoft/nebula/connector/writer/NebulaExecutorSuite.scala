@@ -107,7 +107,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
     nodes.append(NebulaNode(props1))
     nodes.append(NebulaNode(props2))
 
-    val nebulaNodes = NebulaNodes(nodeType, nodes.toList)
+    val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string")
     val nodeStatement =
       NebulaExecutor.toExecuteSentence(graphName, nodeType, nebulaNodes)
 
@@ -143,11 +143,71 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
     edges.append(NebulaEdge("id", "\"vid1\"", "id", "\"vid2\"", props1))
     edges.append(NebulaEdge("id", "\"vid2\"", "id", "\"vid1\"", props2))
 
-    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, edges.toList)
+    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, "person", "person", edges.toList)
     val edgeStatement = NebulaExecutor.toExecuteSentence(graphName, edgeType, nebulaEdges)
 
     val expectStatement =
       s"""USE `$graphName` INSERT EDGE `$edgeType` ({`id`:\"vid1\"})-[{`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}]->({`id`:\"vid2\"}),({`id`:\"vid2\"})-[{`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")}]->({`id`:\"vid1\"})""".stripMargin
+    assert(expectStatement.toCharArray.sorted.mkString("").equals(edgeStatement.toCharArray.sorted.mkString("")))
+  }
+
+
+  test("test toDeleteSentence for node") {
+    val nodes: ListBuffer[NebulaNode] = new ListBuffer[NebulaNode]
+    val nodeType = "person"
+
+    val props1: Map[String, String] = Map(
+      "col_string" -> "\"Tom\"",
+      "col_fixed_string" -> "\"Tom\"",
+      "col_bool" -> "true",
+      "col_int" -> "10",
+      "col_int64" -> "100",
+      "col_double" -> "1.0",
+      "col_date" -> "date(\"2021-11-12\")"
+    )
+    val props2: Map[String, String] =
+      Map(
+        "col_string" -> "\"Bob\"",
+        "col_fixed_string" -> "\"Bob\"",
+        "col_bool" -> "false",
+        "col_int" -> "20",
+        "col_int64" -> "200",
+        "col_double" -> "2.0",
+        "col_date" -> "date(\"2021-05-01\")"
+      )
+    nodes.append(NebulaNode(props1))
+    nodes.append(NebulaNode(props2))
+
+    val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string")
+    val nodeStatement =
+      NebulaExecutor.toDeleteSentence(graphName, nodeType, nebulaNodes)
+
+    val expectStatement =
+      s"""USE `$graphName` MATCH (a@$nodeType where a.col_string in [\"Bob\",\"Tom\"]) DETACH DELETE a""".stripMargin
+
+    expectStatement.toCharArray.sorted.mkString("")
+    assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
+  }
+
+  test("test toDeleteSentence for edge") {
+    val edges: ListBuffer[NebulaEdge] = new ListBuffer[NebulaEdge]
+    val edgeType = "friend"
+    val props1: Map[String, String] = Map(
+      "col_string" -> "\"Tom\"",
+      "col_fixed_string" -> "\"Tom\"",
+      "col_bool" -> "true",
+      "col_int" -> "10",
+      "col_int64" -> "100",
+      "col_double" -> "1.0",
+      "col_date" -> "date(\"2021-11-12\")"
+    )
+    edges.append(NebulaEdge("id", "\"vid1\"", "id", "\"vid2\"", props1))
+
+    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, "person", "person", edges.toList)
+    val edgeStatement = NebulaExecutor.toDeleteSentence(graphName, edgeType, nebulaEdges)
+
+    val expectStatement =
+      s"""USE `$graphName` MATCH(a@person{id:\"vid1\"})-[e@friend]-(b@person{id:\"vid2\"}) DELETE e""".stripMargin
     assert(expectStatement.toCharArray.sorted.mkString("").equals(edgeStatement.toCharArray.sorted.mkString("")))
   }
 }

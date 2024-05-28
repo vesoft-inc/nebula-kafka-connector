@@ -15,11 +15,11 @@ case class NebulaNode(values: Map[String, String]) {
   }
 }
 
-case class NebulaNodes(nodeType: String, values: List[NebulaNode]) {
+case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkName: String) {
   def getNodesStr = values.map(v => v.getNodeStr).mkString(",")
 }
 
-case class NebulaEdge(srcPkName:String, srcId: String, dstPkName:String, dstId: String, values: Map[String, String]) {
+case class NebulaEdge(srcPkName: String, srcId: String, dstPkName: String, dstId: String, values: Map[String, String]) {
   def getEdgeStr: String = s"({`$srcPkName`:$srcId})-[{${getMapValues(values)}}]->({`$dstPkName`:$dstId})"
 
   private[this] def getMapValues(values: Map[String, String]): String = {
@@ -29,6 +29,6 @@ case class NebulaEdge(srcPkName:String, srcId: String, dstPkName:String, dstId: 
   }
 }
 
-case class NebulaEdges(edgeType: String, values: List[NebulaEdge]) {
+case class NebulaEdges(edgeType: String, srcType: String, dstType: String, values: List[NebulaEdge]) {
   def getEdgesStr = values.map(e => e.getEdgeStr).mkString(",")
 }

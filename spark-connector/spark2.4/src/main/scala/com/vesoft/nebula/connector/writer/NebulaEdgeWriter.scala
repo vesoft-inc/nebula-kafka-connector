@@ -134,10 +134,14 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   }
 
   private def getGql(edges: List[NebulaEdge]): String = {
-    val nebulaEdges = NebulaEdges(nebulaOptions.label, edges)
+    val nebulaEdges = NebulaEdges(nebulaOptions.label, edgeDesc.srcNodeTypeName, edgeDesc.dstNodeTypeName, edges)
     val exec = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
         NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
+      case WriteMode.UPDATE =>
+        NebulaExecutor.toUpdateSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
+      case WriteMode.DELETE =>
+        NebulaExecutor.toDeleteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
       case _ =>
         throw new IllegalArgumentException(s"write mode ${nebulaOptions.writeMode} not supported.")
     }

@@ -44,8 +44,7 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
 
     val values =
       if (nebulaOptions.writeMode == WriteMode.DELETE) {
-        // delete mode does not need property.
-        Map[String, String]()
+        NebulaExecutor.assignNodePkValues(schema, row, fieldTypeMap, pkName)
       } else {
         NebulaExecutor.assignNodePropValues(schema,
           row,
@@ -128,10 +127,14 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
   }
 
   private def getGql(nebulaVertices: List[NebulaNode]): String = {
-    val nebulaNodes = NebulaNodes(nebulaOptions.label, nebulaVertices)
+    val nebulaNodes = NebulaNodes(nebulaOptions.label, nebulaVertices, pkName)
     val exec = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
         NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
+      case WriteMode.UPDATE =>
+        NebulaExecutor.toUpdateSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
+      case WriteMode.DELETE =>
+        NebulaExecutor.toDeleteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
       case _ =>
         throw new IllegalArgumentException(s"write mode ${nebulaOptions.writeMode} not supported.")
     }
