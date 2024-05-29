@@ -243,6 +243,7 @@ func init() {
 	alterUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	alterUserCmd.MarkFlagRequired("user")
 	alterUserCmd.MarkFlagsMutuallyExclusive("password", "auth-info")
+	alterUserCmd.MarkFlagsOneRequired("password", "auth-info")
 
 	showUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "Users, e.g. 'aa,bb'")
 
