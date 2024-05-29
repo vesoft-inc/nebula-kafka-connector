@@ -147,9 +147,22 @@ object NebulaExecutor {
 
   /**
    * construct insert statement for node
+   * TABLE t {id,firstName,lastName, tag_name} =
+   * (1, "f1", "l1", "tag1"),
+   * (2, "f2", "l2", "tag2"),
+   * (3, "f3", "l3", "tag3")
+   * USE nba
+   * FOR r IN t
+   * INSERT (a@Person{id:r.id,firstName:r.firstName,lastName:r.lastName})
    */
-  def toExecuteSentence(graphName: String, nodeType: String, nodes: NebulaNodes): String = {
-    s"USE `$graphName` INSERT NODE `$nodeType` ${nodes.getNodesStr}"
+  def toExecuteSentence(graphName: String, nodes: NebulaNodes, mode:String): String = {
+    s"""
+       |TABLE t {${nodes.propNamesStr}} =
+       |${nodes.getNodesStr}
+       |USE `$graphName`
+       |FOR r IN t
+       |INSERT $mode (@`${nodes.nodeType}`{${nodes.propNamesWithTableStr}})
+       |""".stripMargin
   }
 
   /**

@@ -47,7 +47,7 @@ object NebulaSparkWriterExample {
       .builder()
       .withGraphName("nba")
       .withNodeType("node_type_player")
-      .withWriteMode(WriteMode.INSERT)
+      .withWriteMode(WriteMode.INSERTIGNORE)
       .withBatchSize(10)
       .build()
     df.write.nebula(getNebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()

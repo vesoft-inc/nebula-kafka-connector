@@ -106,16 +106,48 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       )
     nodes.append(NebulaNode(props1))
     nodes.append(NebulaNode(props2))
-
-    val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string")
-    val nodeStatement =
-      NebulaExecutor.toExecuteSentence(graphName, nodeType, nebulaNodes)
-
-    val expectStatement =
-      s"""USE `$graphName` INSERT NODE `$nodeType` ({`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}),({`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")})""".stripMargin
-
-    expectStatement.toCharArray.sorted.mkString("")
+    val fieldTypeMap: Map[String, String] =
+      Map("col_string" -> "STRING", "col_fixed_string" -> "STRING", "col_bool" -> "BOOL", "col_int"->"INT32", "col_int64"->"INT64","col_double"->"DOUBLE","col_date"->"DATE")
+    val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string", fieldTypeMap)
+    // test insert node
+    var nodeStatement =
+      NebulaExecutor.toExecuteSentence(graphName, nebulaNodes, "")
+    var expectStatement =
+      s"""
+         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
+         |USE `$graphName`
+         |FOR r IN t
+         |INSERT  (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+         |""".stripMargin
     assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
+
+    // test insert node with replace
+    nodeStatement =
+      NebulaExecutor.toExecuteSentence(graphName, nebulaNodes, "OR REPLACE")
+    expectStatement =
+      s"""
+         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
+         |USE `$graphName`
+         |FOR r IN t
+         |INSERT OR REPLACE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+         |""".stripMargin
+      assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
+
+    // test insert node with ignore
+    nodeStatement =
+      NebulaExecutor.toExecuteSentence(graphName, nebulaNodes, "OR IGNORE")
+      expectStatement =
+        s"""
+           |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+           |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
+           |USE `$graphName`
+           |FOR r IN t
+           |INSERT OR IGNORE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+           |""".stripMargin
+      assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
+
   }
 
   test("test toExecuteSentence for edge") {
@@ -178,7 +210,9 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
     nodes.append(NebulaNode(props1))
     nodes.append(NebulaNode(props2))
 
-    val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string")
+    val fieldTypeMap: Map[String, String] =
+      Map("col_string" -> "STRING", "col_fixed_string" -> "STRING", "col_bool" -> "BOOL", "col_int" -> "INT32", "col_int64" -> "INT64", "col_double" -> "DOUBLE", "col_date" -> "DATE")
+    val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string", fieldTypeMap)
     val nodeStatement =
       NebulaExecutor.toDeleteSentence(graphName, nodeType, nebulaNodes)
 

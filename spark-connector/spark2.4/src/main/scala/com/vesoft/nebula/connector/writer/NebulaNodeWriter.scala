@@ -71,7 +71,7 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
     if (result.isSucceeded) {
       if (!nebulaOptions.disableWriteLog) {
         LOG.info(
-          s"batch write for ${nebulaOptions.label} succeed. batch size(${vertices.size}, latency(${result.getLatency}))")
+          s"batch write for ${nebulaOptions.label} succeed. batch size(${vertices.size}), latency(${result.getLatency})")
       }
     } else {
       if (vertices.size == 1
@@ -127,10 +127,14 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
   }
 
   private def getGql(nebulaVertices: List[NebulaNode]): String = {
-    val nebulaNodes = NebulaNodes(nebulaOptions.label, nebulaVertices, pkName)
+    val nebulaNodes = NebulaNodes(nebulaOptions.label, nebulaVertices, pkName, fieldTypeMap)
     val exec = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
+        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaNodes, "")
+      case WriteMode.INSERTREPLACE =>
+        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaNodes, "OR REPLACE")
+      case WriteMode.INSERTIGNORE=>
+        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaNodes, "OR IGNORE")
       case WriteMode.UPDATE =>
         NebulaExecutor.toUpdateSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
       case WriteMode.DELETE =>

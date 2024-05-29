@@ -6,7 +6,7 @@
 package com.vesoft.nebula.spark.common
 
 case class NebulaNode(values: Map[String, String]) {
-  def getNodeStr: String = s"({${getMapValues(values)}})"
+  def getNodeStr: String = s"{${getMapValues(values)}}"
 
   private[this] def getMapValues(values: Map[String, String]): String = {
     values
@@ -15,8 +15,16 @@ case class NebulaNode(values: Map[String, String]) {
   }
 }
 
-case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkName: String) {
-  def getNodesStr = values.map(v => v.getNodeStr).mkString(",")
+case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkName: String, fieldTypeMap: Map[String, String]) {
+  private val propNames = values.iterator.next().values.keySet.toSeq
+
+  def getNodesStr = values.map(node => {
+    s"(${propNames.map(prop => s"${node.values(prop)}").mkString(",")})"
+  }).mkString(",")
+
+  def propNamesStr = propNames.mkString(",")
+
+  def propNamesWithTableStr = propNames.map(prop => s"`$prop`:CAST(r.$prop AS ${fieldTypeMap(prop)})").mkString(",")
 }
 
 case class NebulaEdge(srcPkName: String, srcId: String, dstPkName: String, dstId: String, values: Map[String, String]) {
