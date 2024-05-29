@@ -18,7 +18,8 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.Int(flagConcurrency, 5, "Max concurrency for upload, download and playback data")
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
-	flags.String(flagClusterIdMapping, "", "Specify cluster id mapping from old cluster to new cluster, format: <old_cluster_id1>:<new_cluster_id1>,<old_cluster_id2>:<new_cluster_id2>")
+	flags.Int64(flagClusterId, 0, "Specify the restore cluster id")
+	flags.Int64(flagBackupClusterId, 0, "Specify the backup cluster id")
 
 	// support tls
 	flags.Bool(flagEnableSSL, false, "Enable SSL connection")
@@ -27,21 +28,23 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.String(flagCAPath, "/usr/local/certs/ca.crt", "Specify CA file path")
 	flags.Bool(flagInsecureSkipVerify, false, "Skip server side certificate verification")
 
-	//cobra.MarkFlagRequired(flags, FlagMetaAddr)
+	cobra.MarkFlagRequired(flags, FlagMetaAddr)
 	cobra.MarkFlagRequired(flags, FlagStorage)
 	cobra.MarkFlagRequired(flags, flagBackupName)
-	cobra.MarkFlagRequired(flags, flagClusterIdMapping)
+	cobra.MarkFlagRequired(flags, flagClusterId)
+	cobra.MarkFlagRequired(flags, flagBackupClusterId)
 }
 
 type RestoreConfig struct {
-	BackupName       string
-	MetaAddr         string
-	ClusterIdMapping map[int64]int64 // [oldClusterId] = newClusterId
-	Concurrency      int
-	Backend          *agentstorage.Backend // Backend is associated with the root uri
-	TLSConfig        *tls.Config
-	Username         string
-	Password         string
+	BackupName      string
+	MetaAddr        string
+	ClusterId       int64
+	BackupClusterId int64
+	Concurrency     int
+	Backend         *agentstorage.Backend // Backend is associated with the root uri
+	TLSConfig       *tls.Config
+	Username        string
+	Password        string
 }
 
 func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
@@ -57,11 +60,12 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 		return err
 	}
 
-	clusterIdMappingStr, err := flags.GetString(flagClusterIdMapping)
+	r.ClusterId, err = flags.GetInt64(flagClusterId)
 	if err != nil {
 		return err
 	}
-	r.ClusterIdMapping, err = parseClusterIdMapping(clusterIdMappingStr)
+
+	r.BackupClusterId, err = flags.GetInt64(flagBackupClusterId)
 	if err != nil {
 		return err
 	}

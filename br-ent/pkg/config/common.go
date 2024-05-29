@@ -30,7 +30,7 @@ const (
 	flagUsername           = "username"
 	flagPassword           = "password"
 	flagClusterId          = "clusterId"
-	flagClusterIdMapping   = "clusterIdMapping"
+	flagBackupClusterId    = "backup-clusterId"
 
 	CACertPathEnv     = "CA_CERT_PATH"
 	ClientCertPathEnv = "CLIENT_CERT_PATH"

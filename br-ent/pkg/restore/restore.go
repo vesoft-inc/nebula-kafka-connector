@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -34,7 +35,9 @@ type Restore struct {
 	// backupMetas store backup meta list for restore
 	backupMetas []*meta.CreateBackupResp
 
-	clusterIdMapping map[int64]int64
+	// only support restore one cluster now
+	clusterId       int64
+	backupClusterId int64
 
 	rootUri    string
 	backupName string
@@ -43,11 +46,12 @@ type Restore struct {
 
 func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error) {
 	r := &Restore{
-		ctx:              ctx,
-		cfg:              cfg,
-		rootUri:          cfg.Backend.Uri(),
-		backupName:       cfg.BackupName,
-		clusterIdMapping: cfg.ClusterIdMapping,
+		ctx:             ctx,
+		cfg:             cfg,
+		rootUri:         cfg.Backend.Uri(),
+		backupName:      cfg.BackupName,
+		clusterId:       cfg.ClusterId,
+		backupClusterId: cfg.BackupClusterId,
 	}
 
 	var err error
@@ -66,14 +70,46 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 		return nil, fmt.Errorf("create storage failed: %w", err)
 	}
 
+	// get cluster
 	clusters, err := r.meta.ListClusters()
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}
-	r.clusters, err = utils.NewNebulaClusters(clusters, r.amg)
+
+	restoreCluster := make([]*clients.ClusterServiceInfo, 0)
+	for _, cluster := range clusters {
+		if cluster.ClusterId == r.clusterId {
+			restoreCluster = append(restoreCluster, cluster)
+			break
+		}
+	}
+	if len(restoreCluster) == 0 {
+		return nil, fmt.Errorf("restore cluster %d not found", r.clusterId)
+	}
+
+	r.clusters, err = utils.NewNebulaClusters(restoreCluster, r.amg)
 	if err != nil {
 		return nil, fmt.Errorf("new nebula clusters failed: %w", err)
 	}
+
+	// get meta cluster
+	metaResp, err := r.meta.ShowMeta()
+	if err != nil {
+		return nil, fmt.Errorf("show meta failed: %w", err)
+	}
+	metaCluster := make([]*clients.ServiceInfo, 0)
+	for _, service := range metaResp.Services {
+		metaCluster = append(metaCluster, &clients.ServiceInfo{
+			ServiceId:   service.Id,
+			ServiceType: service.Type,
+			Host:        service.Host,
+			Port:        service.Port,
+			//InstallPath: service.InstallPath,
+			//DataPaths:   service.DataPaths,
+		})
+	}
+
+	r.metaCluster = metaCluster
 
 	return r, nil
 }
@@ -115,8 +151,8 @@ func (r *Restore) Restore() error {
 		return fmt.Errorf("physical topology not consistent: %w", err)
 	}
 
-	// stop all cluster
-	err := r.stopAllClustersWithLM()
+	// stop specify cluster's storageds
+	err := r.stopStoragedsWithLM()
 	if err != nil {
 		return fmt.Errorf("stop cluster failed: %w", err)
 	}
@@ -137,16 +173,8 @@ func (r *Restore) Restore() error {
 	}
 	logger.Info("Download meta data to cluster successfully.")
 
-	// start meta service first
-	err = r.startMetaCluster()
-	if err != nil {
-		return fmt.Errorf("start meta service failed: %w", err)
-	}
-	time.Sleep(time.Second * 10)
-	logger.Info("Start meta service successfully.")
-
 	// restore meta service by map
-	hostPartMap, err := r.restoreMeta(r.backupMetas[0])
+	hostPartMap, serviceIdMap, err := r.restoreMeta(r.backupMetas[0])
 	if err != nil {
 		return fmt.Errorf("restore cluster meta failed: %w", err)
 	}
@@ -157,6 +185,12 @@ func (r *Restore) Restore() error {
 		return fmt.Errorf("download storage data to cluster failed: %w", err)
 	}
 	logger.Info("Download storage data to cluster successfully.")
+
+	// play back storage data
+	if err = r.playBackStorageData(mapToString(serviceIdMap)); err != nil {
+		return fmt.Errorf("playback storage data failed: %w", err)
+	}
+	logger.Info("Play back storage data successfully.")
 
 	// start storage and graph service
 	err = r.startAllClusterStorage()
@@ -180,17 +214,16 @@ func (r *Restore) Restore() error {
 }
 
 func (r *Restore) checkPhysicalTopology(bakClusters []*meta.ClusterBackupInfo) error {
-	if len(r.clusters.GetClusterIds()) != len(bakClusters) {
-		return fmt.Errorf("cluster count not consistent: %d vs %d", len(r.clusters.GetClusterIds()), len(bakClusters))
+	if len(bakClusters) != 1 {
+		return fmt.Errorf("backup cluster count should be 1, but %d", len(bakClusters))
 	}
-	for _, bakCluster := range bakClusters {
-		currentClusterId := r.clusterIdMapping[bakCluster.ClusterId]
-		if len(r.clusters.GetStorages(currentClusterId)) != len(bakCluster.StorageInfos) {
-			return fmt.Errorf("cluster %d and %d storage count are not consistent: %d vs %d",
-				currentClusterId, bakCluster.ClusterId,
-				len(r.clusters.GetStorages(currentClusterId)), len(bakCluster.StorageInfos))
-		}
+
+	if len(r.clusters.GetStorages(r.clusterId)) != len(bakClusters[0].StorageInfos) {
+		return fmt.Errorf("cluster %d and %d storage count are not consistent: %d vs %d",
+			r.clusterId, bakClusters[0].ClusterId,
+			len(r.clusters.GetStorages(r.clusterId)), len(bakClusters[0].StorageInfos))
 	}
+
 	return nil
 }
 
@@ -344,7 +377,7 @@ func (r *Restore) downloadMeta() error {
 		}
 
 		// meta kv data path: {nebulaData}/meta/{backup_name}/{cluster_id}/
-		localDir := filepath.Join(service.DataPaths[0], "checkpoint")
+		localDir := filepath.Join(service.DataPaths[0], "checkpoint", r.backupName, strconv.Itoa(int(r.backupClusterId)))
 		if err = agent.DownloadFile(backend, localDir, true); err != nil {
 			return fmt.Errorf("download meta files from %s to %s failed: %w", externalUri, localDir, err)
 		}
@@ -353,92 +386,127 @@ func (r *Restore) downloadMeta() error {
 	return nil
 }
 
-func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]string, error) {
+func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]string, map[int64]int64, error) {
 	storageIdMap := make(map[int64]int64)
 	hostPartMap := make(map[string][]string)
 
 	bakClusterMap := utils.FlattenClusterMap(backupRes)
+	oldStorages := bakClusterMap[r.backupClusterId]
+	curStorages := r.clusters.GetStorages(r.clusterId)
 
-	for cur, old := range r.clusterIdMapping {
-		curStorages := r.clusters.GetStorages(cur)
-		oldStorages := bakClusterMap[old]
-		for i, s := range curStorages {
-			storageIdMap[s.ServiceId] = oldStorages[i].ServiceId
-			for _, info := range oldStorages[i].CkptInfos {
-				key := utils.GenPartKey(cur, info.PartId)
-				hostPartMap[key] = append(hostPartMap[key], s.Host)
-			}
+	for i, s := range curStorages {
+		storageIdMap[s.ServiceId] = oldStorages[i].ServiceId
+		for _, info := range oldStorages[i].CkptInfos {
+			key := utils.GenPartKey(r.clusterId, info.PartId)
+			hostPartMap[key] = append(hostPartMap[key], s.Host)
 		}
 	}
 
+	clusterRestoreInfos := []*meta.ClusterRestoreInfo{
+		{
+			NewClusterId: r.clusterId,
+			MetaBackups:  backupRes.ClusterBackupInfos[0].MetaBackups,
+			ServiceMap:   storageIdMap,
+		},
+	}
+
 	req := &meta.RestoreReq{
-		//MetaBackups: backupRes.MetaBackups,
-		ClusterMap: r.clusterIdMapping,
-		ServiceMap: storageIdMap,
+		ClusterMap:          map[int64]int64{r.backupClusterId: r.clusterId},
+		ClusterRestoreInfos: clusterRestoreInfos,
 	}
 
 	if _, err := r.meta.Restore(req); err != nil {
-		return nil, fmt.Errorf("restore meta failed: %w", err)
+		return nil, nil, fmt.Errorf("restore meta failed: %w", err)
 	}
 
-	return hostPartMap, nil
+	return hostPartMap, storageIdMap, nil
 }
 
 func (r *Restore) downloadStorage(hostPartMap map[string][]string, backupRes *meta.CreateBackupResp) error {
 	group := async.NewGroup(context.TODO(), r.cfg.Concurrency, "download storaged partition")
-	for _, bakCluster := range backupRes.ClusterBackupInfos {
-		curClusterId := r.clusterIdMapping[bakCluster.ClusterId]
+	curClusterId := r.clusterId
 
-		dataPathSelector := utils.NewPathSelectorMap(r.clusters.GetStorages(curClusterId))
-		dataPathMap := make(map[string]string)
+	dataPathSelector := utils.NewPathSelectorMap(r.clusters.GetStorages(curClusterId))
+	dataPathMap := make(map[string]string)
 
-		parts := utils.FlattenClusterBackupInfo(bakCluster)
-		for _, part := range parts {
-			storageUri, _ := utils.UriJoin(r.rootUri, r.backupName, "data")
-			key := utils.GenPartKey(part.ClusterId, part.PartId)
+	parts := utils.FlattenClusterBackupInfo(backupRes.ClusterBackupInfos[0])
+	for _, part := range parts {
+		storageUri, _ := utils.UriJoin(r.rootUri, r.backupName, "data")
+		key := utils.GenPartKey(part.ClusterId, part.PartId)
 
-			strClusterId := strconv.Itoa(int(curClusterId))
-			strPartId := strconv.Itoa(int(part.PartId))
-			for _, host := range hostPartMap[key] {
-				agent, err := r.amg.GetAgent(host)
-				if err != nil {
-					return fmt.Errorf("get agent for storage %s failed: %w", host, err)
-				}
-
-				externalUri, _ := utils.UriJoin(storageUri, strClusterId, strPartId)
-				// avoid agent.DownloadFile prefix bugs
-				externalUri += "/"
-
-				source, err := r.sto.GetDir(r.ctx, externalUri)
-				if err != nil {
-					return fmt.Errorf("get storage backend for %s failed: %w", externalUri, err)
-				}
-
-				// ensure every part's all checkpoint place in same dataPath
-				dataPathKey := utils.GenDataPathKey(host, key)
-				dataPath, hasPlace := dataPathMap[dataPathKey]
-				if !hasPlace {
-					dataPath = dataPathSelector[host].EvenlyGet()
-					dataPathMap[dataPathKey] = dataPath
-				}
-
-				target := filepath.Join(dataPath, "checkpoint", backupRes.BackupName, strPartId)
-
-				// source: {backupRoot}/{backupName}/data/{clusterId}/{partId}/
-				// target: {nebulaDataPath}/checkpoint/{backupName}/{partId}
-				worker := func() error {
-					if err = agent.DownloadFile(source, target, true); err != nil {
-						return fmt.Errorf("download %s to %s failed:%w", externalUri, target, err)
-					}
-					return nil
-				}
-
-				group.Add(func(stopCh chan interface{}) {
-					stopCh <- worker()
-				})
+		strClusterId := strconv.Itoa(int(curClusterId))
+		strPartId := strconv.Itoa(int(part.PartId))
+		for _, host := range hostPartMap[key] {
+			agent, err := r.amg.GetAgent(host)
+			if err != nil {
+				return fmt.Errorf("get agent for storage %s failed: %w", host, err)
 			}
+
+			externalUri, _ := utils.UriJoin(storageUri, strClusterId, strPartId)
+			// avoid agent.DownloadFile prefix bugs
+			externalUri += "/"
+
+			source, err := r.sto.GetDir(r.ctx, externalUri)
+			if err != nil {
+				return fmt.Errorf("get storage backend for %s failed: %w", externalUri, err)
+			}
+
+			// ensure every part's all checkpoint place in same dataPath
+			dataPathKey := utils.GenDataPathKey(host, key)
+			dataPath, hasPlace := dataPathMap[dataPathKey]
+			if !hasPlace {
+				dataPath = dataPathSelector[host].EvenlyGet()
+				dataPathMap[dataPathKey] = dataPath
+			}
+
+			target := filepath.Join(dataPath, "checkpoint", backupRes.BackupName, strPartId)
+
+			// source: {backupRoot}/{backupName}/data/{clusterId}/{partId}/
+			// target: {nebulaDataPath}/checkpoint/{backupName}/{partId}
+			worker := func() error {
+				if err = agent.DownloadFile(source, target, true); err != nil {
+					return fmt.Errorf("download %s to %s failed:%w", externalUri, target, err)
+				}
+				return nil
+			}
+
+			group.Add(func(stopCh chan interface{}) {
+				stopCh <- worker()
+			})
 		}
 	}
 
 	return group.Wait()
+}
+
+func (r *Restore) playBackStorageData(serviceIdMap string) error {
+	group := async.NewGroup(context.TODO(), r.cfg.Concurrency, "playback storaged data")
+
+	storages := r.clusters.GetStorages(0)
+	for _, s := range storages {
+		agent, err := r.amg.GetAgent(s.Host)
+		if err != nil {
+			return fmt.Errorf("get agent for storage %s failed: %w", s.Host, err)
+		}
+
+		worker := func() error {
+			if err = agent.DBPlayBack(r.backupName, s.InstallPath, strings.Join(s.DataPaths, ","), serviceIdMap); err != nil {
+				return fmt.Errorf("playback storaged data failed: %w", err)
+			}
+			return nil
+		}
+
+		group.Add(func(stopCh chan interface{}) {
+			stopCh <- worker()
+		})
+	}
+	return group.Wait()
+}
+
+func mapToString(m map[int64]int64) string {
+	pairs := make([]string, 0, len(m))
+	for k, v := range m {
+		pairs = append(pairs, fmt.Sprintf("%d:%d", k, v))
+	}
+	return strings.Join(pairs, ",")
 }

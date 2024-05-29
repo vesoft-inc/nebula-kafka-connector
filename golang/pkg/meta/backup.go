@@ -56,10 +56,15 @@ type (
 		*HeaderResponse
 	}
 
+	ClusterRestoreInfo struct {
+		NewClusterId int64
+		MetaBackups  []string
+		ServiceMap   map[int64]int64
+	}
+
 	RestoreReq struct {
-		MetaBackups []string
-		ClusterMap  map[int64]int64
-		ServiceMap  map[int64]int64
+		ClusterMap          map[int64]int64
+		ClusterRestoreInfos []*ClusterRestoreInfo
 	}
 
 	RestoreResp struct {
@@ -167,11 +172,21 @@ func (c *metaClient) DropBackup(req *DropBackupReq) (*DropBackupResp, error) {
 func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
+
+	clusterInfos := make([]*admin.ClusterRestoreInfo, 0)
+	for _, info := range req.ClusterRestoreInfos {
+		clusterInfos = append(clusterInfos, &admin.ClusterRestoreInfo{
+			NewClusterId: info.NewClusterId,
+			MetaBackups:  stringsToBytes(info.MetaBackups),
+			ServiceMap:   info.ServiceMap,
+		})
+
+	}
+
 	in := &admin.RestoreRequest{
-		Header: &admin.RequestHeader{Token: c.token},
-		//MetaBackups: stringsToBytes(req.MetaBackups),
-		ClusterMap: req.ClusterMap,
-		//ServiceMap:  req.ServiceMap,
+		Header:       &admin.RequestHeader{Token: c.token},
+		ClusterMap:   req.ClusterMap,
+		ClusterInfos: clusterInfos,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.Restore(ctx, in)

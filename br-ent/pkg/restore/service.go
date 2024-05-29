@@ -9,42 +9,6 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-func (r *Restore) stopMetaCluster() error {
-	for _, service := range r.metaCluster {
-		agent, err := r.amg.GetAgent(service.Host)
-		if err != nil {
-			return fmt.Errorf("get agent for metad %s failed: %w", service.Host, err)
-		}
-
-		if err = agent.StopService(service.ServiceType, service.InstallPath); err != nil {
-			return fmt.Errorf("stop metad service %s by agent failed: %w",
-				service.Host, err)
-		}
-
-		log.WithField("addr", service.Host).
-			Info("Stop metad service successfully.")
-	}
-	return nil
-}
-
-func (r *Restore) startMetaCluster() error {
-	for _, service := range r.metaCluster {
-		agent, err := r.amg.GetAgent(service.Host)
-		if err != nil {
-			return fmt.Errorf("get agent for metad %s failed: %w", service.Host, err)
-		}
-
-		if err = agent.StartService(service.ServiceType, service.InstallPath); err != nil {
-			return fmt.Errorf("start metad service %s by agent failed: %w",
-				service.Host, err)
-		}
-
-		log.WithField("addr", service.Host).
-			Info("Start metad service successfully.")
-	}
-	return nil
-}
-
 func (r *Restore) stopClusterGraph(clusterId int64) error {
 	for id, cluster := range r.clusters.GetClusters() {
 		if id == clusterId {
@@ -182,10 +146,6 @@ func (r *Restore) startAllClusterStorage() error {
 }
 
 func (r *Restore) stopAllClusters() error {
-	if err := r.stopMetaCluster(); err != nil {
-		return fmt.Errorf("stop metad cluster failed: %w", err)
-	}
-
 	if err := r.stopAllClusterGraph(); err != nil {
 		return fmt.Errorf("stop graphd cluster failed: %w", err)
 	}
@@ -197,11 +157,7 @@ func (r *Restore) stopAllClusters() error {
 	return nil
 }
 
-func (r *Restore) stopAllClustersWithLM() error {
-	if err := r.stopAllClusterGraph(); err != nil {
-		return fmt.Errorf("stop graphd cluster failed: %w", err)
-	}
-
+func (r *Restore) stopStoragedsWithLM() error {
 	if err := r.stopAllClusterStorage(); err != nil {
 		return fmt.Errorf("stop storaged cluster failed: %w", err)
 	}

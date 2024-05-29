@@ -63,6 +63,7 @@ type (
 		RemoveDir(path string) error
 		ExistDir(path string) (bool, error)
 		GetInstallPath(serviceType meta.ServiceType) (string, error)
+		DBPlayBack(backupName, installPath, dataPath, serviceMap string) error
 	}
 
 	agentClient struct {
@@ -350,6 +351,16 @@ func (ag *agentClient) GetInstallPath(serviceType meta.ServiceType) (string, err
 	}
 
 	return installPath, nil
+}
+
+func (ag *agentClient) DBPlayBack(backupName, installPath, dataPath, serviceMap string) error {
+	cmdStr := fmt.Sprintf("cd %s && bin/db_playback --db_path=%s --backup_name=%s --service_map=%s", installPath, dataPath, backupName, serviceMap)
+	stdout, stderr, err := ag.shell(cmdStr, false)
+	if err != nil {
+		return fmt.Errorf("db playback failed %s, %s, %w", stdout, stderr, err)
+	}
+
+	return nil
 }
 
 func GetTLSConfig(certPath string) (*tls.Config, error) {
