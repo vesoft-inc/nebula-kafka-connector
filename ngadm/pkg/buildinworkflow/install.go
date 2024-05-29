@@ -14,13 +14,22 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
-	installTask, err := InstallMetaCluster(args, spec)
+	//installTask, err := InstallMetaCluster(args, spec)
+	//if err != nil {
+	//	return nil, err
+	//}
+	//if installTask != nil {
+	//	workflow.Tasks = append(workflow.Tasks, installTask)
+	//}
+
+	installTask, err := InstallCluster(args, spec)
 	if err != nil {
 		return nil, err
 	}
 	if installTask != nil {
 		workflow.Tasks = append(workflow.Tasks, installTask)
 	}
+
 	installUtilsTask, err := InstallUtils(args, spec)
 	if err != nil {
 		return nil, err
@@ -125,17 +134,17 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 						Path:         installPath,
 					},
 				},
-				{
-					Type: "save-agent-config",
-					Params: &tasks.SaveAgentParams{
-						Component: "metad",
-						Config: map[string]any{
-							"installPath": installPath,
-							"host":        utils.GetHostIP(agent.Host),
-							"port":        utils.GetConfigPort(metaCluster.Config),
-						},
-					},
-				},
+				//{
+				//	Type: "save-agent-config",
+				//	Params: &tasks.SaveAgentParams{
+				//		Component: "metad",
+				//		Config: map[string]any{
+				//			"installPath": installPath,
+				//			"host":        utils.GetHostIP(agent.Host),
+				//			"port":        utils.GetConfigPort(metaCluster.Config),
+				//		},
+				//	},
+				//},
 			},
 		})
 	}

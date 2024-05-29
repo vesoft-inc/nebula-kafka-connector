@@ -131,17 +131,17 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 							Path:      installPath,
 						},
 					},
-					{
-						Type: "save-agent-config",
-						Params: &tasks.SaveAgentParams{
-							Component: "metad",
-							Config: map[string]any{
-								"installPath": installPath,
-								"host":        utils.GetHostIP(agent.Host),
-								"port":        utils.GetConfigPort(metaCluster.Config),
-							},
-						},
-					},
+					//{
+					//	Type: "save-agent-config",
+					//	Params: &tasks.SaveAgentParams{
+					//		Component: "metad",
+					//		Config: map[string]any{
+					//			"installPath": installPath,
+					//			"host":        utils.GetHostIP(agent.Host),
+					//			"port":        utils.GetConfigPort(metaCluster.Config),
+					//		},
+					//	},
+					//},
 				},
 			})
 		}

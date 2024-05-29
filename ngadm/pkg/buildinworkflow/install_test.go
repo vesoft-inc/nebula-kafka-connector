@@ -42,12 +42,14 @@ func TestClusterInstall(t *testing.T) {
 	tasks.Init()
 
 	args := map[string]interface{}{
-		"force": true,
+		"force":    true,
+		"username": "root",
+		"password": "nebula",
 	}
 	spec := GetNebulaYaml(t)
 	delete(spec.UtilsProcesses, "license-manager")
 	spec.Rollback = true
-	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
+	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.31.sh"
 	// spec.Spec.Metad.Clusters = []types.Cluster{}
 	workflow, err := buildinworkflow.Install(args, spec)
 	assert.NoError(t, err)
