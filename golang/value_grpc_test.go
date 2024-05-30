@@ -243,10 +243,18 @@ func TestGRPCString(t *testing.T) {
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{
 				&graph.Duration{
-					Year: 1, Month: 1, Ismonth: 1,
+					Year: 1, Month: 1, IsMonthBased: true,
 				},
 			}},
 			expect: `P1Y1M`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_DurationValue{
+				&graph.Duration{
+					Day: 1,
+				},
+			}},
+			expect: `P1D`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{
@@ -259,10 +267,10 @@ func TestGRPCString(t *testing.T) {
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{
 				&graph.Duration{
-					Sec: -59, Microsec: -99,
+					Sec: -59, Microsec: -99000,
 				},
 			}},
-			expect: `PT-59.000099S`,
+			expect: `PT-59.099S`,
 		},
 		{
 			value: &graph.Value{Data: &graph.Value_DurationValue{

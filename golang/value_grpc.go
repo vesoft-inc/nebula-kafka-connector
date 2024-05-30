@@ -617,7 +617,9 @@ func (d *grpcDuration) String() string {
 		if d.GetDay() != 0 {
 			prefix += fmt.Sprintf("%dD", d.GetDay())
 		}
-		prefix += "T"
+		if d.GetHour() != 0 || d.GetMinute() != 0 || d.GetSecond() != 0 || d.GetMicrosecond() != 0 {
+			prefix += "T"
+		}
 		if d.GetHour() != 0 {
 			prefix += fmt.Sprintf("%dH", d.GetHour())
 		}
@@ -635,10 +637,12 @@ func (d *grpcDuration) String() string {
 				}
 				s, ss := ms/1e6, ms%1e6
 				if isMinus {
-					prefix += fmt.Sprintf("-%d.%06dS", s, ss)
+					prefix += fmt.Sprintf("-%d.%06d", s, ss)
 				} else {
-					prefix += fmt.Sprintf("%d.%06dS", s, ss)
+					prefix += fmt.Sprintf("%d.%06d", s, ss)
 				}
+				prefix = strings.TrimRight(prefix, "0")
+				prefix += "S"
 			}
 		}
 	}
@@ -646,7 +650,7 @@ func (d *grpcDuration) String() string {
 }
 
 func (d *grpcDuration) IsMonthBased() bool {
-	return d.data.Ismonth == 1
+	return d.data.IsMonthBased
 }
 
 func (d *grpcDuration) GetYear() int32 {
