@@ -183,9 +183,10 @@ func (f *Fix) fixServices(services []*clients.ServiceInfo) error {
 		for _, s := range services {
 			switch s.ServiceType {
 			case meta.ServiceTypeMetad:
-				if err := f.fixServiceData(s); err != nil {
-					return err
-				}
+				// TODO
+				//if err := f.fixServiceData(s); err != nil {
+				//	return err
+				//}
 			case meta.ServiceTypeStoraged:
 				if err := f.fixServiceData(s); err != nil {
 					return err

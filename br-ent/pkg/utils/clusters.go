@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"github.com/vesoft-inc/nebula-ng-tools/br-ent/pkg/clients"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
@@ -15,21 +14,22 @@ func NewNebulaClusters(clusters []*clients.ClusterServiceInfo, amg *clients.Agen
 	for _, cluster := range clusters {
 		services := make([]*clients.ServiceInfo, 0)
 		for _, service := range cluster.Services {
-			agent, err := amg.GetAgent(service.Host)
-			if err != nil {
-				return nil, fmt.Errorf("get agent for %s failed: %w", service.Host, err)
-			}
-			installPath, err := agent.GetInstallPath(service.ServiceType)
-			if err != nil {
-				return nil, fmt.Errorf("get install path for %s failed: %w", service.ServiceType, err)
-			}
+			// TODO
+			//agent, err := amg.GetAgent(service.Host)
+			//if err != nil {
+			//	return nil, fmt.Errorf("get agent for %s failed: %w", service.Host, err)
+			//}
+			//installPath, err := agent.GetInstallPath(service.ServiceType)
+			//if err != nil {
+			//	return nil, fmt.Errorf("get install path for %s failed: %w", service.ServiceType, err)
+			//}
 
 			services = append(services, &clients.ServiceInfo{
 				ServiceId:   service.ServiceId,
 				ServiceType: service.ServiceType,
 				Host:        service.Host,
 				Port:        service.Port,
-				InstallPath: installPath,
+				InstallPath: "/home/vesoft/nebula5.x/cluster",
 			})
 		}
 

@@ -128,6 +128,8 @@ func (m *NebulaMeta) ListClusters() ([]*ClusterServiceInfo, error) {
 				ServiceType: s.Type,
 				Host:        s.Host,
 				Port:        s.Port,
+				InstallPath: "/home/vesoft/nebula5.x/cluster",
+				DataPaths:   []string{"/home/vesoft/nebula5.x/cluster/data/storage"},
 			}
 
 			cluster.Services = append(cluster.Services, sInfo)

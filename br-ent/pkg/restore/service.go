@@ -2,8 +2,6 @@ package restore
 
 import (
 	"fmt"
-	"time"
-
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 
 	log "github.com/sirupsen/logrus"
@@ -163,7 +161,7 @@ func (r *Restore) stopStoragedsWithLM() error {
 	}
 
 	log.Info("Waiting for lm to clear quota...")
-	time.Sleep(time.Second * 100)
+	//time.Sleep(time.Second * 100)
 
 	return nil
 }

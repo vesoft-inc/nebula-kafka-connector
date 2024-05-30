@@ -40,7 +40,7 @@ func ParseMetaFromFile(filename string) (*meta.CreateBackupResp, error) {
 		return nil, err
 	}
 
-	var resp *meta.CreateBackupResp
+	resp := &meta.CreateBackupResp{}
 	err = json.Unmarshal(jsonData, resp)
 	if err != nil {
 		return nil, err

@@ -104,8 +104,8 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 			ServiceType: service.Type,
 			Host:        service.Host,
 			Port:        service.Port,
-			//InstallPath: service.InstallPath,
-			//DataPaths:   service.DataPaths,
+			InstallPath: "/home/vesoft/nebula5.x/cluster",
+			DataPaths:   []string{"/home/vesoft/nebula5.x/cluster/data/meta"},
 		})
 	}
 
@@ -230,29 +230,29 @@ func (r *Restore) checkPhysicalTopology(bakClusters []*meta.ClusterBackupInfo) e
 func (r *Restore) backupOriginalData() error {
 	r.backSuffix = GetBackupSuffix()
 
-	// backup meta data
-	for _, service := range r.metaCluster {
-		agent, err := r.amg.GetAgent(service.Host)
-		if err != nil {
-			return fmt.Errorf("get agent %s failed: %w", service.Host, err)
-		}
-
-		if len(service.DataPaths) != 1 {
-			return fmt.Errorf("meta service: %s should only have one data dir, but %d",
-				service.Host, len(service.DataPaths))
-		}
-
-		srcPath := filepath.Join(service.DataPaths[0], "nebula")
-		dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
-		if err = agent.MoveDir(srcPath, dstPath); err != nil && !utils.IsNotExist(err) {
-			return fmt.Errorf("move dir from %s to %s failed: %w", srcPath, dstPath, err)
-		}
-
-		log.WithField("origin path", srcPath).
-			WithField("backup path", dstPath).
-			WithField("origin not exist", utils.IsNotExist(err)).
-			Info("Backup origin storage data path successfully.")
-	}
+	// TODO:backup meta data
+	//for _, service := range r.metaCluster {
+	//	agent, err := r.amg.GetAgent(service.Host)
+	//	if err != nil {
+	//		return fmt.Errorf("get agent %s failed: %w", service.Host, err)
+	//	}
+	//
+	//	if len(service.DataPaths) != 1 {
+	//		return fmt.Errorf("meta service: %s should only have one data dir, but %d",
+	//			service.Host, len(service.DataPaths))
+	//	}
+	//
+	//	srcPath := filepath.Join(service.DataPaths[0], "nebula")
+	//	dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
+	//	if err = agent.MoveDir(srcPath, dstPath); err != nil && !utils.IsNotExist(err) {
+	//		return fmt.Errorf("move dir from %s to %s failed: %w", srcPath, dstPath, err)
+	//	}
+	//
+	//	log.WithField("origin path", srcPath).
+	//		WithField("backup path", dstPath).
+	//		WithField("origin not exist", utils.IsNotExist(err)).
+	//		Info("Backup origin storage data path successfully.")
+	//}
 
 	// backup storage data
 	for _, cluster := range r.clusters.GetClusters() {
@@ -376,8 +376,9 @@ func (r *Restore) downloadMeta() error {
 			return fmt.Errorf("get agent for meta %s failed: %w", service.Host, err)
 		}
 
-		// meta kv data path: {nebulaData}/meta/{backup_name}/{cluster_id}/
-		localDir := filepath.Join(service.DataPaths[0], "checkpoint", r.backupName, strconv.Itoa(int(r.backupClusterId)))
+		// meta kv data path: {nebulaData}/meta/{backup_name}
+		localDir := filepath.Join(service.DataPaths[0], "checkpoint", r.backupName)
+
 		if err = agent.DownloadFile(backend, localDir, true); err != nil {
 			return fmt.Errorf("download meta files from %s to %s failed: %w", externalUri, localDir, err)
 		}
