@@ -9,6 +9,7 @@ import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.proto.common.Date;
+import com.vesoft.nebula.proto.common.Duration;
 import com.vesoft.nebula.proto.common.Edge;
 import com.vesoft.nebula.proto.common.LocalDatetime;
 import com.vesoft.nebula.proto.common.LocalTime;
@@ -250,6 +251,59 @@ public class DataTest {
     }
 
     @Test
+    public void testDuration() {
+        // test duration of time-based duration
+        ValueWrapper valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setDurationValue(Duration.newBuilder()
+                        .setIsMonthBased(false)
+                        .setDay(1)
+                        .setHour(2)
+                        .setMinute(3)
+                        .setSec(4)
+                        .setMicrosec(5)
+                        .build())
+                .build());
+        String expectString = "P1DT2H3M4.000005S";
+        Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
+
+        // test duration with 5000 ms, test the number of digits after the decimal point
+        valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setDurationValue(Duration.newBuilder()
+                        .setIsMonthBased(false)
+                        .setSec(4)
+                        .setMicrosec(5000)
+                        .build())
+                .build());
+        expectString = "PT4.005S";
+        Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
+
+        // tet duration of time-based duration only with day
+        valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setDurationValue(Duration.newBuilder()
+                        .setIsMonthBased(false)
+                        .setDay(1)
+                        .build())
+                .build());
+        expectString = "P1D";
+        Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
+
+        // test duration of month-based duration
+        valueWrapper = new ValueWrapper(Value
+                .newBuilder()
+                .setDurationValue(Duration.newBuilder()
+                        .setIsMonthBased(true)
+                        .setYear(-1)
+                        .setMonth(-1)
+                        .build())
+                .build());
+        expectString = "P-1Y-1M";
+        Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
+    }
+
+    @Test
     public void testPath() {
         ValueWrapper valueWrapper = new ValueWrapper(
                 Value.newBuilder().setPathValue(getPath()).build());
@@ -480,7 +534,6 @@ public class DataTest {
     private Date getSimpleDate() {
         return Date.newBuilder().setYear(2024).setMonth(1).setDay(1).build();
     }
-
 
     private ResultTable getDateset() {
         List<Value> values = Arrays.asList(

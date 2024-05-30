@@ -35,9 +35,14 @@ option (supported_versions) = "5.0.0";
  * own codec scheme for some of messages like `Duration' and `Date'.
  */
 message Duration {
-    uint64 seconds      = 1;
-    uint32 microseconds = 2;
-    uint32 months       = 3;
+    bool  is_month_based = 1;
+    int32 year           = 2;
+    int32 month          = 3;
+    int32 day            = 4;
+    int32 hour           = 5;
+    int32 minute         = 6;
+    int32 sec            = 7;
+    int32 microsec       = 8;
 }
 
 message Date {
