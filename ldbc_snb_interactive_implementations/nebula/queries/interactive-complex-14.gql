@@ -16,11 +16,7 @@ LET prev = pathNodes[i-1], curr = pathNodes[i]
 RETURN 1.0 * VALUE {MATCH (curr)<-[:HAS_CREATOR]-(:Comment)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(prev) RETURN COUNT(*) AS a GROUP BY ()}
     + 1.0 * VALUE {MATCH (prev)<-[:HAS_CREATOR]-(:Comment)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(curr) RETURN COUNT(*) AS b GROUP BY ()}
     + 0.5 * VALUE {MATCH (prev)<-[:HAS_CREATOR]-(:Comment)<-[:REPLY_OF]->(:Comment)-[:HAS_CREATOR]->(curr) RETURN COUNT(*) AS c GROUP BY ()}
-    AS weight, pathNodes, numNodes
+    AS weight, pathNodes
 NEXT
-RETURN pathNodes, numNodes, SUM(weight) AS pathWeight GROUP BY pathNodes, numNodes
+RETURN transform(pathNodes, n -> n.id) AS personIdsInPath, SUM(weight) AS pathWeight GROUP BY personIdsInPath
 ORDER BY pathWeight DESC
-NEXT
-FOR i IN range(0, numNodes)
-LET pathNode = pathNodes[i]
-RETURN COLLECT(pathNode.id) AS personIdsInPath, pathWeight GROUP BY pathNodes, pathWeight
