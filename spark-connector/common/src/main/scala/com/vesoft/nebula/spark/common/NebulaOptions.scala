@@ -65,7 +65,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   var graphAddress = parameters(GRAPH_ADDRESS)
   var graphName: String = _
   var label: String = _
-  if (!dataType.equals(DataTypeEnum.GQL.toString)) {
+  if (!dataType.equalsIgnoreCase(DataTypeEnum.GQL.toString)) {
     require(parameters.isDefinedAt(GRAPH_NAME) && StringUtils.isNotBlank(parameters(GRAPH_NAME)),
       s"Option '$GRAPH_NAME' is required and can not be blank")
     graphName = parameters(GRAPH_NAME)

@@ -72,7 +72,7 @@ object NebulaSparkReaderExample {
   private def readGqlQuery(spark:SparkSession): Unit = {
     val nebulaGqlConfig:GqlNebulaConfig = GqlNebulaConfig
       .builder()
-      .withGql("USE nba MATCH(v:player) return v")
+      .withGql("USE nba MATCH(v:player) return v.id, v.score, v.name")
       .build()
     val df = spark.read.gql(getNebulaConnectionConfig, nebulaGqlConfig).load()
     println(s"count:${df.count()}" )

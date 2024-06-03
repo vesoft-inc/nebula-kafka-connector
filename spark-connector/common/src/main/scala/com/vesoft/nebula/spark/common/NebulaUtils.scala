@@ -11,6 +11,7 @@ import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
 import org.slf4j.LoggerFactory
 
+import scala.collection.JavaConverters.asScalaBufferConverter
 import scala.collection.mutable.ListBuffer
 
 object NebulaUtils {
@@ -128,5 +129,35 @@ object NebulaUtils {
       }
       new StructType(fields.toArray)
     }
+  }
+
+
+  /**
+   * return the qgl result schema
+   */
+  def getSchemaForGql(nebulaOptions: NebulaOptions): StructType = {
+    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.passwd, nebulaOptions.timeout)
+    val fields: ListBuffer[StructField] = new ListBuffer[StructField]
+
+    val gql = nebulaOptions.gql.trim
+
+    val newGql =
+      if (gql.toUpperCase.contains(" LIMIT ")) {
+        val lowerGql = gql.toLowerCase
+        val limitIndex = lowerGql.indexOf("limit");
+        var endIndex = lowerGql.indexOf(" ", limitIndex + 6);
+        endIndex = if (endIndex > 0) endIndex else gql.length()
+        gql.substring(0, limitIndex) + "limit 1 " + gql.substring(endIndex);
+      } else {
+        gql + " limit 1"
+      }
+
+
+    LOG.info(s"new gql: $newGql")
+    val result = graphProvider.submit(newGql)
+    for (column <- result.getColumnNames.asScala) {
+      fields.append(StructField(column, StringType, true))
+    }
+    StructType(fields)
   }
 }

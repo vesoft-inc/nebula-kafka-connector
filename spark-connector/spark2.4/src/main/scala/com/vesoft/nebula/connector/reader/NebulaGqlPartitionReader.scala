@@ -48,8 +48,7 @@ class NebulaGqlPartitionReader extends InputPartitionReader[InternalRow] {
     val record: Array[ValueWrapper] = resultSet.next().values().toArray.map(v => v.asInstanceOf[ValueWrapper])
     val getters: Array[NebulaValueGetter] = NebulaUtils.makeGetters(schema)
     val mutableRow = new SpecificInternalRow(schema.fields.map(x => x.dataType))
-
-    // the value is property data, will not be Node,Edge,Record.
+    // resolve the query result data
     for (i <- getters.indices) {
       val value: ValueWrapper = record(i)
       if (value.isNull) {

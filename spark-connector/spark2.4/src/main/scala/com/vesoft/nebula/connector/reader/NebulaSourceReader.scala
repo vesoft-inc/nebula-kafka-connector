@@ -10,7 +10,7 @@ import org.apache.spark.TaskContext
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.reader.{DataSourceReader, InputPartition}
 import org.apache.spark.sql.types.{StringType, StructType}
-import org.slf4j.LoggerFactory
+import org.slf4j.{Logger, LoggerFactory}
 
 import java.util
 import scala.collection.JavaConverters._
@@ -68,10 +68,11 @@ class NebulaDataSourceEdgeReader(nebulaOptions: NebulaOptions)
  * NebulaSourceReader for Nebula Gql query
  */
 class NebulaDataSourceGqlReader(nebulaOptions: NebulaOptions) extends DataSourceReader {
+  private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
 
   override def readSchema(): StructType = {
-    val schema = new StructType
-    schema.add("gql", StringType, true)
+    val schema = NebulaUtils.getSchemaForGql(nebulaOptions)
+    LOG.info(s"dataset's schema: $schema")
     schema
   }
 
