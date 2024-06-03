@@ -30,7 +30,7 @@ var clusterCmd = &cobra.Command{
 var createClusterCmd = &cobra.Command{
 	Use:   "create",
 	Short: "Create cluster in meta server.",
-	Long:  `ngctl cluster create --cluster [clustername] --replica [replica] --owner [owner]`,
+	Long:  `ngctl cluster create --cluster [clustername] --replica-factor [replica-factor] --owner [owner]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},
@@ -113,7 +113,7 @@ var initClusterCmd = &cobra.Command{
 var showClusterCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show cluster, show all if no cluster name specified.",
-	Long:  `nebula-meta cluster show --cluster [clustername]`,
+	Long:  `ngctl cluster show --cluster [clustername]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return metaClientInit()
 	},

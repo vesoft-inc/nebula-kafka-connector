@@ -72,14 +72,13 @@ Available Commands:
 创建一个集群的常用命令如下：
 
 ```bash
-ngctl cluster create -c=<clusterName> --replica-factor=3 --zones="z1,z2,z3"
+ngctl cluster create -c=<clusterName> --replica-factor=3
 ```
 
 创建集群需要指定：
 
 - 集群名称
 - 集群的副本特性
-- 集群的zone列表，如果不指定，则会生成一个默认zone.
 
 ```bash
 Usage:
@@ -97,8 +96,8 @@ Global Flags:
 ### 显示集群
 
 ```bash
-ngctl cluster show  -h                                                                                                                                                     fix_nightly_workflow [7c66e60] (!) modified untracked
-nebula-meta cluster show --cluster [clustername]
+ngctl cluster show  -h                                                                                                                                                     
+ngctl cluster show --cluster [clustername]
 
 Usage:
   ngctl cluster show [flags]

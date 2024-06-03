@@ -22,7 +22,7 @@ var loginFlags loginFlagsType
 var loginCmd = &cobra.Command{
 	Use:   "login",
 	Short: "Login meta server.",
-	Long:  `login meta server --host [host] --port [port] --user [user] --password [password]`,
+	Long:  `ngctl login --host [host] --port [port] --user [user] --password [password]`,
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if loginFlags.password == "" {
 			var err error
