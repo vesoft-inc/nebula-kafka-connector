@@ -155,15 +155,10 @@ func (s *defaultStringer) complexString(v nebula.Value, strWithQuote bool, strFn
 		buf := bytes.NewBuffer(nil)
 		defer buf.Reset()
 		var preN nebula.Node
-		var isPre bool = false
 		for _, v := range values {
 			if v.GetType() == nebula.ValueTypeNode {
 				n, _ := v.AsNode()
-				if isPre {
-				} else {
-					preN = n
-				}
-				isPre = !isPre
+				preN = n
 				buf.WriteString(n.String())
 			} else if v.GetType() == nebula.ValueTypeEdge {
 				e, _ := v.AsEdge()

@@ -163,6 +163,52 @@ func TestGRPCString(t *testing.T) {
 					Values: []*graph.Value{
 						{Data: &graph.Value_NodeValue{
 							&graph.Node{
+								NodeId: 1,
+								Type:   "node1",
+								Labels: []string{"label1", "label2"},
+							},
+						}},
+						{Data: &graph.Value_EdgeValue{
+							&graph.Edge{
+								SrcId:  1,
+								DstId:  2,
+								Rank:   123456,
+								Type:   "edge",
+								Labels: []string{"label3", "label4"},
+							},
+						}},
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
+								NodeId: 2,
+								Type:   "node2",
+								Labels: []string{"label5", "label6"},
+							},
+						}},
+						{Data: &graph.Value_EdgeValue{
+							&graph.Edge{
+								SrcId:  1,
+								DstId:  2,
+								Rank:   123456,
+								Type:   "edge",
+								Labels: []string{"label3", "label4"},
+							},
+						}},
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
+								NodeId: 1,
+								Type:   "node1",
+								Labels: []string{"label1", "label2"},
+							},
+						}},
+					}}}},
+			expect: `(1@node1:label1&label2{})-[123456@edge:label3&label4{}]->(2@node2:label5&label6{})<-[123456@edge:label3&label4{}]-(1@node1:label1&label2{})`,
+		},
+		{
+			value: &graph.Value{Data: &graph.Value_PathValue{
+				&graph.Path{
+					Values: []*graph.Value{
+						{Data: &graph.Value_NodeValue{
+							&graph.Node{
 								NodeId: 2,
 								Properties: map[string]*graph.Value{
 									"int": {Data: &graph.Value_Int8Value{8}},

@@ -487,15 +487,10 @@ func (p *grpcPath) String() string {
 	buf := bytes.NewBuffer(nil)
 	defer buf.Reset()
 	var preN Node
-	var isPre bool = false
 	for _, v := range values {
 		if v.GetType() == ValueTypeNode {
 			n, _ := v.AsNode()
-			if isPre {
-			} else {
-				preN = n
-			}
-			isPre = !isPre
+			preN = n
 			buf.WriteString(n.String())
 		} else if v.GetType() == ValueTypeEdge {
 			e, _ := v.AsEdge()
