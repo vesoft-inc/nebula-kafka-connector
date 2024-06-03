@@ -21,3 +21,8 @@ class NebulaEdgePartition(index: Int, nebulaOptions: NebulaOptions, schema: Stru
   override def createPartitionReader(): InputPartitionReader[InternalRow] =
     new NebulaEdgePartitionReader(index, nebulaOptions, schema)
 }
+
+class NebulaGqlPartition(nebulaOptions: NebulaOptions) extends InputPartition[InternalRow]{
+  override def createPartitionReader(): InputPartitionReader[InternalRow] =
+    new NebulaGqlPartitionReader(nebulaOptions)
+}

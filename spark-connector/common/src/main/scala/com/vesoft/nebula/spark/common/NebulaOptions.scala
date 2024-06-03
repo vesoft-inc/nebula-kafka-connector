@@ -57,19 +57,23 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   val dataType: String = parameters(TYPE)
   require(
     DataTypeEnum.validDataType(dataType),
-    s"Option '$TYPE' is illegal, it should be '${DataTypeEnum.NODE}' or '${DataTypeEnum.EDGE}'")
+    s"Option '$TYPE' is illegal, it should be '${DataTypeEnum.NODE}' or '${DataTypeEnum.EDGE}' or `${DataTypeEnum.GQL}`")
 
   /** nebula common parameters */
   require(parameters.isDefinedAt(GRAPH_ADDRESS),
     s"option $GRAPH_ADDRESS is required and can not be blank")
   var graphAddress = parameters(GRAPH_ADDRESS)
-  require(parameters.isDefinedAt(GRAPH_NAME) && StringUtils.isNotBlank(parameters(GRAPH_NAME)),
-    s"Option '$GRAPH_NAME' is required and can not be blank")
-  val graphName: String = parameters(GRAPH_NAME)
+  var graphName: String = _
+  var label: String = _
+  if (!dataType.equals(DataTypeEnum.GQL.toString)) {
+    require(parameters.isDefinedAt(GRAPH_NAME) && StringUtils.isNotBlank(parameters(GRAPH_NAME)),
+      s"Option '$GRAPH_NAME' is required and can not be blank")
+    graphName = parameters(GRAPH_NAME)
+    require(parameters.isDefinedAt(LABEL) && StringUtils.isNotBlank(parameters(LABEL)),
+      s"Option '$LABEL' is required and can not be blank")
+    label = parameters(LABEL)
+  }
 
-  require(parameters.isDefinedAt(LABEL) && StringUtils.isNotBlank(parameters(LABEL)),
-    s"Option '$LABEL' is required and can not be blank")
-  val label: String = parameters(LABEL)
   var batchSize: Int = parameters.getOrElse(BATCH_SIZE, DEFAULT_BATCH_SIZE).toString.toInt
 
   /** write parameters */
@@ -104,6 +108,9 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
       returnCols.split(",").toList
     }
   }
+
+  /** gql parameters */
+  var gql: String = parameters.getOrElse(GQL, null)
 }
 
 object NebulaOptions {
@@ -123,6 +130,9 @@ object NebulaOptions {
   val PASSWD: String = "passwd"
 
   val OPERATE_TYPE: String = "operateType"
+
+  /** gql config */
+  val GQL: String = "gql"
 
   /** write config */
   val RATE_LIMIT: String = "rateLimit"

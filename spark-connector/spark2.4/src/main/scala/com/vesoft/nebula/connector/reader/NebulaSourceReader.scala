@@ -9,7 +9,7 @@ import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
 import org.apache.spark.TaskContext
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.reader.{DataSourceReader, InputPartition}
-import org.apache.spark.sql.types.StructType
+import org.apache.spark.sql.types.{StringType, StructType}
 import org.slf4j.LoggerFactory
 
 import java.util
@@ -62,4 +62,23 @@ class NebulaDataSourceEdgeReader(nebulaOptions: NebulaOptions)
 
     partitions.map(_.asInstanceOf[InputPartition[InternalRow]]).asJava
   }
+}
+
+/**
+ * NebulaSourceReader for Nebula Gql query
+ */
+class NebulaDataSourceGqlReader(nebulaOptions: NebulaOptions) extends DataSourceReader {
+
+  override def readSchema(): StructType = {
+    val schema = new StructType
+    schema.add("gql", StringType, true)
+    schema
+  }
+
+  override def planInputPartitions(): util.List[InputPartition[InternalRow]] = {
+    val partitions = new util.ArrayList[InputPartition[InternalRow]]()
+    partitions.add(new NebulaGqlPartition(nebulaOptions))
+    partitions
+  }
+
 }

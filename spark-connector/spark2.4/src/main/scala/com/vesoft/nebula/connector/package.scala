@@ -6,7 +6,7 @@
 package com.vesoft.nebula
 
 import com.vesoft.nebula.spark.common.utils.SparkValidate
-import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaConnectionConfig, NebulaOptions, OperaType, ReadNebulaConfig, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaNodeConfig}
+import com.vesoft.nebula.spark.common.{DataTypeEnum, GqlNebulaConfig, NebulaConnectionConfig, NebulaOptions, OperaType, ReadNebulaConfig, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaNodeConfig}
 import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row, SaveMode}
 
 package object connector {
@@ -111,7 +111,8 @@ package object connector {
      * @return DataFrame
      */
     def loadNode(): DataFrame = {
-      assert(connectionConfig != null && readConfig != null, "nebula config is not set, please call nebula() before loadVerticesToDF")
+      assert(connectionConfig != null && readConfig != null,
+        "nebula config is not set, please call nebula() before loadVerticesToDF")
       val dfReader = reader
         .format(classOf[NebulaDataSource].getName)
         .option(NebulaOptions.TYPE, DataTypeEnum.NODE.toString)
@@ -133,7 +134,8 @@ package object connector {
 
 
     def loadEdge(): DataFrame = {
-      assert(connectionConfig != null && readConfig != null, "nebula config is not set, please call nebula() before loadVerticesToDF")
+      assert(connectionConfig != null && readConfig != null,
+        "nebula config is not set, please call nebula() before loadVerticesToDF")
       val dfReader = reader
         .format(classOf[NebulaDataSource].getName)
         .option(NebulaOptions.TYPE, DataTypeEnum.EDGE.toString)
@@ -153,4 +155,43 @@ package object connector {
       dfReader.load()
     }
   }
+
+
+  /**
+   * spark reader for nebula gql query
+   */
+  implicit class NebulaDataFrameGqlReader(reader: DataFrameReader) {
+    var connectionConfig: NebulaConnectionConfig = _
+    var gqlConfig: GqlNebulaConfig = _
+
+    def gql(connectionConfig: NebulaConnectionConfig, gqlConfig: GqlNebulaConfig): NebulaDataFrameGqlReader = {
+      SparkValidate.validate("2.4.*")
+      this.connectionConfig = connectionConfig
+      this.gqlConfig = gqlConfig
+      this
+    }
+
+    /**
+     * Reading gql result from NebulaGraph
+     *
+     * @return DataFrame
+     */
+    def load(): DataFrame = {
+      assert(connectionConfig != null && gqlConfig != null,
+        "nebula gql config is not set, please call gql() before load()")
+      val dfReader = reader
+        .format(classOf[NebulaDataSource].getName)
+        .option(NebulaOptions.TYPE, DataTypeEnum.GQL.toString)
+        .option(NebulaOptions.OPERATE_TYPE, OperaType.READ.toString)
+        .option(NebulaOptions.TIMEOUT, connectionConfig.getTimeout)
+        .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
+        .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
+        .option(NebulaOptions.GRAPH_ADDRESS, connectionConfig.getGraphAddress)
+        .option(NebulaOptions.USER_NAME, connectionConfig.getUser)
+        .option(NebulaOptions.PASSWD, connectionConfig.getPasswd)
+        .option(NebulaOptions.GQL, gqlConfig.getGql)
+      dfReader.load()
+    }
+  }
+
 }

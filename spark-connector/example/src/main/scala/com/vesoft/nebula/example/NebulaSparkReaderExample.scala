@@ -5,8 +5,8 @@
 
 package com.vesoft.nebula.example
 
-import com.vesoft.nebula.connector.NebulaDataFrameReader
-import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, ReadNebulaConfig}
+import com.vesoft.nebula.connector.{NebulaDataFrameGqlReader, NebulaDataFrameReader}
+import com.vesoft.nebula.spark.common.{GqlNebulaConfig, NebulaConnectionConfig, ReadNebulaConfig}
 import org.apache.spark.sql.SparkSession
 
 object NebulaSparkReaderExample {
@@ -16,8 +16,10 @@ object NebulaSparkReaderExample {
       .master("local")
       .getOrCreate()
 
-    readNode(spark)
-    readEdge(spark)
+//    readNode(spark)
+//    readEdge(spark)
+
+    readGqlQuery(spark)
 
     spark.close()
   }
@@ -62,5 +64,18 @@ object NebulaSparkReaderExample {
       .build()
     val df = spark.read.nebula(getNebulaConnectionConfig, nebulaReadEdgeConfig).loadEdge()
     df.show()
+  }
+
+  /**
+   * for this example, you can config the gql config to read data through gql query
+   */
+  private def readGqlQuery(spark:SparkSession): Unit = {
+    val nebulaGqlConfig:GqlNebulaConfig = GqlNebulaConfig
+      .builder()
+      .withGql("USE nba MATCH(v:player) return v")
+      .build()
+    val df = spark.read.gql(getNebulaConnectionConfig, nebulaGqlConfig).load()
+    println(s"count:${df.count()}" )
+    df.show(truncate = false)
   }
 }

@@ -9,7 +9,8 @@ object DataTypeEnum extends Enumeration {
 
   type DataType = Value
   val NODE = Value("node")
-  val EDGE   = Value("edge")
+  val EDGE = Value("edge")
+  val GQL = Value("gql")
 
   def validDataType(dataType: String): Boolean =
     values.exists(_.toString.equalsIgnoreCase(dataType))
@@ -18,7 +19,7 @@ object DataTypeEnum extends Enumeration {
 object OperaType extends Enumeration {
 
   type Operation = Value
-  val READ  = Value("read")
+  val READ = Value("read")
   val WRITE = Value("write")
 }
 

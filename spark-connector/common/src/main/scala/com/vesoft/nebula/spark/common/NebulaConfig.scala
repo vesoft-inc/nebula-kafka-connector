@@ -533,3 +533,40 @@ object ReadNebulaConfig {
     }
   }
 }
+  class GqlNebulaConfig(gql:String) extends Serializable {
+    def getGql:String = gql
+  }
+
+  /**
+   * config for reading NebulaGraph through gql
+   */
+  object GqlNebulaConfig {
+    private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
+
+    def builder(): GqlConfigBuilder = {
+      new GqlConfigBuilder
+    }
+
+    class GqlConfigBuilder {
+      private var gql: String = _
+
+      def withGql(gql:String): GqlConfigBuilder = {
+        this.gql = gql;
+        this
+      }
+
+
+      /**
+       * build a ReadNebulaConfig
+       */
+      def build(): GqlNebulaConfig = {
+        check()
+        new GqlNebulaConfig(gql)
+      }
+
+      private def check(): Unit = {
+        assert(gql != null, "config gql can't be empty.")
+      }
+    }
+  }
+

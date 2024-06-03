@@ -300,10 +300,10 @@ public class ResultSet {
             return response.getStatus().getMessage().toString(charset);
         }
         List<String> rowStrs = new ArrayList<>();
-        while (hasNext()) {
+        for (Row row : response.getResult().getRecordsList()) {
             List<String> valueStrs = new ArrayList<>();
-            for (ValueWrapper value : next().values()) {
-                valueStrs.add(value.toString());
+            for (Value value : row.getValuesList()) {
+                valueStrs.add((new ValueWrapper(value)).toString());
             }
             String values = "[" + String.join(",", valueStrs) + "]";
             rowStrs.add(values);

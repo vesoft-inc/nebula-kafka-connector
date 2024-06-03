@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.connector
 
-import com.vesoft.nebula.connector.reader.{NebulaDataSourceEdgeReader, NebulaDataSourceNodeReader}
+import com.vesoft.nebula.connector.reader.{NebulaDataSourceEdgeReader, NebulaDataSourceGqlReader, NebulaDataSourceNodeReader}
 import com.vesoft.nebula.spark.common.{DataTypeEnum, NebulaOptions}
 import com.vesoft.nebula.spark.common.exception.IllegalOptionException
 
@@ -48,8 +48,10 @@ class NebulaDataSource
 
     if (DataTypeEnum.NODE == DataTypeEnum.withName(dataType)) {
       new NebulaDataSourceNodeReader(nebulaOptions)
-    } else {
+    } else if (DataTypeEnum.EDGE == DataTypeEnum.withName(dataType)) {
       new NebulaDataSourceEdgeReader(nebulaOptions)
+    } else {
+      new NebulaDataSourceGqlReader(nebulaOptions)
     }
   }
 
