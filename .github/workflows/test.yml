@@ -90,3 +90,30 @@ jobs:
           mvn -B install -Dmaven.test.skip=true
           cd ../ldbc_snb_interactive_implementations
           mvn -B package -Pnebula -Dmaven.test.skip=true
+
+  connectors:
+    runs-on: [ self-hosted, nebula-fast]
+    container:
+      image: vesoft/nebula-dev:ubuntu2004
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "8"
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.8.2
+      - uses: s4u/maven-settings-action@v3.0.0
+        with:
+          mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
+      - name: Build with Maven
+        run: |
+          cd java
+          mvn -B install -Dmaven.test.skip=true
+          cd ../spark-connector
+          mvn -B package -Dmaven.test.skip=true
+          cd ../kafka-connector
+          mvn -B package -Dmaven.test.skip=true
