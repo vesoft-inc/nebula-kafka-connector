@@ -156,45 +156,71 @@ func playFn(r *Runner, args []string) error {
 	if err != nil {
 		return err
 	}
+	var playName, filename string
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
-		filename := entry.Name()
+		filename = entry.Name()
 		if !strings.HasSuffix(filename, ".ngql") {
 			continue
 		}
-		playName := strings.TrimSuffix(filename, ".ngql")
+		playName = strings.TrimSuffix(filename, ".ngql")
 
 		if playName != args[0] {
 			continue
 		}
-		bs, err := data.Play.ReadFile(filename)
-		if err != nil {
-			return err
-		}
-
-		subRunner, err := NewRunner(
-			WithInteractive(false),
-			WithReadCloser(io.NopCloser(bytes.NewBuffer(bs))),
-			WithOutput(false),
-			WithFailFast(true),
-			WithNebula(r.option.address, r.option.user, r.option.password),
-		)
-		if err != nil {
-			return err
-		}
-		fmt.Fprintf(r.stdout, "Playing dataset: %s...\n", playName)
-		err = subRunner.Run()
-		if err != nil {
-			return err
-		} else {
-			fmt.Fprintf(r.stdout, "Play dataset: %s done.\n", playName)
-			return nil
-		}
 	}
 
-	return fmt.Errorf("Play file not found: %s", args[0])
+	if playName == "" {
+		return fmt.Errorf("Play file not found: %s", args[0])
+	}
+
+	bs, err := data.Play.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+	//get current session schema
+	resp, err := r.client.Execute("SHOW CURRENT_SESSION")
+	if err != nil {
+		return err
+	}
+	var scehma string
+	for resp.HasNext() {
+		row, err := resp.Next()
+		if err != nil {
+			return err
+		}
+		v, err := row.GetValueByName("home_schema_path")
+		if err != nil {
+			return err
+		}
+		ss, err := v.AsString()
+		if err != nil {
+			return err
+		}
+		scehma = string(ss)
+		break
+	}
+
+	subRunner, err := NewRunner(
+		WithInteractive(false),
+		WithReadCloser(io.NopCloser(bytes.NewBuffer(bs))),
+		WithOutput(false),
+		WithFailFast(true),
+		WithNebula(r.option.address, r.option.user, r.option.password),
+		WithSchema(scehma),
+	)
+	if err != nil {
+		return err
+	}
+	fmt.Fprintf(r.stdout, "Playing dataset: %s...\n", playName)
+	if err := subRunner.Run(); err != nil {
+		return err
+	} else {
+		fmt.Fprintf(r.stdout, "Play dataset: %s done.\n", playName)
+		return nil
+	}
 }
 
 func formatFn(r *Runner, args []string) error {

@@ -77,9 +77,11 @@ func handleGraphCmd() error {
 	validateFlags()
 
 	interactive := script == "" && file == ""
+	var fastFail bool
 	var rc io.ReadCloser
 	output := true
 	if !interactive {
+		fastFail = true
 		if file != "" {
 			fd, err := os.Open(file)
 			if err != nil {
@@ -113,6 +115,7 @@ func handleGraphCmd() error {
 		runner.WithOutput(output),
 		runner.WithWidthMax(widthMax),
 		runner.WithSignalChan(c),
+		runner.WithFailFast(fastFail),
 	)
 	if err != nil {
 		return err
@@ -121,6 +124,9 @@ func handleGraphCmd() error {
 
 	if err := runner.Run(); err != nil {
 		return err
+	}
+	if !interactive {
+		fmt.Fprintln(os.Stdout, "Execute successfully!")
 	}
 	return nil
 

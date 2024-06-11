@@ -52,6 +52,7 @@ type (
 		pager          bool
 		pagerLimit     int
 		pagerCommand   string
+		schema         string
 	}
 
 	runnerOptionsFn func(*runnerOption)
@@ -102,6 +103,12 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	r.sessionId = id
 	if err := r.client.Ping(); err != nil {
 		return nil, err
+	}
+	// set schema for playing data
+	if r.option.schema != "" {
+		if _, err := r.client.Execute(fmt.Sprintf("SESSION SET SCHEMA `%s`", r.option.schema)); err != nil {
+			return nil, err
+		}
 	}
 	var c cli.Cli
 	if r.option.interactive {
@@ -175,6 +182,11 @@ func WithSignalChan(signalChan <-chan os.Signal) runnerOptionsFn {
 		o.signalChan = signalChan
 	}
 }
+func WithSchema(schema string) runnerOptionsFn {
+	return func(o *runnerOption) {
+		o.schema = schema
+	}
+}
 
 func (r *Runner) welcome() {
 	if !r.option.interactive {
@@ -213,7 +225,6 @@ func (r *Runner) loop() error {
 		exit, err = r.execute(line)
 		r.running = false
 		if err != nil {
-			r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
 			if r.option.failFast {
 				return err
 			}
@@ -340,7 +351,6 @@ func (r *Runner) Run() error {
 	}()
 	go func() {
 		if err := r.loop(); err != nil {
-			r.printBoth(fmt.Sprintf("Error: %s\n", err))
 			loopErr <- err
 		} else {
 			loopErr <- nil
