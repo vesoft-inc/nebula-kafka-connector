@@ -89,7 +89,7 @@ object NebulaUtils {
    */
   def getSchema(nebulaOptions: NebulaOptions): StructType = {
     var returnCols = nebulaOptions.getReturnCols
-    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.passwd, nebulaOptions.timeout)
+    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
     val isNodeType = DataTypeEnum.NODE.toString.equalsIgnoreCase(nebulaOptions.dataType)
 
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
@@ -136,7 +136,7 @@ object NebulaUtils {
    * return the qgl result schema
    */
   def getSchemaForGql(nebulaOptions: NebulaOptions): StructType = {
-    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.passwd, nebulaOptions.timeout)
+    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
 
     val gql = nebulaOptions.gql.trim

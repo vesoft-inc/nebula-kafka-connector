@@ -9,6 +9,7 @@ import com.vesoft.nebula.spark.common.nebula.{GraphProvider, VidType}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
+import java.util
 import java.util.concurrent.TimeUnit
 import scala.collection.JavaConversions.asJavaCollection
 import scala.collection.JavaConverters.asScalaBufferConverter
@@ -18,7 +19,9 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   override def beforeAll(): Unit = {
     val address = "192.168.8.6:3820"
-    graphProvider = new GraphProvider(address, "root", "nebula", 3000)
+    val authOptions = new util.HashMap[String, Object]()
+    authOptions.put("password", "nebula")
+    graphProvider = new GraphProvider(address, "root", authOptions, 3000)
 
     val createSchema = "CREATE GRAPH TYPE graph_type_nba AS {" +
       "(node_type_player LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
@@ -63,9 +66,9 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   }
 
   test("getAllParts") {
-    val parts:List[Integer] = graphProvider.getAllParts("nba").asScala.toList
+    val parts: List[Integer] = graphProvider.getAllParts("nba").asScala.toList
     assert(parts.size() == 10)
-    val expectParts = List(1, 2, 3, 4 ,5, 6, 7, 8, 9, 10)
+    val expectParts = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     assert(parts.containsAll(expectParts))
   }
 

@@ -28,11 +28,13 @@ object NebulaSparkWriterExample {
   }
 
   private def getNebulaConnectionConfig: NebulaConnectionConfig = {
+    val authOptions = Map("password" -> "Nebula123")
     NebulaConnectionConfig
       .builder()
       .withGraphAddress("192.168.8.6:3820")
       .withUser("root")
       .withPasswd("Nebula123")
+      .withAuthOptions(authOptions)
       .build()
   }
 

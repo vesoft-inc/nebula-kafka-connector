@@ -21,10 +21,36 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
       .build()
     assert(config.getGraphAddress.equals("127.0.0.1:9669"))
     assert(config.getUser.equals("root"))
-    assert(config.getPasswd.equals("nebula"))
+    assert(config.getAuthOptions.contains("password"))
+    assert(config.getAuthOptions.contains("nebula"))
     assert(config.getExecRetry == 2)
     assert(config.getExecRetryIntervalMs == 1000)
     assert(config.getTimeout == 1)
+  }
+
+  test("test empty auth options") {
+    assertThrows[AssertionError](NebulaConnectionConfig
+      .builder()
+      .withGraphAddress("127.0.0.1:9669")
+      .withUser("root")
+      .withTimeoutSec(1)
+      .withExecuteRetry(2)
+      .withExecuteRetryIntervalMs(1000)
+      .build())
+  }
+
+  test("test empty password config") {
+    val config = NebulaConnectionConfig
+      .builder()
+      .withGraphAddress("127.0.0.1:9669")
+      .withUser("root")
+      .withPasswd("nebula")
+      .withAuthOptions(Map("password" -> "nebula"))
+      .build()
+    assert(config.getGraphAddress.equals("127.0.0.1:9669"))
+    assert(config.getUser.equals("root"))
+    assert(config.getAuthOptions.contains("password"))
+    assert(config.getAuthOptions.contains("nebula"))
   }
 
   test("test wrong connection config") {

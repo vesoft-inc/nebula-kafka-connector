@@ -5,10 +5,12 @@
 
 package com.vesoft.nebula.spark.common
 
+import com.alibaba.fastjson.JSON
 import org.apache.commons.lang.StringUtils
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 
 import java.util.Properties
+import scala.collection.mutable
 
 class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) extends Serializable {
 
@@ -50,7 +52,10 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   val executionRetryInterval: Int =
     parameters.getOrElse(EXECUTION_RETRY_INTERVAL, DEFAULT_EXECUTION_RETRY_INTERVAL).toString.toInt
   val user: String = parameters.getOrElse(USER_NAME, DEFAULT_USER_NAME)
-  val passwd: String = parameters.getOrElse(PASSWD, DEFAULT_PASSWD)
+  val authOptions: java.util.HashMap[String, Object] = {
+    val authJsonString = parameters.getOrElse(AUTHOPTIONS, "")
+    JSON.parseObject(authJsonString, classOf[java.util.HashMap[String, Object]])
+  }
   val rateLimit: Long = parameters.getOrElse(RATE_LIMIT, DEFAULT_RATE_LIMIT).toString.toLong
 
   require(parameters.isDefinedAt(TYPE), s"Option '$TYPE' is required")
@@ -128,6 +133,7 @@ object NebulaOptions {
   val EXECUTION_RETRY_INTERVAL: String = "executionRetryInterval"
   val USER_NAME: String = "user"
   val PASSWD: String = "passwd"
+  val AUTHOPTIONS: String = "authOptions"
 
   val OPERATE_TYPE: String = "operateType"
 

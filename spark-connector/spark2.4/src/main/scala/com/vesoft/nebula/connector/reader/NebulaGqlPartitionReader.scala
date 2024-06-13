@@ -32,7 +32,7 @@ class NebulaGqlPartitionReader extends InputPartitionReader[InternalRow] {
     this.graphProvider = new GraphProvider(
       nebulaOptions.graphAddress,
       nebulaOptions.user,
-      nebulaOptions.passwd,
+      nebulaOptions.authOptions,
       nebulaOptions.timeout)
     this.resultSet = graphProvider.submit(nebulaOptions.gql)
     schema = new StructType()

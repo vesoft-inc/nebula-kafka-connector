@@ -22,7 +22,7 @@ class NebulaWriter(nebulaOptions: NebulaOptions) extends Serializable {
   val graphProvider = new GraphProvider(
     nebulaOptions.graphAddress,
     nebulaOptions.user,
-    nebulaOptions.passwd,
+    nebulaOptions.authOptions,
     nebulaOptions.timeout
   )
 

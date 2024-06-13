@@ -42,7 +42,7 @@ class NebulaEdgeWriterFactory(nebulaOptions: NebulaOptions,
     val graphProvider = new GraphProvider(
       nebulaOptions.graphAddress,
       nebulaOptions.user,
-      nebulaOptions.passwd,
+      nebulaOptions.authOptions,
       nebulaOptions.timeout)
     val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
     val dataFrameFields = new ListBuffer[String]
@@ -74,7 +74,7 @@ class NebulaDataSourceNodeWriter(nebulaOptions: NebulaOptions,
     val graphProvider = new GraphProvider(
       nebulaOptions.graphAddress,
       nebulaOptions.user,
-      nebulaOptions.passwd,
+      nebulaOptions.authOptions,
       nebulaOptions.timeout)
     val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
     // check primary key name exists in dataframe's schema

@@ -5,13 +5,17 @@
 
 package com.vesoft.nebula.spark.common
 
+import com.alibaba.fastjson.JSONObject
+import com.alibaba.fastjson.serializer.JSONObjectCodec
 import org.slf4j.{Logger, LoggerFactory}
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class NebulaConnectionConfig(graphAddress: String,
                              user: String,
                              passwd: String,
+                             authOptions: Map[String, Any],
                              timeout: Int,
                              executeRetry: Int,
                              executeRetryIntervalMs: Int)
@@ -20,7 +24,17 @@ class NebulaConnectionConfig(graphAddress: String,
 
   def getUser = user
 
-  def getPasswd = passwd
+
+  def getAuthOptions = {
+    val newAuthOptions = new mutable.HashMap[String, Any]()
+    if (passwd != null) {
+      newAuthOptions.put("password", passwd)
+    }
+    newAuthOptions ++= authOptions
+    val json = new JSONObject
+    newAuthOptions.foreach(x => json.put(x._1, x._2))
+    json.toJSONString
+  }
 
   def getTimeout = timeout
 
@@ -37,6 +51,7 @@ object NebulaConnectionConfig {
     protected var graphAddress: String = _
     protected var user: String = _
     protected var passwd: String = _
+    protected var authOptions = new mutable.HashMap[String, Any]
     protected var timeout: Int = 5
     protected var executeRetry: Int = 3
     protected var executeRetryIntervalMs: Int = 0
@@ -62,6 +77,16 @@ object NebulaConnectionConfig {
      */
     def withPasswd(passwd: String): ConfigBuilder = {
       this.passwd = passwd
+      this
+    }
+
+    /**
+     * set auth options for nebula graph's user
+     */
+    def withAuthOptions(authOptions: Map[String, Any]): ConfigBuilder = {
+      if (authOptions != null) {
+        this.authOptions ++= authOptions
+      }
       this
     }
 
@@ -95,7 +120,8 @@ object NebulaConnectionConfig {
     def check(): Unit = {
       assert(graphAddress != null && graphAddress.nonEmpty, "graph address cannot be blank.")
       assert(user != null && user.nonEmpty, "user cannot be blank.")
-      assert(passwd != null && passwd.nonEmpty, "password cannot be blank.")
+      assert((passwd != null && passwd.nonEmpty) || authOptions.nonEmpty,
+        "password and authOptions cannot be blank at the same time.")
       assert(timeout > 0, "timeout must be larger than 0.")
       assert(executeRetry >= 0, "retry must be equal or larger than 0.")
     }
@@ -108,6 +134,7 @@ object NebulaConnectionConfig {
       new NebulaConnectionConfig(graphAddress,
         user,
         passwd,
+        authOptions.toMap,
         timeout,
         executeRetry,
         executeRetryIntervalMs)
@@ -533,40 +560,41 @@ object ReadNebulaConfig {
     }
   }
 }
-  class GqlNebulaConfig(gql:String) extends Serializable {
-    def getGql:String = gql
+
+class GqlNebulaConfig(gql: String) extends Serializable {
+  def getGql: String = gql
+}
+
+/**
+ * config for reading NebulaGraph through gql
+ */
+object GqlNebulaConfig {
+  private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
+
+  def builder(): GqlConfigBuilder = {
+    new GqlConfigBuilder
   }
 
-  /**
-   * config for reading NebulaGraph through gql
-   */
-  object GqlNebulaConfig {
-    private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
+  class GqlConfigBuilder {
+    private var gql: String = _
 
-    def builder(): GqlConfigBuilder = {
-      new GqlConfigBuilder
+    def withGql(gql: String): GqlConfigBuilder = {
+      this.gql = gql;
+      this
     }
 
-    class GqlConfigBuilder {
-      private var gql: String = _
 
-      def withGql(gql:String): GqlConfigBuilder = {
-        this.gql = gql;
-        this
-      }
+    /**
+     * build a ReadNebulaConfig
+     */
+    def build(): GqlNebulaConfig = {
+      check()
+      new GqlNebulaConfig(gql)
+    }
 
-
-      /**
-       * build a ReadNebulaConfig
-       */
-      def build(): GqlNebulaConfig = {
-        check()
-        new GqlNebulaConfig(gql)
-      }
-
-      private def check(): Unit = {
-        assert(gql != null, "config gql can't be empty.")
-      }
+    private def check(): Unit = {
+      assert(gql != null, "config gql can't be empty.")
     }
   }
+}
 

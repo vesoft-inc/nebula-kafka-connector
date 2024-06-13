@@ -10,6 +10,7 @@ import com.vesoft.nebula.client.graph.net.NebulaClient
 import com.vesoft.nebula.client.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
 import org.slf4j.LoggerFactory
 
+
 import java.util
 import java.util.List
 import scala.collection.mutable
@@ -17,12 +18,17 @@ import scala.collection.mutable
 /**
  * GraphProvider for Nebula Graph Service
  */
-class GraphProvider(addresses: String, user: String, password: String, timeout: Int)
+class GraphProvider(addresses: String,
+                    user: String,
+                    authOptions: java.util.HashMap[String, Object],
+                    timeout: Int)
   extends AutoCloseable
     with Serializable {
   @transient private[this] lazy val LOG = LoggerFactory.getLogger(this.getClass)
+
   @transient val client: NebulaClient = NebulaClient
-    .builder(addresses, user, password)
+    .builder(addresses, user)
+    .withAuthOptions(authOptions)
     .withRequestTimeoutMills(timeout * 1000)
     .build()
 
@@ -95,7 +101,7 @@ class GraphProvider(addresses: String, user: String, password: String, timeout: 
       throw new RuntimeException("get all partitions failed for " + resultSet.getErrorMessage)
     }
     val partitions: util.List[Integer] = new util.ArrayList[Integer]
-    while(resultSet.hasNext){
+    while (resultSet.hasNext) {
       partitions.add(resultSet.next().get("partition_id").asInt())
     }
     partitions
