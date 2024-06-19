@@ -10,11 +10,15 @@ import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.client.graph.net.NebulaClient;
+import com.vesoft.nebula.client.graph.scan.ScanEdgeResultIterator;
+import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
+import com.vesoft.nebula.connector.config.NebulaSourceConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
 import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
 import java.io.Serializable;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -25,22 +29,40 @@ import java.util.regex.Pattern;
 public class NebulaGraphProvider implements Serializable {
     private final String host;
     private final String user;
-    private final String passwd;
+    private final Map<String, Object> authOptions;
     private NebulaClient client = null;
 
     public NebulaGraphProvider(NebulaSinkConnectConfig config) {
         this.host = config.graphServers;
         this.user = config.user;
-        this.passwd = config.passwd;
+        this.authOptions = config.authOptions;
         try {
-            client = NebulaClient.builder(host, user, passwd)
+            client = NebulaClient.builder(host, user)
+                    .withAuthOptions(authOptions)
                     .withRequestTimeoutMills(config.requestTimeout)
                     .build();
         } catch (AuthFailedException e) {
             throw new RuntimeException("auth failed, please check your user and passwd");
         } catch (IOErrorException e) {
-            throw new RuntimeException("connect to NebulaGraph server failed, please check " +
-                    "the connectivity between client and server.", e);
+            throw new RuntimeException("connect to NebulaGraph server failed, please check "
+                    + "the connectivity between client and server.", e);
+        }
+    }
+
+    public NebulaGraphProvider(NebulaSourceConnectConfig config) {
+        this.host = config.graphServers;
+        this.user = config.user;
+        this.authOptions = config.authOptions;
+        try {
+            client = NebulaClient.builder(host, user)
+                    .withAuthOptions(authOptions)
+                    .withRequestTimeoutMills(config.requestTimeout)
+                    .build();
+        } catch (AuthFailedException e) {
+            throw new RuntimeException("auth failed, please check your user and passwd");
+        } catch (IOErrorException e) {
+            throw new RuntimeException("connect to NebulaGraph server failed, please check "
+                    + "the connectivity between client and server.", e);
         }
     }
 
@@ -48,89 +70,134 @@ public class NebulaGraphProvider implements Serializable {
         return client.execute(statement);
     }
 
-    public NebulaNodeSchema getNodeSchema(String graphName, String nodeType) throws IOErrorException, NoValidSessionException {
-        NebulaNodeSchema nodeSchema = new NebulaNodeSchema();
-        Map<String, String> schema = new HashMap<>();
-        ResultSet result = getGraphDesc(graphName);
-
-        while (result.hasNext()) {
-            ResultSet.Record record = result.next();
-            if (record.get("Field").asString().equalsIgnoreCase(nodeType)) {
-                String propertyString = record.get("Properties").asString();
-                String[] proeprties =
-                        propertyString.substring(1, propertyString.length() - 1).split(",");
-                for (String prop : proeprties) {
-                    String[] nameAndType = prop.trim().split(" ");
-                    schema.put(nameAndType[0], nameAndType[1]);
-                }
-                nodeSchema.setNodeTypeName(nodeType);
-                nodeSchema.setNodePkType(schema.get("id"));
-                nodeSchema.setNodeProperties(schema);
-                return nodeSchema;
-            }
-        }
-        throw new IllegalArgumentException("nodeType " + nodeType + " does not exist.");
-
+    public ScanNodeResultIterator scanNode(String graphName,
+                                           String nodeType,
+                                           List<String> returnColumns,
+                                           List<Integer> partsId,
+                                           int limit) {
+        return client.scanNode(graphName, nodeType, returnColumns, partsId, limit);
     }
 
-    public NebulaEdgeSchema getEdgeSchema(String graphName, String edgeType) throws IOErrorException, NoValidSessionException {
+
+    public ScanEdgeResultIterator scanEdge(String graphName,
+                                           String edgeType,
+                                           List<String> returnColumns,
+                                           List<Integer> partsId,
+                                           int limit) {
+        return client.scanEdge(graphName, edgeType, returnColumns, partsId, limit);
+    }
+
+
+    /**
+     * get node schema
+     *
+     * @param graphName graph name
+     * @param nodeType  node type name
+     */
+    public NebulaNodeSchema getNodeSchema(String graphName, String nodeType)
+            throws IOErrorException, NoValidSessionException {
+        NebulaNodeSchema nodeSchema = new NebulaNodeSchema();
+        Map<String, String> schema = new HashMap<>();
+        String graphType = getGraphType(graphName);
+
+        ResultSet result = client.execute(
+                String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType));
+        if (!result.isSucceeded() || result.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "node type " + nodeType + " does not exist in " + graphName);
+        }
+
+        String pk = null;
+        String pkDataType = null;
+        while (result.hasNext()) {
+            ResultSet.Record record = result.next();
+            schema.put(record.get("property_name").asString(), record.get("data_type").asString());
+            if ("Y".equals(record.get("primary_key").asString())) {
+                pk = record.get("property_name").asString();
+                pkDataType = record.get("data_type").asString();
+            }
+        }
+        nodeSchema.setNodeTypeName(nodeType);
+        nodeSchema.setNodePkName(pk);
+        nodeSchema.setNodePkType(pkDataType);
+        nodeSchema.setNodeProperties(schema);
+        return nodeSchema;
+    }
+
+    /**
+     * get edge type schema
+     *
+     * @param graphName graph name
+     * @param edgeType  edge type name
+     */
+    public NebulaEdgeSchema getEdgeSchema(String graphName, String edgeType)
+            throws IOErrorException, NoValidSessionException {
+        Map<String, String> schema = new HashMap<>();
+
+        String graphType = getGraphType(graphName);
+
+        String descEdgeType = String.format(
+                "CALL describe_graph_type('%s') filter type_name='%s' return type_pattern "
+                        + "next CALL describe_edge_type('%s','%s') return *",
+                graphType, edgeType, graphType, edgeType);
+
+        ResultSet result = client.execute(descEdgeType);
+        if (!result.isSucceeded() || result.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "edge type " + edgeType + " does not exist in " + graphName);
+        }
+
+        String edgeTypePattern = null;
+        while (result.hasNext()) {
+            ResultSet.Record record = result.next();
+            if (edgeTypePattern == null) {
+                edgeTypePattern = record.get("type_pattern").asString();
+            }
+            schema.put(record.get("property_name").asString(), record.get("data_type").asString());
+        }
+
+        // get the src node type and dst node type according to edge pattern
+        String srcNodeType = null;
+        String dstNodeType = null;
+        String edgeDirectionPattern = "\\((.*?)\\)-\\[.*?\\]->\\((.*?)\\)";
+        String edgeUnDirectionPattern = "\\((.*?)\\)~\\[.*?\\]~\\((.*?)\\)";
+        Pattern patternWithEdgeDirection = Pattern.compile(edgeDirectionPattern);
+        Pattern patternWithoutEdgeDirection = Pattern.compile(edgeUnDirectionPattern);
+        Matcher matcherWithEdgeDirection = patternWithEdgeDirection.matcher(edgeTypePattern);
+        Matcher matcherWithoutEdgeDirection = patternWithoutEdgeDirection.matcher(edgeTypePattern);
+        if (matcherWithEdgeDirection.matches()) {
+            srcNodeType = matcherWithEdgeDirection.group(1);
+            dstNodeType = matcherWithEdgeDirection.group(2);
+        } else if (matcherWithoutEdgeDirection.matches()) {
+            srcNodeType = matcherWithoutEdgeDirection.group(1);
+            dstNodeType = matcherWithoutEdgeDirection.group(2);
+        } else {
+            throw new RuntimeException("Cannot parse the edge type pattern.");
+        }
+
+        NebulaNodeSchema srcNodeSchema = getNodeSchema(graphName, srcNodeType);
+        NebulaNodeSchema dstNodeSchema = getNodeSchema(graphName, dstNodeType);
+
         NebulaEdgeSchema edgeSchema = new NebulaEdgeSchema();
-        Map<String, String> edgeInfo = getEdgeInfo(graphName, edgeType);
-        String sourceType = edgeInfo.get("sourceType");
-        String targetType = edgeInfo.get("targetType");
-        String sourceIdType = getNodeSchema(graphName, sourceType).getNodePkType();
-        String targetIdType = getNodeSchema(graphName, targetType).getNodePkType();
-
         edgeSchema.setEdgeTypeName(edgeType);
-        edgeSchema.setSourceNodeTypeName(sourceType);
-        edgeSchema.setSourceNodePkType(sourceIdType);
-        edgeSchema.setTargetNodeTypeName(targetType);
-        edgeSchema.setTargetNodePkType(targetIdType);
-
-        edgeInfo.remove("sourceType");
-        edgeInfo.remove("targetType");
-
-        edgeSchema.setProperties(edgeInfo);
+        edgeSchema.setSourceNodeTypeName(srcNodeType);
+        edgeSchema.setSourceNodePkName(srcNodeSchema.getNodePkName());
+        edgeSchema.setSourceNodePkType(srcNodeSchema.getNodePkType());
+        edgeSchema.setTargetNodeTypeName(dstNodeType);
+        edgeSchema.setTargetNodePkName(dstNodeSchema.getNodePkName());
+        edgeSchema.setTargetNodePkType(dstNodeSchema.getNodePkType());
+        edgeSchema.setProperties(schema);
         return edgeSchema;
     }
 
 
-    private Map<String, String> getEdgeInfo(String graphName, String edgeType) throws IOErrorException, NoValidSessionException {
-        Map<String, String> schema = new HashMap<>();
-        ResultSet result = getGraphDesc(graphName);
-        String sourceNodeType;
-        String targetNodeType;
-
-        while (result.hasNext()) {
-            ResultSet.Record record = result.next();
-            if (record.get("Kind").asString().equals("Edge")) {
-                String fullEdgeType = record.get("Field").asString();
-                String regex = "\\((.*)\\)-\\[(.*)\\]->\\((.*)\\)";
-                Pattern r = Pattern.compile(regex);
-                Matcher m = r.matcher(fullEdgeType);
-                if (m.find()) {
-                    if (edgeType.equalsIgnoreCase(m.group(2))) {
-                        sourceNodeType = m.group(1);
-                        targetNodeType = m.group(3);
-                        schema.put("sourceType", sourceNodeType);
-                        schema.put("targetType", targetNodeType);
-                        String propertiesString = record.get("Properties").asString();
-                        String[] properties = propertiesString.substring(1,
-                                propertiesString.length() - 1).split(",");
-                        for (String prop : properties) {
-                            String[] nameAndType = prop.trim().split(" ");
-                            schema.put(nameAndType[0], nameAndType[1]);
-                        }
-                        return schema;
-                    }
-                }
-            }
-        }
-        throw new IllegalArgumentException("edgeType " + edgeType + " does not exist.");
-    }
-
-    private ResultSet getGraphDesc(String graphName) throws IOErrorException,
-            NoValidSessionException {
+    /**
+     * get the graph type of graph
+     *
+     * @param graphName graph name
+     * @return graph type name
+     */
+    private String getGraphType(String graphName) throws IOErrorException {
         ResultSet resultSet = client.execute("DESCRIBE GRAPH " + graphName);
         String graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
@@ -138,13 +205,7 @@ public class NebulaGraphProvider implements Serializable {
         } else {
             throw new IllegalArgumentException("graphName " + graphName + " does not exist.");
         }
-
-        String queryStatement = "DESCRIBE GRAPH TYPE " + graphType;
-        resultSet = client.execute(queryStatement);
-        if (!resultSet.isSucceeded()) {
-            throw new RuntimeException("query error with " + queryStatement + " for " + resultSet.getErrorMessage());
-        }
-        return resultSet;
+        return graphType;
     }
 
 

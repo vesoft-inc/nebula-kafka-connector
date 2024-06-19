@@ -5,15 +5,16 @@
 
 package com.vesoft.nebula.connector.config;
 
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BLOCK_WHEN_EXHAUSTED;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_KEY;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PK;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NAME;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_HEALTH_CHECK_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_EDGE_PROPERTIES;
@@ -27,22 +28,20 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_MODE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_KEY;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PK;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_STRICTLY_SERVER_HEALTHY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_GRAPH_PASSWD;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_GRAPH_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_GRAPH_USER;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_INSERT_MODE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_CONNECT_RECONNECT;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_RETRY_TIMES;
+
 import com.vesoft.nebula.connector.util.ConfigUtils;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -58,6 +57,8 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
 
     public enum InsertMode {
         INSERT,
+        INSERTIGNORE,
+        INSERTREPLACE,
         UPDATE,
         DELETE;
     }
@@ -71,7 +72,7 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
     public final String connectorName;
     public final String graphServers;
     public final String user;
-    public final String passwd;
+    public final Map<String, Object> authOptions;
     public final String graphName;
     public final NebulaConnectDataTypeEnum dataType;
     public final String graphNodeType;
@@ -104,14 +105,18 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         connectorName = ConfigUtils.connectorName(props);
         graphServers = getString(CONNECT_GRAPH_ADDRESS);
         user = getString(CONNECT_GRAPH_USER);
-        passwd = getString(CONNECT_GRAPH_PASSWD);
+        String passwd = getString(CONNECT_GRAPH_PASSWD);
+        authOptions = ConfigUtils.authOptions(props);
+        if (passwd != null && !passwd.isEmpty()) {
+            authOptions.put("password", passwd);
+        }
         graphName = getString(CONNECT_GRAPH_NAME);
-        dataType = NebulaConnectDataTypeEnum.getDataType(getString(CONNECT_GRAPH_TYPE));
-        graphNodeType = getString(CONNECT_GRAPH_NODE_TYPE);
-        graphEdgeType = getString(CONNECT_GRAPH_EDGE_TYPE);
+        dataType = NebulaConnectDataTypeEnum.getDataType(getString(CONNECT_GRAPH_DATA_TYPE));
+        graphNodeType = getString(CONNECT_GRAPH_NODE_TYPE_NAME);
+        graphEdgeType = getString(CONNECT_GRAPH_EDGE_TYPE_NAME);
         primaryKey = getString(CONNECT_PRIMARY_KEY);
-        srcKey = getString(CONNECT_SRC_KEY);
-        dstKey = getString(CONNECT_DST_KEY);
+        srcKey = getString(CONNECT_SRC_PK);
+        dstKey = getString(CONNECT_DST_PK);
         kafkaNodePropertyNames = getList(CONNECT_KAFKA_NODE_PROPERTIES);
         kafkaEdgePropertyNames = getList(CONNECT_KAFKA_EDGE_PROPERTIES);
         nebulaNodePropertyNames = getList(CONNECT_NEBULA_NODE_PROPERTIES);
@@ -142,28 +147,30 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         "NebulaGraph user, default user: " + DEFAULT_CONNECT_GRAPH_USER)
                 .define(CONNECT_GRAPH_PASSWD,
                         ConfigDef.Type.STRING,
-                        DEFAULT_CONNECT_GRAPH_PASSWD,
-                        new ConfigDef.NonEmptyString(),
                         ConfigDef.Importance.HIGH,
-                        "NebulaGraph passwd, default passwd: " + DEFAULT_CONNECT_GRAPH_PASSWD)
+                        "NebulaGraph passwd")
+                .define(CONNECT_AUTH_OPTIONS,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph authOptions")
                 .define(CONNECT_GRAPH_NAME,
                         ConfigDef.Type.STRING,
-                        "nba",
-                        new ConfigDef.NonEmptyString(),
                         ConfigDef.Importance.HIGH,
                         "Name of the graph to streaming objects to")
-                .define(CONNECT_GRAPH_TYPE,
+                .define(CONNECT_GRAPH_DATA_TYPE,
                         ConfigDef.Type.STRING,
-                        DEFAULT_CONNECT_GRAPH_TYPE,
-                        EnumValidator.in(DataType.values()),
+                        DataType.NODE.toString(),
+                        EnumValidator.in(
+                                Arrays.stream(DataType.values()).map(DataType::toString).toArray()),
                         ConfigDef.Importance.HIGH,
-                        "the data type, node or edge, default is " + DEFAULT_CONNECT_GRAPH_TYPE)
-                .define(CONNECT_GRAPH_NODE_TYPE,
+                        "the data type, node or edge")
+                .define(CONNECT_GRAPH_NODE_TYPE_NAME,
                         ConfigDef.Type.STRING,
                         null,
                         ConfigDef.Importance.HIGH,
                         "Name of the node type")
-                .define(CONNECT_GRAPH_EDGE_TYPE,
+                .define(CONNECT_GRAPH_EDGE_TYPE_NAME,
                         ConfigDef.Type.STRING,
                         null,
                         ConfigDef.Importance.HIGH,
@@ -171,28 +178,30 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                 .define(CONNECT_SINK_MODE,
                         ConfigDef.Type.STRING,
                         DEFAULT_INSERT_MODE,
-                        EnumValidator.in(InsertMode.values()),
+                        EnumValidator.in(
+                                Arrays.stream(InsertMode.values())
+                                        .map(InsertMode::toString).toArray()),
                         ConfigDef.Importance.HIGH,
-                        "sink mode, available mode is: INSERT, UPDATE, DELETE, default is " +
-                                DEFAULT_INSERT_MODE)
+                        "sink mode, available mode is: INSERT, UPDATE, DELETE, default is "
+                                + DEFAULT_INSERT_MODE)
                 .define(CONNECT_PRIMARY_KEY,
                         ConfigDef.Type.STRING,
                         null,
                         ConfigDef.Importance.HIGH,
                         "primaryKey field for kafka data")
-                .define(CONNECT_SRC_KEY,
+                .define(CONNECT_SRC_PK,
                         ConfigDef.Type.STRING,
                         null,
                         ConfigDef.Importance.HIGH,
                         "src key field for kafka data")
-                .define(CONNECT_DST_KEY,
+                .define(CONNECT_DST_PK,
                         ConfigDef.Type.STRING,
                         null,
                         ConfigDef.Importance.HIGH,
                         "dst key field for kafka data")
                 .define(CONNECT_KAFKA_NODE_PROPERTIES,
                         ConfigDef.Type.LIST,
-                        null,
+                       null,
                         ConfigDef.Importance.HIGH,
                         "property name list for node type in kafka")
                 .define(CONNECT_KAFKA_EDGE_PROPERTIES,
@@ -225,13 +234,14 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         ConfigDef.Type.INT,
                         DEFAULT_SINK_RETRY_TIMES,
                         ConfigDef.Importance.LOW,
-                        "retry times for failed insert query, default is " + DEFAULT_SINK_RETRY_TIMES)
+                        "retry times for failed insert query, default is "
+                                + DEFAULT_SINK_RETRY_TIMES)
                 .define(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY,
                         ConfigDef.Type.INT,
                         DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY,
                         ConfigDef.Importance.LOW,
-                        "interval time between each retry execution, default is " +
-                                DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY)
+                        "interval time between each retry execution, default is "
+                                + DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY)
                 .define(CONNECT_HEALTH_CHECK_TIME,
                         ConfigDef.Type.INT,
                         3000,
@@ -241,21 +251,20 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         ConfigDef.Type.BOOLEAN,
                         true,
                         ConfigDef.Importance.LOW,
-                        "if block when session in pool is exhausted, false to throw exception, " +
-                                "true to wait. default is false")
+                        "if block when session in pool is exhausted, false to throw exception, "
+                                + "true to wait. default is false")
                 .define(CONNECT_MAX_WAIT_TIME,
                         ConfigDef.Type.INT,
                         -1,
                         ConfigDef.Importance.LOW,
-                        "the max wait time if `blockWhenExhausted` is true, if value less than 0," +
-                                " always wait. default is -1")
+                        "the max wait time if `blockWhenExhausted` is true, if value less than 0,"
+                                + " always wait. default is -1")
                 .define(CONNECT_STRICTLY_SERVER_HEALTHY,
                         ConfigDef.Type.BOOLEAN,
                         false,
                         ConfigDef.Importance.LOW,
-                        "if need all servers are strictly healthy, if true, all addresses must be" +
-                                " " +
-                                "available, if false, at least one address is available")
+                        "if need all servers are strictly healthy, if true, all addresses must be"
+                                + " available, if false, at least one address is available")
                 .define(CONNECT_BATCH_SIZE,
                         ConfigDef.Type.INT,
                         DEFAULT_BATCH_SIZE,
@@ -271,8 +280,9 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         if (user == null || user.isEmpty()) {
             throw new IllegalArgumentException("user cannot be blank.");
         }
-        if (passwd == null || passwd.isEmpty()) {
-            throw new IllegalArgumentException("passwd cannot be blank.");
+        if (authOptions.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "passwd or authOptions cannot be blank at the same time.");
         }
 
     }

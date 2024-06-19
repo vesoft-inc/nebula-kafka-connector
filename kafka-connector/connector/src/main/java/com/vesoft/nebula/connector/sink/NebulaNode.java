@@ -7,6 +7,7 @@ package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.NODE_VALUES_TEMPLATE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.PROPERTY_TEMPLATE;
+
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import com.vesoft.nebula.connector.util.NebulaUtils;
 import java.util.ArrayList;
@@ -56,8 +57,8 @@ public class NebulaNode {
 
     @Override
     public String toString() {
-        return "NebulaNode{" +
-                "properties=" + properties +
-                '}';
+        return "NebulaNode{"
+                + "properties=" + properties
+                + '}';
     }
 }

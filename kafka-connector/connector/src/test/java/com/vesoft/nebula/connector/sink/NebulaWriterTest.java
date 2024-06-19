@@ -1,20 +1,21 @@
 package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_KEY;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PK;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NAME;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_TYPE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_KEY;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PK;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
+
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.data.ResultSet;
@@ -22,6 +23,8 @@ import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
+import com.vesoft.nebula.proto.common.Status;
+import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -30,8 +33,6 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import com.vesoft.nebula.proto.common.Status;
-import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.data.SchemaBuilder;
 import org.apache.kafka.connect.data.Struct;
@@ -60,16 +61,16 @@ public class NebulaWriterTest {
     public void setUp() throws Exception {
         props.put(CONNECT_GRAPH_ADDRESS, "127.0.0.1:9669");
         props.put(CONNECT_GRAPH_NAME, "nba");
-        props.put(CONNECT_GRAPH_TYPE, "BOTH");
+        props.put(CONNECT_GRAPH_DATA_TYPE, "BOTH");
         // node config
-        props.put(CONNECT_GRAPH_NODE_TYPE, "person");
-        props.put(CONNECT_GRAPH_EDGE_TYPE, "friend");
+        props.put(CONNECT_GRAPH_NODE_TYPE_NAME, "person");
+        props.put(CONNECT_GRAPH_EDGE_TYPE_NAME, "friend");
         props.put(CONNECT_PRIMARY_KEY, "id");
         props.put(CONNECT_NEBULA_NODE_PROPERTIES, Arrays.asList("Name", "Age"));
         props.put(CONNECT_KAFKA_NODE_PROPERTIES, Arrays.asList("name", "age"));
         // edge config
-        props.put(CONNECT_SRC_KEY, "src");
-        props.put(CONNECT_DST_KEY, "dst");
+        props.put(CONNECT_SRC_PK, "src");
+        props.put(CONNECT_DST_PK, "dst");
         props.put(CONNECT_NEBULA_EDGE_PROPERTIES, Arrays.asList("Degree", "Type"));
         props.put(CONNECT_KAFKA_EDGE_PROPERTIES, Arrays.asList("degree", "type"));
 
@@ -154,27 +155,28 @@ public class NebulaWriterTest {
      */
     @Test
     public void testGetNodeStatement() {
-        List<NebulaNode> nodes = new ArrayList<>();
         Map<String, Object> properties1 = new HashMap<>();
         properties1.put("name", "A");
         properties1.put("age", 10);
         properties1.put("weight", 12);
+        List<NebulaNode> nodes = new ArrayList<>();
         NebulaNode node1 = new NebulaNode(properties1);
+        nodes.add(node1);
         Map<String, Object> properties2 = new HashMap<>();
         properties2.put("name", "B");
         properties2.put("age", 20);
         properties2.put("weight", 22);
         NebulaNode node2 = new NebulaNode(properties2);
-        nodes.add(node1);
         nodes.add(node2);
 
         try {
-            Method getNodeStatementMethod = writer.getClass().getDeclaredMethod("getNodeStatement"
-                    , List.class);
+            Method getNodeStatementMethod = writer.getClass().getDeclaredMethod(
+                    "getNodeStatement", List.class);
             getNodeStatementMethod.setAccessible(true);
             String statement = (String) getNodeStatementMethod.invoke(writer, nodes);
-            String expect = ("USE `nba` INSERT NODE `person` ({`name`:\"A\",`age`:\"10\",`weight`:\"12\"})," +
-                    "({`name`:\"B\",`age`:\"20\",`weight`:\"22\"})");
+            String expect =
+                    "USE `nba` INSERT NODE `person` ({`name`:\"A\",`age`:\"10\",`weight`:\"12\"}),"
+                            + "({`name`:\"B\",`age`:\"20\",`weight`:\"22\"})";
             String statementStr = statement.chars().sorted().collect(StringBuilder::new,
                     StringBuilder::appendCodePoint, StringBuilder::append).toString();
             String expectStr = expect
@@ -197,20 +199,23 @@ public class NebulaWriterTest {
         Map<String, Object> properties1 = new HashMap<>();
         properties1.put("degree", 1);
         properties1.put("type", "friend");
-        NebulaEdge edge1 = new NebulaEdge("srcId","1", "dstId","2", properties1);
+        NebulaEdge edge1 = new NebulaEdge("srcId", "1", "dstId", "2", properties1);
+        edges.add(edge1);
         Map<String, Object> properties2 = new HashMap<>();
         properties2.put("degree", 2);
         properties2.put("type", "friend");
-        NebulaEdge edge2 = new NebulaEdge("srcId","2", "dstId","3", properties2);
-        edges.add(edge1);
+        NebulaEdge edge2 = new NebulaEdge("srcId", "2", "dstId", "3", properties2);
         edges.add(edge2);
 
         try {
-            Method getEdgeStatementMethod = writer.getClass().getDeclaredMethod("getEdgeStatement", List.class);
+            Method getEdgeStatementMethod = writer
+                    .getClass()
+                    .getDeclaredMethod("getEdgeStatement", List.class);
             getEdgeStatementMethod.setAccessible(true);
             String statement = (String) getEdgeStatementMethod.invoke(writer, edges);
-            String expect = ("USE `nba` INSERT EDGE `friend` ({`srcId`:1})-[{`degree`:\"1\",`type`:\"friend\"}]->({`dstId`:2})," +
-                    "({`srcId`:2})-[{`degree`:\"2\",`type`:\"friend\"}]->({`dstId`:3})");
+            String expect = "USE `nba` INSERT EDGE `friend` "
+                    + "({`srcId`:1})-[{`degree`:\"1\",`type`:\"friend\"}]->({`dstId`:2}),"
+                    + "({`srcId`:2})-[{`degree`:\"2\",`type`:\"friend\"}]->({`dstId`:3})";
             String statementStr = statement.chars().sorted().collect(StringBuilder::new,
                     StringBuilder::appendCodePoint, StringBuilder::append).toString();
             String expectStr = expect

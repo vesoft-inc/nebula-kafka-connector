@@ -7,9 +7,9 @@ package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.EDGE_VALUES_TEMPLATE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.PROPERTY_TEMPLATE;
+
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import com.vesoft.nebula.connector.util.NebulaUtils;
-import org.apache.kafka.common.protocol.types.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +45,12 @@ public class NebulaEdge {
         String srcPkValue = NebulaUtils.extractIdValue(edgeSchema.getSourceNodePkType(), srcPk);
         String dstPkValue = NebulaUtils.extractIdValue(edgeSchema.getTargetNodePkType(), dstPk);
 
-        return String.format(EDGE_VALUES_TEMPLATE, srcPkName, srcPkValue, props, dstPkName, dstPkValue);
+        return String.format(EDGE_VALUES_TEMPLATE,
+                srcPkName,
+                srcPkValue,
+                props,
+                dstPkName,
+                dstPkValue);
     }
 
     public String getSrcPkName() {
@@ -104,10 +109,10 @@ public class NebulaEdge {
 
     @Override
     public String toString() {
-        return "NebulaEdge{" +
-                "srcPk='" + srcPk + '\'' +
-                ", dstPk='" + dstPk + '\'' +
-                ", properties=" + properties +
-                '}';
+        return "NebulaEdge{"
+                + "srcPk='" + srcPk + '\''
+                + ", dstPk='" + dstPk + '\''
+                + ", properties=" + properties
+                + '}';
     }
 }

@@ -25,16 +25,30 @@ public class NebulaRecordConverterTest {
             assert (properties.keySet().containsAll(
                     Arrays.asList("a", "b", "c", "d", "e", "f", "g")));
             assert (properties.get("a").equals("Tom"));
-            assert (Integer.valueOf((byte)properties.get("b")) == 1);
+            assert (Integer.valueOf((byte) properties.get("b")) == 1);
             assert (Integer.valueOf((short) properties.get("c")) == 2);
-            assert((int)properties.get("d")==3);
-            assert((long)properties.get("e") ==10);
-            assert((boolean)properties.get("f"));
-            assert((float) properties.get("h") == 2.0);
-            assert((double) properties.get("i") == 1.0);
+            assert ((int) properties.get("d") == 3);
+            assert ((long) properties.get("e") == 10);
+            assert ((boolean) properties.get("f"));
+            assert ((float) properties.get("h") == 2.0);
+            assert ((double) properties.get("i") == 1.0);
         } catch (RecordConversionException e) {
             e.printStackTrace();
             assert (false);
+        }
+    }
+
+    @Test
+    public void testConvertStringRecord() {
+        SinkRecord sinkRecord = new SinkRecord("test", 0, null, null, null,
+                "{\"score\":12.0,\"gender\":\"男\","
+                        + "\"rate\":1.0,\"name\":\"Tom\",\"id\":\"200\"}", 0);
+        try {
+            Map<String, Object> properties = NebulaRecordConverter.convertRecord(sinkRecord);
+            assert (properties.get("name").equals("Tom"));
+        } catch (RecordConversionException e) {
+            e.printStackTrace();
+            assert false;
         }
     }
 
@@ -52,8 +66,8 @@ public class NebulaRecordConverterTest {
                 .build();
         Struct struct = new Struct(SCHEMA)
                 .put("a", "Tom")
-                .put("b", (byte)1)
-                .put("c", (short)2)
+                .put("b", (byte) 1)
+                .put("c", (short) 2)
                 .put("d", 3)
                 .put("e", 10L)
                 .put("f", true)

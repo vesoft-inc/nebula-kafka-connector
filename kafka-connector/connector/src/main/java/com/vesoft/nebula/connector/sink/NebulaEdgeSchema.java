@@ -85,15 +85,15 @@ public class NebulaEdgeSchema {
 
     @Override
     public String toString() {
-        return "NebulaEdgeSchema{" +
-                "edgeTypeName='" + edgeTypeName + '\'' +
-                ", sourceNodeTypeName='" + sourceNodeTypeName + '\'' +
-                ", sourceNodePkName='" + sourceNodePkName + '\'' +
-                ", sourceNodePkType='" + sourceNodePkType + '\'' +
-                ", targetNodeTypeName='" + targetNodeTypeName + '\'' +
-                ", targetNodePkType='" + targetNodePkName + '\'' +
-                ", targetNodePkType='" + targetNodePkType + '\'' +
-                ", properties=" + properties +
-                '}';
+        return "NebulaEdgeSchema{"
+                + "edgeTypeName='" + edgeTypeName + '\''
+                + ", sourceNodeTypeName='" + sourceNodeTypeName + '\''
+                + ", sourceNodePkName='" + sourceNodePkName + '\''
+                + ", sourceNodePkType='" + sourceNodePkType + '\''
+                + ", targetNodeTypeName='" + targetNodeTypeName + '\''
+                + ", targetNodePkType='" + targetNodePkName + '\''
+                + ", targetNodePkType='" + targetNodePkType + '\''
+                + ", properties=" + properties
+                + '}';
     }
 }

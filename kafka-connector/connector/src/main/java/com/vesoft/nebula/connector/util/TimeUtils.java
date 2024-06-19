@@ -14,7 +14,8 @@ public class TimeUtils {
     static SimpleDateFormat dateFormat1 = new SimpleDateFormat("yyyy/MM/dd");
     static SimpleDateFormat dateFormat2 = new SimpleDateFormat("yyyy.MM.dd");
     static SimpleDateFormat dateFormat3 = new SimpleDateFormat("yyyy-MM-dd");
-    static SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSX");
+    static SimpleDateFormat timeFormat =
+            new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSSX");
 
 
     public static String convertDate(String originalDate) throws DataFormatException {
@@ -23,8 +24,9 @@ public class TimeUtils {
         }
         String date = getSimpleDate(originalDate);
         if (date == null) {
-            throw new DataFormatException(String.format("format of date %s is not valid for NebulaGraph.",
-                    originalDate));
+            throw new DataFormatException(
+                    String.format("format of date %s is not valid for NebulaGraph.",
+                            originalDate));
         } else {
             return "date(\"" + date + "\")";
         }
@@ -37,8 +39,9 @@ public class TimeUtils {
         if (originalTime.split(":").length == 3) {
             return "localtime(\"" + originalTime + "\")";
         } else {
-            throw new DataFormatException(String.format("format of time %s is not valid for NebulaGraph.",
-                    originalTime));
+            throw new DataFormatException(
+                    String.format("format of time %s is not valid for NebulaGraph.",
+                            originalTime));
         }
     }
 
@@ -58,8 +61,8 @@ public class TimeUtils {
         }
 
         if (date == null) {
-            throw new DataFormatException(String.format("format of datetime %s is not valid for " +
-                    "NebulaGraph.", originalDateTime));
+            throw new DataFormatException(String.format("format of datetime %s is not valid for "
+                    + "NebulaGraph.", originalDateTime));
         }
 
         String newDateTime = date + "T" + time;
@@ -67,8 +70,8 @@ public class TimeUtils {
             timeFormat.parse(newDateTime);
             return "localdatetime(\"" + newDateTime + "\")";
         } catch (ParseException e) {
-            throw new DataFormatException(String.format("format of datetime %s is not valid for " +
-                    "NebulaGraph.", originalDateTime));
+            throw new DataFormatException(String.format("format of datetime %s is not valid for "
+                    + "NebulaGraph.", originalDateTime));
         }
     }
 
@@ -81,6 +84,7 @@ public class TimeUtils {
             dateFormat1.parse(dateString);
             date = dateString.replace("/", "-");
         } catch (ParseException e) {
+            // nothing
         }
 
         try {
@@ -88,6 +92,7 @@ public class TimeUtils {
             dateFormat2.parse(dateString);
             date = dateString.replace(".", "-");
         } catch (ParseException e) {
+            // nothing
         }
 
         try {
@@ -95,6 +100,7 @@ public class TimeUtils {
             dateFormat3.parse(dateString);
             date = dateString;
         } catch (ParseException e) {
+            // nothing
         }
         return date;
     }

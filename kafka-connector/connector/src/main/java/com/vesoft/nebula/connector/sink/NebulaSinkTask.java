@@ -14,7 +14,10 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.kafka.clients.consumer.OffsetAndMetadata;
+import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.connect.data.Field;
+import org.apache.kafka.connect.data.Schema;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.apache.kafka.connect.sink.SinkTask;
 import org.slf4j.Logger;
@@ -37,11 +40,11 @@ public class NebulaSinkTask extends SinkTask {
 
     @Override
     public void start(Map<String, String> props) {
-        connectorName = props.get("name");
+        config = new NebulaSinkConnectConfig(props);
+        connectorName = config.connectorName;
         taskId = props.get("task.id");
         log.info("Starting Nebula Sink task {}-{}", connectorName, taskId);
 
-        config = new NebulaSinkConnectConfig(props);
         initWriter();
     }
 
@@ -61,10 +64,13 @@ public class NebulaSinkTask extends SinkTask {
         final int recordsCount = records.size();
         List<String> schemaNames = new ArrayList<>();
         if (first.valueSchema() != null) {
-            final List<Field> valueSchemaFields = first.valueSchema().fields();
-            for (Field field : valueSchemaFields) {
-                schemaNames.add(field.name());
+            if (first.valueSchema().type() == Schema.Type.STRUCT) {
+                final List<Field> valueSchemaFields = first.valueSchema().fields();
+                for (Field field : valueSchemaFields) {
+                    schemaNames.add(field.name());
+                }
             }
+
         } else if (first.value() instanceof Map) {
             Map<String, Object> properties = (HashMap<String, Object>) first.value();
             schemaNames.addAll(properties.keySet());
@@ -72,8 +78,8 @@ public class NebulaSinkTask extends SinkTask {
             log.warn("cannot get schema names of records, simple record:{}", first.value());
         }
 
-        log.info("Received {} records. First record kafka coordinates:({}-{}-{}), record " +
-                        "schema:{}. Writing them to nebula...",
+        log.info("Received {} records. First record kafka coordinates:({}-{}-{}), record "
+                        + "schema:{}. Writing them to nebula...",
                 recordsCount, first.topic(), first.kafkaPartition(), first.kafkaOffset(),
                 schemaNames);
 
@@ -90,6 +96,10 @@ public class NebulaSinkTask extends SinkTask {
             log.error("failed to write for interrupted exception.", e);
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    @Override
+    public void flush(Map<TopicPartition, OffsetAndMetadata> currentOffsets) {
     }
 
     @Override

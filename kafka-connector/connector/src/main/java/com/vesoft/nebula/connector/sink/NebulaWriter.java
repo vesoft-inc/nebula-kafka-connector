@@ -7,6 +7,7 @@ package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.BATCH_INSERT_EDGE_TEMPLATE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.BATCH_INSERT_NODE_TEMPLATE;
+
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
@@ -16,6 +17,7 @@ import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
 import com.vesoft.nebula.connector.converter.NebulaRecordConverter;
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
+import com.vesoft.nebula.connector.util.GroupUtils;
 import com.vesoft.nebula.connector.util.NebulaUtils;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -88,6 +90,7 @@ public class NebulaWriter {
                         nodes.add(getNode(properties));
                         edges.add(getEdge(properties));
                         break;
+                    default: // nothing
                 }
             }
         }
@@ -100,32 +103,62 @@ public class NebulaWriter {
     public void commit() throws IOErrorException, NoValidSessionException, InterruptedException {
         int batchSize = config.sinkBatchSize;
         // write nodes
-        if (nodes.size() >= batchSize) {
-            ResultSet result = execute(getNodeStatement(nodes), nodeType, nodes.size());
-            if (result.isSucceeded()) {
-                log.info(">> write {} batch({}), latency({})", nodeType, nodes.size(),
-                        result.getLatency());
-            } else {
-                log.warn(">> write failed for batch nodes, now retry the write one by one.");
-                for (NebulaNode node : nodes) {
-                    execute(getNodeStatement(Arrays.asList(node)), nodeType, 1);
-                }
+        if (nodes.size() > batchSize) {
+            // write nodes batch by batchSize
+            List<List<NebulaNode>> groupNodes = GroupUtils.getGroups(nodes, batchSize);
+            for (List<NebulaNode> batchNodes : groupNodes) {
+                batchWriteNode(batchNodes);
             }
-            nodes.clear();
+        } else {
+            batchWriteNode(nodes);
         }
+        nodes.clear();
         // write edges
-        if (edges.size() >= batchSize) {
-            ResultSet result = execute(getEdgeStatement(edges), edgeType, edges.size());
-            if (result.isSucceeded()) {
-                log.info(">> write {} batch({}), latency({})", edgeType, edges.size(),
-                        result.getLatency());
-            } else {
-                log.warn(">> write failed for batch edges, now retry the write one by one.");
-                for (NebulaEdge edge : edges) {
-                    execute(getEdgeStatement(Arrays.asList(edge)), edgeType, 1);
-                }
+        if (edges.size() > batchSize) {
+            // write edges batch by batchSize
+            List<List<NebulaEdge>> groupEdges = GroupUtils.getGroups(edges, batchSize);
+            for (List<NebulaEdge> batchEdges : groupEdges) {
+                batchWriteEdge(batchEdges);
             }
-            edges.clear();
+        } else {
+            batchWriteEdge(edges);
+        }
+        edges.clear();
+    }
+
+
+    private void batchWriteNode(List<NebulaNode> nodes)
+            throws IOErrorException, NoValidSessionException, InterruptedException {
+        if (nodes.isEmpty()) {
+            return;
+        }
+        ResultSet result = execute(getNodeStatement(nodes), nodeType, nodes.size());
+        if (!result.isSucceeded()) {
+            if (nodes.size() == 1) {
+                return;
+            }
+            log.warn(">> write failed for batch nodes, now retry the write one by one.");
+            for (NebulaNode node : nodes) {
+                execute(getNodeStatement(Arrays.asList(node)), nodeType, 1);
+            }
+        }
+    }
+
+
+    private void batchWriteEdge(List<NebulaEdge> edges)
+            throws IOErrorException, NoValidSessionException, InterruptedException {
+        if (edges.isEmpty()) {
+            return;
+        }
+        ResultSet result = execute(getEdgeStatement(edges), edgeType, edges.size());
+        if (!result.isSucceeded()) {
+            if (edges.size() == 1) {
+                return;
+            }
+            log.warn(">> write failed for batch edges, now retry the write one by one.");
+            for (NebulaEdge edge : edges) {
+                execute(getEdgeStatement(Arrays.asList(edge)), edgeType, 1);
+            }
         }
     }
 
@@ -136,7 +169,6 @@ public class NebulaWriter {
      * @param type      the statement data type, node or edge
      * @param batch     batch size of nodes or edges for param statement
      * @return {@link ResultSet}
-     * TODO change the match for result gqlStatus
      */
     private ResultSet execute(String statement, String type, int batch) throws IOErrorException,
             NoValidSessionException, InterruptedException {
@@ -158,7 +190,6 @@ public class NebulaWriter {
                 return result;
             }
         }
-
         log.error(">> write {} failed for {}", type, result.getErrorMessage());
         return result;
     }
@@ -191,10 +222,11 @@ public class NebulaWriter {
         }
         if (nebulaNodeSchema.getNodePkType().equals("INT64")
                 && !NebulaUtils.isNumeric(properties.get(pk).toString())) {
-            log.error(">>>>> record {} value {} is not INT64 for node primary key", pk, properties.get(pk));
+            log.error(">>>>> record {} value {} is not INT64 for node primary key",
+                    pk, properties.get(pk));
             return null;
         }
-        // 将kafka properties 转换成nebula properties
+        // convert kafka properties to nebula properties
         NebulaNode node = new NebulaNode(nodeProperties);
 
         log.debug("nebula node: {}", node);
@@ -202,11 +234,7 @@ public class NebulaWriter {
     }
 
     private NebulaEdge getEdge(Map<String, Object> properties) {
-        List<String> edgePropertyNames = config.kafkaEdgePropertyNames;
-        List<String> nebulaEdgePropertyNames = config.nebulaEdgePropertyNames;
-        String srcPkName = nebulaEdgeSchema.getSourceNodePkName();
         String srcPk = config.srcKey;
-        String dstPkName = nebulaEdgeSchema.getTargetNodePkName();
         String dstPk = config.dstKey;
 
         if (properties.get(srcPk) == null) {
@@ -215,7 +243,8 @@ public class NebulaWriter {
         }
         if (nebulaEdgeSchema.getSourceNodePkType().equals("INT64")
                 && !NebulaUtils.isNumeric(properties.get(srcPk).toString())) {
-            log.error(">>>>> record {} value {} is not INT64 for source node primary key", srcPk, properties.get(srcPk));
+            log.error(">>>>> record {} value {} is not INT64 for source node primary key",
+                    srcPk, properties.get(srcPk));
             return null;
         }
 
@@ -225,18 +254,23 @@ public class NebulaWriter {
         }
         if (nebulaEdgeSchema.getTargetNodePkType().equals("INT64")
                 && !NebulaUtils.isNumeric(properties.get(dstPk).toString())) {
-            log.error(">>>>> record {} value {} is not INT64 for target node primary key", dstPk, properties.get(dstPk));
+            log.error(">>>>> record {} value {} is not INT64 for target node primary key",
+                    dstPk, properties.get(dstPk));
             return null;
         }
 
         Map<String, Object> edgeProperties = new HashMap<>();
 
+        List<String> edgePropertyNames = config.kafkaEdgePropertyNames;
+        List<String> nebulaEdgePropertyNames = config.nebulaEdgePropertyNames;
         for (int index = 0; index < edgePropertyNames.size(); index++) {
             edgeProperties.put(nebulaEdgePropertyNames.get(index),
                     properties.get(edgePropertyNames.get(index)));
         }
-        NebulaEdge edge = new NebulaEdge(srcPkName, String.valueOf(properties.get(srcPk)),
-                dstPkName, String.valueOf(properties.get(dstPk)), edgeProperties);
+        NebulaEdge edge = new NebulaEdge(nebulaEdgeSchema.getSourceNodePkName(),
+                String.valueOf(properties.get(srcPk)),
+                nebulaEdgeSchema.getTargetNodePkName(),
+                String.valueOf(properties.get(dstPk)), edgeProperties);
         return edge;
     }
 
@@ -264,8 +298,9 @@ public class NebulaWriter {
                 return null; // TODO implement the update statement
             case DELETE:
                 return null; // TODO implement the delete statement
+            default:
+                throw new IllegalArgumentException("unsupported sink mode.");
         }
-        return null; // placeholder
     }
 
     private String getEdgeStatement(List<NebulaEdge> edges) {

@@ -44,8 +44,8 @@ public class NebulaUtils {
             case "INT64":
                 return value;
             default:
-                throw new RuntimeException("data type " + dataType + " of edge source/target id " +
-                        "is not supported.");
+                throw new RuntimeException("data type " + dataType + " of edge source/target id "
+                        + "is not supported.");
         }
 
     }

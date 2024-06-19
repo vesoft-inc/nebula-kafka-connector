@@ -9,10 +9,11 @@ import java.util.Map;
 
 public class NebulaNodeSchema {
     private String nodeTypeName;
+    private String nodePkName;
     private String nodePkType;
 
     // map of property name and property data type
-    private Map<String,String> nodeProperties;
+    private Map<String, String> nodeProperties;
 
     public String getNodeTypeName() {
         return nodeTypeName;
@@ -20,6 +21,14 @@ public class NebulaNodeSchema {
 
     public void setNodeTypeName(String nodeTypeName) {
         this.nodeTypeName = nodeTypeName;
+    }
+
+    public String getNodePkName() {
+        return nodePkName;
+    }
+
+    public void setNodePkName(String nodePkName) {
+        this.nodePkName = nodePkName;
     }
 
     public String getNodePkType() {
@@ -40,10 +49,11 @@ public class NebulaNodeSchema {
 
     @Override
     public String toString() {
-        return "NebulaNodeSchema{" +
-                "nodeTypeName='" + nodeTypeName + '\'' +
-                ", nodePkType='" + nodePkType + '\'' +
-                ", nodeProperties=" + nodeProperties +
-                '}';
+        return "NebulaNodeSchema{"
+                + "nodeTypeName='" + nodeTypeName
+                + ", nodePkName='" + nodePkName
+                + ", nodePkType='" + nodePkType
+                + ", nodeProperties=" + nodeProperties
+                + '}';
     }
 }

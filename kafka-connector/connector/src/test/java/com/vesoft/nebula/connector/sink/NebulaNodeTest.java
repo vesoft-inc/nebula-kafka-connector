@@ -6,6 +6,7 @@
 package com.vesoft.nebula.connector.sink;
 
 import static junit.framework.TestCase.assertEquals;
+
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +27,7 @@ public class NebulaNodeTest {
         node = new NebulaNode(props);
 
         Map<String, String> schema = new HashMap<>();
-        schema.put("id","STRING");
+        schema.put("id", "STRING");
         schema.put("name", "STRING");
         schema.put("age", "INT64");
         schema.put("weight", "INT32");

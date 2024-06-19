@@ -8,12 +8,12 @@ package com.vesoft.nebula.connector.sink;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.util.Version;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.apache.kafka.common.config.ConfigDef;
 import org.apache.kafka.connect.connector.Task;
 import org.apache.kafka.connect.sink.SinkConnector;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +37,9 @@ public class NebulaSinkConnector extends SinkConnector {
         log.info("Setting task configurations for {} workers", maxTasks);
         final List<Map<String, String>> configs = new ArrayList<>(maxTasks);
         for (int i = 0; i < maxTasks; i++) {
-            configs.add(configProps);
+            Map<String, String> taskProps = new HashMap<>(configProps);
+            taskProps.put("task.id", Integer.toString(i));
+            configs.add(taskProps);
         }
         return configs;
     }

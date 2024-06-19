@@ -6,6 +6,7 @@
 package com.vesoft.nebula.connector.sink;
 
 import static junit.framework.TestCase.assertEquals;
+
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,7 +23,7 @@ public class NebulaEdgeTest {
         props.put("duration", 10);
         props.put("type", "friend");
         props.put("degree", 5);
-        edge = new NebulaEdge("srcId","1","dstId", "2", props);
+        edge = new NebulaEdge("srcId", "1", "dstId", "2", props);
 
         Map<String, String> schema = new HashMap<>();
         schema.put("duration", "INT64");
