@@ -376,23 +376,92 @@ func (x *PlanInfo) GetChildren() []*PlanInfo {
 	return nil
 }
 
+type ElapsedTime struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	TotalServerTimeUs int64 `protobuf:"varint,1,opt,name=total_server_time_us,json=totalServerTimeUs,proto3" json:"total_server_time_us,omitempty"`
+	BuildTimeUs       int64 `protobuf:"varint,2,opt,name=build_time_us,json=buildTimeUs,proto3" json:"build_time_us,omitempty"`
+	OptimizeTimeUs    int64 `protobuf:"varint,3,opt,name=optimize_time_us,json=optimizeTimeUs,proto3" json:"optimize_time_us,omitempty"`
+	SerializeTimeUs   int64 `protobuf:"varint,4,opt,name=serialize_time_us,json=serializeTimeUs,proto3" json:"serialize_time_us,omitempty"`
+}
+
+func (x *ElapsedTime) Reset() {
+	*x = ElapsedTime{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_graph_proto_msgTypes[4]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ElapsedTime) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ElapsedTime) ProtoMessage() {}
+
+func (x *ElapsedTime) ProtoReflect() protoreflect.Message {
+	mi := &file_graph_proto_msgTypes[4]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ElapsedTime.ProtoReflect.Descriptor instead.
+func (*ElapsedTime) Descriptor() ([]byte, []int) {
+	return file_graph_proto_rawDescGZIP(), []int{4}
+}
+
+func (x *ElapsedTime) GetTotalServerTimeUs() int64 {
+	if x != nil {
+		return x.TotalServerTimeUs
+	}
+	return 0
+}
+
+func (x *ElapsedTime) GetBuildTimeUs() int64 {
+	if x != nil {
+		return x.BuildTimeUs
+	}
+	return 0
+}
+
+func (x *ElapsedTime) GetOptimizeTimeUs() int64 {
+	if x != nil {
+		return x.OptimizeTimeUs
+	}
+	return 0
+}
+
+func (x *ElapsedTime) GetSerializeTimeUs() int64 {
+	if x != nil {
+		return x.SerializeTimeUs
+	}
+	return 0
+}
+
 type Summary struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	BuildTimeUs       int64       `protobuf:"varint,1,opt,name=build_time_us,json=buildTimeUs,proto3" json:"build_time_us,omitempty"`
-	OptimizeTimeUs    int64       `protobuf:"varint,2,opt,name=optimize_time_us,json=optimizeTimeUs,proto3" json:"optimize_time_us,omitempty"`
-	TotalServerTimeUs int64       `protobuf:"varint,3,opt,name=total_server_time_us,json=totalServerTimeUs,proto3" json:"total_server_time_us,omitempty"`
-	ExplainType       []byte      `protobuf:"bytes,4,opt,name=explain_type,json=explainType,proto3" json:"explain_type,omitempty"`
-	PlanInfo          *PlanInfo   `protobuf:"bytes,5,opt,name=plan_info,json=planInfo,proto3" json:"plan_info,omitempty"`
-	QueryStats        *QueryStats `protobuf:"bytes,6,opt,name=query_stats,json=queryStats,proto3" json:"query_stats,omitempty"`
+	ElapsedTime *ElapsedTime `protobuf:"bytes,1,opt,name=elapsed_time,json=elapsedTime,proto3" json:"elapsed_time,omitempty"`
+	ExplainType []byte       `protobuf:"bytes,2,opt,name=explain_type,json=explainType,proto3" json:"explain_type,omitempty"`
+	PlanInfo    *PlanInfo    `protobuf:"bytes,3,opt,name=plan_info,json=planInfo,proto3" json:"plan_info,omitempty"`
+	QueryStats  *QueryStats  `protobuf:"bytes,4,opt,name=query_stats,json=queryStats,proto3" json:"query_stats,omitempty"`
 }
 
 func (x *Summary) Reset() {
 	*x = Summary{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_graph_proto_msgTypes[4]
+		mi := &file_graph_proto_msgTypes[5]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -405,7 +474,7 @@ func (x *Summary) String() string {
 func (*Summary) ProtoMessage() {}
 
 func (x *Summary) ProtoReflect() protoreflect.Message {
-	mi := &file_graph_proto_msgTypes[4]
+	mi := &file_graph_proto_msgTypes[5]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -418,28 +487,14 @@ func (x *Summary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Summary.ProtoReflect.Descriptor instead.
 func (*Summary) Descriptor() ([]byte, []int) {
-	return file_graph_proto_rawDescGZIP(), []int{4}
+	return file_graph_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *Summary) GetBuildTimeUs() int64 {
+func (x *Summary) GetElapsedTime() *ElapsedTime {
 	if x != nil {
-		return x.BuildTimeUs
+		return x.ElapsedTime
 	}
-	return 0
-}
-
-func (x *Summary) GetOptimizeTimeUs() int64 {
-	if x != nil {
-		return x.OptimizeTimeUs
-	}
-	return 0
-}
-
-func (x *Summary) GetTotalServerTimeUs() int64 {
-	if x != nil {
-		return x.TotalServerTimeUs
-	}
-	return 0
+	return nil
 }
 
 func (x *Summary) GetExplainType() []byte {
@@ -475,7 +530,7 @@ type ExecuteRequest struct {
 func (x *ExecuteRequest) Reset() {
 	*x = ExecuteRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_graph_proto_msgTypes[5]
+		mi := &file_graph_proto_msgTypes[6]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -488,7 +543,7 @@ func (x *ExecuteRequest) String() string {
 func (*ExecuteRequest) ProtoMessage() {}
 
 func (x *ExecuteRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_graph_proto_msgTypes[5]
+	mi := &file_graph_proto_msgTypes[6]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -501,7 +556,7 @@ func (x *ExecuteRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteRequest.ProtoReflect.Descriptor instead.
 func (*ExecuteRequest) Descriptor() ([]byte, []int) {
-	return file_graph_proto_rawDescGZIP(), []int{5}
+	return file_graph_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *ExecuteRequest) GetSessionId() int64 {
@@ -532,7 +587,7 @@ type ExecuteResponse struct {
 func (x *ExecuteResponse) Reset() {
 	*x = ExecuteResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_graph_proto_msgTypes[6]
+		mi := &file_graph_proto_msgTypes[7]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -545,7 +600,7 @@ func (x *ExecuteResponse) String() string {
 func (*ExecuteResponse) ProtoMessage() {}
 
 func (x *ExecuteResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_graph_proto_msgTypes[6]
+	mi := &file_graph_proto_msgTypes[7]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -558,7 +613,7 @@ func (x *ExecuteResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ExecuteResponse.ProtoReflect.Descriptor instead.
 func (*ExecuteResponse) Descriptor() ([]byte, []int) {
-	return file_graph_proto_rawDescGZIP(), []int{6}
+	return file_graph_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ExecuteResponse) GetStatus() *common.Status {
@@ -602,7 +657,7 @@ type AuthRequest struct {
 func (x *AuthRequest) Reset() {
 	*x = AuthRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_graph_proto_msgTypes[7]
+		mi := &file_graph_proto_msgTypes[8]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -615,7 +670,7 @@ func (x *AuthRequest) String() string {
 func (*AuthRequest) ProtoMessage() {}
 
 func (x *AuthRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_graph_proto_msgTypes[7]
+	mi := &file_graph_proto_msgTypes[8]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -628,7 +683,7 @@ func (x *AuthRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthRequest.ProtoReflect.Descriptor instead.
 func (*AuthRequest) Descriptor() ([]byte, []int) {
-	return file_graph_proto_rawDescGZIP(), []int{7}
+	return file_graph_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AuthRequest) GetUsername() []byte {
@@ -664,7 +719,7 @@ type AuthResponse struct {
 func (x *AuthResponse) Reset() {
 	*x = AuthResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_graph_proto_msgTypes[8]
+		mi := &file_graph_proto_msgTypes[9]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -677,7 +732,7 @@ func (x *AuthResponse) String() string {
 func (*AuthResponse) ProtoMessage() {}
 
 func (x *AuthResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_graph_proto_msgTypes[8]
+	mi := &file_graph_proto_msgTypes[9]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -690,7 +745,7 @@ func (x *AuthResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AuthResponse.ProtoReflect.Descriptor instead.
 func (*AuthResponse) Descriptor() ([]byte, []int) {
-	return file_graph_proto_rawDescGZIP(), []int{8}
+	return file_graph_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AuthResponse) GetStatus() *common.Status {
@@ -760,22 +815,30 @@ var file_graph_proto_rawDesc = []byte{
 	0x72, 0x65, 0x6e, 0x18, 0x10, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6e, 0x65, 0x62, 0x75,
 	0x6c, 0x61, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x72, 0x61, 0x70, 0x68, 0x2e, 0x50,
 	0x6c, 0x61, 0x6e, 0x49, 0x6e, 0x66, 0x6f, 0x52, 0x08, 0x63, 0x68, 0x69, 0x6c, 0x64, 0x72, 0x65,
-	0x6e, 0x22, 0xa7, 0x02, 0x0a, 0x07, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x12, 0x22, 0x0a,
-	0x0d, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x75, 0x73, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x55,
-	0x73, 0x12, 0x28, 0x0a, 0x10, 0x6f, 0x70, 0x74, 0x69, 0x6d, 0x69, 0x7a, 0x65, 0x5f, 0x74, 0x69,
-	0x6d, 0x65, 0x5f, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0e, 0x6f, 0x70, 0x74,
-	0x69, 0x6d, 0x69, 0x7a, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x55, 0x73, 0x12, 0x2f, 0x0a, 0x14, 0x74,
-	0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x65, 0x72, 0x5f, 0x74, 0x69, 0x6d, 0x65,
-	0x5f, 0x75, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x11, 0x74, 0x6f, 0x74, 0x61, 0x6c,
-	0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x54, 0x69, 0x6d, 0x65, 0x55, 0x73, 0x12, 0x21, 0x0a, 0x0c,
-	0x65, 0x78, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x04, 0x20, 0x01,
+	0x6e, 0x22, 0xb8, 0x01, 0x0a, 0x0b, 0x45, 0x6c, 0x61, 0x70, 0x73, 0x65, 0x64, 0x54, 0x69, 0x6d,
+	0x65, 0x12, 0x2f, 0x0a, 0x14, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x65,
+	0x72, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x75, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x03, 0x52,
+	0x11, 0x74, 0x6f, 0x74, 0x61, 0x6c, 0x53, 0x65, 0x72, 0x76, 0x65, 0x72, 0x54, 0x69, 0x6d, 0x65,
+	0x55, 0x73, 0x12, 0x22, 0x0a, 0x0d, 0x62, 0x75, 0x69, 0x6c, 0x64, 0x5f, 0x74, 0x69, 0x6d, 0x65,
+	0x5f, 0x75, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x62, 0x75, 0x69, 0x6c, 0x64,
+	0x54, 0x69, 0x6d, 0x65, 0x55, 0x73, 0x12, 0x28, 0x0a, 0x10, 0x6f, 0x70, 0x74, 0x69, 0x6d, 0x69,
+	0x7a, 0x65, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x5f, 0x75, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03,
+	0x52, 0x0e, 0x6f, 0x70, 0x74, 0x69, 0x6d, 0x69, 0x7a, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x55, 0x73,
+	0x12, 0x2a, 0x0a, 0x11, 0x73, 0x65, 0x72, 0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x5f, 0x74, 0x69,
+	0x6d, 0x65, 0x5f, 0x75, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0f, 0x73, 0x65, 0x72,
+	0x69, 0x61, 0x6c, 0x69, 0x7a, 0x65, 0x54, 0x69, 0x6d, 0x65, 0x55, 0x73, 0x22, 0xec, 0x01, 0x0a,
+	0x07, 0x53, 0x75, 0x6d, 0x6d, 0x61, 0x72, 0x79, 0x12, 0x42, 0x0a, 0x0c, 0x65, 0x6c, 0x61, 0x70,
+	0x73, 0x65, 0x64, 0x5f, 0x74, 0x69, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x1f,
+	0x2e, 0x6e, 0x65, 0x62, 0x75, 0x6c, 0x61, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67, 0x72,
+	0x61, 0x70, 0x68, 0x2e, 0x45, 0x6c, 0x61, 0x70, 0x73, 0x65, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x52,
+	0x0b, 0x65, 0x6c, 0x61, 0x70, 0x73, 0x65, 0x64, 0x54, 0x69, 0x6d, 0x65, 0x12, 0x21, 0x0a, 0x0c,
+	0x65, 0x78, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x5f, 0x74, 0x79, 0x70, 0x65, 0x18, 0x02, 0x20, 0x01,
 	0x28, 0x0c, 0x52, 0x0b, 0x65, 0x78, 0x70, 0x6c, 0x61, 0x69, 0x6e, 0x54, 0x79, 0x70, 0x65, 0x12,
-	0x39, 0x0a, 0x09, 0x70, 0x6c, 0x61, 0x6e, 0x5f, 0x69, 0x6e, 0x66, 0x6f, 0x18, 0x05, 0x20, 0x01,
+	0x39, 0x0a, 0x09, 0x70, 0x6c, 0x61, 0x6e, 0x5f, 0x69, 0x6e, 0x66, 0x6f, 0x18, 0x03, 0x20, 0x01,
 	0x28, 0x0b, 0x32, 0x1c, 0x2e, 0x6e, 0x65, 0x62, 0x75, 0x6c, 0x61, 0x2e, 0x70, 0x72, 0x6f, 0x74,
 	0x6f, 0x2e, 0x67, 0x72, 0x61, 0x70, 0x68, 0x2e, 0x50, 0x6c, 0x61, 0x6e, 0x49, 0x6e, 0x66, 0x6f,
 	0x52, 0x08, 0x70, 0x6c, 0x61, 0x6e, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x3f, 0x0a, 0x0b, 0x71, 0x75,
-	0x65, 0x72, 0x79, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x73, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32,
+	0x65, 0x72, 0x79, 0x5f, 0x73, 0x74, 0x61, 0x74, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0b, 0x32,
 	0x1e, 0x2e, 0x6e, 0x65, 0x62, 0x75, 0x6c, 0x61, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x2e, 0x67,
 	0x72, 0x61, 0x70, 0x68, 0x2e, 0x51, 0x75, 0x65, 0x72, 0x79, 0x53, 0x74, 0x61, 0x74, 0x73, 0x52,
 	0x0a, 0x71, 0x75, 0x65, 0x72, 0x79, 0x53, 0x74, 0x61, 0x74, 0x73, 0x22, 0x43, 0x0a, 0x0e, 0x45,
@@ -852,43 +915,45 @@ func file_graph_proto_rawDescGZIP() []byte {
 	return file_graph_proto_rawDescData
 }
 
-var file_graph_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
+var file_graph_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_graph_proto_goTypes = []interface{}{
 	(*Row)(nil),               // 0: nebula.proto.graph.Row
 	(*ResultTable)(nil),       // 1: nebula.proto.graph.ResultTable
 	(*QueryStats)(nil),        // 2: nebula.proto.graph.QueryStats
 	(*PlanInfo)(nil),          // 3: nebula.proto.graph.PlanInfo
-	(*Summary)(nil),           // 4: nebula.proto.graph.Summary
-	(*ExecuteRequest)(nil),    // 5: nebula.proto.graph.ExecuteRequest
-	(*ExecuteResponse)(nil),   // 6: nebula.proto.graph.ExecuteResponse
-	(*AuthRequest)(nil),       // 7: nebula.proto.graph.AuthRequest
-	(*AuthResponse)(nil),      // 8: nebula.proto.graph.AuthResponse
-	(*common.Value)(nil),      // 9: nebula.proto.common.Value
-	(*common.Status)(nil),     // 10: nebula.proto.common.Status
-	(*common.ClientInfo)(nil), // 11: nebula.proto.common.ClientInfo
+	(*ElapsedTime)(nil),       // 4: nebula.proto.graph.ElapsedTime
+	(*Summary)(nil),           // 5: nebula.proto.graph.Summary
+	(*ExecuteRequest)(nil),    // 6: nebula.proto.graph.ExecuteRequest
+	(*ExecuteResponse)(nil),   // 7: nebula.proto.graph.ExecuteResponse
+	(*AuthRequest)(nil),       // 8: nebula.proto.graph.AuthRequest
+	(*AuthResponse)(nil),      // 9: nebula.proto.graph.AuthResponse
+	(*common.Value)(nil),      // 10: nebula.proto.common.Value
+	(*common.Status)(nil),     // 11: nebula.proto.common.Status
+	(*common.ClientInfo)(nil), // 12: nebula.proto.common.ClientInfo
 }
 var file_graph_proto_depIdxs = []int32{
-	9,  // 0: nebula.proto.graph.Row.values:type_name -> nebula.proto.common.Value
+	10, // 0: nebula.proto.graph.Row.values:type_name -> nebula.proto.common.Value
 	0,  // 1: nebula.proto.graph.ResultTable.records:type_name -> nebula.proto.graph.Row
 	3,  // 2: nebula.proto.graph.PlanInfo.children:type_name -> nebula.proto.graph.PlanInfo
-	3,  // 3: nebula.proto.graph.Summary.plan_info:type_name -> nebula.proto.graph.PlanInfo
-	2,  // 4: nebula.proto.graph.Summary.query_stats:type_name -> nebula.proto.graph.QueryStats
-	10, // 5: nebula.proto.graph.ExecuteResponse.status:type_name -> nebula.proto.common.Status
-	1,  // 6: nebula.proto.graph.ExecuteResponse.result:type_name -> nebula.proto.graph.ResultTable
-	4,  // 7: nebula.proto.graph.ExecuteResponse.summary:type_name -> nebula.proto.graph.Summary
-	11, // 8: nebula.proto.graph.AuthRequest.client_info:type_name -> nebula.proto.common.ClientInfo
-	10, // 9: nebula.proto.graph.AuthResponse.status:type_name -> nebula.proto.common.Status
-	7,  // 10: nebula.proto.graph.GraphService.Authenticate:input_type -> nebula.proto.graph.AuthRequest
-	5,  // 11: nebula.proto.graph.GraphService.Execute:input_type -> nebula.proto.graph.ExecuteRequest
-	5,  // 12: nebula.proto.graph.GraphService.StreamingExecute:input_type -> nebula.proto.graph.ExecuteRequest
-	8,  // 13: nebula.proto.graph.GraphService.Authenticate:output_type -> nebula.proto.graph.AuthResponse
-	6,  // 14: nebula.proto.graph.GraphService.Execute:output_type -> nebula.proto.graph.ExecuteResponse
-	6,  // 15: nebula.proto.graph.GraphService.StreamingExecute:output_type -> nebula.proto.graph.ExecuteResponse
-	13, // [13:16] is the sub-list for method output_type
-	10, // [10:13] is the sub-list for method input_type
-	10, // [10:10] is the sub-list for extension type_name
-	10, // [10:10] is the sub-list for extension extendee
-	0,  // [0:10] is the sub-list for field type_name
+	4,  // 3: nebula.proto.graph.Summary.elapsed_time:type_name -> nebula.proto.graph.ElapsedTime
+	3,  // 4: nebula.proto.graph.Summary.plan_info:type_name -> nebula.proto.graph.PlanInfo
+	2,  // 5: nebula.proto.graph.Summary.query_stats:type_name -> nebula.proto.graph.QueryStats
+	11, // 6: nebula.proto.graph.ExecuteResponse.status:type_name -> nebula.proto.common.Status
+	1,  // 7: nebula.proto.graph.ExecuteResponse.result:type_name -> nebula.proto.graph.ResultTable
+	5,  // 8: nebula.proto.graph.ExecuteResponse.summary:type_name -> nebula.proto.graph.Summary
+	12, // 9: nebula.proto.graph.AuthRequest.client_info:type_name -> nebula.proto.common.ClientInfo
+	11, // 10: nebula.proto.graph.AuthResponse.status:type_name -> nebula.proto.common.Status
+	8,  // 11: nebula.proto.graph.GraphService.Authenticate:input_type -> nebula.proto.graph.AuthRequest
+	6,  // 12: nebula.proto.graph.GraphService.Execute:input_type -> nebula.proto.graph.ExecuteRequest
+	6,  // 13: nebula.proto.graph.GraphService.StreamingExecute:input_type -> nebula.proto.graph.ExecuteRequest
+	9,  // 14: nebula.proto.graph.GraphService.Authenticate:output_type -> nebula.proto.graph.AuthResponse
+	7,  // 15: nebula.proto.graph.GraphService.Execute:output_type -> nebula.proto.graph.ExecuteResponse
+	7,  // 16: nebula.proto.graph.GraphService.StreamingExecute:output_type -> nebula.proto.graph.ExecuteResponse
+	14, // [14:17] is the sub-list for method output_type
+	11, // [11:14] is the sub-list for method input_type
+	11, // [11:11] is the sub-list for extension type_name
+	11, // [11:11] is the sub-list for extension extendee
+	0,  // [0:11] is the sub-list for field type_name
 }
 
 func init() { file_graph_proto_init() }
@@ -946,7 +1011,7 @@ func file_graph_proto_init() {
 			}
 		}
 		file_graph_proto_msgTypes[4].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*Summary); i {
+			switch v := v.(*ElapsedTime); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -958,7 +1023,7 @@ func file_graph_proto_init() {
 			}
 		}
 		file_graph_proto_msgTypes[5].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExecuteRequest); i {
+			switch v := v.(*Summary); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -970,7 +1035,7 @@ func file_graph_proto_init() {
 			}
 		}
 		file_graph_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ExecuteResponse); i {
+			switch v := v.(*ExecuteRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -982,7 +1047,7 @@ func file_graph_proto_init() {
 			}
 		}
 		file_graph_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*AuthRequest); i {
+			switch v := v.(*ExecuteResponse); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -994,6 +1059,18 @@ func file_graph_proto_init() {
 			}
 		}
 		file_graph_proto_msgTypes[8].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*AuthRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_graph_proto_msgTypes[9].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*AuthResponse); i {
 			case 0:
 				return &v.state
@@ -1012,7 +1089,7 @@ func file_graph_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_graph_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   9,
+			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

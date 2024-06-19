@@ -83,9 +83,13 @@ func (p *defaultPrinter) PrintResultVertical(w io.Writer, res nebula.Result) {
 func (p *defaultPrinter) PrintPlanInfo(w io.Writer, summary nebula.Summary) {
 	s := p.renderPlanInfo(summary.PlanInfo(), string(summary.ExplainType()))
 	fmt.Fprintln(w, s)
-	fmt.Fprintf(w, "Execution Plan (build time %d us, optimize time %d us), [Px] means pipeline-x and [S] means storage side.\n\n",
-		summary.BuildTimeUs(),
-		summary.OptimizeTimeUs())
+	fmt.Fprintf(w, "Execution Plan: [Px] means pipeline-x and [S] means storage side.\n\n")
+	fmt.Fprintf(w, "Elapsed Time:\n")
+	fmt.Fprintf(w, " build time    : %d us\n", summary.BuildTimeUs())
+	fmt.Fprintf(w, " optimize time : %d us\n", summary.OptimizeTimeUs())
+	fmt.Fprintf(w, " serialize time: %d us\n", summary.SerializeTimeUs())
+	fmt.Fprintf(w, " total time    : %d us\n", summary.TotalServerTimeUs())
+	fmt.Fprintln(w, "")
 }
 
 // use the console string() format

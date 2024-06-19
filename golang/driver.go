@@ -26,6 +26,7 @@ type (
 	Summary interface {
 		BuildTimeUs() int64
 		OptimizeTimeUs() int64
+		SerializeTimeUs() int64
 		TotalServerTimeUs() int64
 		ExplainType() string
 		PlanInfo() PlanInfo

@@ -15,15 +15,19 @@ type (
 )
 
 func (s *summary) BuildTimeUs() int64 {
-	return s.summary.BuildTimeUs
+	return s.summary.ElapsedTime.BuildTimeUs
 }
 
 func (s *summary) OptimizeTimeUs() int64 {
-	return s.summary.OptimizeTimeUs
+	return s.summary.ElapsedTime.OptimizeTimeUs
+}
+
+func (s *summary) SerializeTimeUs() int64 {
+	return s.summary.ElapsedTime.SerializeTimeUs
 }
 
 func (s *summary) TotalServerTimeUs() int64 {
-	return s.summary.TotalServerTimeUs
+	return s.summary.ElapsedTime.TotalServerTimeUs
 }
 
 func (s *summary) ExplainType() string {
@@ -34,7 +38,7 @@ func (s *summary) PlanInfo() PlanInfo {
 	return &planInfo{s.summary.GetPlanInfo()}
 }
 
-func (s * summary) QueryStats() QueryStats {
+func (s *summary) QueryStats() QueryStats {
 	return &queryStats{s.summary.GetQueryStats()}
 }
 
