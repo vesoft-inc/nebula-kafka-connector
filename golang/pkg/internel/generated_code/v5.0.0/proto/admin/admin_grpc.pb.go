@@ -26,7 +26,7 @@ const (
 	AdminService_SetMetaAgent_FullMethodName   = "/nebula.proto.admin.AdminService/SetMetaAgent"
 	AdminService_ShowMetaInfo_FullMethodName   = "/nebula.proto.admin.AdminService/ShowMetaInfo"
 	AdminService_AddHost_FullMethodName        = "/nebula.proto.admin.AdminService/AddHost"
-	AdminService_RemoveHost_FullMethodName     = "/nebula.proto.admin.AdminService/RemoveHost"
+	AdminService_DropHost_FullMethodName       = "/nebula.proto.admin.AdminService/DropHost"
 	AdminService_ListHosts_FullMethodName      = "/nebula.proto.admin.AdminService/ListHosts"
 	AdminService_AddService_FullMethodName     = "/nebula.proto.admin.AdminService/AddService"
 	AdminService_DropService_FullMethodName    = "/nebula.proto.admin.AdminService/DropService"
@@ -55,7 +55,7 @@ type AdminServiceClient interface {
 	SetMetaAgent(ctx context.Context, in *SetMetaAgentRequest, opts ...grpc.CallOption) (*SetMetaAgentResponse, error)
 	ShowMetaInfo(ctx context.Context, in *ShowMetaRequest, opts ...grpc.CallOption) (*ShowMetaResponse, error)
 	AddHost(ctx context.Context, in *AddHostRequest, opts ...grpc.CallOption) (*AddHostResponse, error)
-	RemoveHost(ctx context.Context, in *RemoveHostRequest, opts ...grpc.CallOption) (*RemoveHostResponse, error)
+	DropHost(ctx context.Context, in *RemoveHostRequest, opts ...grpc.CallOption) (*RemoveHostResponse, error)
 	ListHosts(ctx context.Context, in *ListHostsRequest, opts ...grpc.CallOption) (*ListHostsResponse, error)
 	AddService(ctx context.Context, in *AddServiceRequest, opts ...grpc.CallOption) (*AddServiceResponse, error)
 	DropService(ctx context.Context, in *DropServiceRequest, opts ...grpc.CallOption) (*DropServiceResponse, error)
@@ -115,9 +115,9 @@ func (c *adminServiceClient) AddHost(ctx context.Context, in *AddHostRequest, op
 	return out, nil
 }
 
-func (c *adminServiceClient) RemoveHost(ctx context.Context, in *RemoveHostRequest, opts ...grpc.CallOption) (*RemoveHostResponse, error) {
+func (c *adminServiceClient) DropHost(ctx context.Context, in *RemoveHostRequest, opts ...grpc.CallOption) (*RemoveHostResponse, error) {
 	out := new(RemoveHostResponse)
-	err := c.cc.Invoke(ctx, AdminService_RemoveHost_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, AdminService_DropHost_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -302,7 +302,7 @@ type AdminServiceServer interface {
 	SetMetaAgent(context.Context, *SetMetaAgentRequest) (*SetMetaAgentResponse, error)
 	ShowMetaInfo(context.Context, *ShowMetaRequest) (*ShowMetaResponse, error)
 	AddHost(context.Context, *AddHostRequest) (*AddHostResponse, error)
-	RemoveHost(context.Context, *RemoveHostRequest) (*RemoveHostResponse, error)
+	DropHost(context.Context, *RemoveHostRequest) (*RemoveHostResponse, error)
 	ListHosts(context.Context, *ListHostsRequest) (*ListHostsResponse, error)
 	AddService(context.Context, *AddServiceRequest) (*AddServiceResponse, error)
 	DropService(context.Context, *DropServiceRequest) (*DropServiceResponse, error)
@@ -341,8 +341,8 @@ func (UnimplementedAdminServiceServer) ShowMetaInfo(context.Context, *ShowMetaRe
 func (UnimplementedAdminServiceServer) AddHost(context.Context, *AddHostRequest) (*AddHostResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddHost not implemented")
 }
-func (UnimplementedAdminServiceServer) RemoveHost(context.Context, *RemoveHostRequest) (*RemoveHostResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveHost not implemented")
+func (UnimplementedAdminServiceServer) DropHost(context.Context, *RemoveHostRequest) (*RemoveHostResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropHost not implemented")
 }
 func (UnimplementedAdminServiceServer) ListHosts(context.Context, *ListHostsRequest) (*ListHostsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListHosts not implemented")
@@ -468,20 +468,20 @@ func _AdminService_AddHost_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_RemoveHost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _AdminService_DropHost_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemoveHostRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).RemoveHost(ctx, in)
+		return srv.(AdminServiceServer).DropHost(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AdminService_RemoveHost_FullMethodName,
+		FullMethod: AdminService_DropHost_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).RemoveHost(ctx, req.(*RemoveHostRequest))
+		return srv.(AdminServiceServer).DropHost(ctx, req.(*RemoveHostRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -848,8 +848,8 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AdminService_AddHost_Handler,
 		},
 		{
-			MethodName: "RemoveHost",
-			Handler:    _AdminService_RemoveHost_Handler,
+			MethodName: "DropHost",
+			Handler:    _AdminService_DropHost_Handler,
 		},
 		{
 			MethodName: "ListHosts",

@@ -21,6 +21,30 @@ type (
 		owner       string
 	}
 
+	AddHostReq struct {
+		host		string
+		clustername string
+		agentPort	uint32
+	}
+
+	DropHostReq struct {
+		host        string
+		clustername string
+	}
+
+	ListHostsReq struct {
+		clustername string
+	}
+
+	HostInfo struct {
+		HostName string `json:"host"`
+		AgentPort uint32 `json:"agent_port"`
+	}
+
+	ListHostsResp struct {
+		HostInfoList	[]*HostInfo `json:"host_info_list"`
+	}
+
 	AddServiceReq struct {
 		host        string
 		port        uint32
@@ -107,6 +131,27 @@ func NewAlterClusterReq(clusterName string, owner string) *AlterClusterReq {
 	}
 }
 
+func NewAddHostReq(host string, clusterName string, agentPort uint32) *AddHostReq {
+	return &AddHostReq{
+		host:        host,
+		clustername: clusterName,
+		agentPort:   agentPort,
+	}
+}
+
+func NewDropHostReq(host string, clusterName string) *DropHostReq {
+	return &DropHostReq{
+		host:        host,
+		clustername: clusterName,
+	}
+}
+
+func NewListHostsReq(clusterName string) *ListHostsReq {
+	return &ListHostsReq{
+		clustername: clusterName,
+	}
+}
+
 func NewAddServiceReq(host string, port uint32, serviceType ServiceType, clusterName string) *AddServiceReq {
 	return &AddServiceReq{
 		host:        host,
@@ -166,6 +211,72 @@ func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
 		return err
 	}
 	return responseIsErr(resp)
+}
+
+func (c* metaClient) AddHost(req *AddHostReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.AddHostRequest{
+		Header:      &admin.RequestHeader{Token: c.token},
+		HostInfo:    &admin.HostInfo{HostName: []byte(req.host), ClusterName: []byte(req.clustername), AgentPort: req.agentPort},
+		Force: 	 false,
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.AddHost(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return responseIsErr(resp)
+}
+
+func (c *metaClient) DropHost(req *DropHostReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.RemoveHostRequest{
+		Header:      &admin.RequestHeader{Token: c.token},
+		HostName:   []byte(req.host),
+		ClusterName: []byte(req.clustername),
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.DropHost(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return responseIsErr(resp)
+}
+
+func (c* metaClient) ListHosts(req *ListHostsReq) (*ListHostsResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.ListHostsRequest{
+		Header:      &admin.RequestHeader{Token: c.token},
+		ClusterName: []byte(req.clustername),
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.ListHosts(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := responseIsErr(resp); err != nil {
+        return nil, err
+    }
+    response, ok := resp.(*admin.ListHostsResponse)
+    if !ok {
+        return nil, fmt.Errorf("invalid response")
+    }
+	hostInfoList := make([]*HostInfo, 0)
+	for _, h := range response.HostInfo {
+		hostInfoList = append(hostInfoList, &HostInfo{
+			HostName: string(h.HostName),
+			AgentPort: h.AgentPort,
+		})
+	}
+	return &ListHostsResp{
+		HostInfoList: hostInfoList,
+	}, nil
 }
 
 func (c *metaClient) AddService(req *AddServiceReq) error {
@@ -257,6 +368,7 @@ func (c *metaClient) InitCluster(req *InitClusterReq) error {
 	}
 	return responseIsErr(resp)
 }
+
 func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()

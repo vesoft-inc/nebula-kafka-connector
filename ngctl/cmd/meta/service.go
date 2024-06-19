@@ -134,7 +134,7 @@ var showServiceCmd = &cobra.Command{
 			} else {
 				row = append(row, "storaged")
 			}
-			row = append(row, fmt.Sprintf("%s", s.Host))
+			row = append(row, s.Host)
 			row = append(row, fmt.Sprintf("%d", s.Port))
 			data = append(data, row)
 		}

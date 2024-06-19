@@ -54,6 +54,9 @@ type (
 		DropCluster(req *DropClusterReq) error
 		InitCluster(req *InitClusterReq) error
 		ListClusters(req *ListClustersReq) (*ListClustersResp, error)
+		AddHost(req *AddHostReq) error
+		DropHost(req *DropHostReq) error
+		ListHosts(req *ListHostsReq) (*ListHostsResp, error)
 		AddService(req *AddServiceReq) error
 		DropService(req *DropServiceReq) error
 		ListServices(req *ListServicesReq) (*ListServicesResp, error)
