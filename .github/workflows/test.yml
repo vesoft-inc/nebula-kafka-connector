@@ -60,6 +60,9 @@ jobs:
       - uses: s4u/maven-settings-action@v3.0.0
         with:
           mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
+      - name: Link maven config file
+        run: |
+          ln -s /github/home/.m2/ /root/.m2
       - name: Build with Maven
         run: |
           mvn -B install -pl client -D test=DataTest,ProtoVersionTest
@@ -84,6 +87,9 @@ jobs:
       - uses: s4u/maven-settings-action@v3.0.0
         with:
           mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
+      - name: Link maven config file
+        run: |
+          ln -s /github/home/.m2/ /root/.m2
       - name: Build with Maven
         run: |
           cd java
@@ -109,6 +115,9 @@ jobs:
       - uses: s4u/maven-settings-action@v3.0.0
         with:
           mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
+      - name: Link maven config file
+        run: |
+          ln -s /github/home/.m2/ /root/.m2
       - name: Build with Maven
         run: |
           cd java
