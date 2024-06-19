@@ -200,7 +200,7 @@ public class ResultSet {
      * @return int
      */
     public long getLatency() {
-        return response.getSummary().getTotalServerTimeUs();
+        return response.getSummary().getElapsedTime().getTotalServerTimeUs();
     }
 
     /**

@@ -80,13 +80,18 @@ message PlanInfo {
     repeated PlanInfo children         = 16;
 }
 
+message ElapsedTime {
+    int64 total_server_time_us = 1;
+    int64 build_time_us        = 2;
+    int64 optimize_time_us     = 3;
+    int64 serialize_time_us    = 4;
+}
+
 message Summary {
-    int64      build_time_us        = 1;
-    int64      optimize_time_us     = 2;
-    int64      total_server_time_us = 3;
-    bytes      explain_type         = 4;
-    PlanInfo   plan_info            = 5;
-    QueryStats query_stats          = 6;
+    ElapsedTime elapsed_time = 1;
+    bytes       explain_type = 2;
+    PlanInfo    plan_info    = 3;
+    QueryStats  query_stats  = 4;
 }
 
 message ExecuteRequest {

@@ -18,6 +18,7 @@ import com.vesoft.nebula.proto.common.Path;
 import com.vesoft.nebula.proto.common.Record;
 import com.vesoft.nebula.proto.common.Status;
 import com.vesoft.nebula.proto.common.Value;
+import com.vesoft.nebula.proto.graph.ElapsedTime;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.ResultTable;
 import com.vesoft.nebula.proto.graph.Row;
@@ -131,7 +132,9 @@ public class DataTest {
                     .newBuilder()
                     .setResult(resultTable)
                     .setSummary(Summary.newBuilder()
-                            .setTotalServerTimeUs(1000).build())
+                            .setElapsedTime(ElapsedTime.newBuilder()
+                                    .setTotalServerTimeUs(1000)
+                                    .build()))
                     .setStatus(Status.newBuilder()
                             .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build())
                     .build();
