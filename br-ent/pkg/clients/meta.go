@@ -105,7 +105,7 @@ type ClusterServiceInfo struct {
 	Services  []*ServiceInfo
 }
 
-func (m *NebulaMeta) ListClusters() ([]*ClusterServiceInfo, error) {
+func (m *NebulaMeta) ListClusters(amg *AgentManager) ([]*ClusterServiceInfo, error) {
 	clusterResp, err := m.client.ListClusters(meta.NewListClustersReq(""))
 	if err != nil {
 		return nil, err
@@ -128,8 +128,23 @@ func (m *NebulaMeta) ListClusters() ([]*ClusterServiceInfo, error) {
 				ServiceType: s.Type,
 				Host:        s.Host,
 				Port:        s.Port,
-				InstallPath: "/home/vesoft/nebula5.x/cluster",
-				DataPaths:   []string{"/home/vesoft/nebula5.x/cluster/data/storage"},
+			}
+			if s.Type == meta.ServiceTypeStoraged {
+				agent, err := amg.GetAgent(s.Host)
+				if err != nil {
+					return nil, fmt.Errorf("get agent %s failed: %w", s.Host, err)
+				}
+				installPath, err := agent.GetInstallPath(s.Type)
+				if err != nil {
+					return nil, fmt.Errorf("get metad %s install path failed: %w", s.Host, err)
+				}
+				dataPaths, err := agent.GetDataPaths(s.Type, installPath)
+				if err != nil {
+					return nil, fmt.Errorf("get metad %s data path failed: %w", s.Host, err)
+				}
+
+				sInfo.InstallPath = installPath
+				sInfo.DataPaths = dataPaths
 			}
 
 			cluster.Services = append(cluster.Services, sInfo)

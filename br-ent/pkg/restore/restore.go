@@ -72,7 +72,7 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 	}
 
 	// get cluster
-	clusters, err := r.meta.ListClusters()
+	clusters, err := r.meta.ListClusters(r.amg)
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}
@@ -100,13 +100,26 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 	}
 	metaCluster := make([]*clients.ServiceInfo, 0)
 	for _, service := range metaResp.Services {
+		agent, err := r.amg.GetAgent(service.Host)
+		if err != nil {
+			return nil, fmt.Errorf("get agent %s failed: %w", service.Host, err)
+		}
+		installPath, err := agent.GetInstallPath(service.Type)
+		if err != nil {
+			return nil, fmt.Errorf("get metad %s install path failed: %w", service.Host, err)
+		}
+		dataPaths, err := agent.GetDataPaths(service.Type, installPath)
+		if err != nil {
+			return nil, fmt.Errorf("get metad %s data path failed: %w", service.Host, err)
+		}
+
 		metaCluster = append(metaCluster, &clients.ServiceInfo{
 			ServiceId:   service.Id,
 			ServiceType: service.Type,
 			Host:        service.Host,
 			Port:        service.Port,
-			InstallPath: "/home/vesoft/nebula5.x/cluster",
-			DataPaths:   []string{"/home/vesoft/nebula5.x/cluster/data/meta"},
+			InstallPath: installPath,
+			DataPaths:   dataPaths,
 		})
 	}
 
@@ -431,7 +444,7 @@ func (r *Restore) downloadMeta() error {
 			return fmt.Errorf("get agent for meta %s failed: %w", service.Host, err)
 		}
 
-		// meta kv data path: {nebulaData}/meta/{backup_name}
+		// meta kv data path: {nebulaData}/checkpoint/{backup_name}
 		localDir := filepath.Join(service.DataPaths[0], "checkpoint", r.backupName)
 
 		if err = agent.DownloadFile(backend, localDir, true); err != nil {

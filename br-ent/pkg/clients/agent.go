@@ -11,6 +11,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/utils"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -61,6 +62,7 @@ type (
 		RemoveDir(path string) error
 		ExistDir(path string) (bool, error)
 		GetInstallPath(serviceType meta.ServiceType) (string, error)
+		GetDataPaths(serviceType meta.ServiceType, installPath string) ([]string, error)
 		DBPlayBack(backupName, installPath, dataPath, serviceMap string) error
 	}
 
@@ -360,6 +362,36 @@ func (ag *agentClient) GetInstallPath(serviceType meta.ServiceType) (string, err
 	}
 
 	return installPath, nil
+}
+
+func (ag *agentClient) GetDataPaths(serviceType meta.ServiceType, installPath string) ([]string, error) {
+	cmdStr := fmt.Sprintf("cd %s && cat etc/nebula-%s.conf | grep data_path | grep -v '^\\s*#'", installPath, ToName(serviceType))
+	stdout, stderr, err := ag.shell(cmdStr, false)
+	if err != nil {
+		return nil, fmt.Errorf("get data paths failed %s, %s, %w", stdout, stderr, err)
+	}
+
+	stdout = strings.TrimSpace(stdout)
+
+	datapath := strings.Split(stdout, "=")
+	if len(datapath) != 2 {
+		return nil, fmt.Errorf("data dataPath not valid: %s", datapath)
+	}
+
+	var paths []string
+	for _, dataPath := range strings.Split(datapath[1], ",") {
+		if dataPath == "" {
+			continue
+		}
+		if dataPath[0] == '/' {
+			paths = append(paths, dataPath)
+		} else {
+			dataPath = filepath.Join(installPath, dataPath)
+			paths = append(paths, dataPath)
+		}
+	}
+
+	return paths, nil
 }
 
 func (ag *agentClient) DBPlayBack(backupName, installPath, dataPath, serviceMap string) error {

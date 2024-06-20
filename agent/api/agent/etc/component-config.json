@@ -1,0 +1,17 @@
+{
+  "graphd": {
+    "config": {
+      "install_path": "/home/vesoft/nebula5.x/cluster"
+    }
+  },
+  "storaged": {
+    "config": {
+      "install_path": "/home/vesoft/nebula5.x/cluster"
+    }
+  },
+  "metad": {
+    "config": {
+      "install_path": "/home/vesoft/nebula5.x/cluster"
+    }
+  }
+}
