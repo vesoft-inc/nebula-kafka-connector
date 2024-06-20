@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	FlagStorage  = "storage"
-	FlagMetaAddr = "meta"
+	FlagStorage    = "storage"
+	FlagMetaAddr   = "meta"
+	FlagAgentsAddr = "agents"
 
 	FlagLogPath  = "log"
 	FlagLogDebug = "debug"
@@ -31,6 +32,7 @@ const (
 	flagPassword           = "password"
 	flagClusterId          = "clusterId"
 	flagBackupClusterId    = "backup-clusterId"
+	flagCatalogOwner       = "catalog-owner"
 
 	CACertPathEnv     = "CA_CERT_PATH"
 	ClientCertPathEnv = "CLIENT_CERT_PATH"

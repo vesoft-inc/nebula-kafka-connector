@@ -5,15 +5,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"os"
-	"strings"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/vesoft-inc/go-pkg/httpclient"
 	agentstorage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/utils"
-
-	log "github.com/sirupsen/logrus"
+	"os"
+	"strings"
 )
 
 type (
@@ -83,7 +81,8 @@ func NewAgentClient(addr string) (AgentClient, error) {
 	addr = utils.GetHttpsHost(addr)
 
 	return &agentClient{
-		client: httpclient.NewObjectClient(addr, httpclient.WithTLSClientConfig(tlsConfig)),
+		client:  httpclient.NewObjectClient(addr, httpclient.WithTLSClientConfig(tlsConfig)),
+		timeout: 10,
 	}, nil
 }
 
@@ -92,15 +91,23 @@ type AgentManager struct {
 	agents map[string]AgentClient // group by ip or host
 }
 
-func NewAgentManager(ctx context.Context) (*AgentManager, error) {
+func NewAgentManager(ctx context.Context, agentsAddr string) (*AgentManager, error) {
 	agents := make(map[string]AgentClient)
 
-	agent, err := NewAgentClient("192.168.8.34:6688")
-	if err != nil {
-		return nil, err
+	agentAddrs := strings.Split(agentsAddr, ",")
+	for _, addr := range agentAddrs {
+		agent, err := NewAgentClient(addr)
+		if err != nil {
+			return nil, err
+		}
+
+		sAddr := strings.Split(addr, ":")
+		if len(sAddr) != 2 {
+			return nil, fmt.Errorf("bad format agent address: %s", addr)
+		}
+
+		agents[sAddr[0]] = agent
 	}
-	agents["192.168.8.34"] = agent
-	// TODO: get agent from meta list agent
 
 	return &AgentManager{
 		ctx:    ctx,
@@ -129,6 +136,7 @@ func (ag *agentClient) shell(cmd string, sudo bool) (stdout string, stderr strin
 		Command: cmd,
 		Timeout: ag.timeout,
 	}, &respBody)
+
 	if err != nil {
 		return "", "", fmt.Errorf("agent failed to post request: %s", err)
 	}
@@ -260,6 +268,7 @@ func (ag *agentClient) DownloadFile(b *agentstorage.Backend, targetPath string, 
 
 func (ag *agentClient) StopService(serviceType meta.ServiceType, dir string) error {
 	cmdStr := fmt.Sprintf("cd %s && scripts/nebula.service stop %s", dir, ToName(serviceType))
+
 	stdout, stderr, err := ag.shell(cmdStr, false)
 	if err != nil {
 		return fmt.Errorf("stop service failed %s, %s, %w", stdout, stderr, err)
@@ -354,11 +363,16 @@ func (ag *agentClient) GetInstallPath(serviceType meta.ServiceType) (string, err
 }
 
 func (ag *agentClient) DBPlayBack(backupName, installPath, dataPath, serviceMap string) error {
-	cmdStr := fmt.Sprintf("cd %s && bin/db_playback --db_path=%s --backup_name=%s --service_map=%s", installPath, dataPath, backupName, serviceMap)
+	cmdStr := fmt.Sprintf("cd %s && bin/db_playback --v=2 --db_path=%s --backup_name=%s --service_map=%s", installPath, dataPath, backupName, serviceMap)
+
+	log.Infof("db playback cmd: %s", cmdStr)
+
 	stdout, stderr, err := ag.shell(cmdStr, false)
 	if err != nil {
 		return fmt.Errorf("db playback failed %s, %s, %w", stdout, stderr, err)
 	}
+
+	log.Infof("db playback success %s", stdout)
 
 	return nil
 }

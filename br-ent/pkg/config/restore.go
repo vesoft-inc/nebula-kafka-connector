@@ -14,12 +14,14 @@ import (
 
 func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.String(FlagMetaAddr, "", "Specify meta server")
+	flags.String(FlagAgentsAddr, "", "Specify agents address, eg: 192.168.8.1:6688,192.168.8.2:6688,192.168.8.3:6688")
 	flags.String(flagBackupName, "", "Specify backup name")
 	flags.Int(flagConcurrency, 5, "Max concurrency for upload, download and playback data")
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
 	flags.Int64(flagClusterId, 0, "Specify the restore cluster id")
 	flags.Int64(flagBackupClusterId, 0, "Specify the backup cluster id")
+	flags.String(flagCatalogOwner, "root", "Specify the restore cluster catalog owner")
 
 	// support tls
 	flags.Bool(flagEnableSSL, false, "Enable SSL connection")
@@ -29,6 +31,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.Bool(flagInsecureSkipVerify, false, "Skip server side certificate verification")
 
 	cobra.MarkFlagRequired(flags, FlagMetaAddr)
+	cobra.MarkFlagRequired(flags, FlagAgentsAddr)
 	cobra.MarkFlagRequired(flags, FlagStorage)
 	cobra.MarkFlagRequired(flags, flagBackupName)
 	cobra.MarkFlagRequired(flags, flagClusterId)
@@ -38,6 +41,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 type RestoreConfig struct {
 	BackupName      string
 	MetaAddr        string
+	AgentsAddr      string
 	ClusterId       int64
 	BackupClusterId int64
 	Concurrency     int
@@ -45,6 +49,7 @@ type RestoreConfig struct {
 	TLSConfig       *tls.Config
 	Username        string
 	Password        string
+	CatalogOwner    string
 }
 
 func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
@@ -60,12 +65,22 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 		return err
 	}
 
+	r.AgentsAddr, err = flags.GetString(FlagAgentsAddr)
+	if err != nil {
+		return err
+	}
+
 	r.ClusterId, err = flags.GetInt64(flagClusterId)
 	if err != nil {
 		return err
 	}
 
 	r.BackupClusterId, err = flags.GetInt64(flagBackupClusterId)
+	if err != nil {
+		return err
+	}
+
+	r.CatalogOwner, err = flags.GetString(flagCatalogOwner)
 	if err != nil {
 		return err
 	}

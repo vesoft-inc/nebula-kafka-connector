@@ -60,6 +60,7 @@ type (
 		NewClusterId int64
 		MetaBackups  []string
 		ServiceMap   map[int64]int64
+		CatalogOwner string
 	}
 
 	RestoreReq struct {
@@ -179,6 +180,7 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 			NewClusterId: info.NewClusterId,
 			MetaBackups:  stringsToBytes(info.MetaBackups),
 			ServiceMap:   info.ServiceMap,
+			CatalogOwner: []byte(info.CatalogOwner),
 		})
 
 	}

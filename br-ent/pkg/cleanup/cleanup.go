@@ -29,7 +29,7 @@ func NewCleanup(ctx context.Context, cfg *config.CleanupConfig) (*Cleanup, error
 
 	client, err := clients.NewMeta(cfg.MetaAddr, cfg.Username, cfg.Password, nil)
 
-	amg, err := clients.NewAgentManager(ctx)
+	amg, err := clients.NewAgentManager(ctx, cfg.AgentsAddr)
 	if err != nil {
 		return nil, err
 	}

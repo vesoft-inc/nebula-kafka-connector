@@ -33,7 +33,7 @@ func NewBackup(ctx context.Context, cfg *config.BackupConfig) (*Backup, error) {
 	}
 
 	var err error
-	b.amg, err = clients.NewAgentManager(ctx)
+	b.amg, err = clients.NewAgentManager(ctx, cfg.AgentsAddr)
 	if err != nil {
 		return nil, fmt.Errorf("create agent manager failed: %w", err)
 	}

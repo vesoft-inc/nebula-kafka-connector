@@ -12,6 +12,7 @@ import (
 
 func AddBackupFlags(flags *pflag.FlagSet) {
 	flags.String(FlagMetaAddr, "", "Specify meta server")
+	flags.String(FlagAgentsAddr, "", "Specify agents address, eg: 192.168.8.1:6688,192.168.8.2:6688,192.168.8.3:6688")
 	flags.String(flagBackupName, "", "Specify backup name")
 	flags.Int(flagConcurrency, 5, "Max concurrency for download data and data playback")
 	flags.String(flagUsername, "", "Username for login metad service")
@@ -28,11 +29,14 @@ func AddBackupFlags(flags *pflag.FlagSet) {
 
 	cobra.MarkFlagRequired(flags, FlagStorage)
 	cobra.MarkFlagRequired(flags, flagClusterId)
+	cobra.MarkFlagRequired(flags, FlagMetaAddr)
+	cobra.MarkFlagRequired(flags, FlagAgentsAddr)
 }
 
 type BackupConfig struct {
 	BackupName  string
 	MetaAddr    string
+	AgentsAddr  string
 	ClusterId   int64
 	Concurrency int
 	Backend     *agentstorage.Backend // Backend is associated with the root uri
@@ -49,6 +53,11 @@ func (b *BackupConfig) ParseFullFlags(flags *pflag.FlagSet) error {
 	}
 
 	b.MetaAddr, err = flags.GetString(FlagMetaAddr)
+	if err != nil {
+		return err
+	}
+
+	b.AgentsAddr, err = flags.GetString(FlagAgentsAddr)
 	if err != nil {
 		return err
 	}

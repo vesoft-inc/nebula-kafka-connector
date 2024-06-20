@@ -12,6 +12,7 @@ import (
 
 func AddCleanupFlags(flags *pflag.FlagSet) {
 	flags.String(FlagMetaAddr, "", "Specify meta server")
+	flags.String(FlagAgentsAddr, "", "Specify agents address, eg: 192.168.8.1:6688,192.168.8.2:6688,192.168.8.3:6688")
 	flags.String(flagBackupName, "", "Specify backup name")
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
@@ -25,10 +26,13 @@ func AddCleanupFlags(flags *pflag.FlagSet) {
 
 	cobra.MarkFlagRequired(flags, flagBackupName)
 	cobra.MarkFlagRequired(flags, FlagStorage)
+	cobra.MarkFlagRequired(flags, FlagMetaAddr)
+	cobra.MarkFlagRequired(flags, FlagAgentsAddr)
 }
 
 type CleanupConfig struct {
 	MetaAddr   string
+	AgentsAddr string
 	BackupName string
 	Backend    *agentstorage.Backend // Backend is associated with the root uri
 	TLSConfig  *tls.Config
@@ -39,6 +43,10 @@ type CleanupConfig struct {
 func (c *CleanupConfig) ParseFlags(flags *pflag.FlagSet) error {
 	var err error
 	c.MetaAddr, err = flags.GetString(FlagMetaAddr)
+	if err != nil {
+		return err
+	}
+	c.AgentsAddr, err = flags.GetString(FlagAgentsAddr)
 	if err != nil {
 		return err
 	}

@@ -3,6 +3,7 @@ package restore
 import (
 	"fmt"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
+	"time"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -156,12 +157,28 @@ func (r *Restore) stopAllClusters() error {
 }
 
 func (r *Restore) stopStoragedsWithLM() error {
-	if err := r.stopAllClusterStorage(); err != nil {
-		return fmt.Errorf("stop storaged cluster failed: %w", err)
+	//if err := r.stopAllClusterStorage(); err != nil {
+	//	return fmt.Errorf("stop storaged cluster failed: %w", err)
+	//}
+
+	storages := r.clusters.GetStorages(r.clusterId)
+	for _, service := range storages {
+		agent, err := r.amg.GetAgent(service.Host)
+		if err != nil {
+			return fmt.Errorf("get agent for storaged %s failed: %w", service.Host, err)
+		}
+
+		if err = agent.StopService(service.ServiceType, service.InstallPath); err != nil {
+			return fmt.Errorf("stop storaged service %s by agent failed: %w",
+				service.Host, err)
+		}
+
+		log.WithField("addr", service.Host).
+			Info("Stop storaged service successfully.")
 	}
 
 	log.Info("Waiting for lm to clear quota...")
-	//time.Sleep(time.Second * 100)
+	time.Sleep(time.Second * 30)
 
 	return nil
 }

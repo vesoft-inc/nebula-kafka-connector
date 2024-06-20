@@ -38,6 +38,7 @@ type Restore struct {
 	// only support restore one cluster now
 	clusterId       int64
 	backupClusterId int64
+	catalogOwner    string
 
 	rootUri    string
 	backupName string
@@ -52,13 +53,13 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 		backupName:      cfg.BackupName,
 		clusterId:       cfg.ClusterId,
 		backupClusterId: cfg.BackupClusterId,
+		catalogOwner:    cfg.CatalogOwner,
 	}
 
 	var err error
-	r.amg, err = clients.NewAgentManager(ctx)
+	r.amg, err = clients.NewAgentManager(ctx, cfg.AgentsAddr)
 	if err != nil {
 		return nil, fmt.Errorf("create agent manager failed: %w", err)
-
 	}
 	r.meta, err = clients.NewMeta(cfg.MetaAddr, cfg.Username, cfg.Password, nil)
 	if err != nil {
@@ -156,7 +157,7 @@ func (r *Restore) Restore() error {
 	if err != nil {
 		return fmt.Errorf("stop cluster failed: %w", err)
 	}
-	time.Sleep(time.Second * 10)
+
 	logger.Info("Stop cluster successfully.")
 
 	// backup original data
@@ -202,6 +203,13 @@ func (r *Restore) Restore() error {
 		return fmt.Errorf("start graph service failed: %w", err)
 	}
 	logger.Info("Start storage and graph services successfully.")
+
+	//after success restore, cleanup the download checkpoints if needed
+	err = r.cleanupDownloadCheckpoints()
+	if err != nil {
+		return fmt.Errorf("clean up download checkpoints failed: %w", err)
+	}
+	logger.Info("Cleanup download checkpoints successfully.")
 
 	// after success restore, cleanup the backup data if needed
 	err = r.cleanupOriginalData()
@@ -264,7 +272,7 @@ func (r *Restore) backupOriginalData() error {
 				}
 
 				for _, d := range service.DataPaths {
-					srcPath := filepath.Join(d, "nebula")
+					srcPath := filepath.Join(d, "data")
 					dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
 					if err = agent.MoveDir(srcPath, dstPath); err != nil && !utils.IsNotExist(err) {
 						return fmt.Errorf("move dir from %s to %s failed: %w", srcPath, dstPath, err)
@@ -274,6 +282,53 @@ func (r *Restore) backupOriginalData() error {
 						WithField("backup path", dstPath).
 						WithField("origin not exist", utils.IsNotExist(err)).
 						Info("Backup origin storage data path successfully.")
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func (r *Restore) cleanupDownloadCheckpoints() error {
+	// cleanup backup meta data
+	for _, service := range r.metaCluster {
+		agent, err := r.amg.GetAgent(service.Host)
+		if err != nil {
+			return fmt.Errorf("get agent %s failed: %w", service.Host, err)
+		}
+
+		if len(service.DataPaths) != 1 {
+			return fmt.Errorf("meta service: %s should only have one data dir, but %d",
+				service.Host, len(service.DataPaths))
+		}
+
+		dstPath := filepath.Join(service.DataPaths[0], "checkpoint")
+		if err = agent.RemoveDir(dstPath); err != nil {
+			return fmt.Errorf("remove dir %s failed: %w", dstPath, err)
+		}
+
+		log.WithField("download metad checkpoint path", dstPath).
+			Info("Cleanup download metad checkpoint data successfully.")
+	}
+
+	// cleanup backup storage data
+	for _, cluster := range r.clusters.GetClusters() {
+		for _, service := range cluster {
+			if service.ServiceType == meta.ServiceTypeStoraged {
+				agent, err := r.amg.GetAgent(service.Host)
+				if err != nil {
+					return fmt.Errorf("get agent %s failed: %w", service.Host, err)
+				}
+
+				for _, d := range service.DataPaths {
+					dstPath := filepath.Join(d, "checkpoint")
+					if err = agent.RemoveDir(dstPath); err != nil {
+						return fmt.Errorf("remove dir %s failed: %w", dstPath, err)
+					}
+
+					log.WithField("download storaged checkpoint path", dstPath).
+						Info("Cleanup download storaged checkpoint data successfully.")
 				}
 			}
 		}
@@ -295,7 +350,7 @@ func (r *Restore) cleanupOriginalData() error {
 				service.Host, len(service.DataPaths))
 		}
 
-		srcPath := filepath.Join(service.DataPaths[0], "nebula")
+		srcPath := filepath.Join(service.DataPaths[0], "data")
 		dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
 		if err = agent.RemoveDir(dstPath); err != nil {
 			return fmt.Errorf("remove dir %s failed: %w", dstPath, err)
@@ -315,7 +370,7 @@ func (r *Restore) cleanupOriginalData() error {
 				}
 
 				for _, d := range service.DataPaths {
-					srcPath := filepath.Join(d, "nebula")
+					srcPath := filepath.Join(d, "data")
 					dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
 					if err = agent.RemoveDir(dstPath); err != nil {
 						return fmt.Errorf("remove dir %s failed: %w", dstPath, err)
@@ -396,9 +451,9 @@ func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]st
 	curStorages := r.clusters.GetStorages(r.clusterId)
 
 	for i, s := range curStorages {
-		storageIdMap[s.ServiceId] = oldStorages[i].ServiceId
+		storageIdMap[oldStorages[i].ServiceId] = s.ServiceId
 		for _, info := range oldStorages[i].CkptInfos {
-			key := utils.GenPartKey(r.clusterId, info.PartId)
+			key := utils.GenPartKey(oldStorages[i].ServiceId, info.PartId)
 			hostPartMap[key] = append(hostPartMap[key], s.Host)
 		}
 	}
@@ -408,12 +463,18 @@ func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]st
 			NewClusterId: r.clusterId,
 			MetaBackups:  backupRes.ClusterBackupInfos[0].MetaBackups,
 			ServiceMap:   storageIdMap,
+			CatalogOwner: r.catalogOwner,
 		},
 	}
 
 	req := &meta.RestoreReq{
 		ClusterMap:          map[int64]int64{r.backupClusterId: r.clusterId},
 		ClusterRestoreInfos: clusterRestoreInfos,
+	}
+
+	log.Infof("restore req clustermap: %+v, ", req.ClusterMap)
+	for _, info := range req.ClusterRestoreInfos {
+		log.Infof("restore req cluster restore info: %+v, ", info)
 	}
 
 	if _, err := r.meta.Restore(req); err != nil {
@@ -435,7 +496,7 @@ func (r *Restore) downloadStorage(hostPartMap map[string][]string, backupRes *me
 		storageUri, _ := utils.UriJoin(r.rootUri, r.backupName, "data")
 		key := utils.GenPartKey(part.ClusterId, part.PartId)
 
-		strClusterId := strconv.Itoa(int(curClusterId))
+		strClusterId := strconv.Itoa(int(r.backupClusterId))
 		strPartId := strconv.Itoa(int(part.PartId))
 		for _, host := range hostPartMap[key] {
 			agent, err := r.amg.GetAgent(host)
@@ -483,7 +544,7 @@ func (r *Restore) downloadStorage(hostPartMap map[string][]string, backupRes *me
 func (r *Restore) playBackStorageData(serviceIdMap string) error {
 	group := async.NewGroup(context.TODO(), r.cfg.Concurrency, "playback storaged data")
 
-	storages := r.clusters.GetStorages(0)
+	storages := r.clusters.GetStorages(r.clusterId)
 	for _, s := range storages {
 		agent, err := r.amg.GetAgent(s.Host)
 		if err != nil {
