@@ -12,6 +12,7 @@ import org.ldbcouncil.snb.impls.workloads.operationhandlers.UpdateOperationHandl
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.LocalTime;
 import java.util.Map;
 
 public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<LdbcNoResult>>
@@ -29,7 +30,7 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
     @Override
     public void executeOperation(TOperation operation, NebulaDbConnectionState state,
                                  ResultReporter resultReporter) throws DbException {
-
+        String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
         try {
@@ -40,11 +41,25 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
             query = query.replace("$graphName", graphName);
             // final Map<String, Object> parameters = getParameters( operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
+
+            long startTime = System.currentTimeMillis();
             final ResultSet resultSet = client.execute(query);
+            long endTime = System.currentTimeMillis();
             if (!resultSet.isSucceeded()) {
                 LOGGER.error("execute {} failed, {}",
                         operation.getClass().getSimpleName(),
                         resultSet.getErrorMessage());
+            }
+            if (state.isEnableQueryInfoLog()) {
+                LOGGER.info(String.format("====> query=%s", query));
+                LOGGER.info(String.format("====> query type=%s, graphd=%s, execute time=%s, thread_id=%d, latency=%dus, response=%dms",
+                        operation.getClass().getSimpleName(),
+                        newPool.getAddr(),
+                        actualScheduleTime,
+                        Thread.currentThread().getId(),
+                        resultSet.getLatency(),
+                        (endTime - startTime)
+                ));
             }
             resultReporter.report(0, LdbcNoResult.INSTANCE, operation);
         } catch (Exception e) {

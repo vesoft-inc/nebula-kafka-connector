@@ -27,6 +27,9 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
     final long connectTimeout;
     final long requestTimeout;
 
+    // enable the log print for query statement, query type, query execution latency, query response time
+    final boolean enableQueryInfoLog;
+
     private final int graphServerSize;
 
     public String getGraphName() {
@@ -50,6 +53,12 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
             requestTimeout = Integer.parseInt(properties.get("requestTimeout")) * 1000L;
         } else {
             requestTimeout = Long.MAX_VALUE;
+        }
+
+        if (properties.containsKey("enableQueryInfoLog")) {
+            enableQueryInfoLog = Boolean.parseBoolean(properties.get("enableQueryInfoLog"));
+        } else {
+            enableQueryInfoLog = false;
         }
 
         int maxClientSize = Integer.parseInt(properties.get("maxSessionSize"));
@@ -95,6 +104,10 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         }
         // if operation is not query, then just balance the graphd through the requests.
         return pools.get(poolClientIndex.getAndIncrement() % pools.size());
+    }
+
+    public boolean isEnableQueryInfoLog() {
+        return enableQueryInfoLog;
     }
 
     @Override

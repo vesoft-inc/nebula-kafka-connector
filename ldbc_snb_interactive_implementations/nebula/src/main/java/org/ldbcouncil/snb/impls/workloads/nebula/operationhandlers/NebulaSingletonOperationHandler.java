@@ -10,6 +10,7 @@ import org.ldbcouncil.snb.impls.workloads.operationhandlers.SingletonOperationHa
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.Map;
 
 import com.vesoft.nebula.client.graph.data.ResultSet;
@@ -27,6 +28,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
     @Override
     public void executeOperation(TOperation operation, NebulaDbConnectionState state,
                                  ResultReporter resultReporter) throws DbException {
+        String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
         try {
@@ -39,11 +41,24 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
             // final Map<String, Object> parameters = getParameters(state, operation );
             state.logQuery(operation.getClass().getSimpleName(), query);
 
+            long startTime = System.currentTimeMillis();
             final ResultSet resultSet = client.execute(query);
+            long endTime = System.currentTimeMillis();
             if (!resultSet.isSucceeded()) {
                 LOGGER.error("execute {} failed, {}",
                         operation.getClass().getSimpleName(),
                         resultSet.getErrorMessage());
+            }
+            if (state.isEnableQueryInfoLog()) {
+                LOGGER.info(String.format("====> query=%s", query));
+                LOGGER.info(String.format("====> query type=%s, graphd=%s, execute time=%s, thread_id=%d, latency=%dus, response=%dms",
+                        operation.getClass().getSimpleName(),
+                        newPool.getAddr(),
+                        actualScheduleTime,
+                        Thread.currentThread().getId(),
+                        resultSet.getLatency(),
+                        (endTime - startTime)
+                ));
             }
             if (resultSet.hasNext()) {
                 resultReporter.report(1, toResult(resultSet.next()), operation);

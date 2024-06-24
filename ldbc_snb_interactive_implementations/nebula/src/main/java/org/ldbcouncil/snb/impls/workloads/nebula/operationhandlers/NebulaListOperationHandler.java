@@ -10,6 +10,7 @@ import org.ldbcouncil.snb.impls.workloads.operationhandlers.ListOperationHandler
 
 import java.io.UnsupportedEncodingException;
 import java.text.ParseException;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +31,7 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
     @Override
     public void executeOperation(TOperation operation, NebulaDbConnectionState state,
                                  ResultReporter resultReporter) throws DbException {
+        String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
         try {
@@ -43,11 +45,24 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
             state.logQuery(operation.getClass().getSimpleName(), query);
 
             final List<TOperationResult> results = new ArrayList<>();
+            long startTime = System.currentTimeMillis();
             final ResultSet resultSet = client.execute(query);
+            long endTime = System.currentTimeMillis();
             if (!resultSet.isSucceeded()) {
                 LOGGER.error("execute {} failed, {}",
                         operation.getClass().getSimpleName(),
                         resultSet.getErrorMessage());
+            }
+            if (state.isEnableQueryInfoLog()) {
+                LOGGER.info(String.format("====> query=%s", query));
+                LOGGER.info(String.format("====> query type=%s, graphd=%s, execute time=%s, thread_id=%d, latency=%dus, response=%dms",
+                        operation.getClass().getSimpleName(),
+                        newPool.getAddr(),
+                        actualScheduleTime,
+                        Thread.currentThread().getId(),
+                        resultSet.getLatency(),
+                        (endTime - startTime)
+                ));
             }
             while (resultSet.hasNext()) {
                 final ResultSet.Record record = resultSet.next();
