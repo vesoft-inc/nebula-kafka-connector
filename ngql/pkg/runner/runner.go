@@ -228,6 +228,7 @@ func (r *Runner) loop() error {
 			if r.option.failFast {
 				return err
 			}
+			r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
 			continue
 		}
 		if exit { // :exit

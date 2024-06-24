@@ -150,13 +150,15 @@ func playFn(r *Runner, args []string) error {
 	if len(args) == 0 {
 		return fmt.Errorf("Play command needs an argument")
 	}
+	playName := args[0]
 	// TODO maybe we could download the file from oss.
 	// and then play the file.
 	entries, err := data.Play.ReadDir(".")
 	if err != nil {
 		return err
 	}
-	var playName, filename string
+	var found = false
+	var filename string
 	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
@@ -165,15 +167,15 @@ func playFn(r *Runner, args []string) error {
 		if !strings.HasSuffix(filename, ".ngql") {
 			continue
 		}
-		playName = strings.TrimSuffix(filename, ".ngql")
+		datasetName := strings.TrimSuffix(filename, ".ngql")
 
-		if playName != args[0] {
-			continue
+		if datasetName == playName {
+			found = true
+			break
 		}
 	}
-
-	if playName == "" {
-		return fmt.Errorf("Play file not found: %s", args[0])
+	if !found {
+		return fmt.Errorf("Play file not found: %s", playName)
 	}
 
 	bs, err := data.Play.ReadFile(filename)
