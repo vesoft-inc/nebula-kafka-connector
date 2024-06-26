@@ -35,13 +35,18 @@ import org.slf4j.LoggerFactory;
  */
 public class NebulaClient implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
-    private List<HostAddress> servers;
-    private long connectTimeout;
-    private long requestTimeout;
-    private final String userName;
+
+    private       List<HostAddress>   servers;
+    // ms timeout for tcp connection,
+    private       long                connectTimeout;
+    // ms timeout for rpc request, the value must be larger than 0 and smaller than 100000001000L
+    private       long                requestTimeout;
+    // NebulaGraph username
+    private final String              userName;
+    // NebulaGraph auth options, including password
     private final Map<String, Object> authOptions;
-    private GrpcConnection connection;
-    private long sessionId;
+    private       GrpcConnection      connection;
+    private       long                sessionId;
 
     private int scanParallel;
 
@@ -197,7 +202,7 @@ public class NebulaClient implements Serializable {
                                            int part,
                                            int batchSize) {
         return scanNode(graphName, nodeType, new ArrayList<>(), true,
-                Collections.singletonList(part), batchSize);
+                        Collections.singletonList(part), batchSize);
     }
 
     /**
@@ -220,7 +225,7 @@ public class NebulaClient implements Serializable {
                                            int part,
                                            int batchSize) {
         return scanNode(graphName, nodeType, returnProperties,
-                Collections.singletonList(part), batchSize);
+                        Collections.singletonList(part), batchSize);
     }
 
 
@@ -297,8 +302,16 @@ public class NebulaClient implements Serializable {
             }
         }
 
-        return new ScanNodeResultIterator(graphName, nodeType, propertyList,
-                parts, batchSize, scanParallel, servers, userName, authOptions, requestTimeout);
+        return new ScanNodeResultIterator(graphName,
+                                          nodeType,
+                                          propertyList,
+                                          parts,
+                                          batchSize,
+                                          scanParallel,
+                                          servers,
+                                          userName,
+                                          authOptions,
+                                          requestTimeout);
     }
 
 
@@ -325,7 +338,7 @@ public class NebulaClient implements Serializable {
                                            int part,
                                            int batchSize) {
         return scanEdge(graphName, edgeType, new ArrayList<>(), true,
-                Collections.singletonList(part), batchSize);
+                        Collections.singletonList(part), batchSize);
     }
 
 
@@ -423,8 +436,16 @@ public class NebulaClient implements Serializable {
         } else {
             propertyList.addAll(returnProperties);
         }
-        return new ScanEdgeResultIterator(graphName, edgeType, propertyList,
-                parts, batchSize, scanParallel, servers, userName, authOptions, requestTimeout);
+        return new ScanEdgeResultIterator(graphName,
+                                          edgeType,
+                                          propertyList,
+                                          parts,
+                                          batchSize,
+                                          scanParallel,
+                                          servers,
+                                          userName,
+                                          authOptions,
+                                          requestTimeout);
     }
 
 
@@ -434,7 +455,7 @@ public class NebulaClient implements Serializable {
      * @return list of part id
      */
     private List<Integer> getAllParts() {
-        String showPartitions = "CALL show_partitions() RETURN *";
+        String    showPartitions = "CALL show_partitions() RETURN *";
         ResultSet resultSet;
         try {
             resultSet = execute(showPartitions);
@@ -465,17 +486,17 @@ public class NebulaClient implements Serializable {
      */
     private List<String> getNodeProperties(String graphName, String nodeType)
             throws IOErrorException {
-        String graphType = getGraphType(graphName);
-        String descNodeType = String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType);
-        ResultSet resultSet = execute(descNodeType);
+        String    graphType    = getGraphType(graphName);
+        String    descNodeType = String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType);
+        ResultSet resultSet    = execute(descNodeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             logger.error(String.format("get description of %s failed for %s", nodeType,
-                    resultSet.getErrorMessage()));
+                                       resultSet.getErrorMessage()));
             throw new IllegalArgumentException(String.format("node type %s does not exist in %s",
-                    nodeType, graphName));
+                                                             nodeType, graphName));
         }
 
-        List<String> pks = new ArrayList<>();
+        List<String> pks       = new ArrayList<>();
         List<String> propNames = new ArrayList<>();
         while (resultSet.hasNext()) {
             ResultSet.Record record = resultSet.next();
@@ -520,9 +541,9 @@ public class NebulaClient implements Serializable {
         ResultSet resultSet = execute(descEdgeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             logger.error(String.format("get description of %s failed for %s", edgeType,
-                    resultSet.getErrorMessage()));
+                                       resultSet.getErrorMessage()));
             throw new IllegalArgumentException(String.format("edge type %s does not exist in %s",
-                    edgeType, graphName));
+                                                             edgeType, graphName));
         }
 
         List<ValueWrapper> properties = resultSet.next().get("properties").asList();
@@ -539,7 +560,7 @@ public class NebulaClient implements Serializable {
      */
     private String getGraphType(String graphName) throws IOErrorException {
         ResultSet resultSet = execute(String.format("DESCRIBE GRAPH %s", graphName));
-        String graphType;
+        String    graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
             graphType = resultSet.next().values().get(1).asString();
         } else {
@@ -549,14 +570,21 @@ public class NebulaClient implements Serializable {
     }
 
     public static class Builder {
-        private final List<HostAddress> address;
-        private final String userName;
-        private final String password;
-        private Map<String, Object> authOptions = new HashMap<>();
-        private long connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT;
-        private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
-        private int scanParallel = DEFAULT_SCAN_PARALLEL;
+        private final List<HostAddress>   address;
+        private final String              userName;
+        private final String              password;
+        private       Map<String, Object> authOptions         = new HashMap<>();
+        private       long                connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT;
+        private       long                requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
+        private       int                 scanParallel        = DEFAULT_SCAN_PARALLEL;
 
+        /**
+         * Builder for {@link NebulaClient}
+         *
+         * @param addresses graphd servers address
+         * @param userName  username
+         * @param password  password for user
+         */
         public Builder(String addresses, String userName, String password) {
             try {
                 this.address = AddressUtil.validateAddress(addresses);
@@ -567,6 +595,12 @@ public class NebulaClient implements Serializable {
             this.password = password;
         }
 
+        /**
+         * config the auth options for user
+         *
+         * @param authOptions map of auth options
+         * @return NebulaClient.Builder
+         */
         public Builder withAuthOptions(Map<String, Object> authOptions) {
             if (authOptions != null) {
                 this.authOptions.putAll(authOptions);
@@ -574,20 +608,42 @@ public class NebulaClient implements Serializable {
             return this;
         }
 
+        /**
+         * config the timeout for tcp connect, unit: ms
+         * the value must be larger than 0 and smaller than 100000001000L.
+         *
+         * @param connectTimeoutMills timeout ms
+         * @return NebulaClient.Builder
+         */
         public Builder withConnectTimeoutMills(long connectTimeoutMills) {
-            this.connectTimeoutMills =
-                    connectTimeoutMills <= 0 ? Long.MAX_VALUE : connectTimeoutMills;
+            if (connectTimeoutMills > 0 && connectTimeoutMills < 100000001000L) {
+                this.connectTimeoutMills = connectTimeoutMills;
+            }
             return this;
         }
 
+        /**
+         * config the timeout for rpc request, unit: ms
+         * the value must be larger than 0 and smaller than 100000001000L.
+         *
+         * @param requestTimeoutMills timeout ms
+         * @return NebulaClient.Builder
+         */
         public Builder withRequestTimeoutMills(long requestTimeoutMills) {
-            this.requestTimeoutMills =
-                    requestTimeoutMills <= 0 ? Long.MAX_VALUE : requestTimeoutMills;
+            if (requestTimeoutMills > 0 && requestTimeoutMills < 100000001000L) {
+                this.requestTimeoutMills = requestTimeoutMills;
+            }
             return this;
         }
 
-        public Builder withScanParallel(int parallel) {
-            this.scanParallel = parallel;
+        /**
+         * config the parallel for data scan
+         *
+         * @param scanParallel number of the concurrency for data scan
+         * @return NebulaClient.Builder
+         */
+        public Builder withScanParallel(int scanParallel) {
+            this.scanParallel = scanParallel;
             return this;
         }
 
@@ -604,6 +660,11 @@ public class NebulaClient implements Serializable {
             }
         }
 
+        /**
+         * build a new {@link NebulaClient} with configs
+         *
+         * @return {@link NebulaClient}
+         */
         public NebulaClient build() throws AuthFailedException, IOErrorException {
             check();
             if (password != null) {

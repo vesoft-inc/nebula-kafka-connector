@@ -36,11 +36,11 @@ import org.slf4j.LoggerFactory;
 public class NebulaPool implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private GenericObjectPool<NebulaClient> pool;
-    private LoadBalancer loadBalancer;
-    private final AtomicBoolean hasInit = new AtomicBoolean(false);
-    private final AtomicBoolean isClosed = new AtomicBoolean(false);
-    private long maxWaitMills;
+    private       GenericObjectPool<NebulaClient> pool;
+    private       LoadBalancer                    loadBalancer;
+    private final AtomicBoolean                   hasInit  = new AtomicBoolean(false);
+    private final AtomicBoolean                   isClosed = new AtomicBoolean(false);
+    private       long                            maxWaitMills;
 
 
     public static NebulaPool.Builder builder(String addresses, String userName) {
@@ -157,10 +157,10 @@ public class NebulaPool implements Serializable {
 
 
     public static class Builder {
-        private final List<HostAddress> address;
-        private final String userName;
-        private final String password;
-        private Map<String, Object> authOptions = new HashMap<>();
+        private final List<HostAddress>   address;
+        private final String              userName;
+        private final String              password;
+        private       Map<String, Object> authOptions = new HashMap<>();
 
         private int maxClientSize = DEFAULT_MAX_CLIENT_SIZE;
         private int minClientSize = DEFAULT_MIN_CLIENT_SIZE;
@@ -192,9 +192,16 @@ public class NebulaPool implements Serializable {
         private String workingGraph = null;
 
         // the time zone, used to parse ZonedTime and ZonedDatetime
-        private ZoneId timeZone = null;
-        private int scanParallel = DEFAULT_SCAN_PARALLEL;
+        private ZoneId timeZone     = null;
+        private int    scanParallel = DEFAULT_SCAN_PARALLEL;
 
+        /**
+         * Builder for {@link NebulaPool}
+         *
+         * @param addresses graphd servers address
+         * @param userName  username
+         * @param password  password for user
+         */
         public Builder(String addresses, String userName, String password) {
             try {
                 this.address = AddressUtil.validateAddress(addresses);
@@ -205,6 +212,12 @@ public class NebulaPool implements Serializable {
             this.password = password;
         }
 
+        /**
+         * config the auth options for user
+         *
+         * @param authOptions map of auth options
+         * @return NebulaPool.Builder
+         */
         public Builder withAuthOptions(Map<String, Object> authOptions) {
             if (authOptions != null) {
                 this.authOptions.putAll(authOptions);
@@ -212,6 +225,12 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
+        /**
+         * config the max client size for pool
+         *
+         * @param maxClientSize max client size
+         * @return NebulaPool.Builder
+         */
         public Builder withMaxClientSize(int maxClientSize) {
             if (maxClientSize < 1) {
                 throw new IllegalArgumentException("maxClientSize cannot be less than 1.");
@@ -220,6 +239,12 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
+        /**
+         * config the min client size for pool
+         *
+         * @param minClientSize min client size
+         * @return NebulaPool.Builder
+         */
         public Builder withMinClientSize(int minClientSize) {
             if (minClientSize < 0) {
                 throw new IllegalArgumentException("minClientSize cannot be less than 0.");
@@ -228,58 +253,136 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
+        /**
+         * config the timeout for tcp connect, unit: ms
+         * the value must be larger than 0 and smaller than 100000001000L.
+         *
+         * @param connectTimeoutMills timeout ms
+         * @return NebulaPool.Builder
+         */
         public Builder withConnectTimeoutMills(long connectTimeoutMills) {
-            this.connectTimeoutMills =
-                    connectTimeoutMills <= 0 ? Long.MAX_VALUE : connectTimeoutMills;
+            if (connectTimeoutMills > 0 && connectTimeoutMills < 100000001000L) {
+                this.connectTimeoutMills = connectTimeoutMills;
+            }
             return this;
         }
 
+        /**
+         * config the timeout for rpc request, unit: ms
+         * the value must be larger than 0 and smaller than 100000001000L.
+         *
+         * @param requestTimeoutMills timeout ms
+         * @return NebulaPool.Builder
+         */
         public Builder withRequestTimeoutMills(long requestTimeoutMills) {
-            this.requestTimeoutMills =
-                    requestTimeoutMills <= 0 ? Long.MAX_VALUE : requestTimeoutMills;
+            if (requestTimeoutMills > 0 && requestTimeoutMills < 100000001000L) {
+                this.requestTimeoutMills = requestTimeoutMills;
+            }
             return this;
         }
 
+        /**
+         * config time to periodically check the health of graphd servers
+         *
+         * @param healthCheckTimeMills health check time for graphd servers
+         * @return NebulaPool.Builder
+         */
         public Builder withHealthCheckTimeMills(long healthCheckTimeMills) {
             this.healthCheckTimeMills = Math.max(healthCheckTimeMills, 0);
             return this;
         }
 
+        /**
+         * config if block and wait when object in NebulaPool is exhausted.
+         * if false, then throw exception immediately when there's no idle object in NebulaPool.
+         *
+         * @param blockWhenExhausted if block when NebulaPool is exhausted
+         * @return NebulaPool.Builder
+         */
         public Builder withBlockWhenExhausted(boolean blockWhenExhausted) {
             this.blockWhenExhausted = blockWhenExhausted;
             return this;
         }
 
+        /**
+         * config the maximum wait time that the getClient should block before throwing
+         * exception when the NebulaPool is exhausted and blockWhenExhausted is true. unit: ms
+         * if the value is not positive, then always wait.
+         *
+         * @param maxWaitMills maximum time
+         * @return NebulaPool.Builder
+         */
         public Builder withMaxWaitMills(long maxWaitMills) {
             this.maxWaitMills = maxWaitMills <= 0 ? Long.MAX_VALUE : maxWaitMills;
             return this;
         }
 
+        /**
+         * config the schedule time to evict the idle object in NebulaPool.
+         *
+         * @param idleEvictScheduleMills sleep time between runs of the idle object evict task,
+         *                               if the value is not positive, do not run the evict task.
+         * @return NebulaPool.Builder
+         */
         public Builder withIdleEvictScheduleMills(long idleEvictScheduleMills) {
             this.idleEvictScheduleMills = idleEvictScheduleMills;
             return this;
         }
 
+        /**
+         * config the minimum idle time for object in NebulaPool before it is eligible for
+         * eviction by the evict task. unit: ms
+         *
+         * @param minEvictableIdleTimeMillis minimum idle for object in pool, if the value is
+         *                                   not positive, do not evict any idle object
+         * @return NebulaPool.Builder
+         */
         public Builder withMinEvictableIdleTimeMillis(long minEvictableIdleTimeMillis) {
             this.minEvictableIdleTimeMillis = minEvictableIdleTimeMillis;
             return this;
         }
 
+        /**
+         * config whether to require all graphd servers are all strictly available.
+         *
+         * @param strictlyServerHealthy whether the servers are strictly healthy.
+         *                              if true, all servers must be available,
+         *                              if false, at least one server must be available.
+         * @return NebulaPool.Builder
+         */
         public Builder withStrictlyServerHealthy(boolean strictlyServerHealthy) {
             this.strictlyServerHealthy = strictlyServerHealthy;
             return this;
         }
 
+        /**
+         * config the initial working graph for NebulaClient in NebulaPool
+         *
+         * @param graphName working graph name
+         * @return NebulaPool.Builder
+         */
         public Builder withWorkingGraph(String graphName) {
             this.workingGraph = workingGraph;
             return this;
         }
 
+        /**
+         * config the initial ZonedId for NebulaClient in NebulaPool
+         *
+         * @param zoneId zone id
+         * @return NebulaPool.Builder
+         */
         public Builder withTimeZone(ZoneId zoneId) {
             this.timeZone = zoneId;
             return this;
         }
 
+        /**
+         * config the parallel for data scan
+         *
+         * @param scanParallel number of the concurrency for data scan
+         * @return NebulaClient.Builder
+         */
         public Builder setScanParallel(int scanParallel) {
             this.scanParallel = scanParallel;
             return this;
@@ -299,7 +402,7 @@ public class NebulaPool implements Serializable {
         }
 
         /**
-         * construct a NebulaClient with configs
+         * build a new {@link NebulaPool} with configs
          */
         public NebulaPool build() throws IOErrorException {
             check();
