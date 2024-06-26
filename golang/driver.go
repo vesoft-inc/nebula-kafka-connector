@@ -63,7 +63,8 @@ type (
 	Client interface {
 		Execute(stmt string) (Result, error)
 		ExecuteContext(ctx context.Context, stmt string) (Result, error)
-		Ping() error
+		Ping() error // by default, timeout is 1s.
+		PingContext(ctx context.Context) error
 		IsClosed() bool
 		Close() error
 		GetSessionId() (int64, error)
@@ -195,6 +196,13 @@ func (dc *driverConn) Ping() error {
 		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	return dc.conn.Ping()
+}
+
+func (dc *driverConn) PingContext(ctx context.Context) error {
+	if dc.IsClosed() {
+		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+	}
+	return dc.conn.PingContext(ctx)
 }
 
 func (dc *driverConn) Close() error {

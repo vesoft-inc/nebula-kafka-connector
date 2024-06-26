@@ -8,10 +8,10 @@ import (
 )
 
 type resultSet struct {
-	index     int
-	result    *graph.ResultTable
-	summary   *graph.Summary
-	cursor     []byte
+	index   int
+	result  *graph.ResultTable
+	summary *graph.Summary
+	cursor  []byte
 }
 
 type rowData struct {
@@ -63,8 +63,7 @@ func (rs *resultSet) Summary() Summary {
 	return &summary{summary: rs.summary}
 }
 
-
-func (rs *resultSet ) Cursor() []byte {
+func (rs *resultSet) Cursor() []byte {
 	return rs.cursor
 }
 

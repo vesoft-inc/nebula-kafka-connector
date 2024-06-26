@@ -22,6 +22,8 @@ import (
 var defaultConnector = &graphConnector{}
 var defaultMsgSize = math.MaxInt64
 
+const defaultPingTimeout = 1 * time.Second
+
 type graphConnector struct{}
 
 type connection struct {
@@ -142,18 +144,30 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		summary: resp.Summary,
 		cursor:  resp.Cursor,
 	}
-
-	respErr := resp.GetStatus()
-	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
-		return &resultResp, errServerResponse(
-			string(respErr.GetCode()),
-			(string(respErr.GetMessage())))
+	if err := cn.isSucceed(resp); err != nil {
+		return &resultResp, err
 	}
 
 	return &resultResp, nil
 }
 
+func (cn *connection) isSucceed(resp *graph.ExecuteResponse) error {
+	respErr := resp.GetStatus()
+	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
+		return errServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
+	}
+	return nil
+}
+
 func (cn *connection) Ping() error {
+	ctx, cancel := context.WithTimeout(context.Background(), defaultPingTimeout)
+	defer cancel()
+
+	return cn.PingContext(ctx)
+
+}
+
+func (cn *connection) PingContext(ctx context.Context) error {
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
 	stmt := []byte("RETURN 1")
@@ -161,10 +175,14 @@ func (cn *connection) Ping() error {
 		SessionId: cn.sessionId,
 		Stmt:      stmt,
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), cn.timeout)
-	defer cancel()
-	_, err := cn.graphClient.Execute(ctx, in)
-	return err
+	resp, err := cn.graphClient.Execute(ctx, in)
+	if err != nil {
+		return err
+	}
+	if err := cn.isSucceed(resp); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (cn *connection) Close() error {
