@@ -6,8 +6,10 @@
 package com.vesoft.nebula.client.graph.net;
 
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BATCH_SIZE;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT_MS;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_TIMEOUT_MS;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_PING_TIMEOUT_MS;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
 
 import com.vesoft.nebula.client.graph.data.HostAddress;
@@ -25,7 +27,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,16 +102,22 @@ public class NebulaClient implements Serializable {
     /**
      * ping the NebulaGraph server
      *
+     * @param timeoutMs timeout, unit: ms
      * @return true when client can ping server succeed.
      */
-    public synchronized boolean ping() {
+
+    public synchronized boolean ping(long timeoutMs) {
         checkClosed();
         try {
-            return connection.ping(sessionId);
+            return connection.ping(sessionId, timeoutMs);
         } catch (IOErrorException e) {
             logger.error("ping error for host {}", getHost(), e);
             return false;
         }
+    }
+
+    public boolean ping() {
+        return ping(DEFAULT_PING_TIMEOUT_MS);
     }
 
     /**
@@ -574,8 +581,8 @@ public class NebulaClient implements Serializable {
         private final String              userName;
         private final String              password;
         private       Map<String, Object> authOptions         = new HashMap<>();
-        private       long                connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT;
-        private       long                requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
+        private       long                connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT_MS;
+        private       long                requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT_MS;
         private       int                 scanParallel        = DEFAULT_SCAN_PARALLEL;
 
         /**
@@ -610,13 +617,15 @@ public class NebulaClient implements Serializable {
 
         /**
          * config the timeout for tcp connect, unit: ms
-         * the value must be larger than 0 and smaller than 100000001000L.
+         * the value must be larger than 0 and smaller than Integer.MAX_VALUE in jdk 8.
          *
          * @param connectTimeoutMills timeout ms
          * @return NebulaClient.Builder
          */
         public Builder withConnectTimeoutMills(long connectTimeoutMills) {
-            if (connectTimeoutMills > 0 && connectTimeoutMills < 100000001000L) {
+            if (connectTimeoutMills <= 0 || connectTimeoutMills > DEFAULT_MAX_TIMEOUT_MS) {
+                this.connectTimeoutMills = DEFAULT_MAX_TIMEOUT_MS;
+            } else {
                 this.connectTimeoutMills = connectTimeoutMills;
             }
             return this;
@@ -624,13 +633,15 @@ public class NebulaClient implements Serializable {
 
         /**
          * config the timeout for rpc request, unit: ms
-         * the value must be larger than 0 and smaller than 100000001000L.
+         * the value must be larger than 0 and smaller than Integer.MAX_VALUE in jdk 8.
          *
          * @param requestTimeoutMills timeout ms
          * @return NebulaClient.Builder
          */
         public Builder withRequestTimeoutMills(long requestTimeoutMills) {
-            if (requestTimeoutMills > 0 && requestTimeoutMills < 100000001000L) {
+            if (requestTimeoutMills < 0 || requestTimeoutMills > DEFAULT_MAX_TIMEOUT_MS) {
+                this.requestTimeoutMills = DEFAULT_MAX_TIMEOUT_MS;
+            } else {
                 this.requestTimeoutMills = requestTimeoutMills;
             }
             return this;

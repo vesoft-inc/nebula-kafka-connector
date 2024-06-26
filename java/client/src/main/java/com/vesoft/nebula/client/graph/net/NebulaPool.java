@@ -6,14 +6,15 @@
 package com.vesoft.nebula.client.graph.net;
 
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_BLOCK_WHEN_EXHAUSTED;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_HEALTH_CHECK_TIME_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_IDLE_EVICT_SCHEDULE_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_CLIENT_SIZE;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_TIMEOUT_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_WAIT_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MIN_CLIENT_SIZE;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MS;
-import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT;
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT_MS;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
 import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_STRICT_SERVER_HEALTHY;
 
@@ -165,8 +166,8 @@ public class NebulaPool implements Serializable {
         private int maxClientSize = DEFAULT_MAX_CLIENT_SIZE;
         private int minClientSize = DEFAULT_MIN_CLIENT_SIZE;
 
-        private long connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT;
-        private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT;
+        private long connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT_MS;
+        private long requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT_MS;
 
         // The healthCheckTime for schedule check the health of session, unit: millisecond
         private long healthCheckTimeMills = DEFAULT_HEALTH_CHECK_TIME_MS;
@@ -255,13 +256,15 @@ public class NebulaPool implements Serializable {
 
         /**
          * config the timeout for tcp connect, unit: ms
-         * the value must be larger than 0 and smaller than 100000001000L.
+         * the value must be larger than 0 and smaller than Integer.MAX_VALUE in jdk 8.
          *
          * @param connectTimeoutMills timeout ms
          * @return NebulaPool.Builder
          */
         public Builder withConnectTimeoutMills(long connectTimeoutMills) {
-            if (connectTimeoutMills > 0 && connectTimeoutMills < 100000001000L) {
+            if (connectTimeoutMills <= 0 || connectTimeoutMills > DEFAULT_MAX_TIMEOUT_MS) {
+                this.connectTimeoutMills = DEFAULT_MAX_TIMEOUT_MS;
+            } else {
                 this.connectTimeoutMills = connectTimeoutMills;
             }
             return this;
@@ -269,14 +272,16 @@ public class NebulaPool implements Serializable {
 
         /**
          * config the timeout for rpc request, unit: ms
-         * the value must be larger than 0 and smaller than 100000001000L.
+         * the value should be larger than 0 and smaller than Integer.MAX_VALUE in jdk 8.
          *
          * @param requestTimeoutMills timeout ms
          * @return NebulaPool.Builder
          */
         public Builder withRequestTimeoutMills(long requestTimeoutMills) {
-            if (requestTimeoutMills > 0 && requestTimeoutMills < 100000001000L) {
-                this.requestTimeoutMills = requestTimeoutMills;
+            if (requestTimeoutMills <= 0 || requestTimeoutMills > DEFAULT_MAX_TIMEOUT_MS) {
+                this.requestTimeoutMills = DEFAULT_MAX_TIMEOUT_MS;
+            } else {
+                this.connectTimeoutMills = requestTimeoutMills;
             }
             return this;
         }

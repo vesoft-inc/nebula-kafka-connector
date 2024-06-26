@@ -19,5 +19,5 @@ public abstract class Connection implements Serializable {
 
     public abstract void close();
 
-    public abstract boolean ping(long sessionID) throws IOErrorException;
+    public abstract boolean ping(long sessionID, long timeoutMs) throws IOErrorException;
 }

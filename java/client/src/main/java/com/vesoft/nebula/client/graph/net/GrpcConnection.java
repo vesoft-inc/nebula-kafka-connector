@@ -64,8 +64,8 @@ public class GrpcConnection extends Connection {
     }
 
     @Override
-    public boolean ping(long sessionID) throws IOErrorException {
-        ExecuteResponse response = execute(sessionID, "RETURN 1");
+    public boolean ping(long sessionID, long timeoutMs) throws IOErrorException {
+        ExecuteResponse response = execute(sessionID, "RETURN 1", timeoutMs);
         return ErrorCode.SUCCESSFUL_COMPLETION.code
                 .equals(response.getStatus().getCode().toString(charset));
     }

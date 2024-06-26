@@ -9,8 +9,10 @@ public class Constants {
 
     static final int     DEFAULT_MAX_CLIENT_SIZE            = 10;
     static final int     DEFAULT_MIN_CLIENT_SIZE            = 1;
-    static final long    DEFAULT_CONNECT_TIMEOUT            = 3600 * 1000; // 1 hour
-    static final long    DEFAULT_REQUEST_TIMEOUT            = 3600 * 1000; // 1 hour
+    static final long    DEFAULT_CONNECT_TIMEOUT_MS         = 3 * 1000; // 3 seconds
+    static final long    DEFAULT_REQUEST_TIMEOUT_MS         = 60 * 1000; // 1 minute
+    static final long    DEFAULT_MAX_TIMEOUT_MS             = Integer.MAX_VALUE; // about 25 day
+    static final long    DEFAULT_PING_TIMEOUT_MS            = 1000L;
     static final long    DEFAULT_HEALTH_CHECK_TIME_MS       = 5 * 60 * 1000;
     static final boolean DEFAULT_BLOCK_WHEN_EXHAUSTED       = false;
     static final long    DEFAULT_MAX_WAIT_MS                = Long.MAX_VALUE;
