@@ -1,0 +1,356 @@
+{{- if .Values.controllerManager.create }}
+---
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: {{ template "controller-manager.name" . }}-sa
+  namespace: {{ template "nebula-operator.namespace" . }}
+  labels:
+  {{- include "controller-manager.labels" . | nindent 4 }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ template "controller-manager.name" . }}-election-role
+  namespace: {{ template "nebula-operator.namespace" . }}
+  labels:
+  {{- include "controller-manager.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  - coordination.k8s.io
+  resources:
+  - configmaps
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ template "controller-manager.name" . }}-election-rolebinding
+  namespace: {{ template "nebula-operator.namespace" . }}
+  labels:
+  {{- include "controller-manager.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ template "controller-manager.name" . }}-election-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "controller-manager.name" . }}-sa
+  namespace: {{ template "nebula-operator.namespace" . }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ template "controller-manager.name" . }}-role
+  labels:
+  {{- include "controller-manager.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - nodes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - clusterrolebindings
+  - clusterroles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - endpoints
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - list
+  - patch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumes
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - pods/log
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - statefulsets
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.nebula-graph.io
+  resources:
+  - nebulaclusters
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.nebula-graph.io
+  resources:
+  - nebulaclusters/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apps.nebula-graph.io
+  resources:
+  - nebulaclusters/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apps.nebula-graph.io
+  resources:
+  - nebulametads
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps.nebula-graph.io
+  resources:
+  - nebulametads/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - apps.nebula-graph.io
+  resources:
+  - nebulametads/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - autoscaling.nebula-graph.io
+  resources:
+  - nebulaautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling.nebula-graph.io
+  resources:
+  - nebulaautoscalers/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - autoscaling.nebula-graph.io
+  resources:
+  - nebulaautoscalers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - apiextensions.k8s.io
+  resources:
+  - customresourcedefinitions
+  verbs:
+  - get
+  - list
+  - watch
+  - update
+  - patch
+  - create
+- apiGroups:
+  - custom.metrics.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "controller-manager.name" . }}-rolebinding
+  labels:
+  {{- include "controller-manager.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ template "controller-manager.name" . }}-role
+subjects:
+- kind: ServiceAccount
+  name: {{ template "controller-manager.name" . }}-sa
+  namespace: {{ template "nebula-operator.namespace" . }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: {{ template "controller-manager.name" . }}:system:auth-delegator
+  labels:
+  {{- include "controller-manager.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:auth-delegator
+subjects:
+- kind: ServiceAccount
+  name: {{ template "controller-manager.name" . }}-sa
+  namespace: {{ template "nebula-operator.namespace" . }}
+{{- end }}

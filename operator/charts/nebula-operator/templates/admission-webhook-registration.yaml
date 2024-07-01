@@ -1,0 +1,36 @@
+{{- if .Values.admissionWebhook.create }}
+---
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  annotations:
+    cert-manager.io/inject-ca-from: {{ template "nebula-operator.namespace" . }}/{{ template "admission-webhook.name" . }}-cert
+  name: {{ template "admission-webhook.name" . }}-validating
+  labels:
+  {{- include "admission-webhook.labels" . | nindent 4 }}
+webhooks:
+- name: nebulaclustervalidating.nebula-graph.io
+  admissionReviewVersions:
+  - v1
+  clientConfig:
+    service:
+      name: {{ template "admission-webhook.name" . }}-service
+      namespace: {{ template "nebula-operator.namespace" . }}
+      path: /validate-nebulacluster
+  failurePolicy: Fail
+  rules:
+  - apiGroups:
+    - apps.nebula-graph.io
+    apiVersions:
+    - v2alpha1
+    operations:
+    - CREATE
+    - UPDATE
+    - DELETE
+    resources:
+    - nebulaclusters
+    scope: "*"
+  sideEffects: None
+  timeoutSeconds: 3
+{{- end }}
+

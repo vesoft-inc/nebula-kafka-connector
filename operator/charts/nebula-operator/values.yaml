@@ -1,0 +1,115 @@
+image:
+  nebulaOperator:
+    image: reg.vesoft-inc.com/cloud-dev/nebula-ng-operator:v1.0.0
+    imagePullPolicy: Always
+
+imagePullSecrets: [ ]
+kubernetesClusterDomain: ""
+
+controllerManager:
+  create: true
+  replicas: 2
+  env: [ ]
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  verbosity: 0
+  ## Additional InitContainers to initialize the pod
+  # Example:
+  #  extraInitContainers:
+  #  - name: init-auth-sidecar
+  #    command:
+  #    - /bin/sh
+  #    - -c
+  #    args:
+  #    - cp -R /certs/* /credentials/
+  #    imagePullPolicy: Always
+  #    image: reg.vesoft-inc.com/nebula-certs:latest
+  #    volumeMounts:
+  #    - name: credentials
+  #      mountPath: /credentials
+  extraInitContainers: []
+
+  # sidecarContainers - add more containers to controller-manager
+  # Key/Value where Key is the sidecar `- name: <Key>`
+  # Example:
+  #   sidecarContainers:
+  #      webserver:
+  #        image: nginx
+  # OR for adding netshoot to controller manager
+  #  sidecarContainers:
+  #    netshoot:
+  #      args:
+  #      - -c
+  #      - while true; do ping localhost; sleep 60;done
+  #      command:
+  #      - /bin/bash
+  #      image: nicolaka/netshoot
+  #      imagePullPolicy: Always
+  #      name: netshoot
+  #      resources: {}
+  sidecarContainers: {}
+
+  ## Additional controller-manager Volumes
+  extraVolumes: []
+
+  ## Additional controller-manager Volume mounts
+  extraVolumeMounts: []
+
+  securityContext: {}
+#    runAsNonRoot: true
+
+admissionWebhook:
+  create: false
+  # The TCP port the Webhook server binds to. (default 9443)
+  webhookBindPort: 9443
+
+scheduler:
+  create: true
+  schedulerName: nebula-scheduler
+  replicas: 2
+  env: [ ]
+  resources:
+    limits:
+      cpu: 200m
+      memory: 200Mi
+    requests:
+      cpu: 100m
+      memory: 100Mi
+  verbosity: 0
+  podMaxInUnschedulablePodsDuration: 10s
+  plugins:
+    enabled: ["NodeZone"]
+    disabled: [] # only in-tree plugins need to be defined here
+
+# upgrade CRD on chart upgrade
+upgradeCRD: true
+
+# Period at which the controller forces the repopulation of its local object stores. (default 0h30m0s)
+syncPeriod: 0h30m0s
+
+# Namespaces restricts the controller-manager watches for updates to Kubernetes objects. If empty, all namespaces are watched.
+# e.g. ns1,ns2,ns3
+watchNamespaces: ""
+
+# nebula object selector (label query) to filter on, supports '=', '==', and '!='.(e.g. -l key1=value1,key2=value2).
+nebulaObjectSelector: ""
+
+# The number of NebulaCluster objects that are allowed to sync concurrently. (default 5)
+concurrentNebulaClusterSyncs: 5
+
+# The number of NebulaMetad objects that are allowed to sync concurrently. (default 5)
+concurrentNebulaMetadSyncs: 5
+
+# The number of nebula autoscaler objects that are allowed to sync concurrently. (default 5)
+concurrentAutoscalerSyncs: 5
+
+nodeSelector: { }
+
+tolerations: [ ]
+
+affinity: { }
