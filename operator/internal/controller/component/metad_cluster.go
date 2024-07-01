@@ -157,7 +157,7 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 		if err != nil {
 			return err
 		}
-		if err := metaClient.Login(); err != nil {
+		if _, err := metaClient.Login(); err != nil {
 			klog.Errorf("login metad failed: %v", err)
 			return err
 		}
@@ -203,13 +203,10 @@ func (c *metadCluster) syncNebulaMetadStatus(nm *v2alpha1.NebulaMetad, oldWorklo
 }
 
 func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v2alpha1.NebulaMetad) error {
-	req := meta.NewShowClusterReq("")
-	resp, err := mc.ShowCluster(req)
+	req := meta.NewListClustersReq("")
+	resp, err := mc.ListClusters(req)
 	if err != nil {
 		return err
-	}
-	if !resp.IsSucceeded() {
-		return fmt.Errorf("show cluster failed, code: %s, msg: %v", resp.GetErrorCode(), resp.GetErrorMsg())
 	}
 	nm.Status.ManagedClusters = int32(len(resp.Clusters))
 	return nil

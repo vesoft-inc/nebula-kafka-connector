@@ -115,6 +115,50 @@ func (c *defaultNebulaClusterControl) DeleteCluster(nc *v2alpha1.NebulaCluster) 
 	if err := component.PVCDeleter(c.client, nc.Namespace, nc.Name); err != nil {
 		return err
 	}
+
+	if nc.Spec.MetadRef == nil {
+		return component.ErrorMetadReferenceIsNil
+	}
+
+	metad, err := c.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
+	if err != nil {
+		klog.Errorf("failed to get metad cluster: %v", err)
+		return err
+	}
+	if !metad.MetadComponent().IsReady() {
+		return fmt.Errorf("metad [%s/%s] is not ready", metad.Namespace, metad.Name)
+	}
+
+	username, password, err := kube.GetCredential(c.clientSet, nc.Namespace, nc.Spec.CredentialSecret)
+	if err != nil {
+		return err
+	}
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
+	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","), meta.WithUserPassword(username, password))
+	if err != nil {
+		return err
+	}
+	if _, err := metaClient.Login(); err != nil {
+		klog.Errorf("login metad failed: %v", err)
+		return err
+	}
+	defer func() {
+		metaClient.Close()
+	}()
+
+	req := meta.NewDropClusterReq(nc.Name, true)
+	if err := metaClient.DropCluster(req); err != nil {
+		if ne, ok := err.(*nebula.NebulaError); ok {
+			if ne.Code() != nebula.ERROR_META_CLUSTER_NOT_FOUND {
+				klog.Errorf("drop cluster failed: %v", err)
+				return err
+			}
+		} else {
+			klog.Errorf("drop cluster got unkonw error: %v", err)
+			return err
+		}
+	}
+
 	return kube.UpdateFinalizer(context.TODO(), c.client, nc, kube.RemoveFinalizerOpType, finalizer)
 }
 
@@ -151,7 +195,7 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 	if err != nil {
 		return err
 	}
-	if err := metaClient.Login(); err != nil {
+	if _, err := metaClient.Login(); err != nil {
 		klog.Errorf("login metad failed: %v", err)
 		return err
 	}
@@ -160,8 +204,8 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 	}()
 
 	if !nc.Status.CreatedDone {
-		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.ReplicaFactor), nc.Spec.Zones)
-		if err := metaClient.CreateCluster(req); err != nil {
+		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.ReplicaFactor), "root", nc.Spec.Zones)
+		if err = metaClient.CreateCluster(req); err != nil {
 			if ne, ok := err.(*nebula.NebulaError); ok {
 				if ne.Code() != nebula.ERROR_META_CLUSTER_ALREADY_EXISTS {
 					klog.Errorf("create cluster failed: %v", err)
