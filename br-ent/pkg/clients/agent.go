@@ -9,7 +9,7 @@ import (
 	"github.com/vesoft-inc/go-pkg/httpclient"
 	agentstorage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadmin/pkg/utils"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 	"os"
 	"path/filepath"
 	"strings"

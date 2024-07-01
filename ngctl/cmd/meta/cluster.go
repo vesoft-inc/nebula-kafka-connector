@@ -183,6 +183,7 @@ func init() {
 	clusterCmd.AddCommand(createClusterCmd)
 	clusterCmd.AddCommand(initClusterCmd)
 	clusterCmd.AddCommand(showClusterCmd)
+	clusterCmd.AddCommand(brCmd)
 	createClusterCmd.Flags().IntVarP(&clusterFlags.replicas, "replica-factor", "r", 3, "replica number, default: 3")
 	createClusterCmd.Flags().StringVarP(&clusterFlags.owner, "owner", "o", "", "cluster owner")
 

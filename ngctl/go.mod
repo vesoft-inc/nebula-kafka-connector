@@ -5,17 +5,45 @@ go 1.19
 require (
 	github.com/jedib0t/go-pretty/v6 v6.5.8
 	github.com/manifoldco/promptui v0.9.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
+	github.com/vesoft-inc/nebula-ng-tools/br-ent v0.0.0-00010101000000-000000000000
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0
 )
 
 require (
+	github.com/aws/aws-sdk-go v1.50.8 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
+	github.com/colinmarc/hdfs/v2 v2.4.0 // indirect
+	github.com/fatih/color v1.16.0 // indirect
+	github.com/go-resty/resty/v2 v2.10.0 // indirect
 	github.com/golang/protobuf v1.5.3 // indirect
+	github.com/hashicorp/go-uuid v1.0.3 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/jcmturner/aescts/v2 v2.0.0 // indirect
+	github.com/jcmturner/dnsutils/v2 v2.0.0 // indirect
+	github.com/jcmturner/gofork v1.7.6 // indirect
+	github.com/jcmturner/goidentity/v6 v6.0.1 // indirect
+	github.com/jcmturner/gokrb5/v8 v8.4.4 // indirect
+	github.com/jcmturner/rpc/v2 v2.0.3 // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/juju/ratelimit v1.0.2 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
+	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mattn/go-runewidth v0.0.15 // indirect
+	github.com/olekukonko/tablewriter v0.0.5 // indirect
+	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
+	github.com/sirupsen/logrus v1.9.3 // indirect
+	github.com/spaolacci/murmur3 v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
+	github.com/vesoft-inc/go-pkg v0.0.0-20231117110005-307b542ecb31 // indirect
+	github.com/vesoft-inc/nebula-ng-tools/agent v0.0.0-00010101000000-000000000000 // indirect
+	github.com/vesoft-inc/nebula-ng-tools/ngadm v0.0.0-00010101000000-000000000000 // indirect
+	github.com/zeromicro/go-zero v1.6.1 // indirect
+	go.opentelemetry.io/otel v1.19.0 // indirect
+	go.opentelemetry.io/otel/trace v1.19.0 // indirect
+	go.uber.org/automaxprocs v1.5.3 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sys v0.17.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
@@ -24,4 +52,9 @@ require (
 	google.golang.org/protobuf v1.33.0 // indirect
 )
 
-replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
+replace (
+	github.com/vesoft-inc/nebula-ng-tools/agent => ../agent
+	github.com/vesoft-inc/nebula-ng-tools/br-ent => ../br-ent
+	github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
+	github.com/vesoft-inc/nebula-ng-tools/ngadm => ../ngadm
+)

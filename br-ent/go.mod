@@ -4,7 +4,7 @@ go 1.20
 
 replace github.com/vesoft-inc/nebula-ng-tools/agent => ../agent
 
-replace github.com/vesoft-inc/nebula-ng-tools/ngadmin => ../ngadm
+replace github.com/vesoft-inc/nebula-ng-tools/ngadm => ../ngadm
 
 replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
 
@@ -19,7 +19,7 @@ require (
 	github.com/vesoft-inc/nebula-go/v3 v3.7.0
 	github.com/vesoft-inc/nebula-ng-tools/agent v0.0.0-00010101000000-000000000000
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0-20240220091041-76ed2b026c91
-	github.com/vesoft-inc/nebula-ng-tools/ngadmin v0.0.0-00010101000000-000000000000
+	github.com/vesoft-inc/nebula-ng-tools/ngadm v0.0.0-00010101000000-000000000000
 )
 
 require (
