@@ -47,14 +47,14 @@ func GetUserUtilPath(installPath, agentPath, utilName string) string {
 	}
 	return path.Join(installPath, utilName)
 }
-func GetMetaAddressListString(metaHosts []types.Agent, port string) string {
+func GetMetaAddressListString(metaHosts []types.Host, port string) string {
 	if port == "" {
 		port = "9559"
 	}
 	metaAddressList := ""
 	for _, meta := range metaHosts {
 
-		metaAddressList += fmt.Sprintf("%s:%s,", RemoveAddressPort(meta.Host), port)
+		metaAddressList += fmt.Sprintf("%s:%s,", RemoveAddressPort(meta.Agent.Host), port)
 	}
 	metaAddressList = metaAddressList[:len(metaAddressList)-1]
 	return metaAddressList
@@ -148,14 +148,22 @@ func GetAllAgents(spec *types.JobSpec) []*types.Agent {
 	allAgents := make(map[string]*types.Agent)
 	allHosts := []types.Agent{}
 	if spec.Spec.Metad != nil {
-		allHosts = append(allHosts, spec.Spec.Metad.Hosts...)
+		for _, host := range spec.Spec.Metad.Hosts {
+			allHosts = append(allHosts, host.Agent)
+		}
 		for _, cluster := range spec.Spec.Metad.Clusters {
-			allHosts = append(allHosts, cluster.Graphd.Hosts...)
-			allHosts = append(allHosts, cluster.Storaged.Hosts...)
+			for _, host := range cluster.Graphd.Hosts {
+				allHosts = append(allHosts, host.Agent)
+			}
+			for _, host := range cluster.Storaged.Hosts {
+				allHosts = append(allHosts, host.Agent)
+			}
 		}
 	}
 	for _, process := range spec.UtilsProcesses {
-		allHosts = append(allHosts, process.Hosts...)
+		for _, host := range process.Hosts {
+			allHosts = append(allHosts, host.Agent)
+		}
 	}
 	for _, agent := range allHosts {
 		if _, ok := allAgents[agent.Host]; !ok {

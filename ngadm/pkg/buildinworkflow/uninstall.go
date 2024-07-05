@@ -59,41 +59,41 @@ func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec
 			task := &types.TaskSpec{
 				Type: "delete_nebula_data",
 				Params: &tasks.DeleteNebulaDataParams{
-					Host:  storage.Host,
+					Host:  storage.Agent.Host,
 					Path:  utils.GetClusterPath(spec.InstallPath),
 					Drain: drain,
 				},
 			}
-			deletedMap[storage.Host] = task
+			deletedMap[storage.Agent.Host] = task
 		}
 		for _, graphd := range cluster.Graphd.Hosts {
-			if _, ok := deletedMap[graphd.Host]; ok {
+			if _, ok := deletedMap[graphd.Agent.Host]; ok {
 				continue
 			}
 			task := &types.TaskSpec{
 				Type: "delete_nebula_data",
 				Params: &tasks.DeleteNebulaDataParams{
-					Host:  graphd.Host,
+					Host:  graphd.Agent.Host,
 					Path:  utils.GetClusterPath(spec.InstallPath),
 					Drain: true, //for graph delete all data
 				},
 			}
-			deletedMap[graphd.Host] = task
+			deletedMap[graphd.Agent.Host] = task
 		}
 	}
 	for _, metad := range spec.Spec.Metad.Hosts {
-		if _, ok := deletedMap[metad.Host]; ok {
+		if _, ok := deletedMap[metad.Agent.Host]; ok {
 			continue
 		}
 		task := &types.TaskSpec{
 			Type: "delete_nebula_data",
 			Params: &tasks.DeleteNebulaDataParams{
-				Host:  metad.Host,
+				Host:  metad.Agent.Host,
 				Path:  utils.GetClusterPath(spec.InstallPath),
 				Drain: drain,
 			},
 		}
-		deletedMap[metad.Host] = task
+		deletedMap[metad.Agent.Host] = task
 	}
 	for _, task := range deletedMap {
 		uninstallTask.SubTasks = append(uninstallTask.SubTasks, task)

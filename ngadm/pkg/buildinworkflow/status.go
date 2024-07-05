@@ -45,15 +45,15 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 	allAgents := utils.GetAllAgents(spec)
 	metaHosts := spec.Spec.Metad.Hosts
 	allNeedOperations := make(map[string]map[types.NebulaServiceComponent]bool, 0)
-	for _, agent := range metaHosts {
-		addNeedOperation(&allNeedOperations, types.Metad, componentType, agent.Host, host)
+	for _, _host := range metaHosts {
+		addNeedOperation(&allNeedOperations, types.Metad, componentType, _host.Agent.Host, host)
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			addNeedOperation(&allNeedOperations, types.Graphd, componentType, agent.Host, host)
+		for _, _host := range cluster.Graphd.Hosts {
+			addNeedOperation(&allNeedOperations, types.Graphd, componentType, _host.Agent.Host, host)
 		}
-		for _, agent := range cluster.Storaged.Hosts {
-			addNeedOperation(&allNeedOperations, types.Storaged, componentType, agent.Host, host)
+		for _, _host := range cluster.Storaged.Hosts {
+			addNeedOperation(&allNeedOperations, types.Storaged, componentType, _host.Agent.Host, host)
 		}
 	}
 

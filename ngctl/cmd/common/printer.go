@@ -1,4 +1,4 @@
-package ngctl
+package common
 
 import (
 	"github.com/jedib0t/go-pretty/v6/table"

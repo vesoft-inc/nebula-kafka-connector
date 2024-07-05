@@ -1,0 +1,37 @@
+version: 1.0
+kind: NebulaCluster
+rollback: true
+installPath: $INSTALL_PATH
+certFile: certs/client.crt
+keyFile: certs/client.key
+caFile: certs/ca.crt
+spec:
+  metad:
+    packagePath: $PACKAGE_PATH
+    hosts:
+      - host:
+        ip: "127.0.0.1"
+        port: 49559
+        agentPort: 6688
+        agents:
+          host: "127.0.0.1:6688"
+    clusters:
+      - zoneList: [zone1]
+        name: cluster_test
+        replica: 1
+        graphd:
+          hosts:
+            - host:
+              ip: "127.0.0.1"
+              port: 49669
+              agentPort: 6688
+              agents:
+                host: "127.0.0.1:6688"
+        storaged:
+          hosts:
+            - host:
+              ip: "127.0.0.1"
+              port: 49779
+              agentPort: 6688
+              agents:
+                host: "127.0.0.1:6688"

@@ -8,21 +8,24 @@ caFile: certs/ca.crt
 spec:
   metad:
     packagePath: "./bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
-    config:
-      port: 9559
     hosts:
-      - host: "192.168.8.240:6688"
+      host:
+        - ip: "192.168.8.240"
+        - port: 9559
+        - agentPort: 6688
     clusters:
       - zoneList: [zone1]
         name: cluster_test
         replica: 1
         graphd:
-          config:
-            port: 9669
           hosts:
-            - host: "192.168.8.240:6688"
+            host:
+              - ip: "192.168.8.240"
+              - port: 9669
+              - agentPort: 6688
         storaged:
-          config:
-            port: 9779
           hosts:
-            - host: "192.168.8.240:6688"
+            host:
+              - ip: "192.168.8.240"
+              - port: 9779
+              - agentPort: 6688

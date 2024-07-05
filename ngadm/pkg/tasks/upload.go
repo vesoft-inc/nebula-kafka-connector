@@ -42,7 +42,8 @@ func (d *Upload) Execute() error {
 		return fmt.Errorf("executor not found for host: %s", d.host)
 	}
 	// make dir
-	stdout, stderr, err := executor.Shell(fmt.Sprintf("mkdir -p %s", path.Dir(d.dstPath)), false)
+	cmd := fmt.Sprintf("mkdir -p %s", path.Dir(d.dstPath))
+	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil || stderr != "" {
 		return fmt.Errorf("mkdir failed:%s, %s,%w", stdout, stderr, err)
 	}

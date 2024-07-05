@@ -54,7 +54,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 		})
 	}
 	configTask := []*types.TaskSpec{}
-	for _, agent := range spec.Spec.Metad.Hosts {
+	for _, host := range spec.Spec.Metad.Hosts {
 		configTask = append(configTask, &types.TaskSpec{
 			Type:        "serial",
 			Description: "config metad",
@@ -62,7 +62,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 				{
 					Type: "config",
 					Params: &tasks.ConfigParams{
-						Host:   agent.Host,
+						Host:   host.Agent.Host,
 						Config: spec.Spec.Metad.Config,
 						Type:   "nebulagraph",
 						Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-metad.conf"),
@@ -72,7 +72,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 		})
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
+		for _, host := range cluster.Graphd.Hosts {
 			configTask = append(configTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "config graphd",
@@ -80,7 +80,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 					{
 						Type: "config",
 						Params: &tasks.ConfigParams{
-							Host:   agent.Host,
+							Host:   host.Agent.Host,
 							Config: cluster.Graphd.Config,
 							Type:   "nebulagraph",
 							Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-graphd.conf"),
@@ -90,7 +90,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 			})
 		}
 		// 4.2 start storaged
-		for _, agent := range cluster.Storaged.Hosts {
+		for _, host := range cluster.Storaged.Hosts {
 			configTask = append(configTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "config storaged",
@@ -98,7 +98,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 					{
 						Type: "config",
 						Params: &tasks.ConfigParams{
-							Host:   agent.Host,
+							Host:   host.Agent.Host,
 							Config: cluster.Storaged.Config,
 							Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-storaged.conf"),
 							Type:   "nebulagraph",
@@ -129,12 +129,12 @@ func ConfigUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, err
 	//1. connect all need hosts
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
-		for _, agent := range process.Hosts {
+		for _, host := range process.Hosts {
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host:      agent.Host,
-					SSHConfig: agent.SSHConfig,
+					Host:      host.Agent.Host,
+					SSHConfig: host.Agent.SSHConfig,
 				},
 			})
 		}
@@ -143,14 +143,14 @@ func ConfigUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, err
 	//2.1 todo: apply utils config
 	configTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
-		for _, agent := range process.Hosts {
+		for _, host := range process.Hosts {
 			task := &types.TaskSpec{
 				Type: "serial",
 				SubTasks: []*types.TaskSpec{
 					{
 						Type: "config",
 						Params: &tasks.ConfigParams{
-							Host:   agent.Host,
+							Host:   host.Agent.Host,
 							Config: process.Config,
 							Dst:    path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ConfigPath),
 							Type:   "yaml",

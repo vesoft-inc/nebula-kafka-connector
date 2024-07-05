@@ -4,17 +4,17 @@ metaCtl ?= ngctl
 buildDate = $(shell TZ=UTC date +%FT%T%z)
 gitCommit = $(shell git log --pretty=format:'%h' -1)
 
-ldflags="-w -X main.gitTag=${gitTag} -X main.buildDate=${buildDate} -X main.gitCommit=${gitCommit}"
+ldflags="-X main.gitTag=${gitTag} -X main.buildDate=${buildDate} -X main.gitCommit=${gitCommit}"
 
 .PHONY: build vendorbuild clean fmt gen
 
 default: build
 
 build: clean fmt
-	@CGO_ENABLED=0 go build -o ${metaCtl} -ldflags ${ldflags} ./cmd/meta/
+	@CGO_ENABLED=0 go build -o ${metaCtl} -ldflags ${ldflags} ./
 
 vendorbuild: clean fmt
-	@CGO_ENABLED=0 go mod vendor && go build -mod vendor -o ${metaCtl} --tags netgo -ldflags ${ldflags} ./cmd/meta/
+	@CGO_ENABLED=0 go mod vendor && go build -mod vendor -o ${metaCtl} --tags netgo -ldflags ${ldflags} ./
 
 clean:
 	@rm -rf ${metaCtl} vendor

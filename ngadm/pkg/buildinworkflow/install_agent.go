@@ -13,24 +13,24 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 	process := spec.UtilsProcesses["agent"]
 	//1. connect all need hosts
 	connectTasks := []*types.TaskSpec{}
-	for _, agent := range process.Hosts {
-		if agent.SSHConfig == nil {
+	for _, host := range process.Hosts {
+		if host.Agent.SSHConfig == nil {
 			continue
 		}
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "connect",
 			Params: &tasks.ConnectParams{
-				Host:      agent.Host,
-				SSHConfig: agent.SSHConfig,
+				Host:      host.Agent.Host,
+				SSHConfig: host.Agent.SSHConfig,
 			},
 		})
 	}
 	//2. upload and start
 	//2.1 todo: apply utils config
 	uploadAndStartTasks := []*types.TaskSpec{}
-	for _, agent := range process.Hosts {
+	for _, host := range process.Hosts {
 		dstPath := path.Join(utils.GetDownloadPath(spec.InstallPath), path.Base(process.PackagePath))
-		installPath := utils.GetUserUtilPath(spec.InstallPath, agent.InstallPath, process.Name)
+		installPath := utils.GetUserUtilPath(spec.InstallPath, host.Agent.InstallPath, process.Name)
 		task := &types.TaskSpec{
 			Type: "serial",
 			SubTasks: []*types.TaskSpec{
@@ -39,13 +39,13 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 					Params: &tasks.UploadParams{
 						SrcPath: process.PackagePath,
 						DstPath: dstPath,
-						Host:    agent.Host,
+						Host:    host.Agent.Host,
 					},
 				},
 				{
 					Type: "extract",
 					Params: &tasks.ExtractParams{
-						Host:        agent.Host,
+						Host:        host.Agent.Host,
 						ExtractPath: installPath,
 						PkgPath:     dstPath,
 					},
@@ -53,8 +53,8 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 				{
 					Type: "config",
 					Params: &tasks.ConfigParams{
-						Host:   agent.Host,
-						Config: utils.MergeAgentConfig(agent.Config, process.Config),
+						Host:   host.Agent.Host,
+						Config: utils.MergeAgentConfig(host.Agent.Config, process.Config),
 						Dst:    path.Join(installPath, process.ConfigPath),
 						Type:   "yaml",
 					},
@@ -70,21 +70,21 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 			Params: &tasks.UploadParams{
 				SrcPath: spec.ServerCertFile,
 				DstPath: path.Join(installPath, "certs/server.crt"),
-				Host:    agent.Host,
+				Host:    host.Agent.Host,
 			},
 		}, &types.TaskSpec{
 			Type: "upload",
 			Params: &tasks.UploadParams{
 				SrcPath: spec.ServerKeyFile,
 				DstPath: path.Join(installPath, "certs/server.key"),
-				Host:    agent.Host,
+				Host:    host.Agent.Host,
 			},
 		}, &types.TaskSpec{
 			Type: "upload",
 			Params: &tasks.UploadParams{
 				SrcPath: spec.CAFile,
 				DstPath: path.Join(installPath, "certs/ca.crt"),
-				Host:    agent.Host,
+				Host:    host.Agent.Host,
 			},
 		})
 
@@ -93,7 +93,7 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 			task.SubTasks = append(task.SubTasks, &types.TaskSpec{
 				Type: "operate",
 				Params: &tasks.OperateParams{
-					Host:      agent.Host,
+					Host:      host.Agent.Host,
 					ExecPath:  scriptPath,
 					Operation: "start",
 				},
@@ -102,7 +102,7 @@ func InstallAgent(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec
 			task.SubTasks = append(task.SubTasks, &types.TaskSpec{
 				Type: "systemd",
 				Params: &tasks.SystemdParams{
-					Host:             agent.Host,
+					Host:             host.Agent.Host,
 					Name:             process.Name,
 					ExecStartPath:    path.Join(installPath, process.ExecStartPath),
 					WorkingDirectory: path.Join(installPath, process.WorkingDir),

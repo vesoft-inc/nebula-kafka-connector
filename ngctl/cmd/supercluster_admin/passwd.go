@@ -1,11 +1,11 @@
-package main
+package supercluster_admin
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
 var passwdCmd = &cobra.Command{
@@ -13,7 +13,7 @@ var passwdCmd = &cobra.Command{
 	Short: "Change the password of the user.",
 	Long:  `passwd`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cacheToken, err := ngctl.LoadMetaToken()
+		cacheToken, err := common.LoadMetaToken()
 		if err != nil || cacheToken == nil {
 			return fmt.Errorf("load meta session failed, please login first.")
 		}
@@ -23,15 +23,14 @@ var passwdCmd = &cobra.Command{
 		}
 		defer client.Close()
 		if _, err := resetPassword(client); err != nil {
-			return metaConsoleError("cannot change password, ", err.Error())
+			return common.NgctlError("cannot change password, ", err.Error())
 		}
 
-		fmt.Fprintln(metaOutput, "Change password succeeded.")
+		fmt.Fprintln(common.MetaOutput, "Change password succeeded.")
 
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(passwdCmd)
 }

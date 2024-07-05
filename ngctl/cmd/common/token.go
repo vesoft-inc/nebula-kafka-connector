@@ -1,4 +1,4 @@
-package ngctl
+package common
 
 import (
 	"encoding/json"

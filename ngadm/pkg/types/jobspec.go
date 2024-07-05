@@ -40,11 +40,11 @@ type Process struct {
 	ConfigPath    string         `yaml:"configPath,omitempty"`
 	InstallPath   string         `yaml:"installPath,omitempty"`
 	Config        map[string]any `yaml:"config,omitempty"`
-	Hosts         []Agent        `yaml:"hosts,omitempty"`
+	Hosts         []Host        `yaml:"hosts,omitempty"`
 	StartType     string         `yaml:"startType,omitempty"`     //systemd, shell
 	ExecShellPath string         `yaml:"execShellPath,omitempty"` // exec path
 	ExecStartPath string         `yaml:"execStartPath,omitempty"` // bin path
-	WorkingDir    string         `yaml:"workingDir,omitempty"`    // working dir
+	WorkingDir    string         `yaml:"workingDir,omitempty"`    // working dir1
 }
 
 type MetadSpec struct {
@@ -53,11 +53,18 @@ type MetadSpec struct {
 }
 
 type Agent struct {
-	Host        string         `yaml:"host,omitempty"`
+	Host        string         `yaml:"host"`
 	SSHConfig   *SSHConfig     `yaml:"sshConfig,omitempty"`
 	InstallPath string         `yaml:"installPath,omitempty"`
 	PackagePath string         `yaml:"packagePath,omitempty"`
 	Config      map[string]any `yaml:"config,omitempty"`
+}
+
+type Host struct {
+	IP  string `yaml:"ip"`
+	Port string `yaml:"port"`
+	AgentPort string `yaml:"agentPort,omitempty"`
+	Agent Agent `yaml:"agents,omitempty"`
 }
 
 type Cluster struct {

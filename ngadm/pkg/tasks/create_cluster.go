@@ -73,11 +73,11 @@ func (d *CreateCluster) Execute() error {
 		if err != nil {
 			return fmt.Errorf("get graphd port failed: %s", err)
 		}
-		req := meta.NewAddServiceReq(utils.GetHostIP(host.Host), port, meta.ServiceTypeGraphd, d.clusterSpec.Name)
+		req := meta.NewAddServiceReq(utils.GetHostIP(host.Agent.Host), port, meta.ServiceTypeGraphd, d.clusterSpec.Name)
 		if err := d.metaClient.AddService(req); err != nil {
 			return fmt.Errorf("add host failed: %s", err)
 		}
-		d.JobContext.Logger.Info("add host success: " + host.Host)
+		d.JobContext.Logger.Info("add host success: " + host.Agent.Host)
 	}
 	for _, host := range d.clusterSpec.Storaged.Hosts {
 		if d.ifExited() {
@@ -87,11 +87,11 @@ func (d *CreateCluster) Execute() error {
 		if err != nil {
 			return fmt.Errorf("get storaged port failed: %s", err)
 		}
-		req := meta.NewAddServiceReq(utils.GetHostIP(host.Host), port, meta.ServiceTypeStoraged, d.clusterSpec.Name)
+		req := meta.NewAddServiceReq(utils.GetHostIP(host.Agent.Host), port, meta.ServiceTypeStoraged, d.clusterSpec.Name)
 		if err := d.metaClient.AddService(req); err != nil {
 			return fmt.Errorf("add host failed: %s", err)
 		}
-		d.JobContext.Logger.Info("add host success: " + host.Host)
+		d.JobContext.Logger.Info("add host success: " + host.Agent.Host)
 	}
 	if d.ifExited() {
 		return fmt.Errorf("exited signal received")

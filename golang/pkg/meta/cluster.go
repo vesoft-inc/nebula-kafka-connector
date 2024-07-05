@@ -146,7 +146,7 @@ func NewDropHostReq(host string, clusterName string) *DropHostReq {
 	}
 }
 
-func NewListHostsReq(clusterName string) *ListHostsReq {
+func NewShowHostsReq(clusterName string) *ListHostsReq {
 	return &ListHostsReq{
 		clustername: clusterName,
 	}

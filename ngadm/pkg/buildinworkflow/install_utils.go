@@ -13,12 +13,12 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 	//1. connect all need hosts
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
-		for _, agent := range process.Hosts {
+		for _, host := range process.Hosts {
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host:      agent.Host,
-					SSHConfig: agent.SSHConfig,
+					Host:      host.Agent.Host,
+					SSHConfig: host.Agent.SSHConfig,
 				},
 			})
 		}
@@ -27,7 +27,7 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 	//2.1 todo: apply utils config
 	uploadAndStartTasks := []*types.TaskSpec{}
 	for _, process := range allUtils {
-		for _, agent := range process.Hosts {
+		for _, host := range process.Hosts {
 			dstPath := path.Join(utils.GetDownloadPath(spec.InstallPath), path.Base(process.PackagePath))
 			task := &types.TaskSpec{
 				Type: "serial",
@@ -37,13 +37,13 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 						Params: &tasks.UploadParams{
 							SrcPath: process.PackagePath,
 							DstPath: dstPath,
-							Host:    agent.Host,
+							Host:    host.Agent.Host,
 						},
 					},
 					{
 						Type: "extract",
 						Params: &tasks.ExtractParams{
-							Host:        agent.Host,
+							Host:        host.Agent.Host,
 							ExtractPath: utils.GetUtilPath(spec.InstallPath, process.Name),
 							PkgPath:     dstPath,
 						},
@@ -51,8 +51,8 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 					{
 						Type: "config",
 						Params: &tasks.ConfigParams{
-							Host:   agent.Host,
-							Config: utils.MergeAgentConfig(agent.Config, process.Config),
+							Host:   host.Agent.Host,
+							Config: utils.MergeAgentConfig(host.Agent.Config, process.Config),
 							Dst:    path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ConfigPath),
 							Type:   "yaml",
 						},
@@ -64,7 +64,7 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
 					Type: "operate",
 					Params: &tasks.OperateParams{
-						Host:      agent.Host,
+						Host:      host.Agent.Host,
 						ExecPath:  scriptPath,
 						Operation: "start",
 					},
@@ -73,7 +73,7 @@ func InstallUtils(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 				task.SubTasks = append(task.SubTasks, &types.TaskSpec{
 					Type: "systemd",
 					Params: &tasks.SystemdParams{
-						Host:             agent.Host,
+						Host:             host.Agent.Host,
 						Name:             process.Name,
 						ExecStartPath:    path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.ExecStartPath),
 						WorkingDirectory: path.Join(utils.GetUtilPath(spec.InstallPath, process.Name), process.WorkingDir),

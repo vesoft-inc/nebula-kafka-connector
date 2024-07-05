@@ -1,4 +1,4 @@
-package main
+package supercluster_admin
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
 type loginFlagsType struct {
@@ -42,26 +42,30 @@ var loginCmd = &cobra.Command{
 		address = fmt.Sprintf("%s:%d", loginFlags.host, loginFlags.port)
 		c, err := meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, loginFlags.password))
 		if err != nil {
-			return metaConsoleError(fmt.Sprintf("cannot create client to %s", address), err.Error())
+			return common.NgctlError(fmt.Sprintf("cannot create client to %s", address), err.Error())
 		}
 		resp, err := c.Login()
 		if err != nil {
 			//should reset password for first login
 			e, ok := err.(*nebula.NebulaError)
 			if !ok {
-				return metaConsoleError("Login failed", err.Error())
+				return common.NgctlError("Login failed", err.Error())
 			}
 			if e.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
-				return metaConsoleError("Login failed", err.Error())
+				return common.NgctlError("Login failed", err.Error())
 			}
 			// reset password and re-login
-			fmt.Fprintln(metaOutput, "Please reset the password for the first login.")
+			fmt.Fprintln(common.MetaOutput, "Please reset the password for the first login.")
 			var newPassword string
 			newPassword, err = resetPassword(c)
 			if err != nil {
-				return metaConsoleError("Cannot reset password", err.Error())
+				return common.NgctlError("Cannot reset password", err.Error())
 			}
-			fmt.Fprintf(metaOutput, "Reset password succeeded for %s, re-login with the new password.\n", loginFlags.user)
+			fmt.Fprintf(
+				common.MetaOutput,
+				"Reset password succeeded for %s, re-login with the new password.\n",
+				loginFlags.user,
+			)
 			c.Close()
 			c, err = meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, newPassword))
 			if err != nil {
@@ -69,15 +73,15 @@ var loginCmd = &cobra.Command{
 			}
 			resp, err = c.Login()
 			if err != nil {
-				return metaConsoleError("Login failed", err.Error())
+				return common.NgctlError("Login failed", err.Error())
 			}
 		}
-		if err := ngctl.SaveMetaToken(address, resp.Leader, resp.Token); err != nil {
-			return metaConsoleError("Save meta session failed", err.Error())
+		if err := common.SaveMetaToken(address, resp.Leader, resp.Token); err != nil {
+			return common.NgctlError("Save meta session failed", err.Error())
 		}
 
-		fmt.Fprintln(metaOutput, "Login succeeded.")
-		fmt.Fprintf(metaOutput, "Your token will be stored in %s.\n", ngctl.CachePath())
+		fmt.Fprintln(common.MetaOutput, "Login succeeded.")
+		fmt.Fprintf(common.MetaOutput, "Your token will be stored in %s.\n", common.CachePath())
 
 		return nil
 	},
@@ -126,7 +130,6 @@ func resetPassword(c meta.Client) (string, error) {
 }
 
 func init() {
-	rootCmd.AddCommand(loginCmd)
 	loginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "127.0.0.1", "meta server host")
 	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
 	loginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "root", "user name")

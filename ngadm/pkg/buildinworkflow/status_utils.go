@@ -17,7 +17,7 @@ func StatusUtils(spec *types.JobSpec, component string) (*types.TaskSpec, error)
 			for _, host := range process.Hosts {
 				connectTasks = append(connectTasks, &types.TaskSpec{
 					Type:   "connect",
-					Params: &tasks.ConnectParams{Host: host.Host, SSHConfig: host.SSHConfig},
+					Params: &tasks.ConnectParams{Host: host.Agent.Host, SSHConfig: host.Agent.SSHConfig},
 				})
 			}
 
@@ -28,7 +28,7 @@ func StatusUtils(spec *types.JobSpec, component string) (*types.TaskSpec, error)
 					Params: &tasks.StatusParams{
 						Component:     types.NebulaServiceComponent(component),
 						Name:          process.Name,
-						Host:          process.Hosts[0].Host,
+						Host:          process.Hosts[0].Agent.Host,
 						ExecShellPath: scriptPath,
 						Port:          utils.GetConfigPort(process.Config),
 					},
@@ -37,7 +37,7 @@ func StatusUtils(spec *types.JobSpec, component string) (*types.TaskSpec, error)
 				statusTasks = append(statusTasks, &types.TaskSpec{
 					Type: "systemd",
 					Params: &tasks.SystemdParams{
-						Host:    process.Hosts[0].Host,
+						Host:    process.Hosts[0].Agent.Host,
 						Name:    process.Name,
 						Operate: "status",
 						Port:    utils.GetConfigPort(process.Config),

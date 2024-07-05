@@ -107,8 +107,8 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	}
 	//3. config and start needed processes
 	startNeededProcessesTask := []*types.TaskSpec{}
-	for _, agent := range metaHosts {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.PackagePath)
+	for _, host := range metaHosts {
+		installPath := utils.GetUserClusterPath(spec.InstallPath, host.Agent.PackagePath)
 		startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 			Type:        "serial",
 			Description: "start metad",
@@ -116,9 +116,9 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 				{
 					Type: "init_config",
 					Params: &tasks.InitConfigParams{
-						Host: agent.Host,
+						Host: host.Agent.Host,
 						ChangeMap: utils.MergeNebulaConfigMap(metaCluster.Config, map[string]string{
-							"local_ip":          utils.GetHostIP(agent.Host),
+							"local_ip":          utils.GetHostIP(host.Agent.Host),
 							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
 						}),
 						Dst: path.Join(installPath, "etc/nebula-metad.conf"),
@@ -127,7 +127,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 				{
 					Type: "nebula_operation",
 					Params: &tasks.NebulaOperationParams{
-						Host:         agent.Host,
+						Host:         host.Agent.Host,
 						Operation:    "start",
 						Component:    "metad",
 						NeedRollback: true,
@@ -172,18 +172,18 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 
 func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	allNeedHosts := make(map[string]*types.Agent, 0)
-	for _, agent := range spec.Spec.Metad.Hosts {
-		agentCopy := agent
-		allNeedHosts[agent.Host] = &agentCopy
+	for _, host := range spec.Spec.Metad.Hosts {
+		agentCopy := host.Agent
+		allNeedHosts[host.Agent.Host] = &agentCopy
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			agentCopy := agent
-			allNeedHosts[agent.Host] = &agentCopy
+		for _, host := range cluster.Graphd.Hosts {
+			agentCopy := host.Agent
+			allNeedHosts[host.Agent.Host] = &agentCopy
 		}
-		for _, agent := range cluster.Storaged.Hosts {
-			agentCopy := agent
-			allNeedHosts[agent.Host] = &agentCopy
+		for _, host := range cluster.Storaged.Hosts {
+			agentCopy := host.Agent
+			allNeedHosts[host.Agent.Host] = &agentCopy
 		}
 	}
 	return allNeedHosts

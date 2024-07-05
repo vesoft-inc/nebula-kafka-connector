@@ -30,15 +30,15 @@ func VerifyAgents(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 	}
 	metaHosts := spec.Spec.Metad.Hosts
 	allNeedHosts := make(map[string]*types.Agent, 0)
-	for _, agent := range metaHosts {
-		allNeedHosts[agent.Host] = &agent
+	for _, host := range metaHosts {
+		allNeedHosts[host.Agent.Host] = &host.Agent
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			allNeedHosts[agent.Host] = &agent
+		for _, host := range cluster.Graphd.Hosts {
+			allNeedHosts[host.Agent.Host] = &host.Agent
 		}
-		for _, agent := range cluster.Storaged.Hosts {
-			allNeedHosts[agent.Host] = &agent
+		for _, host := range cluster.Storaged.Hosts {
+			allNeedHosts[host.Agent.Host] = &host.Agent
 		}
 	}
 

@@ -60,15 +60,15 @@ func OperateUtils(spec *types.JobSpec, component, operation, host string) (*type
 	operateTasks := []*types.TaskSpec{}
 	connectTasks := []*types.TaskSpec{}
 	for _, process := range allUitils {
-		for _, agent := range process.Hosts {
-			if host != "" && host != agent.Host {
+		for _, _h := range process.Hosts {
+			if host != "" && host != _h.Agent.Host {
 				continue
 			}
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "connect",
 				Params: &tasks.ConnectParams{
-					Host:      agent.Host,
-					SSHConfig: agent.SSHConfig,
+					Host:      _h.Agent.Host,
+					SSHConfig: _h.Agent.SSHConfig,
 				},
 			})
 
@@ -80,7 +80,7 @@ func OperateUtils(spec *types.JobSpec, component, operation, host string) (*type
 						Params: &tasks.OperateParams{
 							Operation: operation,
 							ExecPath:  scriptPath,
-							Host:      agent.Host,
+							Host:      _h.Agent.Host,
 						},
 					})
 				} else {
@@ -89,7 +89,7 @@ func OperateUtils(spec *types.JobSpec, component, operation, host string) (*type
 						Params: &tasks.SystemdParams{
 							Operate: operation,
 							Name:    process.Name,
-							Host:    agent.Host,
+							Host:    _h.Agent.Host,
 						},
 					})
 				}
@@ -148,15 +148,15 @@ func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait 
 	metaHosts := spec.Spec.Metad.Hosts
 	allNeedOperations := make(map[string]map[types.NebulaServiceComponent]bool, 0)
 	allAgents := utils.GetAllAgents(spec)
-	for _, agent := range metaHosts {
-		addNeedOperation(&allNeedOperations, types.Metad, componentType, agent.Host, host)
+	for _, _host := range metaHosts {
+		addNeedOperation(&allNeedOperations, types.Metad, componentType, _host.Agent.Host, host)
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			addNeedOperation(&allNeedOperations, types.Graphd, componentType, agent.Host, host)
+		for _, _host := range cluster.Graphd.Hosts {
+			addNeedOperation(&allNeedOperations, types.Graphd, componentType, _host.Agent.Host, host)
 		}
-		for _, agent := range cluster.Storaged.Hosts {
-			addNeedOperation(&allNeedOperations, types.Storaged, componentType, agent.Host, host)
+		for _, _host := range cluster.Storaged.Hosts {
+			addNeedOperation(&allNeedOperations, types.Storaged, componentType, _host.Agent.Host, host)
 		}
 	}
 

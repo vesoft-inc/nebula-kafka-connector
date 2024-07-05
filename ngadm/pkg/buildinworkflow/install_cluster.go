@@ -105,8 +105,8 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	startNeededProcessesTask := []*types.TaskSpec{}
 	for _, cluster := range spec.Spec.Metad.Clusters {
 		// 3.1 start graphd
-		for _, agent := range cluster.Graphd.Hosts {
-			installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
+		for _, host := range cluster.Graphd.Hosts {
+			installPath := utils.GetUserClusterPath(spec.InstallPath, host.Agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start graphd",
@@ -114,9 +114,9 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					{
 						Type: "init_config",
 						Params: &tasks.InitConfigParams{
-							Host: agent.Host,
+							Host: host.Agent.Host,
 							ChangeMap: utils.MergeNebulaConfigMap(cluster.Graphd.Config, map[string]string{
-								"local_ip":          utils.GetHostIP(agent.Host),
+								"local_ip":          utils.GetHostIP(host.Agent.Host),
 								"meta_server_addrs": metaServerAddress,
 							}),
 							Dst: path.Join(installPath, "etc/nebula-graphd.conf"),
@@ -125,7 +125,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					{
 						Type: "nebula_operation",
 						Params: &tasks.NebulaOperationParams{
-							Host:      agent.Host,
+							Host:      host.Agent.Host,
 							Operation: "start",
 							Component: "graphd",
 							Path:      installPath,
@@ -146,8 +146,8 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 			})
 		}
 		// .2 start storaged
-		for _, agent := range cluster.Storaged.Hosts {
-			installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
+		for _, host := range cluster.Storaged.Hosts {
+			installPath := utils.GetUserClusterPath(spec.InstallPath, host.Agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start storaged",
@@ -155,9 +155,9 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					{
 						Type: "init_config",
 						Params: &tasks.InitConfigParams{
-							Host: agent.Host,
+							Host: host.Agent.Host,
 							ChangeMap: utils.MergeNebulaConfigMap(cluster.Storaged.Config, map[string]string{
-								"local_ip":          utils.GetHostIP(agent.Host),
+								"local_ip":          utils.GetHostIP(host.Agent.Host),
 								"meta_server_addrs": metaServerAddress,
 							}),
 							Dst: path.Join(installPath, "etc/nebula-storaged.conf"),
@@ -166,7 +166,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					{
 						Type: "nebula_operation",
 						Params: &tasks.NebulaOperationParams{
-							Host:         agent.Host,
+							Host:         host.Agent.Host,
 							Operation:    "start",
 							Component:    "storaged",
 							NeedRollback: true,
@@ -227,18 +227,18 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 
 func GetClusterNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	allNeedHosts := make(map[string]*types.Agent, 0)
-	for _, agent := range spec.Spec.Metad.Hosts {
-		agentCopy := agent
-		allNeedHosts[agent.Host] = &agentCopy
+	for _, host := range spec.Spec.Metad.Hosts {
+		agentCopy := host.Agent
+		allNeedHosts[host.Agent.Host] = &agentCopy
 	}
 	for _, cluster := range spec.Spec.Metad.Clusters {
-		for _, agent := range cluster.Graphd.Hosts {
-			agentCopy := agent
-			allNeedHosts[agent.Host] = &agentCopy
+		for _, host := range cluster.Graphd.Hosts {
+			agentCopy := host.Agent
+			allNeedHosts[host.Agent.Host] = &agentCopy
 		}
-		for _, agent := range cluster.Storaged.Hosts {
-			agentCopy := agent
-			allNeedHosts[agent.Host] = &agentCopy
+		for _, host := range cluster.Storaged.Hosts {
+			agentCopy := host.Agent
+			allNeedHosts[host.Agent.Host] = &agentCopy
 		}
 	}
 	return allNeedHosts

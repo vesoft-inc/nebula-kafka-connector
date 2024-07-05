@@ -1,4 +1,4 @@
-package main
+package cluster_admin
 
 import (
 	"github.com/spf13/cobra"
@@ -12,6 +12,5 @@ var brCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(brCmd)
 	brCmd.AddCommand(cmd.NewBackupCmd(), cmd.NewVersionCmd(), cmd.NewRestoreCmd(), cmd.NewCleanupCmd(), cmd.NewShowCmd())
 }

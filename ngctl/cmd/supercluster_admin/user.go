@@ -1,4 +1,4 @@
-package main
+package supercluster_admin
 
 import (
 	"encoding/json"
@@ -8,7 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
 type userFlagsType struct {
@@ -35,10 +35,10 @@ var createUserCmd = &cobra.Command{
 	Long: `ngctl user create --user [username] --password [password] or 
 ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -57,10 +57,10 @@ ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo
 			userFlags.authType,
 			userFlags.authInfo,
 		)
-		if err := metaClient.CreateUser(req); err != nil {
+		if err := common.MetaClient.CreateUser(req); err != nil {
 			return err
 		}
-		fmt.Fprintf(metaOutput, "Create user successfully.\n")
+		fmt.Fprintf(common.MetaOutput, "Create user successfully.\n")
 		return nil
 	},
 }
@@ -70,18 +70,18 @@ var dropUserCmd = &cobra.Command{
 	Short: "Drop user in meta server.",
 	Long:  `ngctl user drop --user [username]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		req := meta.NewDropUserReq(userFlags.user)
-		if err := metaClient.DropUser(req); err != nil {
+		if err := common.MetaClient.DropUser(req); err != nil {
 			return err
 		}
-		fmt.Fprintf(metaOutput, "Drop user successfully.\n")
+		fmt.Fprintf(common.MetaOutput, "Drop user successfully.\n")
 		return nil
 	},
 }
@@ -93,10 +93,10 @@ var alterUserCmd = &cobra.Command{
 ngctl user alter --user [username] --password [password]
 	`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -115,10 +115,10 @@ ngctl user alter --user [username] --password [password]
 			userFlags.authInfo,
 			true, //always active for alter user
 		)
-		if err := metaClient.AlterUser(req); err != nil {
+		if err := common.MetaClient.AlterUser(req); err != nil {
 			return err
 		}
-		fmt.Fprintf(metaOutput, "Alter user successfully.\n")
+		fmt.Fprintf(common.MetaOutput, "Alter user successfully.\n")
 
 		return nil
 	},
@@ -129,10 +129,10 @@ var showUserCmd = &cobra.Command{
 	Short: "show user in meta server.",
 	Long:  `ngctl user show --user aa,bb`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -141,15 +141,24 @@ var showUserCmd = &cobra.Command{
 			l = append(l, strings.Split(userFlags.user, ",")...)
 		}
 		req := meta.NewListUsersReq(l)
-		resp, err := metaClient.ListUsers(req)
+		resp, err := common.MetaClient.ListUsers(req)
 		if err != nil {
 			return err
 		}
-		header := []string{"Name", "Active", "Auth Type", "Auth Info", "Created Time", "Last Updated Time", "Last Login Time", "Disabled Time"}
+		header := []string{
+			"Name",
+			"Active",
+			"Auth Type",
+			"Auth Info",
+			"Created Time",
+			"Last Updated Time",
+			"Last Login Time",
+			"Disabled Time",
+		}
 		data := make([][]string, 0)
 		for _, u := range resp.Users {
 			row := make([]string, 0)
-			row = append(row, fmt.Sprintf("%s", u.Name))
+			row = append(row, u.Name)
 			if u.Active {
 				row = append(row, "Y")
 			} else {
@@ -157,17 +166,17 @@ var showUserCmd = &cobra.Command{
 			}
 			row = append(row, u.AuthType)
 			row = append(row, u.AuthInfo)
-			row = append(row, fmt.Sprintf("%s", formatTime(u.CreatedTime)))
-			row = append(row, fmt.Sprintf("%s", formatTime(u.LastUpdatedTime)))
-			row = append(row, fmt.Sprintf("%s", formatTime(u.LastLoginTime)))
-			row = append(row, fmt.Sprintf("%s", formatTime(u.DisabledTime)))
+			row = append(row, common.FormatTime(u.CreatedTime))
+			row = append(row, common.FormatTime(u.LastUpdatedTime))
+			row = append(row, common.FormatTime(u.LastLoginTime))
+			row = append(row, common.FormatTime(u.DisabledTime))
 			data = append(data, row)
 		}
 		// order by user name
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
-		fmt.Fprintln(metaOutput, ngctl.FormatTable(header, data))
+		fmt.Fprintln(common.MetaOutput, common.FormatTable(header, data))
 		return nil
 	},
 }
@@ -177,20 +186,20 @@ var disableUserCmd = &cobra.Command{
 	Short: "disable user in meta server.",
 	Long:  `ngctl user disable --user aa`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		req := meta.NewAlterUserReq(userFlags.user, "", false)
-		if err := metaClient.AlterUser(req); err != nil {
+		if err := common.MetaClient.AlterUser(req); err != nil {
 			return err
 		}
 
-		fmt.Fprintln(metaOutput, "disable user successfully")
+		fmt.Fprintln(common.MetaOutput, "disable user successfully")
 		return nil
 	},
 }
@@ -200,26 +209,25 @@ var enableUserCmd = &cobra.Command{
 	Short: "enable user in meta server.",
 	Long:  `ngctl user enable --user aa`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 
 		req := meta.NewAlterUserReq(userFlags.user, "", true)
-		if err := metaClient.AlterUser(req); err != nil {
+		if err := common.MetaClient.AlterUser(req); err != nil {
 			return err
 		}
 
-		fmt.Fprintln(metaOutput, "enable user successfully")
+		fmt.Fprintln(common.MetaOutput, "enable user successfully")
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(userCmd)
 	userCmd.AddCommand(createUserCmd)
 	userCmd.AddCommand(dropUserCmd)
 	userCmd.AddCommand(alterUserCmd)

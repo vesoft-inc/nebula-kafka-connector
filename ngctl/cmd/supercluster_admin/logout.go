@@ -1,10 +1,10 @@
-package main
+package supercluster_admin
 
 import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
 var logoutCmd = &cobra.Command{
@@ -12,26 +12,25 @@ var logoutCmd = &cobra.Command{
 	Short: "Logout meta server.",
 	Long:  `logout`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
-		return metaClientInit()
+		return common.MetaClientInit()
 	},
 	PostRunE: func(cmd *cobra.Command, args []string) error {
-		metaClientClose()
+		common.MetaClientClose()
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := metaClient.Logout(); err != nil {
+		if err := common.MetaClient.Logout(); err != nil {
 			return err
 		}
-		if err := ngctl.ClearMetaToken(); err != nil {
-			return metaConsoleError("clear meta session failed", err.Error())
+		if err := common.ClearMetaToken(); err != nil {
+			return common.NgctlError("clear meta session failed", err.Error())
 		}
 
-		fmt.Fprintln(metaOutput, "Logout succeeded.")
+		fmt.Fprintln(common.MetaOutput, "Logout succeeded.")
 
 		return nil
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(logoutCmd)
 }
