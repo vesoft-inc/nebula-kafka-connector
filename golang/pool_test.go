@@ -128,8 +128,10 @@ func TestPool(t *testing.T) {
 		t.Fatal(err)
 	}
 	//test min open
+	pool.mu.Lock()
 	assert.Equal(t, pool.minOpen, len(pool.connMap))
 	assert.Equal(t, pool.minOpen, len(pool.freeConn))
+	pool.mu.Unlock()
 	//test max open
 	var wg sync.WaitGroup
 	for i := 0; i < maxOpen; i++ {

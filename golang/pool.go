@@ -12,6 +12,7 @@ type (
 	driverPool struct {
 		ctx      context.Context
 		mu       sync.Mutex
+		once     sync.Once
 		freeConn []Client
 		// When driverConn.ExecuteContext is called, it will retry to get a connection.
 		// The connMap key is the connection.
@@ -158,6 +159,7 @@ func (dp *driverPool) GetClient() (Client, error) {
 	)
 	timeout, cancel := context.WithTimeout(context.Background(), dp.connCfg.requestTimeout)
 	defer cancel()
+
 	dp.mu.Lock()
 	if len(dp.freeConn) == 0 {
 		if len(dp.connMap) < dp.maxOpen {
@@ -184,13 +186,11 @@ func (dp *driverPool) GetClient() (Client, error) {
 		dp.freeConn = dp.freeConn[:len(dp.freeConn)-1]
 		dp.mu.Unlock()
 	}
-
-	// start ticker
-	var once sync.Once
-	once.Do(func() {
+	// // start ticker
+	dp.once.Do(func() {
+		fmt.Print("run ticker")
 		go dp.ticker(dp.ctx)
 	})
-
 	return dc, nil
 }
 
