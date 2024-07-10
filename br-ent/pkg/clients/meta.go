@@ -140,7 +140,7 @@ func (m *NebulaMeta) ListClusters(amg *AgentManager) ([]*ClusterServiceInfo, err
 				}
 				dataPaths, err := agent.GetDataPaths(s.Type, installPath)
 				if err != nil {
-					return nil, fmt.Errorf("get metad %s data path failed: %w", s.Host, err)
+					return nil, fmt.Errorf("get storaged %s data path failed: %w", s.Host, err)
 				}
 
 				sInfo.InstallPath = installPath

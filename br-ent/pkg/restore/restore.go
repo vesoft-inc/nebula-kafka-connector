@@ -3,6 +3,7 @@ package restore
 import (
 	"context"
 	"fmt"
+	"github.com/zeromicro/go-zero/core/logx"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -466,7 +467,7 @@ func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]st
 	for i, s := range curStorages {
 		storageIdMap[oldStorages[i].ServiceId] = s.ServiceId
 		for _, info := range oldStorages[i].CkptInfos {
-			key := utils.GenPartKey(oldStorages[i].ServiceId, info.PartId)
+			key := utils.GenPartKey(r.backupClusterId, info.PartId)
 			hostPartMap[key] = append(hostPartMap[key], s.Host)
 		}
 	}
@@ -498,6 +499,8 @@ func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]st
 }
 
 func (r *Restore) downloadStorage(hostPartMap map[string][]string, backupRes *meta.CreateBackupResp) error {
+	logx.Infof("download storage data, hostpartmap: %v", hostPartMap)
+
 	group := async.NewGroup(context.TODO(), r.cfg.Concurrency, "download storaged partition")
 	curClusterId := r.clusterId
 
@@ -511,6 +514,7 @@ func (r *Restore) downloadStorage(hostPartMap map[string][]string, backupRes *me
 
 		strClusterId := strconv.Itoa(int(r.backupClusterId))
 		strPartId := strconv.Itoa(int(part.PartId))
+
 		for _, host := range hostPartMap[key] {
 			agent, err := r.amg.GetAgent(host)
 			if err != nil {
