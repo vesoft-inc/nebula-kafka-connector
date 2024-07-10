@@ -2,7 +2,10 @@ package service_admin
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"os/exec"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
@@ -11,20 +14,38 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
-func prepareConfigFile(serviceType string, installPath string, host common.IPAndPort, agent types.Agent) error {
+func prepareConfigFile(serviceType string, installPath string, host common.IPAndPort, agent types.Agent, configFileTemplate string) error {
 	hosts := common.ConfigSpec.Spec.Metad.Hosts
 	metaAddrs := []common.IPAndPort{}
 	for _, host := range hosts {
 		metaAddrs = append(metaAddrs, common.IPAndPort{IP: host.IP, Port: host.Port})
 	}
-	localCongfigFilePath := installPath + "cluster/etc/nebula-" + serviceType + ".conf"
-	backupLocalConfigFilePath := installPath + "cluster/etc/nebula-" + serviceType + fmt.Sprintf("-%s-%s.conf", host.IP, host.Port) + ".conf.bak"
+
+	currentFolder, err := os.Getwd()
+	if err != nil {
+		return common.NgctlError("Failed to get current folder", err.Error())
+	}
+	currentFolder = strings.TrimSuffix(currentFolder, "/")
+	// the local config file to be rendered
+	localCongfigFilePath := currentFolder + "/nebula-" + serviceType + ".conf"
+	// the backup config file of the above
+	backupLocalConfigFilePath := currentFolder + "/nebula-" + serviceType + fmt.Sprintf("-%s-%s.conf", host.IP, host.Port) + ".bak"
+	// the final config file path for the service to be started in the remote host
 	dstConfigFilePath := installPath + "cluster/etc/"
-	err := common.GenerateConfigFile(serviceType, localCongfigFilePath, common.IPAndPort{IP: host.IP, Port: host.Port}, metaAddrs)
+
+	if configFileTemplate == "" {
+		configFileTemplate = localCongfigFilePath + ".default"
+		err := common.GenerateDefaultConfigFile(configFileTemplate, serviceType)
+		if err != nil {
+			return common.NgctlError("Failed to generate default config file", err.Error())
+		}
+	}
+	// use the external config file template to generate service config files
+	err = common.GenerateConfigFile(serviceType, configFileTemplate, localCongfigFilePath, common.IPAndPort{IP: host.IP, Port: host.Port}, metaAddrs)
 	if err != nil {
 		return common.NgctlError("Failed to generate metad config file", err.Error())
 	}
-	if err = common.BackupFile(localCongfigFilePath, backupLocalConfigFilePath); err != nil {
+	if err := common.BackupFile(localCongfigFilePath, backupLocalConfigFilePath); err != nil {
 		fmt.Println("Failed to backup the config file: ", err.Error())
 	}
 	job := runner.NewJob("upload-file")
@@ -32,7 +53,7 @@ func prepareConfigFile(serviceType string, installPath string, host common.IPAnd
 	// dst_ip := host.IP
 	dst_agent := agent.Host
 	go func() {
-		err = job.Run("upload-file", map[string]any{
+		err := job.Run("upload-file", map[string]any{
 			"file_path": []string{localCongfigFilePath},
 			"dst_path":  []string{dstConfigFilePath},
 			"host":      []string{dst_agent},
@@ -51,7 +72,9 @@ func ServiceOperation(agent types.Agent, serviceType string, installPath string,
 		return common.NgctlError("invalid operation on service", "")
 	}
 	cmd := exec.Command(installPath+"cluster/scripts/nebula.service", operation, serviceType)
+	log.Printf("exec cmd: %v on %s", cmd, agent.Host)
 	job := runner.NewJob("start_service")
+	fmt.Println(cmd.String())
 	workflow := &types.WorkflowSpec{
 		Tasks: []*types.TaskSpec{
 			{Type: "connect", Params: &tasks.ConnectParams{Host: agent.Host}},
@@ -82,7 +105,7 @@ var startServiceCmd = &cobra.Command{
 		if flags.serviceType == "" || (flags.serviceType != "graphd" && flags.serviceType != "storaged") {
 			return common.NgctlError("invalid service type", "")
 		}
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false{
+		if flags.host == "" || common.IsValidIPAddress(flags.host) == false {
 			return common.NgctlError("no valid host provided", "")
 		}
 		if flags.port == 0 {
@@ -97,11 +120,11 @@ var startServiceCmd = &cobra.Command{
 		if err != nil {
 			return common.NgctlError("Failed to get the agent for the service", err.Error())
 		}
-		// prepare config files for the service
-		err = prepareConfigFile(flags.serviceType, common.ConfigSpec.InstallPath, common.IPAndPort{IP: flags.host, Port: port_string}, agent)
+		err = prepareConfigFile(flags.serviceType, common.ConfigSpec.InstallPath, common.IPAndPort{IP: flags.host, Port: port_string}, agent, flags.serviceConfigFile)
 		if err != nil {
 			return common.NgctlError("Failed to prepare config file for the service", err.Error())
 		}
+
 		// start the service
 		err = ServiceOperation(agent, flags.serviceType, common.ConfigSpec.InstallPath, "start")
 		if err != nil {
@@ -115,6 +138,7 @@ func init() {
 	startServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	startServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "host")
 	startServiceCmd.Flags().Uint32VarP(&ServiceFlags.port, "port", "P", 0, "port")
-	startServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file path")
+	startServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file for ngctl")
+	startServiceCmd.Flags().StringVarP(&ServiceFlags.serviceConfigFile, "service_config_file", "F", "", "config file for the service to start")
 	startServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "config")
 }

@@ -3,9 +3,10 @@ package supercluster_admin
 import "github.com/spf13/cobra"
 
 type superclusterFlagsType struct {
-	host        string
-	withInstall bool
-	configFile  string
+	host              string
+	withInstall       bool
+	configFile        string
+	serviceConfigFile string
 }
 
 var superclusterFlags superclusterFlagsType

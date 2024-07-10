@@ -24,7 +24,7 @@ var stopServiceCmd = &cobra.Command{
 		if err != nil {
 			return common.NgctlError("Failed to parse config file for the install path", err.Error())
 		}
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false{
+		if flags.host == "" || common.IsValidIPAddress(flags.host) == false {
 			return common.NgctlError("no valid host provided", "")
 		}
 		agent, err := common.GetAgentForHost(flags.host)

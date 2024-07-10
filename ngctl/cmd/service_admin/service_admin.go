@@ -7,12 +7,13 @@ import (
 )
 
 type ServiceFlagsType struct {
-	serviceType string
-	host        string
-	port        uint32
-	clusterName string
-	configFile  string
-	agent       types.Agent
+	serviceType       string
+	host              string
+	port              uint32
+	clusterName       string
+	configFile        string
+	serviceConfigFile string
+	agent             types.Agent
 }
 
 var ServiceFlags ServiceFlagsType

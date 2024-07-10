@@ -36,7 +36,7 @@ $CMD supercluster login -P 49559 -u root
 
 $CMD cluster create -c testcluster
 
-$CMD host add -H 127.0.0.1 -f ./config.yaml -c testcluster
+$CMD host add -f ./config.yaml -c testcluster
 
 $CMD service add -t storaged -H 127.0.0.1 -P 49779 -c testcluster
 
@@ -56,7 +56,7 @@ $CMD service drop -t storaged -H 127.0.0.1 -P 49779 -c testcluster
 
 $CMD service drop -t graphd -H 127.0.0.1 -P 49669 -c testcluster
 
-$CMD host drop -H 127.0.0.1 -a 6688 -f ./config.yaml -c testcluster
+$CMD host drop -f ./config.yaml -c testcluster
 
 $CMD host show -c testcluster
 

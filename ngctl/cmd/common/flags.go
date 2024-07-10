@@ -70,8 +70,43 @@ func CheckInConfigFile(filepath string) (err error) {
 }
 
 func IsValidIPAddress(ip string) bool {
-	if net.ParseIP(ip) == nil {
-		return false
+	return net.ParseIP(ip) != nil
+}
+
+// checking all hosts in the config file, including the metad, storaged, and graphd
+func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList []IPAndPort, err error) {
+	// hosts for metad
+	for _, host := range ConfigSpec.Spec.Metad.Hosts {
+		if (host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "") && (IsValidIPAddress(host.IP)) {
+			hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
+			if host.IP == hostFromCmdLineOption {
+				return hostList, nil
+			}
+		}
 	}
-	return true
+	// graphd and storaged are organized in clusters
+	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
+		if cluster.Name == clusterName {
+			for _, host := range cluster.Graphd.Hosts {
+				if (host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "") && (IsValidIPAddress(host.IP)) {
+					hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
+					if host.IP == hostFromCmdLineOption {
+						return hostList, nil
+					}
+				}
+			}
+			for _, host := range cluster.Storaged.Hosts {
+				if (host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "") && (IsValidIPAddress(host.IP)) {
+					hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
+					if host.IP == hostFromCmdLineOption {
+						return hostList, nil
+					}
+				}
+			}
+		}
+	}
+	if len(hostList) == 0 {
+		return hostList, fmt.Errorf("no valid host found")
+	}
+	return hostList, nil
 }

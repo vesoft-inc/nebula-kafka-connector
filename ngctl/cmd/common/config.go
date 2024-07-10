@@ -9,13 +9,13 @@ import (
 
 type IPAndPort struct {
 	// define both members as strings, since we only need them to fill config files
-	IP   string
-	Port string
+	IP        string
+	Port      string
+	AgentPort string
 }
 
 // Genrate config files for metad services only
-func GenerateMetadConfigFile(resultConfigFilePath string, destination IPAndPort, metadAddrs []IPAndPort) (err error) {
-	defaultConfigFile := "etc/nebula-metad.conf.default"
+func GenerateMetadConfigFile(defaultConfigFile string, resultConfigFilePath string, destination IPAndPort, metadAddrs []IPAndPort) (err error) {
 	file, err := os.Open(defaultConfigFile)
 	if err != nil {
 		return fmt.Errorf("failed to open default config file: %v", err)
@@ -62,7 +62,7 @@ func GenerateMetadConfigFile(resultConfigFilePath string, destination IPAndPort,
 }
 
 // Generate config files for a single graphd or storage service
-func GenerateConfigFile(serviceType string, resultConfigFilePath string, destination IPAndPort, metadAddrs []IPAndPort) (err error) {
+func GenerateConfigFile(serviceType string, defaultConfigFile string, resultConfigFilePath string, destination IPAndPort, metadAddrs []IPAndPort) (err error) {
 	// The defulat config files are stored in the ngctl/etc/ folder:
 	// nebula-graphd.conf.default  nebula-metad.conf.default  nebula-storaged.conf.default
 	// This function updates the IPs and ports in these config files. Leave all the rest as default.
@@ -71,7 +71,6 @@ func GenerateConfigFile(serviceType string, resultConfigFilePath string, destina
 	}
 
 	// Read the default config file
-	defaultConfigFile := "etc/nebula-" + serviceType + ".conf.default"
 	file, err := os.Open(defaultConfigFile)
 	if err != nil {
 		return fmt.Errorf("failed to open default config file: %v", err)

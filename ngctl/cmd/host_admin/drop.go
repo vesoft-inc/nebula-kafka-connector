@@ -21,22 +21,25 @@ var dropHostCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		flags := hostFlags
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false{
-			return common.NgctlError("no valid host provided", "")
-		}
 		if flags.clusterName == "" {
 			return common.NgctlError("cluster name is empty", "")
 		}
-		fmt.Println("Dropping host", flags.host, "from cluster", flags.clusterName)
-		req := meta.NewDropHostReq(flags.host, flags.clusterName)
-		if err := common.MetaClient.DropHost(req); err != nil {
-			return common.NgctlError("Drop host failed", err.Error())
+		if err := common.CheckInConfigFile(flags.configFile); err != nil {
+			return common.NgctlError("Failed to get a valid config file", err.Error())
+		}
+		hostList, err := common.DeriveHostList(flags.host, flags.clusterName)
+		if err != nil {
+			return common.NgctlError("Failed to derive host list", err.Error())
+		}
+		for _, host := range hostList {
+			fmt.Println("Dropping host", flags.host, "from cluster", flags.clusterName)
+			req := meta.NewDropHostReq(host.IP, flags.clusterName)
+			if err := common.MetaClient.DropHost(req); err != nil {
+				return common.NgctlError("Drop host failed", err.Error())
+			}
 		}
 		// Uninstall
 		if flags.withInstall {
-			if err := common.CheckInConfigFile(flags.configFile); err != nil {
-				return common.NgctlError("Failed to get a valid config file", err.Error())
-			}
 			if err := UninstallOnHost(); err != nil {
 				return common.NgctlError("Uninstall on host failed", err.Error())
 			}

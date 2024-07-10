@@ -37,24 +37,25 @@ var addHostCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		flags := hostFlags
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false{
-			return common.NgctlError("no valid host provided", "")
-		}
 		if flags.clusterName == "" {
 			return common.NgctlError("cluster name is empty", "")
 		}
 		configError := common.CheckInConfigFile(flags.configFile)
-		if flags.agentPort == 0 {
-			if configError == nil {
-				port, err := getValidAgentPort(flags.host)
-				if port == 0 || err != nil {
-					return common.NgctlError("agent port is empty", err.Error())
-				} else {
-					flags.agentPort = port
-				}
-			} else {
-				return common.NgctlError("cannot find a valid agent port from either the config file or the commdn line options", "")
+		hostList, err := common.DeriveHostList(flags.host, flags.clusterName)
+		if err != nil {
+			return common.NgctlError("Failed to derive host list", err.Error())
+		}
+		// Requesting the meta to add the specified host
+		for _, host := range hostList {
+			agentPort, err := strconv.Atoi(host.AgentPort)
+			if err != nil {
+				return common.NgctlError("failed to get the agent port for host "+host.IP, err.Error())
 			}
+			req := meta.NewAddHostReq(host.IP, flags.clusterName, uint32(agentPort))
+			if err := common.MetaClient.AddHost(req); err != nil {
+				return common.NgctlError("Add host failed", err.Error())
+			}
+			fmt.Fprintln(common.MetaOutput, "Add host successfully.")
 		}
 		// Install
 		if flags.withInstall {
@@ -65,12 +66,6 @@ var addHostCmd = &cobra.Command{
 				return common.NgctlError("Failed to install on the host", err.Error())
 			}
 		}
-		// Requesting the meta to add the specified host
-		req := meta.NewAddHostReq(flags.host, flags.clusterName, flags.agentPort)
-		if err := common.MetaClient.AddHost(req); err != nil {
-			return common.NgctlError("Add host failed", err.Error())
-		}
-		fmt.Fprintln(common.MetaOutput, "Add host successfully.")
 		return nil
 	},
 }
@@ -79,11 +74,11 @@ func init() {
 	// add host
 	addHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be added to a cluster")
 	addHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
-	// an agent port needs to be set by this option, or be configed in the config file, otherwise an error would be reported.
-	addHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 0, "port of the agent on the host")
-	// a config file is needed when no agent port is set in the option list or an install is required.
 	addHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
 	// optinoal, install NebulaGraph on the host or not
 	addHostCmd.Flags().
 		BoolVarP(&hostFlags.withInstall, "with_install", "w", false, "install NebulaGraph on the host or not")
+
+	addHostCmd.MarkFlagRequired("cluster")
+	addHostCmd.MarkFlagRequired("config")
 }
