@@ -15,6 +15,9 @@ type (
 		RowSize() int
 		Summary() Summary
 		Cursor() []byte
+		// Scan copies the columns in the current row into the values pointed at by dest.
+		// If there's no more row, return io.EOF
+		Scan(...any) error
 	}
 
 	Row interface {
