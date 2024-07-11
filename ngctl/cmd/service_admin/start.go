@@ -49,21 +49,16 @@ func prepareConfigFile(serviceType string, installPath string, host common.IPAnd
 		fmt.Println("Failed to backup the config file: ", err.Error())
 	}
 	job := runner.NewJob("upload-file")
-	exit := make(chan error)
 	// dst_ip := host.IP
 	dst_agent := agent.Host
-	go func() {
-		err := job.Run("upload-file", map[string]any{
-			"file_path": []string{localCongfigFilePath},
-			"dst_path":  []string{dstConfigFilePath},
-			"host":      []string{dst_agent},
-		}, &common.ConfigSpec)
-		if err != nil {
-			exit <- err
-			return
-		}
-		exit <- err
-	}()
+	err = job.Run("upload-file", map[string]any{
+		"file_path": []string{localCongfigFilePath},
+		"dst_path":  []string{dstConfigFilePath},
+		"host":      []string{dst_agent},
+	}, &common.ConfigSpec)
+	if err != nil {
+		return common.NgctlError("Failed to upload the config file "+localCongfigFilePath+" to host: "+host.IP, err.Error())
+	}
 	return nil
 }
 

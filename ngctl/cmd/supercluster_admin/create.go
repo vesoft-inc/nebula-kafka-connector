@@ -3,6 +3,7 @@ package supercluster_admin
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
@@ -36,13 +37,25 @@ var createCmd = &cobra.Command{
 		for _, host := range hosts {
 			metaAddrs = append(metaAddrs, common.IPAndPort{IP: host.IP, Port: host.Port})
 		}
+		// prepare config files
+		currentFolder, err := os.Getwd()
+		if err != nil {
+			return common.NgctlError("Failed to get current folder", err.Error())
+		}
+		currentFolder = strings.TrimSuffix(currentFolder, "/")
+		if superclusterFlags.serviceConfigFile == "" {
+			superclusterFlags.serviceConfigFile = currentFolder + "/nebula-metad.conf.default"
+			err := common.GenerateDefaultConfigFile(superclusterFlags.serviceConfigFile, "metad")
+			if err != nil {
+				return common.NgctlError("Failed to generate default config file", err.Error())
+			}
+		}
 		// Generate the config file for metad
 		for _, host := range hosts {
-			currentFolder, err := os.Getwd()
 			localConfigFilePath := currentFolder + "/nebula-metad.conf"
 			backupLocalConfigFilePath := currentFolder + "/nebula-metad-" + host.IP + "-" + fmt.Sprint(host.Port) + ".conf.bak"
-			if err != nil {
-				return common.NgctlError("Failed to get current folder", err.Error())
+			if err := common.GenerateMetadConfigFile(superclusterFlags.serviceConfigFile, localConfigFilePath, common.IPAndPort{IP: host.IP, Port: host.Port}, metaAddrs); err != nil {
+				return common.NgctlError("Failed to generate metad config file", err.Error())
 			}
 			if err := common.BackupFile(localConfigFilePath, backupLocalConfigFilePath); err != nil {
 				fmt.Println("Failed to backup the config file: ", err.Error())
