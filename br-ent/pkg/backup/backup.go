@@ -48,7 +48,7 @@ func NewBackup(ctx context.Context, cfg *config.BackupConfig) (*Backup, error) {
 		return nil, fmt.Errorf("create storage failed: %w", err)
 	}
 
-	clusters, err := b.meta.ListClusters(b.amg)
+	clusters, err := b.meta.ListClusters(b.amg, b.cfg.ClusterId)
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}
@@ -65,7 +65,7 @@ func NewBackup(ctx context.Context, cfg *config.BackupConfig) (*Backup, error) {
 func (b *Backup) uploadMeta(backupRes *meta.CreateBackupResp, targetUri string) error {
 	group := async.NewGroup(context.TODO(), b.cfg.Concurrency, "upload meta backup files")
 
-	meatHost := strings.Split(b.cfg.MetaAddr, ":")[0]
+	meatHost := strings.Split(b.meta.LeaderAddr(), ":")[0]
 	agent, err := b.amg.GetAgent(meatHost)
 	if err != nil {
 		return err

@@ -2,7 +2,6 @@ package config
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"sync"
 )
@@ -25,11 +24,8 @@ func LoadConfig() (*ComponentConfig, error) {
 	configMutex.RLock()
 	defer configMutex.RUnlock()
 
-	fmt.Println("123")
-
 	data, err := os.ReadFile(defaultComponentConfigPath)
 	if err != nil {
-		fmt.Println("@@", err)
 		if os.IsNotExist(err) {
 			// If the file does not exist, return a new instance
 			return &ComponentConfig{

@@ -47,7 +47,7 @@ func (b *backupInfo) StringTable() []string {
 	return table
 }
 
-var tableHeader = []string{"name", "create_time", "spaces", "full_backup", "all_spaces", "base_backup_name"}
+var tableHeader = []string{"name", "create_time"}
 
 func NewShow(ctx context.Context, cfg *config.ShowConfig) (*Show, error) {
 	s, err := storage.New(cfg.Backend)

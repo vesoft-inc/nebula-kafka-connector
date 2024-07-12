@@ -73,7 +73,7 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 	}
 
 	// get cluster
-	clusters, err := r.meta.ListClusters(r.amg)
+	clusters, err := r.meta.ListClusters(r.amg, r.cfg.ClusterId)
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}

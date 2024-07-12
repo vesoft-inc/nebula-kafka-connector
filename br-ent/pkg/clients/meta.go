@@ -21,14 +21,14 @@ func NewMeta(addrStrs, username, password string, tlsConfig *tls.Config) (*Nebul
 		return nil, fmt.Errorf("create meta client failed: %v", err)
 	}
 
-	if _, err = client.Login(); err != nil {
+	resp, err := client.Login()
+	if err != nil {
 		return nil, fmt.Errorf("login meta failed: %v", err)
 	}
 
-	metaAddrs := strings.Split(addrStrs, ",")
-
+	leaderAddr := strings.Split(resp.Leader, ",")
 	m := &NebulaMeta{
-		leaderAddr: metaAddrs[0],
+		leaderAddr: leaderAddr[0],
 		tlsConfig:  tlsConfig,
 		client:     client,
 	}
@@ -105,7 +105,7 @@ type ClusterServiceInfo struct {
 	Services  []*ServiceInfo
 }
 
-func (m *NebulaMeta) ListClusters(amg *AgentManager) ([]*ClusterServiceInfo, error) {
+func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64) ([]*ClusterServiceInfo, error) {
 	clusterResp, err := m.client.ListClusters(meta.NewListClustersReq(""))
 	if err != nil {
 		return nil, err
@@ -113,6 +113,9 @@ func (m *NebulaMeta) ListClusters(amg *AgentManager) ([]*ClusterServiceInfo, err
 
 	clusters := make([]*ClusterServiceInfo, 0)
 	for _, c := range clusterResp.Clusters {
+		if c.Id != clusterId {
+			continue
+		}
 		cluster := &ClusterServiceInfo{
 			ClusterId: c.Id,
 			Services:  make([]*ServiceInfo, 0),
