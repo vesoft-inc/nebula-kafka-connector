@@ -19,9 +19,15 @@ var (
 type OperationType string
 
 const (
-	OpExecuteCmd   OperationType = "execute_cmd"
-	OpUploadFile   OperationType = "upload_file"
-	OpDownloadFile OperationType = "download_file"
+	OpExecuteCmd    OperationType = "execute_cmd"
+	OpUploadFile    OperationType = "upload_file"
+	OpDownloadFile  OperationType = "download_file"
+	OpS3Upload      OperationType = "s3_upload"
+	OpS3Download    OperationType = "s3_download"
+	OpLocalUpload   OperationType = "local_upload"
+	OpLocalDownload OperationType = "local_download"
+	OpHDFSUpload    OperationType = "hdfs_upload"
+	OpHDFSDownload  OperationType = "hdfs_download"
 )
 
 func InitLogFile(path string) error {

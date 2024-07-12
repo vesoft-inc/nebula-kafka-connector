@@ -1,11 +1,18 @@
 package storage
 
 import (
+	"fmt"
+
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/types"
+	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/audit"
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/storage"
 )
 
 func (s *storageService) HDFSDownload(req *types.HDFSDownloadReq) (*types.HDFSDownloadResp, error) {
+	if err := audit.RecordOperation(s.ctx, audit.OpHDFSDownload, fmt.Sprintf("download file from %s to %s", req.Path, req.LocalPath)); err != nil {
+		return nil, err
+	}
+
 	backend := &storage.Backend{
 		HDFS: &storage.HDFSConfig{
 			Address:  req.Address,
@@ -34,6 +41,10 @@ func (s *storageService) HDFSDownload(req *types.HDFSDownloadReq) (*types.HDFSDo
 }
 
 func (s *storageService) HDFSUpload(req *types.HDFSUploadReq) (*types.HDFSUploadResp, error) {
+	if err := audit.RecordOperation(s.ctx, audit.OpHDFSUpload, fmt.Sprintf("upload file to %s from %s", req.Path, req.LocalPath)); err != nil {
+		return nil, err
+	}
+
 	backend := &storage.Backend{
 		HDFS: &storage.HDFSConfig{
 			Address:  req.Address,
