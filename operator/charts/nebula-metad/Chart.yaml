@@ -1,0 +1,20 @@
+apiVersion: v2
+name: nebula-metad
+description: Nebula Metad helm chart for Kubernetes
+type: application
+version: 5.0.0
+appVersion: "5.0.0"
+home: https://nebula-graph.io
+sources:
+- https://github.com/vesoft-inc/nebula-ng-tools
+keywords:
+  - kubernetes
+  - operator
+  - nebula-graph
+  - database
+  - graph database
+maintainers:
+  - name: Kevin Liu
+    email: kevin.liu@vesoft.com
+  - name: Kevin Qiao
+    email: kevin.qiao@vesoft.com

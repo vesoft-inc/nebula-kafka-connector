@@ -1,0 +1,171 @@
+apiVersion: apps.nebula-graph.io/v2alpha1
+kind: NebulaCluster
+metadata:
+  name: {{ template "nebula-cluster.name" . }}
+  namespace: {{ template "nebula-cluster.namespace" . }}
+  labels:
+    {{ include "nebula-cluster.labels" . | indent 4 }}
+spec:
+  console:
+    image: {{ .Values.nebulaCluster.console.image }}
+    version: {{ .Values.nebulaCluster.console.version }}
+  replicaFactor: {{ .Values.nebulaCluster.replicaFactor }}
+  {{- with .Values.nebulaCluster.zones }}
+  zones:
+  {{- toYaml . | nindent 4 }}
+  {{- end }}
+  metadRef:
+    name: {{ .Values.nebulaCluster.metadRef.name }}
+  credentialSecret: {{ .Values.nebulaCluster.credentialSecret }}
+
+  graphd:
+    resources: {{ toYaml .Values.nebulaCluster.graphd.resources | nindent 6 }}
+    replicas: {{ .Values.nebulaCluster.graphd.replicas }}
+    image: {{ .Values.nebulaCluster.graphd.image }}
+    version: {{ .Values.nebulaCluster.graphd.version }}
+    service:
+      type: {{ .Values.nebulaCluster.graphd.serviceType }}
+      externalTrafficPolicy: Local
+    {{- if .Values.nebulaCluster.graphd.logVolume.enable }}
+    logVolumeClaim:
+      resources:
+        requests:
+          storage: {{ .Values.nebulaCluster.graphd.logVolume.storage }}
+      {{- if .Values.nebulaCluster.graphd.storageClassName }}
+      storageClassName: {{ .Values.nebulaCluster.graphd.storageClassName }}
+      {{- end }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.env }}
+    env:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.config }}
+    config:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.nodeSelector }}
+    nodeSelector:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.affinity }}
+    affinity:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.podLabels }}
+    labels:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.podAnnotations }}
+    annotations:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.readinessProbe }}
+    readinessProbe:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.livenessProbe }}
+    livenessProbe:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.initContainers }}
+    initContainers:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.sidecarContainers }}
+    sidecarContainers:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.volumes }}
+    volumes:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.graphd.volumeMounts }}
+    volumeMounts:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+
+  storaged:
+    resources: {{ toYaml .Values.nebulaCluster.storaged.resources | nindent 6 }}
+    replicas: {{ .Values.nebulaCluster.storaged.replicas }}
+    image: {{ .Values.nebulaCluster.storaged.image }}
+    version: {{ .Values.nebulaCluster.version }}
+    dataVolumeClaims:
+    {{- range $volume := .Values.nebulaCluster.storaged.dataVolumes }}
+    - resources:
+        requests:
+          storage: {{ $volume.storage }}
+      {{- if $.Values.nebulaCluster.storaged.storageClassName }}
+      storageClassName: {{ $.Values.nebulaCluster.storaged.storageClassName }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.nebulaCluster.storaged.logVolume.enable }}
+    logVolumeClaim:
+      resources:
+        requests:
+          storage: {{ .Values.nebulaCluster.storaged.logVolume.storage }}
+      {{- if .Values.nebulaCluster.storaged.storageClassName }}
+      storageClassName: {{ .Values.nebulaCluster.storaged.storageClassName }}
+      {{- end }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.env }}
+    env:
+    {{ toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.config }}
+    config:
+    {{ toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.nodeSelector }}
+    nodeSelector:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.affinity }}
+    affinity:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    enableAutoBalance: {{ .Values.nebulaCluster.storaged.enableAutoBalance }}
+    {{- with .Values.nebulaCluster.storaged.podLabels }}
+    labels:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.podAnnotations }}
+    annotations:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.tolerations }}
+    tolerations:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.readinessProbe }}
+    readinessProbe:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.livenessProbe }}
+    livenessProbe:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.initContainers }}
+    initContainers:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.sidecarContainers }}
+    sidecarContainers:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.volumes }}
+    volumes:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.storaged.volumeMounts }}
+    volumeMounts:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+
+  enablePVReclaim: {{ .Values.nebulaCluster.enablePVReclaim }}
+  schedulerName: {{ .Values.nebulaCluster.schedulerName }}
+  imagePullPolicy: {{ .Values.nebulaCluster.imagePullPolicy }}
+  {{- with .Values.nebulaCluster.imagePullSecrets }}
+  imagePullSecrets:
+  {{ toYaml . | nindent 4 }}
+  {{- end }}
+  topologySpreadConstraints: {{ toYaml .Values.nebulaCluster.topologySpreadConstraints | nindent 4 }}

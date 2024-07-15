@@ -1,0 +1,40 @@
+nebulaMetad:
+  credentialSecret: "nebula"
+  enablePVReclaim: true
+  image: reg.vesoft-inc.com/vesoft-ng/nebula-metad
+  imagePullPolicy: Always
+  imagePullSecrets: []
+  topologySpreadConstraints:
+  - topologyKey: "kubernetes.io/hostname"
+    whenUnsatisfiable: "ScheduleAnyway"
+  version: nightly
+  replicas: 3
+  env: []
+  config: {}
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "500Mi"
+    limits:
+      cpu: "1"
+      memory: "1Gi"
+  dataVolume:
+    storage: "5Gi"
+  logVolume:
+    storage: "1Gi"
+  storageClassName: ""
+  schedulerName: default-scheduler # nebula-scheduler
+  nodeSelector: {}
+  tolerations: []
+  affinity: {}
+  initContainers: []
+  sidecarContainers: []
+  volumes: []
+  podLabels: {}
+  podAnnotations: {}
+
+  
+  
+  
+  
+  

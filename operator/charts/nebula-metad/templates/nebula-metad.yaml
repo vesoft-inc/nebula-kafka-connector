@@ -1,0 +1,75 @@
+apiVersion: apps.nebula-graph.io/v2alpha1
+kind: NebulaMetad
+metadata:
+  name: {{ template "nebula-metad.name" . }}
+  namespace: {{ template "nebula-metad.namespace" . }}
+  labels:
+    {{ include "nebula-metad.labels" . | indent 4 }}
+spec:
+  credentialSecret: {{ .Values.nebulaMetad.credentialSecret }}
+  enablePVReclaim: {{ .Values.nebulaMetad.enablePVReclaim }}
+  resources: {{ toYaml .Values.nebulaMetad.resources | nindent 6 }}
+  replicas: {{ .Values.nebulaMetad.replicas }}
+  image: {{ .Values.nebulaMetad.image }}
+  version: {{ .Values.nebulaMetad.version }}
+  {{- with .Values.nebulaMetad.env }}
+  env:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.config }}
+  config:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  dataVolumeClaim:
+    resources:
+      requests:
+        storage: {{ .Values.nebulaMetad.dataVolume.storage }}
+    {{- if .Values.nebulaMetad.storageClassName }}
+    storageClassName: {{ .Values.nebulaMetad.storageClassName }}
+    {{- end }}
+  logVolumeClaim:
+    resources:
+      requests:
+        storage: {{ .Values.nebulaMetad.logVolume.storage }}
+    {{- if .Values.nebulaMetad.storageClassName }}
+    storageClassName: {{ .Values.nebulaMetad.storageClassName }}
+    {{- end }}
+  {{- with .Values.nebulaMetad.nodeSelector }}
+  nodeSelector:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.affinity }}
+  affinity:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.tolerations }}
+  tolerations:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  schedulerName: {{ .Values.nebulaMetad.schedulerName }}
+  imagePullPolicy: {{ .Values.nebulaMetad.imagePullPolicy }}
+  {{- with .Values.nebulaMetad.imagePullSecrets }}
+  imagePullSecrets:
+  {{ toYaml . | nindent 4 }}
+  {{- end }}
+  topologySpreadConstraints: {{ toYaml .Values.nebulaMetad.topologySpreadConstraints | nindent 4 }}
+  {{- with .Values.nebulaMetad.initContainers }}
+  initContainers:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.sidecarContainers }}
+  sidecarContainers:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.volumes }}
+  volumes:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.podLabels }}
+  labels:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.nebulaMetad.podAnnotations }}
+  annotations:
+  {{- toYaml . | nindent 6 }}
+  {{- end }}
