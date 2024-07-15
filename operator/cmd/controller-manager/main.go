@@ -19,7 +19,6 @@ package main
 import (
 	"os"
 
-	_ "k8s.io/client-go/plugin/pkg/client/auth"
 	"k8s.io/component-base/cli"
 	ctrl "sigs.k8s.io/controller-runtime"
 

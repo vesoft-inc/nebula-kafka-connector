@@ -5,6 +5,8 @@ metadata:
 spec:
   credentialSecret: "nebula"
   enablePVReclaim: true
+  config:
+    "license_manager_url": "192.168.8.53:9119"
   resources:
     requests:
       cpu: "500m"

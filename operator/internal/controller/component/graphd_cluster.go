@@ -258,8 +258,8 @@ func addGraphdServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldRe
 		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
 		if err := metaClient.AddService(req); err != nil {
 			if ne, ok := err.(*nebula.NebulaError); ok {
-				// TODO [NM019]: Service with static port already exists
-				if ne.Code() != "NM019" {
+				// TODO [NI107]: Service with static port already exists
+				if ne.Code() != "NI107" {
 					klog.Errorf("add graphd service failed: %v", err)
 					return err
 				}

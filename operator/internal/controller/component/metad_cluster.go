@@ -26,12 +26,15 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
+
+const defaultPassword = "nebula"
 
 type MetadReconcileManager interface {
 	// Reconcile reconciles the metad desired state
@@ -153,14 +156,35 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 			return err
 		}
 		endpoints := []string{nm.GetMetadThriftConnAddress()}
-		metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, password))
+		metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, defaultPassword))
 		if err != nil {
 			return err
 		}
-		if _, err := metaClient.Login(); err != nil {
-			klog.Errorf("login metad failed: %v", err)
-			return err
+		_, err = metaClient.Login()
+		if err != nil {
+			ne, ok := err.(*nebula.NebulaError)
+			if !ok {
+				klog.Errorf("login metad failed: %v", err)
+				return err
+			}
+			if ne.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
+				return fmt.Errorf("login metad got unkonw error: %v", ne.Error())
+			}
+			req := meta.NewChangePasswordReq(username, defaultPassword, password)
+			if err := metaClient.ChangePassword(req); err != nil {
+				klog.Errorf("change password failed: %v", err)
+				return err
+			}
+			metaClient.Close()
+			metaClient, err = meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, password))
+			if err != nil {
+				return err
+			}
+			if _, err = metaClient.Login(); err != nil {
+				return err
+			}
 		}
+
 		defer func() {
 			metaClient.Close()
 		}()

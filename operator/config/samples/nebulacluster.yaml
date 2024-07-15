@@ -22,7 +22,7 @@ spec:
       limits:
         cpu: "2"
         memory: "2Gi"
-    replicas: 1
+    replicas: 2
     image: reg.vesoft-inc.com/vesoft-ng/nebula-graphd
     version: nightly
     service:

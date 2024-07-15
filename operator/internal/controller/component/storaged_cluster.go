@@ -208,8 +208,8 @@ func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string
 	req := meta.NewInitClusterReq(clusterName)
 	if err := metaClient.InitCluster(req); err != nil {
 		if ne, ok := err.(*nebula.NebulaError); ok {
-			// TODO [NM007]: Part already inited
-			if ne.Code() != "NM007" {
+			// TODO [NI203]: Part already inited
+			if ne.Code() != "NI203" {
 				klog.Errorf("init cluster failed: %v", err)
 				return err
 			}
@@ -250,8 +250,8 @@ func addStorageServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldR
 		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)
 		if err := metaClient.AddService(req); err != nil {
 			if ne, ok := err.(*nebula.NebulaError); ok {
-				// TODO [NM019]: Service with static port already exists
-				if ne.Code() != "NM019" {
+				// TODO [NI107]: Service with static port already exists
+				if ne.Code() != "NI107" {
 					klog.Errorf("add storaged service failed: %v", err)
 					return err
 				}

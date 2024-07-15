@@ -88,6 +88,7 @@ func NewMetadReconciler(mgr ctrl.Manager) (*MetadReconciler, error) {
 // +kubebuilder:rbac:groups="",resources=persistentvolumes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch;list
+//+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters,verbs=get;list;watch
 //+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulametads,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulametads/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulametads/finalizers,verbs=update
@@ -144,6 +145,7 @@ func (r *MetadReconciler) syncNebulaMetad(nm *v2alpha1.NebulaMetad) error {
 func (r *MetadReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&v2alpha1.NebulaMetad{}).
+		Owns(&v2alpha1.NebulaCluster{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Service{}).
 		Owns(&appsv1.StatefulSet{}).

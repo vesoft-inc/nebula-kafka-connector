@@ -83,13 +83,13 @@ lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
 ##@ Build
 
 .PHONY: build
-build: manifests generate fmt vet ## Build manager binary.
+build: ## Build manager binary.
 	go build -o bin/manager cmd/controller-manager/main.go
 	go build -o bin/scheduler cmd/scheduler/main.go
 	go build -o bin/autoscaler cmd/autoscaler/main.go
 
 .PHONY: run
-run: manifests generate fmt vet ## Run a controller from your host.
+run: ## Run a controller from your host.
 	go run ./cmd/main.go
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
