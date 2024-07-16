@@ -27,7 +27,7 @@ var createCmd = &cobra.Command{
 		if err != nil {
 			return common.NgctlError("Failed to check in config file", err.Error())
 		}
-		if err := host_admin.InstallOnHost(true); err != nil {
+		if err := host_admin.InstallOnHost(nil, true); err != nil {
 			return common.NgctlError("Failed to install on the host", err.Error())
 		}
 		dstConfigFilePath := common.ConfigSpec.InstallPath + "cluster/etc/"
@@ -83,7 +83,7 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	createCmd.Flags().StringVar(&superclusterFlags.configFile, "config", "", "The config file for ngctl to create the supercluster")
+	createCmd.Flags().StringVarP(&superclusterFlags.configFile, "config", "f", "", "The config file for ngctl to create the supercluster")
 	createCmd.Flags().StringVarP(&superclusterFlags.serviceConfigFile, "service_config_file", "F", "", "config file for the service to start")
 	createCmd.Flags().BoolVar(&superclusterFlags.withInstall, "with_install", false, "Install and start the metad on the host")
 	createCmd.Flags().Lookup("with_install").NoOptDefVal = "false"

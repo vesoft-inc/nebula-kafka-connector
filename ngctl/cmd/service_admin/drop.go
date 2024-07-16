@@ -2,6 +2,7 @@ package service_admin
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
@@ -21,25 +22,59 @@ var dropServiceCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		flags := ServiceFlags
-		var serviceType meta.ServiceType
-		if flags.serviceType == "graphd" {
-			serviceType = meta.ServiceTypeGraphd
-		} else if flags.serviceType == "storaged" {
-			serviceType = meta.ServiceTypeStoraged
-		} else {
-			return common.NgctlError("service type is not correct, valid value is graphd or storaged", "")
-		}
-		if flags.host == "" {
-			return common.NgctlError("no valid host provided", "")
+		readFromConfig := false
+		if flags.serviceType == "" {
+			readFromConfig = true
 		}
 		if flags.clusterName == "" {
 			return common.NgctlError("cluster name is empty", "")
 		}
-		req := meta.NewDropServiceReq(flags.host, flags.port, serviceType, flags.clusterName)
-		if err := common.MetaClient.DropService(req); err != nil {
-			return common.NgctlError("Drop service failed", err.Error())
+		if flags.host == "" {
+			readFromConfig = true
 		}
-		fmt.Fprintln(common.MetaOutput, "Drop service successfully.")
+		if readFromConfig {
+			if flags.configFile == "" {
+				return common.NgctlError("Neither a valid service nor a config file is provided", "")
+			} else {
+				configError := common.CheckInConfigFile(flags.configFile)
+				if configError != nil {
+					return common.NgctlError("Error in config file", configError.Error())
+				}
+			}
+		}
+		serviceList, err := common.DeriveServiceList(common.IPAndPort{IP: flags.host, Port: fmt.Sprintf("%d", flags.port), ServiceType: flags.serviceType}, flags.clusterName)
+		// Prepare the resource request
+		serviceResource := common.ResourceInfo{
+			ResourceType:        "services",
+			OperationOnResource: "drop",
+			ResourceList:        make([]common.IPAndPort, 0),
+			ClusterName:         flags.clusterName,
+		}
+		for _, service := range serviceList {
+			serviceResource.ResourceList = append(serviceResource.ResourceList, service)
+		}
+		if flags.host == "" {
+			serviceResource, err = common.ConfirmResourceList(serviceResource)
+			if err != nil {
+				return common.NgctlError("Failed to confirm resource list", err.Error())
+			}
+		}
+		for _, service := range serviceResource.ResourceList {
+			port, _ := strconv.Atoi(service.Port)
+			var serviceType meta.ServiceType
+			if service.ServiceType == "graphd" {
+				serviceType = meta.ServiceTypeGraphd
+			} else if service.ServiceType == "storaged" {
+				serviceType = meta.ServiceTypeStoraged
+			} else {
+				return common.NgctlError("Invalid service type.", "")
+			}
+			req := meta.NewDropServiceReq(service.IP, uint32(port), serviceType, flags.clusterName)
+			if err := common.MetaClient.DropService(req); err != nil {
+				return common.NgctlError("Drop service failed", err.Error())
+			}
+		}
+		fmt.Fprintln(common.MetaOutput, "Drop services successfully.")
 		return nil
 	},
 }

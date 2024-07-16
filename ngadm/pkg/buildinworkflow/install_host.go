@@ -27,7 +27,17 @@ func InstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec,
 	if !ok {
 		force = false
 	}
-	allNeedHosts := GetMetadAllNeedHosts(spec)
+	installAll, ok := args["installAll"].(bool)
+	if !ok {
+		installAll = true
+	}
+	var allNeedHosts map[string]*types.Agent
+	if installAll {
+		allNeedHosts = GetMetadAllNeedHosts(spec)
+	} else {
+		selectedHost := args["selectedHost"].([]string)
+		allNeedHosts = GetMetadSelectedHosts(selectedHost, spec)
+	}
 	for _, agent := range allNeedHosts {
 		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
 		//1. connect

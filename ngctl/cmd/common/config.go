@@ -9,9 +9,10 @@ import (
 
 type IPAndPort struct {
 	// define both members as strings, since we only need them to fill config files
-	IP        string
-	Port      string
-	AgentPort string
+	IP          string
+	Port        string
+	AgentPort   string
+	ServiceType string
 }
 
 // Genrate config files for metad services only

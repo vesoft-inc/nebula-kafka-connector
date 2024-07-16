@@ -16,7 +16,17 @@ func UninstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpe
 		args = map[string]any{}
 	}
 	connectTasks := []*types.TaskSpec{}
-	allNeedHosts := GetMetadAllNeedHosts(spec)
+	uninstallAll, ok := args["uninstallAll"].(bool)
+	if !ok {
+		uninstallAll = true
+	}
+	var allNeedHosts map[string]*types.Agent
+	if uninstallAll {
+		allNeedHosts = GetMetadAllNeedHosts(spec)
+	} else {
+		selectedHost := args["selectedHost"].([]string)
+		allNeedHosts = GetMetadSelectedHosts(selectedHost, spec)
+	}
 	for _, agent := range allNeedHosts {
 		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
 		// connect and uninstall

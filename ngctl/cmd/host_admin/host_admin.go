@@ -29,33 +29,42 @@ var HostCmd = &cobra.Command{
 	},
 }
 
-func InstallOnHost(force bool) (err error) {
+func InstallOnHost(hosts []common.IPAndPort, force bool) (err error) {
 	var jobName = "install-host"
 	log.Print("install nebulagraph cluster.")
 	job := runner.NewJob(jobName)
-	exit := make(chan error)
-	go func() {
-		err = job.Run(jobName, map[string]any{
-			"force": force,
-		}, &common.ConfigSpec)
-		if err != nil {
-			exit <- err
-			return
+	selectedHosts := make([]string, len(hosts))
+	if hosts != nil {
+		for i, host := range hosts {
+			selectedHosts[i] = host.IP
 		}
-		exit <- err
-	}()
-	return <-exit
+	}
+	err = job.Run(jobName, map[string]any{
+		"installAll":   hosts == nil,
+		"force":        force,
+		"selectedHost": selectedHosts,
+	}, &common.ConfigSpec)
+	return err
 }
 
 // drain, if delete the cluster data
-func UninstallOnHost() (err error) {
+func UninstallOnHost(hosts []common.IPAndPort) (err error) {
 	var jobName = "uninstall-host"
 	if err != nil {
 		log.Println("parse config file failed: ", err)
 		return
 	}
+	selectedHosts := make([]string, len(hosts))
+	if hosts != nil {
+		for i, host := range hosts {
+			selectedHosts[i] = host.IP
+		}
+	}
 	job := runner.NewJob(jobName)
-	err = job.Run(jobName, map[string]any{}, &common.ConfigSpec)
+	err = job.Run(jobName, map[string]any{
+		"uninstallAll": hosts == nil,
+		"selectedHost": selectedHosts,
+	}, &common.ConfigSpec)
 	if err != nil {
 		log.Println("uninstall failed: ", err)
 	}

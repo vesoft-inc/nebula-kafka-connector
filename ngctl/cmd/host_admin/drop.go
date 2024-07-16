@@ -31,20 +31,38 @@ var dropHostCmd = &cobra.Command{
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
+		// Prepare the resource request
+		hostResrouces := common.ResourceInfo{
+			ResourceType:        "hosts",
+			OperationOnResource: "drop",
+			ResourceList:        make([]common.IPAndPort, 0),
+			ClusterName:         flags.clusterName,
+		}
 		for _, host := range hostList {
-			fmt.Println("Dropping host", flags.host, "from cluster", flags.clusterName)
+			hostResrouces.ResourceList = append(hostResrouces.ResourceList, host)
+		}
+		if flags.host == "" {
+			hostResrouces, err = common.ConfirmResourceList(hostResrouces)
+			if err != nil {
+				return common.NgctlError("Failed to confirm the host list", err.Error())
+			}
+		}
+		for _, host := range hostResrouces.ResourceList {
 			req := meta.NewDropHostReq(host.IP, flags.clusterName)
 			if err := common.MetaClient.DropHost(req); err != nil {
-				return common.NgctlError("Drop host failed", err.Error())
+				fmt.Fprintln(common.MetaOutput, fmt.Sprintf("Drop host %s failed: %s", host.IP, err.Error()))
+			} else {
+				fmt.Fprintln(common.MetaOutput, fmt.Sprintf("Drop host %s successfully.", host.IP))
 			}
 		}
 		// Uninstall
-		if flags.withInstall {
-			if err := UninstallOnHost(); err != nil {
-				return common.NgctlError("Uninstall on host failed", err.Error())
+		if flags.withUninstall {
+			if err := UninstallOnHost(nil); err != nil {
+				fmt.Fprintln(common.MetaOutput, fmt.Sprintf("Failed to uninstall NebulaGraph on the selected hosts: %s", err.Error()))
+			} else {
+				fmt.Fprintln(common.MetaOutput, "Uninstall NebulaGraph on the selected hosts successfully.")
 			}
 		}
-		fmt.Fprintln(common.MetaOutput, "Drop host successfully.")
 		return nil
 	},
 }

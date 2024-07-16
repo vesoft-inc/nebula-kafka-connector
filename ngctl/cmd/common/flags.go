@@ -71,11 +71,15 @@ func CheckInConfigFile(filepath string) (err error) {
 // checking all hosts in the config file, including the metad, storaged, and graphd
 func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList []IPAndPort, err error) {
 	// hosts for metad
+	dict := map[string]IPAndPort{}
 	for _, host := range ConfigSpec.Spec.Metad.Hosts {
 		if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-			hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
+			// omit port for hosts
+			if _, ok := dict[host.IP]; !ok {
+				dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+			}
 			if host.IP == hostFromCmdLineOption {
-				return hostList, nil
+				return []IPAndPort{{IP: host.IP}}, nil
 			}
 		}
 	}
@@ -84,24 +88,53 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList 
 		if cluster.Name == clusterName {
 			for _, host := range cluster.Graphd.Hosts {
 				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-					hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
+					if _, ok := dict[host.IP]; !ok {
+						dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+					}
 					if host.IP == hostFromCmdLineOption {
-						return hostList, nil
+						return []IPAndPort{{IP: host.IP}}, nil
 					}
 				}
 			}
 			for _, host := range cluster.Storaged.Hosts {
 				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-					hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
+					if _, ok := dict[host.IP]; !ok {
+						dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+					}
 					if host.IP == hostFromCmdLineOption {
-						return hostList, nil
+						return []IPAndPort{{IP: host.IP}}, nil
 					}
 				}
 			}
 		}
 	}
+	for _, ipAndPort := range dict {
+		hostList = append(hostList, ipAndPort)
+	}
 	if len(hostList) == 0 {
 		return hostList, fmt.Errorf("no valid host found")
 	}
 	return hostList, nil
+}
+
+// checking all services in the config file, including only storaged and graphd
+func DeriveServiceList(serviceFromCmdLineOption IPAndPort, clusterName string) (serviceList []IPAndPort, err error) {
+	if serviceFromCmdLineOption.IP != "" && serviceFromCmdLineOption.Port != "" {
+		return []IPAndPort{{IP: serviceFromCmdLineOption.IP, Port: serviceFromCmdLineOption.Port, ServiceType: serviceFromCmdLineOption.ServiceType}}, nil
+	}
+	// graphd and storaged are organized in clusters
+	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
+		if cluster.Name == clusterName {
+			for _, host := range cluster.Graphd.Hosts {
+				serviceList = append(serviceList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort, ServiceType: "graphd"})
+			}
+			for _, host := range cluster.Storaged.Hosts {
+				serviceList = append(serviceList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort, ServiceType: "storaged"})
+			}
+		}
+	}
+	if len(serviceList) == 0 {
+		return serviceList, fmt.Errorf("no valid service found")
+	}
+	return serviceList, nil
 }

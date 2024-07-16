@@ -188,3 +188,34 @@ func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	}
 	return allNeedHosts
 }
+
+func GetMetadSelectedHosts(selectedHost []string, spec *types.JobSpec) map[string]*types.Agent {
+	selectedHosts := make(map[string]*types.Agent, 0)
+	for _, host := range spec.Spec.Metad.Hosts {
+		for _, h := range selectedHost {
+			if host.IP == h {
+				agentCopy := host.Agent
+				selectedHosts[host.Agent.Host] = &agentCopy
+			}
+		}
+	}
+	for _, cluster := range spec.Spec.Metad.Clusters {
+		for _, host := range cluster.Graphd.Hosts {
+			for _, h := range selectedHost {
+				if host.IP == h {
+					agentCopy := host.Agent
+					selectedHosts[host.Agent.Host] = &agentCopy
+				}
+			}
+		}
+		for _, host := range cluster.Storaged.Hosts {
+			for _, h := range selectedHost {
+				if host.IP == h {
+					agentCopy := host.Agent
+					selectedHosts[host.Agent.Host] = &agentCopy
+				}
+			}
+		}
+	}
+	return selectedHosts
+}

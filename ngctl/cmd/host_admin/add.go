@@ -41,31 +41,42 @@ var addHostCmd = &cobra.Command{
 			return common.NgctlError("cluster name is empty", "")
 		}
 		configError := common.CheckInConfigFile(flags.configFile)
+		if configError != nil {
+			return common.NgctlError("config file error", configError.Error())
+		}
 		hostList, err := common.DeriveHostList(flags.host, flags.clusterName)
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
-		// Requesting the meta to add the specified host
+		// Prepare the resource request
+		hostResrouces := common.ResourceInfo{
+			ResourceType:        "hosts",
+			OperationOnResource: "add",
+			ResourceList:        make([]common.IPAndPort, 0),
+			ClusterName:         flags.clusterName,
+		}
 		for _, host := range hostList {
-			agentPort, err := strconv.Atoi(host.AgentPort)
+			hostResrouces.ResourceList = append(hostResrouces.ResourceList, host)
+		}
+		if flags.host == "" {
+			hostResrouces, err = common.ConfirmResourceList(hostResrouces)
 			if err != nil {
-				return common.NgctlError("failed to get the agent port for host "+host.IP, err.Error())
+				return common.NgctlError("Failed to confirm host list", err.Error())
 			}
+		}
+		for _, host := range hostResrouces.ResourceList {
+			agentPort, _ := strconv.Atoi(host.AgentPort)
 			req := meta.NewAddHostReq(host.IP, flags.clusterName, uint32(agentPort))
 			if err := common.MetaClient.AddHost(req); err != nil {
 				return common.NgctlError("Add host failed", err.Error())
 			}
-			fmt.Fprintln(common.MetaOutput, "Add host successfully.")
 		}
-		// Install
 		if flags.withInstall {
-			if configError != nil {
-				return common.NgctlError("Failed to get a valid config file needed to install on the host", configError.Error())
-			}
-			if err := InstallOnHost(false); err != nil {
-				return common.NgctlError("Failed to install on the host", err.Error())
+			if err = InstallOnHost(hostResrouces.ResourceList, false); err != nil {
+				return common.NgctlError("Failed to install NebulaGraph on the host", err.Error())
 			}
 		}
+		fmt.Fprintln(common.MetaOutput, "Add hosts successfully.")
 		return nil
 	},
 }
