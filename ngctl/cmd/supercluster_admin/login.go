@@ -56,10 +56,13 @@ var loginCmd = &cobra.Command{
 			}
 			// reset password and re-login
 			fmt.Fprintln(common.MetaOutput, "Please reset the password for the first login.")
-			var newPassword string
-			newPassword, err = resetPassword(c)
+			currentPassword, newPassword, err := getPromptPassword()
 			if err != nil {
 				return common.NgctlError("Cannot reset password", err.Error())
+			}
+			if err := resetPassword(
+				c, loginFlags.user, currentPassword, newPassword); err != nil {
+				return common.NgctlError("Reset password failed", err.Error())
 			}
 			fmt.Fprintf(
 				common.MetaOutput,
@@ -87,7 +90,19 @@ var loginCmd = &cobra.Command{
 	},
 }
 
-func resetPassword(c meta.Client) (string, error) {
+func resetPassword(c meta.Client, user, old, new string) error {
+	req := meta.NewChangePasswordReq(
+		user,
+		old,
+		new,
+	)
+	if err := c.ChangePassword(req); err != nil {
+		return err
+	}
+	return nil
+}
+
+func getPromptPassword() (string, string, error) {
 	currentPassword := promptui.Prompt{
 		Label:     "Current password:",
 		AllowEdit: true,
@@ -95,7 +110,7 @@ func resetPassword(c meta.Client) (string, error) {
 	}
 	currentPasswordStr, err := currentPassword.Run()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	newPassword := promptui.Prompt{
 		Label:     "New password:",
@@ -104,7 +119,7 @@ func resetPassword(c meta.Client) (string, error) {
 	}
 	newPasswordStr, err := newPassword.Run()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	confirmPassword := promptui.Prompt{
 		Label:     "Retype new password:",
@@ -113,20 +128,13 @@ func resetPassword(c meta.Client) (string, error) {
 	}
 	confirmPasswordStr, err := confirmPassword.Run()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 	if newPasswordStr != confirmPasswordStr {
-		return "", fmt.Errorf("Sorry, the passwords you entered do not match.")
+		return "", "", fmt.Errorf("Sorry, the passwords you entered do not match.")
 	}
-	req := meta.NewChangePasswordReq(
-		loginFlags.user,
-		currentPasswordStr,
-		newPasswordStr,
-	)
-	if err := c.ChangePassword(req); err != nil {
-		return "", err
-	}
-	return newPasswordStr, nil
+
+	return currentPasswordStr, newPasswordStr, nil
 }
 
 func init() {

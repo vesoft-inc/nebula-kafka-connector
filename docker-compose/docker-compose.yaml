@@ -179,9 +179,10 @@ services:
       - -c
       - |
         sleep 5;
-        ngctl login -H metad0 -P 9559;
         for i in `seq 1 60`;do
-          var=`ngctl cluster create --cluster my_cluster1 --replica 3 --zones zh_sh,zh_bj,zh_hz`;
+          var=`ngctl supercluster passwd -H metad0 -P 9559 -u root -c nebula -p NebulaGraph01;\
+               ngctl supercluster login -H metad0 -P 9559 -u root  -p NebulaGraph01;\
+               ngctl cluster create --cluster my_cluster1 --replica-factor 3`;
           if [[ $$? == 0 ]];then
             break;
           fi;

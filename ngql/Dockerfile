@@ -12,6 +12,5 @@ RUN cd /usr/src && apk add --no-cache git make && make
 FROM alpine as ngql
 
 COPY --from=builder /usr/src/ngql /usr/local/bin/ngql
-COPY --from=builder /usr/src/data/ /data/
 
 ENTRYPOINT ["ngql"]

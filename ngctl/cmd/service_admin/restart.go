@@ -17,7 +17,7 @@ var restartServiceCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		flags := ServiceFlags
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false {
+		if flags.host == "" {
 			return common.NgctlError("no valid host provided", "")
 		}
 		if flags.serviceType == "" || (flags.serviceType != "graphd" && flags.serviceType != "storaged") {

@@ -2,10 +2,13 @@
 # e.g.
 # cd nebula-ng-tools
 # docker build -t reg.vesoft-inc.com/vesoft-ng/ngctl:nightly -f console/Dockerfile  --target ngctl .
-FROM golang:1.20.3-alpine as builder
+FROM golang:1.22.4-alpine as builder
 
 COPY ngctl /usr/src
 COPY golang /usr/golang
+COPY ngadm /usr/ngadm
+COPY br-ent /usr/br-ent
+COPY agent /usr/agent
 
 RUN cd /usr/src && apk add --no-cache git make && make
 

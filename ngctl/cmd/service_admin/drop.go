@@ -29,7 +29,7 @@ var dropServiceCmd = &cobra.Command{
 		} else {
 			return common.NgctlError("service type is not correct, valid value is graphd or storaged", "")
 		}
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false {
+		if flags.host == "" {
 			return common.NgctlError("no valid host provided", "")
 		}
 		if flags.clusterName == "" {

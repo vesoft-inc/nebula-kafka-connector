@@ -3,7 +3,6 @@ package common
 import (
 	"fmt"
 	"log"
-	"net"
 	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
@@ -69,15 +68,11 @@ func CheckInConfigFile(filepath string) (err error) {
 	return nil
 }
 
-func IsValidIPAddress(ip string) bool {
-	return net.ParseIP(ip) != nil
-}
-
 // checking all hosts in the config file, including the metad, storaged, and graphd
 func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList []IPAndPort, err error) {
 	// hosts for metad
 	for _, host := range ConfigSpec.Spec.Metad.Hosts {
-		if (host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "") && (IsValidIPAddress(host.IP)) {
+		if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
 			hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
 			if host.IP == hostFromCmdLineOption {
 				return hostList, nil
@@ -88,7 +83,7 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList 
 	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
 		if cluster.Name == clusterName {
 			for _, host := range cluster.Graphd.Hosts {
-				if (host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "") && (IsValidIPAddress(host.IP)) {
+				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
 					hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
 					if host.IP == hostFromCmdLineOption {
 						return hostList, nil
@@ -96,7 +91,7 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList 
 				}
 			}
 			for _, host := range cluster.Storaged.Hosts {
-				if (host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "") && (IsValidIPAddress(host.IP)) {
+				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
 					hostList = append(hostList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort})
 					if host.IP == hostFromCmdLineOption {
 						return hostList, nil

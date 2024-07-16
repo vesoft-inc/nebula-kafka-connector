@@ -100,7 +100,7 @@ var startServiceCmd = &cobra.Command{
 		if flags.serviceType == "" || (flags.serviceType != "graphd" && flags.serviceType != "storaged") {
 			return common.NgctlError("invalid service type", "")
 		}
-		if flags.host == "" || common.IsValidIPAddress(flags.host) == false {
+		if flags.host == "" {
 			return common.NgctlError("no valid host provided", "")
 		}
 		if flags.port == 0 {
