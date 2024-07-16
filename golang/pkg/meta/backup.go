@@ -70,6 +70,7 @@ type (
 
 	RestoreResp struct {
 		*HeaderResponse
+		PartServiceMap map[int64][]int64
 	}
 
 	ShowMetaResp struct {
@@ -208,8 +209,14 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 		return nil, fmt.Errorf("get response header failed: %w", err)
 	}
 
+	partServiceMap := make(map[int64][]int64)
+	for _, partService := range response.Parts {
+		partServiceMap[int64(partService.PartId)] = partService.ServiceIds
+	}
+
 	return &RestoreResp{
 		HeaderResponse: header,
+		PartServiceMap: partServiceMap,
 	}, nil
 }
 

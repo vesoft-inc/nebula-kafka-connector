@@ -459,17 +459,18 @@ func (r *Restore) downloadMeta() error {
 func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]string, map[int64]int64, error) {
 	storageIdMap := make(map[int64]int64)
 	hostPartMap := make(map[string][]string)
+	storageIdHostMap := make(map[int64]string)
 
 	bakClusterMap := utils.FlattenClusterMap(backupRes)
 	oldStorages := bakClusterMap[r.backupClusterId]
 	curStorages := r.clusters.GetStorages(r.clusterId)
 
+	for _, s := range curStorages {
+		storageIdHostMap[s.ServiceId] = s.Host
+	}
+
 	for i, s := range curStorages {
 		storageIdMap[oldStorages[i].ServiceId] = s.ServiceId
-		for _, info := range oldStorages[i].CkptInfos {
-			key := utils.GenPartKey(r.backupClusterId, info.PartId)
-			hostPartMap[key] = append(hostPartMap[key], s.Host)
-		}
 	}
 
 	clusterRestoreInfos := []*meta.ClusterRestoreInfo{
@@ -491,8 +492,17 @@ func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]st
 		log.Infof("restore req cluster restore info: %+v, ", info)
 	}
 
-	if _, err := r.meta.Restore(req); err != nil {
+	resp, err := r.meta.Restore(req)
+	if err != nil {
 		return nil, nil, fmt.Errorf("restore meta failed: %w", err)
+	}
+
+	for partId, serviceIds := range resp.PartServiceMap {
+		key := utils.GenPartKey(r.backupClusterId, partId)
+		hostPartMap[key] = make([]string, 0)
+		for _, serviceId := range serviceIds {
+			hostPartMap[key] = append(hostPartMap[key], storageIdHostMap[serviceId])
+		}
 	}
 
 	return hostPartMap, storageIdMap, nil
