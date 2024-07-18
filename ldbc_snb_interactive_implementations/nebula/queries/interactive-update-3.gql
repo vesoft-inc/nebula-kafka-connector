@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE PERSON_LIKES_COMMENT ({id:$personId})-[{creationDate:local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")}]->({id: $commentId})
+MATCH (a@Person{id:$personId}),(b@Comment{id: $commentId})
+INSERT OR IGNORE (a)-[@PERSON_LIKES_COMMENT{creationDate:local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")}]->(b)

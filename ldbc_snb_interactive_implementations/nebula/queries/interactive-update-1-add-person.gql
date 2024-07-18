@@ -1,11 +1,11 @@
 USE $graphName
-INSERT NODE Person ({id: $personId,
-                     firstName: $personFirstName,
-                     lastName: $personLastName,
-                     gender: $gender,
-                     birthday: date($birthday),
-                     creationDate: local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S"),
-                     locationIP: $locationIP,
-                     browserUsed: $browserUsed,
-                     email: $emails,
-                     speaks: $languages})
+INSERT OR IGNORE (@Person{id: $personId,
+              firstName: $personFirstName,
+              lastName: $personLastName,
+              gender: $gender,
+              birthday: date($birthday),
+              creationDate: local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S"),
+              locationIP: $locationIP,
+              browserUsed: $browserUsed,
+              email: $emails,
+              speaks: $languages})

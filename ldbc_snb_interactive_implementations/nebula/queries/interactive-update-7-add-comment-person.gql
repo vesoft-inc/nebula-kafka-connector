@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE COMMENT_HAS_CREATOR_PERSON ({id: $commentId})-[{}]->({id: $authorPersonId})
+MATCH (a@Comment{id: $commentId}),(b@Person{id: $authorPersonId})
+INSERT OR IGNORE (a)-[@COMMENT_HAS_CREATOR_PERSON{}]->(b)

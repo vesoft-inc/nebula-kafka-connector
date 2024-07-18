@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE COMMENT_IS_LOCATED_IN_COUNTRY ({id: $commentId})-[{}]->({id:$countryId})
+MATCH (a@Comment{id: $commentId}),(b@Country{id:$countryId})
+INSERT OR IGNORE (a)-[@COMMENT_IS_LOCATED_IN_COUNTRY{}]->(b)

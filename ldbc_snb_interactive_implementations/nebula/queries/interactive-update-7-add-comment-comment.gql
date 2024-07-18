@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE  COMMENT_REPLY_OF_COMMENT ({id: $commentId})-[{}]->({id: $replyToCommentId})
+MATCH (a@Comment{id: $commentId}),(b@Comment{id: $replyToCommentId})
+INSERT OR IGNORE (a)-[@COMMENT_REPLY_OF_COMMENT{}]->(b)

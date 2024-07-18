@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE PERSON_KNOWS_PERSON ({id:$person1Id})-[{creationDate : local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")}]->({id:$person2Id})
+MATCH (a@Person{id:$person1Id}),(b@Person{id:$person2Id})
+INSERT OR IGNORE (a)-[@PERSON_KNOWS_PERSON{creationDate : local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")}]->(b)

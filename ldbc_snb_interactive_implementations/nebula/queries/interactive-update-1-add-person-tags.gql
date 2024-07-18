@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE PERSON_HAS_INTEREST_TAG ({id:$personId})-[{}]->({id:$tagId})
+MATCH (a@Person{id:$personId}),(b@Person{id:$tagId})
+INSERT OR IGNORE (a)-[@PERSON_HAS_INTEREST_TAG{}]->(b)

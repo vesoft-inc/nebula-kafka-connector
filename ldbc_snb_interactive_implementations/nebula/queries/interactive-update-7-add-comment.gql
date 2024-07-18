@@ -1,7 +1,7 @@
 USE $graphName
-INSERT NODE Comment ({id: $commentId,
-                      creationDate: local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S"),
-                      locationIP: $locationIP,
-                      browserUsed: $browserUsed,
-                      content: $content,
-                      `length`: $length})
+INSERT OR IGNORE (@Comment{id: $commentId,
+                  creationDate: local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S"),
+                  locationIP: $locationIP,
+                  browserUsed: $browserUsed,
+                  content: $content,
+                  `length`: $length})

@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE PERSON_STUDY_AT_UNIVERSITY ({id: $personId})-[{classYear: $studiesFromYear}]->({id:$organizationId})
+MATCH (a@Person{id: $personId}),(b@University{id:$organizationId})
+INSERT OR IGNORE (a)-[@PERSON_STUDY_AT_UNIVERSITY{classYear: $studiesFromYear}]->(b)

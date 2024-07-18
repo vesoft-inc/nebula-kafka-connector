@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE POST_HAS_TAG_TAG ({id: $postId})-[{}]->({id: $tagId})
+MATCH (a@Post{id: $postId}),(b@Tag{id: $tagId})
+INSERT OR IGNORE (a)-[@POST_HAS_TAG_TAG{}]->(b)

@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE FORUM_HAS_MODERATOR_PERSON ({id: $forumId})-[{}]->({id: $moderatorPersonId})
+MATCH (a@Forum{id: $forumId}),(b@Person{id: $moderatorPersonId})
+INSERT OR IGNORE (a)-[@FORUM_HAS_MODERATOR_PERSON{}]->(b)

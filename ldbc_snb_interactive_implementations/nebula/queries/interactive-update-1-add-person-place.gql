@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE PERSON_IS_LOCATED_IN_CITY ({id:$personId})-[{}]->({id:$cityId})
+MATCH (a@Person{id:$personId}),(b@City{id:$cityId})
+INSERT OR IGNORE (a)-[@PERSON_IS_LOCATED_IN_CITY{}]->(b)

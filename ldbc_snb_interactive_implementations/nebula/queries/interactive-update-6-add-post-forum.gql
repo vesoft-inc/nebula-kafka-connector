@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE FORUM_CONTAINER_OF_POST ({id:$forumId})-[{}]->({id:$postId})
+MATCH (a@Forum{id: $forumId}),(b@Post{id:$postId})
+INSERT OR IGNORE (a)-[@FORUM_CONTAINER_OF_POST{}]->(b)

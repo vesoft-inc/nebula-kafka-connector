@@ -1,2 +1,3 @@
 USE $graphName
-INSERT EDGE PERSON_WORK_AT_COMPANY ({id: $personId})-[{workFrom: $worksFromYear}]->({id: $organizationId})
+MATCH (a@Person{id: $personId}),(b@Company{id: $organizationId})
+INSERT OR IGNORE (a)-[@PERSON_WORK_AT_COMPANY{workFrom: $worksFromYear}]->(b)
