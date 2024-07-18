@@ -22,6 +22,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.Int64(flagClusterId, 0, "Specify the restore cluster id")
 	flags.Int64(flagBackupClusterId, 0, "Specify the backup cluster id")
 	flags.String(flagCatalogOwner, "root", "Specify the restore cluster catalog owner")
+	flags.Bool(flagForce, false, "Force to restore data")
 
 	// support tls
 	flags.Bool(flagEnableSSL, false, "Enable SSL connection")
@@ -50,6 +51,7 @@ type RestoreConfig struct {
 	Username        string
 	Password        string
 	CatalogOwner    string
+	Force           bool
 }
 
 func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
@@ -81,6 +83,11 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 	}
 
 	r.CatalogOwner, err = flags.GetString(flagCatalogOwner)
+	if err != nil {
+		return err
+	}
+
+	r.Force, err = flags.GetBool(flagForce)
 	if err != nil {
 		return err
 	}

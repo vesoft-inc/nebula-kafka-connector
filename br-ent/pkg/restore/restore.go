@@ -167,7 +167,7 @@ func (r *Restore) Restore() error {
 	}
 
 	// stop specify cluster's storageds
-	err := r.stopStoragedsWithLM()
+	err := r.stopStorageds()
 	if err != nil {
 		return fmt.Errorf("stop cluster failed: %w", err)
 	}

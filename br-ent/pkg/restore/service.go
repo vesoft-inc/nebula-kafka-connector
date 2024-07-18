@@ -2,10 +2,8 @@ package restore
 
 import (
 	"fmt"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"time"
-
 	log "github.com/sirupsen/logrus"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
 
 func (r *Restore) stopClusterGraph(clusterId int64) error {
@@ -156,7 +154,7 @@ func (r *Restore) stopAllClusters() error {
 	return nil
 }
 
-func (r *Restore) stopStoragedsWithLM() error {
+func (r *Restore) stopStorageds() error {
 	//if err := r.stopAllClusterStorage(); err != nil {
 	//	return fmt.Errorf("stop storaged cluster failed: %w", err)
 	//}
@@ -176,9 +174,8 @@ func (r *Restore) stopStoragedsWithLM() error {
 		log.WithField("addr", service.Host).
 			Info("Stop storaged service successfully.")
 	}
-
-	log.Info("Waiting for lm to clear quota...")
-	time.Sleep(time.Second * 30)
+	//log.Info("Waiting for lm to clear quota...")
+	//time.Sleep(time.Second * 30)
 
 	return nil
 }

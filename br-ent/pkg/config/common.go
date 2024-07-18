@@ -33,6 +33,7 @@ const (
 	flagClusterId          = "clusterId"
 	flagBackupClusterId    = "backup-clusterId"
 	flagCatalogOwner       = "catalog-owner"
+	flagForce              = "force"
 
 	CACertPathEnv     = "CA_CERT_PATH"
 	ClientCertPathEnv = "CLIENT_CERT_PATH"
