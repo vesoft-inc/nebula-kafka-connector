@@ -41,6 +41,8 @@ type Restore struct {
 	backupClusterId int64
 	catalogOwner    string
 
+	force bool
+
 	rootUri    string
 	backupName string
 	backSuffix string
@@ -55,6 +57,7 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 		clusterId:       cfg.ClusterId,
 		backupClusterId: cfg.BackupClusterId,
 		catalogOwner:    cfg.CatalogOwner,
+		force:           cfg.Force,
 	}
 
 	var err error
@@ -485,6 +488,7 @@ func (r *Restore) restoreMeta(backupRes *meta.CreateBackupResp) (map[string][]st
 	req := &meta.RestoreReq{
 		ClusterMap:          map[int64]int64{r.backupClusterId: r.clusterId},
 		ClusterRestoreInfos: clusterRestoreInfos,
+		Force:               r.force,
 	}
 
 	log.Infof("restore req clustermap: %+v, ", req.ClusterMap)

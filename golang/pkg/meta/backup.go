@@ -66,6 +66,7 @@ type (
 	RestoreReq struct {
 		ClusterMap          map[int64]int64
 		ClusterRestoreInfos []*ClusterRestoreInfo
+		Force               bool
 	}
 
 	RestoreResp struct {
@@ -190,6 +191,7 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 		Header:       &admin.RequestHeader{Token: c.token},
 		ClusterMap:   req.ClusterMap,
 		ClusterInfos: clusterInfos,
+		Force:        req.Force,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.Restore(ctx, in)
