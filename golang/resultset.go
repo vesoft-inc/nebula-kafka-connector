@@ -110,7 +110,7 @@ func (rs *resultSet) convertValue(src Value, dst any) error {
 		return sn.scan(src)
 	}
 
-	return fmt.Errorf("unsupported type")
+	return fmt.Errorf("cannot scan the value, unsupported type: %T", dst)
 }
 
 func (rs *resultSet) convertBasicValue(src Value, dst any) error {

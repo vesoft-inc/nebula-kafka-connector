@@ -156,6 +156,7 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 		maxOpen:         defaultMaxOpenConns,
 		minOpen:         defaultMinOpenConns,
 		maxIdle:         defaultMaxIdleConns,
+		sessionConfig:   &sessionConfig{},
 		tickerDuration:  defaultPoolTicker,
 		log:             DefaultLogger,
 	}

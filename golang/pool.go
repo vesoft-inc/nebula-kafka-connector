@@ -34,12 +34,20 @@ type (
 		hostIndex       int
 		tickerDuration  time.Duration
 		connMaxLifeTime time.Duration
+		sessionConfig   *sessionConfig
 		log             Logger
 	}
 
 	hostAddress struct {
 		host string
 		port int
+	}
+
+	sessionConfig struct {
+		graph      string
+		schema     string
+		timezone   string
+		parameters map[string]string
 	}
 )
 
@@ -75,6 +83,34 @@ func (dp *driverPool) openNewConnLocked() (Client, error) {
 	)
 	if err != nil {
 		return nil, err
+	}
+	fn := func(stmt string) error {
+		_, err := dc.Execute(stmt)
+		if err != nil {
+			_ = dc.Close()
+		}
+		return err
+	}
+	// set session config
+	if dp.sessionConfig.graph != "" {
+		if err := fn(fmt.Sprintf("SESSION SET GRAPH %s", dp.sessionConfig.graph)); err != nil {
+			return nil, err
+		}
+	}
+	if dp.sessionConfig.schema != "" {
+		if err := fn(fmt.Sprintf("SESSION SET SCHEMA %s", dp.sessionConfig.schema)); err != nil {
+			return nil, err
+		}
+	}
+	if dp.sessionConfig.timezone != "" {
+		if err := fn(fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dp.sessionConfig.timezone)); err != nil {
+			return nil, err
+		}
+	}
+	for k, v := range dp.sessionConfig.parameters {
+		if err := fn(fmt.Sprintf("SESSION SET VALUE %s=%s", k, v)); err != nil {
+			return nil, err
+		}
 	}
 
 	dp.connMap[dc] = struct{}{}
@@ -258,6 +294,7 @@ func (dp *driverPool) connectionOpener(ctx context.Context) {
 			dp.mu.Lock()
 			dc, err := dp.openNewConnLocked()
 			if err != nil {
+				dp.log.Error(fmt.Sprintf("open connection failed, err: %s", err.Error()))
 				// reset opener
 				dp.openerCh <- struct{}{}
 				dp.mu.Unlock()

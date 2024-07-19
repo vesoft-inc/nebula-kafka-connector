@@ -10,8 +10,14 @@ test:
 	go mod tidy
 	go test -v -race --covermode=atomic --coverprofile coverage.out
 
+e2e-up:
+	cd ../docker-compose && docker-compose up -d
+
+e2e-down:
+	cd ../docker-compose && docker-compose down
+
 e2e:
-	@echo "TODO: Add e2e tests"
+	cd e2e && go test -v -race
 
 fmt:
 	go fmt $(shell go list ./... | grep -v /generated_code/)

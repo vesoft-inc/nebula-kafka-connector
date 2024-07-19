@@ -90,6 +90,30 @@ func WithPoolLogger(logger Logger) poolOptionsFn {
 	}
 }
 
+func WithPoolGraph(graph string) poolOptionsFn {
+	return func(ops *driverPool) {
+		ops.sessionConfig.graph = graph
+	}
+}
+
+func WithPoolSchema(schema string) poolOptionsFn {
+	return func(ops *driverPool) {
+		ops.sessionConfig.schema = schema
+	}
+}
+
+func WithPoolTimezone(timezone string) poolOptionsFn {
+	return func(ops *driverPool) {
+		ops.sessionConfig.timezone = timezone
+	}
+}
+
+func WithPoolParameters(parameters map[string]string) poolOptionsFn {
+	return func(ops *driverPool) {
+		ops.sessionConfig.parameters = parameters
+	}
+}
+
 // used for testing
 func withPoolConnector(connector connector) poolOptionsFn {
 	return func(ops *driverPool) {
