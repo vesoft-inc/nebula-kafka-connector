@@ -93,7 +93,9 @@ public class NebulaPool implements Serializable {
                 builder.requestTimeoutMills,
                 builder.scanParallel,
                 builder.workingGraph,
-                builder.timeZone);
+                builder.timeZone,
+                builder.schemaName,
+                builder.parameters);
         pool = new GenericObjectPool<>(factory, objConfig);
         hasInit.compareAndSet(false, true);
     }
@@ -193,8 +195,10 @@ public class NebulaPool implements Serializable {
         private String workingGraph = null;
 
         // the time zone, used to parse ZonedTime and ZonedDatetime
-        private ZoneId timeZone     = null;
-        private int    scanParallel = DEFAULT_SCAN_PARALLEL;
+        private ZoneId              timeZone     = null;
+        private String              schemaName   = null;
+        private Map<String, String> parameters   = new HashMap<>();
+        private int                 scanParallel = DEFAULT_SCAN_PARALLEL;
 
         /**
          * Builder for {@link NebulaPool}
@@ -383,12 +387,52 @@ public class NebulaPool implements Serializable {
         }
 
         /**
+         * config the initial schema for NebulaClient in NebulaPool
+         *
+         * @param schemaName schema name
+         * @return NebulaPool.Builder
+         */
+        public Builder withSchemaName(String schemaName) {
+            this.schemaName = schemaName;
+            return this;
+        }
+
+        /**
+         * config the parameters for NebulaClient in NebulaPool
+         * session set value $key=value
+         *
+         * @param parameters map of parameter key and value
+         * @return NebulaPool.Builder
+         */
+        public Builder withParameters(Map<String, String> parameters) {
+            if (parameters != null) {
+                this.parameters = parameters;
+            }
+            return this;
+        }
+
+
+        /**
+         * add the parameter into parameters for NebulaClient in NebulaPool
+         * session set value $key=value
+         *
+         * @param paramName map of parameter key and value
+         * @return NebulaPool.Builder
+         */
+        public Builder addParameter(String paramName, String value) {
+            if (paramName != null) {
+                this.parameters.put(paramName, value);
+            }
+            return this;
+        }
+
+        /**
          * config the parallel for data scan
          *
          * @param scanParallel number of the concurrency for data scan
          * @return NebulaClient.Builder
          */
-        public Builder setScanParallel(int scanParallel) {
+        public Builder withScanParallel(int scanParallel) {
             this.scanParallel = scanParallel;
             return this;
         }

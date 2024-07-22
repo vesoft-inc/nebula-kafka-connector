@@ -23,14 +23,16 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final LoadBalancer loadBalancer;
-    private String userName;
-    private Map<String, Object> authOptions;
-    private long connectTimeoutMs;
-    private long requestTimeout;
-    private int scanParallel;
-    private String workingGraph;
-    private ZoneId timeZone;
+    private final LoadBalancer        loadBalancer;
+    private       String              userName;
+    private       Map<String, Object> authOptions;
+    private       long                connectTimeoutMs;
+    private       long                requestTimeout;
+    private       int                 scanParallel;
+    private       String              workingGraph;
+    private       ZoneId              timeZone;
+    private       String              schemaName;
+    private       Map<String, String> parameters;
 
     public ClientPoolFactory(
             LoadBalancer loadBalancer,
@@ -40,7 +42,9 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
             long requestTimeoutMs,
             int scanParallel,
             String workingGraph,
-            ZoneId zoneId) {
+            ZoneId zoneId,
+            String schemaName,
+            Map<String, String> parameters) {
         this.loadBalancer = loadBalancer;
         this.userName = userName;
         this.authOptions = authOptions;
@@ -49,6 +53,8 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         this.scanParallel = scanParallel;
         this.workingGraph = workingGraph;
         this.timeZone = zoneId;
+        this.schemaName = schemaName;
+        this.parameters = parameters;
     }
 
 
@@ -81,9 +87,21 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         if (timeZone != null) {
             sessionSetStatement.append("SESSION SET TIME ZONE \"").append(timeZone).append("\"");
         }
+        if (schemaName != null) {
+            sessionSetStatement.append("SESSION SET SCHEMA `").append(schemaName).append("` ");
+        }
+        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+            sessionSetStatement
+                    .append("SESSION SET VALUE $")
+                    .append(parameter.getKey())
+                    .append("=")
+                    .append(parameter.getValue())
+                    .append(" ");
+        }
         if (!sessionSetStatement.toString().isEmpty()) {
             client.execute(sessionSetStatement.toString());
         }
+
         return client;
     }
 
