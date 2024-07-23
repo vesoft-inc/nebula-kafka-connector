@@ -179,3 +179,24 @@ func (r *Restore) stopStorageds() error {
 
 	return nil
 }
+
+func (r *Restore) stopGraphds() error {
+	graphs := r.clusters.GetGraphs(r.clusterId)
+	for _, service := range graphs {
+		agent, err := r.amg.GetAgent(service.Host)
+		if err != nil {
+			return fmt.Errorf("get agent for graphd %s failed: %w", service.Host, err)
+		}
+
+		if err = agent.StopService(service.ServiceType, service.InstallPath); err != nil {
+			return fmt.Errorf("stop graphd service %s by agent failed: %w",
+				service.Host, err)
+		}
+
+		log.WithField("addr", service.Host).
+			Info("Stop graphd service successfully.")
+	}
+
+	return nil
+
+}

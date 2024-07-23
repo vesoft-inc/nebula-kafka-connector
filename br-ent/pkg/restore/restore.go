@@ -172,7 +172,13 @@ func (r *Restore) Restore() error {
 	// stop specify cluster's storageds
 	err := r.stopStorageds()
 	if err != nil {
-		return fmt.Errorf("stop cluster failed: %w", err)
+		return fmt.Errorf("stop cluster storageds failed: %w", err)
+	}
+
+	// stop specify cluster's graphds
+	err = r.stopGraphds()
+	if err != nil {
+		return fmt.Errorf("stop cluster graphd failed: %w", err)
 	}
 
 	logger.Info("Stop cluster successfully.")
