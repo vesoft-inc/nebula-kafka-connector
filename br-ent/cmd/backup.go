@@ -55,9 +55,13 @@ func newFullBackupCmd() *cobra.Command {
 				log2.Errorf("Full backup failed: %v, will try to clean the remaining garbage...\n", err)
 				if backupName != "" {
 					if cleanErr := clean(&config.CleanupConfig{
+						MetaAddr:   cfg.MetaAddr,
+						Username:   cfg.Username,
+						Password:   cfg.Password,
 						BackupName: backupName,
 						Backend:    cfg.Backend,
 						TLSConfig:  cfg.TLSConfig,
+						AgentsAddr: cfg.AgentsAddr,
 					}); cleanErr != nil {
 						return cleanErr
 					}
