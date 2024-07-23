@@ -9,8 +9,8 @@ import (
 
 func TestPoolSessionSet(t *testing.T) {
 	params := map[string]string{
-		"$s": "\"1\"",
-		"$i": "2",
+		"s": "\"1\"",
+		"i": "2",
 	}
 	p, err := nebula.NewNebulaPool(nebulaAddress, nebulaUser, nebulaPassword,
 		nebula.WithPoolTimezone("Asia/Shanghai"),

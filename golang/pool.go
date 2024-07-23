@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"math"
+	"strings"
 	"sync"
 	"time"
 )
@@ -52,8 +53,7 @@ type (
 )
 
 const (
-	requestConnChannelSize = 10000
-	openConnChannelSize    = 10000
+	openConnChannelSize = 1000000
 )
 
 var _ Client = &connection{}
@@ -71,10 +71,7 @@ func (dp *driverPool) Close() error {
 	return nil
 }
 
-func (dp *driverPool) openNewConnLocked() (Client, error) {
-	hostAddress := dp.hostAddresses[dp.getHostIndexLocked()]
-
-	address := fmt.Sprintf("%s:%d", hostAddress.host, hostAddress.port)
+func (dp *driverPool) openNewConn(address string) (Client, error) {
 	dc, err := NewNebulaClient(address, dp.connCfg.username, dp.connCfg.password,
 		WithClientConnectTimeout(dp.connCfg.connectTimeout),
 		WithClientRequestTimeout(dp.connCfg.requestTimeout),
@@ -84,36 +81,28 @@ func (dp *driverPool) openNewConnLocked() (Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	fn := func(stmt string) error {
-		_, err := dc.Execute(stmt)
-		if err != nil {
-			_ = dc.Close()
-		}
-		return err
-	}
 	// set session config
+	var stmts []string
 	if dp.sessionConfig.graph != "" {
-		if err := fn(fmt.Sprintf("SESSION SET GRAPH %s", dp.sessionConfig.graph)); err != nil {
-			return nil, err
-		}
+		stmts = append(stmts, fmt.Sprintf("SESSION SET GRAPH %s", dp.sessionConfig.graph))
 	}
 	if dp.sessionConfig.schema != "" {
-		if err := fn(fmt.Sprintf("SESSION SET SCHEMA %s", dp.sessionConfig.schema)); err != nil {
-			return nil, err
-		}
+		stmts = append(stmts, fmt.Sprintf("SESSION SET SCHEMA %s", dp.sessionConfig.schema))
 	}
 	if dp.sessionConfig.timezone != "" {
-		if err := fn(fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dp.sessionConfig.timezone)); err != nil {
-			return nil, err
-		}
+		stmts = append(stmts, fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dp.sessionConfig.timezone))
 	}
 	for k, v := range dp.sessionConfig.parameters {
-		if err := fn(fmt.Sprintf("SESSION SET VALUE %s=%s", k, v)); err != nil {
+		stmts = append(stmts, fmt.Sprintf("SESSION SET VALUE $%s=%s", k, v))
+	}
+
+	if len(stmts) != 0 {
+		if _, err := dc.Execute(strings.Join(stmts, " ")); err != nil {
+			_ = dc.Close()
 			return nil, err
 		}
 	}
 
-	dp.connMap[dc] = struct{}{}
 	return dc, nil
 }
 
@@ -224,7 +213,6 @@ func (dp *driverPool) GetClient() (Client, error) {
 	}
 	// // start ticker
 	dp.once.Do(func() {
-		fmt.Print("run ticker")
 		go dp.ticker(dp.ctx)
 	})
 	return dc, nil
@@ -292,14 +280,19 @@ func (dp *driverPool) connectionOpener(ctx context.Context) {
 			return
 		case <-dp.openerCh:
 			dp.mu.Lock()
-			dc, err := dp.openNewConnLocked()
+			hostAddress := dp.hostAddresses[dp.getHostIndexLocked()]
+			address := fmt.Sprintf("%s:%d", hostAddress.host, hostAddress.port)
+			dp.mu.Unlock()
+			// address :=
+			dc, err := dp.openNewConn(address)
 			if err != nil {
 				dp.log.Error(fmt.Sprintf("open connection failed, err: %s", err.Error()))
 				// reset opener
 				dp.openerCh <- struct{}{}
-				dp.mu.Unlock()
 				continue
 			}
+			dp.mu.Lock()
+			dp.connMap[dc] = struct{}{}
 			_ = dp.putConnLocked(dc)
 			dp.mu.Unlock()
 		}

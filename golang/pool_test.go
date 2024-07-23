@@ -10,13 +10,18 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-type dummyConnector struct{}
+type dummyConnector struct {
+	sleep time.Duration
+}
 
 type dummyConn struct {
 	id int
 }
 
 func (c *dummyConnector) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+	if c.sleep > 0 {
+		<-time.After(c.sleep)
+	}
 	return &dummyConn{}, nil
 }
 
@@ -255,5 +260,44 @@ func TestPoolGet(t *testing.T) {
 		if err := eg.Wait(); err != nil {
 			t.Fatal(err)
 		}
+	}
+}
+
+func TestPoolConcurrency(t *testing.T) {
+	p, err := NewNebulaPool("127.0.0.1:9669", "", "",
+		withPoolConnector(&dummyConnector{sleep: 2 * time.Millisecond}),
+		WithPoolMaxOpenConns(400),
+		WithPoolRequestTimeout(100*time.Millisecond),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.Close()
+	concurrency := 200
+	loopsPerGoroutine := 10000
+	var eg errgroup.Group
+	for i := 0; i < concurrency; i++ {
+		eg.Go(func() error {
+			for l := 0; l < loopsPerGoroutine; l++ {
+				run(t, p)
+			}
+			return nil
+		})
+	}
+	if err := eg.Wait(); err != nil {
+		t.Fatal(err)
+	}
+}
+
+func run(t *testing.T, p Pool) {
+	c, err := p.GetClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.PutClient(c)
+	_, err = c.Execute("Return 1")
+
+	if err != nil {
+		t.Fatal(err)
 	}
 }
