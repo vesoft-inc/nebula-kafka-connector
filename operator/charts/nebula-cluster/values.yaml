@@ -1,6 +1,6 @@
 nebulaCluster:
   console:
-    image: vesoft/nebula-console
+    image: reg.vesoft-inc.com/vesoft-ng/nebula-console
     version: latest
   replicaFactor: 3
   zones:
@@ -20,7 +20,7 @@ nebulaCluster:
         cpu: "1"
         memory: "500Mi"
     replicas: 1
-    image: vesoft/nebula-graphd
+    image: reg.vesoft-inc.com/vesoft-ng/nebula-graphd
     version: nightly
     serviceType: NodePort
     logVolume:
@@ -50,7 +50,7 @@ nebulaCluster:
         cpu: "2"
         memory: "2Gi"
     replicas: 3
-    image: vesoft/nebula-storaged
+    image: reg.vesoft-inc.com/vesoft-ng/nebula-storaged
     version: nightly
     dataVolumes:
     - storage: "10Gi"
@@ -76,8 +76,7 @@ nebulaCluster:
   enablePVReclaim: false
   schedulerName: default-scheduler # nebula-scheduler
   imagePullPolicy: Always
-  imagePullSecrets:
-  - name: "image-secret"
+  imagePullSecrets: []
   topologySpreadConstraints:
   - topologyKey: "kubernetes.io/hostname"
     whenUnsatisfiable: "ScheduleAnyway"

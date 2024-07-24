@@ -151,38 +151,46 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 	}
 
 	if equal && nm.MetadComponent().IsReady() {
+		var metaClient meta.Client
 		username, password, err := kube.GetCredential(c.clientSet, nm.Namespace, nm.Spec.CredentialSecret)
 		if err != nil {
 			return err
 		}
 		endpoints := []string{nm.GetMetadThriftConnAddress()}
-		metaClient, err := meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, defaultPassword))
-		if err != nil {
-			return err
-		}
-		_, err = metaClient.Login()
-		if err != nil {
-			ne, ok := err.(*nebula.NebulaError)
-			if !ok {
-				klog.Errorf("login metad failed: %v", err)
-				return err
-			}
-			if ne.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
-				return fmt.Errorf("login metad got unkonw error: %v", ne.Error())
-			}
-			req := meta.NewChangePasswordReq(username, defaultPassword, password)
-			if err := metaClient.ChangePassword(req); err != nil {
-				klog.Errorf("change password failed: %v", err)
-				return err
-			}
-			metaClient.Close()
-			metaClient, err = meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, password))
+		if !nm.Status.PasswordChanged {
+			metaClient, err = meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, defaultPassword))
 			if err != nil {
 				return err
 			}
-			if _, err = metaClient.Login(); err != nil {
-				return err
+			_, err = metaClient.Login()
+			if err != nil {
+				ne, ok := err.(*nebula.NebulaError)
+				if !ok {
+					klog.Errorf("login metad failed: %v", err)
+					return err
+				}
+				if ne.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
+					return fmt.Errorf("login metad got unkonw error: %v", ne.Error())
+				}
+				req := meta.NewChangePasswordReq(username, defaultPassword, password)
+				if err := metaClient.ChangePassword(req); err != nil {
+					klog.Errorf("change password failed: %v", err)
+					return err
+				}
+				nm.Status.PasswordChanged = true
 			}
+			defer func() {
+				metaClient.Close()
+			}()
+		}
+
+		metaClient, err = meta.NewMetaClient(strings.Join(endpoints, ","), meta.WithUserPassword(username, password))
+		if err != nil {
+			return err
+		}
+		if _, err = metaClient.Login(); err != nil {
+			klog.Errorf("login metad with new password failed: %v", err)
+			return err
 		}
 
 		defer func() {

@@ -2,13 +2,6 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  labels:
-    app.kubernetes.io/name: clusterrole
-    app.kubernetes.io/instance: manager-role
-    app.kubernetes.io/component: rbac
-    app.kubernetes.io/created-by: operator
-    app.kubernetes.io/part-of: operator
-    app.kubernetes.io/managed-by: kustomize
   name: manager-role
 rules:
 - apiGroups:
@@ -31,6 +24,13 @@ rules:
   - create
   - list
   - patch
+- apiGroups:
+  - ""
+  resources:
+  - namespaces
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ""
   resources:
@@ -170,6 +170,40 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+  - autoscaling.nebula-graph.io
+  resources:
+  - nebulaautoscalers
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - autoscaling.nebula-graph.io
+  resources:
+  - nebulaautoscalers/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - custom.metrics.k8s.io
+  resources:
+  - '*'
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - metrics.k8s.io
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:

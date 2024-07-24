@@ -2903,6 +2903,8 @@ spec:
               observedGeneration:
                 format: int64
                 type: integer
+              passwordChanged:
+                type: boolean
               phase:
                 type: string
               version:

@@ -67,6 +67,7 @@ type NebulaMetadStatus struct {
 	ComponentStatus    `json:",inline"`
 	ObservedGeneration int64              `json:"observedGeneration,omitempty"`
 	ManagedClusters    int32              `json:"managedClusters,omitempty"`
+	PasswordChanged    bool               `json:"passwordChanged,omitempty"`
 	Conditions         []metav1.Condition `json:"conditions,omitempty"`
 	Volume             *VolumeStatus      `json:"volume,omitempty"`
 }
