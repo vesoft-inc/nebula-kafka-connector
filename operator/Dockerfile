@@ -1,33 +1,33 @@
-# Build the manager binary
-FROM golang:1.20 as builder
-ARG TARGETOS
+FROM alpine:3.18.2
+
+ARG TARGETPLATFORM
 ARG TARGETARCH
+ARG USERNAME
 
-WORKDIR /workspace
-# Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
-RUN go mod download
+RUN if [ "$USERNAME" = "ng-user" ]; then \
+    addgroup -S -g 65532 ng-user && \
+    adduser -S -D -H -u 65532 \
+    -s /sbin/nologin -G ng-user -g ng-user ng-user; \
+    fi
 
-# Copy the go source
-COPY cmd/main.go cmd/main.go
-COPY api/ api/
-COPY internal/controller/ internal/controller/
+RUN apk update \
+  && apk upgrade \
+  && apk add --no-cache \
+    curl \
+  && rm -rf /var/cache/apk/*
 
-# Build
-# the GOARCH has not a default value to allow the binary be built according to the host where the command
-# was called. For example, if we call make docker-build in a local env which has the Apple Silicon M1 SO
-# the docker BUILDPLATFORM arg will be linux/arm64 when for Apple x86 it will be linux/amd64. Therefore,
-# by leaving it empty we can ensure that the container and binary shipped on it will have the same platform.
-RUN CGO_ENABLED=0 GOOS=${TARGETOS:-linux} GOARCH=${TARGETARCH} go build -a -o manager cmd/main.go
+RUN mkdir -p /tmp/nebula-operator
+RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/${TARGETARCH}/kubectl
+RUN chmod +x ./kubectl
+RUN mv ./kubectl /usr/local/bin
 
-# Use distroless as minimal base image to package the manager binary
-# Refer to https://github.com/GoogleContainerTools/distroless for more details
-FROM gcr.io/distroless/static:nonroot
-WORKDIR /
-COPY --from=builder /workspace/manager .
-USER 65532:65532
+ADD charts/nebula-operator/crds/nebulaautoscalers.yaml /tmp/nebula-operator/nebulaautoscalers.yaml
+ADD charts/nebula-operator/crds/nebulaclusters.yaml /tmp/nebula-operator/nebulaclusters.yaml
+ADD charts/nebula-operator/crds/nebulametads.yaml /tmp/nebula-operator/nebulametads.yaml
 
-ENTRYPOINT ["/manager"]
+ADD bin/${TARGETPLATFORM}/controller-manager /usr/local/bin/controller-manager
+ADD bin/${TARGETPLATFORM}/autoscaler /usr/local/bin/autoscaler
+ADD bin/${TARGETPLATFORM}/scheduler /usr/local/bin/scheduler
+
+# [Optional] Set the default user. Omit if you want to keep the default as root.
+USER $USERNAME

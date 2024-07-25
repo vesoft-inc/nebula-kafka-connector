@@ -4,6 +4,7 @@
 resources:
 - bases/apps.nebula-graph.io_nebulametads.yaml
 - bases/apps.nebula-graph.io_nebulaclusters.yaml
+- bases/autoscaling.nebula-graph.io_nebulaautoscalers.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patches:

@@ -11,6 +11,14 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+GOOS := $(if $(GOOS),$(GOOS),linux)
+GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
+GOENV  := GOOS=$(GOOS) GOARCH=$(GOARCH)
+GO     := $(GOENV) go
+
+TARGETDIR := "$(GOOS)/$(GOARCH)"
+USERNAME ?= ng-user
+
 # CONTAINER_TOOL defines the container tool to be used for building images.
 # Be aware that the target commands are only tested with Docker which is
 # scaffolded by default. However, you might want to replace it to use other
@@ -84,20 +92,20 @@ lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
 
 .PHONY: build
 build: ## Build manager binary.
-	go build -o bin/manager cmd/controller-manager/main.go
-	go build -o bin/scheduler cmd/scheduler/main.go
-	go build -o bin/autoscaler cmd/autoscaler/main.go
+	$(GO) build -o bin/$(TARGETDIR)/controller-manager cmd/controller-manager/main.go
+	$(GO) build -o bin/$(TARGETDIR)/scheduler cmd/scheduler/main.go
+	$(GO) build -o bin/$(TARGETDIR)/autoscaler cmd/autoscaler/main.go
 
 .PHONY: run
 run: ## Run a controller from your host.
-	go run ./cmd/main.go
+	go run ./cmd/controller-manager/main.go
 
 # If you wish to build the manager image targeting other platforms you can use the --platform flag.
 # (i.e. docker build --platform linux/arm64). However, you must enable docker buildKit for it.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
-	$(CONTAINER_TOOL) build -t ${IMG} .
+	$(CONTAINER_TOOL) build --build-arg TARGETPLATFORM=$(TARGETDIR) --build-arg TARGETARCH=$(GOARCH) -t "${IMG}" .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
@@ -110,16 +118,21 @@ docker-push: ## Push docker image with the manager.
 # - be able to push the image to your registry (i.e. if you do not set a valid value via IMG=<myregistry/image:<tag>> then the export will fail)
 # To adequately provide solutions that are compatible with multiple platforms, you should consider using this option.
 PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
+DILIM := ,
+
 .PHONY: docker-buildx
 docker-buildx: ## Build and push docker image for the manager for cross-platform support
-	# copy existing Dockerfile and insert --platform=${BUILDPLATFORM} into Dockerfile.cross, and preserve the original Dockerfile
-	sed -e '1 s/\(^FROM\)/FROM --platform=\$$\{BUILDPLATFORM\}/; t' -e ' 1,// s//FROM --platform=\$$\{BUILDPLATFORM\}/' Dockerfile > Dockerfile.cross
+	$(foreach PLATFORM,$(subst $(DILIM), ,$(PLATFORMS)), \
+	echo -n "$(PLATFORM)..."; \
+	OS=$(shell echo $(PLATFORM) | cut -d "/" -f 1) \
+	ARCH=$(shell echo $(PLATFORM) | cut -d "/" -f 2); \
+	GOOS=$$OS GOARCH=$$ARCH make build;)
+	echo "Building and pushing nebula-operator image... $(PLATFORMS)"
 	- $(CONTAINER_TOOL) buildx create --name project-v3-builder
 	$(CONTAINER_TOOL) buildx use project-v3-builder
-	- $(CONTAINER_TOOL) buildx build --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile.cross .
+	$(CONTAINER_TOOL) buildx build --pull --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile --build-arg USERNAME=${USERNAME} .
 	- $(CONTAINER_TOOL) buildx rm project-v3-builder
-	rm Dockerfile.cross
-
+	
 ##@ Deployment
 
 ifndef ignore-not-found

@@ -116,6 +116,7 @@ func (o *Options) AddFlags(flags *pflag.FlagSet) {
 	flags.StringVar(&o.HealthProbeBindAddress, "health-probe-bind-address", ":8081", "The TCP address that the controller should bind to for serving health probes.(e.g. 127.0.0.1:8081, :8081). It can be set to \"0\" to disable the health probe serving.")
 	flags.IntVar(&o.ConcurrentNebulaClusterSyncs, "concurrent-nebulacluster-syncs", 5, "The number of NebulaCluster objects that are allowed to sync concurrently.")
 	flags.IntVar(&o.ConcurrentNebulaMetadSyncs, "concurrent-nebulametad-syncs", 5, "The number of NebulaMetad objects that are allowed to sync concurrently.")
+	flags.BoolVar(&o.EnableAdmissionWebhook, "enable-admission-webhook", false, "If set to ture enable admission webhook for controller manager.")
 
 	o.ProfileOpts.AddFlags(flags)
 	o.WebhookOpts.AddFlags(flags)

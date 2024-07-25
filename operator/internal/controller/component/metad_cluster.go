@@ -170,13 +170,14 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 					return err
 				}
 				if ne.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
-					return fmt.Errorf("login metad got unkonw error: %v", ne.Error())
+					return fmt.Errorf("login metad got unknown error: %v", ne.Error())
 				}
 				req := meta.NewChangePasswordReq(username, defaultPassword, password)
 				if err := metaClient.ChangePassword(req); err != nil {
 					klog.Errorf("change password failed: %v", err)
 					return err
 				}
+
 				nm.Status.PasswordChanged = true
 			}
 			defer func() {

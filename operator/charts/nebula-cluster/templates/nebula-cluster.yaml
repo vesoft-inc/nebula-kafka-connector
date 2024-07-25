@@ -88,7 +88,7 @@ spec:
     resources: {{ toYaml .Values.nebulaCluster.storaged.resources | nindent 6 }}
     replicas: {{ .Values.nebulaCluster.storaged.replicas }}
     image: {{ .Values.nebulaCluster.storaged.image }}
-    version: {{ .Values.nebulaCluster.version }}
+    version: {{ .Values.nebulaCluster.storaged.version }}
     dataVolumeClaims:
     {{- range $volume := .Values.nebulaCluster.storaged.dataVolumes }}
     - resources:
