@@ -32,7 +32,7 @@ import (
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -43,7 +43,7 @@ const (
 	defaultTimeout   = 5 * time.Second
 	reconcileTimeOut = 10 * time.Second
 
-	finalizerKey = "apps.nebula-graph.io/metad-cleanup"
+	finalizerKey = "apps.nebula-graph-ng.io/metad-cleanup"
 )
 
 // MetadReconciler reconciles a NebulaMetad object
@@ -88,10 +88,10 @@ func NewMetadReconciler(mgr ctrl.Manager) (*MetadReconciler, error) {
 // +kubebuilder:rbac:groups="",resources=persistentvolumes,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch;list
-//+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters,verbs=get;list;watch
-//+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulametads,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulametads/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulametads/finalizers,verbs=update
+//+kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters,verbs=get;list;watch
+//+kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulametads,verbs=get;list;watch;create;update;patch;delete
+//+kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulametads/status,verbs=get;update;patch
+//+kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulametads/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -113,7 +113,7 @@ func (r *MetadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 		}
 	}()
 
-	var nebulaMetad v2alpha1.NebulaMetad
+	var nebulaMetad v1alpha1.NebulaMetad
 	if err := r.Get(context.Background(), req.NamespacedName, &nebulaMetad); err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Infof("Skipping because NebulaMetad [%s] has been deleted", key)
@@ -134,7 +134,7 @@ func (r *MetadReconciler) Reconcile(ctx context.Context, req ctrl.Request) (res 
 	return ctrl.Result{}, nil
 }
 
-func (r *MetadReconciler) syncNebulaMetad(nm *v2alpha1.NebulaMetad) error {
+func (r *MetadReconciler) syncNebulaMetad(nm *v1alpha1.NebulaMetad) error {
 	if nm.DeletionTimestamp != nil {
 		return r.control.DeleteNebulaMetad(nm)
 	}
@@ -144,8 +144,8 @@ func (r *MetadReconciler) syncNebulaMetad(nm *v2alpha1.NebulaMetad) error {
 // SetupWithManager sets up the controller with the Manager.
 func (r *MetadReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v2alpha1.NebulaMetad{}).
-		Owns(&v2alpha1.NebulaCluster{}).
+		For(&v1alpha1.NebulaMetad{}).
+		Owns(&v1alpha1.NebulaCluster{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Service{}).
 		Owns(&appsv1.StatefulSet{}).

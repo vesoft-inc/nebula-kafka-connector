@@ -24,7 +24,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 // ValidatingAdmission handles StatefulSet
@@ -44,7 +44,7 @@ func (h *ValidatingAdmission) Handle(_ context.Context, req admission.Request) (
 			resp.Result.Reason, resp.Result.Message)
 	}()
 
-	obj := &v2alpha1.NebulaMetad{}
+	obj := &v1alpha1.NebulaMetad{}
 
 	if req.Operation == admissionv1.Delete {
 		if err := h.Decoder.DecodeRaw(req.OldObject, obj); err != nil {
@@ -67,7 +67,7 @@ func (h *ValidatingAdmission) Handle(_ context.Context, req admission.Request) (
 			return admission.Errored(http.StatusUnprocessableEntity, allErrs.ToAggregate())
 		}
 	} else if operation == admissionv1.Update {
-		oldObj := &v2alpha1.NebulaMetad{}
+		oldObj := &v1alpha1.NebulaMetad{}
 
 		if err := h.Decoder.DecodeRaw(req.AdmissionRequest.OldObject, oldObj); err != nil {
 			return admission.Errored(http.StatusBadRequest, err)

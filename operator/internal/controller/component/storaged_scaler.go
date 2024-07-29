@@ -25,7 +25,7 @@ import (
 	"k8s.io/utils/pointer"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
@@ -38,25 +38,25 @@ func NewStorageScaler(clientSet kube.ClientSet) ScaleManager {
 	return &storageScaler{clientSet: clientSet}
 }
 
-func (s *storageScaler) Scale(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
+func (s *storageScaler) Scale(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
 	oldReplicas := pointer.Int32Deref(oldSts.Spec.Replicas, 0)
 	newReplicas := pointer.Int32Deref(newSts.Spec.Replicas, 0)
 
-	if newReplicas < oldReplicas || nc.Status.Storaged.Phase == v2alpha1.ScaleInPhase {
+	if newReplicas < oldReplicas || nc.Status.Storaged.Phase == v1alpha1.ScaleInPhase {
 		return s.ScaleIn(metaClient, nc, oldReplicas, newReplicas)
 	}
 
-	if newReplicas > oldReplicas || nc.Status.Storaged.Phase == v2alpha1.ScaleOutPhase {
+	if newReplicas > oldReplicas || nc.Status.Storaged.Phase == v1alpha1.ScaleOutPhase {
 		return s.ScaleOut(metaClient, nc, oldReplicas, newReplicas)
 	}
 
 	return nil
 }
 
-func (s *storageScaler) ScaleOut(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
+func (s *storageScaler) ScaleOut(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.StoragedComponent().GetName()
-	nc.Status.Storaged.Phase = v2alpha1.ScaleOutPhase
+	nc.Status.Storaged.Phase = v1alpha1.ScaleOutPhase
 	if err := s.clientSet.NebulaCluster().UpdateNebulaClusterStatus(nc); err != nil {
 		return err
 	}
@@ -66,19 +66,19 @@ func (s *storageScaler) ScaleOut(metaClient meta.Client, nc *v2alpha1.NebulaClus
 	}
 	klog.Infof("storaged cluster [%s/%s] add services succeed", namespace, componentName)
 
-	nc.Status.Storaged.Phase = v2alpha1.RunningPhase
+	nc.Status.Storaged.Phase = v1alpha1.RunningPhase
 	return nil
 }
 
-func (s *storageScaler) ScaleIn(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
+func (s *storageScaler) ScaleIn(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.StoragedComponent().GetName()
-	nc.Status.Storaged.Phase = v2alpha1.ScaleInPhase
+	nc.Status.Storaged.Phase = v1alpha1.ScaleInPhase
 	if err := s.clientSet.NebulaCluster().UpdateNebulaClusterStatus(nc); err != nil {
 		return err
 	}
 
-	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameGRPC)
+	port := nc.StoragedComponent().GetPort(v1alpha1.StoragedPortNameGRPC)
 	if oldReplicas-newReplicas > 0 {
 		for i := oldReplicas - 1; i >= newReplicas; i-- {
 			host := nc.StoragedComponent().GetPodFQDN(i)
@@ -110,6 +110,6 @@ func (s *storageScaler) ScaleIn(metaClient meta.Client, nc *v2alpha1.NebulaClust
 	}
 
 	klog.V(4).Infof("storaged cluster [%s/%s] used pvcs were reclaimed", namespace, componentName)
-	nc.Status.Storaged.Phase = v2alpha1.RunningPhase
+	nc.Status.Storaged.Phase = v1alpha1.RunningPhase
 	return nil
 }

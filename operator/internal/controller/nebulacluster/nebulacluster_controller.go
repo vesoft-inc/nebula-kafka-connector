@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -105,9 +105,9 @@ func NewClusterReconciler(mgr ctrl.Manager) (*ClusterReconciler, error) {
 // +kubebuilder:rbac:groups="",resources=secrets,verbs=get;list
 // +kubebuilder:rbac:groups="",resources=configmaps,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch;list
-// +kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters/finalizers,verbs=update
+// +kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters/finalizers,verbs=update
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
 
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
@@ -129,7 +129,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 		}
 	}()
 
-	var nebulaCluster v2alpha1.NebulaCluster
+	var nebulaCluster v1alpha1.NebulaCluster
 	if err := r.client.Get(context.Background(), req.NamespacedName, &nebulaCluster); err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Infof("Skipping because NebulaCluster [%s] has been deleted", key)
@@ -150,7 +150,7 @@ func (r *ClusterReconciler) Reconcile(ctx context.Context, req ctrl.Request) (re
 	return ctrl.Result{}, nil
 }
 
-func (r *ClusterReconciler) syncNebulaCluster(nc *v2alpha1.NebulaCluster) error {
+func (r *ClusterReconciler) syncNebulaCluster(nc *v1alpha1.NebulaCluster) error {
 	if nc.DeletionTimestamp != nil {
 		return r.control.DeleteCluster(nc)
 	}
@@ -160,7 +160,7 @@ func (r *ClusterReconciler) syncNebulaCluster(nc *v2alpha1.NebulaCluster) error 
 // SetupWithManager sets up the controller with the Manager.
 func (r *ClusterReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v2alpha1.NebulaCluster{}).
+		For(&v1alpha1.NebulaCluster{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&corev1.Service{}).
 		Owns(&appsv1.StatefulSet{}).

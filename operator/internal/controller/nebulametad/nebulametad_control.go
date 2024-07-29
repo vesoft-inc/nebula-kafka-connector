@@ -25,7 +25,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -33,9 +33,9 @@ import (
 )
 
 type ControlInterface interface {
-	UpdateNebulaMetad(metad *v2alpha1.NebulaMetad) error
+	UpdateNebulaMetad(metad *v1alpha1.NebulaMetad) error
 
-	DeleteNebulaMetad(metad *v2alpha1.NebulaMetad) error
+	DeleteNebulaMetad(metad *v1alpha1.NebulaMetad) error
 }
 
 var _ ControlInterface = &defaultNebulaMetadControl{}
@@ -67,7 +67,7 @@ type defaultNebulaMetadControl struct {
 	conditionUpdater MetadConditionUpdater
 }
 
-func (c *defaultNebulaMetadControl) UpdateNebulaMetad(nm *v2alpha1.NebulaMetad) error {
+func (c *defaultNebulaMetadControl) UpdateNebulaMetad(nm *v1alpha1.NebulaMetad) error {
 	var errs []error
 	oldStatus := nm.Status.DeepCopy()
 
@@ -92,7 +92,7 @@ func (c *defaultNebulaMetadControl) UpdateNebulaMetad(nm *v2alpha1.NebulaMetad) 
 	return errorutils.NewAggregate(errs)
 }
 
-func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v2alpha1.NebulaMetad) error {
+func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v1alpha1.NebulaMetad) error {
 	if !kube.HasFinalizer(nm, finalizerKey) {
 		if err := kube.UpdateFinalizer(context.TODO(), c.client, nm, kube.AddFinalizerOpType, finalizerKey); err != nil {
 			return err
@@ -117,7 +117,7 @@ func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v2alpha1.NebulaMetad) 
 	return nil
 }
 
-func (c *defaultNebulaMetadControl) DeleteNebulaMetad(nm *v2alpha1.NebulaMetad) error {
+func (c *defaultNebulaMetadControl) DeleteNebulaMetad(nm *v1alpha1.NebulaMetad) error {
 	if nm.Status.ManagedClusters > 0 {
 		return fmt.Errorf("managed clusters is %d, cannot be deleted now", nm.Status.ManagedClusters)
 	}

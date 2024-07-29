@@ -14,13 +14,9 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v2alpha1
-
-import metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-func (na *NebulaAutoscaler) GetPollingPeriod() *metav1.Duration {
-	if na == nil {
-		return nil
-	}
-	return na.Spec.PollingPeriod
-}
+// Package v1alpha1 contains v1alpha1 version's types in autoscaling.nebula-graph-ng.io group.
+//
+// +groupName=autoscaling.nebula-graph-ng.io
+// +k8s:defaulter-gen=TypeMeta
+// +k8s:defaulter-gen-input=github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1
+package v1alpha1

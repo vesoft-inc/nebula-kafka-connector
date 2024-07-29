@@ -21,8 +21,8 @@ import (
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 
-	appsv2alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v2alpha1"
+	appsv1alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
+	asv1alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1"
 )
 
 var (
@@ -35,8 +35,8 @@ func init() {
 
 func AddToScheme(scheme *runtime.Scheme) {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v2alpha1.AddToScheme(clientgoscheme.Scheme))
-	utilruntime.Must(v2alpha1.AddToScheme(scheme))
-	utilruntime.Must(appsv2alpha1.AddToScheme(clientgoscheme.Scheme))
-	utilruntime.Must(appsv2alpha1.AddToScheme(scheme))
+	utilruntime.Must(asv1alpha1.AddToScheme(clientgoscheme.Scheme))
+	utilruntime.Must(asv1alpha1.AddToScheme(scheme))
+	utilruntime.Must(appsv1alpha1.AddToScheme(clientgoscheme.Scheme))
+	utilruntime.Must(appsv1alpha1.AddToScheme(scheme))
 }

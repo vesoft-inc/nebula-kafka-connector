@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
-  name: nebulaclusters.apps.nebula-graph.io
+  name: nebulaclusters.apps.nebula-graph-ng.io
 spec:
-  group: apps.nebula-graph.io
+  group: apps.nebula-graph-ng.io
   names:
     kind: NebulaCluster
     listKind: NebulaClusterList
@@ -41,7 +41,7 @@ spec:
       jsonPath: .metadata.creationTimestamp
       name: AGE
       type: date
-    name: v2alpha1
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         properties:
@@ -810,6 +810,28 @@ spec:
                     additionalProperties:
                       type: string
                     type: object
+                  dnsConfig:
+                    properties:
+                      nameservers:
+                        items:
+                          type: string
+                        type: array
+                      options:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+                          type: object
+                        type: array
+                      searches:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  dnsPolicy:
+                    type: string
                   env:
                     items:
                       properties:
@@ -3644,6 +3666,28 @@ spec:
                           type: string
                       type: object
                     type: array
+                  dnsConfig:
+                    properties:
+                      nameservers:
+                        items:
+                          type: string
+                        type: array
+                      options:
+                        items:
+                          properties:
+                            name:
+                              type: string
+                            value:
+                              type: string
+                          type: object
+                        type: array
+                      searches:
+                        items:
+                          type: string
+                        type: array
+                    type: object
+                  dnsPolicy:
+                    type: string
                   enableAutoBalance:
                     type: boolean
                   env:

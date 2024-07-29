@@ -28,7 +28,7 @@ import (
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
@@ -38,10 +38,10 @@ const defaultPassword = "nebula"
 
 type MetadReconcileManager interface {
 	// Reconcile reconciles the metad desired state
-	Reconcile(metad *v2alpha1.NebulaMetad) error
+	Reconcile(metad *v1alpha1.NebulaMetad) error
 
 	// Delete deletes the metad
-	Delete(metad *v2alpha1.NebulaMetad) error
+	Delete(metad *v1alpha1.NebulaMetad) error
 }
 
 type metadCluster struct {
@@ -62,7 +62,7 @@ func NewMetadManager(
 	}
 }
 
-func (c *metadCluster) Reconcile(nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) Reconcile(nm *v1alpha1.NebulaMetad) error {
 	if err := c.syncMetadHeadlessService(nm); err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func (c *metadCluster) Reconcile(nm *v2alpha1.NebulaMetad) error {
 	return c.syncMetadWorkload(nm)
 }
 
-func (c *metadCluster) Delete(nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) Delete(nm *v1alpha1.NebulaMetad) error {
 	namespace := nm.GetNamespace()
 	componentName := nm.MetadComponent().GetName()
 
@@ -85,7 +85,7 @@ func (c *metadCluster) Delete(nm *v2alpha1.NebulaMetad) error {
 	return c.clientSet.Workload().DeleteWorkload(workload)
 }
 
-func (c *metadCluster) syncMetadHeadlessService(nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) syncMetadHeadlessService(nm *v1alpha1.NebulaMetad) error {
 	newSvc := nm.MetadComponent().GenerateHeadlessService()
 	if newSvc == nil {
 		return nil
@@ -94,7 +94,7 @@ func (c *metadCluster) syncMetadHeadlessService(nm *v2alpha1.NebulaMetad) error 
 	return syncService(newSvc, c.clientSet.Service())
 }
 
-func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) syncMetadWorkload(nm *v1alpha1.NebulaMetad) error {
 	namespace := nm.GetNamespace()
 	componentName := nm.MetadComponent().GetName()
 
@@ -135,12 +135,12 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 		if err := c.clientSet.Workload().CreateWorkload(newWorkload); err != nil {
 			return err
 		}
-		nm.Status.Workload = &v2alpha1.WorkloadStatus{}
+		nm.Status.Workload = &v1alpha1.WorkloadStatus{}
 		return utilerrors.ReconcileErrorf("waiting for metad cluster %s running", newWorkload.GetName())
 	}
 
 	equal := podTemplateEqual(newWorkload, oldWorkload)
-	if !equal || nm.Status.Phase == v2alpha1.UpdatePhase {
+	if !equal || nm.Status.Phase == v1alpha1.UpdatePhase {
 		if err := c.updateManager.Update(nm, oldWorkload, newWorkload); err != nil {
 			return err
 		}
@@ -209,15 +209,15 @@ func (c *metadCluster) syncMetadWorkload(nm *v2alpha1.NebulaMetad) error {
 	return updateWorkload(c.clientSet.Workload(), newWorkload, oldWorkload)
 }
 
-func (c *metadCluster) syncMetadConfigMap(nm *v2alpha1.NebulaMetad) (*corev1.ConfigMap, string, error) {
+func (c *metadCluster) syncMetadConfigMap(nm *v1alpha1.NebulaMetad) (*corev1.ConfigMap, string, error) {
 	return syncConfigMap(
 		nm.MetadComponent(),
 		c.clientSet.ConfigMap(),
-		v2alpha1.MetadhConfigTemplate,
+		v1alpha1.MetadhConfigTemplate,
 		nm.MetadComponent().GetConfigMapKey())
 }
 
-func (c *metadCluster) syncNebulaMetadStatus(nm *v2alpha1.NebulaMetad, oldWorkload *appsv1.StatefulSet) error {
+func (c *metadCluster) syncNebulaMetadStatus(nm *v1alpha1.NebulaMetad, oldWorkload *appsv1.StatefulSet) error {
 	if oldWorkload == nil {
 		return nil
 	}
@@ -227,15 +227,15 @@ func (c *metadCluster) syncNebulaMetadStatus(nm *v2alpha1.NebulaMetad, oldWorklo
 	}
 
 	if updating {
-		nm.Status.Phase = v2alpha1.UpdatePhase
+		nm.Status.Phase = v1alpha1.UpdatePhase
 	} else {
-		nm.Status.Phase = v2alpha1.RunningPhase
+		nm.Status.Phase = v1alpha1.RunningPhase
 	}
 
 	return syncComponentStatus(nm.MetadComponent(), &nm.Status.ComponentStatus, oldWorkload)
 }
 
-func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v1alpha1.NebulaMetad) error {
 	req := meta.NewListClustersReq("")
 	resp, err := mc.ListClusters(req)
 	if err != nil {
@@ -246,11 +246,11 @@ func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v2alpha1.NebulaMe
 }
 
 // TODO set server version
-func (c *metadCluster) setVersion(mc meta.Client, nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) setVersion(mc meta.Client, nm *v1alpha1.NebulaMetad) error {
 	return nil
 }
 
-func (c *metadCluster) syncMetadPVC(nm *v2alpha1.NebulaMetad) error {
+func (c *metadCluster) syncMetadPVC(nm *v1alpha1.NebulaMetad) error {
 	volumeStatus, err := syncPVC(nm.MetadComponent(), c.clientSet.StorageClass(), c.clientSet.PVC())
 	if err != nil {
 		return nil

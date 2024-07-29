@@ -1,4 +1,4 @@
-apiVersion: apps.nebula-graph.io/v2alpha1
+apiVersion: apps.nebula-graph-ng.io/v1alpha1
 kind: NebulaMetad
 metadata:
   name: {{ template "nebula-metad.name" . }}

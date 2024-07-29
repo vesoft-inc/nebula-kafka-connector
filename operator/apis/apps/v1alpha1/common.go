@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v2alpha1
+package v1alpha1
 
 import (
 	"fmt"
@@ -323,6 +323,8 @@ func generateStatefulSet(c NebulaComponent, metadEndpoints []string, cm *corev1.
 		Affinity:           c.ComponentSpec().Affinity(),
 		Tolerations:        c.ComponentSpec().Tolerations(),
 		ServiceAccountName: NebulaServiceAccountName,
+		DNSConfig:          c.ComponentSpec().DNSConfig(),
+		DNSPolicy:          c.ComponentSpec().DNSPolicy(),
 	}
 
 	podSpec.TopologySpreadConstraints = c.ComponentSpec().TopologySpreadConstraints(componentLabel)

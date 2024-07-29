@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v2alpha1
+package v1alpha1
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ const (
 	defaultStoragedPortGRPC               = 9779
 	StoragedPortNameHTTP                  = "http"
 	defaultStoragedPortHTTP               = 19779
-	defaultStoragedImage                  = "vesoft/nebula-storaged"
+	defaultStoragedImage                  = "vesoft-ng/nebula-storaged"
 )
 
 var _ NebulaComponent = &storagedComponent{}

@@ -25,7 +25,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 var statefulPodRegex = regexp.MustCompile("(.*)-([0-9]+)$")
@@ -53,12 +53,12 @@ func getParentName(pod *corev1.Pod) string {
 
 // getConfigMapName gets the configmap name for zone data.
 func getConfigMapName(pod *corev1.Pod) string {
-	return fmt.Sprintf("%s-%s", getParentName(pod), v2alpha1.ZoneSuffix)
+	return fmt.Sprintf("%s-%s", getParentName(pod), v1alpha1.ZoneSuffix)
 }
 
 func needSchedule(podName string) bool {
-	return strings.Contains(podName, v2alpha1.GraphdComponentType.String()) ||
-		strings.Contains(podName, v2alpha1.StoragedComponentType.String())
+	return strings.Contains(podName, v1alpha1.GraphdComponentType.String()) ||
+		strings.Contains(podName, v1alpha1.StoragedComponentType.String())
 }
 
 func getPodNameByOrdinal(parentName string, ordinal int) string {

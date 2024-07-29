@@ -28,7 +28,7 @@ import (
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component/reclaimer"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -36,13 +36,13 @@ import (
 )
 
 const (
-	finalizer = "apps.nebula-graph.io/cluster-cleanup"
+	finalizer = "apps.nebula-graph-ng.io/cluster-cleanup"
 )
 
 type ControlInterface interface {
-	UpdateNebulaCluster(cluster *v2alpha1.NebulaCluster) error
+	UpdateNebulaCluster(cluster *v1alpha1.NebulaCluster) error
 
-	DeleteCluster(cluster *v2alpha1.NebulaCluster) error
+	DeleteCluster(cluster *v1alpha1.NebulaCluster) error
 }
 
 var _ ControlInterface = &defaultNebulaClusterControl{}
@@ -80,7 +80,7 @@ type defaultNebulaClusterControl struct {
 	conditionUpdater ClusterConditionUpdater
 }
 
-func (c *defaultNebulaClusterControl) UpdateNebulaCluster(nc *v2alpha1.NebulaCluster) error {
+func (c *defaultNebulaClusterControl) UpdateNebulaCluster(nc *v1alpha1.NebulaCluster) error {
 	var errs []error
 	oldStatus := nc.Status.DeepCopy()
 
@@ -105,7 +105,7 @@ func (c *defaultNebulaClusterControl) UpdateNebulaCluster(nc *v2alpha1.NebulaClu
 	return errorutils.NewAggregate(errs)
 }
 
-func (c *defaultNebulaClusterControl) DeleteCluster(nc *v2alpha1.NebulaCluster) error {
+func (c *defaultNebulaClusterControl) DeleteCluster(nc *v1alpha1.NebulaCluster) error {
 	if err := c.graphdCluster.Delete(nc); err != nil {
 		return err
 	}
@@ -133,7 +133,7 @@ func (c *defaultNebulaClusterControl) DeleteCluster(nc *v2alpha1.NebulaCluster) 
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v1alpha1.MetadPortNameGRPC)
 	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","), meta.WithUserPassword(username, password))
 	if err != nil {
 		return err
@@ -162,7 +162,7 @@ func (c *defaultNebulaClusterControl) DeleteCluster(nc *v2alpha1.NebulaCluster) 
 	return kube.UpdateFinalizer(context.TODO(), c.client, nc, kube.RemoveFinalizerOpType, finalizer)
 }
 
-func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaCluster) error {
+func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v1alpha1.NebulaCluster) error {
 	if !kube.HasFinalizer(nc, finalizer) {
 		if err := kube.UpdateFinalizer(context.TODO(), c.client, nc, kube.AddFinalizerOpType, finalizer); err != nil {
 			return err
@@ -190,7 +190,7 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v2alpha1.NebulaClu
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v1alpha1.MetadPortNameGRPC)
 	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","), meta.WithUserPassword(username, password))
 	if err != nil {
 		return err

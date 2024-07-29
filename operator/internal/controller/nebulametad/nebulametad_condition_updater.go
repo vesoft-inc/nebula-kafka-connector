@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 const (
@@ -32,7 +32,7 @@ const (
 )
 
 type MetadConditionUpdater interface {
-	Update(metad *v2alpha1.NebulaMetad)
+	Update(metad *v1alpha1.NebulaMetad)
 }
 
 var _ MetadConditionUpdater = &nebulaMetadConditionUpdater{}
@@ -43,12 +43,12 @@ func NewMetadConditionUpdater() MetadConditionUpdater {
 
 type nebulaMetadConditionUpdater struct{}
 
-func (u *nebulaMetadConditionUpdater) Update(nm *v2alpha1.NebulaMetad) {
+func (u *nebulaMetadConditionUpdater) Update(nm *v1alpha1.NebulaMetad) {
 	u.updateReadyCondition(nm)
 }
 
-func workloadIsUpToDate(nm *v2alpha1.NebulaMetad) bool {
-	isUpToDate := func(status *v2alpha1.WorkloadStatus, requireExist bool) bool {
+func workloadIsUpToDate(nm *v1alpha1.NebulaMetad) bool {
+	isUpToDate := func(status *v1alpha1.WorkloadStatus, requireExist bool) bool {
 		if status == nil {
 			return !requireExist
 		}
@@ -57,7 +57,7 @@ func workloadIsUpToDate(nm *v2alpha1.NebulaMetad) bool {
 	return isUpToDate(nm.Status.Workload, false)
 }
 
-func (u *nebulaMetadConditionUpdater) updateReadyCondition(nm *v2alpha1.NebulaMetad) {
+func (u *nebulaMetadConditionUpdater) updateReadyCondition(nm *v1alpha1.NebulaMetad) {
 	status := metav1.ConditionFalse
 	var reason string
 	var message string
@@ -76,7 +76,7 @@ func (u *nebulaMetadConditionUpdater) updateReadyCondition(nm *v2alpha1.NebulaMe
 	}
 
 	cond := metav1.Condition{
-		Type:    v2alpha1.NebulaMetadReady,
+		Type:    v1alpha1.NebulaMetadReady,
 		Status:  status,
 		Reason:  reason,
 		Message: message,

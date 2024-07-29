@@ -26,12 +26,12 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1"
 )
 
 type NebulaAutoscaler interface {
-	GetNebulaAutoscaler(namespace, name string) (*v2alpha1.NebulaAutoscaler, error)
-	UpdateNebulaAutoscalerStatus(na *v2alpha1.NebulaAutoscaler) error
+	GetNebulaAutoscaler(namespace, name string) (*v1alpha1.NebulaAutoscaler, error)
+	UpdateNebulaAutoscalerStatus(na *v1alpha1.NebulaAutoscaler) error
 }
 
 type nebulaAutoscalerClient struct {
@@ -42,8 +42,8 @@ func NewNebulaAutoscaler(client client.Client) NebulaAutoscaler {
 	return &nebulaAutoscalerClient{client: client}
 }
 
-func (c *nebulaAutoscalerClient) GetNebulaAutoscaler(namespace, name string) (*v2alpha1.NebulaAutoscaler, error) {
-	nebulaCluster := &v2alpha1.NebulaAutoscaler{}
+func (c *nebulaAutoscalerClient) GetNebulaAutoscaler(namespace, name string) (*v1alpha1.NebulaAutoscaler, error) {
+	nebulaCluster := &v1alpha1.NebulaAutoscaler{}
 	err := c.client.Get(context.TODO(), types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
@@ -55,7 +55,7 @@ func (c *nebulaAutoscalerClient) GetNebulaAutoscaler(namespace, name string) (*v
 	return nebulaCluster, nil
 }
 
-func (c *nebulaAutoscalerClient) UpdateNebulaAutoscalerStatus(na *v2alpha1.NebulaAutoscaler) error {
+func (c *nebulaAutoscalerClient) UpdateNebulaAutoscalerStatus(na *v1alpha1.NebulaAutoscaler) error {
 	ns := na.Namespace
 	ncName := na.Name
 	status := na.Status.DeepCopy()

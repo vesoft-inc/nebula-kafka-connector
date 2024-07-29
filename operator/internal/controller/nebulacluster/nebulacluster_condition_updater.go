@@ -20,7 +20,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/meta"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 const (
@@ -34,7 +34,7 @@ const (
 )
 
 type ClusterConditionUpdater interface {
-	Update(cluster *v2alpha1.NebulaCluster)
+	Update(cluster *v1alpha1.NebulaCluster)
 }
 
 var _ ClusterConditionUpdater = &nebulaClusterConditionUpdater{}
@@ -45,12 +45,12 @@ func NewClusterConditionUpdater() ClusterConditionUpdater {
 
 type nebulaClusterConditionUpdater struct{}
 
-func (u *nebulaClusterConditionUpdater) Update(nc *v2alpha1.NebulaCluster) {
+func (u *nebulaClusterConditionUpdater) Update(nc *v1alpha1.NebulaCluster) {
 	u.updateReadyCondition(nc)
 }
 
-func allWorkloadsAreUpToDate(nc *v2alpha1.NebulaCluster) bool {
-	isUpToDate := func(status *v2alpha1.WorkloadStatus, requireExist bool) bool {
+func allWorkloadsAreUpToDate(nc *v1alpha1.NebulaCluster) bool {
+	isUpToDate := func(status *v1alpha1.WorkloadStatus, requireExist bool) bool {
 		if status == nil {
 			return !requireExist
 		}
@@ -63,7 +63,7 @@ func allWorkloadsAreUpToDate(nc *v2alpha1.NebulaCluster) bool {
 	return updated
 }
 
-func (u *nebulaClusterConditionUpdater) updateReadyCondition(nc *v2alpha1.NebulaCluster) {
+func (u *nebulaClusterConditionUpdater) updateReadyCondition(nc *v1alpha1.NebulaCluster) {
 	status := metav1.ConditionFalse
 	var reason string
 	var message string
@@ -85,7 +85,7 @@ func (u *nebulaClusterConditionUpdater) updateReadyCondition(nc *v2alpha1.Nebula
 	}
 
 	cond := metav1.Condition{
-		Type:    v2alpha1.NebulaClusterReady,
+		Type:    v1alpha1.NebulaClusterReady,
 		Status:  status,
 		Reason:  reason,
 		Message: message,

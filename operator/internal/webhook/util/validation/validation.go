@@ -22,7 +22,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/utils/pointer"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 const (
@@ -93,7 +93,7 @@ func ValidateMinReplicasStoraged(fldPath *field.Path, replicas int, bHaMode bool
 	return allErrs
 }
 
-func IsNebulaClusterHA(nc *v2alpha1.NebulaCluster) bool {
+func IsNebulaClusterHA(nc *v1alpha1.NebulaCluster) bool {
 	if pointer.Int32Deref(nc.Spec.Graphd.Replicas, 0) < minReplicasGraphdInHaMode {
 		return false
 	}
@@ -103,6 +103,6 @@ func IsNebulaClusterHA(nc *v2alpha1.NebulaCluster) bool {
 	return true
 }
 
-func IsNebulaMetadHA(nm *v2alpha1.NebulaMetad) bool {
+func IsNebulaMetadHA(nm *v1alpha1.NebulaMetad) bool {
 	return pointer.Int32Deref(nm.Spec.Replicas, 0) < minReplicasMetadInHaMode
 }

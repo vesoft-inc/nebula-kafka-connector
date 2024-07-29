@@ -53,9 +53,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	appsv2alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	appsv1alpha1 "github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/scheme"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 )
@@ -191,11 +191,11 @@ func NewHorizontalController(
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=namespaces,verbs=get;list
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch;list
-// +kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=apps.nebula-graph.io,resources=nebulaclusters/finalizers,verbs=update
-// +kubebuilder:rbac:groups=autoscaling.nebula-graph.io,resources=nebulaautoscalers,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=autoscaling.nebula-graph.io,resources=nebulaautoscalers/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=apps.nebula-graph-ng.io,resources=nebulaclusters/finalizers,verbs=update
+// +kubebuilder:rbac:groups=autoscaling.nebula-graph-ng.io,resources=nebulaautoscalers,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=autoscaling.nebula-graph-ng.io,resources=nebulaautoscalers/status,verbs=get;update;patch
 
 func (a *HorizontalController) Reconcile(ctx context.Context, request ctrl.Request) (res reconcile.Result, retErr error) {
 	key := request.NamespacedName.String()
@@ -212,7 +212,7 @@ func (a *HorizontalController) Reconcile(ctx context.Context, request ctrl.Reque
 		}
 	}()
 
-	var hpa v2alpha1.NebulaAutoscaler
+	var hpa v1alpha1.NebulaAutoscaler
 	if err := a.client.Get(ctx, request.NamespacedName, &hpa); err != nil {
 		if apierrors.IsNotFound(err) {
 			klog.Infof("Skipping because NebulaAutoscaler [%s] has been deleted", key)
@@ -244,7 +244,7 @@ func (a *HorizontalController) Reconcile(ctx context.Context, request ctrl.Reque
 	return defaultResult(&hpa), nil
 }
 
-func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShared *v2alpha1.NebulaAutoscaler, key string) (retErr error) {
+func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShared *v1alpha1.NebulaAutoscaler, key string) (retErr error) {
 	// make a copy so that we never mutate the shared informer cache (conversion can mutate the object)
 	hpa := hpaShared.DeepCopy()
 	hpaStatusOriginal := hpa.Status.DeepCopy()
@@ -252,13 +252,13 @@ func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShare
 	nc, err := a.clientSet.NebulaCluster().GetNebulaCluster(hpaShared.Namespace, hpaShared.Spec.NebulaClusterRef.Name)
 	if err != nil {
 		a.eventRecorder.Event(hpa, corev1.EventTypeWarning, "FailedGetNebulaCluster", err.Error())
-		setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionFalse, "FailedGetNebulaCluster", "the HPA controller unable to get the target cluster: %v", err)
+		setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionFalse, "FailedGetNebulaCluster", "the HPA controller unable to get the target cluster: %v", err)
 		if err := a.updateStatusIfNeeded(ctx, hpaStatusOriginal, hpa); err != nil {
 			utilruntime.HandleError(err)
 		}
 		if apierrors.IsNotFound(err) {
 			a.setCurrentReplicasInStatus(hpa, 0)
-			setCondition(hpa, v2alpha1.AutoscalerReady, corev1.ConditionFalse, "NebulaClusterReady", "the HPA controller was waiting for target cluster ready")
+			setCondition(hpa, v1alpha1.AutoscalerReady, corev1.ConditionFalse, "NebulaClusterReady", "the HPA controller was waiting for target cluster ready")
 			if err := a.updateStatusIfNeeded(ctx, hpaStatusOriginal, hpa); err != nil {
 				return err
 			}
@@ -266,7 +266,7 @@ func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShare
 		}
 		return fmt.Errorf("unable to get target cluster: %v", err)
 	}
-	setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionTrue, "SucceededGetNebulaCluster", "the HPA controller was able to get the target cluster")
+	setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionTrue, "SucceededGetNebulaCluster", "the HPA controller was able to get the target cluster")
 	currentReplicas := pointer.Int32Deref(nc.Spec.Graphd.Replicas, 0)
 	a.recordInitialRecommendation(currentReplicas, key)
 
@@ -295,7 +295,7 @@ func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShare
 		// Autoscaling is disabled for this resource
 		desiredReplicas = 0
 		rescale = false
-		setCondition(hpa, v2alpha1.AutoscalerActive, corev1.ConditionFalse, "ScalingDisabled", "scaling is disabled since the replica count of the target is zero")
+		setCondition(hpa, v1alpha1.AutoscalerActive, corev1.ConditionFalse, "ScalingDisabled", "scaling is disabled since the replica count of the target is zero")
 	} else if currentReplicas > hpa.Spec.GraphdPolicy.MaxReplicas {
 		rescaleReason = "Current number of replicas above Spec.MaxReplicas"
 		desiredReplicas = hpa.Spec.GraphdPolicy.MaxReplicas
@@ -350,14 +350,14 @@ func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShare
 		err = a.clientSet.NebulaCluster().UpdateNebulaCluster(nc)
 		if err != nil {
 			a.eventRecorder.Eventf(hpa, corev1.EventTypeWarning, "FailedRescale", "New size: %d; reason: %s; error: %v", desiredReplicas, rescaleReason, err.Error())
-			setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionFalse, "FailedUpdateScale", "the HPA controller was unable to update the target cluster replicas: %v", err)
+			setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionFalse, "FailedUpdateScale", "the HPA controller was unable to update the target cluster replicas: %v", err)
 			a.setCurrentReplicasInStatus(hpa, currentReplicas)
 			if err := a.updateStatusIfNeeded(ctx, hpaStatusOriginal, hpa); err != nil {
 				utilruntime.HandleError(err)
 			}
 			return fmt.Errorf("failed to rescale %s: %v", hpa.Spec.NebulaClusterRef.Name, err)
 		}
-		setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionTrue, "SucceededRescale", "the HPA controller was able to update the target cluster replicas to %d", desiredReplicas)
+		setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionTrue, "SucceededRescale", "the HPA controller was able to update the target cluster replicas to %d", desiredReplicas)
 		a.eventRecorder.Eventf(hpa, corev1.EventTypeNormal, "SuccessfulRescale", "New size: %d; reason: %s", desiredReplicas, rescaleReason)
 		a.storeScaleEvent(hpa.Spec.GraphdPolicy.Behavior, key, currentReplicas, desiredReplicas)
 		logger.Info("Successfully rescaled",
@@ -374,9 +374,9 @@ func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShare
 	}
 
 	if !nc.IsConditionReady() {
-		setCondition(hpa, v2alpha1.AutoscalerReady, corev1.ConditionFalse, "NebulaClusterReady", "the HPA controller was waiting for target cluster ready")
+		setCondition(hpa, v1alpha1.AutoscalerReady, corev1.ConditionFalse, "NebulaClusterReady", "the HPA controller was waiting for target cluster ready")
 	} else {
-		setCondition(hpa, v2alpha1.AutoscalerReady, corev1.ConditionTrue, "NebulaClusterReady", "the target cluster status is ready")
+		setCondition(hpa, v1alpha1.AutoscalerReady, corev1.ConditionTrue, "NebulaClusterReady", "the target cluster status is ready")
 	}
 
 	a.setStatus(hpa, currentReplicas, desiredReplicas, metricStatuses, rescale)
@@ -395,7 +395,7 @@ func (a *HorizontalController) reconcileAutoscaler(ctx context.Context, hpaShare
 // It may return both valid metricDesiredReplicas and an error,
 // when some metrics still work and HPA should perform scaling based on them.
 // If HPA cannot do anything due to error, it returns -1 in metricDesiredReplicas as a failure signal.
-func (a *HorizontalController) computeReplicasForMetrics(ctx context.Context, hpa *v2alpha1.NebulaAutoscaler, nc *appsv2alpha1.NebulaCluster,
+func (a *HorizontalController) computeReplicasForMetrics(ctx context.Context, hpa *v1alpha1.NebulaAutoscaler, nc *appsv1alpha1.NebulaCluster,
 	metricSpecs []autoscalingv2.MetricSpec) (replicas int32, metric string, statuses []autoscalingv2.MetricStatus, timestamp time.Time, err error) {
 
 	ncSelector := nc.GraphdComponent().GenerateLabels()
@@ -411,7 +411,7 @@ func (a *HorizontalController) computeReplicasForMetrics(ctx context.Context, hp
 
 	invalidMetricsCount := 0
 	var invalidMetricError error
-	var invalidMetricCondition v2alpha1.NebulaAutoscalerCondition
+	var invalidMetricCondition v1alpha1.NebulaAutoscalerCondition
 
 	for i, metricSpec := range metricSpecs {
 		replicaCountProposal, metricNameProposal, timestampProposal, condition, err := a.computeReplicasForMetric(ctx, hpa, metricSpec, specReplicas, statusReplicas, selector, &statuses[i])
@@ -442,7 +442,7 @@ func (a *HorizontalController) computeReplicasForMetrics(ctx context.Context, hp
 		setCondition(hpa, invalidMetricCondition.Type, invalidMetricCondition.Status, invalidMetricCondition.Reason, invalidMetricCondition.Message)
 		return -1, "", statuses, time.Time{}, invalidMetricError
 	}
-	setCondition(hpa, v2alpha1.AutoscalerActive, corev1.ConditionTrue, "ValidMetricFound", "the HPA was able to successfully calculate a replica count from %s", metric)
+	setCondition(hpa, v1alpha1.AutoscalerActive, corev1.ConditionTrue, "ValidMetricFound", "the HPA was able to successfully calculate a replica count from %s", metric)
 
 	return replicas, metric, statuses, timestamp, invalidMetricError
 }
@@ -453,11 +453,11 @@ func (a *HorizontalController) computeReplicasForMetrics(ctx context.Context, hp
 // - all pods by current selector are controlled by only one HPA.
 // Returns an error if the check has failed or the parsed selector if succeeded.
 // In case of an error the ScalingActive is set to false with the corresponding reason.
-func (a *HorizontalController) validateAndParseSelector(hpa *v2alpha1.NebulaAutoscaler, selector string) (labels.Selector, error) {
+func (a *HorizontalController) validateAndParseSelector(hpa *v1alpha1.NebulaAutoscaler, selector string) (labels.Selector, error) {
 	if selector == "" {
 		errMsg := "selector is required"
 		a.eventRecorder.Event(hpa, corev1.EventTypeWarning, "SelectorRequired", errMsg)
-		setCondition(hpa, v2alpha1.AutoscalerActive, corev1.ConditionFalse, "InvalidSelector", "the HPA target's scale is missing a selector")
+		setCondition(hpa, v1alpha1.AutoscalerActive, corev1.ConditionFalse, "InvalidSelector", "the HPA target's scale is missing a selector")
 		return nil, fmt.Errorf(errMsg)
 	}
 
@@ -465,7 +465,7 @@ func (a *HorizontalController) validateAndParseSelector(hpa *v2alpha1.NebulaAuto
 	if err != nil {
 		errMsg := fmt.Sprintf("couldn't convert selector into a corresponding internal selector object: %v", err)
 		a.eventRecorder.Event(hpa, corev1.EventTypeWarning, "InvalidSelector", errMsg)
-		setCondition(hpa, v2alpha1.AutoscalerActive, corev1.ConditionFalse, "InvalidSelector", errMsg)
+		setCondition(hpa, v1alpha1.AutoscalerActive, corev1.ConditionFalse, "InvalidSelector", errMsg)
 		return nil, fmt.Errorf(errMsg)
 	}
 
@@ -486,7 +486,7 @@ func (a *HorizontalController) validateAndParseSelector(hpa *v2alpha1.NebulaAuto
 	if len(selectingHpas) > 1 {
 		errMsg := fmt.Sprintf("pods by selector %v are controlled by multiple HPAs: %v", selector, selectingHpas)
 		a.eventRecorder.Event(hpa, corev1.EventTypeWarning, "AmbiguousSelector", errMsg)
-		setCondition(hpa, v2alpha1.AutoscalerActive, corev1.ConditionFalse, "AmbiguousSelector", errMsg)
+		setCondition(hpa, v1alpha1.AutoscalerActive, corev1.ConditionFalse, "AmbiguousSelector", errMsg)
 		return nil, fmt.Errorf(errMsg)
 	}
 
@@ -558,20 +558,20 @@ func (a *HorizontalController) stabilizeRecommendation(key string, prenormalized
 
 // normalizeDesiredReplicas takes the metrics desired replicas value and normalizes it based on the appropriate conditions (i.e. < maxReplicas, >
 // minReplicas, etc...)
-func (a *HorizontalController) normalizeDesiredReplicas(hpa *v2alpha1.NebulaAutoscaler, key string, currentReplicas int32, prenormalizedDesiredReplicas int32, minReplicas int32) int32 {
+func (a *HorizontalController) normalizeDesiredReplicas(hpa *v1alpha1.NebulaAutoscaler, key string, currentReplicas int32, prenormalizedDesiredReplicas int32, minReplicas int32) int32 {
 	stabilizedRecommendation := a.stabilizeRecommendation(key, prenormalizedDesiredReplicas)
 	if stabilizedRecommendation != prenormalizedDesiredReplicas {
-		setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionTrue, "ScaleDownStabilized", "recent recommendations were higher than current one, applying the highest recent recommendation")
+		setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionTrue, "ScaleDownStabilized", "recent recommendations were higher than current one, applying the highest recent recommendation")
 	} else {
-		setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionTrue, "ReadyForNewScale", "recommended size matches current size")
+		setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionTrue, "ReadyForNewScale", "recommended size matches current size")
 	}
 
 	desiredReplicas, condition, reason := convertDesiredReplicasWithRules(currentReplicas, stabilizedRecommendation, minReplicas, hpa.Spec.GraphdPolicy.MaxReplicas)
 
 	if desiredReplicas == stabilizedRecommendation {
-		setCondition(hpa, v2alpha1.AutoscalerLimited, corev1.ConditionFalse, condition, reason)
+		setCondition(hpa, v1alpha1.AutoscalerLimited, corev1.ConditionFalse, condition, reason)
 	} else {
-		setCondition(hpa, v2alpha1.AutoscalerLimited, corev1.ConditionTrue, condition, reason)
+		setCondition(hpa, v1alpha1.AutoscalerLimited, corev1.ConditionTrue, condition, reason)
 	}
 
 	return desiredReplicas
@@ -593,7 +593,7 @@ type NormalizationArg struct {
 // 2. Apply the scale up/down limits from the hpaSpec.Behaviors (i.e. add no more than 4 pods)
 // 3. Apply the constraints period (i.e. add no more than 4 pods per minute)
 // 4. Apply the stabilization (i.e. add no more than 4 pods per minute, and pick the smallest recommendation during last 5 minutes)
-func (a *HorizontalController) normalizeDesiredReplicasWithBehaviors(hpa *v2alpha1.NebulaAutoscaler, key string, currentReplicas, prenormalizedDesiredReplicas, minReplicas int32) int32 {
+func (a *HorizontalController) normalizeDesiredReplicasWithBehaviors(hpa *v1alpha1.NebulaAutoscaler, key string, currentReplicas, prenormalizedDesiredReplicas, minReplicas int32) int32 {
 	a.maybeInitScaleDownStabilizationWindow(hpa)
 	normalizationArg := NormalizationArg{
 		Key:               key,
@@ -607,21 +607,21 @@ func (a *HorizontalController) normalizeDesiredReplicasWithBehaviors(hpa *v2alph
 	normalizationArg.DesiredReplicas = stabilizedRecommendation
 	if stabilizedRecommendation != prenormalizedDesiredReplicas {
 		// "ScaleUpStabilized" || "ScaleDownStabilized"
-		setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionTrue, reason, message)
+		setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionTrue, reason, message)
 	} else {
-		setCondition(hpa, v2alpha1.AbleToScale, corev1.ConditionTrue, "ReadyForNewScale", "recommended size matches current size")
+		setCondition(hpa, v1alpha1.AbleToScale, corev1.ConditionTrue, "ReadyForNewScale", "recommended size matches current size")
 	}
 	desiredReplicas, reason, message := a.convertDesiredReplicasWithBehaviorRate(normalizationArg)
 	if desiredReplicas == stabilizedRecommendation {
-		setCondition(hpa, v2alpha1.AutoscalerLimited, corev1.ConditionFalse, reason, message)
+		setCondition(hpa, v1alpha1.AutoscalerLimited, corev1.ConditionFalse, reason, message)
 	} else {
-		setCondition(hpa, v2alpha1.AutoscalerLimited, corev1.ConditionTrue, reason, message)
+		setCondition(hpa, v1alpha1.AutoscalerLimited, corev1.ConditionTrue, reason, message)
 	}
 
 	return desiredReplicas
 }
 
-func (a *HorizontalController) maybeInitScaleDownStabilizationWindow(hpa *v2alpha1.NebulaAutoscaler) {
+func (a *HorizontalController) maybeInitScaleDownStabilizationWindow(hpa *v1alpha1.NebulaAutoscaler) {
 	behavior := hpa.Spec.GraphdPolicy.Behavior
 	if behavior != nil && behavior.ScaleDown != nil && behavior.ScaleDown.StabilizationWindowSeconds == nil {
 		stabilizationWindowSeconds := (int32)(a.downscaleStabilisationWindow.Seconds())
@@ -643,10 +643,10 @@ func getReplicasChangePerPeriod(periodSeconds int32, scaleEvents []timestampedSc
 
 }
 
-func (a *HorizontalController) getUnableComputeReplicaCountCondition(hpa runtime.Object, reason string, err error) (condition v2alpha1.NebulaAutoscalerCondition) {
+func (a *HorizontalController) getUnableComputeReplicaCountCondition(hpa runtime.Object, reason string, err error) (condition v1alpha1.NebulaAutoscalerCondition) {
 	a.eventRecorder.Event(hpa, corev1.EventTypeWarning, reason, err.Error())
-	return v2alpha1.NebulaAutoscalerCondition{
-		Type:    v2alpha1.AutoscalerActive,
+	return v1alpha1.NebulaAutoscalerCondition{
+		Type:    v1alpha1.AutoscalerActive,
 		Status:  corev1.ConditionFalse,
 		Reason:  reason,
 		Message: fmt.Sprintf("the HPA was unable to compute the replica count: %v", err),
@@ -943,15 +943,15 @@ func calculateScaleDownLimitWithBehaviors(currentReplicas int32, scaleUpEvents, 
 }
 
 // setCurrentReplicasInStatus sets the current replica count in the status of the HPA.
-func (a *HorizontalController) setCurrentReplicasInStatus(hpa *v2alpha1.NebulaAutoscaler, currentReplicas int32) {
+func (a *HorizontalController) setCurrentReplicasInStatus(hpa *v1alpha1.NebulaAutoscaler, currentReplicas int32) {
 	a.setStatus(hpa, currentReplicas, hpa.Status.GraphdStatus.DesiredReplicas, hpa.Status.GraphdStatus.CurrentMetrics, false)
 }
 
 // setStatus recreates the status of the given HPA, updating the current and
 // desired replicas, as well as the metric statuses
-func (a *HorizontalController) setStatus(hpa *v2alpha1.NebulaAutoscaler, currentReplicas, desiredReplicas int32, metricStatuses []autoscalingv2.MetricStatus, rescale bool) {
-	hpa.Status = v2alpha1.NebulaAutoscalerStatus{
-		GraphdStatus: v2alpha1.AutoscalingPolicyStatus{
+func (a *HorizontalController) setStatus(hpa *v1alpha1.NebulaAutoscaler, currentReplicas, desiredReplicas int32, metricStatuses []autoscalingv2.MetricStatus, rescale bool) {
+	hpa.Status = v1alpha1.NebulaAutoscalerStatus{
+		GraphdStatus: v1alpha1.AutoscalingPolicyStatus{
 			CurrentReplicas: currentReplicas,
 			DesiredReplicas: desiredReplicas,
 			LastScaleTime:   hpa.Status.GraphdStatus.LastScaleTime,
@@ -967,7 +967,7 @@ func (a *HorizontalController) setStatus(hpa *v2alpha1.NebulaAutoscaler, current
 }
 
 // updateStatusIfNeeded calls updateStatus only if the status of the new HPA is not the same as the old status
-func (a *HorizontalController) updateStatusIfNeeded(ctx context.Context, oldStatus *v2alpha1.NebulaAutoscalerStatus, newHPA *v2alpha1.NebulaAutoscaler) error {
+func (a *HorizontalController) updateStatusIfNeeded(ctx context.Context, oldStatus *v1alpha1.NebulaAutoscalerStatus, newHPA *v1alpha1.NebulaAutoscaler) error {
 	if apiequality.Semantic.DeepEqual(oldStatus, &newHPA.Status) {
 		return nil
 	}
@@ -975,7 +975,7 @@ func (a *HorizontalController) updateStatusIfNeeded(ctx context.Context, oldStat
 }
 
 // updateStatus actually does the update request for the status of the given HPA
-func (a *HorizontalController) updateStatus(ctx context.Context, hpa *v2alpha1.NebulaAutoscaler) error {
+func (a *HorizontalController) updateStatus(ctx context.Context, hpa *v1alpha1.NebulaAutoscaler) error {
 	err := a.clientSet.NebulaAutoscaler().UpdateNebulaAutoscalerStatus(hpa)
 	if err != nil {
 		a.eventRecorder.Event(hpa, corev1.EventTypeWarning, "FailedUpdateStatus", err.Error())
@@ -989,16 +989,16 @@ func (a *HorizontalController) updateStatus(ctx context.Context, hpa *v2alpha1.N
 // setCondition sets the specific condition type on the given HPA to the specified value with the given reason
 // and message.  The message and args are treated like a format string.  The condition will be added if it is
 // not present.
-func setCondition(hpa *v2alpha1.NebulaAutoscaler, conditionType v2alpha1.NebulaAutoscalerConditionType, status corev1.ConditionStatus, reason, message string, args ...interface{}) {
+func setCondition(hpa *v1alpha1.NebulaAutoscaler, conditionType v1alpha1.NebulaAutoscalerConditionType, status corev1.ConditionStatus, reason, message string, args ...interface{}) {
 	hpa.Status.Conditions = setConditionInList(hpa.Status.Conditions, conditionType, status, reason, message, args...)
 }
 
 // setConditionInList sets the specific condition type on the given HPA to the specified value with the given
 // reason and message.  The message and args are treated like a format string.  The condition will be added if
 // it is not present.  The new list will be returned.
-func setConditionInList(inputList []v2alpha1.NebulaAutoscalerCondition, conditionType v2alpha1.NebulaAutoscalerConditionType, status corev1.ConditionStatus, reason, message string, args ...interface{}) []v2alpha1.NebulaAutoscalerCondition {
+func setConditionInList(inputList []v1alpha1.NebulaAutoscalerCondition, conditionType v1alpha1.NebulaAutoscalerConditionType, status corev1.ConditionStatus, reason, message string, args ...interface{}) []v1alpha1.NebulaAutoscalerCondition {
 	resList := inputList
-	var existingCond *v2alpha1.NebulaAutoscalerCondition
+	var existingCond *v1alpha1.NebulaAutoscalerCondition
 	for i, condition := range resList {
 		if condition.Type == conditionType {
 			// can't take a pointer to an iteration variable
@@ -1008,7 +1008,7 @@ func setConditionInList(inputList []v2alpha1.NebulaAutoscalerCondition, conditio
 	}
 
 	if existingCond == nil {
-		resList = append(resList, v2alpha1.NebulaAutoscalerCondition{
+		resList = append(resList, v1alpha1.NebulaAutoscalerCondition{
 			Type: conditionType,
 		})
 		existingCond = &resList[len(resList)-1]
@@ -1039,8 +1039,8 @@ func minFn(a, b int32) int32 {
 	return b
 }
 
-func defaultResult(hpa *v2alpha1.NebulaAutoscaler) reconcile.Result {
-	requeueAfter := v2alpha1.DefaultPollingPeriod
+func defaultResult(hpa *v1alpha1.NebulaAutoscaler) reconcile.Result {
+	requeueAfter := v1alpha1.DefaultPollingPeriod
 	pollingPeriod := hpa.GetPollingPeriod()
 	if pollingPeriod != nil {
 		requeueAfter = pollingPeriod.Duration
@@ -1051,7 +1051,7 @@ func defaultResult(hpa *v2alpha1.NebulaAutoscaler) reconcile.Result {
 // SetupWithManager sets up the controller with the Manager.
 func (a *HorizontalController) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&v2alpha1.NebulaAutoscaler{}).
-		Watches(&appsv2alpha1.NebulaCluster{}, handler.Funcs{}).
+		For(&v1alpha1.NebulaAutoscaler{}).
+		Watches(&appsv1alpha1.NebulaCluster{}, handler.Funcs{}).
 		Complete(a)
 }

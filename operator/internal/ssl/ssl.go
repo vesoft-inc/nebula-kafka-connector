@@ -27,7 +27,7 @@ import (
 	"k8s.io/utils/pointer"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/cert"
 )
@@ -42,7 +42,7 @@ type Options struct {
 	TLSConfig     *tls.Config
 }
 
-func ClientOptions(nc *v2alpha1.NebulaCluster, certs *v2alpha1.SSLCertsSpec, enableMetaTLS bool, opts ...Option) ([]Option, error) {
+func ClientOptions(nc *v1alpha1.NebulaCluster, certs *v1alpha1.SSLCertsSpec, enableMetaTLS bool, opts ...Option) ([]Option, error) {
 	options := []Option{SetTimeout(DefaultTimeout)}
 	if !enableMetaTLS {
 		return options, nil
@@ -101,7 +101,7 @@ func SetMetaTLS(e bool) Option {
 	}
 }
 
-func getCerts(namespace string, cert *v2alpha1.SSLCertsSpec) ([]byte, []byte, []byte, error) {
+func getCerts(namespace string, cert *v1alpha1.SSLCertsSpec) ([]byte, []byte, []byte, error) {
 	if os.Getenv("CA_CERT_PATH") != "" &&
 		os.Getenv("CLIENT_CERT_PATH") != "" &&
 		os.Getenv("CLIENT_KEY_PATH") != "" {

@@ -27,7 +27,7 @@ import (
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 func CheckRBAC(ctx context.Context, c client.Client, namespace string) error {
@@ -46,7 +46,7 @@ func CheckRBAC(ctx context.Context, c client.Client, namespace string) error {
 func createClusterRole(ctx context.Context, k8sClient client.Client) error {
 	role := rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: v2alpha1.NebulaRoleName,
+			Name: v1alpha1.NebulaRoleName,
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
@@ -83,15 +83,15 @@ func createClusterRole(ctx context.Context, k8sClient client.Client) error {
 func createClusterRoleBinding(ctx context.Context, k8sClient client.Client, namespace string) error {
 	binding := &rbacv1.ClusterRoleBinding{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: v2alpha1.NebulaRoleBindingName,
+			Name: v1alpha1.NebulaRoleBindingName,
 		},
 		RoleRef: rbacv1.RoleRef{
 			APIGroup: "rbac.authorization.k8s.io",
 			Kind:     "ClusterRole",
-			Name:     v2alpha1.NebulaRoleName,
+			Name:     v1alpha1.NebulaRoleName,
 		},
 	}
-	if err := k8sClient.Get(ctx, client.ObjectKey{Name: v2alpha1.NebulaRoleBindingName}, binding); err != nil {
+	if err := k8sClient.Get(ctx, client.ObjectKey{Name: v1alpha1.NebulaRoleBindingName}, binding); err != nil {
 		if !apierrors.IsNotFound(err) {
 			return fmt.Errorf("failed to get ClusterRoleBinding: %v", err)
 		}
@@ -104,7 +104,7 @@ func createClusterRoleBinding(ctx context.Context, k8sClient client.Client, name
 	if !isApplied(binding.Subjects, namespace) {
 		binding.Subjects = append(binding.Subjects, rbacv1.Subject{
 			Kind:      "ServiceAccount",
-			Name:      v2alpha1.NebulaServiceAccountName,
+			Name:      v1alpha1.NebulaServiceAccountName,
 			Namespace: namespace,
 		})
 		if err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
@@ -119,7 +119,7 @@ func createClusterRoleBinding(ctx context.Context, k8sClient client.Client, name
 func createServiceAccount(ctx context.Context, k8sClient client.Client, namespace string) error {
 	serviceAccount := corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      v2alpha1.NebulaServiceAccountName,
+			Name:      v1alpha1.NebulaServiceAccountName,
 			Namespace: namespace,
 		},
 	}
@@ -135,7 +135,7 @@ func createServiceAccount(ctx context.Context, k8sClient client.Client, namespac
 func isApplied(subjects []rbacv1.Subject, namespace string) bool {
 	for _, sj := range subjects {
 		if sj.Kind == "ServiceAccount" &&
-			sj.Name == v2alpha1.NebulaServiceAccountName &&
+			sj.Name == v1alpha1.NebulaServiceAccountName &&
 			sj.Namespace == namespace {
 			return true
 		}

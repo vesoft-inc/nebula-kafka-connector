@@ -28,14 +28,14 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 type NebulaCluster interface {
-	CreateNebulaCluster(nc *v2alpha1.NebulaCluster) error
-	GetNebulaCluster(namespace, name string) (*v2alpha1.NebulaCluster, error)
-	UpdateNebulaCluster(nc *v2alpha1.NebulaCluster) error
-	UpdateNebulaClusterStatus(nc *v2alpha1.NebulaCluster) error
+	CreateNebulaCluster(nc *v1alpha1.NebulaCluster) error
+	GetNebulaCluster(namespace, name string) (*v1alpha1.NebulaCluster, error)
+	UpdateNebulaCluster(nc *v1alpha1.NebulaCluster) error
+	UpdateNebulaClusterStatus(nc *v1alpha1.NebulaCluster) error
 	DeleteNebulaCluster(namespace, name string) error
 }
 
@@ -47,7 +47,7 @@ func NewNebulaCluster(client client.Client) NebulaCluster {
 	return &nebulaClusterClient{client: client}
 }
 
-func (c *nebulaClusterClient) CreateNebulaCluster(nc *v2alpha1.NebulaCluster) error {
+func (c *nebulaClusterClient) CreateNebulaCluster(nc *v1alpha1.NebulaCluster) error {
 	if err := c.client.Create(context.TODO(), nc); err != nil {
 		if apierrors.IsAlreadyExists(err) {
 			klog.Infof("NebulaCluster %s/%s already exists", nc.Namespace, nc.Name)
@@ -58,8 +58,8 @@ func (c *nebulaClusterClient) CreateNebulaCluster(nc *v2alpha1.NebulaCluster) er
 	return nil
 }
 
-func (c *nebulaClusterClient) GetNebulaCluster(namespace, name string) (*v2alpha1.NebulaCluster, error) {
-	nebulaCluster := &v2alpha1.NebulaCluster{}
+func (c *nebulaClusterClient) GetNebulaCluster(namespace, name string) (*v1alpha1.NebulaCluster, error) {
+	nebulaCluster := &v1alpha1.NebulaCluster{}
 	err := c.client.Get(context.TODO(), types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
@@ -71,7 +71,7 @@ func (c *nebulaClusterClient) GetNebulaCluster(namespace, name string) (*v2alpha
 	return nebulaCluster, nil
 }
 
-func (c *nebulaClusterClient) UpdateNebulaCluster(nc *v2alpha1.NebulaCluster) error {
+func (c *nebulaClusterClient) UpdateNebulaCluster(nc *v1alpha1.NebulaCluster) error {
 	ns := nc.Namespace
 	ncName := nc.Name
 	ncSpec := nc.Spec.DeepCopy()
@@ -106,7 +106,7 @@ func (c *nebulaClusterClient) UpdateNebulaCluster(nc *v2alpha1.NebulaCluster) er
 	})
 }
 
-func (c *nebulaClusterClient) UpdateNebulaClusterStatus(nc *v2alpha1.NebulaCluster) error {
+func (c *nebulaClusterClient) UpdateNebulaClusterStatus(nc *v1alpha1.NebulaCluster) error {
 	ns := nc.Namespace
 	ncName := nc.Name
 	status := nc.Status.DeepCopy()

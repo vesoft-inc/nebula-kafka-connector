@@ -20,14 +20,14 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
 
 type MetadUpdateManager interface {
 	// Update updates the nebula metad
-	Update(nc *v2alpha1.NebulaMetad, oldSts, newSts *appsv1.StatefulSet) error
+	Update(nc *v1alpha1.NebulaMetad, oldSts, newSts *appsv1.StatefulSet) error
 }
 
 type metadUpdater struct {
@@ -38,7 +38,7 @@ func NewMetadUpdater(podClient kube.Pod) MetadUpdateManager {
 	return &metadUpdater{podClient: podClient}
 }
 
-func (m *metadUpdater) Update(nm *v2alpha1.NebulaMetad, oldSts, newSts *appsv1.StatefulSet) error {
+func (m *metadUpdater) Update(nm *v1alpha1.NebulaMetad, oldSts, newSts *appsv1.StatefulSet) error {
 	if *nm.Spec.Replicas == int32(0) {
 		return nil
 	}
@@ -48,7 +48,7 @@ func (m *metadUpdater) Update(nm *v2alpha1.NebulaMetad, oldSts, newSts *appsv1.S
 	}
 
 	if nm.Status.Workload.UpdateRevision == nm.Status.Workload.CurrentRevision &&
-		nm.Status.Phase == v2alpha1.RunningPhase {
+		nm.Status.Phase == v1alpha1.RunningPhase {
 		return nil
 	}
 

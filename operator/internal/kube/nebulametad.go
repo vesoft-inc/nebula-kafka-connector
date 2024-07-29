@@ -27,12 +27,12 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 type NebulaMetad interface {
-	GetNebulaMetad(namespace, name string) (*v2alpha1.NebulaMetad, error)
-	UpdateNebulaMetadStatus(nm *v2alpha1.NebulaMetad) error
+	GetNebulaMetad(namespace, name string) (*v1alpha1.NebulaMetad, error)
+	UpdateNebulaMetadStatus(nm *v1alpha1.NebulaMetad) error
 }
 
 type nebulaMetadClient struct {
@@ -43,8 +43,8 @@ func NewNebulaMetad(client client.Client) NebulaMetad {
 	return &nebulaMetadClient{client: client}
 }
 
-func (m *nebulaMetadClient) GetNebulaMetad(namespace, name string) (*v2alpha1.NebulaMetad, error) {
-	nebulaMetad := &v2alpha1.NebulaMetad{}
+func (m *nebulaMetadClient) GetNebulaMetad(namespace, name string) (*v1alpha1.NebulaMetad, error) {
+	nebulaMetad := &v1alpha1.NebulaMetad{}
 	err := m.client.Get(context.TODO(), types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
@@ -56,7 +56,7 @@ func (m *nebulaMetadClient) GetNebulaMetad(namespace, name string) (*v2alpha1.Ne
 	return nebulaMetad, nil
 }
 
-func (m *nebulaMetadClient) UpdateNebulaMetadStatus(nm *v2alpha1.NebulaMetad) error {
+func (m *nebulaMetadClient) UpdateNebulaMetadStatus(nm *v1alpha1.NebulaMetad) error {
 	ns := nm.Namespace
 	status := nm.Status.DeepCopy()
 

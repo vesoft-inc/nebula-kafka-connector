@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v2alpha1
+package v1alpha1
 
 import (
 	"fmt"
@@ -32,7 +32,7 @@ const (
 	defaultGraphdPortGRPC               = 9669
 	GraphdPortNameHTTP                  = "http"
 	defaultGraphdPortHTTP               = 19669
-	defaultGraphdImage                  = "vesoft/nebula-graphd"
+	defaultGraphdImage                  = "vesoft-ng/nebula-graphd"
 )
 
 var _ NebulaComponent = &graphdComponent{}

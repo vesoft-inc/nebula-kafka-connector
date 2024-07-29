@@ -38,7 +38,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/controller-runtime/pkg/webhook/admission"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/cmd/controller-manager/app/options"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulacluster"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/nebulametad"
@@ -57,8 +57,8 @@ var (
 
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
-	utilruntime.Must(v2alpha1.AddToScheme(clientgoscheme.Scheme))
-	utilruntime.Must(v2alpha1.AddToScheme(scheme))
+	utilruntime.Must(v1alpha1.AddToScheme(clientgoscheme.Scheme))
+	utilruntime.Must(v1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -149,8 +149,8 @@ func Run(ctx context.Context, opts *options.Options) error {
 		},
 		Controller: config.Controller{
 			GroupKindConcurrency: map[string]int{
-				v2alpha1.SchemeGroupVersion.WithKind("NebulaCluster").GroupKind().String(): opts.ConcurrentNebulaClusterSyncs,
-				v2alpha1.SchemeGroupVersion.WithKind("NebulaMetad").GroupKind().String():   opts.ConcurrentNebulaMetadSyncs,
+				v1alpha1.SchemeGroupVersion.WithKind("NebulaCluster").GroupKind().String(): opts.ConcurrentNebulaClusterSyncs,
+				v1alpha1.SchemeGroupVersion.WithKind("NebulaMetad").GroupKind().String():   opts.ConcurrentNebulaMetadSyncs,
 			},
 			RecoverPanic: pointer.Bool(true),
 		},

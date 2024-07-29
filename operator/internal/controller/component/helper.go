@@ -34,7 +34,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -49,9 +49,9 @@ var (
 	ErrorMetadReferenceIsNil = errors.New("metad reference is nil")
 )
 
-var suspendOrder = []v2alpha1.ComponentType{
-	v2alpha1.GraphdComponentType,
-	v2alpha1.StoragedComponentType,
+var suspendOrder = []v1alpha1.ComponentType{
+	v1alpha1.GraphdComponentType,
+	v1alpha1.StoragedComponentType,
 }
 
 const (
@@ -59,8 +59,8 @@ const (
 )
 
 func syncComponentStatus(
-	component v2alpha1.NebulaComponent,
-	status *v2alpha1.ComponentStatus,
+	component v1alpha1.NebulaComponent,
+	status *v1alpha1.ComponentStatus,
 	workload *appsv1.StatefulSet,
 ) error {
 	if workload == nil {
@@ -82,8 +82,8 @@ func syncComponentStatus(
 	return nil
 }
 
-func setWorkloadStatus(sts *appsv1.StatefulSet, status *v2alpha1.ComponentStatus) error {
-	workload := &v2alpha1.WorkloadStatus{}
+func setWorkloadStatus(sts *appsv1.StatefulSet, status *v1alpha1.ComponentStatus) error {
+	workload := &v1alpha1.WorkloadStatus{}
 	data, err := json.Marshal(sts.Status)
 	if err != nil {
 		return err
@@ -212,7 +212,7 @@ func setPartition(sts *appsv1.StatefulSet, upgradeOrdinal int32) {
 	klog.Infof("sts [%s/%s] partition to %d", sts.GetNamespace(), sts.GetName(), upgradeOrdinal)
 }
 
-func getNextUpdatePod(component v2alpha1.NebulaComponent, replicas int32, podClient kube.Pod) (int32, error) {
+func getNextUpdatePod(component v1alpha1.NebulaComponent, replicas int32, podClient kube.Pod) (int32, error) {
 	namespace := component.GetNamespace()
 	updateRevision := component.GetUpdateRevision()
 	// for index := replicas -1; index >= 0; index -= RollingUpdateCount
@@ -239,7 +239,7 @@ func getNextUpdatePod(component v2alpha1.NebulaComponent, replicas int32, podCli
 	return -1, nil
 }
 
-func isUpdating(component v2alpha1.NebulaComponent, podClient kube.Pod, sts *appsv1.StatefulSet) (bool, error) {
+func isUpdating(component v1alpha1.NebulaComponent, podClient kube.Pod, sts *appsv1.StatefulSet) (bool, error) {
 	if statefulSetIsUpdating(sts) {
 		return true, nil
 	}
@@ -274,7 +274,7 @@ func isUpdating(component v2alpha1.NebulaComponent, podClient kube.Pod, sts *app
 }
 
 func syncConfigMap(
-	component v2alpha1.NebulaComponent,
+	component v1alpha1.NebulaComponent,
 	cmClient kube.ConfigMap,
 	template,
 	cmKey string,
@@ -294,7 +294,7 @@ func syncConfigMap(
 	return cm, cmHash, nil
 }
 
-func syncPVC(component v2alpha1.NebulaComponent, scClient kube.StorageClass, pvcClient kube.PersistentVolumeClaim) (*v2alpha1.VolumeStatus, error) {
+func syncPVC(component v1alpha1.NebulaComponent, scClient kube.StorageClass, pvcClient kube.PersistentVolumeClaim) (*v1alpha1.VolumeStatus, error) {
 	replicas := int(component.ComponentSpec().Replicas())
 	volumeClaims, err := component.GenerateVolumeClaim()
 	if err != nil {
@@ -305,7 +305,7 @@ func syncPVC(component v2alpha1.NebulaComponent, scClient kube.StorageClass, pvc
 	}
 
 	volumeProvisioned := make(map[string]bool)
-	volumes := make(map[string]v2alpha1.ProvisionedVolume)
+	volumes := make(map[string]v1alpha1.ProvisionedVolume)
 	var lock sync.Mutex
 	for i := range volumeClaims {
 		volumeClaim := volumeClaims[i]
@@ -324,7 +324,7 @@ func syncPVC(component v2alpha1.NebulaComponent, scClient kube.StorageClass, pvc
 				}
 
 				lock.Lock()
-				volumes[pvcName] = v2alpha1.ProvisionedVolume{
+				volumes[pvcName] = v1alpha1.ProvisionedVolume{
 					VolumeName:   oldPVC.Spec.VolumeName,
 					StorageClass: pointer.StringDeref(oldPVC.Spec.StorageClassName, "default"),
 					Capacity:     oldPVC.Status.Capacity.Storage().String(),
@@ -385,7 +385,7 @@ func syncPVC(component v2alpha1.NebulaComponent, scClient kube.StorageClass, pvc
 		}
 	}
 
-	volumeStatus := &v2alpha1.VolumeStatus{
+	volumeStatus := &v1alpha1.VolumeStatus{
 		ProvisionedVolumes: volumes,
 		ProvisionedDone:    true,
 	}
@@ -586,13 +586,13 @@ func updateSinglePod(clientSet kube.ClientSet, newPod, oldPod *corev1.Pod) error
 
 func suspendComponent(
 	workloadClient kube.Workload,
-	component v2alpha1.NebulaComponent,
+	component v1alpha1.NebulaComponent,
 	workload *appsv1.StatefulSet) (bool, error) {
 	nc := component.GetCluster()
 	suspending := component.IsSuspending()
 	if !nc.IsSuspendEnabled() {
 		if suspending {
-			component.SetPhase(v2alpha1.RunningPhase)
+			component.SetPhase(v1alpha1.RunningPhase)
 			return true, nil
 		}
 		klog.V(4).Infof("component %s is not needed to be suspended", component.GetName())
@@ -603,7 +603,7 @@ func suspendComponent(
 			klog.Warningf("component %s can not be suspended: %s", component.GetName(), reason)
 			return false, nil
 		}
-		component.SetPhase(v2alpha1.SuspendPhase)
+		component.SetPhase(v1alpha1.SuspendPhase)
 		return true, nil
 	}
 	if workload != nil {
@@ -615,9 +615,9 @@ func suspendComponent(
 	return true, nil
 }
 
-func canSuspendComponent(component v2alpha1.NebulaComponent) (bool, string) {
+func canSuspendComponent(component v1alpha1.NebulaComponent) (bool, string) {
 	nc := component.GetCluster()
-	if component.GetPhase() != v2alpha1.RunningPhase && component.GetPhase() != v2alpha1.SuspendPhase {
+	if component.GetPhase() != v1alpha1.RunningPhase && component.GetPhase() != v1alpha1.SuspendPhase {
 		return false, "component phase is not Running or Suspend"
 	}
 	for _, ct := range suspendOrder {

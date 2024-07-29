@@ -12,7 +12,7 @@ metadata:
   name: nebulacluster-viewer-role
 rules:
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulaclusters
   verbs:
@@ -20,7 +20,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulaclusters/status
   verbs:

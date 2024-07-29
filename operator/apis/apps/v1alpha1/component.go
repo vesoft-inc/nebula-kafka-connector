@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v2alpha1
+package v1alpha1
 
 import (
 	"fmt"
@@ -46,6 +46,8 @@ type ComponentAccessor interface {
 	VolumeMounts() []corev1.VolumeMount
 	ReadinessProbe() *corev1.Probe
 	LivenessProbe() *corev1.Probe
+	DNSConfig() *corev1.PodDNSConfig
+	DNSPolicy() corev1.DNSPolicy
 }
 
 var _ ComponentAccessor = &componentAccessor{}
@@ -194,6 +196,20 @@ func (a *componentAccessor) LivenessProbe() *corev1.Probe {
 		return nil
 	}
 	return a.componentSpec.LivenessProbe
+}
+
+func (a *componentAccessor) DNSConfig() *corev1.PodDNSConfig {
+	if a.componentSpec == nil {
+		return nil
+	}
+	return a.componentSpec.DNSConfig
+}
+
+func (a *componentAccessor) DNSPolicy() corev1.DNSPolicy {
+	if a.componentSpec != nil && a.componentSpec.DNSPolicy != "" {
+		return a.componentSpec.DNSPolicy
+	}
+	return corev1.DNSClusterFirst
 }
 
 // KObjectAccessor is the interface for manipulating k8s object

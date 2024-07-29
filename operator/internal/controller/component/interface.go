@@ -21,32 +21,32 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 )
 
 type ReconcileManager interface {
 	// Reconcile reconciles the cluster to desired state
-	Reconcile(metaClient meta.Client, cluster *v2alpha1.NebulaCluster) error
+	Reconcile(metaClient meta.Client, cluster *v1alpha1.NebulaCluster) error
 
 	// Delete deletes the cluster
-	Delete(cluster *v2alpha1.NebulaCluster) error
+	Delete(cluster *v1alpha1.NebulaCluster) error
 }
 
 type ScaleManager interface {
 	// Scale scales the cluster
-	Scale(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error
+	Scale(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error
 	// ScaleIn scales in the cluster
-	ScaleIn(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error
+	ScaleIn(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldReplicas, newReplicas int32) error
 	// ScaleOut scales out the cluster
-	ScaleOut(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error
+	ScaleOut(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldReplicas, newReplicas int32) error
 }
 
 type UpdateManager interface {
 	// Update updates the cluster
-	Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error
+	Update(nc *v1alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error
 
 	// RestartPod restart the specified Pod
-	RestartPod(nc *v2alpha1.NebulaCluster, ordinal int32) error
+	RestartPod(nc *v1alpha1.NebulaCluster, ordinal int32) error
 }
 
 type MetaReconcileManager interface {

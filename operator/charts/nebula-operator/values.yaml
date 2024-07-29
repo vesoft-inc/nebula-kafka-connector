@@ -1,6 +1,6 @@
 image:
   nebulaOperator:
-    image: reg.vesoft-inc.com/cloud-dev/nebula-ng-operator:v1.0.0
+    image: reg.vesoft-inc.com/cloud-ng/nebula-ng-operator:v1.0.0
     imagePullPolicy: Always
 
 imagePullSecrets: [ ]

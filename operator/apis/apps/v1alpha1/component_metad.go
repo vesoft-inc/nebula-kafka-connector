@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package v2alpha1
+package v1alpha1
 
 import (
 	"fmt"
@@ -33,7 +33,7 @@ const (
 	defaultMetadPortGRPC               = 9559
 	MetadPortNameHTTP                  = "http"
 	defaultMetadPortHTTP               = 19559
-	defaultMetadImage                  = "vesoft/nebula-metad"
+	defaultMetadImage                  = "vesoft-ng/nebula-metad"
 )
 
 var _ NebulaComponent = &metadComponent{}

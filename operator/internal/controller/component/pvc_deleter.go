@@ -24,7 +24,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
@@ -55,7 +55,7 @@ func PVCDeleter(cli client.Client, namespace, clusterName string) error {
 	return nil
 }
 
-func PVCMark(pvcClient kube.PersistentVolumeClaim, component v2alpha1.NebulaComponent, oldReplicas, newReplicas int32) error {
+func PVCMark(pvcClient kube.PersistentVolumeClaim, component v1alpha1.NebulaComponent, oldReplicas, newReplicas int32) error {
 	ns := component.GetNamespace()
 	componentName := component.GetName()
 	for i := oldReplicas - 1; i >= newReplicas; i-- {
@@ -85,11 +85,11 @@ func PVCMark(pvcClient kube.PersistentVolumeClaim, component v2alpha1.NebulaComp
 	return nil
 }
 
-func ordinalPVCNames(componentType v2alpha1.ComponentType, setName string, ordinal int32) []string {
+func ordinalPVCNames(componentType v1alpha1.ComponentType, setName string, ordinal int32) []string {
 	// TODO unify function to get logPVC and dataPVC name
 	logPVC := fmt.Sprintf("%s-log-%s-%d", componentType, setName, ordinal)
 	dataPVC := fmt.Sprintf("%s-data-%s-%d", componentType, setName, ordinal)
-	if componentType == v2alpha1.GraphdComponentType {
+	if componentType == v1alpha1.GraphdComponentType {
 		return []string{logPVC}
 	}
 	return []string{logPVC, dataPVC}

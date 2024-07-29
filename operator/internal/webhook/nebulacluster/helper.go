@@ -24,13 +24,13 @@ import (
 	"k8s.io/klog/v2"
 	apivalidation "k8s.io/kubernetes/pkg/apis/core/validation"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/webhook/util/validation"
 )
 
 // validateNebulaClusterGraphd validates a NebulaCluster for Graphd.
-func validateNebulaClusterGraphd(nc *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterGraphd(nc *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	replicas := *nc.Spec.Graphd.Replicas
 	bHaMode := annotation.IsInHaMode(nc.Annotations)
 
@@ -44,7 +44,7 @@ func validateNebulaClusterGraphd(nc *v2alpha1.NebulaCluster) (allErrs field.Erro
 }
 
 // validateNebulaClusterStoraged validates a NebulaCluster for Storaged.
-func validateNebulaClusterStoraged(nc *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterStoraged(nc *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	replicas := *nc.Spec.Storaged.Replicas
 	bHaMode := annotation.IsInHaMode(nc.Annotations)
 
@@ -58,21 +58,21 @@ func validateNebulaClusterStoraged(nc *v2alpha1.NebulaCluster) (allErrs field.Er
 }
 
 // validateNebulaClusterGraphd validates a NebulaCluster for Graphd on create.
-func validateNebulaClusterCreateGraphd(nc *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterCreateGraphd(nc *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	allErrs = append(allErrs, validateNebulaClusterGraphd(nc)...)
 
 	return allErrs
 }
 
 // validateNebulaClusterStoraged validates a NebulaCluster for Storaged on create.
-func validateNebulaClusterCreateStoraged(nc *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterCreateStoraged(nc *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	allErrs = append(allErrs, validateNebulaClusterStoraged(nc)...)
 
 	return allErrs
 }
 
 // ValidateNebulaCluster validates a NebulaCluster on create.
-func validateNebulaClusterCreate(nc *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterCreate(nc *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	name := nc.Name
 	namespace := nc.Namespace
 
@@ -86,27 +86,27 @@ func validateNebulaClusterCreate(nc *v2alpha1.NebulaCluster) (allErrs field.Erro
 }
 
 // validateNebulaClusterGraphd validates a NebulaCluster for Graphd on update.
-func validateNebulaClusterUpdateGraphd(nc, oldNC *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterUpdateGraphd(nc, oldNC *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	allErrs = append(allErrs, validateNebulaClusterGraphd(nc)...)
 
 	return allErrs
 }
 
 // validateNebulaClusterStoraged validates a NebulaCluster for Storaged on Update.
-func validateNebulaClusterUpdateStoraged(nc, oldNC *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
-	if oldNC.Status.Storaged.Phase == v2alpha1.ScaleInPhase || oldNC.Status.Storaged.Phase == v2alpha1.ScaleOutPhase {
+func validateNebulaClusterUpdateStoraged(nc, oldNC *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
+	if oldNC.Status.Storaged.Phase == v1alpha1.ScaleInPhase || oldNC.Status.Storaged.Phase == v1alpha1.ScaleOutPhase {
 		allErrs = append(allErrs, field.Forbidden(
 			field.NewPath("spec", "storaged"),
 			fmt.Sprintf("field is immutable while in %s phase", oldNC.Status.Storaged.Phase),
 		))
 	}
 
-	if nc.Status.Storaged.Phase != v2alpha1.RunningPhase {
+	if nc.Status.Storaged.Phase != v1alpha1.RunningPhase {
 		if *nc.Spec.Storaged.Replicas != *oldNC.Spec.Storaged.Replicas {
 			allErrs = append(allErrs, field.Invalid(
 				field.NewPath("spec", "storaged", "replicas"),
 				nc.Spec.Storaged.Replicas,
-				fmt.Sprintf("field is immutable while not in %s phase", v2alpha1.RunningPhase),
+				fmt.Sprintf("field is immutable while not in %s phase", v1alpha1.RunningPhase),
 			))
 		}
 	}
@@ -118,7 +118,7 @@ func validateNebulaClusterUpdateStoraged(nc, oldNC *v2alpha1.NebulaCluster) (all
 }
 
 // validateNebulaClusterUpdateStoragedDataVolume validates a NebulaCluster for Storaged data volume on Update.
-func validateNebulaClusterUpdateStoragedDataVolume(nc, oldNC *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterUpdateStoragedDataVolume(nc, oldNC *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	if len(nc.Spec.Storaged.DataVolumeClaims) != len(oldNC.Spec.Storaged.DataVolumeClaims) {
 		allErrs = append(allErrs, field.Forbidden(
 			field.NewPath("spec", "storaged", "dataVolumeClaims"),
@@ -140,7 +140,7 @@ func validateNebulaClusterUpdateStoragedDataVolume(nc, oldNC *v2alpha1.NebulaClu
 }
 
 // ValidateNebulaCluster validates a NebulaCluster on Update.
-func validateNebulaClusterUpdate(nc, oldNC *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterUpdate(nc, oldNC *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	name := nc.Name
 	namespace := nc.Namespace
 
@@ -169,7 +169,7 @@ func validateNebulaClusterUpdate(nc, oldNC *v2alpha1.NebulaCluster) (allErrs fie
 }
 
 // validateNebulaClusterDelete validates a NebulaCluster on Delete.
-func validateNebulaClusterDelete(nc *v2alpha1.NebulaCluster) (allErrs field.ErrorList) {
+func validateNebulaClusterDelete(nc *v1alpha1.NebulaCluster) (allErrs field.ErrorList) {
 	name := nc.Name
 	namespace := nc.Namespace
 

@@ -30,8 +30,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/scheme"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v2alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/cmd/autoscaler/app/options"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/autoscaler"
 	klogflag "github.com/vesoft-inc/nebula-ng-tools/operator/internal/flag/klog"
@@ -101,7 +101,7 @@ func Run(ctx context.Context, opts *options.Options) error {
 		},
 		Controller: config.Controller{
 			GroupKindConcurrency: map[string]int{
-				v2alpha1.SchemeGroupVersion.WithKind("NebulaAutoscaler").GroupKind().String(): int(opts.HPAOpts.ConcurrentHorizontalPodAutoscalerSyncs),
+				v1alpha1.SchemeGroupVersion.WithKind("NebulaAutoscaler").GroupKind().String(): int(opts.HPAOpts.ConcurrentHorizontalPodAutoscalerSyncs),
 			},
 			RecoverPanic: pointer.Bool(true),
 		},

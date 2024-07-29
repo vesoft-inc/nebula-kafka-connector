@@ -2,7 +2,7 @@
 # This file is used to track the info used to scaffold your project
 # and allow the plugins properly work.
 # More info: https://book.kubebuilder.io/reference/project-config.html
-domain: nebula-graph.io
+domain: nebula-graph-ng.io
 layout:
 - go.kubebuilder.io/v4
 projectName: operator
@@ -12,27 +12,27 @@ resources:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: nebula-graph.io
+  domain: nebula-graph-ng.io
   group: apps
   kind: NebulaMetad
-  path: github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1
-  version: v2alpha1
+  path: github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1
+  version: v1alpha1
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: nebula-graph.io
+  domain: nebula-graph-ng.io
   group: apps
   kind: NebulaCluster
-  path: github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1
-  version: v2alpha1
+  path: github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1
+  version: v1alpha1
 - api:
     crdVersion: v1
     namespaced: true
   controller: true
-  domain: nebula-graph.io
+  domain: nebula-graph-ng.io
   group: autoscaling
   kind: NebulaAutoscaler
-  path: github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v2alpha1
+  path: github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1
   version: v1alpha1
 version: "3"

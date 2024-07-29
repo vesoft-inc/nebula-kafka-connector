@@ -27,7 +27,7 @@ import (
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
@@ -49,7 +49,7 @@ func NewStoragedCluster(clientSet kube.ClientSet, sm ScaleManager, um UpdateMana
 	}
 }
 
-func (s *storagedCluster) Reconcile(metaClient meta.Client, nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) Reconcile(metaClient meta.Client, nc *v1alpha1.NebulaCluster) error {
 	if nc.Spec.Storaged == nil {
 		return nil
 	}
@@ -59,7 +59,7 @@ func (s *storagedCluster) Reconcile(metaClient meta.Client, nc *v2alpha1.NebulaC
 	return s.syncStoragedWorkload(metaClient, nc)
 }
 
-func (s *storagedCluster) syncStoragedHeadlessService(nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) syncStoragedHeadlessService(nc *v1alpha1.NebulaCluster) error {
 	newSvc := nc.StoragedComponent().GenerateHeadlessService()
 	if newSvc == nil {
 		return nil
@@ -68,7 +68,7 @@ func (s *storagedCluster) syncStoragedHeadlessService(nc *v2alpha1.NebulaCluster
 	return syncService(newSvc, s.clientSet.Service())
 }
 
-func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v1alpha1.NebulaCluster) error {
 	namespace := nc.GetNamespace()
 	componentName := nc.StoragedComponent().GetName()
 
@@ -99,7 +99,7 @@ func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alp
 	if err != nil {
 		return err
 	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v2alpha1.MetadPortNameGRPC)
+	metadEndpoints := metad.MetadComponent().GetEndpoints(v1alpha1.MetadPortNameGRPC)
 	newSts, err := nc.StoragedComponent().GenerateWorkload(cm, metadEndpoints)
 	if err != nil {
 		klog.Errorf("generate storaged cluster template failed: %v", err)
@@ -121,7 +121,7 @@ func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alp
 		if err := s.clientSet.Workload().CreateWorkload(newSts); err != nil {
 			return err
 		}
-		nc.Status.Storaged.Workload = &v2alpha1.WorkloadStatus{}
+		nc.Status.Storaged.Workload = &v1alpha1.WorkloadStatus{}
 		return utilerrors.ReconcileErrorf("waiting for storaged cluster %s running", newSts.GetName())
 	}
 
@@ -146,7 +146,7 @@ func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alp
 	}
 
 	equal := podTemplateEqual(newSts, oldSts)
-	if !equal || nc.Status.Storaged.Phase == v2alpha1.UpdatePhase {
+	if !equal || nc.Status.Storaged.Phase == v1alpha1.UpdatePhase {
 		if err := s.updateManager.Update(nc, oldSts, newSts); err != nil {
 			return err
 		}
@@ -165,13 +165,13 @@ func (s *storagedCluster) syncStoragedWorkload(metaClient meta.Client, nc *v2alp
 	return updateWorkload(s.clientSet.Workload(), newSts, oldSts)
 }
 
-func (s *storagedCluster) syncNebulaClusterStatus(nc *v2alpha1.NebulaCluster, oldSts *appsv1.StatefulSet) error {
+func (s *storagedCluster) syncNebulaClusterStatus(nc *v1alpha1.NebulaCluster, oldSts *appsv1.StatefulSet) error {
 	if oldSts == nil {
 		return nil
 	}
 
 	if nc.Status.Storaged.Phase == "" {
-		nc.Status.Storaged.Phase = v2alpha1.RunningPhase
+		nc.Status.Storaged.Phase = v1alpha1.RunningPhase
 	}
 
 	updating, err := isUpdating(nc.StoragedComponent(), s.clientSet.Pod(), oldSts)
@@ -181,21 +181,21 @@ func (s *storagedCluster) syncNebulaClusterStatus(nc *v2alpha1.NebulaCluster, ol
 
 	// TODO metad phase
 	if updating {
-		nc.Status.Storaged.Phase = v2alpha1.UpdatePhase
+		nc.Status.Storaged.Phase = v1alpha1.UpdatePhase
 	}
 
 	return syncComponentStatus(nc.StoragedComponent(), &nc.Status.Storaged.ComponentStatus, oldSts)
 }
 
-func (s *storagedCluster) syncStoragedConfigMap(nc *v2alpha1.NebulaCluster) (*corev1.ConfigMap, string, error) {
+func (s *storagedCluster) syncStoragedConfigMap(nc *v1alpha1.NebulaCluster) (*corev1.ConfigMap, string, error) {
 	return syncConfigMap(
 		nc.StoragedComponent(),
 		s.clientSet.ConfigMap(),
-		v2alpha1.StoragedConfigTemplate,
+		v1alpha1.StoragedConfigTemplate,
 		nc.StoragedComponent().GetConfigMapKey())
 }
 
-func (s *storagedCluster) syncStoragedPVC(nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) syncStoragedPVC(nc *v1alpha1.NebulaCluster) error {
 	volumeStatus, err := syncPVC(nc.StoragedComponent(), s.clientSet.StorageClass(), s.clientSet.PVC())
 	if err != nil {
 		return err
@@ -221,7 +221,7 @@ func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string
 	return nil
 }
 
-func (s *storagedCluster) Delete(nc *v2alpha1.NebulaCluster) error {
+func (s *storagedCluster) Delete(nc *v1alpha1.NebulaCluster) error {
 	if nc.Spec.Storaged == nil {
 		return nil
 	}
@@ -238,13 +238,13 @@ func (s *storagedCluster) Delete(nc *v2alpha1.NebulaCluster) error {
 	return s.clientSet.Workload().DeleteWorkload(workload)
 }
 
-func addStorageServices(metaClient meta.Client, nc *v2alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
+func addStorageServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldReplicas, newReplicas int32) error {
 	var start int32
 	if newReplicas > oldReplicas {
 		start = oldReplicas
 	}
 
-	port := nc.StoragedComponent().GetPort(v2alpha1.StoragedPortNameGRPC)
+	port := nc.StoragedComponent().GetPort(v1alpha1.StoragedPortNameGRPC)
 	for i := start; i < newReplicas; i++ {
 		host := nc.StoragedComponent().GetPodFQDN(i)
 		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)

@@ -4,9 +4,9 @@ kind: CustomResourceDefinition
 metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.13.0
-  name: nebulaautoscalers.autoscaling.nebula-graph.io
+  name: nebulaautoscalers.autoscaling.nebula-graph-ng.io
 spec:
-  group: autoscaling.nebula-graph.io
+  group: autoscaling.nebula-graph-ng.io
   names:
     kind: NebulaAutoscaler
     listKind: NebulaAutoscalerList
@@ -46,7 +46,7 @@ spec:
       jsonPath: .metadata.creationTimestamp
       name: AGE
       type: date
-    name: v2alpha1
+    name: v1alpha1
     schema:
       openAPIV3Schema:
         properties:

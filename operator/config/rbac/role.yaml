@@ -119,7 +119,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulaclusters
   verbs:
@@ -131,13 +131,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulaclusters/finalizers
   verbs:
   - update
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulaclusters/status
   verbs:
@@ -145,7 +145,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulametads
   verbs:
@@ -157,13 +157,13 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulametads/finalizers
   verbs:
   - update
 - apiGroups:
-  - apps.nebula-graph.io
+  - apps.nebula-graph-ng.io
   resources:
   - nebulametads/status
   verbs:
@@ -171,7 +171,7 @@ rules:
   - patch
   - update
 - apiGroups:
-  - autoscaling.nebula-graph.io
+  - autoscaling.nebula-graph-ng.io
   resources:
   - nebulaautoscalers
   verbs:
@@ -183,7 +183,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - autoscaling.nebula-graph.io
+  - autoscaling.nebula-graph-ng.io
   resources:
   - nebulaautoscalers/status
   verbs:

@@ -22,13 +22,13 @@ import (
 	"k8s.io/klog/v2"
 	apivalidation "k8s.io/kubernetes/pkg/apis/core/validation"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/webhook/util/validation"
 )
 
 // validateNebulaMetadReplicas validates Metad replicas.
-func validateNebulaMetadReplicas(nm *v2alpha1.NebulaMetad) (allErrs field.ErrorList) {
+func validateNebulaMetadReplicas(nm *v1alpha1.NebulaMetad) (allErrs field.ErrorList) {
 	replicas := *nm.Spec.Replicas
 	bHaMode := annotation.IsInHaMode(nm.Annotations)
 
@@ -42,14 +42,14 @@ func validateNebulaMetadReplicas(nm *v2alpha1.NebulaMetad) (allErrs field.ErrorL
 }
 
 // validateNebulaMetadCreate validates a NebulaMetad on create.
-func validateNebulaMetadCreate(nm *v2alpha1.NebulaMetad) (allErrs field.ErrorList) {
+func validateNebulaMetadCreate(nm *v1alpha1.NebulaMetad) (allErrs field.ErrorList) {
 	allErrs = append(allErrs, validateNebulaMetadReplicas(nm)...)
 
 	return allErrs
 }
 
 // ValidateNebulaCluster validates a NebulaMetad on Update.
-func validateNebulaMetadUpdate(nm, oldNM *v2alpha1.NebulaMetad) (allErrs field.ErrorList) {
+func validateNebulaMetadUpdate(nm, oldNM *v1alpha1.NebulaMetad) (allErrs field.ErrorList) {
 	name := nm.Name
 	namespace := nm.Namespace
 
@@ -77,7 +77,7 @@ func validateNebulaMetadUpdate(nm, oldNM *v2alpha1.NebulaMetad) (allErrs field.E
 }
 
 // validateNebulaMetadDelete validates a NebulaMetad on Delete.
-func validateNebulaMetadDelete(nm *v2alpha1.NebulaMetad) (allErrs field.ErrorList) {
+func validateNebulaMetadDelete(nm *v1alpha1.NebulaMetad) (allErrs field.ErrorList) {
 	name := nm.Name
 	namespace := nm.Namespace
 

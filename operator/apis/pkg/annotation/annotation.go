@@ -19,29 +19,29 @@ package annotation
 const (
 	AnnDeploymentRevision = "deployment.kubernetes.io/revision"
 	// AnnPVCDeferDeletingKey is pvc defer deletion annotation key used in PVC for defer deleting PVC
-	AnnPVCDeferDeletingKey = "nebula-graph.io/pvc-defer-deleting"
+	AnnPVCDeferDeletingKey = "nebula-graph-ng.io/pvc-defer-deleting"
 	// AnnPodNameKey is pod name annotation key used in PV/PVC for synchronizing nebula cluster meta info
-	AnnPodNameKey = "nebula-graph.io/pod-name"
+	AnnPodNameKey = "nebula-graph-ng.io/pod-name"
 	// AnnLastSyncTimestampKey is annotation key to indicate the last timestamp the operator sync the workload
-	AnnLastSyncTimestampKey = "nebula-graph.io/sync-timestamp"
+	AnnLastSyncTimestampKey = "nebula-graph-ng.io/sync-timestamp"
 	// AnnHaModeKey is annotation key to indicate whether in HA mode
-	AnnHaModeKey = "nebula-graph.io/ha-mode"
+	AnnHaModeKey = "nebula-graph-ng.io/ha-mode"
 	// AnnLastReplicas is annotation key to indicate the last replicas
-	AnnLastReplicas = "nebula-graph.io/last-replicas"
+	AnnLastReplicas = "nebula-graph-ng.io/last-replicas"
 	// AnnLastAppliedDynamicFlagsKey is annotation key to indicate the last applied custom dynamic flags
-	AnnLastAppliedDynamicFlagsKey = "nebula-graph.io/last-applied-dynamic-flags"
+	AnnLastAppliedDynamicFlagsKey = "nebula-graph-ng.io/last-applied-dynamic-flags"
 	// AnnLastAppliedConfigKey is annotation key to indicate the last applied configuration
-	AnnLastAppliedConfigKey = "nebula-graph.io/last-applied-configuration"
+	AnnLastAppliedConfigKey = "nebula-graph-ng.io/last-applied-configuration"
 	// AnnPodConfigMapHash is pod configmap hash key to update configuration dynamically
-	AnnPodConfigMapHash = "nebula-graph.io/cm-hash"
+	AnnPodConfigMapHash = "nebula-graph-ng.io/cm-hash"
 	// AnnPvReclaimKey is annotation key that indicate whether reclaim persistent volume
-	AnnPvReclaimKey = "nebula-graph.io/enable-pv-reclaim"
+	AnnPvReclaimKey = "nebula-graph-ng.io/enable-pv-reclaim"
 
 	// AnnHaModeVal is annotation value to indicate whether in HA mode
 	AnnHaModeVal = "true"
 
 	// AnnDeleteProtection is an annotation key used to prevent the deletion of a nebula cluster that has been annotated by this key
-	AnnDeleteProtection = "nebula-graph.io/delete-protection"
+	AnnDeleteProtection = "nebula-graph-ng.io/delete-protection"
 
 	// AnnDeleteProtectionVal is annotation value to indicate whether nebula cluster is protected
 	AnnDeleteProtectionVal = "true"

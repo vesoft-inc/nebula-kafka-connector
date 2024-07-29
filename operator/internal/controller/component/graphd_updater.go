@@ -20,7 +20,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
@@ -33,15 +33,15 @@ func NewGraphdUpdater(podClient kube.Pod) UpdateManager {
 	return &graphUpdater{podClient: podClient}
 }
 
-func (g *graphUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
+func (g *graphUpdater) Update(nc *v1alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
 	if *nc.Spec.Graphd.Replicas == int32(0) {
 		return nil
 	}
 
 	// TODO metad phase
-	if nc.Status.Storaged.Phase == v2alpha1.UpdatePhase ||
-		nc.Status.Storaged.Phase == v2alpha1.ScaleInPhase ||
-		nc.Status.Storaged.Phase == v2alpha1.ScaleOutPhase {
+	if nc.Status.Storaged.Phase == v1alpha1.UpdatePhase ||
+		nc.Status.Storaged.Phase == v1alpha1.ScaleInPhase ||
+		nc.Status.Storaged.Phase == v1alpha1.ScaleOutPhase {
 		return setLastConfig(oldSts, newSts)
 	}
 
@@ -51,7 +51,7 @@ func (g *graphUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1
 	}
 
 	if nc.Status.Graphd.Workload.UpdateRevision == nc.Status.Graphd.Workload.CurrentRevision &&
-		nc.Status.Graphd.Phase == v2alpha1.RunningPhase {
+		nc.Status.Graphd.Phase == v1alpha1.RunningPhase {
 		return nil
 	}
 
@@ -70,7 +70,7 @@ func (g *graphUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1
 	return nil
 }
 
-func (g *graphUpdater) RestartPod(nc *v2alpha1.NebulaCluster, ordinal int32) error {
+func (g *graphUpdater) RestartPod(nc *v1alpha1.NebulaCluster, ordinal int32) error {
 	return nil
 }
 

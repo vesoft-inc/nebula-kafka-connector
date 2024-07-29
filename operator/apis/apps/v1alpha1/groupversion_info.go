@@ -1,5 +1,5 @@
 /*
-Copyright 2023 Vesoft Inc.
+Copyright 2023.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,10 +14,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-// Package v2alpha1 contains API Schema definitions for the autoscaling v2alpha1 API group
+// Package v1alpha1 contains API Schema definitions for the apps v1alpha1 API group
 // +kubebuilder:object:generate=true
-// +groupName=autoscaling.nebula-graph.io
-package v2alpha1
+// +groupName=apps.nebula-graph-ng.io
+package v1alpha1
 
 import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -26,7 +26,7 @@ import (
 
 var (
 	// GroupVersion is group version used to register these objects
-	GroupVersion = schema.GroupVersion{Group: "autoscaling.nebula-graph.io", Version: "v2alpha1"}
+	GroupVersion = schema.GroupVersion{Group: "apps.nebula-graph-ng.io", Version: "v1alpha1"}
 
 	SchemeGroupVersion = GroupVersion
 
@@ -36,8 +36,3 @@ var (
 	// AddToScheme adds the types in this group-version to the given scheme.
 	AddToScheme = SchemeBuilder.AddToScheme
 )
-
-// Resource is required by pkg/client/listers/...
-func Resource(resource string) schema.GroupResource {
-	return SchemeGroupVersion.WithResource(resource).GroupResource()
-}

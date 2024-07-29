@@ -25,7 +25,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/label"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
@@ -43,7 +43,7 @@ func NewNebulaConsole(clientSet kube.ClientSet) ReconcileManager {
 	return &nebulaConsole{clientSet: clientSet}
 }
 
-func (c *nebulaConsole) Reconcile(_ meta.Client, nc *v2alpha1.NebulaCluster) error {
+func (c *nebulaConsole) Reconcile(_ meta.Client, nc *v1alpha1.NebulaCluster) error {
 	if nc.Spec.Console == nil {
 		return nil
 	}
@@ -53,7 +53,7 @@ func (c *nebulaConsole) Reconcile(_ meta.Client, nc *v2alpha1.NebulaCluster) err
 	return c.syncConsolePod(nc)
 }
 
-func (c *nebulaConsole) Delete(nc *v2alpha1.NebulaCluster) error {
+func (c *nebulaConsole) Delete(nc *v1alpha1.NebulaCluster) error {
 	if nc.Spec.Console == nil {
 		return nil
 	}
@@ -68,7 +68,7 @@ func (c *nebulaConsole) Delete(nc *v2alpha1.NebulaCluster) error {
 	return c.clientSet.Pod().DeletePod(nc.Namespace, podName, true)
 }
 
-func (c *nebulaConsole) syncConsolePod(nc *v2alpha1.NebulaCluster) error {
+func (c *nebulaConsole) syncConsolePod(nc *v1alpha1.NebulaCluster) error {
 	newPod, err := c.generatePod(nc)
 	if err != nil {
 		return err
@@ -88,14 +88,14 @@ func (c *nebulaConsole) syncConsolePod(nc *v2alpha1.NebulaCluster) error {
 	return updateSinglePod(c.clientSet, newPod, oldPod)
 }
 
-func (c *nebulaConsole) generatePod(nc *v2alpha1.NebulaCluster) (*corev1.Pod, error) {
+func (c *nebulaConsole) generatePod(nc *v1alpha1.NebulaCluster) (*corev1.Pod, error) {
 	mounts := make([]corev1.VolumeMount, 0)
 	cmd := []string{
 		"ngql",
 		"-H",
 		nc.GetGraphdServiceName(),
 		"-P",
-		strconv.Itoa(int(nc.GraphdComponent().GetPort(v2alpha1.GraphdPortNameGRPC))),
+		strconv.Itoa(int(nc.GraphdComponent().GetPort(v1alpha1.GraphdPortNameGRPC))),
 	}
 
 	username, password, err := kube.GetCredential(c.clientSet, nc.Namespace, nc.Spec.CredentialSecret)
@@ -129,19 +129,19 @@ func (c *nebulaConsole) generatePod(nc *v2alpha1.NebulaCluster) (*corev1.Pod, er
 			NodeSelector:       c.getNodeSelector(nc),
 			Containers:         []corev1.Container{container},
 			ImagePullSecrets:   nc.Spec.ImagePullSecrets,
-			ServiceAccountName: v2alpha1.NebulaServiceAccountName,
+			ServiceAccountName: v1alpha1.NebulaServiceAccountName,
 			Volumes:            volumes,
 		},
 	}, nil
 }
 
-func (c *nebulaConsole) getConsoleLabels(nc *v2alpha1.NebulaCluster) map[string]string {
+func (c *nebulaConsole) getConsoleLabels(nc *v1alpha1.NebulaCluster) map[string]string {
 	selector := label.New().Cluster(nc.GetName()).Console()
 	labels := selector.Copy().Labels()
 	return labels
 }
 
-func (c *nebulaConsole) getNodeSelector(nc *v2alpha1.NebulaCluster) map[string]string {
+func (c *nebulaConsole) getNodeSelector(nc *v1alpha1.NebulaCluster) map[string]string {
 	selector := map[string]string{}
 	for k, v := range nc.Spec.NodeSelector {
 		selector[k] = v
@@ -155,7 +155,7 @@ func (c *nebulaConsole) getNodeSelector(nc *v2alpha1.NebulaCluster) map[string]s
 	return selector
 }
 
-func getConsoleImage(console *v2alpha1.ConsoleSpec) string {
+func getConsoleImage(console *v1alpha1.ConsoleSpec) string {
 	image := defaultConsoleImage
 	if console.Image != "" {
 		image = console.Image

@@ -20,7 +20,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/kube"
 	utilerrors "github.com/vesoft-inc/nebula-ng-tools/operator/internal/util/errors"
 )
@@ -33,14 +33,14 @@ func NewStorageUpdater(podClient kube.Pod) UpdateManager {
 	return &storageUpdater{podClient: podClient}
 }
 
-func (g *storageUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
+func (g *storageUpdater) Update(nc *v1alpha1.NebulaCluster, oldSts, newSts *appsv1.StatefulSet) error {
 	if *nc.Spec.Storaged.Replicas == int32(0) {
 		return nil
 	}
 
 	// TODO metad phase
-	if nc.Status.Storaged.Phase == v2alpha1.ScaleInPhase ||
-		nc.Status.Storaged.Phase == v2alpha1.ScaleOutPhase {
+	if nc.Status.Storaged.Phase == v1alpha1.ScaleInPhase ||
+		nc.Status.Storaged.Phase == v1alpha1.ScaleOutPhase {
 		return setLastConfig(oldSts, newSts)
 	}
 
@@ -50,7 +50,7 @@ func (g *storageUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *apps
 	}
 
 	if nc.Status.Storaged.Workload.UpdateRevision == nc.Status.Storaged.Workload.CurrentRevision &&
-		nc.Status.Storaged.Phase == v2alpha1.RunningPhase {
+		nc.Status.Storaged.Phase == v1alpha1.RunningPhase {
 		return nil
 	}
 
@@ -69,7 +69,7 @@ func (g *storageUpdater) Update(nc *v2alpha1.NebulaCluster, oldSts, newSts *apps
 	return nil
 }
 
-func (g *storageUpdater) RestartPod(nc *v2alpha1.NebulaCluster, ordinal int32) error {
+func (g *storageUpdater) RestartPod(nc *v1alpha1.NebulaCluster, ordinal int32) error {
 	return nil
 }
 

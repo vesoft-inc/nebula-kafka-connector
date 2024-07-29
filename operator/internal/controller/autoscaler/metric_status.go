@@ -29,7 +29,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
-	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v2alpha1"
+	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1"
 )
 
 var (
@@ -41,9 +41,9 @@ var (
 
 // Computes the desired number of replicas for a specific hpa and metric specification,
 // returning the metric status and a proposed condition to be set on the HPA object.
-func (a *HorizontalController) computeReplicasForMetric(ctx context.Context, hpa *v2alpha1.NebulaAutoscaler, spec autoscalingv2.MetricSpec,
+func (a *HorizontalController) computeReplicasForMetric(ctx context.Context, hpa *v1alpha1.NebulaAutoscaler, spec autoscalingv2.MetricSpec,
 	specReplicas, statusReplicas int32, selector labels.Selector, status *autoscalingv2.MetricStatus) (replicaCountProposal int32, metricNameProposal string,
-	timestampProposal time.Time, condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	timestampProposal time.Time, condition v1alpha1.NebulaAutoscalerCondition, err error) {
 
 	switch spec.Type {
 	case autoscalingv2.ObjectMetricSourceType:
@@ -87,13 +87,13 @@ func (a *HorizontalController) computeReplicasForMetric(ctx context.Context, hpa
 		condition := a.getUnableComputeReplicaCountCondition(hpa, "InvalidMetricSourceType", err)
 		return 0, "", time.Time{}, condition, err
 	}
-	return replicaCountProposal, metricNameProposal, timestampProposal, v2alpha1.NebulaAutoscalerCondition{}, nil
+	return replicaCountProposal, metricNameProposal, timestampProposal, v1alpha1.NebulaAutoscalerCondition{}, nil
 }
 
 // computeStatusForObjectMetric computes the desired number of replicas for the specified metric of type ObjectMetricSourceType.
 func (a *HorizontalController) computeStatusForObjectMetric(specReplicas, statusReplicas int32, metricSpec autoscalingv2.MetricSpec,
-	hpa *v2alpha1.NebulaAutoscaler, selector labels.Selector, status *autoscalingv2.MetricStatus, metricSelector labels.Selector) (replicas int32,
-	timestamp time.Time, metricName string, condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	hpa *v1alpha1.NebulaAutoscaler, selector labels.Selector, status *autoscalingv2.MetricStatus, metricSelector labels.Selector) (replicas int32,
+	timestamp time.Time, metricName string, condition v1alpha1.NebulaAutoscalerCondition, err error) {
 	if metricSpec.Object.Target.Type == autoscalingv2.ValueMetricType {
 		replicaCountProposal, usageProposal, timestampProposal, err := a.replicaCalc.GetObjectMetricReplicas(specReplicas,
 			metricSpec.Object.Target.Value.MilliValue(), metricSpec.Object.Metric.Name, hpa.Namespace, &metricSpec.Object.DescribedObject, selector, metricSelector)
@@ -114,7 +114,7 @@ func (a *HorizontalController) computeStatusForObjectMetric(specReplicas, status
 				},
 			},
 		}
-		return replicaCountProposal, timestampProposal, fmt.Sprintf("%s metric %s", metricSpec.Object.DescribedObject.Kind, metricSpec.Object.Metric.Name), v2alpha1.NebulaAutoscalerCondition{}, nil
+		return replicaCountProposal, timestampProposal, fmt.Sprintf("%s metric %s", metricSpec.Object.DescribedObject.Kind, metricSpec.Object.Metric.Name), v1alpha1.NebulaAutoscalerCondition{}, nil
 	} else if metricSpec.Object.Target.Type == autoscalingv2.AverageValueMetricType {
 		replicaCountProposal, usageProposal, timestampProposal, err := a.replicaCalc.GetObjectPerPodMetricReplicas(statusReplicas,
 			metricSpec.Object.Target.AverageValue.MilliValue(), metricSpec.Object.Metric.Name, hpa.Namespace, &metricSpec.Object.DescribedObject, metricSelector)
@@ -134,7 +134,7 @@ func (a *HorizontalController) computeStatusForObjectMetric(specReplicas, status
 				},
 			},
 		}
-		return replicaCountProposal, timestampProposal, fmt.Sprintf("external metric %s(%+v)", metricSpec.Object.Metric.Name, metricSpec.Object.Metric.Selector), v2alpha1.NebulaAutoscalerCondition{}, nil
+		return replicaCountProposal, timestampProposal, fmt.Sprintf("external metric %s(%+v)", metricSpec.Object.Metric.Name, metricSpec.Object.Metric.Selector), v1alpha1.NebulaAutoscalerCondition{}, nil
 	}
 	errMsg := "invalid object metric source: neither a value target nor an average value target was set"
 	err = fmt.Errorf(errMsg)
@@ -144,9 +144,9 @@ func (a *HorizontalController) computeStatusForObjectMetric(specReplicas, status
 
 // computeStatusForPodsMetric computes the desired number of replicas for the specified metric of type PodsMetricSourceType.
 // computeStatusForResourceMetric computes the desired number of replicas for the specified metric of type ResourceMetricSourceType.
-func (a *HorizontalController) computeStatusForResourceMetric(ctx context.Context, currentReplicas int32, metricSpec autoscalingv2.MetricSpec, hpa *v2alpha1.NebulaAutoscaler,
+func (a *HorizontalController) computeStatusForResourceMetric(ctx context.Context, currentReplicas int32, metricSpec autoscalingv2.MetricSpec, hpa *v1alpha1.NebulaAutoscaler,
 	selector labels.Selector, status *autoscalingv2.MetricStatus) (replicaCountProposal int32, timestampProposal time.Time,
-	metricNameProposal string, condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	metricNameProposal string, condition v1alpha1.NebulaAutoscalerCondition, err error) {
 	replicaCountProposal, metricValueStatus, timestampProposal, metricNameProposal, condition, err := a.computeStatusForResourceMetricGeneric(ctx,
 		currentReplicas, metricSpec.Resource.Target, metricSpec.Resource.Name, hpa.Namespace, "", selector, autoscalingv2.ResourceMetricSourceType)
 	if err != nil {
@@ -164,9 +164,9 @@ func (a *HorizontalController) computeStatusForResourceMetric(ctx context.Contex
 }
 
 // computeStatusForContainerResourceMetric computes the desired number of replicas for the specified metric of type ResourceMetricSourceType.
-func (a *HorizontalController) computeStatusForContainerResourceMetric(ctx context.Context, currentReplicas int32, metricSpec autoscalingv2.MetricSpec, hpa *v2alpha1.NebulaAutoscaler,
+func (a *HorizontalController) computeStatusForContainerResourceMetric(ctx context.Context, currentReplicas int32, metricSpec autoscalingv2.MetricSpec, hpa *v1alpha1.NebulaAutoscaler,
 	selector labels.Selector, status *autoscalingv2.MetricStatus) (replicaCountProposal int32, timestampProposal time.Time,
-	metricNameProposal string, condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	metricNameProposal string, condition v1alpha1.NebulaAutoscalerCondition, err error) {
 	replicaCountProposal, metricValueStatus, timestampProposal, metricNameProposal, condition, err := a.computeStatusForResourceMetricGeneric(ctx,
 		currentReplicas, metricSpec.ContainerResource.Target, metricSpec.ContainerResource.Name, hpa.Namespace, metricSpec.ContainerResource.Container, selector, autoscalingv2.ContainerResourceMetricSourceType)
 	if err != nil {
@@ -186,8 +186,8 @@ func (a *HorizontalController) computeStatusForContainerResourceMetric(ctx conte
 
 // computeStatusForExternalMetric computes the desired number of replicas for the specified metric of type ExternalMetricSourceType.
 func (a *HorizontalController) computeStatusForExternalMetric(specReplicas, statusReplicas int32, metricSpec autoscalingv2.MetricSpec,
-	hpa *v2alpha1.NebulaAutoscaler, selector labels.Selector, status *autoscalingv2.MetricStatus) (replicaCountProposal int32,
-	timestampProposal time.Time, metricNameProposal string, condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	hpa *v1alpha1.NebulaAutoscaler, selector labels.Selector, status *autoscalingv2.MetricStatus) (replicaCountProposal int32,
+	timestampProposal time.Time, metricNameProposal string, condition v1alpha1.NebulaAutoscalerCondition, err error) {
 	if metricSpec.External.Target.AverageValue != nil {
 		replicaCountProposal, usageProposal, timestampProposal, err := a.replicaCalc.GetExternalPerPodMetricReplicas(statusReplicas,
 			metricSpec.External.Target.AverageValue.MilliValue(), metricSpec.External.Metric.Name, hpa.Namespace, metricSpec.External.Metric.Selector)
@@ -207,7 +207,7 @@ func (a *HorizontalController) computeStatusForExternalMetric(specReplicas, stat
 				},
 			},
 		}
-		return replicaCountProposal, timestampProposal, fmt.Sprintf("external metric %s(%+v)", metricSpec.External.Metric.Name, metricSpec.External.Metric.Selector), v2alpha1.NebulaAutoscalerCondition{}, nil
+		return replicaCountProposal, timestampProposal, fmt.Sprintf("external metric %s(%+v)", metricSpec.External.Metric.Name, metricSpec.External.Metric.Selector), v1alpha1.NebulaAutoscalerCondition{}, nil
 	}
 	if metricSpec.External.Target.Value != nil {
 		replicaCountProposal, usageProposal, timestampProposal, err := a.replicaCalc.GetExternalMetricReplicas(specReplicas,
@@ -228,7 +228,7 @@ func (a *HorizontalController) computeStatusForExternalMetric(specReplicas, stat
 				},
 			},
 		}
-		return replicaCountProposal, timestampProposal, fmt.Sprintf("external metric %s(%+v)", metricSpec.External.Metric.Name, metricSpec.External.Metric.Selector), v2alpha1.NebulaAutoscalerCondition{}, nil
+		return replicaCountProposal, timestampProposal, fmt.Sprintf("external metric %s(%+v)", metricSpec.External.Metric.Name, metricSpec.External.Metric.Selector), v1alpha1.NebulaAutoscalerCondition{}, nil
 	}
 	errMsg := "invalid external metric source: neither a value target nor an average value target was set"
 	err = fmt.Errorf(errMsg)
@@ -237,8 +237,8 @@ func (a *HorizontalController) computeStatusForExternalMetric(specReplicas, stat
 }
 
 func (a *HorizontalController) computeStatusForPodsMetric(currentReplicas int32, metricSpec autoscalingv2.MetricSpec,
-	hpa *v2alpha1.NebulaAutoscaler, selector labels.Selector, status *autoscalingv2.MetricStatus, metricSelector labels.Selector) (replicaCountProposal int32,
-	timestampProposal time.Time, metricNameProposal string, condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	hpa *v1alpha1.NebulaAutoscaler, selector labels.Selector, status *autoscalingv2.MetricStatus, metricSelector labels.Selector) (replicaCountProposal int32,
+	timestampProposal time.Time, metricNameProposal string, condition v1alpha1.NebulaAutoscalerCondition, err error) {
 	replicaCountProposal, usageProposal, timestampProposal, err := a.replicaCalc.GetMetricReplicas(currentReplicas,
 		metricSpec.Pods.Target.AverageValue.MilliValue(), metricSpec.Pods.Metric.Name, hpa.Namespace, selector, metricSelector)
 	if err != nil {
@@ -258,13 +258,13 @@ func (a *HorizontalController) computeStatusForPodsMetric(currentReplicas int32,
 		},
 	}
 
-	return replicaCountProposal, timestampProposal, fmt.Sprintf("pods metric %s", metricSpec.Pods.Metric.Name), v2alpha1.NebulaAutoscalerCondition{}, nil
+	return replicaCountProposal, timestampProposal, fmt.Sprintf("pods metric %s", metricSpec.Pods.Metric.Name), v1alpha1.NebulaAutoscalerCondition{}, nil
 }
 
 func (a *HorizontalController) computeStatusForResourceMetricGeneric(ctx context.Context, currentReplicas int32, target autoscalingv2.MetricTarget,
 	resourceName corev1.ResourceName, namespace string, container string, selector labels.Selector, sourceType autoscalingv2.MetricSourceType) (replicaCountProposal int32,
 	metricStatus *autoscalingv2.MetricValueStatus, timestampProposal time.Time, metricNameProposal string,
-	condition v2alpha1.NebulaAutoscalerCondition, err error) {
+	condition v1alpha1.NebulaAutoscalerCondition, err error) {
 	if target.AverageValue != nil {
 		var rawProposal int64
 		replicaCountProposal, rawProposal, timestampProposal, err := a.replicaCalc.GetRawResourceReplicas(ctx,
@@ -276,7 +276,7 @@ func (a *HorizontalController) computeStatusForResourceMetricGeneric(ctx context
 		status := autoscalingv2.MetricValueStatus{
 			AverageValue: resource.NewMilliQuantity(rawProposal, resource.DecimalSI),
 		}
-		return replicaCountProposal, &status, timestampProposal, metricNameProposal, v2alpha1.NebulaAutoscalerCondition{}, nil
+		return replicaCountProposal, &status, timestampProposal, metricNameProposal, v1alpha1.NebulaAutoscalerCondition{}, nil
 	}
 
 	if target.AverageUtilization == nil {
@@ -298,5 +298,5 @@ func (a *HorizontalController) computeStatusForResourceMetricGeneric(ctx context
 		AverageUtilization: &percentageProposal,
 		AverageValue:       resource.NewMilliQuantity(rawProposal, resource.DecimalSI),
 	}
-	return replicaCountProposal, &status, timestampProposal, metricNameProposal, v2alpha1.NebulaAutoscalerCondition{}, nil
+	return replicaCountProposal, &status, timestampProposal, metricNameProposal, v1alpha1.NebulaAutoscalerCondition{}, nil
 }

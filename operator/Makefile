@@ -1,6 +1,8 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+DOCKER_REGISTRY ?= reg.vesoft-inc.com
+DOCKER_REPO ?= ${DOCKER_REGISTRY}/vesoft-ng
+IMAGE_TAG ?= latest
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.28.0
 
@@ -18,6 +20,9 @@ GO     := $(GOENV) go
 
 TARGETDIR := "$(GOOS)/$(GOARCH)"
 USERNAME ?= ng-user
+
+# Set build symbols
+LDFLAGS = $(if $(DEBUGGER),,-s -w) $(shell ./hack/version.sh)
 
 # CONTAINER_TOOL defines the container tool to be used for building images.
 # Be aware that the target commands are only tested with Docker which is
@@ -54,11 +59,13 @@ help: ## Display this help.
 
 .PHONY: manifests
 manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
-	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:maxDescLen=0 webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+	$(CONTROLLER_GEN) rbac:roleName=manager-role crd:generateEmbeddedObjectMeta=false,maxDescLen=0 webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+generate: controller-gen defaulter-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+	mkdir -p tmp.gen && $(GOBIN)/defaulter-gen --go-header-file "hack/boilerplate.go.txt" --input-dirs "./apis/autoscaling/v1alpha1" --output-base "./tmp.gen/"
+	cp -f tmp.gen/github.com/vesoft-inc/nebula-ng-tools/operator/apis/autoscaling/v1alpha1/zz_generated.defaults.go apis/autoscaling/v1alpha1/ && rm -rf ./tmp.gen
 
 .PHONY: fmt
 fmt: ## Run go fmt against code.
@@ -92,9 +99,9 @@ lint-fix: golangci-lint ## Run golangci-lint linter and perform fixes
 
 .PHONY: build
 build: ## Build manager binary.
-	$(GO) build -o bin/$(TARGETDIR)/controller-manager cmd/controller-manager/main.go
-	$(GO) build -o bin/$(TARGETDIR)/scheduler cmd/scheduler/main.go
-	$(GO) build -o bin/$(TARGETDIR)/autoscaler cmd/autoscaler/main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/$(TARGETDIR)/controller-manager cmd/controller-manager/main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/$(TARGETDIR)/scheduler cmd/scheduler/main.go
+	$(GO) build -ldflags '$(LDFLAGS)' -o bin/$(TARGETDIR)/autoscaler cmd/autoscaler/main.go
 
 .PHONY: run
 run: ## Run a controller from your host.
@@ -117,7 +124,7 @@ docker-push: ## Push docker image with the manager.
 # - have enabled BuildKit. More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 # - be able to push the image to your registry (i.e. if you do not set a valid value via IMG=<myregistry/image:<tag>> then the export will fail)
 # To adequately provide solutions that are compatible with multiple platforms, you should consider using this option.
-PLATFORMS ?= linux/arm64,linux/amd64,linux/s390x,linux/ppc64le
+PLATFORMS ?= linux/arm64,linux/amd64
 DILIM := ,
 
 .PHONY: docker-buildx
@@ -130,7 +137,7 @@ docker-buildx: ## Build and push docker image for the manager for cross-platform
 	echo "Building and pushing nebula-operator image... $(PLATFORMS)"
 	- $(CONTAINER_TOOL) buildx create --name project-v3-builder
 	$(CONTAINER_TOOL) buildx use project-v3-builder
-	$(CONTAINER_TOOL) buildx build --pull --push --platform=$(PLATFORMS) --tag ${IMG} -f Dockerfile --build-arg USERNAME=${USERNAME} .
+	$(CONTAINER_TOOL) buildx build --pull --push --platform=$(PLATFORMS) --tag "${DOCKER_REPO}/nebula-ng-operator:${IMAGE_TAG}" -f Dockerfile --build-arg USERNAME=${USERNAME} .
 	- $(CONTAINER_TOOL) buildx rm project-v3-builder
 	
 ##@ Deployment
@@ -167,11 +174,13 @@ $(LOCALBIN):
 KUBECTL ?= kubectl
 KUSTOMIZE ?= $(LOCALBIN)/kustomize
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
+DEFAULTER_GEN ?= $(LOCALBIN)/defaulter-gen
 ENVTEST ?= $(LOCALBIN)/setup-envtest
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.2.1
 CONTROLLER_TOOLS_VERSION ?= v0.13.0
+DEFAULTER_TOOLS_VERSION ?= v0.27.16
 
 .PHONY: kustomize
 kustomize: $(KUSTOMIZE) ## Download kustomize locally if necessary. If wrong version is installed, it will be removed before downloading.
@@ -187,6 +196,12 @@ controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessar
 $(CONTROLLER_GEN): $(LOCALBIN)
 	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
 	GOBIN=$(LOCALBIN) go install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
+
+.PHONY: defaulter-gen
+defaulter-gen: $(DEFAULTER_GEN) ## Download defaulter-gen locally if necessary. If wrong version is installed, it will be overwritten.
+$(DEFAULTER_GEN): $(LOCALBIN)
+	test -s $(LOCALBIN)/defaulter-gen && $(LOCALBIN)/defaulter-gen --version | grep -q $(DEFAULTER_TOOLS_VERSION) || \
+	GOBIN=$(LOCALBIN) go install k8s.io/code-generator/cmd/defaulter-gen@$(DEFAULTER_TOOLS_VERSION)
 
 .PHONY: envtest
 envtest: $(ENVTEST) ## Download envtest-setup locally if necessary.
