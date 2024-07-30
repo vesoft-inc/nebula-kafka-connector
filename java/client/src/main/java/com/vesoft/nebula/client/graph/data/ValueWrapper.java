@@ -9,14 +9,16 @@ import com.google.common.base.Charsets;
 import com.vesoft.nebula.client.graph.exception.InvalidValueException;
 import com.vesoft.nebula.proto.common.Value;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Vector;
 
 public class ValueWrapper {
 
-    private final Value value;
+    private final Value   value;
     private final Charset charset = Charsets.UTF_8;
 
     public String getDataType() {
@@ -26,16 +28,20 @@ public class ValueWrapper {
         if (value.getDataCase() == Value.DataCase.BOOL_VALUE) {
             return "BOOLEAN";
         }
-        if (value.getDataCase() == Value.DataCase.INT8_VALUE) {
+        if (value.getDataCase() == Value.DataCase.INT8_VALUE
+                || value.getDataCase() == Value.DataCase.UINT8_VALUE) {
             return "BYTE";
         }
-        if (value.getDataCase() == Value.DataCase.INT16_VALUE) {
+        if (value.getDataCase() == Value.DataCase.INT16_VALUE
+                || value.getDataCase() == Value.DataCase.UINT16_VALUE) {
             return "SHORT";
         }
-        if (value.getDataCase() == Value.DataCase.INT32_VALUE) {
+        if (value.getDataCase() == Value.DataCase.INT32_VALUE
+                || value.getDataCase() == Value.DataCase.UINT32_VALUE) {
             return "INT";
         }
-        if (value.getDataCase() == Value.DataCase.INT64_VALUE) {
+        if (value.getDataCase() == Value.DataCase.INT64_VALUE
+                || value.getDataCase() == Value.DataCase.UINT64_VALUE) {
             return "LONG";
         }
         if (value.getDataCase() == Value.DataCase.FLOAT_VALUE) {
@@ -79,6 +85,12 @@ public class ValueWrapper {
         }
         if (value.getDataCase() == Value.DataCase.PATH_VALUE) {
             return "PATH";
+        }
+        if (value.getDataCase() == Value.DataCase.DECIMAL_VALUE) {
+            return "DECIMAL";
+        }
+        if (value.getDataCase() == Value.DataCase.VECTOR_VALUE) {
+            return "VECTOR";
         }
         throw new IllegalArgumentException("Unknown field id " + value.getDataCase());
     }
@@ -223,6 +235,13 @@ public class ValueWrapper {
         return value.getDataCase() == Value.DataCase.PATH_VALUE;
     }
 
+    public boolean isDecimal() {
+        return value.getDataCase() == Value.DataCase.DECIMAL_VALUE;
+    }
+
+    public boolean isVector() {
+        return value.getDataCase() == Value.DataCase.RECORD_VALUE;
+    }
 
     /**
      * Convert the original data type Value to boolean
@@ -473,6 +492,21 @@ public class ValueWrapper {
                 "cannot get field `path` because value's type is " + getDataType());
     }
 
+    public BigDecimal asDecimal() throws InvalidValueException {
+        if (value.getDataCase() == Value.DataCase.DECIMAL_VALUE) {
+            return new BigDecimal(value.getStringValue().toString(charset));
+        }
+        throw new InvalidValueException(
+                "cannot get field `decimal` because value's type is " + getDataType());
+    }
+
+    public Vector asVector() throws InvalidValueException {
+        if (value.getDataCase() == Value.DataCase.VECTOR_VALUE) {
+            return new java.util.Vector(value.getVectorValue().getValuesList());
+        }
+        throw new InvalidValueException(
+                "cannot get field `vector` because value's type is " + getDataType());
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -536,8 +570,11 @@ public class ValueWrapper {
             return asDuration().toString();
         } else if (isPath()) {
             return asPath().toString();
+        } else if (isDecimal()) {
+            return asDecimal().toString();
+        } else if (isRecord()) {
+            return asRecord().toString();
         }
         return "Unknown type: " + getDataType();
-
     }
 }

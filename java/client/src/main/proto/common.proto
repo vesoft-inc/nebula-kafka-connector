@@ -19,6 +19,10 @@ extend google.protobuf.FileOptions {
     repeated bytes supported_versions = 9560;
 }
 
+// reference: https://github.com/protocolbuffers/protobuf/issues/3520
+// Each client should use the following version to communicate with the
+// server:
+//   nebula.proto.common.DESCRIPTOR.GetOptions().Extensions[nebula.proto.common.protocol_version]
 option (protocol_version) = "5.0.0";
 // The supported_versions field is used to store the supported versions of the
 // protocol. multiple versions are defined in same option repeatedly, such as:
@@ -91,6 +95,10 @@ message List {
     repeated Value values = 1;
 }
 
+message Vector {
+    repeated float values = 1;
+}
+
 message Record {
     map<string, Value> values = 1;
 }
@@ -117,6 +125,15 @@ message Edge {
     repeated string    labels     = 6;
     int64              rank       = 7;
     map<string, Value> properties = 8;
+}
+
+message Decimal {
+    // int16 ndigits;
+    // int32  weight = 1;
+    // int32  dscale = 2;
+    // int32  sign   = 3;
+    // bytes  digits = 4;
+    string sval = 5;
 }
 
 message Path {
@@ -161,6 +178,8 @@ message Value {
         kLocalDatetime = 22;
         kZonedDatetime = 23;
         kRef           = 24;
+        kDecimal       = 25;
+        kVector        = 26;
     }
 
     oneof data {
@@ -188,6 +207,8 @@ message Value {
         LocalDatetime local_datetime_value = 22;
         ZonedDatetime zoned_datetime_value = 23;
         Ref           ref_value            = 24;
+        Decimal       decimal_value        = 25;
+        Vector        vector_value         = 26;
     }
 }
 
@@ -206,18 +227,9 @@ enum ServiceType {
     ALL     = 4;
 }
 
-message RequestHeader {
-    int64 cluster_id = 1;
-}
-
 message Status {
     bytes code    = 1;
     bytes message = 2;
-}
-
-message ResponseHeader {
-    Status      status = 1;
-    HostAddress leader = 2;
 }
 
 message DirInfo {
