@@ -149,6 +149,17 @@ func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64) ([]*Cluste
 				sInfo.InstallPath = installPath
 				sInfo.DataPaths = dataPaths
 			}
+			if s.Type == meta.ServiceTypeGraphd {
+				agent, err := amg.GetAgent(s.Host)
+				if err != nil {
+					return nil, fmt.Errorf("get agent %s failed: %w", s.Host, err)
+				}
+				installPath, err := agent.GetInstallPath(s.Type)
+				if err != nil {
+					return nil, fmt.Errorf("get graphd %s install path failed: %w", s.Host, err)
+				}
+				sInfo.InstallPath = installPath
+			}
 
 			cluster.Services = append(cluster.Services, sInfo)
 		}
