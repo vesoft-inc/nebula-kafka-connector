@@ -11,8 +11,8 @@ import (
 
 var showServiceCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show service in cluster.",
-	Long:  `ngctl service show --cluster [clustername]`,
+	Short: "Show services in a cluster.",
+	Long:  `Show services in a cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

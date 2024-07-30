@@ -30,39 +30,42 @@ echo "INSTALL_PATH set to: ${INSTALL_PATH}"
 
 echo "PACKAGE_PATH set to: ${PACKAGE_PATH}"
 
-${CMD} supercluster create --config ./config.yaml --with_install
+../ngctl supercluster create --config ./config.yaml
 
-${CMD} supercluster login -P 49559 -u root
+../ngctl supercluster login -P 49559 -u root
 
-${CMD} cluster create -c testcluster
+../ngctl cluster create -c testcluster
 
-${CMD} host add -f ./config.yaml -c testcluster
+../ngctl host add -f ./config.yaml -c testcluster
 
-${CMD} service add -t storaged -H 127.0.0.1 -P 49779 -c testcluster
+../ngctl host install -f ./config.yaml -c testcluster
 
-${CMD} service add -t graphd -H 127.0.0.1 -P 49669 -c testcluster
+../ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testcluster
 
-${CMD} service start -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
+../ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testcluster
 
-${CMD} service start -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
+../ngctl service start -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 
-${CMD} service show -c testcluster
+../ngctl service start -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
-${CMD} service stop -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
+../ngctl service show -c testcluster
 
-${CMD} service stop -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
+../ngctl service stop -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 
-${CMD} service drop -t storaged -H 127.0.0.1 -P 49779 -c testcluster
+../ngctl service stop -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
-${CMD} service drop -t graphd -H 127.0.0.1 -P 49669 -c testcluster
+../ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testcluster
 
-${CMD} host drop -f ./config.yaml -c testcluster
+../ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testcluster
 
-${CMD} host show -c testcluster
+../ngctl host drop -f ./config.yaml -c testcluster
 
-${CMD} supercluster stop --config ./config.yaml
+../ngctl host uninstall -f ./config.yaml -c testcluster
+
+../ngctl host show -c testcluster
+
+../ngctl supercluster stop --config ./config.yaml
 
 # logout to the supercluster
-${CMD} supercluster logout
+../ngctl supercluster logout
 
-rm ./config.yaml

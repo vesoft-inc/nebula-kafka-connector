@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/cluster_admin"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/host_admin"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/service_admin"
@@ -20,6 +21,13 @@ var rootCmd = &cobra.Command{
 	},
 }
 
+func docGen() {
+	err := doc.GenMarkdownTree(rootCmd, "doc")
+	if err != nil {
+		panic(err)
+	}
+}
+
 func init() {
 	// cmds communicating with the metad to manage the supercluster
 	rootCmd.AddCommand(supercluster_admin.SuperclusterCmd)
@@ -29,6 +37,8 @@ func init() {
 	rootCmd.AddCommand(host_admin.HostCmd)
 	// cmds coomunicating with a agent to manage services on a host
 	rootCmd.AddCommand(service_admin.ServiceAdminCmd)
+
+	// docGen()
 }
 
 func main() {

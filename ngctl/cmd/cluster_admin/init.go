@@ -10,8 +10,8 @@ import (
 
 var initClusterCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Init cluster storage part.",
-	Long:  `ngctl cluster init --cluster [clustername]`,
+	Short: "Initialize a cluster in the supercluster.",
+	Long:  `Initialize a cluster in the supercluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

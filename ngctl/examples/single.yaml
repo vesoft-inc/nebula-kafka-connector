@@ -17,7 +17,7 @@ spec:
           host: "127.0.0.1:6688"
     clusters:
       - zoneList: [zone1]
-        name: cluster_test
+        name: testcluster
         replica: 1
         graphd:
           hosts:

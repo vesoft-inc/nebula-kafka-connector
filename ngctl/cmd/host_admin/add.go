@@ -27,7 +27,7 @@ func getValidAgentPort(hostIP string) (uint32, error) {
 var addHostCmd = &cobra.Command{
 	Use:   "add",
 	Short: "Add a host into a cluster.",
-	Long:  `Add a host into a cluster, with the NebulaGraph pkg installed`,
+	Long:  `Add a host into a cluster. A host is identified by its IP address. The port of the deployed agent is also needed.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -44,7 +44,7 @@ var addHostCmd = &cobra.Command{
 		if configError != nil {
 			return common.NgctlError("config file error", configError.Error())
 		}
-		hostList, err := common.DeriveHostList(flags.host, flags.clusterName)
+		hostList, err := common.DeriveHostList(flags.host, flags.clusterName, false)
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
@@ -71,11 +71,6 @@ var addHostCmd = &cobra.Command{
 				return common.NgctlError("Add host failed", err.Error())
 			}
 		}
-		if flags.withInstall {
-			if err = InstallOnHost(hostResrouces.ResourceList, false); err != nil {
-				return common.NgctlError("Failed to install NebulaGraph on the host", err.Error())
-			}
-		}
 		fmt.Fprintln(common.MetaOutput, "Add hosts successfully.")
 		return nil
 	},
@@ -86,9 +81,6 @@ func init() {
 	addHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be added to a cluster")
 	addHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
 	addHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
-	// optinoal, install NebulaGraph on the host or not
-	addHostCmd.Flags().
-		BoolVarP(&hostFlags.withInstall, "with_install", "w", false, "install NebulaGraph on the host or not")
 
 	addHostCmd.MarkFlagRequired("cluster")
 	addHostCmd.MarkFlagRequired("config")

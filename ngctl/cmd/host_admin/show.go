@@ -12,7 +12,7 @@ import (
 var showHostsCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show hosts in cluster.",
-	Long:  `ngctl host show --cluster [clustername]`,
+	Long:  `Show all hosts currently in a cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

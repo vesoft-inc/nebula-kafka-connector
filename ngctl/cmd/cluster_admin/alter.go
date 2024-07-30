@@ -10,8 +10,8 @@ import (
 
 var alterClusterCmd = &cobra.Command{
 	Use:   "alter",
-	Short: "Alter cluster in meta server.",
-	Long:  `ngctl cluster alter --cluster [clustername] --owner [owner]`,
+	Short: "Alter the owner of a cluster.",
+	Long:  `A cluster has an owner registered in the supercluster. Users can alter it.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

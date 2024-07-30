@@ -10,8 +10,8 @@ import (
 
 var dropHostCmd = &cobra.Command{
 	Use:   "drop",
-	Short: "Drop host from cluster.",
-	Long:  `ngctl host drop --host [host] --cluster [clustername]`,
+	Short: "Drop a host from a cluster.",
+	Long:  `Drop a host from a cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -27,7 +27,7 @@ var dropHostCmd = &cobra.Command{
 		if err := common.CheckInConfigFile(flags.configFile); err != nil {
 			return common.NgctlError("Failed to get a valid config file", err.Error())
 		}
-		hostList, err := common.DeriveHostList(flags.host, flags.clusterName)
+		hostList, err := common.DeriveHostList(flags.host, flags.clusterName, false)
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
@@ -55,14 +55,6 @@ var dropHostCmd = &cobra.Command{
 				fmt.Fprintln(common.MetaOutput, fmt.Sprintf("Drop host %s successfully.", host.IP))
 			}
 		}
-		// Uninstall
-		if flags.withUninstall {
-			if err := UninstallOnHost(nil); err != nil {
-				fmt.Fprintln(common.MetaOutput, fmt.Sprintf("Failed to uninstall NebulaGraph on the selected hosts: %s", err.Error()))
-			} else {
-				fmt.Fprintln(common.MetaOutput, "Uninstall NebulaGraph on the selected hosts successfully.")
-			}
-		}
 		return nil
 	},
 }
@@ -74,6 +66,4 @@ func init() {
 	dropHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
 	dropHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 0, "port of the agent on the host")
 	dropHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
-	dropHostCmd.Flags().
-		BoolVarP(&hostFlags.withUninstall, "with_uninstall", "u", false, "uninstall NebulaGraph on the host or not")
 }

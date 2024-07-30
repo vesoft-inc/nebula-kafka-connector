@@ -7,8 +7,8 @@ import (
 
 var restartServiceCmd = &cobra.Command{
 	Use:   "start",
-	Short: `Start a service on a host`,
-	Long:  `ngctl service start --type [graphd|storaged] --host [host] --port [port] --config [config_file_path]`,
+	Short: `Restart a service on a host.`,
+	Long:  `Restart a service on a host.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

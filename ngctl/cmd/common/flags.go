@@ -69,17 +69,19 @@ func CheckInConfigFile(filepath string) (err error) {
 }
 
 // checking all hosts in the config file, including the metad, storaged, and graphd
-func DeriveHostList(hostFromCmdLineOption string, clusterName string) (hostList []IPAndPort, err error) {
+func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad bool) (hostList []IPAndPort, err error) {
 	// hosts for metad
 	dict := map[string]IPAndPort{}
-	for _, host := range ConfigSpec.Spec.Metad.Hosts {
-		if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-			// omit port for hosts
-			if _, ok := dict[host.IP]; !ok {
-				dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
-			}
-			if host.IP == hostFromCmdLineOption {
-				return []IPAndPort{{IP: host.IP}}, nil
+	if needMetad {
+		for _, host := range ConfigSpec.Spec.Metad.Hosts {
+			if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
+				// omit port for hosts
+				if _, ok := dict[host.IP]; !ok {
+					dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+				}
+				if host.IP == hostFromCmdLineOption {
+					return []IPAndPort{{IP: host.IP}}, nil
+				}
 			}
 		}
 	}

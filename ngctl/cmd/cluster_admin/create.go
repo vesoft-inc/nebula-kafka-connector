@@ -10,8 +10,8 @@ import (
 
 var createClusterCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create cluster in meta server.",
-	Long:  `ngctl cluster create --cluster [clustername] --replica-factor [replica-factor] --owner [owner]`,
+	Short: "Create a cluster in the supercluster.",
+	Long:  `Create a cluster and register in the supercluster. The cluster will be empty after creation. Users need to add hosts and services into a newly created cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

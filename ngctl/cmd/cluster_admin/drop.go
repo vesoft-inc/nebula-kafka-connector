@@ -10,8 +10,9 @@ import (
 
 var dropClusterCmd = &cobra.Command{
 	Use:   "drop",
-	Short: "drop cluster storage part.",
-	Long:  `ngctl cluster drop --cluster [clustername]`,
+	Short: "Drop a cluster from the supercluster.",
+	// what is the cluster is not empty?
+	Long: `Drop a cluster from the supercluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -28,7 +29,7 @@ var dropClusterCmd = &cobra.Command{
 
 		req := meta.NewDropClusterReq(cluster, force)
 		if err := common.MetaClient.DropCluster(req); err != nil {
-			return common.NgctlError("Init cluster failed", err.Error())
+			return common.NgctlError("Drop cluster failed", err.Error())
 		}
 		fmt.Fprintln(common.MetaOutput, "Drop cluster successfully.")
 		return nil

@@ -7,8 +7,8 @@ import (
 
 var stopServiceCmd = &cobra.Command{
 	Use:   "stop",
-	Short: `Stop a service on a host`,
-	Long:  `Stop a service on a host`,
+	Short: `Stop a service on a host.`,
+	Long:  `Stop a service on a host.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

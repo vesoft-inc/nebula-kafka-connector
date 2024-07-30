@@ -87,8 +87,8 @@ func ServiceOperation(agent types.Agent, serviceType string, installPath string,
 
 var startServiceCmd = &cobra.Command{
 	Use:   "start",
-	Short: `Start a service on a host`,
-	Long:  `Start a service on a host`,
+	Short: `Start a service on a host.`,
+	Long:  `Start a service on a host.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

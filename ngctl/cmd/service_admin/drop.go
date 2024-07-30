@@ -11,8 +11,8 @@ import (
 
 var dropServiceCmd = &cobra.Command{
 	Use:   "drop",
-	Short: `Drop service from assigned cluster.`,
-	Long:  `ngctl service drop --type [graphd|storaged] --host [host] --port [port] --cluster [clustername]`,
+	Short: `Drop a service from a cluster.`,
+	Long:  `Drop a service from a cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

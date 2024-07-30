@@ -15,8 +15,8 @@ var clusterFlags clusterFlagsType
 
 var ClusterCmd = &cobra.Command{
 	Use:   "cluster",
-	Short: "Process cluster command",
-	Long:  `Execute cluster command in cli mode.`,
+	Short: "Run commands managing a cluster",
+	Long:  `A cluster may contain multiple graphd and storaged services. Users could run commands to create, initialize, alternate, show, backup or drop a cluster.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},

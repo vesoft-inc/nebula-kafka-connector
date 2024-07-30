@@ -11,8 +11,8 @@ import (
 
 var showClusterCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show cluster, show all if no cluster name specified.",
-	Long:  `ngctl cluster show --cluster [clustername]`,
+	Short: "Show details of a cluster.",
+	Long:  `Show details of a cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

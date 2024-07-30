@@ -22,8 +22,8 @@ var hostFlags hostFlagsType
 
 var HostCmd = &cobra.Command{
 	Use:   "host",
-	Short: `Process host command`,
-	Long:  `Execute host command in cli mode.`,
+	Short: `Run commands managing hosts.`,
+	Long:  `Run commands managing hosts.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -75,6 +75,8 @@ func init() {
 	HostCmd.AddCommand(addHostCmd)
 	HostCmd.AddCommand(dropHostCmd)
 	HostCmd.AddCommand(showHostsCmd)
+	HostCmd.AddCommand(installHostCmd)
+	HostCmd.AddCommand(uninstallHostCmd)
 
 	ngadm_tasks.Init()
 }

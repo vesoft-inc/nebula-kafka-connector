@@ -20,8 +20,8 @@ var ServiceFlags ServiceFlagsType
 
 var ServiceAdminCmd = &cobra.Command{
 	Use:   "service",
-	Short: "Process service command",
-	Long:  `Execute service command in cli mode.`,
+	Short: "Run commands managing services.",
+	Long:  `Run commands managing services.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()
 		if err != nil {

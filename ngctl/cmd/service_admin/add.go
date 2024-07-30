@@ -11,8 +11,8 @@ import (
 
 var addServiceCmd = &cobra.Command{
 	Use:   "add",
-	Short: `Add service into assigned cluster.`,
-	Long:  `ngctl service add --type [graphd|storaged] --host [host] --port [port] --cluster [clustername]`,
+	Short: `Add a service into a cluster.`,
+	Long:  `Add a service into a cluster.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

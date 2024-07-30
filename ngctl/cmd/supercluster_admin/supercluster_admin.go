@@ -13,8 +13,8 @@ var superclusterFlags superclusterFlagsType
 
 var SuperclusterCmd = &cobra.Command{
 	Use:   "supercluster",
-	Short: "Process supercluster command",
-	Long:  `Execute supercluster command in cli mode.`,
+	Short: "Run commands managing a superclsuter.",
+	Long:  `Run commands managing a superclsuter.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
