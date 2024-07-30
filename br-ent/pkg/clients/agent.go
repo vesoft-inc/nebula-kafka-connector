@@ -404,7 +404,7 @@ func (ag *agentClient) DBPlayBack(backupName, installPath, dataPath, serviceMap 
 		return fmt.Errorf("db playback failed %s, %s, %w", stdout, stderr, err)
 	}
 
-	log.Infof("db playback success, log: %s", stderr)
+	fmt.Println("db playback success, log:", stderr)
 
 	return nil
 }

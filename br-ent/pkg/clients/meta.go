@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
@@ -16,7 +17,8 @@ type NebulaMeta struct {
 
 func NewMeta(addrStrs, username, password string, tlsConfig *tls.Config) (*NebulaMeta, error) {
 	// TODO: support tls
-	client, err := meta.NewMetaClient(addrStrs, meta.WithUserPassword(username, password))
+	client, err := meta.NewMetaClient(addrStrs, meta.WithUserPassword(username, password),
+		meta.WithConnectTimeout(time.Second*3600), meta.WithRequestTimeout(time.Second*3600))
 	if err != nil {
 		return nil, fmt.Errorf("create meta client failed: %v", err)
 	}
