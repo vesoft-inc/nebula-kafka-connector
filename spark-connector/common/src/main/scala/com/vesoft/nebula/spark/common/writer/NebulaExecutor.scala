@@ -167,9 +167,33 @@ object NebulaExecutor {
 
   /**
    * construct insert statement for edge
+   * TABLE t {id1, id2, degree} =
+   * (1,2,10),
+   * (2,3,20)
+   * USE nba
+   * FOR r IN t
+   * MATCH (src@Person{id:r.id1}), (dst:@Person{id:r.id2})
+   * INSERT (src)-[e@friend{degree:r.degree}]->(dst)
    */
-  def toExecuteSentence(graphName: String, edgeType: String, edges: NebulaEdges): String = {
-    s"USE `$graphName` INSERT EDGE `$edgeType` ${edges.getEdgesStr}"
+  def toExecuteSentence(graphName: String, edges: NebulaEdges, mode:String): String = {
+//    s"""
+//       |TABLE t {${edges.tableHeaders}} =
+//       |${edges.getEdgesStr}
+//       |USE `$graphName`
+//       |FOR r IN t
+//       |MATCH (src@`${edges.srcType}`${edges.getSrcPkStr}),(dst@`${edges.dstType}`${edges.getDstPkStr})
+//       |INSERT $mode (src)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst)
+//       |""".stripMargin
+
+    // TODO tmp statement, above statement for now has some problem, use the follow one temporary
+    s"""
+       |TABLE t {${edges.tableHeaders}} =
+       |${edges.getEdgesStr}
+       |USE `$graphName`
+       |FOR r IN t
+       |MATCH (src@`${edges.srcType}`),(dst@`${edges.dstType}`) WHERE src.`${edges.srcPkName}`=r.${edges.dfSrcField} AND dst.`${edges.dstPkName}`=r.${edges.dfDstField}
+       |INSERT $mode (src)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst)
+       |""".stripMargin
   }
 
   /**
@@ -204,7 +228,7 @@ object NebulaExecutor {
    */
   def toDeleteSentence(graphName: String, edgeType: String, edges: NebulaEdges): String = {
     val edge = edges.values.iterator.next()
-    val edgeMatchStatement = s"MATCH(a@${edges.srcType}{${edge.srcPkName}:${edge.srcId}})-[e@$edgeType]-(b@${edges.dstType}{${edge.dstPkName}:${edge.dstId}}) DELETE e"
+    val edgeMatchStatement = s"MATCH(a@${edges.srcType}{${edges.srcPkName}:${edge.srcId}})-[e@$edgeType]-(b@${edges.dstType}{${edges.dstPkName}:${edge.dstId}}) DELETE e"
     s"USE `$graphName` $edgeMatchStatement"
   }
 

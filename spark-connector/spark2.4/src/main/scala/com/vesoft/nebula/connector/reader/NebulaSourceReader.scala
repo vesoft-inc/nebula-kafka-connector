@@ -6,7 +6,6 @@
 package com.vesoft.nebula.connector.reader
 
 import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
-import org.apache.spark.TaskContext
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.reader.{DataSourceReader, InputPartition}
 import org.apache.spark.sql.types.{StringType, StructType}

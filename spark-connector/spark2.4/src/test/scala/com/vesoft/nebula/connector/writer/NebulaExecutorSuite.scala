@@ -5,6 +5,7 @@
 
 package com.vesoft.nebula.connector.writer
 
+import com.vesoft.nebula.spark.common.nebula.VidType
 import com.vesoft.nebula.spark.common.{NebulaEdge, NebulaEdges, NebulaNode, NebulaNodes}
 import com.vesoft.nebula.spark.common.writer.NebulaExecutor
 import org.apache.log4j.BasicConfigurator
@@ -107,7 +108,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
     nodes.append(NebulaNode(props1))
     nodes.append(NebulaNode(props2))
     val fieldTypeMap: Map[String, String] =
-      Map("col_string" -> "STRING", "col_fixed_string" -> "STRING", "col_bool" -> "BOOL", "col_int"->"INT32", "col_int64"->"INT64","col_double"->"DOUBLE","col_date"->"DATE")
+      Map("col_string" -> "STRING", "col_fixed_string" -> "STRING", "col_bool" -> "BOOL", "col_int" -> "INT32", "col_int64" -> "INT64", "col_double" -> "DOUBLE", "col_date" -> "DATE")
     val nebulaNodes = NebulaNodes(nodeType, nodes.toList, "col_string", fieldTypeMap)
     // test insert node
     var nodeStatement =
@@ -133,20 +134,20 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
          |FOR r IN t
          |INSERT OR REPLACE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
          |""".stripMargin
-      assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
+    assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
 
     // test insert node with ignore
     nodeStatement =
       NebulaExecutor.toExecuteSentence(graphName, nebulaNodes, "OR IGNORE")
-      expectStatement =
-        s"""
-           |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
-           |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
-           |USE `$graphName`
-           |FOR r IN t
-           |INSERT OR IGNORE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
-           |""".stripMargin
-      assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
+    expectStatement =
+      s"""
+         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
+         |USE `$graphName`
+         |FOR r IN t
+         |INSERT OR IGNORE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+         |""".stripMargin
+    assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
 
   }
 
@@ -172,14 +173,25 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
         "col_double" -> "2.0",
         "col_date" -> "date(\"2021-05-01\")"
       )
-    edges.append(NebulaEdge("id", "\"vid1\"", "id", "\"vid2\"", props1))
-    edges.append(NebulaEdge("id", "\"vid2\"", "id", "\"vid1\"", props2))
+    edges.append(NebulaEdge("\"vid1\"", "\"vid2\"", props1))
+    edges.append(NebulaEdge("\"vid2\"", "\"vid1\"", props2))
 
-    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, "person", "person", edges.toList)
-    val edgeStatement = NebulaExecutor.toExecuteSentence(graphName, edgeType, nebulaEdges)
+    val fieldTypeMap: Map[String, String] =
+      Map("col_string" -> "STRING", "col_fixed_string" -> "STRING", "col_bool" -> "BOOL", "col_int" -> "INT32", "col_int64" -> "INT64", "col_double" -> "DOUBLE", "col_date" -> "DATE")
+
+    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, "person", "id", VidType.STRING, "id1", "person", "id", VidType.STRING, "id2", edges.toList, fieldTypeMap)
+    val edgeStatement = NebulaExecutor.toExecuteSentence(graphName, nebulaEdges, "")
 
     val expectStatement =
-      s"""USE `$graphName` INSERT EDGE `$edgeType` ({`id`:\"vid1\"})-[{`col_string`:\"Tom\",`col_fixed_string`:\"Tom\",`col_bool`:true,`col_int`:10,`col_int64`:100,`col_double`:1.0,`col_date`:date(\"2021-11-12\")}]->({`id`:\"vid2\"}),({`id`:\"vid2\"})-[{`col_string`:\"Bob\",`col_fixed_string`:\"Bob\",`col_bool`:false,`col_int`:20,`col_int64`:200,`col_double`:2.0,`col_date`:date(\"2021-05-01\")}]->({`id`:\"vid1\"})""".stripMargin
+      s"""
+         |TABLE t {id1,id2,col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |(\"vid1\",\"vid2\",\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"vid2\",\"vid1\",\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
+         |USE `$graphName`
+         |FOR r IN t
+         |MATCH (src@`person`{`id`:CAST(r.id1 AS STRING)}),(dst@`person`{`id`:CAST(r.id2 AS STRING)})
+         |INSERT  (src)-[e@`friend`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)}]->(dst)
+         |""".stripMargin
+
     assert(expectStatement.toCharArray.sorted.mkString("").equals(edgeStatement.toCharArray.sorted.mkString("")))
   }
 
@@ -235,9 +247,13 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       "col_double" -> "1.0",
       "col_date" -> "date(\"2021-11-12\")"
     )
-    edges.append(NebulaEdge("id", "\"vid1\"", "id", "\"vid2\"", props1))
+    edges.append(NebulaEdge("\"vid1\"", "\"vid2\"", props1))
 
-    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, "person", "person", edges.toList)
+    val fieldTypeMap: Map[String, String] =
+      Map("col_string" -> "STRING", "col_fixed_string" -> "STRING", "col_bool" -> "BOOL", "col_int" -> "INT32", "col_int64" -> "INT64", "col_double" -> "DOUBLE", "col_date" -> "DATE")
+
+    val nebulaEdges: NebulaEdges = NebulaEdges(edgeType, "person", "id", VidType.STRING, "col_string", "person", "id", VidType.STRING, "col_fixed_string", edges.toList, fieldTypeMap)
+
     val edgeStatement = NebulaExecutor.toDeleteSentence(graphName, edgeType, nebulaEdges)
 
     val expectStatement =

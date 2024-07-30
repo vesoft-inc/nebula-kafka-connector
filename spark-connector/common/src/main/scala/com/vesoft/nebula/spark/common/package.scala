@@ -5,15 +5,11 @@
 
 package com.vesoft.nebula.spark.common
 
-case class NebulaNode(values: Map[String, String]) {
-  def getNodeStr: String = s"{${getMapValues(values)}}"
+import com.vesoft.nebula.spark.common.nebula.VidType
 
-  private[this] def getMapValues(values: Map[String, String]): String = {
-    values
-      .map(kv => s"`${kv._1}`:${kv._2}")
-      .mkString(",")
-  }
-}
+import scala.collection.mutable.ListBuffer
+
+case class NebulaNode(values: Map[String, String])
 
 case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkName: String, fieldTypeMap: Map[String, String]) {
   private val propNames = values.iterator.next().values.keySet.toSeq
@@ -27,16 +23,43 @@ case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkName: Strin
   def propNamesWithTableStr = propNames.map(prop => s"`$prop`:CAST(r.$prop AS ${fieldTypeMap(prop)})").mkString(",")
 }
 
-case class NebulaEdge(srcPkName: String, srcId: String, dstPkName: String, dstId: String, values: Map[String, String]) {
-  def getEdgeStr: String = s"({`$srcPkName`:$srcId})-[{${getMapValues(values)}}]->({`$dstPkName`:$dstId})"
+case class NebulaEdge(srcId: String, dstId: String, values: Map[String, String])
 
-  private[this] def getMapValues(values: Map[String, String]): String = {
-    values
-      .map(kv => s"`${kv._1}`:${kv._2}")
-      .mkString(",")
+case class NebulaEdges(edgeType: String,
+                       srcType: String,
+                       srcPkName: String,
+                       srcPkDataType: VidType.Value,
+                       dfSrcField: String,
+                       dstType: String,
+                       dstPkName: String,
+                       dstPkDataType:VidType.Value,
+                       dfDstField: String,
+                       values: List[NebulaEdge],
+                       fieldTypeMap: Map[String, String]) {
+  private val propNames = values.iterator.next().values.keySet.toSeq
+
+  def getEdgesStr = {
+    values.map(edge => {
+      s"(${edge.srcId},${edge.dstId}," +
+        s"${
+          propNames
+            .filterNot(p => p.equals(dfSrcField) || p.equals(dfDstField))
+            .map(prop => s"${edge.values(prop)}")
+            .mkString(",")
+        })"
+    }).mkString(",")
   }
-}
 
-case class NebulaEdges(edgeType: String, srcType: String, dstType: String, values: List[NebulaEdge]) {
-  def getEdgesStr = values.map(e => e.getEdgeStr).mkString(",")
+  def getSrcPkStr: String = s"{`${srcPkName}`:CAST(r.${dfSrcField} AS ${srcPkDataType.toString})}"
+
+  def getDstPkStr: String = s"{`${dstPkName}`:CAST(r.${dfDstField} AS ${dstPkDataType.toString})}"
+
+
+  def tableHeaders: String = {
+    val propNamesWithoutPks = propNames.filterNot(p => p.equals(dfSrcField) || p.equals(dfDstField))
+    val pksAndPropNames = Seq(dfSrcField, dfDstField) ++ propNamesWithoutPks
+    pksAndPropNames.mkString(",")
+  }
+
+  def propNamesWithTableStr: String = propNames.map(prop => s"`$prop`:CAST(r.$prop AS ${fieldTypeMap(prop)})").mkString(",")
 }

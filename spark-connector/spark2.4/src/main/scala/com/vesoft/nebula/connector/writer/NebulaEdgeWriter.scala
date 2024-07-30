@@ -62,7 +62,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
           nebulaOptions.dstPkAsProp,
           fieldTypeMap)
       }
-    val nebulaEdge = NebulaEdge(edgeDesc.srcNodePkName, srcId, edgeDesc.dstNodePkName, dstId, values)
+    val nebulaEdge = NebulaEdge(srcId, dstId, values)
     edges.append(nebulaEdge)
     if (edges.size >= nebulaOptions.batchSize) {
       execute()
@@ -134,10 +134,25 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   }
 
   private def getGql(edges: List[NebulaEdge]): String = {
-    val nebulaEdges = NebulaEdges(nebulaOptions.label, edgeDesc.srcNodeTypeName, edgeDesc.dstNodeTypeName, edges)
+    val nebulaEdges = NebulaEdges(
+      nebulaOptions.label,
+      edgeDesc.srcNodeTypeName,
+      edgeDesc.srcNodePkName,
+      edgeDesc.srcNodePkDataType,
+      nebulaOptions.srcPkField,
+      edgeDesc.dstNodeTypeName,
+      edgeDesc.dstNodePkName,
+      edgeDesc.dstNodePkDataType,
+      nebulaOptions.dstPkField,
+      edges,
+      fieldTypeMap)
     val exec = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
+        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaEdges, "")
+      case WriteMode.INSERTREPLACE =>
+        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaEdges, "OR REPLACE")
+      case WriteMode.INSERTIGNORE =>
+        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaEdges, "OR IGNORE")
       case WriteMode.UPDATE =>
         NebulaExecutor.toUpdateSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
       case WriteMode.DELETE =>
