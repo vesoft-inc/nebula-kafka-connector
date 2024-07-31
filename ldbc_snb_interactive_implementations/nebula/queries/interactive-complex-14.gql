@@ -10,7 +10,7 @@
 USE $graphName
 MATCH path0 = ALL SHORTEST PATH (person1:Person {id:$person1Id})<-[:KNOWS]->*(person2:Person {id:$person2Id})
 LET pathNodes = nodes(path0)
-LET numNodes = CAST(size(pathNodes)-1 AS INT64)
+LET numNodes = size(pathNodes)-1
 FOR i IN range(1, numNodes)
 LET prev = pathNodes[i-1], curr = pathNodes[i]
 RETURN 1.0 * VALUE {MATCH (curr)<-[:HAS_CREATOR]-(:Comment)-[:REPLY_OF]->(:Post)-[:HAS_CREATOR]->(prev) RETURN COUNT(*) AS a GROUP BY ()}
