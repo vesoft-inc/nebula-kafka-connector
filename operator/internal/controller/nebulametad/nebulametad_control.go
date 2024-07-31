@@ -99,6 +99,10 @@ func (c *defaultNebulaMetadControl) updateNebulaMetad(nm *v1alpha1.NebulaMetad) 
 		}
 	}
 
+	if err := kube.CheckRBAC(context.TODO(), c.client, nm.Namespace); err != nil {
+		return err
+	}
+
 	if err := c.metadCluster.Reconcile(nm); err != nil {
 		klog.Errorf("reconcile metad cluster failed: %v", err)
 		return err

@@ -1,6 +1,6 @@
 nebulaCluster:
   console:
-    image: reg.vesoft-inc.com/vesoft-ng/nebula-console
+    image: reg.vesoft-inc.com/vesoft-ng/ngql
     version: latest
   replicaFactor: 3
   zones:
