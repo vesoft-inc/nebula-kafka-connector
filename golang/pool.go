@@ -6,6 +6,7 @@ import (
 	"math"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -28,7 +29,7 @@ type (
 		maxIdle         int
 		maxOpen         int
 		minOpen         int
-		closed          bool
+		closed          atomic.Bool
 		stop            func()
 		hostAddresses   []*hostAddress
 		connCfg         *connConfig
@@ -60,13 +61,13 @@ var _ Client = &connection{}
 var _ Result = &resultSet{}
 
 func (dp *driverPool) Close() error {
+	dp.closed.Store(true)
+	dp.stop()
 	dp.mu.Lock()
 	for dc := range dp.connMap {
 		// ignore connection close error
 		_ = dc.Close()
 	}
-	dp.stop()
-	dp.closed = true
 	dp.mu.Unlock()
 	return nil
 }
@@ -290,6 +291,10 @@ func (dp *driverPool) connectionOpener(ctx context.Context) {
 				// reset opener
 				dp.openerCh <- struct{}{}
 				continue
+			}
+			if dp.closed.Load() {
+				_ = dc.Close()
+				return
 			}
 			dp.mu.Lock()
 			dp.connMap[dc] = struct{}{}

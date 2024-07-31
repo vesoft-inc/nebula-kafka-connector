@@ -5,10 +5,6 @@ import com.vesoft.nebula.common.reader.DataSourceReader
 import org.apache.spark.sql.execution.datasources.jdbc.JDBCOptions.{JDBC_BATCH_FETCH_SIZE, JDBC_DRIVER_CLASS, JDBC_LOWER_BOUND, JDBC_NUM_PARTITIONS, JDBC_PARTITION_COLUMN, JDBC_QUERY_STRING, JDBC_TABLE_NAME, JDBC_UPPER_BOUND, JDBC_URL}
 import org.apache.spark.sql.{DataFrame, SparkSession}
 
-/* Copyright (c) 2023 vesoft inc. All rights reserved.
- *
- * This source code is licensed under Apache 2.0 License.
- */
 
 class JdbcReader extends DataSourceReader {
 

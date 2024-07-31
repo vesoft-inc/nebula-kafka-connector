@@ -4,16 +4,22 @@ Official NebulaGraph Go client which communicates with Nebula service using [gRP
 
 ## Install & Update
 
-(TODO) should update if release in another repo
-currenyly, we use in private repo, so should run
+We now only support install by source code.
 
-`go env -w GOPRIVATE="github.com/vesoft-inc/*"`
+Could build the source code in `package` workspace.
 
-And then
+```bash
+workspace=/app/myapp
+# get the source code, e.g. nebula-golang-5.0.0.tar.gz
+tar nebula-golang-5.0.0.tar.gz -o /tmp/golang
+# in your project, run go mod edit
+cd ${workspace}
+go mod edit -replace github.com/vesoft-inc/nebula-ng-tools/golang=/tmp/golang
+```
 
-`go get -u -v github.com/vesoft-inc/nebula-ng-tools/golang@master`
+for more details, pleader refer: [gomod ref](https://go.dev/doc/modules/gomod-ref#replace)
 
-## Usage example(TODO)
+## Usage example
 
 ```golang
 package main

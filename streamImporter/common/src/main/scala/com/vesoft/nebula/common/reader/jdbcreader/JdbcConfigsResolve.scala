@@ -14,10 +14,6 @@ import com.vesoft.nebula.common.configuration.{
 }
 import org.apache.log4j.Logger
 
-/* Copyright (c) 2023 vesoft inc. All rights reserved.
- *
- * This source code is licensed under Apache 2.0 License.
- */
 
 object JdbcConfigsResolve {
   private[this] val LOG = Logger.getLogger(this.getClass)
