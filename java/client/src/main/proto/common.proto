@@ -1,5 +1,3 @@
-// Copyright (c) 2024 vesoft inc. All rights reserved.
-
 // gRPC requires the proto3 syntax
 syntax = "proto3";
 

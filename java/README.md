@@ -57,3 +57,36 @@ There are two ways to use Java SDK: get a NebulaClient from NebulaPool or get a 
             }
         }
 ```
+
+## Note
+If your packaged jar project that imports the NebulaGraph client dependency happens 
+`java.lang.IllegalArgumentException: Address types of NameResolver 'unix' for '192.168.15.8:9669' not supported by transport` exception, 
+please pay attention to configure transformer with the `maven-shade-plugin` plugin in your project pom.xml.
+
+```agsl
+  <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.4.1</version>
+                <configuration>
+                    <!-- put your configurations here -->
+                    <filters>
+                        <filter>
+                            <artifact>*:*</artifact>
+                        </filter>
+                    </filters>
+                    <transformers>
+                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">
+                        </transformer>
+                    </transformers>
+                </configuration>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+```

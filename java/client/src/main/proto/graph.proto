@@ -1,11 +1,4 @@
 /**
- * Copyright (c) 2024 vesoft inc. All rights reserved.
- *
- * This is the protocol file that defines the data exchanging contract
- * between the client SDKs and the server of NebulaGraph
- */
-
-/**
  *             === Some Key Notes About Protobuf ===
  * 1. Field Presence
  *     - `required' is removed from proto3 while `optional' kept.
