@@ -155,17 +155,17 @@ public class NebulaWriterTest {
      */
     @Test
     public void testGetNodeStatement() {
-        Map<String, Object> properties1 = new HashMap<>();
+        Map<String, String> properties1 = new HashMap<>();
         properties1.put("name", "A");
-        properties1.put("age", 10);
-        properties1.put("weight", 12);
+        properties1.put("age", "10");
+        properties1.put("weight", "12");
         List<NebulaNode> nodes = new ArrayList<>();
         NebulaNode node1 = new NebulaNode(properties1);
         nodes.add(node1);
-        Map<String, Object> properties2 = new HashMap<>();
-        properties2.put("name", "B");
-        properties2.put("age", 20);
-        properties2.put("weight", 22);
+        Map<String, String> properties2 = new HashMap<>();
+        properties2.put("name", "\"B\"");
+        properties2.put("age", "20");
+        properties2.put("weight", "22");
         NebulaNode node2 = new NebulaNode(properties2);
         nodes.add(node2);
 
@@ -196,15 +196,15 @@ public class NebulaWriterTest {
     @Test
     public void testGetEdgeStatement() {
         List<NebulaEdge> edges = new ArrayList<>();
-        Map<String, Object> properties1 = new HashMap<>();
-        properties1.put("degree", 1);
-        properties1.put("type", "friend");
-        NebulaEdge edge1 = new NebulaEdge("srcId", "1", "dstId", "2", properties1);
+        Map<String, String> properties1 = new HashMap<>();
+        properties1.put("degree", "1");
+        properties1.put("type", "\"friend\"");
+        NebulaEdge edge1 = new NebulaEdge("1", "2", properties1);
         edges.add(edge1);
-        Map<String, Object> properties2 = new HashMap<>();
-        properties2.put("degree", 2);
-        properties2.put("type", "friend");
-        NebulaEdge edge2 = new NebulaEdge("srcId", "2", "dstId", "3", properties2);
+        Map<String, String> properties2 = new HashMap<>();
+        properties2.put("degree", "2");
+        properties2.put("type", "\"friend\"");
+        NebulaEdge edge2 = new NebulaEdge("2", "3", properties2);
         edges.add(edge2);
 
         try {

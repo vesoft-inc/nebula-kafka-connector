@@ -11,44 +11,20 @@ import java.util.List;
 import java.util.Map;
 
 public class NebulaNode {
-    private Map<String, Object> properties;
+    private Map<String, String> properties;
 
-    public NebulaNode(Map<String, Object> properties) {
+    public NebulaNode(Map<String, String> properties) {
         this.properties = properties;
     }
 
-    // TODO update schema data type class
-    public String getNodeStatement(NebulaNodeSchema nodeSchema) throws DataFormatException {
-        List<String> propEntryStringList = new ArrayList<>();
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String propString = String.format(PROPERTY_TEMPLATE, entry.getKey(),
-                    NebulaUtils.extractPropertyValue(nodeSchema.getNodeProperties(), entry));
-            propEntryStringList.add(propString);
-        }
-        String props = String.join(",", propEntryStringList);
-        return String.format(NODE_VALUES_TEMPLATE, props);
-    }
 
-    public Map<String, Object> getProperties() {
+
+    public Map<String, String> getProperties() {
         return properties;
     }
 
-    public void setProperties(Map<String, Object> properties) {
+    public void setProperties(Map<String, String> properties) {
         this.properties = properties;
-    }
-
-    public String getNodeString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("{");
-        for (Map.Entry<String, Object> kv : properties.entrySet()) {
-            sb.append(kv.getKey());
-            sb.append(":");
-            sb.append(kv.getValue());
-            sb.append(",");
-        }
-        sb.deleteCharAt(sb.length() - 1);
-        sb.append("}");
-        return sb.toString();
     }
 
     @Override

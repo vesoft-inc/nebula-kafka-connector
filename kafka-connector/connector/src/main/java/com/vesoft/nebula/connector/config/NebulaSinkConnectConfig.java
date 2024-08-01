@@ -3,7 +3,7 @@ package com.vesoft.nebula.connector.config;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BLOCK_WHEN_EXHAUSTED;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PK;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
@@ -12,10 +12,8 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_HEALTH_CHECK_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NODE_PROPERTIES;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_MAX_WAIT_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
@@ -25,13 +23,13 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PK;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_STRICTLY_SERVER_HEALTHY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_GRAPH_USER;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_INSERT_MODE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_RETRY_TIMES;
 
 import com.vesoft.nebula.connector.util.ConfigUtils;
@@ -56,7 +54,8 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         INSERTIGNORE,
         INSERTREPLACE,
         UPDATE,
-        DELETE;
+        DELETE,
+        DETACHDELETE;
     }
 
     public enum DataType {
@@ -65,29 +64,26 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         BOTH;
     }
 
-    public final String connectorName;
-    public final String graphServers;
-    public final String user;
-    public final Map<String, Object> authOptions;
-    public final String graphName;
+    public final String                    connectorName;
+    public final String                    graphServers;
+    public final String                    user;
+    public final Map<String, Object>       authOptions;
+    public final String                    graphName;
     public final NebulaConnectDataTypeEnum dataType;
-    public final String graphNodeType;
-    public final String graphEdgeType;
-    public final String primaryKey;
-    public final String srcKey;
-    public final String dstKey;
-    public List<String> kafkaNodePropertyNames = new ArrayList<>();
-    public List<String> nebulaNodePropertyNames = new ArrayList<>();
-    public List<String> kafkaEdgePropertyNames = new ArrayList<>();
-    public List<String> nebulaEdgePropertyNames = new ArrayList<>();
-    public final int requestTimeout;
-    public final int retryTimes;
-    public final int intervalTimeMill;
-    public final int healthCheckTime;
-    public final boolean blockWithExhausted;
-    public final int maxWaitTimeWhenSessionExhausted;
-    public final boolean strictlyServerHealth;
-    public final int sinkPartition;
+    public final String                    graphNodeType;
+    public final String                    graphEdgeType;
+    public final String                    primaryKey;
+    public final String                    srcKey;
+    public final String                    dstKey;
+    public       List<String>              kafkaNodePropertyNames  = new ArrayList<>();
+    public       List<String>              nebulaNodePropertyNames = new ArrayList<>();
+    public       List<String>              kafkaEdgePropertyNames  = new ArrayList<>();
+    public       List<String>              nebulaEdgePropertyNames = new ArrayList<>();
+    public final int                       connectTimeout;
+    public final int                       requestTimeout;
+    public final int                       retryTimes;
+    public final long                      intervalTimeMill;
+    public final int                       sinkPartition;
 
     public final InsertMode sinkMode;
 
@@ -117,16 +113,13 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         kafkaEdgePropertyNames = getList(CONNECT_KAFKA_EDGE_PROPERTIES);
         nebulaNodePropertyNames = getList(CONNECT_NEBULA_NODE_PROPERTIES);
         nebulaEdgePropertyNames = getList(CONNECT_NEBULA_EDGE_PROPERTIES);
-        requestTimeout = getInt(CONNECT_REQUEST_TIMEOUT);
-        retryTimes = getInt(CONNECT_SINK_RETRY_TIMES);
-        intervalTimeMill = getInt(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY);
-        healthCheckTime = getInt(CONNECT_HEALTH_CHECK_TIME);
-        blockWithExhausted = getBoolean(CONNECT_BLOCK_WHEN_EXHAUSTED);
-        maxWaitTimeWhenSessionExhausted = getInt(CONNECT_MAX_WAIT_TIME);
-        strictlyServerHealth = getBoolean(CONNECT_STRICTLY_SERVER_HEALTHY);
-        sinkPartition = getInt(CONNECT_SINK_PARTITION);
+        connectTimeout = ConfigUtils.connectTimeout(props);
+        requestTimeout = ConfigUtils.requestTimeout(props);
+        retryTimes = ConfigUtils.retryTimes(props);
+        intervalTimeMill = ConfigUtils.intervalTimeMill(props);
+        sinkPartition = ConfigUtils.sinkPartition(props);
         sinkMode = ConfigUtils.sinkMode(props);
-        sinkBatchSize = getInt(CONNECT_BATCH_SIZE);
+        sinkBatchSize = ConfigUtils.batchSize(props);
     }
 
     public static ConfigDef configDef() {
@@ -197,7 +190,7 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         "dst key field for kafka data")
                 .define(CONNECT_KAFKA_NODE_PROPERTIES,
                         ConfigDef.Type.LIST,
-                       null,
+                        null,
                         ConfigDef.Importance.HIGH,
                         "property name list for node type in kafka")
                 .define(CONNECT_KAFKA_EDGE_PROPERTIES,
@@ -215,12 +208,16 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         null,
                         ConfigDef.Importance.HIGH,
                         "property name list for node type in Nebula")
+                .define(CONNECT_CONNECT_TIMEOUT,
+                        ConfigDef.Type.INT,
+                        DEFAULT_CONNECTOR_CONNECT_TIMEOUT,
+                        ConfigDef.Importance.LOW,
+                        "connection timeout for connect NebulaGraph")
                 .define(CONNECT_REQUEST_TIMEOUT,
                         ConfigDef.Type.INT,
-                        DEFAULT_SINK_REQUEST_TIMEOUT,
+                        DEFAULT_CONNECTOR_REQUEST_TIMEOUT,
                         ConfigDef.Importance.LOW,
-                        "request timeout for insert query's response time"
-                )
+                        "request timeout for insert query's response time")
                 .define(CONNECT_SINK_PARTITION,
                         ConfigDef.Type.INT,
                         DEFAULT_CONNECT_SINK_PARTITION,
@@ -238,29 +235,6 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         ConfigDef.Importance.LOW,
                         "interval time between each retry execution, default is "
                                 + DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY)
-                .define(CONNECT_HEALTH_CHECK_TIME,
-                        ConfigDef.Type.INT,
-                        3000,
-                        ConfigDef.Importance.LOW,
-                        "schedule time for checking the health of session, default is 3000")
-                .define(CONNECT_BLOCK_WHEN_EXHAUSTED,
-                        ConfigDef.Type.BOOLEAN,
-                        true,
-                        ConfigDef.Importance.LOW,
-                        "if block when session in pool is exhausted, false to throw exception, "
-                                + "true to wait. default is false")
-                .define(CONNECT_MAX_WAIT_TIME,
-                        ConfigDef.Type.INT,
-                        -1,
-                        ConfigDef.Importance.LOW,
-                        "the max wait time if `blockWhenExhausted` is true, if value less than 0,"
-                                + " always wait. default is -1")
-                .define(CONNECT_STRICTLY_SERVER_HEALTHY,
-                        ConfigDef.Type.BOOLEAN,
-                        false,
-                        ConfigDef.Importance.LOW,
-                        "if need all servers are strictly healthy, if true, all addresses must be"
-                                + " available, if false, at least one address is available")
                 .define(CONNECT_BATCH_SIZE,
                         ConfigDef.Type.INT,
                         DEFAULT_BATCH_SIZE,
@@ -286,7 +260,7 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
 
     private static class EnumValidator implements ConfigDef.Validator {
         private final List<String> canonicalValues;
-        private final Set<String> validValues;
+        private final Set<String>  validValues;
 
         private EnumValidator(List<String> canonicalValues, Set<String> validValues) {
             this.canonicalValues = canonicalValues;
@@ -295,7 +269,7 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
 
         public static <E> EnumValidator in(E[] enumerators) {
             final List<String> canonicalValues = new ArrayList<>(enumerators.length);
-            final Set<String> validValues = new HashSet<>(enumerators.length * 2);
+            final Set<String>  validValues     = new HashSet<>(enumerators.length * 2);
             for (E e : enumerators) {
                 canonicalValues.add(e.toString().toLowerCase());
                 validValues.add(e.toString().toUpperCase());

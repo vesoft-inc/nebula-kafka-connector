@@ -26,14 +26,14 @@ import org.slf4j.LoggerFactory;
 public class NebulaGraphProviderTest {
     private static final Logger log = LoggerFactory.getLogger(NebulaGraphProviderTest.class);
 
-    String host = "192.168.8.6:3820";
-    String user = "root";
-    String passwd = "Nebula123";
-    String graphName = "nba";
-    String graphType = "NODE";
-    String nodeType = "node_type_player";
+    String host       = "192.168.8.6:3820";
+    String user       = "root";
+    String passwd     = "Nebula123";
+    String graphName  = "nba";
+    String graphType  = "NODE";
+    String nodeType   = "node_type_player";
     String primaryKey = "id";
-    String edgeType = "edge_type_follow";
+    String edgeType   = "edge_type_follow";
 
     NebulaGraphProvider provider;
 

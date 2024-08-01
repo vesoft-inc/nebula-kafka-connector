@@ -7,10 +7,9 @@ import java.util.Map;
 
 public class NebulaUtils {
 
-    public static String extractPropertyValue(Map<String, String> schema, Map.Entry<String,
-            Object> entry) {
-        String propName = entry.getKey();
-        String value = String.valueOf(entry.getValue());
+    public static String extractPropertyValue(Map<String, String> schema,
+                                              String propName,
+                                              String value) {
         switch (schema.get(propName)) {
             case "STRING":
                 return mkString(value, "\"", "", "\"");

@@ -2,7 +2,6 @@
 package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BLOCK_WHEN_EXHAUSTED;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PK;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
@@ -11,10 +10,8 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_HEALTH_CHECK_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NODE_PROPERTIES;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_MAX_WAIT_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
@@ -24,7 +21,6 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PK;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_STRICTLY_SERVER_HEALTHY;
 import static junit.framework.TestCase.assertEquals;
 
 import com.vesoft.nebula.connector.config.NebulaConnectConfigName;
@@ -102,10 +98,6 @@ public class NebulaSinkConfigTest {
         props.put(CONNECT_SINK_PARTITION, 2000);
         props.put(CONNECT_SINK_RETRY_TIMES, 5);
         props.put(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY, 2000);
-        props.put(CONNECT_HEALTH_CHECK_TIME, 5000);
-        props.put(CONNECT_BLOCK_WHEN_EXHAUSTED, false);
-        props.put(CONNECT_MAX_WAIT_TIME, 10000);
-        props.put(CONNECT_STRICTLY_SERVER_HEALTHY, true);
         props.put(CONNECT_BATCH_SIZE, 1000);
         createConfig();
         assertEquals("test", config.user);
@@ -122,10 +114,6 @@ public class NebulaSinkConfigTest {
         assertEquals(2000, config.sinkPartition);
         assertEquals(5, config.retryTimes);
         assertEquals(2000, config.intervalTimeMill);
-        assertEquals(5000, config.healthCheckTime);
-        assertEquals(false, config.blockWithExhausted);
-        assertEquals(10000, config.maxWaitTimeWhenSessionExhausted);
-        assertEquals(true, config.strictlyServerHealth);
         assertEquals(1000, config.sinkBatchSize);
     }
 

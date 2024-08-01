@@ -3,76 +3,219 @@ package com.vesoft.nebula.connector.sink;
 
 import static junit.framework.TestCase.assertEquals;
 
-import com.vesoft.nebula.connector.exceptions.DataFormatException;
+import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
 public class NebulaEdgeTest {
-    private NebulaEdge edge = null;
-    private NebulaEdgeSchema edgeSchema = new NebulaEdgeSchema();
+    private String           graphName        = "nba";
+    private String           srcField         = "src";
+    private String           dstField         = "dst";
+    private List<String>     kafkaFieldNames  = Arrays.asList("dura", "ty", "de");
+    private List<String>     nebulaFieldNames = Arrays.asList("duration", "type", "degree");
+    private NebulaEdge       edge             = null;
+    private NebulaEdgeSchema edgeSchema       = new NebulaEdgeSchema();
 
     @Before
     public void setup() {
-        Map<String, Object> props = new HashMap<>();
-        props.put("duration", 10);
-        props.put("type", "friend");
-        props.put("degree", 5);
-        edge = new NebulaEdge("srcId", "1", "dstId", "2", props);
+        Map<String, String> props = new HashMap<>();
+        props.put("duration", "10");
+        props.put("type", "\"friend\"");
+        props.put("degree", "5");
+        edge = new NebulaEdge("1", "2", props);
 
         Map<String, String> schema = new HashMap<>();
         schema.put("duration", "INT64");
         schema.put("type", "STRING");
         schema.put("degree", "INT64");
+        edgeSchema.setEdgeTypeName("friend");
         edgeSchema.setSourceNodeTypeName("person");
+        edgeSchema.setSourceNodePkName("id");
         edgeSchema.setSourceNodePkType("INT64");
         edgeSchema.setTargetNodeTypeName("person");
+        edgeSchema.setTargetNodePkName("id");
         edgeSchema.setTargetNodePkType("INT64");
         edgeSchema.setProperties(schema);
     }
 
     @Test
-    public void testGetEdgeStatement() {
-        try {
-            String statement =
-                    edge.getEdgeStatement(edgeSchema)
-                            .chars()
-                            .sorted()
-                            .collect(StringBuilder::new,
-                                    StringBuilder::appendCodePoint,
-                                    StringBuilder::append)
-                            .toString();
-            String expect = "({`id`:1})-[{`duration`:10,`type`:\"friend\",`degree`:5}]->({`id`:2})"
-                    .chars()
-                    .sorted()
-                    .collect(StringBuilder::new,
-                            StringBuilder::appendCodePoint,
-                            StringBuilder::append)
-                    .toString();
-            assertEquals(expect, statement);
-        } catch (DataFormatException e) {
-            assert (false);
-        }
-    }
-
-    @Test
-    public void testGetEdgeString() {
-        String edgeString = edge.getEdgeString()
+    public void testGetEdgeInsertStatement() {
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcField,
+                                                  dstField,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String insertStatement = nebulaEdges
+                .getInsertStatement(graphName, NebulaSinkConnectConfig.InsertMode.INSERT);
+        String insertChars = insertStatement
                 .chars()
                 .sorted()
                 .collect(StringBuilder::new,
-                        StringBuilder::appendCodePoint,
-                        StringBuilder::append)
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
                 .toString();
-        String expect =
-                "{`srcPk`:1,`dstPk`:2,`duration`:10,`degree`:5,`type`:friend}"
-                        .chars()
-                        .sorted()
-                        .collect(StringBuilder::new,
-                                StringBuilder::appendCodePoint,
-                                StringBuilder::append)
-                        .toString();
-        assertEquals(expect, edgeString);
+        String expectStatement = "TABLE t{src,dst,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "MATCH (src@person) WHERE src.id=r.src "
+                + "MATCH (dst@person) WHERE dst.id=r.dst \n"
+                + "INSERT (src)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst)";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, insertChars);
+
+    }
+
+
+    @Test
+    public void testGetEdgeInsertIgnoreStatement() {
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcField,
+                                                  dstField,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String insertStatement = nebulaEdges
+                .getInsertStatement(graphName, NebulaSinkConnectConfig.InsertMode.INSERTIGNORE);
+        String insertChars = insertStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src,dst,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "MATCH (src@person) WHERE src.id=r.src "
+                + "MATCH (dst@person) WHERE dst.id=r.dst \n"
+                + "INSERT OR IGNORE (src)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst)";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, insertChars);
+
+    }
+
+
+    @Test
+    public void testGetEdgeInsertReplaceStatement() {
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcField,
+                                                  dstField,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String insertStatement = nebulaEdges
+                .getInsertStatement(graphName, NebulaSinkConnectConfig.InsertMode.INSERTREPLACE);
+        String insertChars = insertStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src,dst,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "MATCH (src@person) WHERE src.id=r.src "
+                + "MATCH (dst@person) WHERE dst.id=r.dst \n"
+                + "INSERT OR REPLACE (src)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst)";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, insertChars);
+    }
+
+
+    @Test
+    public void testGetEdgeUpdateStatement() {
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcField,
+                                                  dstField,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String updateStatement = nebulaEdges
+                .getUpdateStatement(graphName);
+        String updateChars = updateStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src,dst,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "MATCH (src@person)-[e@friend]->(dst@person) "
+                + "WHERE src.id=r.src AND dst.id=r.dst \n"
+                + "SET e.duration=r.dura,e.type=r.ty,e.degree=r.de";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, updateChars);
+    }
+
+
+    @Test
+    public void testGetEdgeDeleteStatement() {
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcField,
+                                                  dstField,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String deleteStatement = nebulaEdges
+                .getDeleteStatement(graphName);
+        String deleteChars = deleteStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src,dst,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "MATCH (src@person)-[e@friend]->(dst@person) "
+                + "WHERE src.id=r.src AND dst.id=r.dst \n"
+                + "DELETE e";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, deleteChars);
+
     }
 }

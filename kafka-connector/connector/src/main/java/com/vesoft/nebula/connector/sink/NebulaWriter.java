@@ -34,9 +34,9 @@ public class NebulaWriter {
     private static final Logger log = LoggerFactory.getLogger(NebulaWriter.class);
 
     private final NebulaSinkConnectConfig config;
-    private final NebulaGraphProvider graphProvider;
-    private List<NebulaNode> nodes = new ArrayList<>();
-    private List<NebulaEdge> edges = new ArrayList<>();
+    private final NebulaGraphProvider     graphProvider;
+    private       List<NebulaNode>        nodes = new ArrayList<>();
+    private       List<NebulaEdge>        edges = new ArrayList<>();
 
     private final String nodeType = "node";
     private final String edgeType = "edge";
@@ -50,15 +50,15 @@ public class NebulaWriter {
         try {
             if (config.dataType == NebulaConnectDataTypeEnum.NODE) {
                 nebulaNodeSchema = graphProvider.getNodeSchema(config.graphName,
-                        config.graphNodeType);
+                                                               config.graphNodeType);
             } else if (config.dataType == NebulaConnectDataTypeEnum.EDGE) {
                 nebulaEdgeSchema = graphProvider.getEdgeSchema(config.graphName,
-                        config.graphEdgeType);
+                                                               config.graphEdgeType);
             } else {
                 nebulaNodeSchema = graphProvider.getNodeSchema(config.graphName,
-                        config.graphNodeType);
+                                                               config.graphNodeType);
                 nebulaEdgeSchema = graphProvider.getEdgeSchema(config.graphName,
-                        config.graphEdgeType);
+                                                               config.graphEdgeType);
             }
         } catch (Exception e) {
             throw new RuntimeException("failed to get NebulaGraph schema", e);
@@ -70,24 +70,25 @@ public class NebulaWriter {
         for (SinkRecord record : records) {
             if (record.value() == null) {
                 log.warn(String.format("Getting empty record skip the insert topic[%s] offset[%s]",
-                        record.topic(), record.kafkaOffset()));
-            } else {
-                // the mapping for kafka property name and property value. get values
-                // according to propertyNames config
-                Map<String, Object> properties = NebulaRecordConverter.convertRecord(record);
-                switch (config.dataType) {
-                    case NODE:
-                        nodes.add(getNode(properties));
-                        break;
-                    case EDGE:
-                        edges.add(getEdge(properties));
-                        break;
-                    case BOTH:
-                        nodes.add(getNode(properties));
-                        edges.add(getEdge(properties));
-                        break;
-                    default: // nothing
-                }
+                                       record.topic(), record.kafkaOffset()));
+                continue;
+            }
+            // the mapping for kafka property name and property value. get values
+            // according to propertyNames config
+            Map<String, Object> kafkaRecordProperties = NebulaRecordConverter
+                    .convertRecord(record);
+            switch (config.dataType) {
+                case NODE:
+                    nodes.add(getNode(kafkaRecordProperties));
+                    break;
+                case EDGE:
+                    edges.add(getEdge(kafkaRecordProperties));
+                    break;
+                case BOTH:
+                    nodes.add(getNode(kafkaRecordProperties));
+                    edges.add(getEdge(kafkaRecordProperties));
+                    break;
+                default: // nothing
             }
         }
         commit();
@@ -199,27 +200,31 @@ public class NebulaWriter {
 
 
     /**
-     * @param properties mapping of kafka property name and kafka property value
+     * @param kafkaRecordProperties mapping of kafka property name and kafka property value
      */
-    private NebulaNode getNode(Map<String, Object> properties) {
-        List<String> nodePropertyNames = config.kafkaNodePropertyNames;
+    private NebulaNode getNode(Map<String, Object> kafkaRecordProperties) {
+        List<String> nodePropertyNames       = config.kafkaNodePropertyNames;
         List<String> nebulaNodePropertyNames = config.nebulaNodePropertyNames;
 
-        Map<String, Object> nodeProperties = new HashMap<>();
-        String pk = config.primaryKey;
+        Map<String, String> nodeProperties = new HashMap<>();
+        String              pk             = config.primaryKey;
         for (int index = 0; index < nodePropertyNames.size(); index++) {
-            nodeProperties.put(nebulaNodePropertyNames.get(index),
-                    properties.get(nodePropertyNames.get(index)));
+            Object kafkaValue = kafkaRecordProperties.get(nodePropertyNames.get(index));
+            String propName   = nebulaNodePropertyNames.get(index);
+            String value = NebulaUtils.extractPropertyValue(nebulaNodeSchema.getNodeProperties(),
+                                                            nebulaNodePropertyNames.get(index),
+                                                            String.valueOf(kafkaValue));
+            nodeProperties.put(propName, value);
         }
 
-        if (properties.get(pk) == null) {
+        if (kafkaRecordProperties.get(pk) == null) {
             log.error(">>>>> record {} has null value for node primary key", pk);
             return null;
         }
         if (nebulaNodeSchema.getNodePkType().equals("INT64")
-                && !NebulaUtils.isNumeric(properties.get(pk).toString())) {
+                && !NebulaUtils.isNumeric(kafkaRecordProperties.get(pk).toString())) {
             log.error(">>>>> record {} value {} is not INT64 for node primary key",
-                    pk, properties.get(pk));
+                      pk, kafkaRecordProperties.get(pk));
             return null;
         }
         // convert kafka properties to nebula properties
@@ -229,93 +234,99 @@ public class NebulaWriter {
         return node;
     }
 
-    private NebulaEdge getEdge(Map<String, Object> properties) {
+    private NebulaEdge getEdge(Map<String, Object> kafkaRecordProperties) {
         String srcPk = config.srcKey;
         String dstPk = config.dstKey;
 
-        if (properties.get(srcPk) == null) {
+        if (kafkaRecordProperties.get(srcPk) == null) {
             log.error(">>>>> record {} has null value for source node primary key", srcPk);
             return null;
         }
         if (nebulaEdgeSchema.getSourceNodePkType().equals("INT64")
-                && !NebulaUtils.isNumeric(properties.get(srcPk).toString())) {
+                && !NebulaUtils.isNumeric(kafkaRecordProperties.get(srcPk).toString())) {
             log.error(">>>>> record {} value {} is not INT64 for source node primary key",
-                    srcPk, properties.get(srcPk));
+                      srcPk, kafkaRecordProperties.get(srcPk));
             return null;
         }
 
-        if (properties.get(dstPk) == null) {
+        if (kafkaRecordProperties.get(dstPk) == null) {
             log.error(">>>>> record {} has null value for target node primary key", dstPk);
             return null;
         }
         if (nebulaEdgeSchema.getTargetNodePkType().equals("INT64")
-                && !NebulaUtils.isNumeric(properties.get(dstPk).toString())) {
+                && !NebulaUtils.isNumeric(kafkaRecordProperties.get(dstPk).toString())) {
             log.error(">>>>> record {} value {} is not INT64 for target node primary key",
-                    dstPk, properties.get(dstPk));
+                      dstPk, kafkaRecordProperties.get(dstPk));
             return null;
         }
 
-        Map<String, Object> edgeProperties = new HashMap<>();
+        Map<String, String> edgeProperties = new HashMap<>();
 
-        List<String> edgePropertyNames = config.kafkaEdgePropertyNames;
+        List<String> kafkaEdgePropertyNames  = config.kafkaEdgePropertyNames;
         List<String> nebulaEdgePropertyNames = config.nebulaEdgePropertyNames;
-        for (int index = 0; index < edgePropertyNames.size(); index++) {
-            edgeProperties.put(nebulaEdgePropertyNames.get(index),
-                    properties.get(edgePropertyNames.get(index)));
+        for (int index = 0; index < kafkaEdgePropertyNames.size(); index++) {
+            Object kafkaValue = kafkaRecordProperties.get(kafkaEdgePropertyNames.get(index));
+            String propName   = nebulaEdgePropertyNames.get(index);
+            String value = NebulaUtils.extractPropertyValue(nebulaEdgeSchema.getProperties(),
+                                                            nebulaEdgePropertyNames.get(index),
+                                                            String.valueOf(kafkaValue));
+            edgeProperties.put(propName, value);
         }
-        NebulaEdge edge = new NebulaEdge(nebulaEdgeSchema.getSourceNodePkName(),
-                String.valueOf(properties.get(srcPk)),
-                nebulaEdgeSchema.getTargetNodePkName(),
-                String.valueOf(properties.get(dstPk)), edgeProperties);
+
+
+        String srcValue = NebulaUtils
+                .extractIdValue(nebulaEdgeSchema.getSourceNodePkType(),
+                                String.valueOf(kafkaRecordProperties.get(srcPk)));
+        String dstValue = NebulaUtils
+                .extractIdValue(nebulaEdgeSchema.getTargetNodePkType(),
+                                String.valueOf(kafkaRecordProperties.get(dstPk)));
+        NebulaEdge edge = new NebulaEdge(
+                srcValue,
+                dstValue,
+                edgeProperties);
         return edge;
     }
 
     private String getNodeStatement(List<NebulaNode> nodes) {
-        List<String> nodeStringList = new ArrayList<>();
-        for (NebulaNode node : nodes) {
-            String nodeStatement = null;
-            try {
-                nodeStatement = node.getNodeStatement(nebulaNodeSchema);
-            } catch (DataFormatException e) {
-                log.error(">>>> dirty data {exception: {}, record: {}}", e.getMessage(),
-                        node.getNodeString());
-                continue;
-            }
-            nodeStringList.add(nodeStatement);
-        }
-        String graphName = config.graphName;
-        String nodeName = config.graphNodeType;
-
+        String      graphName   = config.graphName;
+        NebulaNodes nebulaNodes = new NebulaNodes(nebulaNodeSchema, nodes);
         switch (config.sinkMode) {
             case INSERT:
-                return String.format(BATCH_INSERT_NODE_TEMPLATE, graphName, nodeName,
-                        NebulaUtils.join(nodeStringList, ","));
+            case INSERTIGNORE:
+            case INSERTREPLACE:
+                return nebulaNodes.getInsertStatement(graphName, config.sinkMode);
             case UPDATE:
-                return null; // TODO implement the update statement
+                return nebulaNodes.getUpdateStatement(graphName);
             case DELETE:
-                return null; // TODO implement the delete statement
+            case DETACHDELETE:
+                return nebulaNodes.getDeleteStatement(graphName, config.sinkMode);
             default:
                 throw new IllegalArgumentException("unsupported sink mode.");
         }
     }
 
     private String getEdgeStatement(List<NebulaEdge> edges) {
-        List<String> edgeStringList = new ArrayList<>();
-        for (NebulaEdge edge : edges) {
-            String edgeStatement = null;
-            try {
-                edgeStatement = edge.getEdgeStatement(nebulaEdgeSchema);
-            } catch (DataFormatException e) {
-                log.error(">>>> dirty data {exception: {}, record: {}}", e.getMessage(),
-                        edge.getEdgeString());
-                continue;
-            }
-            edgeStringList.add(edgeStatement);
+        List<String> kafkaEdgePropertyNames  = config.kafkaEdgePropertyNames;
+        List<String> nebulaEdgePropertyNames = config.nebulaEdgePropertyNames;
+        String       graphName               = config.graphName;
+        NebulaEdges nebulaEdges = new NebulaEdges(nebulaEdgeSchema,
+                                                  config.srcKey,
+                                                  config.dstKey,
+                                                  kafkaEdgePropertyNames,
+                                                  nebulaEdgePropertyNames,
+                                                  edges);
+        switch (config.sinkMode) {
+            case INSERT:
+            case INSERTIGNORE:
+            case INSERTREPLACE:
+                return nebulaEdges.getInsertStatement(graphName, config.sinkMode);
+            case UPDATE:
+                return nebulaEdges.getUpdateStatement(graphName);
+            case DELETE:
+            case DETACHDELETE:
+                return nebulaEdges.getDeleteStatement(graphName);
+            default:
+                throw new IllegalArgumentException("unsupported sink mode.");
         }
-        String graphName = config.graphName;
-        String edgeName = config.graphEdgeType;
-
-        return String.format(BATCH_INSERT_EDGE_TEMPLATE, graphName, edgeName,
-                NebulaUtils.join(edgeStringList, ","));
     }
 }

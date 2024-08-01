@@ -2,7 +2,7 @@
 package com.vesoft.nebula.connector.config;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BLOCK_WHEN_EXHAUSTED;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
@@ -10,9 +10,7 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_HEALTH_CHECK_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_MAX_TASK;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_MAX_WAIT_TIME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_PROPERTIES;
@@ -22,10 +20,10 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_EDGE_TYPES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_NODE_TYPES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_TOPIC_PREFIX;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_STRICTLY_SERVER_HEALTHY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECT_GRAPH_USER;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_SINK_REQUEST_TIMEOUT;
 
 import com.vesoft.nebula.connector.util.ConfigUtils;
 import java.io.Serializable;
@@ -54,10 +52,6 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
     public final int requestTimeout;
     public final int retryTimes;
     public final int intervalTimeMill;
-    public final int healthCheckTime;
-    public final boolean blockWithExhausted;
-    public final int maxWaitTimeWhenSessionExhausted;
-    public final boolean strictlyServerHealth;
 
     public final int batchSize;
 
@@ -83,10 +77,6 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
         requestTimeout = getInt(CONNECT_REQUEST_TIMEOUT);
         retryTimes = getInt(CONNECT_SINK_RETRY_TIMES);
         intervalTimeMill = getInt(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY);
-        healthCheckTime = getInt(CONNECT_HEALTH_CHECK_TIME);
-        blockWithExhausted = getBoolean(CONNECT_BLOCK_WHEN_EXHAUSTED);
-        maxWaitTimeWhenSessionExhausted = getInt(CONNECT_MAX_WAIT_TIME);
-        strictlyServerHealth = getBoolean(CONNECT_STRICTLY_SERVER_HEALTHY);
         batchSize = getInt(CONNECT_BATCH_SIZE);
         maxTask = getInt(CONNECT_MAX_TASK);
         topicPrefix = getString(CONNECT_SOURCE_TOPIC_PREFIX);
@@ -131,17 +121,16 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
                         null,
                         ConfigDef.Importance.HIGH,
                         "property name list in Nebula")
+                .define(CONNECT_CONNECT_TIMEOUT,
+                        ConfigDef.Type.INT,
+                        DEFAULT_CONNECTOR_CONNECT_TIMEOUT,
+                        ConfigDef.Importance.LOW,
+                        "connect timeout for connect to NebulaGraph")
                 .define(CONNECT_REQUEST_TIMEOUT,
                         ConfigDef.Type.INT,
-                        DEFAULT_SINK_REQUEST_TIMEOUT,
+                        DEFAULT_CONNECTOR_REQUEST_TIMEOUT,
                         ConfigDef.Importance.LOW,
                         "request timeout for scan's response time")
-                .define(CONNECT_STRICTLY_SERVER_HEALTHY,
-                        ConfigDef.Type.BOOLEAN,
-                        false,
-                        ConfigDef.Importance.LOW,
-                        "if need all servers are strictly healthy, if true, all addresses must "
-                                + "be available, if false, at least one address is available")
                 .define(CONNECT_BATCH_SIZE,
                         ConfigDef.Type.INT,
                         DEFAULT_BATCH_SIZE,
