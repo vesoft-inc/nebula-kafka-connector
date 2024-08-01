@@ -261,29 +261,29 @@ func (r *Restore) checkPhysicalTopology(bakClusters []*meta.ClusterBackupInfo) e
 func (r *Restore) backupOriginalData() error {
 	r.backSuffix = GetBackupSuffix()
 
-	// TODO:backup meta data
-	//for _, service := range r.metaCluster {
-	//	agent, err := r.amg.GetAgent(service.Host)
-	//	if err != nil {
-	//		return fmt.Errorf("get agent %s failed: %w", service.Host, err)
-	//	}
-	//
-	//	if len(service.DataPaths) != 1 {
-	//		return fmt.Errorf("meta service: %s should only have one data dir, but %d",
-	//			service.Host, len(service.DataPaths))
-	//	}
-	//
-	//	srcPath := filepath.Join(service.DataPaths[0], "nebula")
-	//	dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
-	//	if err = agent.MoveDir(srcPath, dstPath); err != nil && !utils.IsNotExist(err) {
-	//		return fmt.Errorf("move dir from %s to %s failed: %w", srcPath, dstPath, err)
-	//	}
-	//
-	//	log.WithField("origin path", srcPath).
-	//		WithField("backup path", dstPath).
-	//		WithField("origin not exist", utils.IsNotExist(err)).
-	//		Info("Backup origin storage data path successfully.")
-	//}
+	// backup meta data
+	for _, service := range r.metaCluster {
+		agent, err := r.amg.GetAgent(service.Host)
+		if err != nil {
+			return fmt.Errorf("get agent %s failed: %w", service.Host, err)
+		}
+
+		if len(service.DataPaths) != 1 {
+			return fmt.Errorf("meta service: %s should only have one data dir, but %d",
+				service.Host, len(service.DataPaths))
+		}
+
+		srcPath := filepath.Join(service.DataPaths[0], "data")
+		dstPath := fmt.Sprintf("%s%s", srcPath, r.backSuffix)
+		if err = agent.MoveDir(srcPath, dstPath); err != nil && !utils.IsNotExist(err) {
+			return fmt.Errorf("move dir from %s to %s failed: %w", srcPath, dstPath, err)
+		}
+
+		log.WithField("origin path", srcPath).
+			WithField("backup path", dstPath).
+			WithField("origin not exist", utils.IsNotExist(err)).
+			Info("Backup origin meta data path successfully.")
+	}
 
 	// backup storage data
 	for _, cluster := range r.clusters.GetClusters() {

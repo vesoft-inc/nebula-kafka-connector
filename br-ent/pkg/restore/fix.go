@@ -26,10 +26,11 @@ func NewFixFrom(r *Restore) (*Fix, error) {
 	}
 
 	return &Fix{
-		r:          r,
-		amg:        r.amg,
-		backSuffix: r.backSuffix,
-		clusters:   r.clusters,
+		r:           r,
+		amg:         r.amg,
+		backSuffix:  r.backSuffix,
+		clusters:    r.clusters,
+		metaCluster: r.metaCluster,
 	}, nil
 }
 
@@ -40,7 +41,7 @@ func (f *Fix) fixServiceData(s *clients.ServiceInfo) error {
 	}
 
 	for _, d := range s.DataPaths {
-		opath := filepath.Join(d, "nebula")
+		opath := filepath.Join(d, "data")
 		bpath := fmt.Sprintf("%s%s", opath, f.backSuffix)
 
 		// check if the old data exist
@@ -183,10 +184,9 @@ func (f *Fix) fixServices(services []*clients.ServiceInfo) error {
 		for _, s := range services {
 			switch s.ServiceType {
 			case meta.ServiceTypeMetad:
-				// TODO
-				//if err := f.fixServiceData(s); err != nil {
-				//	return err
-				//}
+				if err := f.fixServiceData(s); err != nil {
+					return err
+				}
 			case meta.ServiceTypeStoraged:
 				if err := f.fixServiceData(s); err != nil {
 					return err
@@ -229,9 +229,11 @@ func (f *Fix) Fix() error {
 	}
 
 	// fix clusters
-	for _, cluster := range f.clusters.GetClusters() {
-		if err := f.fixServices(cluster); err != nil {
-			return err
+	for id, cluster := range f.clusters.GetClusters() {
+		if id == f.r.cfg.ClusterId {
+			if err := f.fixServices(cluster); err != nil {
+				return err
+			}
 		}
 	}
 

@@ -50,7 +50,6 @@ func newFullRestoreCmd() *cobra.Command {
 			log2.Info("Start to restore clusters...")
 			err = r.Restore()
 			if err != nil {
-				return err
 				log2.Errorf("Restore failed: %v, will try to recovery original data...\n", err)
 				f, ferr := restore.NewFixFrom(r)
 				if ferr != nil {
