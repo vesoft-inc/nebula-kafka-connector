@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"math"
-	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -83,22 +82,31 @@ func (dp *driverPool) openNewConn(address string) (Client, error) {
 		return nil, err
 	}
 	// set session config
-	var stmts []string
+	var stmt string
 	if dp.sessionConfig.graph != "" {
-		stmts = append(stmts, fmt.Sprintf("SESSION SET GRAPH %s", dp.sessionConfig.graph))
+		stmt = fmt.Sprintf("SESSION SET GRAPH %s", dp.sessionConfig.graph)
+		if _, err := dc.Execute(stmt); err != nil {
+			_ = dc.Close()
+			return nil, err
+		}
 	}
 	if dp.sessionConfig.schema != "" {
-		stmts = append(stmts, fmt.Sprintf("SESSION SET SCHEMA %s", dp.sessionConfig.schema))
+		stmt = fmt.Sprintf("SESSION SET SCHEMA %s", dp.sessionConfig.schema)
+		if _, err := dc.Execute(stmt); err != nil {
+			_ = dc.Close()
+			return nil, err
+		}
 	}
 	if dp.sessionConfig.timezone != "" {
-		stmts = append(stmts, fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dp.sessionConfig.timezone))
+		stmt = fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dp.sessionConfig.timezone)
+		if _, err := dc.Execute(stmt); err != nil {
+			_ = dc.Close()
+			return nil, err
+		}
 	}
 	for k, v := range dp.sessionConfig.parameters {
-		stmts = append(stmts, fmt.Sprintf("SESSION SET VALUE $%s=%s", k, v))
-	}
-
-	if len(stmts) != 0 {
-		if _, err := dc.Execute(strings.Join(stmts, " ")); err != nil {
+		stmt = fmt.Sprintf("SESSION SET VALUE $%s=%s", k, v)
+		if _, err := dc.Execute(stmt); err != nil {
 			_ = dc.Close()
 			return nil, err
 		}
