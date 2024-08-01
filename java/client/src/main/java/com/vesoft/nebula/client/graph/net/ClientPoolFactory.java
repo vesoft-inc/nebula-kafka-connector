@@ -1,6 +1,7 @@
 package com.vesoft.nebula.client.graph.net;
 
 import com.vesoft.nebula.client.graph.data.HostAddress;
+import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
 import java.io.Serializable;
@@ -85,18 +86,23 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         if (schemaName != null) {
             sessionSetStatement.append("SESSION SET SCHEMA `").append(schemaName).append("` ");
         }
-        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
-            sessionSetStatement
-                    .append("SESSION SET VALUE $")
-                    .append(parameter.getKey())
-                    .append("=")
-                    .append(parameter.getValue())
-                    .append(" ");
-        }
-        if (!sessionSetStatement.toString().isEmpty()) {
-            client.execute(sessionSetStatement.toString());
-        }
 
+        if (!sessionSetStatement.toString().isEmpty()) {
+            ResultSet result = client.execute(sessionSetStatement.toString());
+            if (!result.isSucceeded()) {
+                throw new RuntimeException("SESSION SET failed for " + result.getErrorMessage());
+            }
+        }
+        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+            String setParameterStatement = String.format("SESSION SET VALUE $%s=%s",
+                                                         parameter.getKey(),
+                                                         parameter.getValue());
+            ResultSet setParamResult = client.execute(setParameterStatement);
+            if (!setParamResult.isSucceeded()) {
+                throw new RuntimeException("SESSION SET failed for "
+                                                   + setParamResult.getErrorMessage());
+            }
+        }
         return client;
     }
 
