@@ -112,6 +112,7 @@ const (
 	defaultRequestTimeout = 1 * time.Minute
 	defaultConnetTimeout  = 3 * time.Second
 	defaultPoolTicker     = 5 * time.Second
+	defaultPoolMaxWait    = 1 * time.Minute
 )
 
 func NewNebulaClient(addresses, username, password string, opts ...clientOptionsFn) (Client, error) {
@@ -156,6 +157,7 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 		maxOpen:         defaultMaxOpenConns,
 		minOpen:         defaultMinOpenConns,
 		maxIdle:         defaultMaxIdleConns,
+		maxWait:         defaultPoolMaxWait,
 		sessionConfig:   &sessionConfig{},
 		tickerDuration:  defaultPoolTicker,
 		log:             DefaultLogger,

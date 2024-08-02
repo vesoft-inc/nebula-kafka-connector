@@ -8,6 +8,7 @@ import (
 type clientOptionsFn func(*driverConn)
 type poolOptionsFn func(*driverPool)
 
+// WithClientConnectTimeout sets the timeout for connecting to the server
 func WithClientConnectTimeout(timeout time.Duration) clientOptionsFn {
 	return func(ops *driverConn) {
 		if timeout <= 0 {
@@ -17,6 +18,7 @@ func WithClientConnectTimeout(timeout time.Duration) clientOptionsFn {
 	}
 }
 
+// WithClientRequestTimeout sets the timeout for a request to the server
 func WithClientRequestTimeout(timeout time.Duration) clientOptionsFn {
 	return func(ops *driverConn) {
 		if timeout <= 0 {
@@ -26,6 +28,7 @@ func WithClientRequestTimeout(timeout time.Duration) clientOptionsFn {
 	}
 }
 
+// WithClientLogger sets the logger for the client
 func WithClientLogger(logger Logger) clientOptionsFn {
 	return func(ops *driverConn) {
 		ops.log = logger
@@ -39,6 +42,7 @@ func withClientConnector(connector connector) clientOptionsFn {
 	}
 }
 
+// WithPoolConnectTimeout sets the timeout for connecting to the server
 func WithPoolConnectTime(timeout time.Duration) poolOptionsFn {
 	return func(ops *driverPool) {
 		if timeout <= 0 {
@@ -48,6 +52,7 @@ func WithPoolConnectTime(timeout time.Duration) poolOptionsFn {
 	}
 }
 
+// WithPoolRequestTimeout sets the timeout for a request to the server
 func WithPoolRequestTimeout(timeout time.Duration) poolOptionsFn {
 	return func(ops *driverPool) {
 		if timeout <= 0 {
@@ -57,24 +62,51 @@ func WithPoolRequestTimeout(timeout time.Duration) poolOptionsFn {
 	}
 }
 
+// WithPoolMaxWait sets max wait time
+// that the pool will wait (when there are no available connections)
+// for a connection to be returned
+func WithPoolMaxWait(maxWait time.Duration) poolOptionsFn {
+	return func(ops *driverPool) {
+		if maxWait <= 0 {
+			maxWait = math.MaxInt64
+		}
+		ops.maxWait = maxWait
+	}
+}
+
+// WithPoolMaxLifetime sets the maximum amount of time a connection may be reused
+func WithPoolMaxLifetime(maxLifeTime time.Duration) poolOptionsFn {
+	return func(ops *driverPool) {
+		if maxLifeTime <= 0 {
+			maxLifeTime = math.MaxInt64
+		}
+		ops.connMaxLifeTime = maxLifeTime
+	}
+}
+
+// WithPoolMinOpenConns sets the minimum number of open connections
 func WithPoolMinOpenConns(minOpenConns int) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.minOpen = minOpenConns
 	}
 }
 
+// WithPoolMaxOpenConns sets the maximum number of open connections
 func WithPoolMaxOpenConns(maxOpenConns int) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.maxOpen = maxOpenConns
 	}
 }
 
+// WithPoolMaxIdleConns sets the maximum number of idle connections
+// would evicte the idle connections until the number of idle connections
 func WithPoolMaxIdleConns(maxIdleConns int) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.maxIdle = maxIdleConns
 	}
 }
 
+// WithPoolTickerDuration sets the duration of the ticker
 func WithPoolTickerDuration(ticker time.Duration) poolOptionsFn {
 	return func(ops *driverPool) {
 		if ticker <= 0 {
@@ -84,30 +116,35 @@ func WithPoolTickerDuration(ticker time.Duration) poolOptionsFn {
 	}
 }
 
+// WithPoolLogger sets the logger for the pool
 func WithPoolLogger(logger Logger) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.log = logger
 	}
 }
 
+// WithPoolGraph sets the graph for the session
 func WithPoolGraph(graph string) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.sessionConfig.graph = graph
 	}
 }
 
+// WithPoolSchema sets the schema for the session
 func WithPoolSchema(schema string) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.sessionConfig.schema = schema
 	}
 }
 
+// WithPoolTimezone sets the timezone for the session
 func WithPoolTimezone(timezone string) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.sessionConfig.timezone = timezone
 	}
 }
 
+// WithPoolParameters sets the parameters for the session
 func WithPoolParameters(parameters map[string]string) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.sessionConfig.parameters = parameters

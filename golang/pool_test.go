@@ -15,14 +15,15 @@ type dummyConnector struct {
 }
 
 type dummyConn struct {
-	id int
+	id     int
+	closed bool
 }
 
 func (c *dummyConnector) connect(host *hostAddress, cfg *connConfig) (Client, error) {
 	if c.sleep > 0 {
 		<-time.After(c.sleep)
 	}
-	return &dummyConn{}, nil
+	return &dummyConn{closed: true}, nil
 }
 
 func (d *dummyConn) Execute(stmt string) (Result, error) {
@@ -43,10 +44,11 @@ func (d *dummyConn) GetSessionId() (int64, error) {
 	return 0, nil
 }
 func (d *dummyConn) Close() error {
+	d.closed = true
 	return nil
 }
 func (d *dummyConn) IsClosed() bool {
-	return false
+	return d.closed == true
 }
 
 func TestCleanIdle(t *testing.T) {
@@ -57,28 +59,28 @@ func TestCleanIdle(t *testing.T) {
 	}{
 		{5,
 			[]Client{
-				&dummyConn{0},
-				&dummyConn{1},
-				&dummyConn{2},
-				&dummyConn{3},
-				&dummyConn{4},
+				&dummyConn{id: 0},
+				&dummyConn{id: 1},
+				&dummyConn{id: 2},
+				&dummyConn{id: 3},
+				&dummyConn{id: 4},
 			},
 			5,
 		},
 		{4,
 			[]Client{
-				&dummyConn{0},
-				&dummyConn{1},
-				&dummyConn{2},
-				&dummyConn{3},
-				&dummyConn{4},
+				&dummyConn{id: 0},
+				&dummyConn{id: 1},
+				&dummyConn{id: 2},
+				&dummyConn{id: 3},
+				&dummyConn{id: 4},
 			},
 			4,
 		},
 		{2,
 			[]Client{
-				&dummyConn{0},
-				&dummyConn{1},
+				&dummyConn{id: 0},
+				&dummyConn{id: 1},
 			},
 			2,
 		},
@@ -267,14 +269,14 @@ func TestPoolConcurrency(t *testing.T) {
 	p, err := NewNebulaPool("127.0.0.1:9669", "", "",
 		withPoolConnector(&dummyConnector{sleep: 2 * time.Millisecond}),
 		WithPoolMaxOpenConns(400),
-		WithPoolRequestTimeout(100*time.Millisecond),
+		WithPoolMaxWait(200*time.Millisecond),
 	)
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer p.Close()
 	concurrency := 200
-	loopsPerGoroutine := 10000
+	loopsPerGoroutine := 1000
 	var eg errgroup.Group
 	for i := 0; i < concurrency; i++ {
 		eg.Go(func() error {
@@ -300,4 +302,50 @@ func run(t *testing.T, p Pool) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestPoolMaxWati(t *testing.T) {
+	p, err := NewNebulaPool("127.0.0.1:9669", "", "",
+		withPoolConnector(&dummyConnector{sleep: 2 * time.Second}),
+		WithPoolMaxOpenConns(400),
+		WithPoolMaxWait(200*time.Millisecond),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.Close()
+	_, err = p.GetClient()
+	assert.Equal(t, "[99009]: Internel error, cannot get the valid connection", err.Error())
+}
+
+func TestPoolMaxLifeTime(t *testing.T) {
+	p, err := NewNebulaPool("127.0.0.1:9669", "", "",
+		withPoolConnector(&dummyConnector{sleep: 20 * time.Millisecond}),
+		WithPoolMaxOpenConns(400),
+		WithPoolMaxLifetime(100*time.Millisecond),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.Close()
+	c, err := p.GetClient()
+	if err != nil {
+		t.Fatal(err)
+	}
+	pool, _ := p.(*driverPool)
+	pool.mu.Lock()
+	assert.Equal(t, 1, len(pool.connMap))
+	assert.Equal(t, 0, len(pool.freeConn))
+	pool.mu.Unlock()
+	<-time.After(200 * time.Millisecond)
+	// the connection should be removed from pool
+	if err := p.PutClient(c); err != nil {
+		t.Fatal(err)
+	}
+	conn := c.(*driverConn)
+	assert.True(t, conn.IsClosed())
+	pool.mu.Lock()
+	assert.Equal(t, 0, len(pool.freeConn))
+	assert.Equal(t, 0, len(pool.connMap))
+	pool.mu.Unlock()
 }

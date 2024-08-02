@@ -28,6 +28,7 @@ type (
 		maxIdle         int
 		maxOpen         int
 		minOpen         int
+		maxWait         time.Duration
 		closed          atomic.Bool
 		stop            func()
 		hostAddresses   []*hostAddress
@@ -191,7 +192,7 @@ func (dp *driverPool) GetClient() (Client, error) {
 	var (
 		dc Client
 	)
-	timeout, cancel := context.WithTimeout(context.Background(), dp.connCfg.requestTimeout)
+	timeout, cancel := context.WithTimeout(context.Background(), dp.maxWait)
 	defer cancel()
 
 	dp.mu.Lock()
