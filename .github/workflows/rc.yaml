@@ -1,9 +1,12 @@
 name: nightly
 
 on:
-  schedule:
-    - cron: "0 18 * * *"
   workflow_dispatch:
+    inputs:
+      version:
+        description: "version such as '5.1.0'"
+        required: true
+        default: "5.0.0"
   
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -13,7 +16,8 @@ defaults:
   run:
     shell: bash
 env:
-  OSS_DIR: minio/nightly-build/nebula-ng-tools
+  OSS_DIR: minio/rc-build/nebula-ng-tools
+  VERSION: ${{ github.event.inputs.version }}
 
 jobs:
   build:
@@ -34,11 +38,11 @@ jobs:
       - name: package source code
         run: |
           cd package
-          ./package.sh --product=java --release-name=nightly --package-name=nebula-java
-          ./package.sh --product=golang --release-name=nightly --package-name=nebula-golang
-          ./package.sh --product=ngql --release-name=nightly --package-name=nebula-ngql
-          ./package.sh --product=ngctl --release-name=nightly --package-name=nebula-ngctl
-          ./package.sh --product=operator --release-name=nightly --package-name=nebula-operator
+          ./package.sh --product=java --release-name=$VERSION --package-name=nebula-java
+          ./package.sh --product=golang --release-name=$VERSION --package-name=nebula-golang
+          ./package.sh --product=ngql --release-name=$VERSION --package-name=nebula-ngql
+          ./package.sh --product=ngctl --release-name=$VERSION --package-name=nebula-ngctl
+          ./package.sh --product=operator --release-name=$VERSION --package-name=nebula-operator
       - name: build ngctl
         run: |
           cd ngctl
@@ -55,10 +59,9 @@ jobs:
         
       - name: upload asserts
         run: |
-          today=$(date "+%Y.%m.%d")
-          mc cp ngql/ngql $OSS_DIR/$today/
-          mc cp ngctl/ngctl $OSS_DIR/$today/
-          mc cp -r package/packages/ $OSS_DIR/$today/packages/
+          mc cp ngql/ngql $OSS_DIR/$VERSION/
+          mc cp ngctl/ngctl $OSS_DIR/$Version/
+          mc cp -r package/packages/ $OSS_DIR/$Version/packages/
 
   docker:
     name: build docker image

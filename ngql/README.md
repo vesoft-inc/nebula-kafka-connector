@@ -13,10 +13,6 @@ ngql is the NebulaGraph console for NebulaGraph 5.0. With ngql, you can create a
 
 ### From Source Code
 
-Note that this repo is **private** now so you need to run `go env -w GOPRIVATE="github.com/vesoft-inc/*"` before building the source code
-
-To build Nebula Graph Console, make sure that you have installed [Go](https://golang.org/doc/install).
-
 > NOTE: Go version provided with apt on ubuntu is usually "outdated".
 
 Run the following command to examine if Go is installed on your machine.
@@ -29,15 +25,17 @@ The version should be newer than 1.19.
 
 Use Git to clone the source code of Nebula Graph Console to your host.
 
-```bash
-$ git clone https://github.com/vesoft-inc/nebula-ng-tools
-```
-
-Run the following command to build Nebula Graph Console.
+Before build, you should download the nebula-golang source code.
 
 ```bash
-$ cd ngql
-$ make
+# suppose nebula-golang-5.0.0.tar.gz & nebula-ngql-5.0.0.tar.gz
+tar zxvf nebula-golang-5.0.0.tar.gz -o /tmp/golang
+tar zxvf nebula-ngql-5.0.0.tar.gz -o /app/ngql
+
+
+cd /app/ngql
+go mod edit -replace github.com/vesoft-inc/nebula-ng-tools/golang=/tmp/golang
+make
 ```
 
 You can find a binary named `ngql`.
