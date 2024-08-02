@@ -10,7 +10,6 @@ services:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9559
       - --data_path=/data/meta
-      - --log_dir=/logs
       - --v=0
       - --minloglevel=0
       - --fromenv=local_ip
@@ -26,7 +25,7 @@ services:
       - 19560
     volumes:
       - ./data/metad0:/data/meta
-      - ./logs/metad0:/logs
+      - ./logs/metad0:/usr/local/nebula/logs
     networks:
       - nebula-ng
     restart: on-failure
@@ -41,7 +40,7 @@ services:
       FLAGS_local_ip: metad1
     volumes:
       - ./data/metad1:/data/meta
-      - ./logs/metad1:/logs
+      - ./logs/metad1:/usr/local/nebula/logs
 
   metad2:
     <<: *metad
@@ -51,7 +50,7 @@ services:
       FLAGS_local_ip: metad2
     volumes:
       - ./data/metad2:/data/meta
-      - ./logs/metad2:/logs
+      - ./logs/metad2:/usr/local/nebula/logs
 
   storaged0: &storaged
     image: ${IMAGE_GROUP}/nebula-storaged:${IMAGE_VERSION}
@@ -63,7 +62,6 @@ services:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9779
       - --data_path=/data/storage
-      - --log_dir=/logs
       - --v=0
       - --minloglevel=0
       - --fromenv=local_ip
@@ -80,10 +78,9 @@ services:
     ports:
       - 9779
       - 19779
-      - 19780
     volumes:
       - ./data/storaged0:/data/storage
-      - ./logs/storaged0:/logs
+      - ./logs/storaged0:/usr/local/nebula/logs
     networks:
       - nebula-ng
     restart: on-failure
@@ -98,7 +95,7 @@ services:
       FLAGS_local_ip: storaged1
     volumes:
       - ./data/storaged1:/data/storage
-      - ./logs/storaged1:/logs
+      - ./logs/storaged1:/usr/local/nebula/logs
 
   storaged2:
     <<: *storaged
@@ -108,7 +105,7 @@ services:
       FLAGS_local_ip: storaged2
     volumes:
       - ./data/storaged2:/data/storage
-      - ./logs/storaged2:/logs
+      - ./logs/storaged2:/usr/local/nebula/logs
 
   graphd0: &graphd
     image: ${IMAGE_GROUP}/nebula-graphd:${IMAGE_VERSION}
@@ -119,7 +116,6 @@ services:
     command:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9669
-      - --log_dir=/logs
       - --v=0
       - --minloglevel=0
       - --fromenv=local_ip
@@ -138,7 +134,7 @@ services:
       - 19669
       - 19670
     volumes:
-      - ./logs/graphd0:/logs
+      - ./logs/graphd0:/usr/local/nebula/logs
     networks:
       - nebula-ng
     restart: on-failure
@@ -152,11 +148,11 @@ services:
       TZ:   "${TZ}"
       FLAGS_local_ip: graphd1
     ports:
-      - 9669
+      - "9670:9669"
       - 19669
       - 19670
     volumes:
-      - ./logs/graphd0:/logs
+      - ./logs/graphd1:/usr/local/nebula/logs
 
   graphd2:
     <<: *graphd
@@ -165,11 +161,11 @@ services:
       TZ:   "${TZ}"
       FLAGS_local_ip: graphd2
     ports:
-      - 9669
+      - "9671:9669"
       - 19669
       - 19670
     volumes:
-      - ./logs/graphd2:/logs
+      - ./logs/graphd2:/usr/local/nebula/logs
   
   console:
     image: ${IMAGE_GROUP}/ngctl:${IMAGE_VERSION}
@@ -191,8 +187,9 @@ services:
         done ;
         for i in `seq 0 2`;do
           ngctl service add --type graphd -H graphd$${i} --port 9669 --cluster my_cluster1
-          ngctl service add --type storaged -H storaged$${i} --port 9559 --cluster my_cluster1
+          ngctl service add --type storaged -H storaged$${i} --port 9779 --cluster my_cluster1
         done;
+        ngctl cluster init --cluster my_cluster1
         tail -f /dev/null;
 
     depends_on:
