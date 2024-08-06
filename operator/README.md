@@ -15,7 +15,7 @@ It makes NebulaGraph a truly cloud-native database.
 
 ### Install nebula operator
 
-See [install/uninstall nebula operator](doc/user/operator_guide.md) .
+See [install/uninstall nebula operator](doc/user/install_guide.md) .
 
 ### Create and destroy a nebula cluster
 
@@ -235,11 +235,6 @@ nebula-cluster-storaged-0   1/1     Running   0          3h50m
 nebula-cluster-storaged-1   1/1     Running   0          3h50m
 nebula-cluster-storaged-2   1/1     Running   0          31s
 ```
-
-
-## FAQ
-
-Please refer to [FAQ.md](FAQ.md)
 
 ## License
 
