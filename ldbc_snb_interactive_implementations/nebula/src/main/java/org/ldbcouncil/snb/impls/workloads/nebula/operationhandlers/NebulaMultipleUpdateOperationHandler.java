@@ -37,9 +37,10 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
                     LOGGER.info(String.format("====> sub_update_query=%s, latency=%dus", queryString, resultSet.getLatency()));
                 }
                 if (!resultSet.isSucceeded()) {
-                    LOGGER.error("execute {} failed, {}",
+                    LOGGER.error("execute {} failed, {}, session id:{}",
                             operation.getClass().getSimpleName(),
-                            resultSet.getErrorMessage());
+                            resultSet.getErrorMessage(),
+                                 client.getSessionId());
                 }
             }
             long endTime = System.currentTimeMillis();
