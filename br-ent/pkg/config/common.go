@@ -31,7 +31,6 @@ const (
 	flagUsername           = "username"
 	flagPassword           = "password"
 	flagClusterId          = "clusterId"
-	flagBackupClusterId    = "backup-clusterId"
 	flagCatalogOwner       = "catalog-owner"
 	flagForce              = "force"
 

@@ -26,4 +26,3 @@ service agent-api {
 	@handler SetComponentConfig
 	post /api/v1/component-config (SetComponentConfigReq) returns (SetComponentConfigResp)
 }
-

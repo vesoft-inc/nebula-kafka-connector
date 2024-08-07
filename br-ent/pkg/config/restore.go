@@ -20,7 +20,6 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
 	flags.Int64(flagClusterId, 0, "Specify the restore cluster id")
-	flags.Int64(flagBackupClusterId, 0, "Specify the backup cluster id")
 	flags.String(flagCatalogOwner, "root", "Specify the restore cluster catalog owner")
 	flags.Bool(flagForce, false, "Force to restore data")
 
@@ -36,22 +35,20 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	cobra.MarkFlagRequired(flags, FlagStorage)
 	cobra.MarkFlagRequired(flags, flagBackupName)
 	cobra.MarkFlagRequired(flags, flagClusterId)
-	cobra.MarkFlagRequired(flags, flagBackupClusterId)
 }
 
 type RestoreConfig struct {
-	BackupName      string
-	MetaAddr        string
-	AgentsAddr      string
-	ClusterId       int64
-	BackupClusterId int64
-	Concurrency     int
-	Backend         *agentstorage.Backend // Backend is associated with the root uri
-	TLSConfig       *tls.Config
-	Username        string
-	Password        string
-	CatalogOwner    string
-	Force           bool
+	BackupName   string
+	MetaAddr     string
+	AgentsAddr   string
+	ClusterId    int64
+	Concurrency  int
+	Backend      *agentstorage.Backend // Backend is associated with the root uri
+	TLSConfig    *tls.Config
+	Username     string
+	Password     string
+	CatalogOwner string
+	Force        bool
 }
 
 func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
@@ -73,11 +70,6 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 	}
 
 	r.ClusterId, err = flags.GetInt64(flagClusterId)
-	if err != nil {
-		return err
-	}
-
-	r.BackupClusterId, err = flags.GetInt64(flagBackupClusterId)
 	if err != nil {
 		return err
 	}

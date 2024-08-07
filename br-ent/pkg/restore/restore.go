@@ -50,14 +50,13 @@ type Restore struct {
 
 func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error) {
 	r := &Restore{
-		ctx:             ctx,
-		cfg:             cfg,
-		rootUri:         cfg.Backend.Uri(),
-		backupName:      cfg.BackupName,
-		clusterId:       cfg.ClusterId,
-		backupClusterId: cfg.BackupClusterId,
-		catalogOwner:    cfg.CatalogOwner,
-		force:           cfg.Force,
+		ctx:          ctx,
+		cfg:          cfg,
+		rootUri:      cfg.Backend.Uri(),
+		backupName:   cfg.BackupName,
+		clusterId:    cfg.ClusterId,
+		catalogOwner: cfg.CatalogOwner,
+		force:        cfg.Force,
 	}
 
 	var err error
@@ -434,6 +433,11 @@ func (r *Restore) loadBakMetas(backupName string) error {
 		return fmt.Errorf("parse backup meta file %s failed: %w", tmpLocalPath, err)
 	}
 
+	if len(bakMeta.ClusterBackupInfos) != 1 {
+		return fmt.Errorf("backup cluster count should be 1, but %d", len(bakMeta.ClusterBackupInfos))
+	}
+
+	r.backupClusterId = bakMeta.ClusterBackupInfos[0].ClusterId
 	r.backupMetas = append(r.backupMetas, bakMeta)
 
 	return nil
