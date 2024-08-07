@@ -13,9 +13,10 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
+export GO111MODULE := on
 GOOS := $(if $(GOOS),$(GOOS),linux)
 GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
-GOENV  := GOOS=$(GOOS) GOARCH=$(GOARCH)
+GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 
 TARGETDIR := "$(GOOS)/$(GOARCH)"
@@ -118,27 +119,26 @@ docker-build: ## Build docker image with the manager.
 docker-push: ## Push docker image with the manager.
 	$(CONTAINER_TOOL) push ${IMG}
 
-# PLATFORMS defines the target platforms for the manager image be built to provide support to multiple
-# architectures. (i.e. make docker-buildx IMG=myregistry/mypoperator:0.0.1). To use this option you need to:
-# - be able to use docker buildx. More info: https://docs.docker.com/build/buildx/
-# - have enabled BuildKit. More info: https://docs.docker.com/develop/develop-images/build_enhancements/
-# - be able to push the image to your registry (i.e. if you do not set a valid value via IMG=<myregistry/image:<tag>> then the export will fail)
-# To adequately provide solutions that are compatible with multiple platforms, you should consider using this option.
-PLATFORMS ?= linux/arm64,linux/amd64
-DILIM := ,
+.PHNOY: ensure-buildx
+ensure-buildx:
+	chmod +x hack/init-buildx.sh && ./hack/init-buildx.sh
+
+PLATFORMS = arm64 amd64
+BUILDX_PLATFORMS = linux/arm64,linux/amd64
 
 .PHONY: docker-buildx
-docker-buildx: ## Build and push docker image for the manager for cross-platform support
-	$(foreach PLATFORM,$(subst $(DILIM), ,$(PLATFORMS)), \
-	echo -n "$(PLATFORM)..."; \
-	OS=$(shell echo $(PLATFORM) | cut -d "/" -f 1) \
-	ARCH=$(shell echo $(PLATFORM) | cut -d "/" -f 2); \
-	GOOS=$$OS GOARCH=$$ARCH make build;)
-	echo "Building and pushing nebula-operator image... $(PLATFORMS)"
-	- $(CONTAINER_TOOL) buildx create --name project-v3-builder
-	$(CONTAINER_TOOL) buildx use project-v3-builder
-	$(CONTAINER_TOOL) buildx build --pull --push --platform=$(PLATFORMS) --tag "${DOCKER_REPO}/nebula-ng-operator:${IMAGE_TAG}" -f Dockerfile --build-arg USERNAME=${USERNAME} .
-	- $(CONTAINER_TOOL) buildx rm project-v3-builder
+docker-buildx: ensure-buildx ## Build and push docker image for the manager for cross-platform support
+	$(foreach PLATFORM,$(PLATFORMS), echo -n "$(PLATFORM)..."; GOARCH=$(PLATFORM) make build;)
+	echo "Building and pushing nebula-ng-operator image... $(BUILDX_PLATFORMS)"
+	docker buildx build \
+			--no-cache \
+			--pull \
+			--push \
+			--progress plain \
+			--platform $(BUILDX_PLATFORMS) \
+			--file Dockerfile \
+			--build-arg USERNAME=${USERNAME} \
+			-t "${DOCKER_REPO}/nebula-ng-operator:${IMAGE_TAG}" .
 	
 ##@ Deployment
 
