@@ -4,6 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.proto.common.Date;
+import com.vesoft.nebula.proto.common.Decimal;
 import com.vesoft.nebula.proto.common.Duration;
 import com.vesoft.nebula.proto.common.Edge;
 import com.vesoft.nebula.proto.common.LocalDatetime;
@@ -13,11 +14,13 @@ import com.vesoft.nebula.proto.common.Path;
 import com.vesoft.nebula.proto.common.Record;
 import com.vesoft.nebula.proto.common.Status;
 import com.vesoft.nebula.proto.common.Value;
+import com.vesoft.nebula.proto.common.Vector;
 import com.vesoft.nebula.proto.graph.ElapsedTime;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.ResultTable;
 import com.vesoft.nebula.proto.graph.Row;
 import com.vesoft.nebula.proto.graph.Summary;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -69,11 +72,11 @@ public class DataTest {
     @Test
     public void testRelationShip() {
         try {
-            Edge edge = getEdge(101L, 102L, 10L);
+            Edge         edge         = getEdge(101L, 102L, 10L);
             Relationship relationShip = new Relationship(edge);
             assert relationShip.getSrcId() == 101L;
             assert relationShip.getDstId() == 102L;
-            // TODO assert Objects.equals(relationShip.edgeName(), "classmate");
+            assert relationShip.getType().equals("knows");
             assert relationShip.getRank() == 10;
 
             // check keys
@@ -92,7 +95,7 @@ public class DataTest {
             }
             List<Integer> expectVals = Arrays.asList(0, 1, 2, 3, 4);
             assert Objects.equals(expectVals.stream().sorted().collect(Collectors.toList()),
-                    longVals.stream().sorted().collect(Collectors.toList()));
+                                  longVals.stream().sorted().collect(Collectors.toList()));
 
             // check properties
             HashMap<String, ValueWrapper> properties = relationShip.getProperties();
@@ -127,11 +130,12 @@ public class DataTest {
                     .newBuilder()
                     .setResult(resultTable)
                     .setSummary(Summary.newBuilder()
-                            .setElapsedTime(ElapsedTime.newBuilder()
-                                    .setTotalServerTimeUs(1000)
-                                    .build()))
+                                        .setElapsedTime(ElapsedTime.newBuilder()
+                                                                .setTotalServerTimeUs(1000)
+                                                                .build()))
                     .setStatus(Status.newBuilder()
-                            .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build())
+                                       .setCode(ByteString.copyFrom("00000", Charsets.UTF_8))
+                                       .build())
                     .build();
 
             ResultSet resultSet = new ResultSet(response);
@@ -139,9 +143,18 @@ public class DataTest {
             assert resultSet.getErrorCode() == ErrorCode.SUCCESSFUL_COMPLETION;
             assert !resultSet.isEmpty();
             Assert.assertEquals(1000, resultSet.getLatency());
-            List<String> expectColNames = Arrays.asList("col0_empty", "col1_bool", "col2_int64",
-                    "col3_int32", "col4_int16", "col5_int8", "col6_float", "col7_double",
-                    "col8_string", "col9_list", "col10_vertex", "col11_edge");
+            List<String> expectColNames = Arrays.asList("col0_empty",
+                                                        "col1_bool",
+                                                        "col2_int64",
+                                                        "col3_int32",
+                                                        "col4_int16",
+                                                        "col5_int8",
+                                                        "col6_float",
+                                                        "col7_double",
+                                                        "col8_string",
+                                                        "col9_list",
+                                                        "col10_vertex",
+                                                        "col11_edge");
             assert Objects.equals(resultSet.getColumnNames(), expectColNames);
 
             assert resultSet.rowSize() == 1;
@@ -181,11 +194,11 @@ public class DataTest {
 
             assert record.get(10).isNode();
             assert Objects.equals(record.get(10).asNode(),
-                    new Vertex(getNode(1)));
+                                  new Vertex(getNode(1)));
 
             assert record.get(11).isEdge();
             assert Objects.equals(record.get(11).asEdge(),
-                    new Relationship(getEdge(1, 2, 10)));
+                                  new Relationship(getEdge(1, 2, 10)));
         } catch (Exception e) {
             e.printStackTrace();
             assert (false);
@@ -197,49 +210,56 @@ public class DataTest {
         try {
             // test node
             ValueWrapper valueWrapper = new ValueWrapper(Value
-                    .newBuilder()
-                    .setNodeValue(getSimpleNode(1))
-                    .build());
+                                                                 .newBuilder()
+                                                                 .setNodeValue(getSimpleNode(1))
+                                                                 .build());
             String expectString =
                     "(1@person:teacher{prop:Bob})";
 
             Assert.assertEquals(expectString, valueWrapper.asNode().toString());
             // test relationship
-            valueWrapper = new ValueWrapper(Value
-                    .newBuilder()
-                    .setEdgeValue(getSimpleEdge(false, 1, 2))
-                    .build());
+            valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                    .setEdgeValue(
+                                                            getSimpleDirectedEdge(false, 1, 2))
+                                                    .build());
             expectString = "(1)-[10@knows:knows1&knows2{edge_prop:100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             valueWrapper = new ValueWrapper(Value
-                    .newBuilder()
-                    .setEdgeValue(getSimpleEdge(true, 1, 2))
-                    .build());
+                                                    .newBuilder()
+                                                    .setEdgeValue(getSimpleDirectedEdge(true, 1, 2))
+                                                    .build());
             expectString = "(1)-[10@knows:knows1&knows2{edge_prop:100}]->(2)";
+            Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
+
+            valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                    .setEdgeValue(
+                                                            getSimpleUndirectedEdge(false, 1, 2))
+                                                    .build());
+            expectString = "(1)~[10@knows:knows1&knows2{edge_prop:100}]~(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             // test local time
             valueWrapper = new ValueWrapper(Value
-                    .newBuilder()
-                    .setLocalTimeValue(getSimpleLocalTime())
-                    .build());
+                                                    .newBuilder()
+                                                    .setLocalTimeValue(getSimpleLocalTime())
+                                                    .build());
             expectString = "12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalTime().toString());
 
             // test local datetime
             valueWrapper = new ValueWrapper(Value
-                    .newBuilder()
-                    .setLocalDatetimeValue(getSimpleLocalDateTime())
-                    .build());
+                                                    .newBuilder()
+                                                    .setLocalDatetimeValue(getSimpleLocalDateTime())
+                                                    .build());
             expectString = "2024-01-01T12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalDateTime().toString());
 
             // test date
             valueWrapper = new ValueWrapper(Value
-                    .newBuilder()
-                    .setDateValue(getSimpleDate())
-                    .build());
+                                                    .newBuilder()
+                                                    .setDateValue(getSimpleDate())
+                                                    .build());
             expectString = "2024-01-01";
             Assert.assertEquals(expectString, valueWrapper.asDate().toString());
         } catch (Exception e) {
@@ -251,52 +271,50 @@ public class DataTest {
     @Test
     public void testDuration() {
         // test duration of time-based duration
-        ValueWrapper valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setDurationValue(Duration.newBuilder()
-                        .setIsMonthBased(false)
-                        .setDay(1)
-                        .setHour(2)
-                        .setMinute(3)
-                        .setSec(4)
-                        .setMicrosec(5)
-                        .build())
-                .build());
+        Duration duration = Duration.newBuilder()
+                .setIsMonthBased(false)
+                .setDay(1)
+                .setHour(2)
+                .setMinute(3)
+                .setSec(4)
+                .setMicrosec(5)
+                .build();
+        ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                             .setDurationValue(duration)
+                                                             .build());
         String expectString = "P1DT2H3M4.000005S";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
 
         // test duration with 5000 ms, test the number of digits after the decimal point
-        valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setDurationValue(Duration.newBuilder()
-                        .setIsMonthBased(false)
-                        .setSec(4)
-                        .setMicrosec(5000)
-                        .build())
-                .build());
+        duration = Duration.newBuilder()
+                .setIsMonthBased(false)
+                .setSec(4)
+                .setMicrosec(5000)
+                .build();
+        valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                .setDurationValue(duration)
+                                                .build());
         expectString = "PT4.005S";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
 
         // tet duration of time-based duration only with day
-        valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setDurationValue(Duration.newBuilder()
-                        .setIsMonthBased(false)
-                        .setDay(1)
-                        .build())
-                .build());
+        valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                .setDurationValue(Duration.newBuilder()
+                                                                          .setIsMonthBased(false)
+                                                                          .setDay(1)
+                                                                          .build())
+                                                .build());
         expectString = "P1D";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
 
         // test duration of month-based duration
-        valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setDurationValue(Duration.newBuilder()
-                        .setIsMonthBased(true)
-                        .setYear(-1)
-                        .setMonth(-1)
-                        .build())
-                .build());
+        valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                .setDurationValue(Duration.newBuilder()
+                                                                          .setIsMonthBased(true)
+                                                                          .setYear(-1)
+                                                                          .setMonth(-1)
+                                                                          .build())
+                                                .build());
         expectString = "P-1Y-1M";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
     }
@@ -333,11 +351,28 @@ public class DataTest {
     }
 
     @Test
+    public void testUndirectedPath() {
+        ValueWrapper valueWrapper = new ValueWrapper(
+                Value.newBuilder()
+                        .setPathValue(getUndirectedPath())
+                        .build()
+        );
+        String expectString = "(1@person:teacher{prop:Bob})~[10@knows:knows1&knows2{edge_prop:100}]"
+                + "~(2@person:teacher{prop:Bob})"
+                + "~[10@knows:knows1&knows2{edge_prop:100}]~(3@person:teacher{prop:Bob})";
+        Assert.assertEquals(expectString, valueWrapper.asPath().toString());
+
+        NPath path = valueWrapper.asPath();
+        Assert.assertEquals(3, path.nodes().size());
+        Assert.assertEquals(2, path.relationships().size());
+        Assert.assertEquals(5, path.values().size());
+    }
+
+    @Test
     public void testRecord() {
-        ValueWrapper valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setRecordValue(getRowRecord())
-                .build());
+        ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                             .setRecordValue(getRowRecord())
+                                                             .build());
 
         NRecord record = valueWrapper.asRecord();
         assert (!record.isEmpty());
@@ -348,25 +383,33 @@ public class DataTest {
         Assert.assertTrue(record.getValue("prop4").asBoolean());
         Assert.assertEquals(1, record.getValue("prop5").asNode().getId());
         Assert.assertEquals("person",
-                record.getValue("prop5").asNode().getType());
+                            record.getValue("prop5").asNode().getType());
         Assert.assertEquals("teacher",
-                record.getValue("prop5").asNode().getLabels().get(0));
+                            record.getValue("prop5").asNode().getLabels().get(0));
         Assert.assertEquals("prop",
-                record.getValue("prop5").asNode().getProperties().keySet().toArray()[0]);
+                            record.getValue("prop5")
+                                    .asNode()
+                                    .getProperties()
+                                    .keySet()
+                                    .toArray()[0]);
 
         Map<String, ValueWrapper> values = record.getValuesMap();
-        List<String> expectMapKeys = Arrays.asList("prop1", "prop2", "prop3", "prop4", "prop5",
-                "prop6");
+        List<String> expectMapKeys = Arrays.asList("prop1",
+                                                   "prop2",
+                                                   "prop3",
+                                                   "prop4",
+                                                   "prop5",
+                                                   "prop6");
         Assert.assertEquals(expectMapKeys.stream().sorted().collect(Collectors.toList()),
-                values.keySet().stream().sorted().collect(Collectors.toList()));
+                            values.keySet().stream().sorted().collect(Collectors.toList()));
     }
 
     @Test
     public void testEmptyRecord() {
-        ValueWrapper valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setRecordValue(Record.newBuilder().build())
-                .build());
+        ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                             .setRecordValue(Record.newBuilder()
+                                                                                     .build())
+                                                             .build());
         NRecord record = valueWrapper.asRecord();
         assert (record.isEmpty());
     }
@@ -376,16 +419,15 @@ public class DataTest {
         Map<String, Value> map = new HashMap<>();
         map.put("prop", Value.newBuilder().setInt32Value(1).build());
 
-        ValueWrapper valueWrapper1 = new ValueWrapper(Value
-                .newBuilder()
-                .setRecordValue(Record.newBuilder().putAllValues(map).build())
-                .build());
+        Record record = Record.newBuilder().putAllValues(map).build();
+        ValueWrapper valueWrapper1 = new ValueWrapper(Value.newBuilder()
+                                                              .setRecordValue(record)
+                                                              .build());
         NRecord record1 = valueWrapper1.asRecord();
 
-        ValueWrapper valueWrapper2 = new ValueWrapper(Value
-                .newBuilder()
-                .setRecordValue(Record.newBuilder().putAllValues(map).build())
-                .build());
+        ValueWrapper valueWrapper2 = new ValueWrapper(Value.newBuilder()
+                                                              .setRecordValue(record)
+                                                              .build());
         NRecord record2 = valueWrapper2.asRecord();
         Assert.assertEquals(record1, record2);
         Assert.assertEquals(record1.hashCode(), record2.hashCode());
@@ -394,12 +436,31 @@ public class DataTest {
 
     @Test
     public void testList() {
-        ValueWrapper valueWrapper = new ValueWrapper(Value
-                .newBuilder()
-                .setListValue(getList())
-                .build());
+        ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                             .setListValue(getList())
+                                                             .build());
         List<ValueWrapper> values = valueWrapper.asList();
         Assert.assertEquals(4, values.size());
+    }
+
+    @Test
+    public void testDecimal() {
+        ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                             .setDecimalValue(getDecimal())
+                                                             .build());
+        BigDecimal decimal = valueWrapper.asDecimal();
+        Assert.assertEquals(new BigDecimal("1.23456789"), decimal);
+    }
+
+    @Test
+    public void testVector() {
+        ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
+                                                             .setVectorValue(getVector())
+                                                             .build());
+        java.util.Vector vector = valueWrapper.asVector();
+        Assert.assertEquals(vector.get(0), 0.1f);
+        Assert.assertEquals(vector.get(1), 0.2f);
+        Assert.assertEquals(vector.get(2), 0.3f);
     }
 
 
@@ -411,14 +472,14 @@ public class DataTest {
             Value value = Value.newBuilder().setInt64Value(j).build();
             props.put(String.format("prop%d", j), value);
         }
-        String nodeType = "person";
-        Node.Builder builder = Node.newBuilder().setNodeId(vid).setType(nodeType);
+        String       nodeType = "person";
+        Node.Builder builder  = Node.newBuilder().setNodeId(vid).setType(nodeType);
         builder.putAllProperties(props);
         return builder.build();
     }
 
     private Edge getEdge(long srcId, long dstId, long rank) {
-        String edgeType = "knows";
+        String edgeType  = "knows";
         String graphName = "test";
         Edge.Builder builder = Edge
                 .newBuilder()
@@ -451,11 +512,11 @@ public class DataTest {
         return node;
     }
 
-    private Edge getSimpleEdge(boolean isReverse, long srcId, long dstId) {
+    private Edge getSimpleDirectedEdge(boolean isReverse, long srcId, long dstId) {
         Map<String, Value> props = new HashMap<>();
         props.put("edge_prop", Value.newBuilder().setInt64Value(100L).build());
         String edgeType = "knows";
-        long rank = 10;
+        long   rank     = 10;
 
         return Edge.newBuilder()
                 .setType(edgeType)
@@ -468,12 +529,48 @@ public class DataTest {
                 .build();
     }
 
+    private Edge getSimpleUndirectedEdge(boolean isReverse, long srcId, long dstId) {
+        Map<String, Value> props = new HashMap<>();
+        props.put("edge_prop", Value.newBuilder().setInt64Value(100L).build());
+        String edgeType = "knows";
+        long   rank     = 10;
+
+        return Edge.newBuilder()
+                .setType(edgeType)
+                .addLabels("knows1")
+                .addLabels("knows2")
+                .setSrcId(srcId)
+                .setDstId(dstId)
+                .setRank(rank)
+                .setDirectionValue(Edge.Direction.UNDIRECTED_VALUE)
+                .putAllProperties(props)
+                .build();
+    }
+
     private Path getPath() {
         Path.Builder builder = Path.newBuilder();
         builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(1)));
-        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 1, 2)).build());
+        builder.addValues(Value.newBuilder()
+                                  .setEdgeValue(getSimpleDirectedEdge(false, 1, 2))
+                                  .build());
         builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(2)).build());
-        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 2, 3)).build());
+        builder.addValues(Value.newBuilder()
+                                  .setEdgeValue(getSimpleDirectedEdge(false, 2, 3))
+                                  .build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(3)).build());
+        return builder.build();
+    }
+
+    private Path getUndirectedPath() {
+        Path.Builder builder = Path.newBuilder();
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(1)));
+        builder.addValues(Value.newBuilder()
+                                  .setEdgeValue(getSimpleUndirectedEdge(false, 1, 2))
+                                  .build());
+        builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(2)).build());
+        builder.addValues(Value.newBuilder()
+                                  .setEdgeValue(getSimpleUndirectedEdge(false, 2, 3))
+                                  .build());
         builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(3)).build());
         return builder.build();
     }
@@ -481,9 +578,13 @@ public class DataTest {
     private Path getReversePath() {
         Path.Builder builder = Path.newBuilder();
         builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(1)));
-        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 2, 1)).build());
+        builder.addValues(Value.newBuilder()
+                                  .setEdgeValue(getSimpleDirectedEdge(false, 2, 1))
+                                  .build());
         builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(2)).build());
-        builder.addValues(Value.newBuilder().setEdgeValue(getSimpleEdge(false, 3, 2)).build());
+        builder.addValues(Value.newBuilder()
+                                  .setEdgeValue(getSimpleDirectedEdge(false, 3, 2))
+                                  .build());
         builder.addValues(Value.newBuilder().setNodeValue(getSimpleNode(3)).build());
         return builder.build();
     }
@@ -533,6 +634,18 @@ public class DataTest {
         return Date.newBuilder().setYear(2024).setMonth(1).setDay(1).build();
     }
 
+    private Decimal getDecimal() {
+        return Decimal.newBuilder().setSval("1.23456789").build();
+    }
+
+    private Vector getVector() {
+        return Vector.newBuilder()
+                .addValues(0.1f)
+                .addValues(0.2f)
+                .addValues(0.3f)
+                .build();
+    }
+
     private ResultTable getDateset() {
         List<Value> values = Arrays.asList(
                 Value.newBuilder().build(),
@@ -548,7 +661,9 @@ public class DataTest {
                         .build(),
                 Value.newBuilder().setListValue(getList()).build(),
                 Value.newBuilder().setNodeValue(getSimpleNode(1)).build(),
-                Value.newBuilder().setEdgeValue(getSimpleEdge(false, 1, 2)).build());
+                Value.newBuilder()
+                        .setEdgeValue(getSimpleDirectedEdge(false, 1, 2))
+                        .build());
 
         Row row = Row.newBuilder().addAllValues(values).build();
 

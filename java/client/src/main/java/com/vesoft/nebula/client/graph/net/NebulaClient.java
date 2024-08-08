@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- *
+ * Client to connect to NebulaGraph and send request to NebulaGraph.
  */
 public class NebulaClient implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -154,14 +154,19 @@ public class NebulaClient implements Serializable {
 
     private void initClient() throws AuthFailedException {
         // create connection with NebulaGraph Server
+        AuthResult authResult = null;
         connection = new GrpcConnection();
         int tryConnectTimes = servers.size();
+        Collections.shuffle(servers);
         while (tryConnectTimes-- > 0) {
             try {
-                // TODO polling the address
-                Collections.shuffle(servers);
                 connection.open(servers.get(tryConnectTimes), connectTimeout, requestTimeout);
+                authResult = connection.authenticate(userName, authOptions);
+                sessionId = authResult.getSessionId();
                 break;
+            } catch (AuthFailedException e) {
+                logger.error("create NebulaClient failed.", e);
+                throw e;
             } catch (Exception e) {
                 if (tryConnectTimes == 0) {
                     logger.error("create NebulaClient failed.", e);
@@ -169,16 +174,6 @@ public class NebulaClient implements Serializable {
                 }
             }
         }
-
-        // auth for user
-        AuthResult authResult;
-        try {
-            authResult = connection.authenticate(userName, authOptions);
-        } catch (AuthFailedException e) {
-            logger.error("create NebulaClient failed.", e);
-            throw e;
-        }
-        sessionId = authResult.getSessionId();
     }
 
 
@@ -187,24 +182,41 @@ public class NebulaClient implements Serializable {
         return scanNode(graphName, nodeType, new ArrayList<>(), true, parts, DEFAULT_BATCH_SIZE);
     }
 
+    public ScanNodeResultIterator scanNode(String graphName,
+                                           String nodeType,
+                                           List<String> returnProperties) {
+        List<Integer> parts         = getAllParts();
+        boolean       allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
+        return scanNode(graphName, nodeType, returnProperties,
+                        allProperties, parts, DEFAULT_BATCH_SIZE);
+    }
+
     /**
      * scan the data of specific nodeType.
      * the result will contain all property of nodeType.
      *
-     * @param graphName NebulaGraph name
-     * @param nodeType  node type name
-     * @param part      graph part id
-     * @param batchSize the data size for one request for one part,
-     *                  the ScanNodeResultIterator.next() will return at most batchSize
-     *                  node records
+     * @param graphName        NebulaGraph name
+     * @param nodeType         node type name
+     * @param returnProperties the property list to scan, if list is empty,
+     *                         then the result just contain primary key.
+     * @param batchSize        the data size for one request for one part,
+     *                         the ScanNodeResultIterator.next() will return at most batchSize
+     *                         node records
      * @return ScanNodeResultIterator
      */
     public ScanNodeResultIterator scanNode(String graphName,
                                            String nodeType,
-                                           int part,
+                                           List<String> returnProperties,
                                            int batchSize) {
-        return scanNode(graphName, nodeType, new ArrayList<>(), true,
-                        Collections.singletonList(part), batchSize);
+        List<Integer> parts         = getAllParts();
+        boolean       allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
+        return scanNode(graphName, nodeType, returnProperties, allProperties, parts, batchSize);
     }
 
     /**
@@ -322,25 +334,42 @@ public class NebulaClient implements Serializable {
         return scanEdge(graphName, edgeType, new ArrayList<>(), true, parts, DEFAULT_BATCH_SIZE);
     }
 
+    public ScanEdgeResultIterator scanEdge(String graphName,
+                                           String edgeType,
+                                           List<String> returnProperties) {
+        List<Integer> parts         = getAllParts();
+        boolean       allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
+        return scanEdge(graphName, edgeType, returnProperties,
+                        allProperties, parts, DEFAULT_BATCH_SIZE);
+    }
 
     /**
      * scan the data of specific edgeType
      * the result will contain src node's primary key, dst node's primary key, edge's all property.
      *
-     * @param graphName NebulaGraph name
-     * @param edgeType  edge type name
-     * @param part      graph part id
-     * @param batchSize the data size for one request for one part,
-     *                  the ScanEdgeResultIterator.next() will return at most batchSize
-     *                  edge records
+     * @param graphName        NebulaGraph name
+     * @param edgeType         edge type name
+     * @param returnProperties the property list to scan, if list is empty, then the result will
+     *                         just contain src node's primary key and dst node's primary key
+     * @param batchSize        the data size for one request for one part,
+     *                         the ScanEdgeResultIterator.next() will return at most batchSize
+     *                         edge records
      * @return ScanEdgeResultIterator
      */
     public ScanEdgeResultIterator scanEdge(String graphName,
                                            String edgeType,
-                                           int part,
+                                           List<String> returnProperties,
                                            int batchSize) {
-        return scanEdge(graphName, edgeType, new ArrayList<>(), true,
-                        Collections.singletonList(part), batchSize);
+        boolean allProperties = false;
+        if (returnProperties == null) {
+            allProperties = true;
+        }
+        List<Integer> parts = getAllParts();
+        return scanEdge(graphName, edgeType, returnProperties, allProperties,
+                        parts, batchSize);
     }
 
 

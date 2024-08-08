@@ -3,9 +3,9 @@
 name: test client
 on:
   push:
-    branches: [master, "release-**"]
+    branches: [ master, "release-**" ]
   pull_request:
-    branches: [master, "release-**"]
+    branches: [ master, "release-**" ]
   schedule:
     - cron: "0 6 * * *"
 
@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   go-client:
-    runs-on: [self-hosted, nebula-fast]
+    runs-on: [ self-hosted, nebula-fast ]
     container:
       image: vesoft/nebula-dev:ubuntu2004
     env:
@@ -43,7 +43,7 @@ jobs:
         working-directory: k6-plugin
 
   java-client:
-    runs-on: [self-hosted, nebula-fast]
+    runs-on: [ self-hosted, nebula-fast ]
     container:
       image: vesoft/nebula-dev:ubuntu2004
     steps:
@@ -63,9 +63,16 @@ jobs:
       - name: Link maven config file
         run: |
           ln -s /github/home/.m2/ /root/.m2
+      - name: install docker
+        uses: papodaca/install-docker-action@main
+      - name: install NebulaGraph 5.0
+        run: |
+          docker compose up -d
+          sleep 30
+          docker compose ps
+        working-directory: docker-compose
       - name: Build with Maven
         run: |
-          mvn -B install -pl client -D test=DataTest,ProtoVersionTest
           mvn -B package -Dmaven.test.skip=true
         working-directory: java
 
@@ -98,7 +105,7 @@ jobs:
           mvn -B package -Pnebula -Dmaven.test.skip=true
 
   connectors:
-    runs-on: [ self-hosted, nebula-fast]
+    runs-on: [ self-hosted, nebula-fast ]
     container:
       image: vesoft/nebula-dev:ubuntu2004
     steps:

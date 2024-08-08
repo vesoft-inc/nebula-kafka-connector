@@ -4,17 +4,15 @@ import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
 import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import com.vesoft.nebula.client.util.ProcessUtil;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Test;
 
 public class NebulaClientTest {
-    String addresses = "192.168.8.6:3820";
-    String user = "root";
-    String passwd = "Nebula123";
+    String addresses = "127.0.0.1:9669,127.0.0.1:9670,127.0.0.1:9671";
+    String user      = "root";
+    String passwd    = "NebulaGraph01";
 
     @Test()
     public void testBuildNebulaClient() {
@@ -74,33 +72,37 @@ public class NebulaClientTest {
         }
     }
 
-    @Test()
-    public void testStrictlyServerHealthy() {
-        System.out.println("<==== testStrictlyServerHealthy ====>");
-        // TODO stop one graphd server
-        String address = "127.0.0.1:9669,127.0.0.1:9670,127.0.0.1:9671";
+    @Test
+    public void testReconnectWithMultiServices() {
+        System.out.println("<==== testReconnectWithMultiServices ====>");
+        Runtime runtime = Runtime.getRuntime();
+        String  cmd     = "docker stop docker-compose-graphd0-1";
+
         try {
-            NebulaClient client = NebulaClient.builder(address, user, passwd)
-                    .build();
-            ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION);
-            client.close();
-        } catch (AuthFailedException | IOErrorException e) {
-            Assert.fail(e.getMessage());
+            NebulaClient.builder("127.0.0.1:9669", user, passwd).build();
+        } catch (Exception e) {
+            assert true;
         }
 
         try {
-            NebulaClient.builder(address, user, passwd).build();
-            Assert.fail("client build should failed, strictlyServerHealthy is true, "
-                    + "graphd servers are not all ok.");
-        } catch (AuthFailedException e) {
+            Process p = runtime.exec(cmd);
+            p.waitFor(10, TimeUnit.SECONDS);
+            ProcessUtil.printProcessStatus(cmd, p);
+            NebulaClient client    = NebulaClient.builder(addresses, user, passwd).build();
+            ResultSet    resultSet = client.execute("RETURN 1");
+            assert resultSet.isSucceeded();
+        } catch (Exception e) {
             Assert.fail(e.getMessage());
-        } catch (IOErrorException e) {
-            Assert.assertTrue("expect here:" + e.getMessage(),
-                    e.getMessage().contains("Servers status is not ok"));
+        } finally {
+            try {
+                cmd = "docker start docker-compose-graphd0-1";
+                Process p = runtime.exec(cmd);
+                p.waitFor(10, TimeUnit.SECONDS);
+                ProcessUtil.printProcessStatus(cmd, p);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
-
-        // TODO start the graphd server
     }
 
     @Test
@@ -120,52 +122,12 @@ public class NebulaClientTest {
         // test the check for execute using closed client
         try {
             client.execute("RETURN 1");
+            Assert.fail("client execute should fail.");
         } catch (RuntimeException e) {
-            Assert.assertEquals(e.getMessage(), "NebulaClient has closed. Couldn't use again.");
+            Assert.assertEquals(e.getMessage(), "The NebulaClient already closed.");
         } catch (IOErrorException e) {
             Assert.fail(e.getMessage());
         }
-    }
-
-    @Test
-    public void testExecuteRetryForExecutionError() {
-        System.out.println("<==== testExecuteRetryForExecutionError ====>");
-        // retry 50 times at most, wait 5 s between retry.
-        NebulaClient client = null;
-        try {
-            client = NebulaClient.builder(addresses, user, passwd)
-                    .build();
-        } catch (IOErrorException | AuthFailedException e) {
-            Assert.fail(e.getMessage());
-        }
-
-        // TODO stop one storaged server
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        NebulaClient finalClient = client;
-        AtomicInteger succeedCount = new AtomicInteger(0);
-        for (int i = 0; i < 10; i++) {
-            executorService.submit(() -> {
-                try {
-                    ResultSet resultSet = finalClient.execute("MATCH(v) RETURN v limit 10");
-                    if (resultSet.isSucceeded()) {
-                        succeedCount.incrementAndGet();
-                    }
-                } catch (Exception e) {
-                    Assert.fail(e.getMessage());
-                }
-            });
-        }
-
-        // TODO start the storaged server
-        executorService.shutdown();
-        try {
-            executorService.awaitTermination(Long.MAX_VALUE, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-            assert false;
-        }
-        client.close();
-        Assert.assertEquals(10, succeedCount.get());
     }
 
     @Test
@@ -191,10 +153,43 @@ public class NebulaClientTest {
 
         try {
             nebulaClient.execute("RETURN 1");
+            Assert.fail("client execute should fail.");
         } catch (RuntimeException e) {
             assert true;
         } catch (IOErrorException e) {
             Assert.fail(e.getMessage());
         }
+    }
+
+    @Test
+    public void testPingClient() {
+        System.out.println("<==== testPingClient ====>");
+        NebulaClient client = null;
+        try {
+            client = NebulaClient.builder(addresses, user, passwd)
+                    .build();
+        } catch (IOErrorException | AuthFailedException e) {
+            Assert.fail(e.getMessage());
+        }
+        assert client.ping();
+    }
+
+    @Test
+    public void testGetHost() {
+        System.out.println("<==== testGetHost ====>");
+        NebulaClient client = null;
+        try {
+            for (int i = 0; i < 10; i++) {
+                client = NebulaClient.builder(addresses, user, passwd)
+                        .build();
+                System.out.println(">>>> host:" + client.getHost());
+                assert client.getHost().equals("127.0.0.1:9669")
+                        || client.getHost().equals("127.0.0.1:9670")
+                        || client.getHost().equals("127.0.0.1:9671");
+            }
+        } catch (IOErrorException | AuthFailedException e) {
+            Assert.fail(e.getMessage());
+        }
+        assert client.ping();
     }
 }

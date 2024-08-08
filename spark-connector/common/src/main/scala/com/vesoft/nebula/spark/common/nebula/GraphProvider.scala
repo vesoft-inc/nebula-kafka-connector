@@ -54,7 +54,7 @@ class GraphProvider(addresses: String,
    * @return {@link ScanNodeResultIterator}
    */
   def scanNode(graphName: String, nodeType: String, part: Int, batchSize: Int): ScanNodeResultIterator = {
-    client.scanNode(graphName, nodeType, part, batchSize)
+    client.scanNode(graphName, nodeType, null, part, batchSize)
   }
 
 
@@ -72,7 +72,7 @@ class GraphProvider(addresses: String,
    * @return {@link ScanEdgeResultIterator}
    */
   def scanEdge(graphName: String, edgeType: String, part: Int, batchSize: Int): ScanEdgeResultIterator = {
-    client.scanEdge(graphName, edgeType, part, batchSize)
+    client.scanEdge(graphName, edgeType, null, part, batchSize)
   }
 
 
@@ -84,8 +84,8 @@ class GraphProvider(addresses: String,
    * get all part list for NebulaGraph
    */
   def getAllParts(graphName: String): List[Integer] = {
-    val showPartitions: String = "CALL show_partitions() RETURN *"
-    var resultSet: ResultSet = null
+    val showPartitions: String    = "CALL show_partitions() RETURN *"
+    var resultSet     : ResultSet = null
     try resultSet = client.execute(showPartitions)
     catch {
       case e: Exception =>
@@ -117,17 +117,17 @@ class GraphProvider(addresses: String,
    */
   def getNodeDesc(graphName: String, nodeType: String): NodeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val graphType = getGraphType(graphName)
+    val graphType                               = getGraphType(graphName)
 
     val descNodeType = s"DESCRIBE NODE TYPE $nodeType OF $graphType"
-    val result = client.execute(descNodeType)
+    val result       = client.execute(descNodeType)
     if (!result.isSucceeded || result.isEmpty) {
       LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $nodeType does not exist in $graphName.")
     }
 
     // for now, the pk is one property, composite pk is not support yet.
-    var pk: String = null
+    var pk        : String = null
     var pkDataType: String = null
 
     while (result.hasNext) {
@@ -157,7 +157,7 @@ class GraphProvider(addresses: String,
    */
   def getEdgeDesc(graphName: String, edgeType: String): EdgeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val graphType = getGraphType(graphName)
+    val graphType                               = getGraphType(graphName)
 
     val descEdgeType =
       s"call describe_graph_type('$graphType') filter type_name='$edgeType' return type_pattern next call describe_edge_type('$graphType', '$edgeType') return *"
@@ -177,12 +177,12 @@ class GraphProvider(addresses: String,
       schema += (record.get("property_name").asString() -> record.get("data_type").asString())
     }
 
-    var srcNodeType: String = null
-    var dstNodeType: String = null
+    var srcNodeType: String       = null
+    var dstNodeType: String       = null
     // regularly match two types of edge:()-[]->() or ()~[]~() to get the srcNodeType and dstNodeType.
-    val edgeDirectionPattern = """\((.*?)\)-\[.*?\]->\((.*?)\)"""
-    val edgeUnDirectionPattern = """\((.*?)\)~\[.*?\]~\((.*?)\)"""
-    val regexWithEdgeDirection = edgeDirectionPattern.r
+    val edgeDirectionPattern      = """\((.*?)\)-\[.*?\]->\((.*?)\)"""
+    val edgeUnDirectionPattern    = """\((.*?)\)~\[.*?\]~\((.*?)\)"""
+    val regexWithEdgeDirection    = edgeDirectionPattern.r
     val regexWithoutEdgeDirection = edgeUnDirectionPattern.r
     if (edgeTypePattern.matches(edgeDirectionPattern)) {
       edgeTypePattern match {
@@ -225,5 +225,5 @@ object VidType extends Enumeration {
   type Type = Value
 
   val STRING = Value("STRING")
-  val INT = Value("INT64")
+  val INT    = Value("INT64")
 }

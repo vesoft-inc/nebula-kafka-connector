@@ -362,10 +362,10 @@ public class NebulaPool implements Serializable {
         /**
          * config the initial working graph for NebulaClient in NebulaPool
          *
-         * @param graphName working graph name
+         * @param workingGraph working graph name
          * @return NebulaPool.Builder
          */
-        public Builder withWorkingGraph(String graphName) {
+        public Builder withWorkingGraph(String workingGraph) {
             this.workingGraph = workingGraph;
             return this;
         }

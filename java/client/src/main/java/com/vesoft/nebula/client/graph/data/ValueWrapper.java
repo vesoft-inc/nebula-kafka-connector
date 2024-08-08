@@ -489,7 +489,7 @@ public class ValueWrapper {
 
     public BigDecimal asDecimal() throws InvalidValueException {
         if (value.getDataCase() == Value.DataCase.DECIMAL_VALUE) {
-            return new BigDecimal(value.getStringValue().toString(charset));
+            return new BigDecimal(value.getDecimalValue().getSval());
         }
         throw new InvalidValueException(
                 "cannot get field `decimal` because value's type is " + getDataType());

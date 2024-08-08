@@ -17,9 +17,9 @@ import org.slf4j.LoggerFactory;
 public class SchemaParseTest {
     private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-    String address = "192.168.8.6:3820";
+    String address = "127.0.0.1:9669";
     String user = "root";
-    String passwd = "nebula";
+    String passwd = "NebulaGraph01";
 
 
     //@Before

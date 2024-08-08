@@ -20,7 +20,7 @@ public class AddressUtilTest {
             addresses = AddressUtil.validateAddress(",127.0.0.1:9669 ");
             assert (addresses.size() == 1);
             assert (addresses.get(0).toString().equals("127.0.0.1:9669"));
-        } catch (UnknownHostException e) {
+        } catch (Exception e) {
             assert (false);
         }
     }
@@ -36,7 +36,7 @@ public class AddressUtilTest {
 
             addresses = AddressUtil.validateAddress("[fe80::64eb:eff:fe32:f7fe]:9669");
             assert (addresses.get(0).toString().equals("[fe80::64eb:eff:fe32:f7fe]:9669"));
-        } catch (UnknownHostException e) {
+        } catch (Exception e) {
             assert (false);
         }
     }

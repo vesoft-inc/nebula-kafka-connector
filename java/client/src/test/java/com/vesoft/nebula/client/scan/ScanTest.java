@@ -8,6 +8,7 @@ import com.vesoft.nebula.client.graph.net.NebulaClient;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResult;
 import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.client.graph.scan.TableRow;
+import com.vesoft.nebula.client.util.MockGraph;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,11 +17,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class ScanTest {
-    String addresses = "192.168.8.6:3820";
-    String user = "root";
-    String passwd = "nebula";
+    String addresses = "127.0.0.1:9669";
+    String user      = "root";
+    String passwd    = "NebulaGraph01";
     String graphName = "nba";
-    String nodeType = "node_type_player";
+    String nodeType  = "node_type_player";
 
     NebulaClient client;
 
@@ -31,20 +32,20 @@ public class ScanTest {
                     .withRequestTimeoutMills(3000)
                     .build();
             ResultSet resultSet = client.execute("return 1");
-            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION.code);
+            Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION);
         } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
-        // MockGraph.mockGraphData();
+        MockGraph.mockGraphData();
     }
 
     @Test
     public void scanNodeForReturnCols() {
         // test specific return columns
-        List<String> returnCols = Arrays.asList("id", "name");
-        ScanNodeResultIterator iterator = client.scanNode(graphName, nodeType, returnCols, 3, 1);
-        List<TableRow> rows = new ArrayList<>();
-        List<String> columns = new ArrayList<>();
+        List<String>           returnCols = Arrays.asList("id", "name");
+        ScanNodeResultIterator iterator   = client.scanNode(graphName, nodeType, returnCols);
+        List<TableRow>         rows       = new ArrayList<>();
+        List<String>           columns    = new ArrayList<>();
         while (iterator.hasNext()) {
             ScanNodeResult result = iterator.next();
             if (!result.isEmpty()) {
@@ -53,14 +54,14 @@ public class ScanTest {
             }
 
         }
-        assert (rows.size() == 1);
+        assert (rows.size() == 3);
         assert (columns.size() == 2);
 
         // test null return columns
         rows.clear();
         columns.clear();
         returnCols = null;
-        iterator = client.scanNode(graphName, nodeType, returnCols, 3, 1);
+        iterator = client.scanNode(graphName, nodeType, returnCols);
         while (iterator.hasNext()) {
             ScanNodeResult result = iterator.next();
             if (!result.isEmpty()) {
@@ -68,14 +69,29 @@ public class ScanTest {
                 columns.addAll(result.getPropNames());
             }
         }
-        assert (rows.size() == 1);
+        assert (rows.size() == 3);
         assert (columns.size() == 5);
 
         // test empty return columns
         rows.clear();
         columns.clear();
         returnCols = new ArrayList<>();
-        iterator = client.scanNode(graphName, nodeType, returnCols, 3, 1);
+        iterator = client.scanNode(graphName, nodeType, returnCols);
+        while (iterator.hasNext()) {
+            ScanNodeResult result = iterator.next();
+            if (!result.isEmpty()) {
+                rows.addAll(result.getTableRows());
+                columns.addAll(result.getPropNames());
+            }
+        }
+        assert (rows.size() == 3);
+        assert (columns.size() == 1);
+
+        // test batch size
+        rows.clear();
+        columns.clear();
+        returnCols = new ArrayList<>();
+        iterator = client.scanNode(graphName, nodeType, returnCols,2, 1);
         while (iterator.hasNext()) {
             ScanNodeResult result = iterator.next();
             if (!result.isEmpty()) {

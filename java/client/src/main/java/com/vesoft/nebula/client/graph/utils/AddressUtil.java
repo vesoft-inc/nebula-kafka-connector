@@ -21,12 +21,12 @@ public class AddressUtil {
     public static List<HostAddress> validateAddress(String addresses) throws UnknownHostException {
         List<HostAddress> newAddrs = new ArrayList<>();
         for (String addr : addresses.split(",")) {
-            if (addr.isEmpty()) {
+            if (addr == null || addr.isEmpty()) {
                 continue;
             }
             int indexOfLastComa = addr.lastIndexOf(":");
-            String host = addr.substring(0, indexOfLastComa);
-            int port = Integer.parseInt(addr.substring(indexOfLastComa + 1));
+            String host = addr.substring(0, indexOfLastComa).trim();
+            int port = Integer.parseInt(addr.substring(indexOfLastComa + 1).trim());
 
             // get all host name
             InetAddress[] inetAddresses = InetAddress.getAllByName(host);
