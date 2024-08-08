@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vesoft</groupId>
         <artifactId>nebula</artifactId>
-        <version>5.0.0</version>
+        <version>5.0-SNAPSHOT</version>
     </parent>
 
     <groupId>org.example</groupId>
@@ -89,19 +89,10 @@
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <version>1.6.7</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
-                        <goals>
-                            <goal>deploy</goal>
-                        </goals>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
-                        </configuration>
-                    </execution>
-                </executions>
+                <extensions>true</extensions>
+                <configuration>
+                   <skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
+                </configuration>
             </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

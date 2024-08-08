@@ -100,7 +100,7 @@ jobs:
       - name: Build with Maven
         run: |
           cd java
-          mvn -B install -Dmaven.test.skip=true
+          mvn clean install -Dmaven.test.skip=true -Dgpg.skip
           cd ../ldbc_snb_interactive_implementations
           mvn -B package -Pnebula -Dmaven.test.skip=true
 
@@ -128,7 +128,7 @@ jobs:
       - name: Build with Maven
         run: |
           cd java
-          mvn -B install -Dmaven.test.skip=true
+          mvn clean install -Dmaven.test.skip=true -Dgpg.skip
           cd ../spark-connector
           mvn -B package -Dmaven.test.skip=true
           cd ../kafka-connector

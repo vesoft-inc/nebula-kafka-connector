@@ -6,7 +6,7 @@
 
     <groupId>com.vesoft</groupId>
     <artifactId>spark-connector</artifactId>
-    <version>5.0.0</version>
+    <version>5.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <modules>
         <module>spark2.4</module>

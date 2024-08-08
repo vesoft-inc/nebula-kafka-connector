@@ -6,7 +6,7 @@
     <parent>
         <groupId>com.vesoft</groupId>
         <artifactId>nebula</artifactId>
-        <version>5.0.0</version>
+        <version>5.0-SNAPSHOT</version>
     </parent>
 
     <artifactId>client</artifactId>
@@ -143,7 +143,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!-- Nexus Staging Plugin -->
             <plugin>
                 <groupId>org.sonatype.plugins</groupId>
                 <artifactId>nexus-staging-maven-plugin</artifactId>
@@ -151,7 +150,7 @@
                 <extensions>true</extensions>
                 <configuration>
                     <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
+                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>true</autoReleaseAfterClose>
                 </configuration>
             </plugin>
@@ -169,8 +168,7 @@
                         <configuration>
                             <sources>
                                 <source>src/main/java</source>
-                                <source>src/main/generated</source>
-                                <source>src/main/fbthrift</source>
+                                <source>src/main/proto</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -184,8 +182,6 @@
                             <sources>
                                 <source>src/test/java</source>
                                 <source>src/main/java</source>
-                                <source>src/main/generated</source>
-                                <source>src/main/fbthrift</source>
                             </sources>
                         </configuration>
                     </execution>
@@ -251,7 +247,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <generatedSourcesDirectory>src/main/generated</generatedSourcesDirectory>
                 </configuration>
             </plugin>
             <plugin>
@@ -321,9 +316,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.2.0</version>
-                <configuration>
-                    <excludePackageNames>com.facebook.thrift:com.facebook.thrift.*</excludePackageNames>
-                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
