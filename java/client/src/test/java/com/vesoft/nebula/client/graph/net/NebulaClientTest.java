@@ -88,6 +88,7 @@ public class NebulaClientTest {
             Process p = runtime.exec(cmd);
             p.waitFor(10, TimeUnit.SECONDS);
             ProcessUtil.printProcessStatus(cmd, p);
+            Thread.sleep(5000);
             NebulaClient client    = NebulaClient.builder(addresses, user, passwd).build();
             ResultSet    resultSet = client.execute("RETURN 1");
             assert resultSet.isSucceeded();
@@ -99,6 +100,7 @@ public class NebulaClientTest {
                 Process p = runtime.exec(cmd);
                 p.waitFor(10, TimeUnit.SECONDS);
                 ProcessUtil.printProcessStatus(cmd, p);
+                Thread.sleep(10000);
             } catch (Exception e) {
                 e.printStackTrace();
             }
