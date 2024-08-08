@@ -76,11 +76,12 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad 
 		for _, host := range ConfigSpec.Spec.Metad.Hosts {
 			if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
 				// omit port for hosts
+				ipPort := IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
 				if _, ok := dict[host.IP]; !ok {
-					dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+					dict[host.IP] = ipPort
 				}
 				if host.IP == hostFromCmdLineOption {
-					return []IPAndPort{{IP: host.IP}}, nil
+					return []IPAndPort{ipPort}, nil
 				}
 			}
 		}
@@ -90,11 +91,12 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad 
 		if cluster.Name == clusterName {
 			for _, host := range cluster.Graphd.Hosts {
 				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
+					ipPort := IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
 					if _, ok := dict[host.IP]; !ok {
-						dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+						dict[host.IP] = ipPort
 					}
 					if host.IP == hostFromCmdLineOption {
-						return []IPAndPort{{IP: host.IP}}, nil
+						return []IPAndPort{ipPort}, nil
 					}
 				}
 			}

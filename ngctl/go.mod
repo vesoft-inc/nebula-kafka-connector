@@ -16,9 +16,11 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.5.9
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.8.1
+	github.com/stretchr/testify v1.9.0
 	github.com/vesoft-inc/nebula-ng-tools/br-ent v0.0.0-00010101000000-000000000000
 	github.com/vesoft-inc/nebula-ng-tools/golang v0.0.0
 	github.com/vesoft-inc/nebula-ng-tools/ngadm v0.0.0-00010101000000-000000000000
+	gopkg.in/yaml.v2 v2.4.0
 )
 
 require (
@@ -28,6 +30,7 @@ require (
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/colinmarc/hdfs/v2 v2.4.0 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dchest/bcrypt_pbkdf v0.0.0-20150205184540-83f37f9c154a // indirect
 	github.com/fatih/color v1.16.0 // indirect
 	github.com/go-resty/resty/v2 v2.10.0 // indirect
@@ -49,6 +52,7 @@ require (
 	github.com/mattn/go-runewidth v0.0.15 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect

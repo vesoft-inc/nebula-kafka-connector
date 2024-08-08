@@ -22,7 +22,7 @@ var stopCmd = &cobra.Command{
 		// TODO(Xuntao): check the status of graphd/storaged services in the supercluster
 		for _, metad_host := range common.ConfigSpec.Spec.Metad.Hosts {
 			agent_host := metad_host.Agent.Host
-			path := common.ConfigSpec.InstallPath + "/cluster"
+			path := common.ConfigSpec.InstallPath
 			err = service_admin.ServiceOperation(types.Agent{Host: agent_host}, "metad", path, "stop")
 			if err != nil {
 				return common.NgctlError(fmt.Sprintf("Failed to stop the metad service at %s:%s", metad_host.IP, metad_host.Port), err.Error())
@@ -34,5 +34,5 @@ var stopCmd = &cobra.Command{
 }
 
 func init() {
-	stopCmd.Flags().StringVar(&superclusterFlags.configFile, "config", "", "The config file used to create the supercluster")
+	stopCmd.Flags().StringVarP(&superclusterFlags.configFile, "config", "f", "", "The config file used to create the supercluster")
 }

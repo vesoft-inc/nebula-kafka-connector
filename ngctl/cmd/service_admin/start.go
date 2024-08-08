@@ -68,7 +68,7 @@ func ServiceOperation(agent types.Agent, serviceType string, installPath string,
 	}
 	cmd := exec.Command(installPath+"cluster/scripts/nebula.service", operation, serviceType)
 	log.Printf("exec cmd: %v on %s", cmd, agent.Host)
-	job := runner.NewJob("start_service")
+	job := runner.NewJob(fmt.Sprintf("%s_service", operation))
 	fmt.Println(cmd.String())
 	workflow := &types.WorkflowSpec{
 		Tasks: []*types.TaskSpec{
@@ -77,7 +77,7 @@ func ServiceOperation(agent types.Agent, serviceType string, installPath string,
 				Host:    agent.Host,
 				Command: cmd.String(),
 				Sudo:    false,
-				CmdID:   "start_service_cmd",
+				CmdID:   fmt.Sprintf("%s_service_cmd", operation),
 			}},
 		},
 	}

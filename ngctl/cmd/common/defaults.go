@@ -47,9 +47,11 @@ func GenerateDefaultConfigFile(filePath string, serviceType string) error {
 	} else if serviceType == "metad" {
 		decompressedData, err = DecompressData(Metad_config_file)
 	} else {
-		return NgctlError("invalid service type", err.Error())
+		return NgctlError("invalid service type "+serviceType, "")
 	}
-
+	if err != nil {
+		return fmt.Errorf("failed to decompress data: %v", err)
+	}
 	err = WriteByteStringToFile(filePath, decompressedData)
 	if err != nil {
 		return fmt.Errorf("failed to write file: %v", err)
