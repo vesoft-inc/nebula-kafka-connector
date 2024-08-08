@@ -38,6 +38,8 @@ nebulaMetad:
   topologySpreadConstraints:
   - topologyKey: "kubernetes.io/hostname"
     whenUnsatisfiable: "ScheduleAnyway"
+  nameOverride: ""
+  fullnameOverride: ""
 
   
   

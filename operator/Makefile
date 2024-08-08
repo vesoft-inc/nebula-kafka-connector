@@ -113,11 +113,11 @@ run: ## Run a controller from your host.
 # More info: https://docs.docker.com/develop/develop-images/build_enhancements/
 .PHONY: docker-build
 docker-build: ## Build docker image with the manager.
-	$(CONTAINER_TOOL) build --build-arg TARGETPLATFORM=$(TARGETDIR) --build-arg TARGETARCH=$(GOARCH) -t "${IMG}" .
+	$(CONTAINER_TOOL) build --build-arg TARGETPLATFORM=$(TARGETDIR) --build-arg TARGETARCH=$(GOARCH) -t "${DOCKER_REPO}:${IMAGE_TAG}" .
 
 .PHONY: docker-push
 docker-push: ## Push docker image with the manager.
-	$(CONTAINER_TOOL) push ${IMG}
+	$(CONTAINER_TOOL) push "${DOCKER_REPO}:${IMAGE_TAG}"
 
 .PHNOY: ensure-buildx
 ensure-buildx:
@@ -156,7 +156,7 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${DOCKER_REPO}:${IMAGE_TAG}
 	$(KUSTOMIZE) build config/default | $(KUBECTL) apply -f -
 
 .PHONY: undeploy
