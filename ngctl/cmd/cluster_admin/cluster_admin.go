@@ -9,6 +9,7 @@ type clusterFlagsType struct {
 	replicas    int
 	force       bool
 	owner       string
+	output      string
 }
 
 var clusterFlags clusterFlagsType
@@ -27,6 +28,8 @@ func init() {
 	ClusterCmd.AddCommand(createClusterCmd)
 	ClusterCmd.AddCommand(initClusterCmd)
 	ClusterCmd.AddCommand(showClusterCmd)
+	showClusterCmd.Flags().StringVarP(&clusterFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
+
 	ClusterCmd.AddCommand(brCmd)
 	createClusterCmd.Flags().IntVarP(&clusterFlags.replicas, "replica-factor", "r", 3, "replica number, default: 3")
 	createClusterCmd.Flags().StringVarP(&clusterFlags.owner, "owner", "o", "", "cluster owner")

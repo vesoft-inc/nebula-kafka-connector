@@ -4,6 +4,7 @@ import (
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/cluster_admin"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/host_admin"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/service_admin"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/supercluster_admin"
@@ -37,6 +38,8 @@ func init() {
 	rootCmd.AddCommand(host_admin.HostCmd)
 	// cmds coomunicating with a agent to manage services on a host
 	rootCmd.AddCommand(service_admin.ServiceAdminCmd)
+
+	rootCmd.PersistentFlags().StringVarP(&common.CachePath, "tokenFile", "t", "", "token file path")
 
 	// docGen()
 }

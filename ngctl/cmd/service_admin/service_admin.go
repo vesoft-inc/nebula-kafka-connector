@@ -14,6 +14,7 @@ type ServiceFlagsType struct {
 	configFile        string
 	serviceConfigFile string
 	agent             types.Agent
+	output            string
 }
 
 var ServiceFlags ServiceFlagsType
@@ -33,6 +34,8 @@ var ServiceAdminCmd = &cobra.Command{
 func init() {
 	ServiceAdminCmd.AddCommand(addServiceCmd)
 	ServiceAdminCmd.AddCommand(showServiceCmd)
+	showServiceCmd.Flags().StringVarP(&ServiceFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
+
 	ServiceAdminCmd.AddCommand(dropServiceCmd)
 	ServiceAdminCmd.AddCommand(startServiceCmd)
 	ServiceAdminCmd.AddCommand(stopServiceCmd)

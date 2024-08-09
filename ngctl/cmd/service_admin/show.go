@@ -51,7 +51,12 @@ var showServiceCmd = &cobra.Command{
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
-		fmt.Fprintln(common.MetaOutput, common.FormatTable(header, data))
+		r, err := common.Format(header, data, common.OutputFormatType(ServiceFlags.output))
+		if err != nil {
+			return common.NgctlError("Show service failed", err.Error())
+		}
+
+		fmt.Fprintln(common.MetaOutput, r)
 		return nil
 	},
 }

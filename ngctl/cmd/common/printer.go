@@ -1,11 +1,49 @@
 package common
 
 import (
+	"encoding/json"
+	"fmt"
+
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
 )
 
-func FormatTable(headers []string, data [][]string) string {
+type OutputFormatType string
+
+const (
+	FormatTypeTable OutputFormatType = "table"
+	FormatTypeJson                   = "json"
+)
+
+func Format(headers []string, data [][]string, typ OutputFormatType) (string, error) {
+	switch typ {
+	case FormatTypeTable:
+		return formatTable(headers, data)
+	case FormatTypeJson:
+		return formatJson(headers, data)
+	default:
+		return "", fmt.Errorf("unsupported format type, %s", typ)
+	}
+}
+
+func formatJson(headers []string, data [][]string) (string, error) {
+	m := make([]map[string]string, 0)
+	for _, d := range data {
+		row := make(map[string]string)
+		for i, val := range d {
+			row[headers[i]] = val
+		}
+		m = append(m, row)
+	}
+	bs, err := json.Marshal(m)
+	if err != nil {
+		return "", err
+	} else {
+		return string(bs), nil
+	}
+}
+
+func formatTable(headers []string, data [][]string) (string, error) {
 	writer := table.NewWriter()
 	writer.Style().Format.Header = text.FormatTitle
 	writer.Style().Options.DrawBorder = false
@@ -26,5 +64,5 @@ func FormatTable(headers []string, data [][]string) string {
 		}
 		writer.AppendRow(values)
 	}
-	return writer.Render()
+	return writer.Render(), nil
 }

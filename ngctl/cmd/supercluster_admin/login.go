@@ -84,7 +84,7 @@ var loginCmd = &cobra.Command{
 		}
 
 		fmt.Fprintln(common.MetaOutput, "Login succeeded.")
-		fmt.Fprintf(common.MetaOutput, "Your token will be stored in %s.\n", common.CachePath())
+		fmt.Fprintf(common.MetaOutput, "Your token will be stored in <%s>.\n", common.GetCachePath())
 
 		return nil
 	},

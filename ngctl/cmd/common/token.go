@@ -7,13 +7,18 @@ import (
 	"path/filepath"
 )
 
+var CachePath string
+
 type MetaToken struct {
 	Address string
 	Leader  string
 	Token   []byte
 }
 
-func CachePath() string {
+func GetCachePath() string {
+	if CachePath != "" {
+		return CachePath
+	}
 	cacheHome := os.Getenv("HOME")
 	if cacheHome == "" {
 		ex, err := os.Executable()
@@ -22,8 +27,9 @@ func CachePath() string {
 		}
 		cacheHome = filepath.Dir(ex) // Set to executable folder
 	}
-	cacheFile := filepath.Join(cacheHome, ".nebula_meta_token")
-	return cacheFile
+	CachePath = filepath.Join(cacheHome, ".nebula_meta_token")
+
+	return CachePath
 }
 
 func SaveMetaToken(addr string, leader string, token []byte) error {
@@ -31,7 +37,7 @@ func SaveMetaToken(addr string, leader string, token []byte) error {
 	if err != nil {
 		return err
 	}
-	cacheFile := CachePath()
+	cacheFile := GetCachePath()
 	err = os.WriteFile(cacheFile, data, 0644)
 	if err != nil {
 		return err
@@ -40,7 +46,7 @@ func SaveMetaToken(addr string, leader string, token []byte) error {
 }
 
 func LoadMetaToken() (*MetaToken, error) {
-	cachePath := CachePath()
+	cachePath := GetCachePath()
 	data, err := os.ReadFile(cachePath)
 	if err != nil {
 		return nil, err
@@ -54,6 +60,6 @@ func LoadMetaToken() (*MetaToken, error) {
 }
 
 func ClearMetaToken() error {
-	cachePath := CachePath()
+	cachePath := GetCachePath()
 	return os.Remove(cachePath)
 }

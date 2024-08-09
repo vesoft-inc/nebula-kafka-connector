@@ -16,6 +16,7 @@ type hostFlagsType struct {
 	withInstall   bool
 	withUninstall bool
 	configFile    string
+	output        string
 }
 
 var hostFlags hostFlagsType
@@ -75,6 +76,8 @@ func init() {
 	HostCmd.AddCommand(addHostCmd)
 	HostCmd.AddCommand(dropHostCmd)
 	HostCmd.AddCommand(showHostsCmd)
+	showHostsCmd.Flags().StringVarP(&hostFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
+
 	HostCmd.AddCommand(installHostCmd)
 	HostCmd.AddCommand(uninstallHostCmd)
 

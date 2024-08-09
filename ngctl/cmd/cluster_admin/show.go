@@ -44,7 +44,11 @@ var showClusterCmd = &cobra.Command{
 			return data[i][0] < data[j][0]
 		})
 		// printer.FormatTable(headers []string, data [][]string)
-		fmt.Fprintln(common.MetaOutput, common.FormatTable(header, data))
+		r, err := common.Format(header, data, common.OutputFormatType(clusterFlags.output))
+		if err != nil {
+			return common.NgctlError("Show cluster failed", err.Error())
+		}
+		fmt.Fprintln(common.MetaOutput, r)
 		return nil
 	},
 }

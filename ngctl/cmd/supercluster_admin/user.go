@@ -16,6 +16,7 @@ type userFlagsType struct {
 	password string
 	authType string
 	authInfo string
+	output   string
 }
 
 var userFlags = userFlagsType{}
@@ -176,7 +177,11 @@ var showUserCmd = &cobra.Command{
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
-		fmt.Fprintln(common.MetaOutput, common.FormatTable(header, data))
+		r, err := common.Format(header, data, common.OutputFormatType(userFlags.output))
+		if err != nil {
+			return common.NgctlError("Show user failed", err.Error())
+		}
+		fmt.Fprintln(common.MetaOutput, r)
 		return nil
 	},
 }
@@ -254,6 +259,7 @@ func init() {
 	alterUserCmd.MarkFlagsOneRequired("password", "auth-info")
 
 	showUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "Users, e.g. 'aa,bb'")
+	showUserCmd.Flags().StringVarP(&userFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
 
 	disableUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	disableUserCmd.MarkFlagRequired("user")

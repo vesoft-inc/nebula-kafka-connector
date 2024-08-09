@@ -42,7 +42,11 @@ var showHostsCmd = &cobra.Command{
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
-		fmt.Fprintln(common.MetaOutput, common.FormatTable(header, data))
+		r, err := common.Format(header, data, common.OutputFormatType(hostFlags.output))
+		if err != nil {
+			return common.NgctlError("Show hosts failed", err.Error())
+		}
+		fmt.Fprintln(common.MetaOutput, r)
 		return nil
 	},
 }
