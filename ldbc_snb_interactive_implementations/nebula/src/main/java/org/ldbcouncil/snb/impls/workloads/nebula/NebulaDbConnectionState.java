@@ -11,21 +11,22 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends BaseDbConnectionState<TDbQueryStore> {
 
-    private List<NewNebulaPool> pools = new ArrayList<>();
-    private Map<Integer, Integer> requestTypeAndClientPoolIndex = new HashMap<>();
-    private AtomicInteger poolClientIndex = new AtomicInteger(0);
-    private final String graphName;
+    private       List<NewNebulaPool>         pools                         = new ArrayList<>();
+    private       Map<Integer, AtomicInteger> requestTypeAndClientPoolIndex = new ConcurrentHashMap<>();
+    private       AtomicInteger               poolClientIndex               = new AtomicInteger(0);
+    private final String                      graphName;
 
     final String[] graphAddresses;
-    final String userName;
-    final String password;
-    final long connectTimeout;
-    final long requestTimeout;
+    final String   userName;
+    final String   password;
+    final long     connectTimeout;
+    final long     requestTimeout;
 
     // enable the log print for query statement, query type, query execution latency, query response time
     final boolean enableQueryInfoLog;
@@ -61,7 +62,7 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
             enableQueryInfoLog = false;
         }
 
-        int maxClientSize = Integer.parseInt(properties.get("maxSessionSize"));
+        int  maxClientSize      = Integer.parseInt(properties.get("maxSessionSize"));
         long maxSessionWaitTime = 0;
         if (properties.containsKey("maxSessionWaitTime")) {
             maxSessionWaitTime = Integer.parseInt(properties.get("maxSessionWaitTime")) * 1000L;
@@ -91,19 +92,24 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         // we just balance the graphd for query operation types: LdbcQyery1 to LdbcQuery14
         // see org.ldbcouncil.snb.driver.Operation.type
         for (int i = 1; i < 15; i++) {
-            requestTypeAndClientPoolIndex.put(i, 0);
+            requestTypeAndClientPoolIndex.put(i, new AtomicInteger(0));
         }
     }
 
     public NewNebulaPool getPool(int requestType) {
         if (requestType < 15) {
-            int currentClientPoolIndex = requestTypeAndClientPoolIndex.get(requestType);
-            int nextClientPoolIndex = (currentClientPoolIndex + 1) % graphServerSize;
-            requestTypeAndClientPoolIndex.put(requestType, nextClientPoolIndex);
-            return pools.get(currentClientPoolIndex);
+            int currentClientPoolIndexValue = requestTypeAndClientPoolIndex.get(requestType).get();
+            while (!requestTypeAndClientPoolIndex.get(requestType).compareAndSet(currentClientPoolIndexValue, currentClientPoolIndexValue + 1)) {
+                currentClientPoolIndexValue = requestTypeAndClientPoolIndex.get(requestType).get();
+            }
+            return pools.get(currentClientPoolIndexValue % graphServerSize);
         }
         // if operation is not query, then just balance the graphd through the requests.
-        return pools.get(poolClientIndex.getAndIncrement() % pools.size());
+        int curClientIndexV = poolClientIndex.get();
+        while (!poolClientIndex.compareAndSet(curClientIndexV, curClientIndexV + 1)) {
+            curClientIndexV = poolClientIndex.get();
+        }
+        return pools.get(curClientIndexV % pools.size());
     }
 
     public boolean isEnableQueryInfoLog() {

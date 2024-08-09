@@ -280,7 +280,7 @@ public class NebulaPool implements Serializable {
             if (requestTimeoutMills <= 0 || requestTimeoutMills > DEFAULT_MAX_TIMEOUT_MS) {
                 this.requestTimeoutMills = DEFAULT_MAX_TIMEOUT_MS;
             } else {
-                this.connectTimeoutMills = requestTimeoutMills;
+                this.requestTimeoutMills = requestTimeoutMills;
             }
             return this;
         }
