@@ -94,6 +94,18 @@ public class NebulaClient implements Serializable {
         return connection.getServerAddress().toString();
     }
 
+    public long getConnectTimeoutMills() {
+        return connectTimeout;
+    }
+
+    public long getRequestTimeoutMills() {
+        return requestTimeout;
+    }
+
+    public long getScanParallel() {
+        return scanParallel;
+    }
+
     /**
      * ping the NebulaGraph server
      *

@@ -23,7 +23,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
     private       String              userName;
     private       Map<String, Object> authOptions;
     private       long                connectTimeoutMs;
-    private       long                requestTimeout;
+    private       long                requestTimeoutMs;
     private       int                 scanParallel;
     private       String              workingGraph;
     private       ZoneId              timeZone;
@@ -45,7 +45,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         this.userName = userName;
         this.authOptions = authOptions;
         this.connectTimeoutMs = connectTimeoutMs;
-        this.requestTimeout = requestTimeoutMs;
+        this.requestTimeoutMs = requestTimeoutMs;
         this.scanParallel = scanParallel;
         this.workingGraph = workingGraph;
         this.timeZone = zoneId;
@@ -71,7 +71,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
                 .builder(addrStr, userName)
                 .withAuthOptions(authOptions)
                 .withConnectTimeoutMills(connectTimeoutMs)
-                .withRequestTimeoutMills(requestTimeout)
+                .withRequestTimeoutMills(requestTimeoutMs)
                 .withScanParallel(scanParallel)
                 .build();
 

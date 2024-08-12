@@ -1,5 +1,7 @@
 package com.vesoft.nebula.client.graph.net;
 
+import static com.vesoft.nebula.client.graph.net.Constants.DEFAULT_MAX_TIMEOUT_MS;
+
 import com.vesoft.nebula.client.graph.ErrorCode;
 import com.vesoft.nebula.client.graph.data.ResultSet;
 import com.vesoft.nebula.client.graph.exception.AuthFailedException;
@@ -13,6 +15,34 @@ public class NebulaClientTest {
     String addresses = "127.0.0.1:9669,127.0.0.1:9670,127.0.0.1:9671";
     String user      = "root";
     String passwd    = "NebulaGraph01";
+
+    @Test
+    public void testBuilder() {
+        System.out.println("<==== testBuilder =====>");
+        try {
+            NebulaClient client = NebulaClient.builder(addresses, user, passwd)
+                    .withConnectTimeoutMills(1111)
+                    .withRequestTimeoutMills(2222)
+                    .withScanParallel(15)
+                    .build();
+            Assert.assertEquals(1111L, client.getConnectTimeoutMills());
+            Assert.assertEquals(2222L, client.getRequestTimeoutMills());
+            Assert.assertEquals(15, client.getScanParallel());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            NebulaClient client = NebulaClient.builder(addresses, user, passwd)
+                    .withConnectTimeoutMills(0)
+                    .withRequestTimeoutMills(-1)
+                    .build();
+            Assert.assertEquals(Integer.MAX_VALUE, client.getConnectTimeoutMills());
+            Assert.assertEquals(Integer.MAX_VALUE, client.getRequestTimeoutMills());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
 
     @Test()
     public void testBuildNebulaClient() {

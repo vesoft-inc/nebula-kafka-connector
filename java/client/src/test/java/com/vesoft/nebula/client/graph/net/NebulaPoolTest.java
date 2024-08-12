@@ -29,6 +29,37 @@ public class NebulaPoolTest {
     }
 
     @Test
+    public void testBuilder() {
+        System.out.println("<==== testBuilder =====>");
+        try {
+            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+                    .withConnectTimeoutMills(1111)
+                    .withRequestTimeoutMills(2222)
+                    .withScanParallel(15)
+                    .withHealthCheckTimeMills(3333)
+                    .build();
+            NebulaClient client = pool.getClient();
+            Assert.assertEquals(1111L, client.getConnectTimeoutMills());
+            Assert.assertEquals(2222L, client.getRequestTimeoutMills());
+            Assert.assertEquals(15, client.getScanParallel());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        try {
+            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+                    .withConnectTimeoutMills(0)
+                    .withRequestTimeoutMills(-1)
+                    .build();
+            NebulaClient client = pool.getClient();
+            Assert.assertEquals(Integer.MAX_VALUE, client.getConnectTimeoutMills());
+            Assert.assertEquals(Integer.MAX_VALUE, client.getRequestTimeoutMills());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
     public void testNebulaPool() {
         System.out.println("<==== testNebulaPool ====>");
         try {
