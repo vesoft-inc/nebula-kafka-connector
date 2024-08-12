@@ -39,7 +39,7 @@ func init() {
 	// cmds coomunicating with a agent to manage services on a host
 	rootCmd.AddCommand(service_admin.ServiceAdminCmd)
 
-	rootCmd.PersistentFlags().StringVarP(&common.CachePath, "tokenFile", "t", "", "token file path")
+	rootCmd.PersistentFlags().StringVarP(&common.CachePath, "tokenFile", "", "", "token file path")
 
 	// docGen()
 }
