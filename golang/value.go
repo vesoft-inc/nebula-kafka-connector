@@ -49,6 +49,7 @@ type (
 		AsNode() (Node, error)
 		AsEdge() (Edge, error)
 		AsPath() (Path, error)
+		AsDecimal() (Decimal, error)
 	}
 	List interface {
 		String() string
@@ -130,6 +131,10 @@ type (
 		GetValues() []Value
 	}
 
+	Decimal interface {
+		String() string
+	}
+
 	mapValue map[string]Value
 )
 
@@ -158,6 +163,7 @@ const (
 	ValueTypeLocalDateTime
 	ValueTypeZonedTime
 	ValueTypeZonedDateTime
+	ValueTypeDecimal
 )
 
 func (vt ValueType) String() string {
@@ -210,6 +216,8 @@ func (vt ValueType) String() string {
 		return "EDGE"
 	case ValueTypePath:
 		return "PATH"
+	case ValueTypeDecimal:
+		return "Decimal"
 	}
 	return "UNKNOWN"
 }
@@ -320,6 +328,10 @@ func (nv *EmptyValue) AsZonedDatetime() (ZonedDatetime, error) {
 }
 
 func (nv *EmptyValue) AsDate() (Date, error) {
+	return nil, nil
+}
+
+func (nv *EmptyValue) AsDecimal() (Decimal, error) {
 	return nil, nil
 }
 

@@ -48,6 +48,9 @@ type (
 	grpcPath struct {
 		data *common.Path
 	}
+	grpcDecimal struct {
+		data *common.Decimal
+	}
 )
 
 func (v *grpcValue) String() string {
@@ -120,7 +123,9 @@ func (v *grpcValue) String() string {
 	case ValueTypePath:
 		p, _ := v.AsPath()
 		return p.String()
-
+	case ValueTypeDecimal:
+		d, _ := v.AsDecimal()
+		return d.String()
 	default:
 		return fmt.Sprintf("%v", v.data)
 	}
@@ -177,6 +182,8 @@ func (v *grpcValue) GetType() ValueType {
 		return ValueTypeEdge
 	case *common.Value_PathValue:
 		return ValueTypePath
+	case *common.Value_DecimalValue:
+		return ValueTypeDecimal
 	default:
 		return ValueTypeNull
 	}
@@ -312,6 +319,13 @@ func (v *grpcValue) AsPath() (Path, error) {
 	return &grpcPath{data: v.data.GetPathValue()}, nil
 }
 
+func (v *grpcValue) AsDecimal() (Decimal, error) {
+	if v.GetType() != ValueTypeDecimal {
+		return nil, errType("value is not decimal")
+	}
+	return &grpcDecimal{data: v.data.GetDecimalValue()}, nil
+}
+
 func (l *grpcList) String() string {
 	valuesStr := make([]string, 0, len(l.data.Values))
 	for _, v := range l.GetValues() {
@@ -378,6 +392,10 @@ func (r *grpcRecord) GetValues() map[string]Value {
 		values[k] = &grpcValue{data: v}
 	}
 	return values
+}
+
+func (g *grpcDecimal) String() string {
+	return g.data.Sval
 }
 
 // (288314845273522179@City:City&Place{id:32,name:Norway,url:http://dbpedia.org/resource/Norway})
