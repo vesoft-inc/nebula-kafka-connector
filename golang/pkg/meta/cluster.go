@@ -219,7 +219,6 @@ func (c *metaClient) AddHost(req *AddHostReq) error {
 	in := &admin.AddHostRequest{
 		Header:   &admin.RequestHeader{Token: c.token},
 		HostInfo: &admin.HostInfo{HostName: []byte(req.host), ClusterName: []byte(req.clustername), AgentPort: req.agentPort},
-		Force:    false,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AddHost(ctx, in)
