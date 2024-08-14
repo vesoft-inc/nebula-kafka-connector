@@ -63,9 +63,9 @@ public class NebulaEdgeTest {
                 + "(1,2,10,\"friend\",5) \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@person) WHERE src.id=r.src "
-                + "MATCH (dst@person) WHERE dst.id=r.dst \n"
-                + "INSERT (src)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst)";
+                + "OPTIONAL MATCH (src_node@person) WHERE src_node.id=r.src "
+                + "OPTIONAL MATCH (dst_node@person) WHERE dst_node.id=r.dst \n"
+                + "INSERT (src_node)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst_node)";
         String expectChars = expectStatement
                 .chars()
                 .sorted()
@@ -99,9 +99,10 @@ public class NebulaEdgeTest {
                 + "(1,2,10,\"friend\",5) \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@person) WHERE src.id=r.src "
-                + "MATCH (dst@person) WHERE dst.id=r.dst \n"
-                + "INSERT OR IGNORE (src)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst)";
+                + "OPTIONAL MATCH (src_node@person) WHERE src_node.id=r.src "
+                + "OPTIONAL MATCH (dst_node@person) WHERE dst_node.id=r.dst \n"
+                + "INSERT OR IGNORE (src_node)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]"
+                + "->(dst_node)";
         String expectChars = expectStatement
                 .chars()
                 .sorted()
@@ -135,9 +136,10 @@ public class NebulaEdgeTest {
                 + "(1,2,10,\"friend\",5) \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@person) WHERE src.id=r.src "
-                + "MATCH (dst@person) WHERE dst.id=r.dst \n"
-                + "INSERT OR REPLACE (src)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]->(dst)";
+                + "OPTIONAL MATCH (src_node@person) WHERE src_node.id=r.src "
+                + "OPTIONAL MATCH (dst_node@person) WHERE dst_node.id=r.dst \n"
+                + "INSERT OR REPLACE (src_node)-[@friend{duration:r.dura,type:r.ty,degree:r.de}]"
+                + "->(dst_node)";
         String expectChars = expectStatement
                 .chars()
                 .sorted()
@@ -170,8 +172,8 @@ public class NebulaEdgeTest {
                 + "(1,2,10,\"friend\",5) \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@person)-[e@friend]->(dst@person) "
-                + "WHERE src.id=r.src AND dst.id=r.dst \n"
+                + "OPTIONAL MATCH (src_node@person)-[e@friend]->(dst_node@person) "
+                + "WHERE src_node.id=r.src AND dst_node.id=r.dst \n"
                 + "SET e.duration=r.dura,e.type=r.ty,e.degree=r.de";
         String expectChars = expectStatement
                 .chars()
@@ -205,8 +207,8 @@ public class NebulaEdgeTest {
                 + "(1,2,10,\"friend\",5) \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@person)-[e@friend]->(dst@person) "
-                + "WHERE src.id=r.src AND dst.id=r.dst \n"
+                + "OPTIONAL MATCH (src_node@person)-[e@friend]->(dst_node@person) "
+                + "WHERE src_node.id=r.src AND dst_node.id=r.dst \n"
                 + "DELETE e";
         String expectChars = expectStatement
                 .chars()

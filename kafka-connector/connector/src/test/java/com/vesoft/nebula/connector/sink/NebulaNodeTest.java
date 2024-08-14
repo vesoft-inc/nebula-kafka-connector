@@ -130,7 +130,7 @@ public class NebulaNodeTest {
                 + "(\"1\",\"Tom\",18,100,\"male\") \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (v@player) WHERE v.id=r.id \n"
+                + "OPTIONAL MATCH (v@player) WHERE v.id=r.id \n"
                 + "SET v.name=r.name,v.age=r.age,v.weight=r.weight,v.gender=r.gender";
         String expectChars = expectStatement.chars()
                 .sorted()
@@ -158,7 +158,7 @@ public class NebulaNodeTest {
                 + "(\"1\",\"Tom\",18,100,\"male\") \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (v@player) WHERE v.id=r.id \n"
+                + "OPTIONAL MATCH (v@player) WHERE v.id=r.id \n"
                 + "DELETE v";
         String expectChars = expectStatement.chars()
                 .sorted()
@@ -187,7 +187,7 @@ public class NebulaNodeTest {
                 + "(\"1\",\"Tom\",18,100,\"male\") \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "MATCH (v@player) WHERE v.id=r.id \n"
+                + "OPTIONAL MATCH (v@player) WHERE v.id=r.id \n"
                 + "DETACH DELETE v";
         String expectChars = expectStatement.chars()
                 .sorted()

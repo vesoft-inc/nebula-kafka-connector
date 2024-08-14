@@ -187,8 +187,8 @@ object NebulaExecutor {
        |${edges.getEdgesStr}
        |USE `$graphName`
        |FOR r IN t
-       |MATCH (src@`${edges.srcType}`),(dst@`${edges.dstType}`) WHERE src.`${edges.srcPkName}`=r.${edges.dfSrcField} AND dst.`${edges.dstPkName}`=r.${edges.dfDstField}
-       |INSERT $mode (src)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst)
+       |OPTIONAL MATCH (src_node@`${edges.srcType}`),(dst_node@`${edges.dstType}`) WHERE src_node.`${edges.srcPkName}`=r.${edges.dfSrcField} AND dst_node.`${edges.dstPkName}`=r.${edges.dfDstField}
+       |INSERT $mode (src_node)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst_node)
        |""".stripMargin
   }
 

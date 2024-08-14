@@ -59,9 +59,9 @@ public class NebulaEdges {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@%s) WHERE src.%s=r.%s "
-                + "MATCH (dst@%s) WHERE dst.%s=r.%s \n"
-                + "%s (src)-[@%s{%s}]->(dst)";
+                + "OPTIONAL MATCH (src_node@%s) WHERE src_node.%s=r.%s "
+                + "OPTIONAL MATCH (dst_node@%s) WHERE dst_node.%s=r.%s \n"
+                + "%s (src_node)-[@%s{%s}]->(dst_node)";
 
         return String.format(format,
                              getTableHeaders(),
@@ -84,7 +84,8 @@ public class NebulaEdges {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@%s)-[e@%s]->(dst@%s) WHERE src.%s=r.%s AND dst.%s=r.%s \n"
+                + "OPTIONAL MATCH (src_node@%s)-[e@%s]->(dst_node@%s) "
+                + "WHERE src_node.%s=r.%s AND dst_node.%s=r.%s \n"
                 + "SET %s";
         return String.format(format,
                              getTableHeaders(),
@@ -105,7 +106,8 @@ public class NebulaEdges {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "MATCH (src@%s)-[e@%s]->(dst@%s) WHERE src.%s=r.%s AND dst.%s=r.%s \n"
+                + "OPTIONAL MATCH (src_node@%s)-[e@%s]->(dst_node@%s) "
+                + "WHERE src_node.%s=r.%s AND dst_node.%s=r.%s \n"
                 + "DELETE e";
         return String.format(format,
                              getTableHeaders(),
@@ -136,7 +138,7 @@ public class NebulaEdges {
     private String getTableValues() {
         List<String> tableRows = new ArrayList<>();
         for (NebulaEdge edge : edges) {
-            List<String>  rowValues      = new ArrayList<>();
+            List<String> rowValues = new ArrayList<>();
             rowValues.add(edge.getSrcPk());
             rowValues.add(edge.getDstPk());
             for (String propName : nebulaEdgePropertyNames) {

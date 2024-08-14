@@ -67,7 +67,7 @@ public class NebulaNodes {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "MATCH (v@%s) WHERE v.%s=r.%s \n"
+                + "OPTIONAL MATCH (v@%s) WHERE v.%s=r.%s \n"
                 + "SET %s";
         return String.format(format,
                              getTableHeaders(),
@@ -100,7 +100,7 @@ public class NebulaNodes {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "MATCH (v@%s) WHERE v.%s=r.%s \n"
+                + "OPTIONAL MATCH (v@%s) WHERE v.%s=r.%s \n"
                 + "%s v";
         return String.format(format,
                              getTableHeaders(),

@@ -184,8 +184,8 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
          |(\"vid1\",\"vid2\",\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"vid2\",\"vid1\",\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |MATCH (src@`person`{`id`:CAST(r.id1 AS STRING)}),(dst@`person`{`id`:CAST(r.id2 AS STRING)})
-         |INSERT  (src)-[e@`friend`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)}]->(dst)
+         |OPTIONAL MATCH (src_node@`person`),(dst_node@`person`) WHERE src_node.`id`=r.id1 AND dst_node.`id`=r.id2
+         |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)}]->(dst_node)
          |""".stripMargin
 
     assert(expectStatement.toCharArray.sorted.mkString("").equals(edgeStatement.toCharArray.sorted.mkString("")))
