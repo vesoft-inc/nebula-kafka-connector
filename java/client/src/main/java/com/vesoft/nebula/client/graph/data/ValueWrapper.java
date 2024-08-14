@@ -567,6 +567,8 @@ public class ValueWrapper {
             return asPath().toString();
         } else if (isDecimal()) {
             return asDecimal().toString();
+        } else if (isVector()) {
+            return asVector().toString();
         } else if (isRecord()) {
             return asRecord().toString();
         }
