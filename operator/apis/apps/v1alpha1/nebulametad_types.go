@@ -75,7 +75,7 @@ type NebulaMetadStatus struct {
 // +genclient
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName=nm
+// +kubebuilder:resource:shortName=ngnm
 // +kubebuilder:printcolumn:name="READY",type=string,JSONPath=`.status.conditions[?(@.type=="Ready")].status`
 // +kubebuilder:printcolumn:name="METAD-DESIRED",type="string",JSONPath=".spec.replicas",description="The desired number of metad pods."
 // +kubebuilder:printcolumn:name="METAD-READY",type="string",JSONPath=".status.workload.readyReplicas",description="The number of metad pods ready."

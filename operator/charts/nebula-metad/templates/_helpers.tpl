@@ -41,9 +41,9 @@ Create chart name and version as used by the chart label.
 The ImagePullSecrets.
 */}}
 {{- define "nebula-metad.imagePullSecrets" -}}
-{{- if .Values.imagePullSecrets }}
+{{- if .Values.nebulaMetad.imagePullSecrets }}
 imagePullSecrets:
-{{- toYaml .Values.imagePullSecrets | nindent 2 }}
+{{- toYaml .Values.nebulaMetad.imagePullSecrets | nindent 2 }}
 {{- end }}
 {{- end }}
 

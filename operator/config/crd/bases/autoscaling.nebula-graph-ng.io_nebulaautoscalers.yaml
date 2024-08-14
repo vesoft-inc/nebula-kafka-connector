@@ -12,7 +12,7 @@ spec:
     listKind: NebulaAutoscalerList
     plural: nebulaautoscalers
     shortNames:
-    - na
+    - ngna
     singular: nebulaautoscaler
   scope: Namespaced
   versions:

@@ -12,7 +12,7 @@ spec:
     listKind: NebulaClusterList
     plural: nebulaclusters
     shortNames:
-    - nc
+    - ngnc
     singular: nebulacluster
   scope: Namespaced
   versions:

@@ -151,7 +151,7 @@ type AutoscalingPolicyStatus struct {
 // +genclient
 // +kubebuilder:object:root=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:shortName=na
+// +kubebuilder:resource:shortName=ngna
 // +kubebuilder:printcolumn:name="REFERENCE",type="string",JSONPath=".spec.nebulaClusterRef.name"
 // +kubebuilder:printcolumn:name="MIN-REPLICAS",type="string",JSONPath=".spec.graphdPolicy.minReplicas"
 // +kubebuilder:printcolumn:name="MAX-REPLICAS",type="string",JSONPath=".spec.graphdPolicy.maxReplicas"

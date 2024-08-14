@@ -12,7 +12,7 @@ spec:
     listKind: NebulaMetadList
     plural: nebulametads
     shortNames:
-    - nm
+    - ngnm
     singular: nebulametad
   scope: Namespaced
   versions:
