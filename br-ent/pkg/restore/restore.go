@@ -75,7 +75,7 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 	}
 
 	// get cluster
-	clusters, err := r.meta.ListClusters(r.amg, r.cfg.ClusterId)
+	clusters, err := r.meta.ListClusters(r.amg, r.cfg.ClusterId, r.cfg.Spec)
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}
@@ -103,13 +103,11 @@ func NewRestore(ctx context.Context, cfg *config.RestoreConfig) (*Restore, error
 	}
 	metaCluster := make([]*clients.ServiceInfo, 0)
 	for _, service := range metaResp.Services {
+		installPath := filepath.Join(r.cfg.Spec.InstallPath, "cluster")
+
 		agent, err := r.amg.GetAgent(service.Host)
 		if err != nil {
 			return nil, fmt.Errorf("get agent %s failed: %w", service.Host, err)
-		}
-		installPath, err := agent.GetInstallPath(service.Type)
-		if err != nil {
-			return nil, fmt.Errorf("get metad %s install path failed: %w", service.Host, err)
 		}
 		dataPaths, err := agent.GetDataPaths(service.Type, installPath)
 		if err != nil {

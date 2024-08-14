@@ -48,7 +48,7 @@ func NewBackup(ctx context.Context, cfg *config.BackupConfig) (*Backup, error) {
 		return nil, fmt.Errorf("create storage failed: %w", err)
 	}
 
-	clusters, err := b.meta.ListClusters(b.amg, b.cfg.ClusterId)
+	clusters, err := b.meta.ListClusters(b.amg, b.cfg.ClusterId, b.cfg.Spec)
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}

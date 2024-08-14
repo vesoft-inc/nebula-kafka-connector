@@ -8,8 +8,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
 	agentstorage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/br-ent/pkg/storage"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
 
 func AddRestoreFlags(flags *pflag.FlagSet) {
@@ -22,6 +24,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.Int64(flagClusterId, 0, "Specify the restore cluster id")
 	flags.String(flagCatalogOwner, "root", "Specify the restore cluster catalog owner")
 	flags.Bool(flagForce, false, "Force to restore data")
+	flags.String(FlagConfig, "", "The config file for ngctl to restore")
 
 	// support tls
 	flags.Bool(flagEnableSSL, false, "Enable SSL connection")
@@ -35,6 +38,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	cobra.MarkFlagRequired(flags, FlagStorage)
 	cobra.MarkFlagRequired(flags, flagBackupName)
 	cobra.MarkFlagRequired(flags, flagClusterId)
+	cobra.MarkFlagRequired(flags, FlagConfig)
 }
 
 type RestoreConfig struct {
@@ -49,6 +53,8 @@ type RestoreConfig struct {
 	Password     string
 	CatalogOwner string
 	Force        bool
+
+	Spec *types.JobSpec
 }
 
 func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
@@ -98,6 +104,15 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 		return err
 	}
 	r.Password, err = flags.GetString(flagPassword)
+	if err != nil {
+		return err
+	}
+
+	configPath, err := flags.GetString(FlagConfig)
+	if err != nil {
+		return err
+	}
+	r.Spec, err = ParseConfig(configPath)
 	if err != nil {
 		return err
 	}

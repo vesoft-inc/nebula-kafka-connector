@@ -61,7 +61,7 @@ type (
 		MoveDir(srcPath, dstPath string) error
 		RemoveDir(path string) error
 		ExistDir(path string) (bool, error)
-		GetInstallPath(serviceType meta.ServiceType) (string, error)
+		//GetInstallPath(serviceType meta.ServiceType) (string, error)
 		GetDataPaths(serviceType meta.ServiceType, installPath string) ([]string, error)
 		DBPlayBack(backupName, installPath, dataPath, serviceMap string) error
 	}

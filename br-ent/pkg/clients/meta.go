@@ -3,10 +3,12 @@ package clients
 import (
 	"crypto/tls"
 	"fmt"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
 
 type NebulaMeta struct {
@@ -107,7 +109,7 @@ type ClusterServiceInfo struct {
 	Services  []*ServiceInfo
 }
 
-func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64) ([]*ClusterServiceInfo, error) {
+func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64, spec *types.JobSpec) ([]*ClusterServiceInfo, error) {
 	clusterResp, err := m.client.ListClusters(meta.NewListClustersReq(""))
 	if err != nil {
 		return nil, err
@@ -139,10 +141,9 @@ func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64) ([]*Cluste
 				if err != nil {
 					return nil, fmt.Errorf("get agent %s failed: %w", s.Host, err)
 				}
-				installPath, err := agent.GetInstallPath(s.Type)
-				if err != nil {
-					return nil, fmt.Errorf("get metad %s install path failed: %w", s.Host, err)
-				}
+
+				installPath := filepath.Join(spec.InstallPath, "cluster")
+
 				dataPaths, err := agent.GetDataPaths(s.Type, installPath)
 				if err != nil {
 					return nil, fmt.Errorf("get storaged %s data path failed: %w", s.Host, err)
@@ -152,15 +153,7 @@ func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64) ([]*Cluste
 				sInfo.DataPaths = dataPaths
 			}
 			if s.Type == meta.ServiceTypeGraphd {
-				agent, err := amg.GetAgent(s.Host)
-				if err != nil {
-					return nil, fmt.Errorf("get agent %s failed: %w", s.Host, err)
-				}
-				installPath, err := agent.GetInstallPath(s.Type)
-				if err != nil {
-					return nil, fmt.Errorf("get graphd %s install path failed: %w", s.Host, err)
-				}
-				sInfo.InstallPath = installPath
+				sInfo.InstallPath = filepath.Join(spec.InstallPath, "cluster")
 			}
 
 			cluster.Services = append(cluster.Services, sInfo)

@@ -6,8 +6,10 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
+
 	agentstorage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/br-ent/pkg/storage"
+	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
 
 func AddBackupFlags(flags *pflag.FlagSet) {
@@ -18,6 +20,7 @@ func AddBackupFlags(flags *pflag.FlagSet) {
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
 	flags.Int64(flagClusterId, 0, "Specify the backup cluster id")
+	flags.String(FlagConfig, "", "The config file for ngctl to backup")
 
 	// support tls
 	flags.Bool(flagEnableSSL, false, "Enable SSL connection")
@@ -31,6 +34,7 @@ func AddBackupFlags(flags *pflag.FlagSet) {
 	cobra.MarkFlagRequired(flags, flagClusterId)
 	cobra.MarkFlagRequired(flags, FlagMetaAddr)
 	cobra.MarkFlagRequired(flags, FlagAgentsAddr)
+	cobra.MarkFlagRequired(flags, FlagConfig)
 }
 
 type BackupConfig struct {
@@ -43,6 +47,8 @@ type BackupConfig struct {
 	TLSConfig   *tls.Config
 	Username    string
 	Password    string
+
+	Spec *types.JobSpec
 }
 
 func (b *BackupConfig) ParseFullFlags(flags *pflag.FlagSet) error {
@@ -81,6 +87,15 @@ func (b *BackupConfig) ParseFullFlags(flags *pflag.FlagSet) error {
 		return err
 	}
 	b.Password, err = flags.GetString(flagPassword)
+	if err != nil {
+		return err
+	}
+
+	configPath, err := flags.GetString(FlagConfig)
+	if err != nil {
+		return err
+	}
+	b.Spec, err = ParseConfig(configPath)
 	if err != nil {
 		return err
 	}

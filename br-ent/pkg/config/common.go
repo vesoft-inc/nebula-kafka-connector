@@ -15,6 +15,7 @@ const (
 	FlagStorage    = "storage"
 	FlagMetaAddr   = "meta"
 	FlagAgentsAddr = "agents"
+	FlagConfig     = "config"
 
 	FlagLogPath  = "log"
 	FlagLogDebug = "debug"
