@@ -11,8 +11,12 @@ import (
 
 var addServiceCmd = &cobra.Command{
 	Use:   "add",
-	Short: `Add a service into a cluster.`,
-	Long:  `Add a service into a cluster.`,
+	Short: `Add services into a cluster.`,
+	Long: `Add services info a cluster.
+
+Either provides the config file, all services in the config file will be added into the cluster.
+Or provides the service info, the service will be added into the cluster.
+`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -21,44 +25,22 @@ var addServiceCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		flags := ServiceFlags
-		readFromConfig := false
-		if flags.serviceType == "" {
-			readFromConfig = true
+		if err := validateAddFlags(); err != nil {
+			return err
 		}
-		if flags.clusterName == "" {
-			return common.NgctlError("cluster name is empty", "")
+		var (
+			serviceResource *common.ResourceInfo
+			err             error
+		)
+		if ServiceFlags.configFile == "" {
+			serviceResource, err = getServicesDirectly()
+		} else {
+			serviceResource, err = getServicesWithConfig()
 		}
-		if flags.host == "" {
-			readFromConfig = true
+		if err != nil {
+			return err
 		}
-		if readFromConfig {
-			if flags.configFile == "" {
-				return common.NgctlError("Neither a valid service nor a config file is provided", "")
-			} else {
-				configError := common.CheckInConfigFile(flags.configFile)
-				if configError != nil {
-					return common.NgctlError("Error in config file", configError.Error())
-				}
-			}
-		}
-		serviceList, err := common.DeriveServiceList(common.IPAndPort{IP: flags.host, Port: fmt.Sprintf("%d", flags.port), ServiceType: flags.serviceType}, flags.clusterName)
-		// Prepare the resource request
-		serviceResource := common.ResourceInfo{
-			ResourceType:        "services",
-			OperationOnResource: "add",
-			ResourceList:        make([]common.IPAndPort, 0),
-			ClusterName:         flags.clusterName,
-		}
-		for _, service := range serviceList {
-			serviceResource.ResourceList = append(serviceResource.ResourceList, service)
-		}
-		if flags.host == "" {
-			serviceResource, err = common.ConfirmResourceList(serviceResource)
-			if err != nil {
-				return common.NgctlError("Failed to confirm resource list", err.Error())
-			}
-		}
+
 		for _, service := range serviceResource.ResourceList {
 			port, _ := strconv.Atoi(service.Port)
 			var serviceType meta.ServiceType
@@ -69,7 +51,7 @@ var addServiceCmd = &cobra.Command{
 			} else {
 				return common.NgctlError("Invalid service type: "+service.ServiceType, "")
 			}
-			req := meta.NewAddServiceReq(service.IP, uint32(port), serviceType, flags.clusterName)
+			req := meta.NewAddServiceReq(service.IP, uint32(port), serviceType, serviceResource.ClusterName)
 			if err := common.MetaClient.AddService(req); err != nil {
 				return common.NgctlError("Add service failed", err.Error())
 			}
@@ -77,6 +59,72 @@ var addServiceCmd = &cobra.Command{
 		fmt.Fprintln(common.MetaOutput, "Add services successfully.")
 		return nil
 	},
+}
+
+func getServicesDirectly() (*common.ResourceInfo, error) {
+	var flags = ServiceFlags
+	// get all services from the command line
+	serviceResource := common.ResourceInfo{
+		ResourceType:        "services",
+		OperationOnResource: "add",
+		ResourceList:        make([]common.IPAndPort, 0),
+		ClusterName:         flags.clusterName,
+	}
+	serviceResource.ResourceList = append(serviceResource.ResourceList, common.IPAndPort{
+		IP:          flags.host,
+		Port:        fmt.Sprintf("%d", flags.port),
+		ServiceType: flags.serviceType,
+	})
+	return &serviceResource, nil
+}
+
+func getServicesWithConfig() (*common.ResourceInfo, error) {
+	var flags = ServiceFlags
+	// get all services from the config file
+	serviceList, err := common.DeriveServiceList(common.IPAndPort{
+		IP:          "",
+		Port:        fmt.Sprintf("%d", flags.port),
+		ServiceType: flags.serviceType,
+	}, flags.clusterName)
+	if err != nil {
+		return nil, err
+	}
+	serviceResource := common.ResourceInfo{
+		ResourceType:        "services",
+		OperationOnResource: "add",
+		ResourceList:        make([]common.IPAndPort, 0),
+		ClusterName:         flags.clusterName,
+	}
+	for _, service := range serviceList {
+		serviceResource.ResourceList = append(serviceResource.ResourceList, service)
+	}
+	serviceResource, err = common.ConfirmResourceList(serviceResource)
+	if err != nil {
+		return nil, common.NgctlError("Failed to confirm resource list", err.Error())
+	}
+	return &serviceResource, nil
+
+}
+
+func validateAddFlags() error {
+	var flags = ServiceFlags
+	if flags.clusterName == "" {
+		return common.NgctlError("cluster name is empty", "")
+	}
+	if flags.configFile == "" {
+		if flags.host == "" || flags.port < 0 || flags.serviceType == "" {
+			return common.NgctlError("must provide service info [host, port, type]", "")
+		}
+	} else {
+		if flags.host != "" || flags.port >= 0 || flags.serviceType != "" {
+			return common.NgctlError("cannot use service info and config file at the same time", "")
+		}
+		configError := common.CheckInConfigFile(flags.configFile)
+		if configError != nil {
+			return common.NgctlError("Error in config file", configError.Error())
+		}
+	}
+	return nil
 }
 
 func init() {

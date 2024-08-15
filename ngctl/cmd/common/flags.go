@@ -72,43 +72,30 @@ func CheckInConfigFile(filepath string) (err error) {
 func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad bool) (hostList []IPAndPort, err error) {
 	// hosts for metad
 	dict := map[string]IPAndPort{}
+	hosts := make([]types.Host, 0)
 	if needMetad {
-		for _, host := range ConfigSpec.Spec.Metad.Hosts {
-			if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-				// omit port for hosts
-				ipPort := IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
-				if _, ok := dict[host.IP]; !ok {
-					dict[host.IP] = ipPort
-				}
-				if host.IP == hostFromCmdLineOption {
-					return []IPAndPort{ipPort}, nil
-				}
-			}
-		}
+		hosts = append(hosts, ConfigSpec.Spec.Metad.Hosts...)
 	}
-	// graphd and storaged are organized in clusters
 	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
 		if cluster.Name == clusterName {
-			for _, host := range cluster.Graphd.Hosts {
-				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-					ipPort := IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
-					if _, ok := dict[host.IP]; !ok {
-						dict[host.IP] = ipPort
-					}
-					if host.IP == hostFromCmdLineOption {
-						return []IPAndPort{ipPort}, nil
-					}
-				}
+			hosts = append(hosts, cluster.Graphd.Hosts...)
+			hosts = append(hosts, cluster.Storaged.Hosts...)
+		}
+	}
+	if len(hosts) == 0 {
+		return hostList, fmt.Errorf("no valid host found")
+	}
+	for _, host := range hosts {
+		// if host is specified in the command line, return the host directly
+		// else, return all the hosts
+		if hostFromCmdLineOption != "" {
+			if host.IP == hostFromCmdLineOption {
+				return []IPAndPort{{IP: host.IP, AgentPort: host.AgentPort}}, nil
 			}
-			for _, host := range cluster.Storaged.Hosts {
-				if host.IP == hostFromCmdLineOption || hostFromCmdLineOption == "" {
-					if _, ok := dict[host.IP]; !ok {
-						dict[host.IP] = IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
-					}
-					if host.IP == hostFromCmdLineOption {
-						return []IPAndPort{{IP: host.IP}}, nil
-					}
-				}
+		} else {
+			ipPort := IPAndPort{IP: host.IP, AgentPort: host.AgentPort}
+			if _, ok := dict[host.IP]; !ok {
+				dict[host.IP] = ipPort
 			}
 		}
 	}

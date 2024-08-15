@@ -64,6 +64,6 @@ func init() {
 	// the option list is similar to the above
 	dropHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be dropped from a cluster")
 	dropHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
-	dropHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 0, "port of the agent on the host")
+	dropHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 6688, "port of the agent on the host")
 	dropHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
 }
