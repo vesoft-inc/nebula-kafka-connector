@@ -23,6 +23,14 @@
         <developerConnection>scm:git:https://github.com/vesoft-inc/nebula-ng-tools</developerConnection>
     </scm>
 
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+            <comments>license</comments>
+        </license>
+    </licenses>
 
     <developers>
         <developer>
@@ -60,17 +68,6 @@
                         <goals>
                             <goal>sign</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.8.2</version>
-                <executions>
-                    <execution>
-                        <id>default-deploy</id>
-                        <phase>deploy</phase>
                     </execution>
                 </executions>
             </plugin>
