@@ -3,10 +3,11 @@ package storage
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
 	"os"
 	"path/filepath"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/limiter"
 

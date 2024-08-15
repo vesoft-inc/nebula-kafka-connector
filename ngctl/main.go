@@ -8,6 +8,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/host_admin"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/service_admin"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/supercluster_admin"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/version"
 )
 
 var rootCmd = &cobra.Command{
@@ -36,8 +37,10 @@ func init() {
 	rootCmd.AddCommand(cluster_admin.ClusterCmd)
 	// cmds communicating with a agent to mange hosts
 	rootCmd.AddCommand(host_admin.HostCmd)
-	// cmds coomunicating with a agent to manage services on a host
+	// cmds communicating with a agent to manage services on a host
 	rootCmd.AddCommand(service_admin.ServiceAdminCmd)
+	// cmds to show the version of ngctl
+	rootCmd.AddCommand(version.VersionCmd)
 
 	rootCmd.PersistentFlags().StringVarP(&common.CachePath, "tokenFile", "", "", "token file path")
 

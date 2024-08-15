@@ -1,10 +1,13 @@
 metaCtl ?= ngctl
 
 # build with verison infos
-buildDate = $(shell TZ=UTC date +%FT%T%z)
+buildTime = $(shell TZ=UTC date +%FT%T%z)
 gitCommit = $(shell git log --pretty=format:'%h' -1)
+gitTag = $(shell git describe --tags --abbrev=0 --tag 2>/dev/null)
 
-ldflags="-X main.gitTag=${gitTag} -X main.buildDate=${buildDate} -X main.gitCommit=${gitCommit}"
+ldflags="-X github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/version.GitTag=${gitTag} \
+-X github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/version.BuildTime=${buildTime} \
+-X github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/version.GitCommit=${gitCommit}"
 
 .PHONY: build vendorbuild clean fmt gen
 

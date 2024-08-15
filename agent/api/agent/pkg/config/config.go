@@ -56,7 +56,7 @@ func SaveConfig(config *ComponentConfig) error {
 	}
 
 	// If the file does not exist, create a new one
-	err = os.WriteFile(defaultComponentConfigPath, data, 0644)
+	err = os.WriteFile(defaultComponentConfigPath, data, 0o644)
 	if err != nil {
 		return err
 	}

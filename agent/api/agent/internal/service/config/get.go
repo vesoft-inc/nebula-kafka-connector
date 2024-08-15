@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+
 	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/internal/types"
 	pkgconfig "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/config"
 )

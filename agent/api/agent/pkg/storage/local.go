@@ -3,8 +3,6 @@ package storage
 import (
 	"context"
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/limiter"
 	"io"
 	"io/ioutil"
 	"os"
@@ -12,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 	"syscall"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/limiter"
 )
 
 type LocalConfig struct {
@@ -111,7 +112,7 @@ func (l *Local) copyDir(ctx context.Context, dstDir, srcDir string) error {
 	default:
 	}
 
-	if err := createIfNotExists(dstDir, 0755); err != nil {
+	if err := createIfNotExists(dstDir, 0o755); err != nil {
 		return err
 	}
 
@@ -131,7 +132,7 @@ func (l *Local) copyDir(ctx context.Context, dstDir, srcDir string) error {
 
 		switch srcEntry.Mode() & os.ModeType {
 		case os.ModeDir:
-			if err := createIfNotExists(dstPath, 0755); err != nil {
+			if err := createIfNotExists(dstPath, 0o755); err != nil {
 				return err
 			}
 			if err := l.copyDir(ctx, dstPath, srcPath); err != nil {

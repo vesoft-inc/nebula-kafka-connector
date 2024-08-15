@@ -125,7 +125,7 @@ type SetComponentConfigReq struct {
 	Config    map[string]interface{} `json:"config"`
 }
 
-type SetComponentConfigResp struct {}
+type SetComponentConfigResp struct{}
 
 type LocalUploadReq struct {
 	Path        string `json:"path"`

@@ -8,6 +8,7 @@ require (
 	github.com/colinmarc/hdfs/v2 v2.4.0
 	github.com/jcmturner/gokrb5/v8 v8.4.4
 	github.com/juju/ratelimit v1.0.2
+	github.com/sirupsen/logrus v1.9.3
 	github.com/vesoft-inc/go-pkg v0.0.0-20231117110005-307b542ecb31
 	github.com/zeromicro/go-zero v1.6.1
 )

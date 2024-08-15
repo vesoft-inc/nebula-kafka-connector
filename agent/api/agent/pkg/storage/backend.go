@@ -119,7 +119,6 @@ func (b *Backend) DeepCopy() *Backend {
 	case LocalType:
 		if b.Local != nil {
 			cp.Local = b.Local.DeepCopy()
-
 		}
 	}
 	return cp

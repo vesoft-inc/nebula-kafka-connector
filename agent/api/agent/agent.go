@@ -21,14 +21,61 @@ import (
 	"github.com/zeromicro/go-zero/rest/httpx"
 )
 
-var configFile = flag.String("f", "etc/agent-api.yaml", "the config file")
+var (
+	configFile   = flag.String("f", "", "the config file")
+	host         = flag.String("H", "", "the host, default: 0.0.0.0")
+	port         = flag.Uint("P", 0, "the port, default: 6688")
+	caFile       = flag.String("ca", "", "the ca file, default: certs/ca.crt")
+	certFile     = flag.String("cert", "", "the cert file, default: certs/server.crt")
+	keyFile      = flag.String("key", "", "the key file, default: certs/server.key")
+	auditLogFile = flag.String("audit", "", "the audit log file, default: audit.log")
+)
 
-func main() {
+// 优先加载 config file
+// 用 flag 的值替换掉 config file 的值
+// 如果值为空，设置默认值
+func parseFlags() config.Config {
 	flag.Parse()
 
 	var c config.Config
-	conf.MustLoad(*configFile, &c, conf.UseEnv())
+	c.Port = 6688
+	c.Host = "0.0.0.0"
+	c.CAFile = "certs/ca.crt"
+	c.CertFile = "certs/server.crt"
+	c.KeyFile = "certs/server.key"
+	c.AuditLogFile = "audit.log"
+	setFile := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "f" {
+			setFile = true
+		}
+	})
+	if setFile {
+		conf.MustLoad(*configFile, &c, conf.UseEnv())
+	}
+	if *host != "" {
+		c.Host = *host
+	}
+	if *port != 0 {
+		c.Port = int(*port)
+	}
+	if *caFile != "" {
+		c.CAFile = *caFile
+	}
+	if *certFile != "" {
+		c.CertFile = *certFile
+	}
+	if *keyFile != "" {
+		c.KeyFile = *keyFile
+	}
+	if *auditLogFile != "" {
+		c.AuditLogFile = *auditLogFile
+	}
+	return c
+}
 
+func main() {
+	c := parseFlags()
 	// init audit log file
 	if err := audit.InitLogFile(c.AuditLogFile); err != nil {
 		log.Fatal(err)
