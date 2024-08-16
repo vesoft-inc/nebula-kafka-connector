@@ -1,10 +1,10 @@
 
 package com.vesoft.nebula.connector.sink;
 
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.util.Version;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

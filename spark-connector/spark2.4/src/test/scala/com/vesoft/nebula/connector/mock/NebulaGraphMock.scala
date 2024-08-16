@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.connector.mock
 
-import com.vesoft.nebula.client.graph.net.NebulaClient
+import com.vesoft.nebula.driver.graph.net.NebulaClient
 import org.apache.log4j.Logger
 
 class NebulaGraphMock {

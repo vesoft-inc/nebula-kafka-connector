@@ -10,12 +10,12 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
 import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Before;

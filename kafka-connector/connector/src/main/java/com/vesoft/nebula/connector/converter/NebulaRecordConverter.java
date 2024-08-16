@@ -2,9 +2,9 @@
 package com.vesoft.nebula.connector.converter;
 
 import com.alibaba.fastjson.JSON;
-import com.vesoft.nebula.client.graph.data.ValueWrapper;
-import com.vesoft.nebula.client.graph.scan.TableRow;
 import com.vesoft.nebula.connector.exceptions.RecordConversionException;
+import com.vesoft.nebula.driver.graph.data.ValueWrapper;
+import com.vesoft.nebula.driver.graph.scan.TableRow;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;

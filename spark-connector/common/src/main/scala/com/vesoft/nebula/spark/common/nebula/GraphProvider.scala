@@ -1,9 +1,9 @@
 
 package com.vesoft.nebula.spark.common.nebula
 
-import com.vesoft.nebula.client.graph.data.{ResultSet, ValueWrapper}
-import com.vesoft.nebula.client.graph.net.NebulaClient
-import com.vesoft.nebula.client.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
+import com.vesoft.nebula.driver.graph.data.{ResultSet, ValueWrapper}
+import com.vesoft.nebula.driver.graph.net.NebulaClient
+import com.vesoft.nebula.driver.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
 import org.slf4j.LoggerFactory
 
 

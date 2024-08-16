@@ -1,14 +1,13 @@
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 
-import com.vesoft.nebula.client.graph.net.NebulaPool;
+import com.vesoft.nebula.driver.graph.net.NebulaPool;
 import org.ldbcouncil.snb.impls.workloads.BaseDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.QueryStore;
 
 import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

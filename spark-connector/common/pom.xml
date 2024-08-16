@@ -15,7 +15,7 @@
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <nebula.version>5.0.0</nebula.version>
+        <nebula.version>5.0-SNAPSHOT</nebula.version>
         <compiler.source.version>1.8</compiler.source.version>
         <compiler.target.version>1.8</compiler.target.version>
         <scalatest.version>3.2.3</scalatest.version>
@@ -53,7 +53,7 @@
         <dependency>
             <groupId>com.vesoft</groupId>
             <artifactId>client</artifactId>
-            <version>5.0-SNAPSHOT</version>
+            <version>${nebula.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>

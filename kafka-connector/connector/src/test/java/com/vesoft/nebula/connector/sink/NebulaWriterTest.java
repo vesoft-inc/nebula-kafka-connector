@@ -18,11 +18,11 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
-import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.proto.common.Status;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import java.lang.reflect.InvocationTargetException;

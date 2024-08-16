@@ -8,11 +8,11 @@ package com.vesoft.nebula.connector.source;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_POLLING_SLEEP_MS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.NEBULA_PARTS_FOR_EACH_TASK;
 
-import com.vesoft.nebula.client.graph.scan.TableRow;
 import com.vesoft.nebula.connector.config.NebulaSourceConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
 import com.vesoft.nebula.connector.converter.NebulaRecordConverter;
 import com.vesoft.nebula.connector.util.Version;
+import com.vesoft.nebula.driver.graph.scan.TableRow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

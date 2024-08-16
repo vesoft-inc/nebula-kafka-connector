@@ -1,9 +1,9 @@
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
 import com.google.common.collect.ImmutableMap;
-import com.vesoft.nebula.client.graph.data.ValueWrapper;
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.InvalidValueException;
+import com.vesoft.nebula.driver.graph.data.ValueWrapper;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.InvalidValueException;
 import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.control.LoggingService;
@@ -20,7 +20,7 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.Collections;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
 
 import static org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter.convertDateTimesToEpoch;
 

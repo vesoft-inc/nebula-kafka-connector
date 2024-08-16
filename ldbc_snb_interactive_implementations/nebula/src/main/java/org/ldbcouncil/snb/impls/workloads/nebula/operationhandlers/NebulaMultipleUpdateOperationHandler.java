@@ -1,12 +1,12 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
-import com.vesoft.nebula.client.graph.net.NebulaClient;
+import com.vesoft.nebula.driver.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.*;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.nebula.NewNebulaPool;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.MultipleUpdateOperationHandler;
 import org.ldbcouncil.snb.driver.workloads.interactive.LdbcNoResult;
-import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.time.LocalTime;

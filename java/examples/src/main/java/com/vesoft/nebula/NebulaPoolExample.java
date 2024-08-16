@@ -1,8 +1,8 @@
 package com.vesoft.nebula;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.net.NebulaClient;
-import com.vesoft.nebula.client.graph.net.NebulaPool;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.net.NebulaClient;
+import com.vesoft.nebula.driver.graph.net.NebulaPool;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

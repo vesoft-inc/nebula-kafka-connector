@@ -5,8 +5,9 @@
 
 package com.vesoft.nebula.spark.common.reader
 
-import com.vesoft.nebula.client.graph.data._
-import com.vesoft.nebula.client.graph.scan.{ScanEdgeResult, ScanEdgeResultIterator, ScanNodeResult, ScanNodeResultIterator, TableRow}
+import com.vesoft.nebula.driver.graph.data._
+import com.vesoft.nebula.driver.graph.data.ValueWrapper
+import com.vesoft.nebula.driver.graph.scan.{ScanEdgeResult, ScanEdgeResultIterator, ScanNodeResult, ScanNodeResultIterator, TableRow}
 import com.vesoft.nebula.spark.common.NebulaUtils.NebulaValueGetter
 import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
 import com.vesoft.nebula.spark.common.nebula.GraphProvider

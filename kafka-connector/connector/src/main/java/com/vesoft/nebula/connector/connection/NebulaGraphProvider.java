@@ -1,17 +1,17 @@
 
 package com.vesoft.nebula.connector.connection;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.exception.AuthFailedException;
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
-import com.vesoft.nebula.client.graph.net.NebulaClient;
-import com.vesoft.nebula.client.graph.scan.ScanEdgeResultIterator;
-import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.config.NebulaSourceConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
 import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.driver.graph.net.NebulaClient;
+import com.vesoft.nebula.driver.graph.scan.ScanEdgeResultIterator;
+import com.vesoft.nebula.driver.graph.scan.ScanNodeResultIterator;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;

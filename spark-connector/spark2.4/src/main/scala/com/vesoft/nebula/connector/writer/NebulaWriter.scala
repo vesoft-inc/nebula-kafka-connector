@@ -1,7 +1,7 @@
 
 package com.vesoft.nebula.connector.writer
 
-import com.vesoft.nebula.client.graph.data.ResultSet
+import com.vesoft.nebula.driver.graph.data.ResultSet
 import com.vesoft.nebula.spark.common.NebulaOptions
 import com.vesoft.nebula.spark.common.nebula.GraphProvider
 import org.slf4j.LoggerFactory

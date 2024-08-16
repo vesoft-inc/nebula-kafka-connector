@@ -1,7 +1,7 @@
 
 package com.vesoft.nebula.connector.writer
 
-import com.vesoft.nebula.client.graph.ErrorCode
+import com.vesoft.nebula.driver.graph.ErrorCode
 import com.vesoft.nebula.spark.common.exception.IllegalOptionException
 import com.vesoft.nebula.spark.common.nebula.VidType
 import com.vesoft.nebula.spark.common.writer.NebulaExecutor

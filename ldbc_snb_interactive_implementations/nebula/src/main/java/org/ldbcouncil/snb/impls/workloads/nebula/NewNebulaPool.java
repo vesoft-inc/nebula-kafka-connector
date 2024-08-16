@@ -5,7 +5,7 @@
 
 package org.ldbcouncil.snb.impls.workloads.nebula;
 
-import com.vesoft.nebula.client.graph.net.NebulaPool;
+import com.vesoft.nebula.driver.graph.net.NebulaPool;
 
 public class NewNebulaPool {
     private NebulaPool pool;

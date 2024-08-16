@@ -1,6 +1,6 @@
 package org.ldbcouncil.snb.impls.workloads.nebula.operationhandlers;
 
-import com.vesoft.nebula.client.graph.net.NebulaClient;
+import com.vesoft.nebula.driver.graph.net.NebulaClient;
 import org.ldbcouncil.snb.driver.DbException;
 import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

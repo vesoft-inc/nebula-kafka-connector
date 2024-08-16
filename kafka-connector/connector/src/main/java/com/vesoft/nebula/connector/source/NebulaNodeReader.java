@@ -5,15 +5,15 @@
 
 package com.vesoft.nebula.connector.source;
 
-import com.vesoft.nebula.client.graph.data.ResultSet;
-import com.vesoft.nebula.client.graph.exception.IOErrorException;
-import com.vesoft.nebula.client.graph.exception.NoValidSessionException;
-import com.vesoft.nebula.client.graph.scan.ScanNodeResult;
-import com.vesoft.nebula.client.graph.scan.ScanNodeResultIterator;
-import com.vesoft.nebula.client.graph.scan.TableRow;
 import com.vesoft.nebula.connector.config.NebulaSourceConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
 import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
+import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
+import com.vesoft.nebula.driver.graph.scan.ScanNodeResult;
+import com.vesoft.nebula.driver.graph.scan.ScanNodeResultIterator;
+import com.vesoft.nebula.driver.graph.scan.TableRow;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;

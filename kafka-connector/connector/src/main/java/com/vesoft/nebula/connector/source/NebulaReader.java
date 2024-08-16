@@ -5,9 +5,9 @@
 
 package com.vesoft.nebula.connector.source;
 
-import com.vesoft.nebula.client.graph.scan.TableRow;
 import com.vesoft.nebula.connector.config.NebulaSourceConnectConfig;
 import com.vesoft.nebula.connector.connection.NebulaGraphProvider;
+import com.vesoft.nebula.driver.graph.scan.TableRow;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.Logger;

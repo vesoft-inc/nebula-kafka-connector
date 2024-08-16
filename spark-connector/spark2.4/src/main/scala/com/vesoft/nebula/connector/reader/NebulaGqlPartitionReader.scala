@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.connector.reader
 
-import com.vesoft.nebula.client.graph.data.{ResultSet, ValueWrapper}
+import com.vesoft.nebula.driver.graph.data.{ResultSet, ValueWrapper}
 import com.vesoft.nebula.spark.common.NebulaUtils.NebulaValueGetter
 import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
 import com.vesoft.nebula.spark.common.nebula.GraphProvider
