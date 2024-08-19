@@ -19,6 +19,7 @@ public class ScanTest {
     String passwd    = "NebulaGraph01";
     String graphName = "nba";
     String nodeType  = "node_type_player";
+    String edgeType = "edge_type_follow";
 
     NebulaClient client;
 
@@ -98,6 +99,70 @@ public class ScanTest {
         }
         assert (rows.size() == 1);
         assert (columns.size() == 1);
+    }
+
+
+    @Test
+    public void scanEdgeForReturnCols() {
+        // test specific return columns
+        List<String>           returnCols = Arrays.asList("likeness");
+        ScanEdgeResultIterator iterator   = client.scanEdge(graphName, edgeType, returnCols);
+        List<TableRow>         rows       = new ArrayList<>();
+        List<String>           columns    = new ArrayList<>();
+        while (iterator.hasNext()) {
+            ScanEdgeResult result = iterator.next();
+            if (!result.isEmpty()) {
+                rows.addAll(result.getTableRows());
+                columns.addAll(result.getPropNames());
+            }
+        }
+        assert (rows.size() == 2);
+        assert (columns.size() == 3);
+
+        // test null return columns
+        rows.clear();
+        columns.clear();
+        returnCols = null;
+        iterator = client.scanEdge(graphName, edgeType, returnCols);
+        while (iterator.hasNext()) {
+            ScanEdgeResult result = iterator.next();
+            if (!result.isEmpty()) {
+                rows.addAll(result.getTableRows());
+                columns.addAll(result.getPropNames());
+            }
+        }
+        assert (rows.size() == 2);
+        assert (columns.size() == 4);
+
+        // test empty return columns
+        rows.clear();
+        columns.clear();
+        returnCols = new ArrayList<>();
+        iterator = client.scanEdge(graphName, edgeType, returnCols);
+        while (iterator.hasNext()) {
+            ScanEdgeResult result = iterator.next();
+            if (!result.isEmpty()) {
+                rows.addAll(result.getTableRows());
+                columns.addAll(result.getPropNames());
+            }
+        }
+        assert (rows.size() == 2);
+        assert (columns.size() == 2);
+
+        // test batch size
+        rows.clear();
+        columns.clear();
+        returnCols = new ArrayList<>();
+        iterator = client.scanEdge(graphName, edgeType, returnCols, 2,1);
+        while (iterator.hasNext()) {
+            ScanEdgeResult result = iterator.next();
+            if (!result.isEmpty()) {
+                rows.addAll(result.getTableRows());
+                columns.addAll(result.getPropNames());
+            }
+        }
+        assert (rows.size() == 1);
+        assert (columns.size() == 2);
     }
 
 }

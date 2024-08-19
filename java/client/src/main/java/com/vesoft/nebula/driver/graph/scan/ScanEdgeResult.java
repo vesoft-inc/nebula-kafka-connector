@@ -41,9 +41,9 @@ public class ScanEdgeResult extends ScanResult {
                     ResultSet.Record   record    = resultSet.next();
                     List<ValueWrapper> rowValues = new ArrayList<>();
 
-                    Vertex       srcNode = record.get("Src").asNode();
-                    Vertex       dstNode = record.get("Dst").asNode();
-                    Relationship edge    = record.get("Edge").asEdge();
+                    Vertex       srcNode = record.get("src").asNode();
+                    Vertex       dstNode = record.get("dst").asNode();
+                    Relationship edge    = record.get("edge").asEdge();
                     for (String key : srcNode.getProperties().keySet()) {
                         rowValues.add(srcNode.getProperties().get(key));
                     }
