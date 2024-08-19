@@ -24,10 +24,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GraphClientExample {
-    private static final Logger log = LoggerFactory.getLogger(GraphClientExample.class);
-    static String host = "192.168.8.6:3820";
-    static String user = "root";
-    static String passwd = "Nebula123";
+    private static final Logger log    = LoggerFactory.getLogger(GraphClientExample.class);
+    static               String host   = "192.168.8.6:3820";
+    static               String user   = "root";
+    static               String passwd = "Nebula123";
 
     public static void main(String[] args) {
         NebulaClient client = null;
@@ -64,7 +64,7 @@ public class GraphClientExample {
         ResultSet resp = client.execute(createSchema);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    createSchema, resp.getErrorMessage()));
+                                    createSchema, resp.getErrorMessage()));
             System.out.println("create graph type failed, " + resp.getErrorMessage());
             System.exit(1);
         } else {
@@ -75,11 +75,11 @@ public class GraphClientExample {
 
     private static void createGraph(NebulaClient client) throws IOErrorException,
             InterruptedException {
-        String createGraph = "CREATE GRAPH IF NOT EXISTS nba graph_type_nba";
-        ResultSet resp = client.execute(createGraph);
+        String    createGraph = "CREATE GRAPH IF NOT EXISTS nba graph_type_nba";
+        ResultSet resp        = client.execute(createGraph);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute `%s`, failed: %s", createGraph,
-                    resp.getErrorMessage()));
+                                    resp.getErrorMessage()));
             System.out.println("create graph failed, " + resp.getErrorMessage());
             System.exit(1);
         } else {
@@ -90,26 +90,37 @@ public class GraphClientExample {
 
     private static void insertData(NebulaClient client) throws IOErrorException,
             NoValidSessionException {
-        String insertVertexes = " USE nba INSERT NODE node_type_player ({id:1, name:\"Tim\", "
-                + "score: 87.0, gender: true, rate: 7.32}),({id:2, name:\"Jerry\", score: 95.0,"
-                + " gender: false, rate: 4.01}),({id:3, name:\"Kyle\", score: 100, gender: "
-                + "true, rate: 9.99})";
+        String insertVertexes = "TABLE t{id,name,score,gender,rate} =\n"
+                + "(1,\"Tim\",87.0,true,7.32),\n"
+                + "(2,\"Jerry\",95.0,false,4.01),\n"
+                + "(3,\"Kyle\",100,true,9.99)\n"
+                + "USE nba \n"
+                + "FOR r IN t\n"
+                + "INSERT OR IGNORE(@node_type_player"
+                + "{id:r.id,name:r.name,score:r.score,gender:r.gender,rate:r.rate})";
         ResultSet resp = client.execute(insertVertexes);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    insertVertexes, resp.getErrorMessage()));
+                                    insertVertexes, resp.getErrorMessage()));
             System.out.println("insert graph node failed, " + resp.getErrorMessage());
             System.exit(1);
         }
         log.info("insert graph node succeed!");
 
-        String insertEdges = "USE nba INSERT EDGE edge_type_follow ({id:1})-[{followness:90, "
-                + "likeness: 66.8}]->({id:2}),({id:2})-[{followness:100, likeness: 93.35}]->"
-                + "({id:3})";
+        String insertEdges = "TABLE t{id1,id2,followness,likeness}=\n"
+                + "(1,2,90,66.8),\n"
+                + "(2,3,100,93.35)\n"
+                + "USE nba \n"
+                + "FOR r IN t\n"
+                + "OPTIONAL MATCH(src_node) WHERE src_node.id=r.id1 \n"
+                + "OPTIONAL MATCH(dst_node) WHERE dst_node.id=r.id2\n"
+                + "INSERT OR IGNORE (src_node)-"
+                + "[@edge_type_follow{followness:r.followness,likeness:r.likeness}]"
+                + "->(dst_node)";
         resp = client.execute(insertEdges);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    insertEdges, resp.getErrorMessage()));
+                                    insertEdges, resp.getErrorMessage()));
             System.out.println("insert graph edge failed, " + resp.getErrorMessage());
             System.exit(1);
         }
@@ -123,7 +134,7 @@ public class GraphClientExample {
         ResultSet resp = client.execute(queryNode);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    queryNode, resp.getErrorMessage()));
+                                    queryNode, resp.getErrorMessage()));
         } else {
             log.info("query node succeed!");
             resolve(resp);
@@ -135,7 +146,7 @@ public class GraphClientExample {
         resp = client.execute(queryEdge);
         if (!resp.isSucceeded()) {
             log.error(String.format("Execute: `%s', failed: %s",
-                    queryNode, resp.getErrorMessage()));
+                                    queryNode, resp.getErrorMessage()));
         } else {
             log.info("query edge succeed!");
             resolve(resp);
@@ -148,9 +159,9 @@ public class GraphClientExample {
                 + "v.rate";
         int parallel = 200;
 
-        CountDownLatch countDownLatch = new CountDownLatch(parallel);
+        CountDownLatch  countDownLatch  = new CountDownLatch(parallel);
         ExecutorService executorService = Executors.newFixedThreadPool(parallel);
-        AtomicInteger failed = new AtomicInteger(0);
+        AtomicInteger   failed          = new AtomicInteger(0);
         for (int i = 0; i < parallel; i++) {
             executorService.submit(() -> {
                 try {
@@ -158,7 +169,7 @@ public class GraphClientExample {
                             "USE nba MATCH ()-[e:follow]->() RETURN e.followness, e.likeness");
                     if (!result.isSucceeded()) {
                         log.error(String.format("Execute: `%s', failed: %s",
-                                queryNode, result.getErrorMessage()));
+                                                queryNode, result.getErrorMessage()));
                         failed.incrementAndGet();
                     }
                 } catch (Exception e) {
@@ -225,16 +236,16 @@ public class GraphClientExample {
                 } else if (valueWrapper.isRecord()) {
                     System.out.printf("%15s |", valueWrapper.asRecord());
                 } else if (valueWrapper.isNode()) {
-                    Vertex node = valueWrapper.asNode();
-                    long nodeId = node.getId();
-                    String nodeType = node.getType();
+                    Vertex                    node       = valueWrapper.asNode();
+                    long                      nodeId     = node.getId();
+                    String                    nodeType   = node.getType();
                     Map<String, ValueWrapper> properties = node.getProperties();
                     System.out.printf("%15s |", valueWrapper.asNode());
                 } else if (valueWrapper.isEdge()) {
-                    Relationship relationship = valueWrapper.asEdge();
-                    long srcId = relationship.getSrcId();
-                    long dstId = relationship.getDstId();
-                    Map<String, ValueWrapper> properties = relationship.getProperties();
+                    Relationship              relationship = valueWrapper.asEdge();
+                    long                      srcId        = relationship.getSrcId();
+                    long                      dstId        = relationship.getDstId();
+                    Map<String, ValueWrapper> properties   = relationship.getProperties();
                     System.out.printf("%15s |", valueWrapper.asEdge());
                 }
             }
@@ -244,10 +255,10 @@ public class GraphClientExample {
 
     private static void scanNode(NebulaClient client) {
         String graphName = "nba";
-        String nodeType = "node_type_player";
+        String nodeType  = "node_type_player";
 
-        ScanNodeResultIterator iterator = client.scanNode(graphName, nodeType);
-        boolean hasPrintPropNames = false;
+        ScanNodeResultIterator iterator          = client.scanNode(graphName, nodeType);
+        boolean                hasPrintPropNames = false;
         while (iterator.hasNext()) {
             ScanNodeResult result = iterator.next();
             if (!hasPrintPropNames) {
@@ -268,10 +279,10 @@ public class GraphClientExample {
 
     private static void scanEdge(NebulaClient client) {
         String graphName = "nba";
-        String edgeType = "edge_type_follow";
+        String edgeType  = "edge_type_follow";
 
-        ScanEdgeResultIterator iterator = client.scanEdge(graphName, edgeType);
-        boolean hasPrintPropNames = false;
+        ScanEdgeResultIterator iterator          = client.scanEdge(graphName, edgeType);
+        boolean                hasPrintPropNames = false;
         while (iterator.hasNext()) {
             ScanEdgeResult result = iterator.next();
             if (!hasPrintPropNames) {
