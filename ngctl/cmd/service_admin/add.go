@@ -25,7 +25,7 @@ Or provides the service info, the service will be added into the cluster.
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if err := validateAddFlags(); err != nil {
+		if err := validateServiceFlags(); err != nil {
 			return err
 		}
 		var (
@@ -81,11 +81,7 @@ func getServicesDirectly() (*common.ResourceInfo, error) {
 func getServicesWithConfig() (*common.ResourceInfo, error) {
 	var flags = ServiceFlags
 	// get all services from the config file
-	serviceList, err := common.DeriveServiceList(common.IPAndPort{
-		IP:          "",
-		Port:        fmt.Sprintf("%d", flags.port),
-		ServiceType: flags.serviceType,
-	}, flags.clusterName)
+	serviceList, err := common.DeriveServiceList(flags.clusterName)
 	if err != nil {
 		return nil, err
 	}
@@ -106,31 +102,12 @@ func getServicesWithConfig() (*common.ResourceInfo, error) {
 
 }
 
-func validateAddFlags() error {
-	var flags = ServiceFlags
-	if flags.clusterName == "" {
-		return common.NgctlError("cluster name is empty", "")
-	}
-	if flags.configFile == "" {
-		if flags.host == "" || flags.port < 0 || flags.serviceType == "" {
-			return common.NgctlError("must provide service info [host, port, type]", "")
-		}
-	} else {
-		if flags.host != "" || flags.port >= 0 || flags.serviceType != "" {
-			return common.NgctlError("cannot use service info and config file at the same time", "")
-		}
-		configError := common.CheckInConfigFile(flags.configFile)
-		if configError != nil {
-			return common.NgctlError("Error in config file", configError.Error())
-		}
-	}
-	return nil
-}
+
 
 func init() {
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "service host")
-	addServiceCmd.Flags().Uint32VarP(&ServiceFlags.port, "port", "P", 0, "service port")
+	addServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "service port")
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.clusterName, "cluster", "c", "", "cluster name")
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file")
 }

@@ -109,10 +109,7 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad 
 }
 
 // checking all services in the config file, including only storaged and graphd
-func DeriveServiceList(serviceFromCmdLineOption IPAndPort, clusterName string) (serviceList []IPAndPort, err error) {
-	if serviceFromCmdLineOption.IP != "" && serviceFromCmdLineOption.Port != "" {
-		return []IPAndPort{{IP: serviceFromCmdLineOption.IP, Port: serviceFromCmdLineOption.Port, ServiceType: serviceFromCmdLineOption.ServiceType}}, nil
-	}
+func DeriveServiceList(clusterName string) (serviceList []IPAndPort, err error) {
 	// graphd and storaged are organized in clusters
 	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
 		if cluster.Name == clusterName {

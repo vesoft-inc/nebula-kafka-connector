@@ -21,46 +21,35 @@ var dropServiceCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		flags := ServiceFlags
-		readFromConfig := false
-		if flags.serviceType == "" {
-			readFromConfig = true
+		var flags = ServiceFlags
+		if err := validateServiceFlags(); err != nil {
+			return err
 		}
-		if flags.clusterName == "" {
-			return common.NgctlError("cluster name is empty", "")
+		var (
+			serviceList []common.IPAndPort = make([]common.IPAndPort, 0)
+			err         error
+		)
+		if flags.configFile != "" {
+			serviceList, err = common.DeriveServiceList(flags.clusterName)
+		} else {
+			serviceList = append(serviceList, common.IPAndPort{
+				IP:          flags.host,
+				Port:        strconv.Itoa(int(flags.port)),
+				ServiceType: flags.serviceType,
+			})
 		}
-		if flags.host == "" {
-			readFromConfig = true
+		if err != nil {
+			return err
 		}
-		if readFromConfig {
-			if flags.configFile == "" {
-				return common.NgctlError("Neither a valid service nor a config file is provided", "")
-			} else {
-				configError := common.CheckInConfigFile(flags.configFile)
-				if configError != nil {
-					return common.NgctlError("Error in config file", configError.Error())
-				}
-			}
+		if len(serviceList) == 0 {
+			return common.NgctlError("No service to drop.", "")
 		}
-		serviceList, err := common.DeriveServiceList(common.IPAndPort{IP: flags.host, Port: fmt.Sprintf("%d", flags.port), ServiceType: flags.serviceType}, flags.clusterName)
-		// Prepare the resource request
-		serviceResource := common.ResourceInfo{
-			ResourceType:        "services",
-			OperationOnResource: "drop",
-			ResourceList:        make([]common.IPAndPort, 0),
-			ClusterName:         flags.clusterName,
-		}
+
 		for _, service := range serviceList {
-			serviceResource.ResourceList = append(serviceResource.ResourceList, service)
-		}
-		if flags.host == "" {
-			serviceResource, err = common.ConfirmResourceList(serviceResource)
+			port, err := strconv.Atoi(service.Port)
 			if err != nil {
-				return common.NgctlError("Failed to confirm resource list", err.Error())
+				return err
 			}
-		}
-		for _, service := range serviceResource.ResourceList {
-			port, _ := strconv.Atoi(service.Port)
 			var serviceType meta.ServiceType
 			if service.ServiceType == "graphd" {
 				serviceType = meta.ServiceTypeGraphd
@@ -82,7 +71,6 @@ var dropServiceCmd = &cobra.Command{
 func init() {
 	dropServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	dropServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "service host")
-	dropServiceCmd.Flags().Uint32VarP(&ServiceFlags.port, "port", "P", 0, "service port")
+	dropServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "service port")
 	dropServiceCmd.Flags().StringVarP(&ServiceFlags.clusterName, "cluster", "c", "", "cluster name")
-	dropServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "cluster")
 }

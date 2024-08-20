@@ -97,6 +97,9 @@ var startServiceCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		flags := ServiceFlags
+		if flags.port < 0 {
+			return common.NgctlError("no valid port provided", "")
+		}
 		if flags.serviceType == "" || (flags.serviceType != "graphd" && flags.serviceType != "storaged") {
 			return common.NgctlError("invalid service type", "")
 		}
@@ -132,7 +135,7 @@ var startServiceCmd = &cobra.Command{
 func init() {
 	startServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	startServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "host")
-	startServiceCmd.Flags().Uint32VarP(&ServiceFlags.port, "port", "P", 0, "port")
+	startServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "port")
 	startServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file for ngctl")
 	startServiceCmd.Flags().StringVarP(&ServiceFlags.serviceConfigFile, "service_config_file", "F", "", "config file for the service to start")
 	startServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "config")

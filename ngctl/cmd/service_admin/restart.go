@@ -20,6 +20,9 @@ var restartServiceCmd = &cobra.Command{
 		if flags.host == "" {
 			return common.NgctlError("no valid host provided", "")
 		}
+		if flags.port < 0 {
+			return common.NgctlError("no valid port provided", "")
+		}
 		if flags.serviceType == "" || (flags.serviceType != "graphd" && flags.serviceType != "storaged") {
 			return common.NgctlError("service type is wrong", "")
 		}
@@ -42,7 +45,7 @@ var restartServiceCmd = &cobra.Command{
 func inti() {
 	restartServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	restartServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "host")
-	restartServiceCmd.Flags().Uint32VarP(&ServiceFlags.port, "port", "P", 0, "port")
+	restartServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "port")
 	restartServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file path")
 	restartServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "config")
 }
