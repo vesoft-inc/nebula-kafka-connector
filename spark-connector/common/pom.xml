@@ -52,7 +52,7 @@
         </dependency>
         <dependency>
             <groupId>com.vesoft</groupId>
-            <artifactId>client</artifactId>
+            <artifactId>driver</artifactId>
             <version>${nebula.version}</version>
         </dependency>
         <dependency>
