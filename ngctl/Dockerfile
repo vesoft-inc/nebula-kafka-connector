@@ -10,6 +10,8 @@ COPY ngadm /usr/ngadm
 COPY br-ent /usr/br-ent
 COPY agent /usr/agent
 
+# https://github.com/alpinelinux/docker-alpine/issues/98
+RUN sed -i 's/https/http/' /etc/apk/repositories
 RUN cd /usr/src && apk add --no-cache git make && make
 
 FROM alpine as ngctl
