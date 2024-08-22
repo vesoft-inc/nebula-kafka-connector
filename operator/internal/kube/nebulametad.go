@@ -44,16 +44,16 @@ func NewNebulaMetad(client client.Client) NebulaMetad {
 }
 
 func (m *nebulaMetadClient) GetNebulaMetad(namespace, name string) (*v1alpha1.NebulaMetad, error) {
-	nebulaMetad := &v1alpha1.NebulaMetad{}
+	nm := &v1alpha1.NebulaMetad{}
 	err := m.client.Get(context.TODO(), types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
-	}, nebulaMetad)
+	}, nm)
 	if err != nil {
 		klog.V(4).ErrorS(err, "failed to get NebulaMetad", "namespace", namespace, "name", name)
 		return nil, err
 	}
-	return nebulaMetad, nil
+	return nm, nil
 }
 
 func (m *nebulaMetadClient) UpdateNebulaMetadStatus(nm *v1alpha1.NebulaMetad) error {

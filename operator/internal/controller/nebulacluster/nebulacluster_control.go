@@ -219,6 +219,12 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v1alpha1.NebulaClu
 		nc.Status.CreatedDone = true
 	}
 
+	nc.SetOwnerReferences(metad.GenerateOwnerReferences())
+	if err := c.clientSet.NebulaCluster().UpdateNebulaCluster(nc); err != nil {
+		klog.Errorf("set cluster owner references failed: %v", err)
+		return err
+	}
+
 	if err := c.storagedCluster.Reconcile(metaClient, nc); err != nil {
 		klog.Errorf("reconcile storaged cluster failed: %v", err)
 		return err

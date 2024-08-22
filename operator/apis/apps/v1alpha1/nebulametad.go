@@ -18,11 +18,38 @@ package v1alpha1
 
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/utils/pointer"
 )
 
 func (nm *NebulaMetad) MetadComponent() NebulaComponent {
 	return newMetadComponent(nm)
+}
+
+func (nm *NebulaMetad) GenerateOwnerReferences() []metav1.OwnerReference {
+	apiVersion := nm.APIVersion
+	kind := nm.Kind
+	if apiVersion == "" {
+		gv := schema.GroupVersion{
+			Group:   NebulaMetadKind.Group,
+			Version: NebulaMetadKind.Version,
+		}
+		apiVersion = gv.String()
+	}
+	if kind == "" {
+		kind = NebulaMetadKind.Kind
+	}
+
+	return []metav1.OwnerReference{
+		{
+			APIVersion:         apiVersion,
+			Kind:               kind,
+			Name:               nm.GetName(),
+			UID:                nm.GetUID(),
+			Controller:         pointer.Bool(true),
+			BlockOwnerDeletion: pointer.Bool(true),
+		},
+	}
 }
 
 func (nm *NebulaMetad) GetMetadEndpoints(portName string) []string {

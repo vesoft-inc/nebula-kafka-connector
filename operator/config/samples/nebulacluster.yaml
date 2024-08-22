@@ -1,7 +1,7 @@
 apiVersion: apps.nebula-graph-ng.io/v1alpha1
 kind: NebulaCluster
 metadata:
-  name: nebula-sample
+  name: nebula
 spec:
   console:
     image: reg.vesoft-inc.com/vesoft-ng/ngql
@@ -12,7 +12,7 @@ spec:
   - az2
   - az3
   metadRef:
-    name: metad-sample
+    name: ngmeta
   credentialSecret: "nebula"
   graphd:
     resources:

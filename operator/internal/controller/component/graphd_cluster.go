@@ -255,10 +255,21 @@ func addGraphdServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldRe
 	port := nc.GraphdComponent().GetPort(v1alpha1.GraphdPortNameGRPC)
 	for i := start; i < newReplicas; i++ {
 		host := nc.GraphdComponent().GetPodFQDN(i)
-		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
-		if err := metaClient.AddService(req); err != nil {
+		hostReq := meta.NewAddHostReq(host, nc.Name, v1alpha1.AgentPort)
+		if err := metaClient.AddHost(hostReq); err != nil {
 			if ne, ok := err.(*nebula.NebulaError); ok {
-				// TODO [NI107]: Service with static port already exists
+				if ne.Code() != "NI104" {
+					klog.Errorf("add host failed: %v", err)
+					return err
+				}
+			} else {
+				klog.Errorf("add host got unkonw error: %v", err)
+				return err
+			}
+		}
+		svcReq := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
+		if err := metaClient.AddService(svcReq); err != nil {
+			if ne, ok := err.(*nebula.NebulaError); ok {
 				if ne.Code() != "NI107" {
 					klog.Errorf("add graphd service failed: %v", err)
 					return err

@@ -77,6 +77,7 @@ func (c *nebulaClusterClient) UpdateNebulaCluster(nc *v1alpha1.NebulaCluster) er
 	ncSpec := nc.Spec.DeepCopy()
 	labels := nc.GetLabels()
 	annotations := nc.GetAnnotations()
+	ownerReferences := nc.GetOwnerReferences()
 
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		// Update the set with the latest resource version for the next poll
@@ -88,7 +89,8 @@ func (c *nebulaClusterClient) UpdateNebulaCluster(nc *v1alpha1.NebulaCluster) er
 
 		if reflect.DeepEqual(ncSpec, ncClone.Spec) &&
 			reflect.DeepEqual(labels, ncClone.Labels) &&
-			reflect.DeepEqual(annotations, ncClone.Annotations) {
+			reflect.DeepEqual(annotations, ncClone.Annotations) &&
+			reflect.DeepEqual(ownerReferences, ncClone.OwnerReferences) {
 			return nil
 		}
 
@@ -96,6 +98,7 @@ func (c *nebulaClusterClient) UpdateNebulaCluster(nc *v1alpha1.NebulaCluster) er
 		nc.Spec = *ncSpec
 		nc.SetLabels(labels)
 		nc.SetAnnotations(annotations)
+		nc.SetOwnerReferences(ownerReferences)
 		updateErr := c.client.Update(context.TODO(), nc)
 		if updateErr == nil {
 			klog.Infof("NebulaCluster %s/%s updated successfully", ns, ncName)

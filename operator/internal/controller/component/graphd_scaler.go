@@ -76,9 +76,13 @@ func (s *graphScaler) ScaleIn(metaClient meta.Client, nc *v1alpha1.NebulaCluster
 	if oldReplicas-newReplicas > 0 {
 		for i := oldReplicas - 1; i >= newReplicas; i-- {
 			host := nc.GraphdComponent().GetPodFQDN(i)
-			req := meta.NewDropServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
-			if err := metaClient.DropService(req); err != nil {
+			svcReq := meta.NewDropServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
+			if err := metaClient.DropService(svcReq); err != nil {
 				return fmt.Errorf("drop graphd service failed: %v", err)
+			}
+			hostReq := meta.NewDropHostReq(host, nc.Name)
+			if err := metaClient.DropHost(hostReq); err != nil {
+				return fmt.Errorf("drop host failed: %v", err)
 			}
 		}
 	}

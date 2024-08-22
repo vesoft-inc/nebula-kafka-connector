@@ -208,7 +208,6 @@ func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string
 	req := meta.NewInitClusterReq(clusterName)
 	if err := metaClient.InitCluster(req); err != nil {
 		if ne, ok := err.(*nebula.NebulaError); ok {
-			// TODO [NI203]: Part already inited
 			if ne.Code() != "NI203" {
 				klog.Errorf("init cluster failed: %v", err)
 				return err
@@ -247,10 +246,21 @@ func addStorageServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldR
 	port := nc.StoragedComponent().GetPort(v1alpha1.StoragedPortNameGRPC)
 	for i := start; i < newReplicas; i++ {
 		host := nc.StoragedComponent().GetPodFQDN(i)
-		req := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)
-		if err := metaClient.AddService(req); err != nil {
+		hostReq := meta.NewAddHostReq(host, nc.Name, v1alpha1.AgentPort)
+		if err := metaClient.AddHost(hostReq); err != nil {
 			if ne, ok := err.(*nebula.NebulaError); ok {
-				// TODO [NI107]: Service with static port already exists
+				if ne.Code() != "NI104" {
+					klog.Errorf("add host failed: %v", err)
+					return err
+				}
+			} else {
+				klog.Errorf("add host got unkonw error: %v", err)
+				return err
+			}
+		}
+		svcReq := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)
+		if err := metaClient.AddService(svcReq); err != nil {
+			if ne, ok := err.(*nebula.NebulaError); ok {
 				if ne.Code() != "NI107" {
 					klog.Errorf("add storaged service failed: %v", err)
 					return err

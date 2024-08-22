@@ -1,7 +1,7 @@
 apiVersion: apps.nebula-graph-ng.io/v1alpha1
 kind: NebulaMetad
 metadata:
-  name: metad-sample
+  name: ngmeta
 spec:
   credentialSecret: "nebula"
   enablePVReclaim: true

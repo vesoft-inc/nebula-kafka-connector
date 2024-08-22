@@ -78,6 +78,9 @@ type NebulaClusterSpec struct {
 	Console *ConsoleSpec `json:"console,omitempty"`
 
 	// +optional
+	Agent *AgentContainerSpec `json:"agent,omitempty"`
+
+	// +optional
 	AlpineImage *string `json:"alpineImage,omitempty"`
 }
 
@@ -93,6 +96,29 @@ type ConsoleSpec struct {
 	// K8S nodeSelector.
 	// +optional
 	NodeSelector map[string]string `json:"nodeSelector,omitempty"`
+}
+
+// AgentContainerSpec defines the desired state of Agent
+type AgentContainerSpec struct {
+	// Container image.
+	// +optional
+	Image string `json:"image,omitempty"`
+
+	// Version tag for container image.
+	// +kubebuilder:default=latest
+	// +optional
+	Version string `json:"version,omitempty"`
+
+	// K8S resources settings.
+	// +optional
+	Resources corev1.ResourceRequirements `json:"resources,omitempty"`
+
+	// Container environment variables.
+	// +optional
+	EnvVars []corev1.EnvVar `json:"env,omitempty"`
+
+	// +optional
+	VolumeMounts []corev1.VolumeMount `json:"volumeMounts,omitempty"`
 }
 
 type GraphdSpec struct {

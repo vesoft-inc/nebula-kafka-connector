@@ -38,6 +38,13 @@ const (
 	defaultAlpineImage       = "vesoft/nebula-alpine:latest"
 
 	ZoneSuffix = "zone"
+
+	AgentPort = 6688
+)
+
+var (
+	NebulaClusterKind = SchemeGroupVersion.WithKind("NebulaCluster")
+	NebulaMetadKind   = SchemeGroupVersion.WithKind("NebulaMetad")
 )
 
 func getComponentName(objectName string, typ ComponentType) string {
