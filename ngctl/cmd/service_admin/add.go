@@ -102,8 +102,6 @@ func getServicesWithConfig() (*common.ResourceInfo, error) {
 
 }
 
-
-
 func init() {
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "service host")

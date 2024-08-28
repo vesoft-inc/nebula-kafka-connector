@@ -106,7 +106,7 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	}
 	// set schema for playing data
 	if r.option.schema != "" {
-		if _, err := r.client.Execute(fmt.Sprintf("SESSION SET SCHEMA `%s`", r.option.schema)); err != nil {
+		if _, err := r.client.Execute(fmt.Sprintf("SESSION SET SCHEMA \"%s\"", r.option.schema)); err != nil {
 			return nil, err
 		}
 	}
