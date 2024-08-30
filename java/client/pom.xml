@@ -24,7 +24,7 @@
         <commons-codec.version>1.13</commons-codec.version>
         <commons-pool2.version>2.2</commons-pool2.version>
         <servlet.version>3.0.1</servlet.version>
-        <fastjson.version>1.2.78</fastjson.version>
+        <fastjson.version>1.2.83</fastjson.version>
         <bouncycastle.version>1.69</bouncycastle.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jts.version>1.16.1</jts.version>
@@ -177,41 +177,6 @@
                 </executions>
             </plugin>
             <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.4.1</version>
-                <configuration>
-                    <createDependencyReducedPom>false</createDependencyReducedPom>
-                    <!-- put your configurations here -->
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                                <exclude>META-INF/versions/**</exclude>
-                                <exclude>META-INF/LICENSE.txt</exclude>
-                                <exclude>META-INF/NOTICE.txt</exclude>
-                                <exclude>META-INF/MANIFEST.MF</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                    <transformers>
-                        <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer">
-                        </transformer>
-                    </transformers>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
@@ -293,6 +258,12 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-jar-plugin</artifactId>
                 <version>3.2.0</version>
+                <configuration>
+                    <excludes>
+                        <exclude>common.proto</exclude>
+                        <exclude>graph.proto</exclude>
+                    </excludes>
+                </configuration>
                 <executions>
                     <execution>
                         <goals>
