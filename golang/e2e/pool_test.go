@@ -3,7 +3,7 @@ package e2e
 import (
 	"testing"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 )
 

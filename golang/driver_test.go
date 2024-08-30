@@ -23,9 +23,18 @@ type connWithErr struct {
 	err         error
 }
 
+type connetorWithFunc struct {
+	dummyConn
+	fn func(host *hostAddress, cfg *connConfig) (Client, error)
+}
+
 func (c *connetorWithErr) connect(host *hostAddress, cfg *connConfig) (Client, error) {
 	c.connectTimes++
 	return &connWithErr{executeTime: c.executeTime, err: c.err}, nil
+}
+
+func (c *connetorWithFunc) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+	return c.fn(host, cfg)
 }
 
 func (d *connWithErr) ExecuteContext(ctx context.Context, stmt string) (Result, error) {
@@ -120,17 +129,17 @@ func TestPoolRetry(t *testing.T) {
 // after retry, the connection should be put back to pool
 // verify the broken connection would be removed from pool
 func TestPoolRetry2(t *testing.T) {
-	p, err := NewNebulaPool("127.0.0.1:9669", "", "")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer p.Close()
-	pool, _ := p.(*driverPool)
 	connector := &connetorWithErr{
 		connectTime: 3 * time.Millisecond,
 		executeTime: 20 * time.Millisecond,
 		err:         errConnBroken("", 0),
 	}
+	p, err := NewNebulaPool("127.0.0.1:9669", "", "", withPoolConnector(connector))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer p.Close()
+	pool, _ := p.(*driverPool)
 	pool.connector = connector
 	pool.minOpen = 0
 	pool.connCfg = &connConfig{
@@ -154,5 +163,67 @@ func TestPoolRetry2(t *testing.T) {
 		}
 	}
 	pool.mu.Unlock()
+}
 
+func TestPoolStrictlyServerHealthy(t *testing.T) {
+	connector := &connetorWithFunc{
+		fn: func(host *hostAddress, cfg *connConfig) (Client, error) {
+			if host.host == "127.0.0.1" && host.port == 9669 {
+				return nil, errConnBroken(host.host, host.port)
+			} else {
+				return &dummyConn{}, nil
+			}
+		},
+	}
+	testcases := []struct {
+		strictly  bool
+		addresses string
+		hasErr    bool
+		err       string
+	}{
+		{true, "127.0.0.4:9669,127.0.0.2:9669,127.0.0.3:9669", false, ""},
+		{false, "127.0.0.4:9669,127.0.0.2:9669,127.0.0.3:9669", false, ""},
+		{true, "127.0.0.1:9669,127.0.0.2:9669,127.0.0.3:9669", true, "[99002]: connection to 127.0.0.1:9669 is broken"},
+		{false, "127.0.0.1:9669,127.0.0.2:9669,127.0.0.3:9669", false, ""},
+		{false, "127.0.0.1:9669", true, "[99002]: connection to 127.0.0.1:9669 is broken"},
+	}
+	for _, tc := range testcases {
+		_, err := NewNebulaPool(tc.addresses, "", "",
+			withPoolConnector(connector),
+			WithPoolStrictlyServerHealthy(tc.strictly),
+		)
+		assert.Equal(t, tc.hasErr, err != nil)
+		if tc.hasErr {
+			assert.Equal(t, tc.err, err.Error())
+		}
+	}
+
+}
+
+// if session set error, new pool would return error
+func TestPoolStrictlyServerHealthy2(t *testing.T) {
+	connector := &connetorWithErr{
+		err: fmt.Errorf("session set error"),
+	}
+	testcases := []struct {
+		graphName string
+		hasErr    bool
+		errMsg    string
+	}{
+		{"test", true, "session set error"},
+		{"", false, ""},
+	}
+	var err error
+	for _, tc := range testcases {
+		if tc.graphName != "" {
+			_, err = NewNebulaPool("127.0.0.1:9669", "", "", withPoolConnector(connector),
+				WithPoolGraph(tc.graphName))
+		} else {
+			_, err = NewNebulaPool("127.0.0.1:9669", "", "", withPoolConnector(connector))
+		}
+		assert.Equal(t, tc.hasErr, err != nil)
+		if tc.hasErr {
+			assert.Equal(t, tc.errMsg, err.Error())
+		}
+	}
 }

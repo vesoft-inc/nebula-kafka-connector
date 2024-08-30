@@ -151,6 +151,16 @@ func WithPoolParameters(parameters map[string]string) poolOptionsFn {
 	}
 }
 
+// WithPoolStrictlyServerHealthy sets the pool to strictly check the server health
+// if strictly is false, the pool will be created successfully if any of the servers is healthy
+// if strictly is true, the pool will be created successfully only if all of the servers are healthy
+// default is false
+func WithPoolStrictlyServerHealthy(strictly bool) poolOptionsFn {
+	return func(ops *driverPool) {
+		ops.strictlyServerHealthy = strictly
+	}
+}
+
 // used for testing
 func withPoolConnector(connector connector) poolOptionsFn {
 	return func(ops *driverPool) {

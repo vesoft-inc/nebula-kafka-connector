@@ -13,7 +13,6 @@ type (
 	driverPool struct {
 		ctx      context.Context
 		mu       sync.Mutex
-		once     sync.Once
 		freeConn []Client
 		// When driverConn.ExecuteContext is called, it will retry to get a connection.
 		// The connMap key is the connection.
@@ -23,21 +22,22 @@ type (
 		requestConnChan map[uint64]chan Client
 		requestCount    uint64
 		// open connection channel
-		openerCh        chan struct{}
-		connector       connector
-		maxIdle         int
-		maxOpen         int
-		minOpen         int
-		maxWait         time.Duration
-		closed          atomic.Bool
-		stop            func()
-		hostAddresses   []*hostAddress
-		connCfg         *connConfig
-		hostIndex       int
-		tickerDuration  time.Duration
-		connMaxLifeTime time.Duration
-		sessionConfig   *sessionConfig
-		log             Logger
+		openerCh              chan struct{}
+		connector             connector
+		maxIdle               int
+		maxOpen               int
+		minOpen               int
+		maxWait               time.Duration
+		closed                atomic.Bool
+		stop                  func()
+		hostAddresses         []*hostAddress
+		connCfg               *connConfig
+		hostIndex             int
+		tickerDuration        time.Duration
+		connMaxLifeTime       time.Duration
+		sessionConfig         *sessionConfig
+		strictlyServerHealthy bool
+		log                   Logger
 	}
 
 	hostAddress struct {
@@ -188,13 +188,10 @@ func (dp *driverPool) openMinConn() {
 	}
 }
 
-func (dp *driverPool) GetClient() (Client, error) {
+func (dp *driverPool) getClient(timeout context.Context) (Client, error) {
 	var (
 		dc Client
 	)
-	timeout, cancel := context.WithTimeout(context.Background(), dp.maxWait)
-	defer cancel()
-
 	dp.mu.Lock()
 	if len(dp.freeConn) == 0 {
 		if len(dp.connMap) < dp.maxOpen {
@@ -208,10 +205,13 @@ func (dp *driverPool) GetClient() (Client, error) {
 			dp.requestCount++
 		}
 		dp.requestConnChan[dp.requestCount] = req
+		var index = dp.requestCount
 		// should unlock and wait for the new connection
 		dp.mu.Unlock()
 		select {
 		case <-timeout.Done():
+			close(req)
+			delete(dp.requestConnChan, index)
 			return nil, errInternel("cannot get the valid connection")
 		case conn := <-req:
 			dc = conn.(*driverConn)
@@ -221,11 +221,27 @@ func (dp *driverPool) GetClient() (Client, error) {
 		dp.freeConn = dp.freeConn[:len(dp.freeConn)-1]
 		dp.mu.Unlock()
 	}
-	// // start ticker
-	dp.once.Do(func() {
-		go dp.ticker(dp.ctx)
-	})
 	return dc, nil
+}
+
+func (dp *driverPool) GetClient() (Client, error) {
+
+	var lastErr error
+	timeout, cancel := context.WithTimeout(context.Background(), dp.maxWait)
+	defer cancel()
+	for {
+		if timeout.Err() != nil {
+			return nil, errInternel("cannot get the valid connection, err:" + lastErr.Error())
+		}
+		dc, err := dp.getClient(timeout)
+		if err != nil {
+			return nil, err
+		}
+		// ping
+		if lastErr = dc.Ping(); lastErr == nil {
+			return dc, nil
+		}
+	}
 }
 
 func (dp *driverPool) PutClient(c Client) error {
@@ -242,7 +258,14 @@ func (dp *driverPool) PutClient(c Client) error {
 	dp.mu.Lock()
 	defer dp.mu.Unlock()
 	return dp.putConnLocked(dc)
+}
 
+// putNewConn put a new connection to the pool
+func (dp *driverPool) putNewConn(dc Client) {
+	dp.mu.Lock()
+	defer dp.mu.Unlock()
+	dp.connMap[dc] = struct{}{}
+	_ = dp.putConnLocked(dc)
 }
 
 func (dp *driverPool) putConnLocked(client Client) error {
@@ -305,10 +328,7 @@ func (dp *driverPool) connectionOpener(ctx context.Context) {
 				_ = dc.Close()
 				return
 			}
-			dp.mu.Lock()
-			dp.connMap[dc] = struct{}{}
-			_ = dp.putConnLocked(dc)
-			dp.mu.Unlock()
+			dp.putNewConn(dc)
 		}
 	}
 }

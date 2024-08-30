@@ -182,13 +182,12 @@ func TestPoolPut(t *testing.T) {
 		{false, true, ""},
 	}
 	for _, tc := range testcases {
-		p, err := NewNebulaPool("127.0.0.1:9669", "", "")
+		p, err := NewNebulaPool("127.0.0.1:9669", "", "", withPoolConnector(&dummyConnector{}))
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer p.Close()
 		pool, _ := p.(*driverPool)
-		pool.connector = &dummyConnector{}
 		pool.minOpen = 0
 		pool.connCfg = &connConfig{
 			requestTimeout: 10 * time.Second,
@@ -231,14 +230,15 @@ func TestPoolGet(t *testing.T) {
 		{10, 30, 20},
 	}
 	for _, tc := range testcases {
-		p, err := NewNebulaPool("127.0.0.1:9669", "", "")
+		p, err := NewNebulaPool("127.0.0.1:9669", "", "",
+			withPoolConnector(&dummyConnector{}),
+			WithPoolMinOpenConns(0),
+		)
 		if err != nil {
 			t.Fatal(err)
 		}
 		defer p.Close()
 		pool, _ := p.(*driverPool)
-		pool.connector = &dummyConnector{}
-		pool.minOpen = 0
 		pool.maxOpen = tc.maxOpen
 		pool.connCfg = &connConfig{
 			requestTimeout: 10 * time.Second,
@@ -304,7 +304,7 @@ func run(t *testing.T, p Pool) {
 	}
 }
 
-func TestPoolMaxWati(t *testing.T) {
+func TestPoolMaxWait(t *testing.T) {
 	p, err := NewNebulaPool("127.0.0.1:9669", "", "",
 		withPoolConnector(&dummyConnector{sleep: 2 * time.Second}),
 		WithPoolMaxOpenConns(400),
@@ -314,7 +314,10 @@ func TestPoolMaxWati(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer p.Close()
+	// ignore validate connection
+	_, _ = p.GetClient()
 	_, err = p.GetClient()
+	assert.True(t, err != nil)
 	assert.Equal(t, "[99009]: Internel error, cannot get the valid connection", err.Error())
 }
 

@@ -3,7 +3,7 @@ package proto
 import (
 	"testing"
 
-	"github.com/go-playground/assert/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestProtocalVersion(t *testing.T) {

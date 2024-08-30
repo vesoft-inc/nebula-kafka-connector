@@ -2,6 +2,7 @@ package nebula_ng
 
 import (
 	"context"
+	"fmt"
 	"math/rand"
 	"time"
 )
@@ -165,7 +166,32 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 	for _, o := range opts {
 		o(pool)
 	}
+	var (
+		successed = 0
+		dc        Client
+	)
+	for _, h := range pool.hostAddresses {
+		if !pool.strictlyServerHealthy && successed > 0 {
+			break
+		}
+		address := fmt.Sprintf("%s:%d", h.host, h.port)
+		dc, err = pool.openNewConn(address)
+		if err != nil {
+			if pool.strictlyServerHealthy {
+				break
+			}
+		} else {
+			successed++
+			pool.putNewConn(dc)
+		}
+	}
+	if successed == 0 || (pool.strictlyServerHealthy && successed != len(pool.hostAddresses)) {
+		return nil, err
+	}
+
 	go pool.connectionOpener(ctx)
+	// start ticker
+	go pool.ticker(pool.ctx)
 	return pool, nil
 }
 
