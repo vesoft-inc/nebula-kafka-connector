@@ -85,6 +85,7 @@ func NewClusterReconciler(mgr ctrl.Manager) (*ClusterReconciler, error) {
 				storageScaler,
 				storagedUpdater,
 				recorder),
+			component.NewNebulaExporter(clientSet),
 			component.NewNebulaConsole(clientSet),
 			reclaimer.NewMetaReconciler(clientSet),
 			reclaimer.NewPVCReclaimer(clientSet),

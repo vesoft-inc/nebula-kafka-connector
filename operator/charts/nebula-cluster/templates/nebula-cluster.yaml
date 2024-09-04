@@ -161,6 +161,61 @@ spec:
     {{- toYaml . | nindent 6 }}
     {{- end }}
 
+  exporter:
+    replicas: {{ .Values.nebulaCluster.exporter.replicas }}
+    resources: {{ toYaml .Values.nebulaCluster.exporter.resources | nindent 6 }}
+    image: {{ .Values.nebulaCluster.exporter.image }}
+    version: {{ .Values.nebulaCluster.exporter.version }}
+    {{- with .Values.nebulaCluster.exporter.env }}
+    env:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.podLabels }}
+    labels:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.podAnnotations }}
+    annotations:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.nodeSelector }}
+    nodeSelector:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.affinity }}
+    affinity:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.tolerations }}
+    tolerations:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.livenessProbe }}
+    livenessProbe:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.readinessProbe }}
+    readinessProbe:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.initContainers }}
+    initContainers:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.sidecarContainers }}
+    sidecarContainers:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.volumes }}
+    volumes:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.nebulaCluster.exporter.volumeMounts }}
+    volumeMounts:
+    {{- toYaml . | nindent 6 }}
+    {{- end }}
+    maxRequests: {{ .Values.nebulaCluster.exporter.maxRequests }}
+
   enablePVReclaim: {{ .Values.nebulaCluster.enablePVReclaim }}
   schedulerName: {{ .Values.nebulaCluster.schedulerName }}
   imagePullPolicy: {{ .Values.nebulaCluster.imagePullPolicy }}

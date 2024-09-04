@@ -103,3 +103,7 @@ func (nc *NebulaCluster) IsConditionReady() bool {
 	}
 	return false
 }
+
+func (nc *NebulaCluster) ExporterComponent() NebulaExporterComponent {
+	return newExporterComponent(nc)
+}

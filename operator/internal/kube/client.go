@@ -32,6 +32,7 @@ type ClientSet interface {
 	Pod() Pod
 	Service() Service
 	Workload() Workload
+	Deployment() Deployment
 	NebulaCluster() NebulaCluster
 	NebulaMetad() NebulaMetad
 	NebulaAutoscaler() NebulaAutoscaler
@@ -47,6 +48,7 @@ type clientSet struct {
 	podClient        Pod
 	svcClient        Service
 	workloadClient   Workload
+	deployClient     Deployment
 	nebulaClient     NebulaCluster
 	metadClient      NebulaMetad
 	autoscalerClient NebulaAutoscaler
@@ -67,6 +69,7 @@ func NewClientSet(config *rest.Config) (ClientSet, error) {
 		podClient:        NewPod(c),
 		svcClient:        NewService(c),
 		workloadClient:   NewWorkload(c),
+		deployClient:     NewDeployment(c),
 		nebulaClient:     NewNebulaCluster(c),
 		metadClient:      NewNebulaMetad(c),
 		autoscalerClient: NewNebulaAutoscaler(c),
@@ -107,6 +110,10 @@ func (c *clientSet) Service() Service {
 
 func (c *clientSet) Workload() Workload {
 	return c.workloadClient
+}
+
+func (c *clientSet) Deployment() Deployment {
+	return c.deployClient
 }
 
 func (c *clientSet) NebulaCluster() NebulaCluster {

@@ -73,6 +73,32 @@ nebulaCluster:
     volumes: []
     volumeMounts: []
 
+  exporter:
+    image: vesoft/nebula-stats-exporter
+    version: latest
+    replicas: 1
+    env: []
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "200m"
+        memory: "256Mi"
+    podLabels: {}
+    podAnnotations: {}
+    securityContext: {}
+    nodeSelector: {}
+    tolerations: []
+    affinity: {}
+    readinessProbe: {}
+    livenessProbe: {}
+    initContainers: []
+    sidecarContainers: []
+    volumes: []
+    volumeMounts: []
+    maxRequests: 20
+
   enablePVReclaim: false
   schedulerName: default-scheduler # nebula-scheduler
   imagePullPolicy: Always

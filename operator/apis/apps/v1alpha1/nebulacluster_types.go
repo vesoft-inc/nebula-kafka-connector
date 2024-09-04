@@ -82,6 +82,31 @@ type NebulaClusterSpec struct {
 
 	// +optional
 	AlpineImage *string `json:"alpineImage,omitempty"`
+
+	// +optional
+	Exporter *ExporterSpec `json:"exporter,omitempty"`
+}
+
+// ExporterSpec defines the desired state of Exporter
+type ExporterSpec struct {
+	ComponentSpec `json:",inline"`
+
+	// Maximum number of parallel scrape requests
+	// +kubebuilder:default=40
+	// +optional
+	MaxRequests int32 `json:"maxRequests,omitempty"`
+
+	// CollectRegex means the regex to filter metrics
+	// +optional
+	CollectRegex string `json:"collectRegex,omitempty"`
+
+	// IgnoreRegex means the regex to ignore metrics
+	// +optional
+	IgnoreRegex string `json:"ignoreRegex,omitempty"`
+
+	// +optional
+	// +kubebuilder:default=9100
+	HTTPPort int32 `json:"httpPort,omitempty"`
 }
 
 type ConsoleSpec struct {
