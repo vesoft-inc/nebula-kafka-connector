@@ -41,6 +41,7 @@ public class GrpcConnection extends Connection {
         channel = ManagedChannelBuilder
                 .forAddress(address.getHost(), address.getPort())
                 .usePlaintext()
+                .maxInboundMessageSize(Integer.MAX_VALUE)
                 .build();
         stub = GraphServiceGrpc.newBlockingStub(channel);
     }
