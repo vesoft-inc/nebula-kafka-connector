@@ -70,4 +70,37 @@ public class GrpcConnectionTest {
             assert (false);
         }
     }
+
+    @Test
+    public void testNotReuseChannel() {
+        Map<String, Object> authInfo = new HashMap<>();
+        authInfo.put("password", password);
+        GrpcConnection connection1 = null;
+        GrpcConnection connection2 = null;
+
+        try {
+            connection1 = new GrpcConnection();
+            connection1.open(new HostAddress(host, port), 1000, 1000);
+            AuthResult authResult = connection1.authenticate(user, authInfo);
+
+            connection2 = new GrpcConnection();
+            connection2.open(new HostAddress(host, port), 1000, 1000);
+            authResult = connection2.authenticate(user, authInfo);
+
+            Thread.sleep(3000);
+            // close connection1 and test whether connection2 is ok
+            connection1.close();
+            assert connection2.ping(authResult.getSessionId(), 1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert false;
+        } finally {
+            if (connection1 != null) {
+                connection1.close();
+            }
+            if (connection2 != null) {
+                connection2.close();
+            }
+        }
+    }
 }

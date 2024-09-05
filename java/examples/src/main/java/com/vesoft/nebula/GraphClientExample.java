@@ -42,6 +42,7 @@ public class GraphClientExample {
             insertData(client);
             query(client);
             queryWithMultiThread(client);
+            queryWithMultiThread();
             scanNode(client);
             scanEdge(client);
         } catch (Exception e) {
@@ -154,6 +155,12 @@ public class GraphClientExample {
 
     }
 
+    /**
+     * Use ONE client for multi-threaded query.
+     * The queries here is actually sequential. There is a lock on the execute interface to avoid
+     * to execute multiple requests at the same time for one client.
+     * DO NOT SUGGEST THIS WAY FOR MULTI_THREAD.
+     */
     private static void queryWithMultiThread(NebulaClient client) {
         String queryNode = "USE nba MATCH (v:player) RETURN v.id, v.name, v.score, v.gender, "
                 + "v.rate";
@@ -176,6 +183,53 @@ public class GraphClientExample {
                     e.printStackTrace();
                 } finally {
                     countDownLatch.countDown();
+                }
+            });
+        }
+
+        try {
+            countDownLatch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println("failed execute: " + failed.get());
+
+        executorService.shutdown();
+    }
+
+
+    /**
+     * use multiple client for multi-threaded query.
+     */
+    private static void queryWithMultiThread() {
+        String queryNode = "USE nba MATCH (v:player) RETURN v.id, v.name, v.score, v.gender, "
+                + "v.rate";
+        int parallel = 200;
+
+        CountDownLatch  countDownLatch  = new CountDownLatch(parallel);
+        ExecutorService executorService = Executors.newFixedThreadPool(parallel);
+        AtomicInteger   failed          = new AtomicInteger(0);
+        for (int i = 0; i < parallel; i++) {
+            executorService.submit(() -> {
+                NebulaClient client = null;
+                try {
+                    client = NebulaClient.builder(host, user, passwd)
+                            .withAuthOptions(Collections.emptyMap())
+                            .withConnectTimeoutMills(5000)
+                            .withRequestTimeoutMills(3000)
+                            .build();
+                    ResultSet result = client.execute(
+                            "USE nba MATCH ()-[e:follow]->() RETURN e.followness, e.likeness");
+                    if (!result.isSucceeded()) {
+                        log.error(String.format("Execute: `%s', failed: %s",
+                                                queryNode, result.getErrorMessage()));
+                        failed.incrementAndGet();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    countDownLatch.countDown();
+                    client.close();
                 }
             });
         }

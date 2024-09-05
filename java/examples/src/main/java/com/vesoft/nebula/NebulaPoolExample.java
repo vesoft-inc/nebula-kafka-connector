@@ -14,7 +14,7 @@ public class NebulaPoolExample {
     private static final Logger logger = LoggerFactory.getLogger(NebulaPoolExample.class);
 
     public static void main(String[] args) {
-        String addresses = "12.168.8.6:3820";
+        String addresses = "192.168.8.6:3820";
         String userName = "root";
         String password = "Nebula123";
         NebulaPool pool = null;
@@ -28,7 +28,7 @@ public class NebulaPoolExample {
                     .withBlockWhenExhausted(true)
                     .withMaxWaitMills(Long.MAX_VALUE)
                     .build();
-
+            queryWithMultipleThreads(pool);
         } catch (Exception e) {
             logger.error("failed :", e);
             System.exit(1);

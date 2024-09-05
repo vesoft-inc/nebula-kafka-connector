@@ -136,6 +136,7 @@ public class NebulaClient implements Serializable {
             if (connection != null) {
                 try {
                     connection.execute(sessionId, "SESSION CLOSE");
+                    connection.close();
                 } catch (Exception e) {
                     logger.warn("signout failed,", e);
                 }
