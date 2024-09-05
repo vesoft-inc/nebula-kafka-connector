@@ -31,10 +31,11 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
         String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
+        String query = null;
         try {
             newPool = state.getPool(operation.type());
             client = newPool.getPool().getClient();
-            String query = getQueryString(state, operation);
+            query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
             // not implement parameter in session yet
@@ -67,6 +68,7 @@ public abstract class NebulaSingletonOperationHandler<TOperation extends Operati
                 resultReporter.report(0, null, operation);
             }
         } catch (Exception e) {
+            LOGGER.error("====> query {} error", query, e);
             throw new DbException(e);
         } finally {
             if (newPool != null && client != null) {

@@ -23,10 +23,11 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
         String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
+        List<String> queryStrings = null;
         try {
             newPool = state.getPool(operation.type());
             client = newPool.getPool().getClient();
-            List<String> queryStrings = getQueryString(state, operation);
+            queryStrings = getQueryString(state, operation);
             String graphName = state.getGraphName();
             long startTime = System.currentTimeMillis();
             for (String queryString : queryStrings) {
@@ -54,6 +55,7 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
                 ));
             }
         } catch (Exception e) {
+            LOGGER.error("====> query {} error.",queryStrings, e);
             throw new DbException(e);
         } finally {
             if (newPool != null && client != null) {

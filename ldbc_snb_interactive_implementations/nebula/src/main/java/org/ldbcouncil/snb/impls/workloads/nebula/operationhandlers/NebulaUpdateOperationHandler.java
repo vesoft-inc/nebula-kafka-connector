@@ -33,10 +33,11 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
         String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
+        String query = null;
         try {
             newPool = state.getPool(operation.type());
             client = newPool.getPool().getClient();
-            String query = getQueryString(state, operation);
+            query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
             // final Map<String, Object> parameters = getParameters( operation );
@@ -64,6 +65,7 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
             }
             resultReporter.report(0, LdbcNoResult.INSTANCE, operation);
         } catch (Exception e) {
+            LOGGER.error("====> query {} error", query, e);
             throw new DbException(e);
         } finally {
             if (newPool != null && client != null) {

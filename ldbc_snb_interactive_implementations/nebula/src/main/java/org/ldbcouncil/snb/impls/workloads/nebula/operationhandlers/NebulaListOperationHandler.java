@@ -34,10 +34,11 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
         String actualScheduleTime = LocalTime.now().toString();
         NewNebulaPool newPool = null;
         NebulaClient client = null;
+        String query = null;
         try {
             newPool = state.getPool(operation.type());
             client = newPool.getPool().getClient();
-            String query = getQueryString(state, operation);
+            query = getQueryString(state, operation);
             String graphName = state.getGraphName();
             query = query.replace("$graphName", graphName);
             // not implement parameter in session interface yet.
@@ -71,6 +72,7 @@ public abstract class NebulaListOperationHandler<TOperation extends Operation<Li
             }
             resultReporter.report(results.size(), results, operation);
         } catch (Exception e) {
+            LOGGER.error("====> query {} error.", query, e);
             throw new DbException(e);
         } finally {
             if (newPool != null && client != null) {
