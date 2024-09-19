@@ -101,6 +101,9 @@ public class ScanNodeResultIterator extends ScanResultIterator {
         if (!hasNext && !threadPool.isShutdown()) {
             threadPool.shutdown();
         }
+        if (!hasNext) {
+            close();
+        }
         return new ScanNodeResult(results, propNames);
     }
 

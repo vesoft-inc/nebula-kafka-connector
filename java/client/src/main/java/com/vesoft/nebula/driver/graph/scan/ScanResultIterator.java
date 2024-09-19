@@ -8,6 +8,7 @@ import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
@@ -31,6 +32,7 @@ public class ScanResultIterator implements Serializable {
     protected List<String> propNames;
     protected int batchSize;
     protected final ExecutorService threadPool;
+    protected final ConcurrentHashMap<Integer, NebulaClient> partClient = new ConcurrentHashMap<>();
 
     protected ScanResultIterator(String graphName,
                                  String labelName,
@@ -46,14 +48,21 @@ public class ScanResultIterator implements Serializable {
         this.labelName = labelName;
         this.propNames = propNames;
         this.batchSize = batchSize;
-        for (int part : parts) {
-            partCursor.put(part, "");
-        }
         this.threadPool = Executors.newFixedThreadPool(parallel);
         this.serversAddress = servers
                 .stream()
                 .map(HostAddress::toString)
                 .collect(Collectors.joining(","));
+        for (int part : parts) {
+            partCursor.put(part, "");
+            try {
+                partClient.put(part, NebulaClient.builder(serversAddress, userName)
+                        .withAuthOptions(authOptions)
+                        .build());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         this.userName = userName;
         this.authOptions = authOptions;
         this.requestTimeout = requestTimeout;
@@ -91,15 +100,8 @@ public class ScanResultIterator implements Serializable {
         // construct the scan producer
         String producer = String.format(scanTemplate, graphName, graphName, labelName,
                 getPropertyListString(), partCur.getKey(), partCur.getValue(), batchSize);
-        NebulaClient client = null;
-        ResultSet    result;
-        client = NebulaClient
-                .builder(serversAddress, userName)
-                .withAuthOptions(authOptions)
-                .withRequestTimeoutMills(requestTimeout)
-                .build();
-        result = client.execute(producer);
-        return result;
+        NebulaClient client = partClient.get(partCur.getKey());
+        return  client.execute(producer);
     }
 
     protected String getCursor(ResultSet resultSet) {
@@ -108,5 +110,11 @@ public class ScanResultIterator implements Serializable {
             throw new RuntimeException("result does not contain cursor in extra info.");
         }
         return extraInfo.getCursor();
+    }
+
+    protected void close() {
+        for (NebulaClient client: partClient.values()) {
+            client.close();
+        }
     }
 }

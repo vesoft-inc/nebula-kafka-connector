@@ -56,7 +56,7 @@ public class GraphClientExample {
     }
 
     private static void createGraphType(NebulaClient client) throws IOErrorException,
-            InterruptedException, NoValidSessionException {
+            InterruptedException {
         String createSchema = "CREATE GRAPH TYPE IF NOT EXISTS graph_type_nba AS {"
                 + "NODE TYPE node_type_player (LABEL player {id INT PRIMARY KEY, name STRING, "
                 + "score FLOAT, gender bool, rate DOUBLE}),"
@@ -89,8 +89,7 @@ public class GraphClientExample {
         TimeUnit.SECONDS.sleep(5);
     }
 
-    private static void insertData(NebulaClient client) throws IOErrorException,
-            NoValidSessionException {
+    private static void insertData(NebulaClient client) throws IOErrorException {
         String insertVertexes = "TABLE t{id,name,score,gender,rate} =\n"
                 + "(1,\"Tim\",87.0,true,7.32),\n"
                 + "(2,\"Jerry\",95.0,false,4.01),\n"
@@ -128,8 +127,7 @@ public class GraphClientExample {
         log.info("insert graph edge succeed!");
     }
 
-    private static void query(NebulaClient client) throws IOErrorException,
-            NoValidSessionException {
+    private static void query(NebulaClient client) throws IOErrorException {
         String queryNode = "USE nba MATCH (v:player) RETURN v.id, v.name, v.score, v.gender, "
                 + "v.rate";
         ResultSet resp = client.execute(queryNode);
@@ -151,6 +149,7 @@ public class GraphClientExample {
         } else {
             log.info("query edge succeed!");
             resolve(resp);
+            System.out.println("\n\n");
         }
 
     }
