@@ -13,11 +13,11 @@ object NebulaSparkReaderExample {
   def main(args: Array[String]): Unit = {
     val spark = SparkSession
       .builder()
-      .master("local")
+      .master("local[*]")
       .getOrCreate()
 
-//    readNode(spark)
-//    readEdge(spark)
+    readNode(spark)
+    readEdge(spark)
 
     readGqlQuery(spark)
 
