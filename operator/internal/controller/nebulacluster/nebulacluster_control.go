@@ -22,6 +22,7 @@ import (
 	"strings"
 
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
+	errorapi "k8s.io/apimachinery/pkg/api/errors"
 	errorutils "k8s.io/apimachinery/pkg/util/errors"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -124,42 +125,45 @@ func (c *defaultNebulaClusterControl) DeleteCluster(nc *v1alpha1.NebulaCluster) 
 	}
 
 	metad, err := c.clientSet.NebulaMetad().GetNebulaMetad(nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
-	if err != nil {
-		klog.Errorf("failed to get metad cluster: %v", err)
-		return err
-	}
-	if !metad.MetadComponent().IsReady() {
-		return fmt.Errorf("metad [%s/%s] is not ready", metad.Namespace, metad.Name)
-	}
+	if err == nil {
+		if !metad.MetadComponent().IsReady() {
+			return fmt.Errorf("metad [%s/%s] is not ready", metad.Namespace, metad.Name)
+		}
 
-	username, password, err := kube.GetCredential(c.clientSet, nc.Namespace, nc.Spec.CredentialSecret)
-	if err != nil {
-		return err
-	}
-	metadEndpoints := metad.MetadComponent().GetEndpoints(v1alpha1.MetadPortNameGRPC)
-	metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","), meta.WithUserPassword(username, password))
-	if err != nil {
-		return err
-	}
-	if _, err := metaClient.Login(); err != nil {
-		klog.Errorf("login metad failed: %v", err)
-		return err
-	}
-	defer func() {
-		metaClient.Close()
-	}()
-
-	req := meta.NewDropClusterReq(nc.Name, true)
-	if err := metaClient.DropCluster(req); err != nil {
-		if ne, ok := err.(*nebula.NebulaError); ok {
-			if ne.Code() != nebula.ERROR_META_CLUSTER_NOT_FOUND {
-				klog.Errorf("drop cluster failed: %v", err)
-				return err
-			}
-		} else {
-			klog.Errorf("drop cluster got unkonw error: %v", err)
+		username, password, err := kube.GetCredential(c.clientSet, nc.Namespace, nc.Spec.CredentialSecret)
+		if err != nil {
 			return err
 		}
+		metadEndpoints := metad.MetadComponent().GetEndpoints(v1alpha1.MetadPortNameGRPC)
+		metaClient, err := meta.NewMetaClient(strings.Join(metadEndpoints, ","), meta.WithUserPassword(username, password))
+		if err != nil {
+			return err
+		}
+		if _, err := metaClient.Login(); err != nil {
+			klog.Errorf("login metad failed: %v", err)
+			return err
+		}
+		defer func() {
+			metaClient.Close()
+		}()
+
+		req := meta.NewDropClusterReq(nc.Name, true)
+		if err := metaClient.DropCluster(req); err != nil {
+			if ne, ok := err.(*nebula.NebulaError); ok {
+				if ne.Code() != nebula.ERROR_META_CLUSTER_NOT_FOUND {
+					klog.Errorf("drop cluster failed: %v", err)
+					return err
+				}
+			} else {
+				klog.Errorf("drop cluster got unknown error: %v", err)
+				return err
+			}
+		}
+	} else if errorapi.IsNotFound(err) {
+		klog.Infof("metad cluster [%v/%v] not found. Skipping deregistration", nc.GetMetadNamespace(), nc.Spec.MetadRef.Name)
+	} else {
+		klog.Errorf("failed to get metad cluster [%v/%v]: %v", nc.GetMetadNamespace(), nc.Spec.MetadRef.Name, err)
+		return err
 	}
 
 	return kube.UpdateFinalizer(context.TODO(), c.client, nc, kube.RemoveFinalizerOpType, finalizer)
