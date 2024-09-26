@@ -19,6 +19,7 @@ var (
 	ERROR_ILLEGAL              ErrorCode = "99007"
 	ERROR_TYPE                 ErrorCode = "99008"
 	ERROR_CLIENT_INTERNEL      ErrorCode = "99009"
+	ERROR_TLS_ERROR            ErrorCode = "99010"
 
 	// Error in server side
 
@@ -532,6 +533,14 @@ func errType(msg string) error {
 		errorFormat: "Type error, %s",
 		errorArgs:   []interface{}{msg},
 	}
+}
+
+func errTLS(msg string) error {
+    return &NebulaError{
+        errorCode:   ERROR_TLS_ERROR,
+        errorFormat: "TLS error: %s",
+        errorArgs:   []interface{}{msg},
+    }
 }
 
 // client internel error

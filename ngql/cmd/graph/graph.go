@@ -19,21 +19,22 @@ import (
 
 // root flags variables
 var (
-	host                  string
-	port                  int
-	username              string
-	password              string
-	timeout               int
-	script                string
-	file                  string
-	version               bool
-	widthMax              int
-	enableSsl             bool
-	sslRootCAPath         string
-	sslCertPath           string
-	sslPrivateKeyPath     string
-	sslInsecureSkipVerify bool
-	goPrompt              bool
+	host           string
+	port           int
+	username       string
+	password       string
+	timeout        int
+	script         string
+	file           string
+	version        bool
+	widthMax       int
+	enableTLS      bool
+	ca             string
+	cert           string
+	key            string
+	peerNameVerify bool
+	peerName       string
+	goPrompt       bool
 )
 
 type ParameterMap map[string]interface{}
@@ -42,25 +43,22 @@ var parameterMap ParameterMap
 
 func validateFlags() {
 	if port == -1 {
-		log.Panicf("Error: argument port is missed!")
+		log.Fatalf("Error: argument port is missing!")
 	}
 	if len(username) == 0 {
-		log.Panicf("Error: argument username is empty!")
+		log.Fatalf("Error: argument username is empty!")
 	}
 
 	if widthMax < 0 || (widthMax > 0 && widthMax <= 3) {
-		log.Panicf("Error: argument width_max should be equal to 0 or greater than 3")
+		log.Fatalf("Error: argument width_max should be equal to 0 or greater than 3")
 	}
 
-	if enableSsl {
-		if sslRootCAPath == "" {
-			log.Panicf("Error: argument ssl_root_ca_path should be specified when enable_ssl is true")
+	if enableTLS {
+		if ca == "" {
+			log.Fatalf("Error: --ca must be specified if --enable-tls is true")
 		}
-		if sslCertPath == "" {
-			log.Panicf("Error: argument ssl_cert_path should be specified when enable_ssl is true")
-		}
-		if sslPrivateKeyPath == "" {
-			log.Panicf("Error: argument ssl_private_key_path should be specified when enable_ssl is true")
+		if (cert != "" && key == "") || (cert == "" && key != "") {
+			log.Fatalf("Error: --cert and --key must be specified in pairs")
 		}
 	}
 }
@@ -85,7 +83,7 @@ func handleGraphCmd() error {
 		if file != "" {
 			fd, err := os.Open(file)
 			if err != nil {
-				log.Panicf("Open file %s failed, %s", file, err.Error())
+				log.Fatalf("Open file %s failed, %s", file, err.Error())
 			}
 			rc = fd
 			// If file is provided, we should not output the result
@@ -99,7 +97,7 @@ func handleGraphCmd() error {
 	if historyHome == "" {
 		ex, err := os.Executable()
 		if err != nil {
-			log.Panicf("Get executable failed: %s", err.Error())
+			log.Fatalf("Get executable failed: %s", err.Error())
 		}
 		historyHome = filepath.Dir(ex) // Set to executable folder
 	}
@@ -116,6 +114,7 @@ func handleGraphCmd() error {
 		runner.WithWidthMax(widthMax),
 		runner.WithSignalChan(c),
 		runner.WithFailFast(fastFail),
+		runner.WithTLS(enableTLS, ca, cert, key, peerNameVerify, peerName),
 	)
 	if err != nil {
 		return err
@@ -170,6 +169,12 @@ func init() {
 	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The GQL directly")
 	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The GQL script file name")
 	rootCmd.Flags().IntVarP(&widthMax, "width-max", "", 100, "The max width of the column of the execution plan")
+	rootCmd.Flags().BoolVarP(&enableTLS, "enable-tls", "", false, "Enable TLS")
+	rootCmd.Flags().StringVarP(&ca, "ca", "", "", "Certificate(s) of trusted CA, in PEM format")
+	rootCmd.Flags().StringVarP(&cert, "cert", "", "", "Client certificate, in PEM format")
+	rootCmd.Flags().StringVarP(&key, "key", "", "", "Client private key, in PEM format")
+	rootCmd.Flags().BoolVarP(&peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
+	rootCmd.Flags().StringVarP(&peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
 }
 
 func main() {

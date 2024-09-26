@@ -35,7 +35,7 @@ var passwdCmd = &cobra.Command{
 		} else {
 			addr = cacheToken.Address
 		}
-		client, err := meta.NewMetaClient(addr)
+		client, err := meta.NewMetaClient(addr, meta.WithTLS(cacheToken.EnableTLS, cacheToken.CA, cacheToken.Cert, cacheToken.Key, cacheToken.PeerNameVerify, cacheToken.PeerName))
 		if err != nil {
 			return err
 		}

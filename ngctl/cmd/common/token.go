@@ -10,9 +10,15 @@ import (
 var CachePath string
 
 type MetaToken struct {
-	Address string
-	Leader  string
-	Token   []byte
+	Address        string
+	Leader         string
+	Token          []byte
+	EnableTLS      bool
+	CA             string
+	Cert           string
+	Key            string
+	PeerNameVerify bool
+	PeerName       string
 }
 
 func GetCachePath() string {
@@ -32,8 +38,8 @@ func GetCachePath() string {
 	return CachePath
 }
 
-func SaveMetaToken(addr string, leader string, token []byte) error {
-	data, err := json.Marshal(MetaToken{Address: addr, Leader: leader, Token: token})
+func SaveMetaToken(addr string, leader string, token []byte, enableTLS bool, ca, cert, key string, peerNameVerify bool, peerName string) error {
+	data, err := json.Marshal(MetaToken{Address: addr, Leader: leader, Token: token, EnableTLS: enableTLS, CA: ca, Cert: cert, Key: key, PeerNameVerify: peerNameVerify, PeerName: peerName})
 	if err != nil {
 		return err
 	}

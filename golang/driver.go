@@ -87,6 +87,12 @@ type (
 		requestTimeout time.Duration
 		connectTimeout time.Duration
 		timezone       string
+        enableTLS      bool
+        cert           string
+        key            string
+        ca             string
+        peerName       string
+        peerNameVerify bool
 	}
 
 	ColumnType int

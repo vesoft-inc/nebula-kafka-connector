@@ -11,10 +11,16 @@ import (
 )
 
 type loginFlagsType struct {
-	host     string
-	port     uint32
-	user     string
-	password string
+	host           string
+	port           uint32
+	user           string
+	password       string
+	enableTLS      bool
+	ca             string
+	cert           string
+	key            string
+	peerNameVerify bool
+	peerName       string
 }
 
 var loginFlags loginFlagsType
@@ -40,7 +46,7 @@ var loginCmd = &cobra.Command{
 		var address string
 
 		address = fmt.Sprintf("%s:%d", loginFlags.host, loginFlags.port)
-		c, err := meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, loginFlags.password))
+		c, err := meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, loginFlags.password), meta.WithTLS(loginFlags.enableTLS, loginFlags.ca, loginFlags.cert, loginFlags.key, loginFlags.peerNameVerify, loginFlags.peerName))
 		if err != nil {
 			return common.NgctlError(fmt.Sprintf("cannot create client to %s", address), err.Error())
 		}
@@ -70,7 +76,7 @@ var loginCmd = &cobra.Command{
 				loginFlags.user,
 			)
 			c.Close()
-			c, err = meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, newPassword))
+			c, err = meta.NewMetaClient(address, meta.WithUserPassword(loginFlags.user, newPassword), meta.WithTLS(loginFlags.enableTLS, loginFlags.ca, loginFlags.cert, loginFlags.key, loginFlags.peerNameVerify, loginFlags.peerName))
 			if err != nil {
 				return err
 			}
@@ -79,7 +85,7 @@ var loginCmd = &cobra.Command{
 				return common.NgctlError("Login failed", err.Error())
 			}
 		}
-		if err := common.SaveMetaToken(address, resp.Leader, resp.Token); err != nil {
+		if err := common.SaveMetaToken(address, resp.Leader, resp.Token, loginFlags.enableTLS, loginFlags.ca, loginFlags.cert, loginFlags.key, loginFlags.peerNameVerify, loginFlags.peerName); err != nil {
 			return common.NgctlError("Save meta session failed", err.Error())
 		}
 
@@ -142,4 +148,10 @@ func init() {
 	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
 	loginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "root", "user name")
 	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "", "password")
+	loginCmd.Flags().BoolVarP(&loginFlags.enableTLS, "enable-tls", "", false, "Enable TLS")
+	loginCmd.Flags().StringVarP(&loginFlags.ca, "ca", "", "", "Certificate of trusted CA, in PEM format")
+	loginCmd.Flags().StringVarP(&loginFlags.cert, "cert", "", "", "Certificate of meta client, in PEM format")
+	loginCmd.Flags().StringVarP(&loginFlags.key, "key", "", "", "Private key of meta client, in PEM format")
+	loginCmd.Flags().BoolVarP(&loginFlags.peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
+	loginCmd.Flags().StringVarP(&loginFlags.peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
 }

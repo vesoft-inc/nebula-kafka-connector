@@ -3,7 +3,9 @@ package nebula_ng
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
+    "io/ioutil"
 	"fmt"
 	"math"
 	"sync"
@@ -14,6 +16,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
+    "google.golang.org/grpc/credentials"
 	grpccodes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/connectivity"
 	grpcstatus "google.golang.org/grpc/status"
@@ -43,9 +46,15 @@ func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Client, er
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.connectTimeout)
 	defer cancel()
-	if err := cn.open(host.host, host.port, cfg.connectTimeout, nil); err != nil {
-		return nil, err
-	}
+
+    if tlsCfg, err := cn.newTLSConfig(host.host, cfg); err != nil {
+        return nil, err
+    } else {
+        if err := cn.open(host.host, host.port, cfg.connectTimeout, tlsCfg); err != nil {
+            return nil, err
+        }
+    }
+
 	if err := cn.authenticate(ctx, cfg.username, cfg.password); err != nil {
 		return nil, err
 	}
@@ -53,25 +62,96 @@ func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Client, er
 	return cn, nil
 }
 
-func (cn *connection) open(host string, port int, timeout time.Duration, sslConfig *tls.Config) error {
+func (cn *connection) open(host string, port int, timeout time.Duration, tlsCfg *tls.Config) error {
 	var (
 		err      error
 		grpcConn *grpc.ClientConn
+        cred     grpc.DialOption
 	)
-	if sslConfig != nil {
-		return fmt.Errorf("ssl is not supported")
-	} else {
-		timeout := time.Duration(timeout)
-		grpcConn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), grpc.WithInsecure(), grpc.WithBlock(), grpc.WithTimeout(timeout),
-			grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
-		if err != nil {
-			return errConnCannotOpen(host, port, err.Error())
-		}
-	}
+
+    if tlsCfg != nil {
+        cred = grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg))
+    } else {
+        cred = grpc.WithInsecure()
+    }
+    duration := time.Duration(timeout)
+    grpcConn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
+    grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
+    if err != nil {
+        return errConnCannotOpen(host, port, err.Error())
+    }
 
 	cn.clientConn = grpcConn
 	cn.graphClient = graph.NewGraphServiceClient(grpcConn)
 	return nil
+}
+
+func (cn *connection) newTLSConfig(host string, cfg *connConfig) (*tls.Config, error) {
+    if !cfg.enableTLS {
+        return nil, nil
+    }
+
+    if cfg.ca == "" {
+        return nil, errTLS("No CA certificate provide")
+    }
+
+    peer := cfg.peerName
+    if !cfg.peerNameVerify {
+        peer = ""
+    } else if peer == "" {
+        peer = host
+    }
+
+    tlsCfg := &tls.Config{
+        InsecureSkipVerify: true,
+        ServerName:         peer,
+        MinVersion:         tls.VersionTLS12,
+    }
+
+    CAs := x509.NewCertPool()
+    if ca, err := ioutil.ReadFile(cfg.ca); err == nil {
+        if !CAs.AppendCertsFromPEM(ca) {
+            return nil, errTLS(err.Error())
+        }
+        tlsCfg.RootCAs = CAs
+    } else {
+        return nil, errTLS(err.Error())
+    }
+
+    if cfg.cert != "" || cfg.key != "" {
+        if cert, err := tls.LoadX509KeyPair(cfg.cert, cfg.key); err != nil {
+            return nil, errTLS(err.Error())
+        } else {
+            tlsCfg.Certificates = []tls.Certificate{cert}
+        }
+    }
+
+    tlsCfg.VerifyPeerCertificate = func(certificates [][]byte, _ [][]*x509.Certificate) error {
+        certs := make([]*x509.Certificate, len(certificates))
+        for i, data := range certificates {
+            cert, err := x509.ParseCertificate(data)
+            if err != nil {
+                return errTLS(err.Error())
+            }
+            certs[i] = cert
+        }
+
+        opts := x509.VerifyOptions{
+            Roots:          tlsCfg.RootCAs,
+            DNSName:        tlsCfg.ServerName,
+            Intermediates:  x509.NewCertPool(),
+        }
+
+        for _, cert := range certs[1:] {
+            opts.Intermediates.AddCert(cert)
+        }
+
+        _, err := certs[0].Verify(opts)
+
+        return err
+    }
+
+    return tlsCfg, nil
 }
 
 func (cn *connection) authenticate(ctx context.Context, username, password string) error {

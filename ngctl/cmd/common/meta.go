@@ -21,7 +21,7 @@ func MetaClientInit() error {
 	if err != nil || cacheToken == nil {
 		return fmt.Errorf("load meta session failed, please login first.")
 	}
-	MetaClient, err = meta.NewMetaClient(cacheToken.Leader, meta.WithToken(cacheToken.Token))
+	MetaClient, err = meta.NewMetaClient(cacheToken.Leader, meta.WithToken(cacheToken.Token), meta.WithTLS(cacheToken.EnableTLS, cacheToken.CA, cacheToken.Cert, cacheToken.Key, cacheToken.PeerNameVerify, cacheToken.PeerName))
 	if err != nil {
 		return err
 	}

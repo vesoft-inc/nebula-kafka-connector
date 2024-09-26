@@ -53,6 +53,12 @@ type (
 		pagerLimit     int
 		pagerCommand   string
 		schema         string
+		enableTLS      bool
+		ca             string
+		cert           string
+		key            string
+		peerNameVerify bool
+		peerName       string
 	}
 
 	runnerOptionsFn func(*runnerOption)
@@ -92,6 +98,7 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 
 	r.client, err = nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password,
 		nebula.WithClientRequestTimeout(time.Duration(r.option.timeoutSec)*time.Second),
+		nebula.WithClientTLS(r.option.enableTLS, r.option.ca, r.option.cert, r.option.key, r.option.peerNameVerify, r.option.peerName),
 	)
 	if err != nil {
 		return nil, err
@@ -163,6 +170,17 @@ func WithNebula(addr, user, password string) runnerOptionsFn {
 		o.address = addr
 		o.user = user
 		o.password = password
+	}
+}
+
+func WithTLS(enable bool, ca, cert, key string, peerNameVerify bool, peerName string) runnerOptionsFn {
+	return func(o *runnerOption) {
+		o.enableTLS = enable
+		o.ca = ca
+		o.cert = cert
+		o.key = key
+		o.peerNameVerify = peerNameVerify
+		o.peerName = peerName
 	}
 }
 
@@ -395,6 +413,7 @@ func (r *Runner) printBoth(s string) {
 func (r *Runner) killQuery() error {
 	killSession, err := nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password,
 		nebula.WithClientRequestTimeout(time.Duration(r.option.timeoutSec)*time.Second),
+		nebula.WithClientTLS(r.option.enableTLS, r.option.ca, r.option.cert, r.option.key, r.option.peerNameVerify, r.option.peerName),
 	)
 	if err != nil {
 		return err

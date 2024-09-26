@@ -42,6 +42,18 @@ func withClientConnector(connector connector) clientOptionsFn {
 	}
 }
 
+// TLS options
+func WithClientTLS(enable bool, ca, cert, key string, peerNameVerify bool, peerName string) clientOptionsFn {
+    return func(conn *driverConn) {
+        conn.cfg.enableTLS = enable
+        conn.cfg.ca = ca
+        conn.cfg.cert = cert
+        conn.cfg.key = key
+        conn.cfg.peerNameVerify = peerNameVerify
+        conn.cfg.peerName = peerName
+    }
+}
+
 // WithPoolConnectTimeout sets the timeout for connecting to the server
 func WithPoolConnectTime(timeout time.Duration) poolOptionsFn {
 	return func(ops *driverPool) {
@@ -166,4 +178,16 @@ func withPoolConnector(connector connector) poolOptionsFn {
 	return func(ops *driverPool) {
 		ops.connector = connector
 	}
+}
+
+// TLS options
+func WithPoolTLS(enable bool, ca, cert, key string, peerNameVerify bool, peerName string) poolOptionsFn {
+    return func(pool *driverPool) {
+        pool.connCfg.enableTLS = enable
+        pool.connCfg.ca = ca
+        pool.connCfg.cert = cert
+        pool.connCfg.key = key
+        pool.connCfg.peerNameVerify = peerNameVerify
+        pool.connCfg.peerName = peerName
+    }
 }
