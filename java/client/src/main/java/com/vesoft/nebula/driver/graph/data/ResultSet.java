@@ -267,6 +267,12 @@ public class ResultSet {
         extraInfo.setAffectedNodes(queryStats.getNumAffectedNodes());
         extraInfo.setAffectedEdges(queryStats.getNumAffectedEdges());
         extraInfo.setCursor(response.getCursor().toString(charset));
+        extraInfo.setBuildTimeUs(response.getSummary().getElapsedTime().getBuildTimeUs());
+        extraInfo.setOptimizeTimeUs(response.getSummary().getElapsedTime().getOptimizeTimeUs());
+        extraInfo.setSerializeTimeUs(response.getSummary().getElapsedTime().getSerializeTimeUs());
+        extraInfo.setTotalServerTimeUs(response.getSummary()
+                                               .getElapsedTime()
+                                               .getTotalServerTimeUs());
         return extraInfo;
     }
 
