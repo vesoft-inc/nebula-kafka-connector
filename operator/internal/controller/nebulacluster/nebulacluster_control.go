@@ -27,7 +27,7 @@ import (
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebulaErr "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/internal/controller/component"
@@ -149,8 +149,8 @@ func (c *defaultNebulaClusterControl) DeleteCluster(nc *v1alpha1.NebulaCluster) 
 
 		req := meta.NewDropClusterReq(nc.Name, true)
 		if err := metaClient.DropCluster(req); err != nil {
-			if ne, ok := err.(*nebula.NebulaError); ok {
-				if ne.Code() != nebula.ERROR_META_CLUSTER_NOT_FOUND {
+			if ne, ok := err.(*nebulaErr.NebulaError); ok {
+				if ne.Code() != nebulaErr.ERROR_META_CLUSTER_NOT_FOUND {
 					klog.Errorf("drop cluster failed: %v", err)
 					return err
 				}
@@ -213,8 +213,8 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v1alpha1.NebulaClu
 	if !nc.Status.CreatedDone {
 		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.ReplicaFactor), "root", nc.Spec.Zones)
 		if err = metaClient.CreateCluster(req); err != nil {
-			if ne, ok := err.(*nebula.NebulaError); ok {
-				if ne.Code() != nebula.ERROR_META_CLUSTER_ALREADY_EXISTS {
+			if ne, ok := err.(*nebulaErr.NebulaError); ok {
+				if ne.Code() != nebulaErr.ERROR_META_CLUSTER_ALREADY_EXISTS {
 					klog.Errorf("create cluster failed: %v", err)
 					return err
 				}

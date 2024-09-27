@@ -5,20 +5,24 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-    "io/ioutil"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"sync"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/decode"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
-    "google.golang.org/grpc/credentials"
 	grpccodes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/connectivity"
+	"google.golang.org/grpc/credentials"
 	grpcstatus "google.golang.org/grpc/status"
 )
 
@@ -39,7 +43,7 @@ type connection struct {
 	port        int
 }
 
-func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (types.Client, error) {
 	cn := &connection{
 		host: host.host,
 		port: host.port,
@@ -47,13 +51,13 @@ func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (Client, er
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.connectTimeout)
 	defer cancel()
 
-    if tlsCfg, err := cn.newTLSConfig(host.host, cfg); err != nil {
-        return nil, err
-    } else {
-        if err := cn.open(host.host, host.port, cfg.connectTimeout, tlsCfg); err != nil {
-            return nil, err
-        }
-    }
+	if tlsCfg, err := cn.newTLSConfig(host.host, cfg); err != nil {
+		return nil, err
+	} else {
+		if err := cn.open(host.host, host.port, cfg.connectTimeout, tlsCfg); err != nil {
+			return nil, err
+		}
+	}
 
 	if err := cn.authenticate(ctx, cfg.username, cfg.password); err != nil {
 		return nil, err
@@ -66,20 +70,20 @@ func (cn *connection) open(host string, port int, timeout time.Duration, tlsCfg 
 	var (
 		err      error
 		grpcConn *grpc.ClientConn
-        cred     grpc.DialOption
+		cred     grpc.DialOption
 	)
 
-    if tlsCfg != nil {
-        cred = grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg))
-    } else {
-        cred = grpc.WithInsecure()
-    }
-    duration := time.Duration(timeout)
-    grpcConn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
-    grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
-    if err != nil {
-        return errConnCannotOpen(host, port, err.Error())
-    }
+	if tlsCfg != nil {
+		cred = grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg))
+	} else {
+		cred = grpc.WithInsecure()
+	}
+	duration := time.Duration(timeout)
+	grpcConn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
+	if err != nil {
+		return internel_error.ErrConnCannotOpen(host, port, err.Error())
+	}
 
 	cn.clientConn = grpcConn
 	cn.graphClient = graph.NewGraphServiceClient(grpcConn)
@@ -87,71 +91,71 @@ func (cn *connection) open(host string, port int, timeout time.Duration, tlsCfg 
 }
 
 func (cn *connection) newTLSConfig(host string, cfg *connConfig) (*tls.Config, error) {
-    if !cfg.enableTLS {
-        return nil, nil
-    }
+	if !cfg.enableTLS {
+		return nil, nil
+	}
 
-    if cfg.ca == "" {
-        return nil, errTLS("No CA certificate provide")
-    }
+	if cfg.ca == "" {
+		return nil, internel_error.ErrTLS("No CA certificate provide")
+	}
 
-    peer := cfg.peerName
-    if !cfg.peerNameVerify {
-        peer = ""
-    } else if peer == "" {
-        peer = host
-    }
+	peer := cfg.peerName
+	if !cfg.peerNameVerify {
+		peer = ""
+	} else if peer == "" {
+		peer = host
+	}
 
-    tlsCfg := &tls.Config{
-        InsecureSkipVerify: true,
-        ServerName:         peer,
-        MinVersion:         tls.VersionTLS12,
-    }
+	tlsCfg := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         peer,
+		MinVersion:         tls.VersionTLS12,
+	}
 
-    CAs := x509.NewCertPool()
-    if ca, err := ioutil.ReadFile(cfg.ca); err == nil {
-        if !CAs.AppendCertsFromPEM(ca) {
-            return nil, errTLS(err.Error())
-        }
-        tlsCfg.RootCAs = CAs
-    } else {
-        return nil, errTLS(err.Error())
-    }
+	CAs := x509.NewCertPool()
+	if ca, err := ioutil.ReadFile(cfg.ca); err == nil {
+		if !CAs.AppendCertsFromPEM(ca) {
+			return nil, internel_error.ErrTLS(err.Error())
+		}
+		tlsCfg.RootCAs = CAs
+	} else {
+		return nil, internel_error.ErrTLS(err.Error())
+	}
 
-    if cfg.cert != "" || cfg.key != "" {
-        if cert, err := tls.LoadX509KeyPair(cfg.cert, cfg.key); err != nil {
-            return nil, errTLS(err.Error())
-        } else {
-            tlsCfg.Certificates = []tls.Certificate{cert}
-        }
-    }
+	if cfg.cert != "" || cfg.key != "" {
+		if cert, err := tls.LoadX509KeyPair(cfg.cert, cfg.key); err != nil {
+			return nil, internel_error.ErrTLS(err.Error())
+		} else {
+			tlsCfg.Certificates = []tls.Certificate{cert}
+		}
+	}
 
-    tlsCfg.VerifyPeerCertificate = func(certificates [][]byte, _ [][]*x509.Certificate) error {
-        certs := make([]*x509.Certificate, len(certificates))
-        for i, data := range certificates {
-            cert, err := x509.ParseCertificate(data)
-            if err != nil {
-                return errTLS(err.Error())
-            }
-            certs[i] = cert
-        }
+	tlsCfg.VerifyPeerCertificate = func(certificates [][]byte, _ [][]*x509.Certificate) error {
+		certs := make([]*x509.Certificate, len(certificates))
+		for i, data := range certificates {
+			cert, err := x509.ParseCertificate(data)
+			if err != nil {
+				return internel_error.ErrTLS(err.Error())
+			}
+			certs[i] = cert
+		}
 
-        opts := x509.VerifyOptions{
-            Roots:          tlsCfg.RootCAs,
-            DNSName:        tlsCfg.ServerName,
-            Intermediates:  x509.NewCertPool(),
-        }
+		opts := x509.VerifyOptions{
+			Roots:         tlsCfg.RootCAs,
+			DNSName:       tlsCfg.ServerName,
+			Intermediates: x509.NewCertPool(),
+		}
 
-        for _, cert := range certs[1:] {
-            opts.Intermediates.AddCert(cert)
-        }
+		for _, cert := range certs[1:] {
+			opts.Intermediates.AddCert(cert)
+		}
 
-        _, err := certs[0].Verify(opts)
+		_, err := certs[0].Verify(opts)
 
-        return err
-    }
+		return err
+	}
 
-    return tlsCfg, nil
+	return tlsCfg, nil
 }
 
 func (cn *connection) authenticate(ctx context.Context, username, password string) error {
@@ -178,14 +182,14 @@ func (cn *connection) authenticate(ctx context.Context, username, password strin
 		return err
 	}
 	respErr := resp.GetStatus()
-	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
-		return errServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
+	if string(respErr.GetCode()) != string(errors.ERROR_SUCCESSFUL_COMPLETION) {
+		return internel_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
 	cn.sessionId = resp.GetSessionId()
 	return nil
 }
 
-func (cn *connection) Execute(stmt string) (Result, error) {
+func (cn *connection) Execute(stmt string) (types.Result, error) {
 	if cn.timeout == 0 {
 		return cn.ExecuteContext(context.Background(), stmt)
 	} else {
@@ -195,7 +199,7 @@ func (cn *connection) Execute(stmt string) (Result, error) {
 	}
 }
 
-func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, error) {
+func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (types.Result, error) {
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
 	}
@@ -213,14 +217,17 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 		}
 		switch rpcErr.Code() {
 		case grpccodes.DeadlineExceeded, grpccodes.Canceled:
-			return nil, errConnRequestTimeout(cn.host, cn.port)
+			return nil, internel_error.ErrConnRequestTimeout(cn.host, cn.port)
 		}
 		return nil, err
 	}
-
+	t, err := decode.NewResultTable(resp.Result)
+	if err != nil {
+		return nil, err
+	}
 	resultResp := resultSet{
 		index:   0,
-		result:  resp.Result,
+		table:   t,
 		summary: resp.Summary,
 		cursor:  resp.Cursor,
 	}
@@ -233,8 +240,8 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (Result, 
 
 func (cn *connection) isSucceed(resp *graph.ExecuteResponse) error {
 	respErr := resp.GetStatus()
-	if string(respErr.GetCode()) != string(ERROR_SUCCESSFUL_COMPLETION) {
-		return errServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
+	if string(respErr.GetCode()) != string(errors.ERROR_SUCCESSFUL_COMPLETION) {
+		return internel_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
 	return nil
 }

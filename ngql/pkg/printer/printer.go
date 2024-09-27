@@ -9,7 +9,7 @@ import (
 
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/jedib0t/go-pretty/v6/text"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 const (
@@ -106,7 +106,7 @@ func (p *defaultPrinter) getResultString(res nebula.Result) string {
 		for res.HasNext() {
 			row, err := res.Next()
 			if err != nil {
-				continue
+				return "INVALID ROW, err: " + err.Error()
 			}
 			var values []interface{}
 			for _, col := range row.Values() {

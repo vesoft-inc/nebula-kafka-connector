@@ -11,6 +11,7 @@ import (
 	"github.com/vesoft-inc/k6-plugin/pkg/common"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type (
@@ -30,11 +31,11 @@ type (
 		graphOption       *common.GraphOption
 	}
 
-	graphClientGetter func(endpoint, username, password string, timeout time.Duration) (nebula.Client, error)
+	graphClientGetter func(endpoint, username, password string, timeout time.Duration) (types.Client, error)
 
 	// GraphClient a wrapper for nebula client, could read data from DataCh
 	GraphClient struct {
-		Session  nebula.Client
+		Session  types.Client
 		Pool     *GraphPool
 		DataCh   chan common.Data
 		username string
@@ -43,7 +44,7 @@ type (
 
 	// Response a wrapper for nebula resultSet
 	Response struct {
-		ResultSet    nebula.Result
+		ResultSet    types.Result
 		err          error
 		ResponseTime int32
 	}
@@ -99,7 +100,7 @@ var outputHeader []string = []string{
 // NewNebulaGraph New for k6 initialization.
 func NewNebulaGraph() *GraphPool {
 	return &GraphPool{
-		clientGetter: func(endpoint string, username, password string, timeout time.Duration) (nebula.Client, error) {
+		clientGetter: func(endpoint string, username, password string, timeout time.Duration) (types.Client, error) {
 			conn, err := nebula.NewNebulaClient(endpoint, username, password,
 				nebula.WithClientRequestTimeout(timeout))
 			if err != nil {
@@ -236,7 +237,7 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		isSucceed  bool = true
 		errMessage string
 		err        error
-		resp       nebula.Result
+		resp       types.Result
 		rows       int32
 		latency    int64
 	)
@@ -261,22 +262,28 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		latency = resp.Summary().TotalServerTimeUs()
 	}
 
+	var fr []string
+	if rows != 0 {
+		// print the first row of the result
+		row, err := resp.Next()
+		if err != nil {
+			return nil, err
+		}
+
+		for _, v := range row.Values() {
+			fr = append(fr, v.String())
+		}
+	}
+	//TODO could add a flag to just decode the first row
+	for resp.HasNext() {
+		_, err := resp.Next()
+		if err != nil {
+			return nil, err
+		}
+	}
 	responseTime := int32(time.Since(start) / 1000)
 	// output
-
 	if gc.Pool.OutputCh != nil {
-		var fr []string
-		if rows != 0 {
-			// print the first row of the result
-			row, err := resp.Next()
-			if err != nil {
-				return nil, err
-			}
-
-			for _, v := range row.Values() {
-				fr = append(fr, v.String())
-			}
-		}
 		o := &output{
 			timeStamp:    start.Unix(),
 			nGQL:         stmt,

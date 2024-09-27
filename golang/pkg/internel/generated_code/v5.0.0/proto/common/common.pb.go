@@ -559,7 +559,7 @@ type ZonedTime struct {
 	Minute   uint32 `protobuf:"varint,2,opt,name=minute,proto3" json:"minute,omitempty"`
 	Sec      uint32 `protobuf:"varint,3,opt,name=sec,proto3" json:"sec,omitempty"`
 	Microsec uint32 `protobuf:"varint,4,opt,name=microsec,proto3" json:"microsec,omitempty"`
-	Offset   int32  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"`
+	Offset   int32  `protobuf:"varint,5,opt,name=offset,proto3" json:"offset,omitempty"` // seconds
 }
 
 func (x *ZonedTime) Reset() {

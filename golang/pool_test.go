@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -19,18 +20,18 @@ type dummyConn struct {
 	closed bool
 }
 
-func (c *dummyConnector) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+func (c *dummyConnector) connect(host *hostAddress, cfg *connConfig) (types.Client, error) {
 	if c.sleep > 0 {
 		<-time.After(c.sleep)
 	}
 	return &dummyConn{closed: true}, nil
 }
 
-func (d *dummyConn) Execute(stmt string) (Result, error) {
+func (d *dummyConn) Execute(stmt string) (types.Result, error) {
 	return nil, nil
 }
 
-func (d *dummyConn) ExecuteContext(ctx context.Context, stmt string) (Result, error) {
+func (d *dummyConn) ExecuteContext(ctx context.Context, stmt string) (types.Result, error) {
 	return nil, nil
 }
 func (d *dummyConn) Ping() error {
@@ -54,11 +55,11 @@ func (d *dummyConn) IsClosed() bool {
 func TestCleanIdle(t *testing.T) {
 	testcases := []struct {
 		maxIdle  int
-		conns    []Client
+		conns    []types.Client
 		expected int
 	}{
 		{5,
-			[]Client{
+			[]types.Client{
 				&dummyConn{id: 0},
 				&dummyConn{id: 1},
 				&dummyConn{id: 2},
@@ -68,7 +69,7 @@ func TestCleanIdle(t *testing.T) {
 			5,
 		},
 		{4,
-			[]Client{
+			[]types.Client{
 				&dummyConn{id: 0},
 				&dummyConn{id: 1},
 				&dummyConn{id: 2},
@@ -78,7 +79,7 @@ func TestCleanIdle(t *testing.T) {
 			4,
 		},
 		{2,
-			[]Client{
+			[]types.Client{
 				&dummyConn{id: 0},
 				&dummyConn{id: 1},
 			},
@@ -87,7 +88,7 @@ func TestCleanIdle(t *testing.T) {
 	}
 
 	for _, tc := range testcases {
-		connMap := make(map[Client]struct{})
+		connMap := make(map[types.Client]struct{})
 		for _, conn := range tc.conns {
 			c := conn
 			connMap[c] = struct{}{}
@@ -291,7 +292,7 @@ func TestPoolConcurrency(t *testing.T) {
 	}
 }
 
-func run(t *testing.T, p Pool) {
+func run(t *testing.T, p types.Pool) {
 	c, err := p.GetClient()
 	if err != nil {
 		t.Fatal(err)

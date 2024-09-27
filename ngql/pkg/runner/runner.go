@@ -11,6 +11,7 @@ import (
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/cli"
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/printer"
 )
@@ -24,7 +25,7 @@ type (
 		option       *runnerOption
 		stdout       io.Writer
 		file         io.WriteCloser
-		client       nebula.Client
+		client       types.Client
 		sessionId    int64
 		cli          cli.Cli
 		printer      printer.Printer

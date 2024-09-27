@@ -5,81 +5,16 @@ import (
 	"fmt"
 	"math/rand"
 	"time"
+
+	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type (
-	Result interface {
-		HasNext() bool
-		Next() (Row, error)
-		Columns() []string
-		ColumnTypes() []ColumnType //not support yet
-		RowSize() int
-		Summary() Summary
-		Cursor() []byte
-		// Scan copies the columns in the current row into the values pointed at by dest.
-		// If there's no more row, return io.EOF
-		Scan(...any) error
-	}
-
-	Row interface {
-		Values() []Value
-		GetValueByName(name string) (Value, error)
-		GetValueByIndex(index int) (Value, error)
-	}
-
-	Summary interface {
-		BuildTimeUs() int64
-		OptimizeTimeUs() int64
-		SerializeTimeUs() int64
-		TotalServerTimeUs() int64
-		ExplainType() string
-		PlanInfo() PlanInfo
-		QueryStats() QueryStats
-	}
-	PlanInfo interface {
-		Id() string
-		Name() string
-		Details() string
-		Columns() []string
-		TimeMs() float64
-		Rows() int64
-		MemoryKib() float64
-		BlockedMs() float64
-		QueuedMs() float64
-		ConsumeMs() float64
-		ProduceMs() float64
-		FinishMs() float64
-		Batches() int64
-		Concurrency() int64
-		OtherStatsJson() []byte
-		Children() []PlanInfo
-	}
-	QueryStats interface {
-		NumAffectedNodes() int64
-		NumAffectedEdges() int64
-	}
-
 	// an internel interface to get the connection
 	connector interface {
-		connect(host *hostAddress, cfg *connConfig) (Client, error)
+		connect(host *hostAddress, cfg *connConfig) (types.Client, error)
 	}
-
-	Client interface {
-		Execute(stmt string) (Result, error)
-		ExecuteContext(ctx context.Context, stmt string) (Result, error)
-		Ping() error // by default, timeout is 1s.
-		PingContext(ctx context.Context) error
-		IsClosed() bool
-		Close() error
-		GetSessionId() (int64, error)
-	}
-
-	Pool interface {
-		GetClient() (Client, error)
-		PutClient(Client) error
-		Close() error
-	}
-
 	connConfig struct {
 		username       string
 		password       string
@@ -87,16 +22,13 @@ type (
 		requestTimeout time.Duration
 		connectTimeout time.Duration
 		timezone       string
-        enableTLS      bool
-        cert           string
-        key            string
-        ca             string
-        peerName       string
-        peerNameVerify bool
+		enableTLS      bool
+		cert           string
+		key            string
+		ca             string
+		peerName       string
+		peerNameVerify bool
 	}
-
-	ColumnType int
-
 	// driverConn is a client wrapper
 	driverConn struct {
 		cfg           *connConfig
@@ -105,7 +37,7 @@ type (
 		connector     connector
 		pool          *driverPool
 		createAt      time.Time
-		conn          Client
+		conn          types.Client
 		isClosed      bool
 		log           Logger
 	}
@@ -122,7 +54,7 @@ const (
 	defaultMaxWait        = 1 * time.Minute
 )
 
-func NewNebulaClient(addresses, username, password string, opts ...clientOptionsFn) (Client, error) {
+func NewNebulaClient(addresses, username, password string, opts ...clientOptionsFn) (types.Client, error) {
 	hostAddresses, err := parseAddresses(addresses)
 	if err != nil {
 		return nil, err
@@ -143,7 +75,7 @@ func NewNebulaClient(addresses, username, password string, opts ...clientOptions
 	return dc, nil
 }
 
-func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) (Pool, error) {
+func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) (types.Pool, error) {
 	hostAddresses, err := parseAddresses(addresses)
 	if err != nil {
 		return nil, err
@@ -155,8 +87,8 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 		stop:            cancel,
 		hostAddresses:   hostAddresses,
 		connCfg:         connCfg,
-		connMap:         make(map[Client]struct{}),
-		requestConnChan: make(map[uint64]chan Client),
+		connMap:         make(map[types.Client]struct{}),
+		requestConnChan: make(map[uint64]chan types.Client),
 		requestCount:    0,
 		openerCh:        make(chan struct{}, openConnChannelSize),
 		connector:       defaultConnector,
@@ -174,7 +106,7 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 	}
 	var (
 		successed = 0
-		dc        Client
+		dc        types.Client
 	)
 	for _, h := range pool.hostAddresses {
 		if !pool.strictlyServerHealthy && successed > 0 {
@@ -210,13 +142,13 @@ func newConnConfig(username, password string) *connConfig {
 	}
 }
 
-func (dc *driverConn) Execute(stmt string) (Result, error) {
+func (dc *driverConn) Execute(stmt string) (types.Result, error) {
 	return dc.ExecuteContext(context.Background(), stmt)
 }
 
-func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (Result, error) {
+func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (types.Result, error) {
 	if dc.isClosed {
-		return nil, errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return nil, internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
@@ -231,14 +163,14 @@ func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (Result, 
 
 func (dc *driverConn) Ping() error {
 	if dc.IsClosed() {
-		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	return dc.conn.Ping()
 }
 
 func (dc *driverConn) PingContext(ctx context.Context) error {
 	if dc.IsClosed() {
-		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	return dc.conn.PingContext(ctx)
 }
@@ -287,7 +219,7 @@ func (dc *driverConn) replaceFromPool() error {
 	newConn, ok := conn.(*driverConn)
 	if !ok {
 		// not reachable
-		return errInternel("invalid connection type")
+		return internel_error.ErrInternel("invalid connection type")
 	}
 	dc.conn = newConn.conn
 	dc.currentHost = newConn.currentHost
@@ -298,7 +230,7 @@ func (dc *driverConn) replaceFromPool() error {
 
 func (dc *driverConn) GetSessionId() (int64, error) {
 	if dc.IsClosed() {
-		return 0, errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return 0, internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 
 	return dc.conn.GetSessionId()

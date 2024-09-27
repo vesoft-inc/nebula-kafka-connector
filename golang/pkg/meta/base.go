@@ -1,7 +1,7 @@
 package meta
 
 import (
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 )
 
 type (
@@ -9,7 +9,7 @@ type (
 		requestType string
 	}
 	HeaderResponse struct {
-		Code    nebula.ErrorCode
+		Code    errors.ErrorCode
 		Msg     string
 		NewHost string // only if code is leader changed
 		NewPort uint32 // only if code is leader changed
@@ -17,10 +17,10 @@ type (
 )
 
 func (h *HeaderResponse) GetStatus() error {
-	return nebula.NewNebulaError(h.Code, h.Msg)
+	return errors.NewNebulaError(h.Code, h.Msg)
 }
 
-func (h *HeaderResponse) GetErrorCode() nebula.ErrorCode {
+func (h *HeaderResponse) GetErrorCode() errors.ErrorCode {
 	return h.Code
 }
 
@@ -29,5 +29,5 @@ func (h *HeaderResponse) GetErrorMsg() string {
 }
 
 func (h *HeaderResponse) IsSucceeded() bool {
-	return h.Code == nebula.ERROR_SUCCESSFUL_COMPLETION
+	return h.Code == errors.ERROR_SUCCESSFUL_COMPLETION
 }

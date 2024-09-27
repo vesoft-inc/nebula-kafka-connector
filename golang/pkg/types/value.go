@@ -1,9 +1,7 @@
-package nebula_ng
+package types
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 	"time"
 )
 
@@ -64,12 +62,12 @@ type (
 	Duration interface {
 		IsMonthBased() bool
 		String() string
-		GetYear() int32
-		GetMonth() int32
-		GetDay() int32
-		GetMinute() int32
-		GetSecond() int32
-		GetMicrosecond() int32
+		GetYear() int
+		GetMonth() int
+		GetDay() int
+		GetMinute() int
+		GetSecond() int
+		GetMicrosecond() int
 	}
 
 	LocalDatetime interface {
@@ -80,10 +78,10 @@ type (
 
 	LocalTime interface {
 		String() string
-		GetHour() uint32
-		GetMinute() uint32
-		GetSec() uint32
-		GetMicrosec() uint32
+		GetHour() int
+		GetMinute() int
+		GetSec() int
+		GetMicrosec() int
 	}
 	ZonedDatetime interface {
 		LocalDatetime
@@ -102,9 +100,9 @@ type (
 
 	Date interface {
 		String() string
-		GetYear() int32
-		GetMonth() uint32
-		GetDay() uint32
+		GetYear() int
+		GetMonth() int
+		GetDay() int
 	}
 
 	Node interface {
@@ -113,17 +111,17 @@ type (
 		GetGraph() string
 		GetType() string
 		GetLabels() []string
-		GetId() int64
+		GetId() int
 	}
 	Edge interface {
 		String() string
 		GetProperties() map[string]Value
-		GetSrcId() int64
-		GetDstId() int64
+		GetSrcId() int
+		GetDstId() int
 		GetGraph() string
 		GetType() string
 		GetLabels() []string
-		GetRank() int64
+		GetRank() int
 		IsDirected() bool
 	}
 	Path interface {
@@ -134,8 +132,6 @@ type (
 	Decimal interface {
 		String() string
 	}
-
-	mapValue map[string]Value
 )
 
 const (
@@ -164,6 +160,7 @@ const (
 	ValueTypeZonedTime
 	ValueTypeZonedDateTime
 	ValueTypeDecimal
+	ValueUnSupport = 0xff
 )
 
 func (vt ValueType) String() string {
@@ -357,21 +354,4 @@ func (s *String) String() string {
 		}
 	}
 	return fmt.Sprintf(`%s`, string(outputBytes))
-}
-
-func (m mapValue) string() string {
-	var kvStr []string = make([]string, 0, len(m))
-	var keys []string = make([]string, 0, len(m))
-	for key := range m {
-		keys = append(keys, key)
-	}
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i] < keys[j]
-	})
-	for _, k := range keys {
-		v := m[k]
-		kvTemp := fmt.Sprintf(`%s:%s`, k, v)
-		kvStr = append(kvStr, kvTemp)
-	}
-	return strings.Join(kvStr, ",")
 }

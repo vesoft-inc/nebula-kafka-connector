@@ -26,7 +26,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebulaErr "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
@@ -164,12 +164,12 @@ func (c *metadCluster) syncMetadWorkload(nm *v1alpha1.NebulaMetad) error {
 			}
 			_, err = metaClient.Login()
 			if err != nil {
-				ne, ok := err.(*nebula.NebulaError)
+				ne, ok := err.(*nebulaErr.NebulaError)
 				if !ok {
 					klog.Errorf("login metad failed: %v", err)
 					return err
 				}
-				if ne.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
+				if ne.Code() != nebulaErr.ERROR_AUTH_NEED_CHANGE_PASSWORD {
 					return fmt.Errorf("login metad got unknown error: %v", ne.Error())
 				}
 				req := meta.NewChangePasswordReq(username, defaultPassword, password)

@@ -5,7 +5,7 @@ import (
 
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
@@ -53,11 +53,11 @@ var loginCmd = &cobra.Command{
 		resp, err := c.Login()
 		if err != nil {
 			//should reset password for first login
-			e, ok := err.(*nebula.NebulaError)
+			e, ok := err.(*errors.NebulaError)
 			if !ok {
 				return common.NgctlError("Login failed", err.Error())
 			}
-			if e.Code() != nebula.ERROR_AUTH_NEED_CHANGE_PASSWORD {
+			if e.Code() != errors.ERROR_AUTH_NEED_CHANGE_PASSWORD {
 				return common.NgctlError("Login failed", err.Error())
 			}
 			// reset password and re-login

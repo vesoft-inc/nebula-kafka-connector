@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type connetorWithErr struct {
@@ -25,19 +26,19 @@ type connWithErr struct {
 
 type connetorWithFunc struct {
 	dummyConn
-	fn func(host *hostAddress, cfg *connConfig) (Client, error)
+	fn func(host *hostAddress, cfg *connConfig) (types.Client, error)
 }
 
-func (c *connetorWithErr) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+func (c *connetorWithErr) connect(host *hostAddress, cfg *connConfig) (types.Client, error) {
 	c.connectTimes++
 	return &connWithErr{executeTime: c.executeTime, err: c.err}, nil
 }
 
-func (c *connetorWithFunc) connect(host *hostAddress, cfg *connConfig) (Client, error) {
+func (c *connetorWithFunc) connect(host *hostAddress, cfg *connConfig) (types.Client, error) {
 	return c.fn(host, cfg)
 }
 
-func (d *connWithErr) ExecuteContext(ctx context.Context, stmt string) (Result, error) {
+func (d *connWithErr) ExecuteContext(ctx context.Context, stmt string) (types.Result, error) {
 	time.Sleep(d.executeTime)
 	return nil, d.err
 }
@@ -52,9 +53,9 @@ func TestClientRetry(t *testing.T) {
 		executionErr error
 		err          error
 	}{
-		{1, timeoutCtx, 150 * time.Millisecond, errConnBroken("", 0), timeoutCtx.Err()},
+		{1, timeoutCtx, 150 * time.Millisecond, fmt.Errorf("error"), timeoutCtx.Err()},
 		{1, context.Background(), 15 * time.Millisecond, nil, nil},
-		{1, context.Background(), 15 * time.Millisecond, errConnBroken("", 0), errConnBroken("", 0)},
+		{1, context.Background(), 15 * time.Millisecond, fmt.Errorf("error"), fmt.Errorf("error")},
 		{1, context.Background(), 15 * time.Millisecond, fmt.Errorf("not connnection error"), fmt.Errorf("not connnection error")},
 	}
 	for _, tc := range testcases {
@@ -89,9 +90,9 @@ func TestPoolRetry(t *testing.T) {
 		err          error
 	}{
 		// timeout is 25ms, connectTime is 3ms, executeTime is 20ms
-		{1, timeoutCtx, 150 * time.Millisecond, errConnBroken("", 0), timeoutCtx.Err()},
+		{1, timeoutCtx, 150 * time.Millisecond, fmt.Errorf("error"), timeoutCtx.Err()},
 		{1, context.Background(), 15 * time.Millisecond, nil, nil},
-		{1, context.Background(), 15 * time.Millisecond, errConnBroken("", 0), errConnBroken("", 0)},
+		{1, context.Background(), 15 * time.Millisecond, fmt.Errorf("error"), fmt.Errorf("error")},
 		{1, context.Background(), 15 * time.Millisecond, fmt.Errorf("not connnection error"), fmt.Errorf("not connnection error")},
 	}
 
@@ -132,7 +133,7 @@ func TestPoolRetry2(t *testing.T) {
 	connector := &connetorWithErr{
 		connectTime: 3 * time.Millisecond,
 		executeTime: 20 * time.Millisecond,
-		err:         errConnBroken("", 0),
+		err:         fmt.Errorf("error"),
 	}
 	p, err := NewNebulaPool("127.0.0.1:9669", "", "", withPoolConnector(connector))
 	if err != nil {
@@ -167,9 +168,9 @@ func TestPoolRetry2(t *testing.T) {
 
 func TestPoolStrictlyServerHealthy(t *testing.T) {
 	connector := &connetorWithFunc{
-		fn: func(host *hostAddress, cfg *connConfig) (Client, error) {
+		fn: func(host *hostAddress, cfg *connConfig) (types.Client, error) {
 			if host.host == "127.0.0.1" && host.port == 9669 {
-				return nil, errConnBroken(host.host, host.port)
+				return nil, fmt.Errorf("broken")
 			} else {
 				return &dummyConn{}, nil
 			}
@@ -183,9 +184,9 @@ func TestPoolStrictlyServerHealthy(t *testing.T) {
 	}{
 		{true, "127.0.0.4:9669,127.0.0.2:9669,127.0.0.3:9669", false, ""},
 		{false, "127.0.0.4:9669,127.0.0.2:9669,127.0.0.3:9669", false, ""},
-		{true, "127.0.0.1:9669,127.0.0.2:9669,127.0.0.3:9669", true, "[99002]: connection to 127.0.0.1:9669 is broken"},
+		{true, "127.0.0.1:9669,127.0.0.2:9669,127.0.0.3:9669", true, "broken"},
 		{false, "127.0.0.1:9669,127.0.0.2:9669,127.0.0.3:9669", false, ""},
-		{false, "127.0.0.1:9669", true, "[99002]: connection to 127.0.0.1:9669 is broken"},
+		{false, "127.0.0.1:9669", true, "broken"},
 	}
 	for _, tc := range testcases {
 		_, err := NewNebulaPool(tc.addresses, "", "",

@@ -1,9 +1,14 @@
 package nebula_ng
 
-import "fmt"
+import (
+	"fmt"
+
+	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
+)
 
 type scanner interface {
-	scan(value Value) error
+	scan(value types.Value) error
 }
 
 type nullable[T any] struct {
@@ -13,83 +18,83 @@ type nullable[T any] struct {
 
 type (
 	NullString struct {
-		nullable[String]
+		nullable[types.String]
 	}
 	NullBool struct {
-		nullable[Bool]
+		nullable[types.Bool]
 	}
 	NullInt struct {
-		nullable[Int64]
+		nullable[types.Int64]
 	}
 	NullInt8 struct {
-		nullable[Int8]
+		nullable[types.Int8]
 	}
 	NullInt16 struct {
-		nullable[Int16]
+		nullable[types.Int16]
 	}
 	NullInt32 struct {
-		nullable[Int32]
+		nullable[types.Int32]
 	}
 	NullInt64 struct {
-		nullable[Int64]
+		nullable[types.Int64]
 	}
 	NullUInt struct {
-		nullable[UInt64]
+		nullable[types.UInt64]
 	}
 	NullUInt8 struct {
-		nullable[UInt8]
+		nullable[types.UInt8]
 	}
 	NullUInt16 struct {
-		nullable[UInt16]
+		nullable[types.UInt16]
 	}
 	NullUInt32 struct {
-		nullable[UInt32]
+		nullable[types.UInt32]
 	}
 	NullUInt64 struct {
-		nullable[UInt64]
+		nullable[types.UInt64]
 	}
 	NullFloat struct {
-		nullable[Float]
+		nullable[types.Float]
 	}
 	NullDouble struct {
-		nullable[Double]
+		nullable[types.Double]
 	}
 	NullList struct {
-		nullable[List]
+		nullable[types.List]
 	}
 	NullRecord struct {
-		nullable[Record]
+		nullable[types.Record]
 	}
 	NullDuration struct {
-		nullable[Duration]
+		nullable[types.Duration]
 	}
 	NullLocalTime struct {
-		nullable[LocalTime]
+		nullable[types.LocalTime]
 	}
 	NullLocalDatetime struct {
-		nullable[LocalDatetime]
+		nullable[types.LocalDatetime]
 	}
 	NullDate struct {
-		nullable[Date]
+		nullable[types.Date]
 	}
 	NullZonedDatetime struct {
-		nullable[ZonedDatetime]
+		nullable[types.ZonedDatetime]
 	}
 	NullZonedTime struct {
-		nullable[ZonedTime]
+		nullable[types.ZonedTime]
 	}
 	NullNode struct {
-		nullable[Node]
+		nullable[types.Node]
 	}
 	NullEdge struct {
-		nullable[Edge]
+		nullable[types.Edge]
 	}
 	NullPath struct {
-		nullable[Path]
+		nullable[types.Path]
 	}
 )
 
-func (n *nullable[T]) scanInternal(value Value, fn func(Value) (T, error)) error {
+func (n *nullable[T]) scanInternal(value types.Value, fn func(types.Value) (T, error)) error {
 	if value == nil || value.IsNull() {
 		n.Valid = false
 		return nil
@@ -113,41 +118,41 @@ func (n *nullable[T]) isValid() bool {
 	return n.Valid
 }
 
-func (n *NullString) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (String, error) {
+func (n *NullString) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.String, error) {
 		return value.AsString()
 	})
 }
 
-func (n *NullBool) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Bool, error) {
+func (n *NullBool) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Bool, error) {
 		return value.AsBool()
 	})
 }
 
-func (n *NullInt) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Int64, error) {
+func (n *NullInt) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Int64, error) {
 		var (
-			i   Int64
+			i   types.Int64
 			err error
 		)
 		switch value.GetType() {
-		case ValueTypeInt8:
-			var d Int8
+		case types.ValueTypeInt8:
+			var d types.Int8
 			d, err = value.AsInt8()
-			i = Int64(d)
-		case ValueTypeInt16:
-			var d Int16
+			i = types.Int64(d)
+		case types.ValueTypeInt16:
+			var d types.Int16
 			d, err = value.AsInt16()
-			i = Int64(d)
-		case ValueTypeInt32:
-			var d Int32
+			i = types.Int64(d)
+		case types.ValueTypeInt32:
+			var d types.Int32
 			d, err = value.AsInt32()
-			i = Int64(d)
-		case ValueTypeInt64:
+			i = types.Int64(d)
+		case types.ValueTypeInt64:
 			i, err = value.AsInt64()
 		default:
-			return 0, errType(fmt.Sprintf("value type not match"))
+			return 0, internel_error.ErrType(fmt.Sprintf("value type not match"))
 		}
 		if err != nil {
 			return 0, err
@@ -156,53 +161,53 @@ func (n *NullInt) scan(value Value) error {
 	})
 }
 
-func (n *NullInt8) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Int8, error) {
+func (n *NullInt8) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Int8, error) {
 		return value.AsInt8()
 	})
 }
 
-func (n *NullInt16) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Int16, error) {
+func (n *NullInt16) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Int16, error) {
 		return value.AsInt16()
 	})
 }
 
-func (n *NullInt32) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Int32, error) {
+func (n *NullInt32) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Int32, error) {
 		return value.AsInt32()
 	})
 }
 
-func (n *NullInt64) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Int64, error) {
+func (n *NullInt64) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Int64, error) {
 		return value.AsInt64()
 	})
 }
 
-func (n *NullUInt) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (UInt64, error) {
+func (n *NullUInt) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.UInt64, error) {
 		var (
-			i   UInt64
+			i   types.UInt64
 			err error
 		)
 		switch value.GetType() {
-		case ValueTypeInt8:
-			var d UInt8
+		case types.ValueTypeInt8:
+			var d types.UInt8
 			d, err = value.AsUInt8()
-			i = UInt64(d)
-		case ValueTypeInt16:
-			var d UInt16
+			i = types.UInt64(d)
+		case types.ValueTypeInt16:
+			var d types.UInt16
 			d, err = value.AsUInt16()
-			i = UInt64(d)
-		case ValueTypeInt32:
-			var d UInt32
+			i = types.UInt64(d)
+		case types.ValueTypeInt32:
+			var d types.UInt32
 			d, err = value.AsUInt32()
-			i = UInt64(d)
-		case ValueTypeInt64:
+			i = types.UInt64(d)
+		case types.ValueTypeInt64:
 			i, err = value.AsUInt64()
 		default:
-			return 0, errType(fmt.Sprintf("value type not match"))
+			return 0, internel_error.ErrType(fmt.Sprintf("value type not match"))
 		}
 		if err != nil {
 			return 0, err
@@ -211,50 +216,50 @@ func (n *NullUInt) scan(value Value) error {
 	})
 }
 
-func (n *NullUInt8) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (UInt8, error) {
+func (n *NullUInt8) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.UInt8, error) {
 		return value.AsUInt8()
 	})
 }
 
-func (n *NullUInt16) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (UInt16, error) {
+func (n *NullUInt16) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.UInt16, error) {
 		return value.AsUInt16()
 	})
 }
 
-func (n *NullUInt32) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (UInt32, error) {
+func (n *NullUInt32) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.UInt32, error) {
 		return value.AsUInt32()
 	})
 }
 
-func (n *NullUInt64) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (UInt64, error) {
+func (n *NullUInt64) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.UInt64, error) {
 		return value.AsUInt64()
 	})
 }
 
-func (n *NullFloat) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Float, error) {
+func (n *NullFloat) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Float, error) {
 		return value.AsFloat()
 	})
 }
-func (n *NullDouble) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Double, error) {
+func (n *NullDouble) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Double, error) {
 		var (
-			d   Double
+			d   types.Double
 			err error
 		)
 		switch value.GetType() {
-		case ValueTypeFloat:
-			var f Float
+		case types.ValueTypeFloat:
+			var f types.Float
 			f, err = value.AsFloat()
-			d = Double(f)
-		case ValueTypeDouble:
+			d = types.Double(f)
+		case types.ValueTypeDouble:
 			d, err = value.AsDouble()
 		default:
-			return 0, errType(fmt.Sprintf("value type not match"))
+			return 0, internel_error.ErrType(fmt.Sprintf("value type not match"))
 		}
 		if err != nil {
 			return 0, err
@@ -263,68 +268,68 @@ func (n *NullDouble) scan(value Value) error {
 	})
 }
 
-func (n *NullList) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (List, error) {
+func (n *NullList) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.List, error) {
 		return value.AsList()
 	})
 }
 
-func (n *NullRecord) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Record, error) {
+func (n *NullRecord) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Record, error) {
 		return value.AsRecord()
 	})
 }
 
-func (n *NullDuration) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Duration, error) {
+func (n *NullDuration) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Duration, error) {
 		return value.AsDuration()
 	})
 }
 
-func (n *NullLocalTime) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (LocalTime, error) {
+func (n *NullLocalTime) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.LocalTime, error) {
 		return value.AsLocalTime()
 	})
 }
 
-func (n *NullLocalDatetime) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (LocalDatetime, error) {
+func (n *NullLocalDatetime) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.LocalDatetime, error) {
 		return value.AsLocalDatetime()
 	})
 }
 
-func (n *NullDate) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Date, error) {
+func (n *NullDate) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Date, error) {
 		return value.AsDate()
 	})
 }
 
-func (n *NullZonedDatetime) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (ZonedDatetime, error) {
+func (n *NullZonedDatetime) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.ZonedDatetime, error) {
 		return value.AsZonedDatetime()
 	})
 }
 
-func (n *NullZonedTime) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (ZonedTime, error) {
+func (n *NullZonedTime) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.ZonedTime, error) {
 		return value.AsZonedTime()
 	})
 }
 
-func (n *NullNode) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Node, error) {
+func (n *NullNode) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Node, error) {
 		return value.AsNode()
 	})
 }
 
-func (n *NullEdge) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Edge, error) {
+func (n *NullEdge) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Edge, error) {
 		return value.AsEdge()
 	})
 }
 
-func (n *NullPath) scan(value Value) error {
-	return n.scanInternal(value, func(value Value) (Path, error) {
+func (n *NullPath) scan(value types.Value) error {
+	return n.scanInternal(value, func(value types.Value) (types.Path, error) {
 		return value.AsPath()
 	})
 }

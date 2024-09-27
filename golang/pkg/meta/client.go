@@ -5,21 +5,22 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
-    "errors"
-    "io/ioutil"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"math"
 	"strconv"
 	"strings"
 	"time"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebulaErr "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
+	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
-    "google.golang.org/grpc/credentials"
+	"google.golang.org/grpc/credentials"
 )
 
 var defaultMsgSize = math.MaxInt64
@@ -82,12 +83,12 @@ type (
 		token          []byte
 		user           string
 		password       string
-        enableTLS      bool
-        ca             string
-        cert           string
-        key            string
-        peerNameVerify bool
-        peerName       string
+		enableTLS      bool
+		ca             string
+		cert           string
+		key            string
+		peerNameVerify bool
+		peerName       string
 	}
 
 	responseHeader interface {
@@ -123,14 +124,14 @@ func WithToken(token []byte) WithOption {
 }
 
 func WithTLS(enable bool, ca, cert, key string, peerNameVerify bool, peerName string) WithOption {
-    return func(client *metaClient) {
-        client.enableTLS = enable
-        client.ca = ca
-        client.cert = cert
-        client.key = key
-        client.peerNameVerify = peerNameVerify
-        client.peerName = peerName
-    }
+	return func(client *metaClient) {
+		client.enableTLS = enable
+		client.ca = ca
+		client.cert = cert
+		client.key = key
+		client.peerNameVerify = peerNameVerify
+		client.peerName = peerName
+	}
 }
 
 func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
@@ -168,18 +169,18 @@ func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
 			opt(client)
 		}
 
-        var tlsCfg *tls.Config
-        tlsCfg, err = client.newTLSConfig(host)
-        if err != nil {
-            continue
-        }
+		var tlsCfg *tls.Config
+		tlsCfg, err = client.newTLSConfig(host)
+		if err != nil {
+			continue
+		}
 
-        err = client.open(host, port, client.requestTimeout, tlsCfg)
-        if err != nil {
-            continue
-        }
+		err = client.open(host, port, client.requestTimeout, tlsCfg)
+		if err != nil {
+			continue
+		}
 
-        break
+		break
 	}
 
 	if err != nil {
@@ -193,22 +194,22 @@ func (c *metaClient) open(host string, port int, timeout time.Duration, tlsCfg *
 	var (
 		err  error
 		conn *grpc.ClientConn
-        cred grpc.DialOption
+		cred grpc.DialOption
 	)
 
-    if tlsCfg != nil {
-        cred = grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg))
-    } else {
-        cred = grpc.WithInsecure()
-    }
+	if tlsCfg != nil {
+		cred = grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg))
+	} else {
+		cred = grpc.WithInsecure()
+	}
 
-    duration := time.Duration(timeout)
-    conn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
-    grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
+	duration := time.Duration(timeout)
+	conn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
+		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
 
-    if err != nil {
-        return err
-    }
+	if err != nil {
+		return err
+	}
 
 	c.clientConn = conn
 	c.client = admin.NewAdminServiceClient(conn)
@@ -216,71 +217,71 @@ func (c *metaClient) open(host string, port int, timeout time.Duration, tlsCfg *
 }
 
 func (c *metaClient) newTLSConfig(host string) (*tls.Config, error) {
-    if !c.enableTLS {
-        return nil, nil
-    }
+	if !c.enableTLS {
+		return nil, nil
+	}
 
-    if c.ca == "" {
-        return nil, errors.New("No CA certificate provide")
-    }
+	if c.ca == "" {
+		return nil, errors.New("No CA certificate provide")
+	}
 
-    peer := c.peerName
-    if !c.peerNameVerify {
-        peer = ""
-    } else if peer == "" {
-        peer = host
-    }
+	peer := c.peerName
+	if !c.peerNameVerify {
+		peer = ""
+	} else if peer == "" {
+		peer = host
+	}
 
-    tlsCfg := &tls.Config{
-        InsecureSkipVerify: true,
-        ServerName:         peer,
-        MinVersion:         tls.VersionTLS13,
-    }
+	tlsCfg := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         peer,
+		MinVersion:         tls.VersionTLS13,
+	}
 
-    CAs := x509.NewCertPool()
-    if ca, err := ioutil.ReadFile(c.ca); err == nil {
-        if !CAs.AppendCertsFromPEM(ca) {
-            return nil, err
-        }
-        tlsCfg.RootCAs = CAs
-    } else {
-        return nil, err
-    }
+	CAs := x509.NewCertPool()
+	if ca, err := ioutil.ReadFile(c.ca); err == nil {
+		if !CAs.AppendCertsFromPEM(ca) {
+			return nil, err
+		}
+		tlsCfg.RootCAs = CAs
+	} else {
+		return nil, err
+	}
 
-    if c.cert != "" || c.key != "" {
-        if cert, err := tls.LoadX509KeyPair(c.cert, c.key); err != nil {
-            return nil, err
-        } else {
-            tlsCfg.Certificates = []tls.Certificate{cert}
-        }
-    }
+	if c.cert != "" || c.key != "" {
+		if cert, err := tls.LoadX509KeyPair(c.cert, c.key); err != nil {
+			return nil, err
+		} else {
+			tlsCfg.Certificates = []tls.Certificate{cert}
+		}
+	}
 
-    tlsCfg.VerifyPeerCertificate = func(certificates [][]byte, _ [][]*x509.Certificate) error {
-        certs := make([]*x509.Certificate, len(certificates))
-        for i, data := range certificates {
-            cert, err := x509.ParseCertificate(data)
-            if err != nil {
-                return err
-            }
-            certs[i] = cert
-        }
+	tlsCfg.VerifyPeerCertificate = func(certificates [][]byte, _ [][]*x509.Certificate) error {
+		certs := make([]*x509.Certificate, len(certificates))
+		for i, data := range certificates {
+			cert, err := x509.ParseCertificate(data)
+			if err != nil {
+				return err
+			}
+			certs[i] = cert
+		}
 
-        opts := x509.VerifyOptions{
-            Roots:          tlsCfg.RootCAs,
-            DNSName:        tlsCfg.ServerName,
-            Intermediates:  x509.NewCertPool(),
-        }
+		opts := x509.VerifyOptions{
+			Roots:         tlsCfg.RootCAs,
+			DNSName:       tlsCfg.ServerName,
+			Intermediates: x509.NewCertPool(),
+		}
 
-        for _, cert := range certs[1:] {
-            opts.Intermediates.AddCert(cert)
-        }
+		for _, cert := range certs[1:] {
+			opts.Intermediates.AddCert(cert)
+		}
 
-        _, err := certs[0].Verify(opts)
+		_, err := certs[0].Verify(opts)
 
-        return err
-    }
+		return err
+	}
 
-    return tlsCfg, nil
+	return tlsCfg, nil
 }
 
 func (c *metaClient) Login() (*LoginResponse, error) {
@@ -325,7 +326,7 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) (*LoginR
 	}
 
 	// retry for leader change
-	if nebula.ErrorCode(response.Header.GetStatus().GetCode()) == nebula.ERROR_LEADER_CHANGED {
+	if nebulaErr.ErrorCode(response.Header.GetStatus().GetCode()) == nebulaErr.ERROR_LEADER_CHANGED {
 		leader := response.Header.GetLeader()
 		if leader == nil {
 			return nil, fmt.Errorf("invalid leader")
@@ -340,15 +341,15 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) (*LoginR
 		if err != nil {
 			return nil, err
 		}
-		if nebula.ErrorCode(response.Header.GetStatus().GetCode()) != nebula.ERROR_SUCCESSFUL_COMPLETION {
-			return nil, nebula.NewNebulaError(
-				nebula.ErrorCode(string(response.Header.GetStatus().GetCode())),
+		if nebulaErr.ErrorCode(response.Header.GetStatus().GetCode()) != nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
+			return nil, nebulaErr.NewNebulaError(
+				nebulaErr.ErrorCode(string(response.Header.GetStatus().GetCode())),
 				string(response.Header.GetStatus().GetMessage()),
 			)
 		}
-	} else if nebula.ErrorCode(response.Header.GetStatus().GetCode()) != nebula.ERROR_SUCCESSFUL_COMPLETION {
-		return nil, nebula.NewNebulaError(
-			nebula.ErrorCode(string(response.Header.GetStatus().GetCode())),
+	} else if nebulaErr.ErrorCode(response.Header.GetStatus().GetCode()) != nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
+		return nil, nebulaErr.NewNebulaError(
+			nebulaErr.ErrorCode(string(response.Header.GetStatus().GetCode())),
 			string(response.Header.GetStatus().GetMessage()),
 		)
 	}
@@ -379,11 +380,11 @@ func (c *metaClient) execute(fn func() (responseHeader, error)) (responseHeader,
 		return nil, err
 	}
 	header := resp.GetHeader()
-	if nebula.ErrorFromBytes(header.GetStatus().GetCode()) == nebula.ERROR_SUCCESSFUL_COMPLETION {
+	if internel_error.ErrorFromBytes(header.GetStatus().GetCode()) == nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
 		return resp, nil
 	} else {
-		return nil, nebula.NewNebulaError(
-			nebula.ErrorCode(string(header.GetStatus().GetCode())),
+		return nil, nebulaErr.NewNebulaError(
+			nebulaErr.ErrorCode(string(header.GetStatus().GetCode())),
 			string(header.GetStatus().GetMessage()),
 		)
 	}
@@ -395,7 +396,7 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 		return nil, fmt.Errorf("invalid response")
 	}
 	leader := header.GetLeader()
-	errorCode := nebula.ErrorFromBytes(header.GetStatus().GetCode())
+	errorCode := internel_error.ErrorFromBytes(header.GetStatus().GetCode())
 	result := &HeaderResponse{
 		Code: errorCode,
 		Msg:  string(header.GetStatus().GetMessage()),

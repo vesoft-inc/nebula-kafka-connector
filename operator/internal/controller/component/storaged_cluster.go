@@ -25,7 +25,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"k8s.io/klog/v2"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebulaErr "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
@@ -207,7 +207,7 @@ func (s *storagedCluster) syncStoragedPVC(nc *v1alpha1.NebulaCluster) error {
 func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string) error {
 	req := meta.NewInitClusterReq(clusterName)
 	if err := metaClient.InitCluster(req); err != nil {
-		if ne, ok := err.(*nebula.NebulaError); ok {
+		if ne, ok := err.(*nebulaErr.NebulaError); ok {
 			if ne.Code() != "NI203" {
 				klog.Errorf("init cluster failed: %v", err)
 				return err
@@ -248,7 +248,7 @@ func addStorageServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldR
 		host := nc.StoragedComponent().GetPodFQDN(i)
 		hostReq := meta.NewAddHostReq(host, nc.Name, v1alpha1.AgentPort)
 		if err := metaClient.AddHost(hostReq); err != nil {
-			if ne, ok := err.(*nebula.NebulaError); ok {
+			if ne, ok := err.(*nebulaErr.NebulaError); ok {
 				if ne.Code() != "NI104" {
 					klog.Errorf("add host failed: %v", err)
 					return err
@@ -260,7 +260,7 @@ func addStorageServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldR
 		}
 		svcReq := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeStoraged, nc.Name)
 		if err := metaClient.AddService(svcReq); err != nil {
-			if ne, ok := err.(*nebula.NebulaError); ok {
+			if ne, ok := err.(*nebulaErr.NebulaError); ok {
 				if ne.Code() != "NI107" {
 					klog.Errorf("add storaged service failed: %v", err)
 					return err

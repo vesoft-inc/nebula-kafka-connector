@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 )
@@ -73,7 +73,7 @@ func (c *metaClient) ChangePassword(req *ChangePasswordReq) error {
 		return err
 	}
 	// retry for change password
-	if nebula.ErrorCode(resp.Header.GetStatus().GetCode()) != nebula.ERROR_LEADER_CHANGED {
+	if errors.ErrorCode(resp.Header.GetStatus().GetCode()) != errors.ERROR_LEADER_CHANGED {
 		return responseIsErr(resp)
 	}
 	leader := resp.Header.GetLeader()

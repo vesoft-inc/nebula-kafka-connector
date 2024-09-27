@@ -4,59 +4,66 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/decode"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type resultSet struct {
 	index   int
-	result  *graph.ResultTable
+	table   *decode.ResultTable
 	summary *graph.Summary
 	cursor  []byte
 }
 
 type rowData struct {
 	resultSet *resultSet
-	values    []Value
+	values    []types.Value
 }
 
 func (rs *resultSet) HasNext() bool {
-	if rs.result == nil {
+	if rs.table == nil {
 		return false
 	}
-	return rs.index < len(rs.result.Records)
+	return rs.index < int(rs.table.NumRecords())
 }
 
-func (rs *resultSet) Next() (Row, error) {
+func (rs *resultSet) Next() (types.Row, error) {
 	if !rs.HasNext() {
 		return nil, io.EOF
 	}
-
-	values := rs.result.GetRecords()[rs.index].Values
 	row := &rowData{
 		resultSet: rs,
-		values:    make([]Value, 0, len(values)),
+		values:    make([]types.Value, 0),
 	}
-
-	for _, v := range values {
-		row.values = append(row.values, &grpcValue{data: v})
+	vs, err := rs.table.Next()
+	if err != nil {
+		return nil, err
 	}
-
 	rs.index++
+	for _, v := range vs {
+		row.values = append(row.values, v)
+	}
+
 	return row, nil
 }
 
 func (rs *resultSet) RowSize() int {
-	if rs.result == nil {
+	if rs.table == nil {
 		return 0
 	}
-	return len(rs.result.GetRecords())
+	return int(rs.table.NumRecords())
 }
 
-func (rs *resultSet) ColumnTypes() []ColumnType {
-	return nil
+func (rs *resultSet) ColumnTypes() []types.ColumnType {
+	if rs.table == nil {
+		return nil
+	}
+	return rs.table.ColumnTypes()
 }
 
-func (rs *resultSet) Summary() Summary {
+func (rs *resultSet) Summary() types.Summary {
 	if rs.summary == nil {
 		return nil
 	}
@@ -68,15 +75,10 @@ func (rs *resultSet) Cursor() []byte {
 }
 
 func (rs *resultSet) Columns() []string {
-	if rs.result == nil {
+	if rs.table == nil {
 		return nil
 	}
-	names := rs.result.ColumnNames
-	var cols []string
-	for _, name := range names {
-		cols = append(cols, string(name))
-	}
-	return cols
+	return rs.table.ColumnNames()
 }
 
 func (rs *resultSet) Scan(dsts ...any) error {
@@ -91,7 +93,7 @@ func (rs *resultSet) Scan(dsts ...any) error {
 
 	values := row.Values()
 	if len(dsts) != len(values) {
-		return errInternel(fmt.Sprintf("scanner length not match values length"))
+		return internel_error.ErrInternel(fmt.Sprintf("scanner length not match values length"))
 	}
 	for i, dst := range dsts {
 		if err := rs.convertValue(values[i], dst); err != nil {
@@ -101,7 +103,7 @@ func (rs *resultSet) Scan(dsts ...any) error {
 	return nil
 }
 
-func (rs *resultSet) convertValue(src Value, dst any) error {
+func (rs *resultSet) convertValue(src types.Value, dst any) error {
 	switch dst.(type) {
 	case *int, *uint, *float32, *float64, *string, *bool:
 		return rs.convertBasicValue(src, dst)
@@ -113,101 +115,101 @@ func (rs *resultSet) convertValue(src Value, dst any) error {
 	return fmt.Errorf("cannot scan the value, unsupported type: %T", dst)
 }
 
-func (rs *resultSet) convertBasicValue(src Value, dst any) error {
+func (rs *resultSet) convertBasicValue(src types.Value, dst any) error {
 	if src.IsNull() {
 		return fmt.Errorf("value is null")
 	}
 	switch d := dst.(type) {
 	case *int:
 		switch src.GetType() {
-		case ValueTypeInt8:
+		case types.ValueTypeInt8:
 			v, _ := src.AsInt8()
 			*d = int(v)
-		case ValueTypeInt16:
+		case types.ValueTypeInt16:
 			v, _ := src.AsInt16()
 			*d = int(v)
-		case ValueTypeInt32:
+		case types.ValueTypeInt32:
 			v, _ := src.AsInt32()
 			*d = int(v)
-		case ValueTypeInt64:
+		case types.ValueTypeInt64:
 			v, _ := src.AsInt64()
 			*d = int(v)
-		case ValueTypeUInt8:
+		case types.ValueTypeUInt8:
 			v, _ := src.AsUInt8()
 			*d = int(v)
-		case ValueTypeUInt16:
+		case types.ValueTypeUInt16:
 			v, _ := src.AsUInt16()
 			*d = int(v)
-		case ValueTypeUInt32:
+		case types.ValueTypeUInt32:
 			v, _ := src.AsInt32()
 			*d = int(v)
-		case ValueTypeUInt64:
+		case types.ValueTypeUInt64:
 			v, _ := src.AsInt64()
 			*d = int(v)
 		default:
-			return errInternel(fmt.Sprintf("value type not match"))
+			return internel_error.ErrInternel(fmt.Sprintf("value type not match"))
 		}
 	case *uint:
 		switch src.GetType() {
-		case ValueTypeUInt8:
+		case types.ValueTypeUInt8:
 			v, _ := src.AsUInt8()
 			*d = uint(v)
-		case ValueTypeUInt16:
+		case types.ValueTypeUInt16:
 			v, _ := src.AsUInt16()
 			*d = uint(v)
-		case ValueTypeUInt32:
+		case types.ValueTypeUInt32:
 			v, _ := src.AsInt32()
 			*d = uint(v)
-		case ValueTypeUInt64:
+		case types.ValueTypeUInt64:
 			v, _ := src.AsInt64()
 			*d = uint(v)
 		default:
-			return errInternel(fmt.Sprintf("value type not match"))
+			return internel_error.ErrInternel(fmt.Sprintf("value type not match"))
 		}
 	case *float32:
 		switch src.GetType() {
-		case ValueTypeFloat:
+		case types.ValueTypeFloat:
 			v, _ := src.AsFloat()
 			*d = float32(v)
 		default:
-			return errInternel(fmt.Sprintf("value type not match"))
+			return internel_error.ErrInternel(fmt.Sprintf("value type not match"))
 		}
 	case *float64:
 		switch src.GetType() {
-		case ValueTypeFloat:
+		case types.ValueTypeFloat:
 			v, _ := src.AsFloat()
 			*d = float64(v)
-		case ValueTypeDouble:
+		case types.ValueTypeDouble:
 			v, _ := src.AsDouble()
 			*d = float64(v)
 		default:
-			return errInternel(fmt.Sprintf("value type not match"))
+			return internel_error.ErrInternel(fmt.Sprintf("value type not match"))
 		}
 	case *string:
 		switch src.GetType() {
-		case ValueTypeString:
+		case types.ValueTypeString:
 			v, _ := src.AsString()
 			*d = string(v)
 		default:
-			return errInternel(fmt.Sprintf("value type not match"))
+			return internel_error.ErrInternel(fmt.Sprintf("value type not match"))
 		}
 	case *bool:
 		switch src.GetType() {
-		case ValueTypeBool:
+		case types.ValueTypeBool:
 			v, _ := src.AsBool()
 			*d = bool(v)
 		default:
-			return errInternel(fmt.Sprintf("value type not match"))
+			return internel_error.ErrInternel(fmt.Sprintf("value type not match"))
 		}
 	}
 	return nil
 }
 
-func (rd *rowData) Values() []Value {
+func (rd *rowData) Values() []types.Value {
 	return rd.values
 }
 
-func (rd *rowData) GetValueByName(name string) (Value, error) {
+func (rd *rowData) GetValueByName(name string) (types.Value, error) {
 	names := rd.resultSet.Columns()
 	var index int = -1
 	for i, n := range names {
@@ -217,14 +219,14 @@ func (rd *rowData) GetValueByName(name string) (Value, error) {
 		}
 	}
 	if index == -1 {
-		return nil, errInternel(fmt.Sprintf("column %s not found", name))
+		return nil, internel_error.ErrInternel(fmt.Sprintf("column %s not found", name))
 	}
 	return rd.values[index], nil
 }
 
-func (rd *rowData) GetValueByIndex(index int) (Value, error) {
+func (rd *rowData) GetValueByIndex(index int) (types.Value, error) {
 	if index < 0 || index >= len(rd.values) {
-		return nil, errInternel(fmt.Sprintf("index out of range"))
+		return nil, internel_error.ErrInternel(fmt.Sprintf("index out of range"))
 	}
 	return rd.values[index], nil
 }

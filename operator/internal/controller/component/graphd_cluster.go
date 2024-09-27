@@ -27,7 +27,7 @@ import (
 	"k8s.io/klog/v2"
 	"k8s.io/utils/pointer"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebulaErr "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/apps/v1alpha1"
 	"github.com/vesoft-inc/nebula-ng-tools/operator/apis/pkg/annotation"
@@ -257,7 +257,7 @@ func addGraphdServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldRe
 		host := nc.GraphdComponent().GetPodFQDN(i)
 		hostReq := meta.NewAddHostReq(host, nc.Name, v1alpha1.AgentPort)
 		if err := metaClient.AddHost(hostReq); err != nil {
-			if ne, ok := err.(*nebula.NebulaError); ok {
+			if ne, ok := err.(*nebulaErr.NebulaError); ok {
 				if ne.Code() != "NI104" {
 					klog.Errorf("add host failed: %v", err)
 					return err
@@ -269,7 +269,7 @@ func addGraphdServices(metaClient meta.Client, nc *v1alpha1.NebulaCluster, oldRe
 		}
 		svcReq := meta.NewAddServiceReq(host, uint32(port), meta.ServiceTypeGraphd, nc.Name)
 		if err := metaClient.AddService(svcReq); err != nil {
-			if ne, ok := err.(*nebula.NebulaError); ok {
+			if ne, ok := err.(*nebulaErr.NebulaError); ok {
 				if ne.Code() != "NI107" {
 					klog.Errorf("add graphd service failed: %v", err)
 					return err

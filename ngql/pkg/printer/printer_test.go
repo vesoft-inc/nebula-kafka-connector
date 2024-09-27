@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type dummyPlan struct{}
@@ -79,5 +79,4 @@ func TestGetField(t *testing.T) {
 	p := &dummyPlan{}
 	v := fieldValue(p, "Name")
 	assert.Equal(t, "dummy", v)
-
 }

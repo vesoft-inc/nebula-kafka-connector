@@ -1,6 +1,9 @@
 package nebula_ng
 
-import "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+import (
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
+)
 
 type (
 	summary struct {
@@ -34,11 +37,11 @@ func (s *summary) ExplainType() string {
 	return string(s.summary.ExplainType)
 }
 
-func (s *summary) PlanInfo() PlanInfo {
+func (s *summary) PlanInfo() types.PlanInfo {
 	return &planInfo{s.summary.GetPlanInfo()}
 }
 
-func (s *summary) QueryStats() QueryStats {
+func (s *summary) QueryStats() types.QueryStats {
 	return &queryStats{s.summary.GetQueryStats()}
 }
 
@@ -106,8 +109,8 @@ func (p *planInfo) OtherStatsJson() []byte {
 	return p.planInfo.OtherStatsJson
 }
 
-func (p *planInfo) Children() []PlanInfo {
-	children := make([]PlanInfo, 0, len(p.planInfo.Children))
+func (p *planInfo) Children() []types.PlanInfo {
+	children := make([]types.PlanInfo, 0, len(p.planInfo.Children))
 	for _, child := range p.planInfo.Children {
 		children = append(children, &planInfo{planInfo: child})
 	}

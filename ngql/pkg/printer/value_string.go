@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	nebula "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type stringFunc func(nebula.Value) string

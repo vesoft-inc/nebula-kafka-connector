@@ -7,19 +7,22 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+
+	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type (
 	driverPool struct {
 		ctx      context.Context
 		mu       sync.Mutex
-		freeConn []Client
+		freeConn []types.Client
 		// When driverConn.ExecuteContext is called, it will retry to get a connection.
 		// The connMap key is the connection.
-		connMap map[Client]struct{}
+		connMap map[types.Client]struct{}
 		// if the max open connection is full, would block
 		// and wait for a free connection
-		requestConnChan map[uint64]chan Client
+		requestConnChan map[uint64]chan types.Client
 		requestCount    uint64
 		// open connection channel
 		openerCh              chan struct{}
@@ -57,8 +60,8 @@ const (
 	openConnChannelSize = 1000000
 )
 
-var _ Client = &connection{}
-var _ Result = &resultSet{}
+var _ types.Client = &connection{}
+var _ types.Result = &resultSet{}
 
 func (dp *driverPool) Close() error {
 	dp.closed.Store(true)
@@ -72,7 +75,7 @@ func (dp *driverPool) Close() error {
 	return nil
 }
 
-func (dp *driverPool) openNewConn(address string) (Client, error) {
+func (dp *driverPool) openNewConn(address string) (types.Client, error) {
 	dc, err := NewNebulaClient(address, dp.connCfg.username, dp.connCfg.password,
 		WithClientConnectTimeout(dp.connCfg.connectTimeout),
 		WithClientRequestTimeout(dp.connCfg.requestTimeout),
@@ -188,9 +191,9 @@ func (dp *driverPool) openMinConn() {
 	}
 }
 
-func (dp *driverPool) getClient(timeout context.Context) (Client, error) {
+func (dp *driverPool) getClient(timeout context.Context) (types.Client, error) {
 	var (
-		dc Client
+		dc types.Client
 	)
 	dp.mu.Lock()
 	if len(dp.freeConn) == 0 {
@@ -198,7 +201,7 @@ func (dp *driverPool) getClient(timeout context.Context) (Client, error) {
 			dp.openerCh <- struct{}{}
 		}
 
-		req := make(chan Client, 1)
+		req := make(chan types.Client, 1)
 		if dp.requestCount == math.MaxUint64 {
 			dp.requestCount = 0
 		} else {
@@ -212,7 +215,7 @@ func (dp *driverPool) getClient(timeout context.Context) (Client, error) {
 		case <-timeout.Done():
 			close(req)
 			delete(dp.requestConnChan, index)
-			return nil, errInternel("cannot get the valid connection")
+			return nil, internel_error.ErrInternel("cannot get the valid connection")
 		case conn := <-req:
 			dc = conn.(*driverConn)
 		}
@@ -224,14 +227,14 @@ func (dp *driverPool) getClient(timeout context.Context) (Client, error) {
 	return dc, nil
 }
 
-func (dp *driverPool) GetClient() (Client, error) {
+func (dp *driverPool) GetClient() (types.Client, error) {
 
 	var lastErr error
 	timeout, cancel := context.WithTimeout(context.Background(), dp.maxWait)
 	defer cancel()
 	for {
 		if timeout.Err() != nil {
-			return nil, errInternel("cannot get the valid connection, err:" + lastErr.Error())
+			return nil, internel_error.ErrInternel("cannot get the valid connection, err:" + lastErr.Error())
 		}
 		dc, err := dp.getClient(timeout)
 		if err != nil {
@@ -244,15 +247,15 @@ func (dp *driverPool) GetClient() (Client, error) {
 	}
 }
 
-func (dp *driverPool) PutClient(c Client) error {
+func (dp *driverPool) PutClient(c types.Client) error {
 	if c == nil {
-		return errInternel("connection is nil")
+		return internel_error.ErrInternel("connection is nil")
 	}
 
 	dc, ok := c.(*driverConn)
 	if !ok {
 		// never happen from nebula client
-		return errInternel("invalid client type")
+		return internel_error.ErrInternel("invalid client type")
 	}
 
 	dp.mu.Lock()
@@ -261,23 +264,23 @@ func (dp *driverPool) PutClient(c Client) error {
 }
 
 // putNewConn put a new connection to the pool
-func (dp *driverPool) putNewConn(dc Client) {
+func (dp *driverPool) putNewConn(dc types.Client) {
 	dp.mu.Lock()
 	defer dp.mu.Unlock()
 	dp.connMap[dc] = struct{}{}
 	_ = dp.putConnLocked(dc)
 }
 
-func (dp *driverPool) putConnLocked(client Client) error {
+func (dp *driverPool) putConnLocked(client types.Client) error {
 	dc, ok := client.(*driverConn)
 	if !ok {
-		return errInternel("invalid client type")
+		return internel_error.ErrInternel("invalid client type")
 	}
 	// if client is closed by user, remove from pool,
 	// and then raise an error.
 	if dc.IsClosed() {
 		delete(dp.connMap, client)
-		return errConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 
 	if dp.connMaxLifeTime > 0 && time.Since(dc.createAt) > dp.connMaxLifeTime {

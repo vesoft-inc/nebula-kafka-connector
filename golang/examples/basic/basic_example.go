@@ -5,6 +5,7 @@ import (
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 const (
@@ -17,7 +18,7 @@ const (
 // Initialize logger
 var log = nebula.DefaultLogger
 
-func printResult(res nebula.Result) error {
+func printResult(res types.Result) error {
 	columns := res.Columns()
 	for _, col := range columns {
 		fmt.Printf("|")
@@ -41,7 +42,7 @@ func printResult(res nebula.Result) error {
 	return nil
 }
 
-func runQuery(client nebula.Client, query string) error {
+func runQuery(client types.Client, query string) error {
 	resp, err := client.Execute(query)
 	if err != nil {
 		return err

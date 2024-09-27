@@ -1,10 +1,23 @@
-package nebula_ng
+package errors
 
 import (
 	"fmt"
+
+	goerr "github.com/pkg/errors"
 )
 
 type ErrorCode string
+
+// TODO add error code in future
+type NebulaError struct {
+	err       error
+	errorCode ErrorCode
+	errorMsg  string
+}
+
+type formater interface {
+	Format(s fmt.State, verb rune)
+}
 
 var (
 	// Error in client side
@@ -427,141 +440,34 @@ var (
 	ERROR_JOB_PLACEHOLDER_ERROR ErrorCode = "NJ099"
 )
 
-// TODO add error code in future
-type NebulaError struct {
-	errorCode   ErrorCode
-	errorFormat string
-	errorArgs   []interface{}
-}
-
 func NewNebulaError(code ErrorCode, format string, args ...interface{}) error {
-	return &NebulaError{
-		errorCode:   code,
-		errorFormat: format,
-		errorArgs:   args,
+	r := &NebulaError{
+		err:       goerr.New(fmt.Sprintf(format, args...)),
+		errorCode: code,
+		errorMsg:  fmt.Sprintf(format, args...),
 	}
+	return r
 }
 
 func (e *NebulaError) Error() string {
-	msg := fmt.Sprintf(e.errorFormat, e.errorArgs...)
-	return fmt.Sprintf("[%s]: %s", e.errorCode, msg)
+	return fmt.Sprintf("[%s]: %s", e.errorCode, e.errorMsg)
 }
 
 func (e *NebulaError) Code() ErrorCode {
 	return e.errorCode
 }
 
-func errAddressNotValid(address string, msg string) error {
-	var (
-		format string
-		args   []interface{}
-	)
-
-	if msg == "" {
-		format = "address %s is not valid"
-		args = []interface{}{address}
-	} else {
-		format = "address %s is not valid, %s"
-		args = []interface{}{address, msg}
-	}
-	return &NebulaError{
-		errorCode:   ERROR_ADDRESS_NOT_VALID,
-		errorFormat: format,
-		errorArgs:   args,
-	}
+func (e *NebulaError) Format(s fmt.State, verb rune) {
+	f := e.err.(formater)
+	f.Format(s, verb)
 }
 
-func errConnCannotOpen(host string, port int, msg string) error {
-	return &NebulaError{
-		errorCode:   ERROR_CANNOT_OPEN,
-		errorFormat: "cannot open connection to %s:%d, %s",
-		errorArgs:   []interface{}{host, port, msg},
+func Wrap(err error, msg string) error {
+	nbErr, ok := err.(*NebulaError)
+	if !ok {
+		return goerr.Wrap(err, msg)
 	}
-}
-
-func errConnBroken(host string, port int) error {
-	return &NebulaError{
-		errorCode:   ERROR_CONN_IS_BROKEN,
-		errorFormat: "connection to %s:%d is broken",
-		errorArgs:   []interface{}{host, port},
-	}
-}
-
-func errConnConnectTimeout(host string, port int) error {
-	return &NebulaError{
-		errorCode:   ERROR_CONN_CONNECT_TIMEOUT,
-		errorFormat: "connection to %s:%d timeout",
-		errorArgs:   []interface{}{host, port},
-	}
-}
-
-func errConnRequestTimeout(host string, port int) error {
-	return &NebulaError{
-		errorCode:   ERROR_CONN_REQUEST_TIMEOUT,
-		errorFormat: "request to %s:%d timeout",
-		errorArgs:   []interface{}{host, port},
-	}
-}
-
-func errConnIsClosed(host string, port int) error {
-	return &NebulaError{
-		errorCode:   ERROR_CONN_IS_CLOSED,
-		errorFormat: "connection to %s:%d is closed",
-		errorArgs:   []interface{}{host, port},
-	}
-}
-
-func errWaitPoolTimeout() error {
-	return &NebulaError{
-		errorCode:   ERROR_WAIT_POOL_TIMEOUT,
-		errorFormat: "get from pool timeout",
-		errorArgs:   []interface{}{},
-	}
-}
-
-func errIllegal(msg string) error {
-	return &NebulaError{
-		errorCode:   ERROR_ILLEGAL, // TODO need to add error code
-		errorFormat: "Illegal error, %s",
-		errorArgs:   []interface{}{msg},
-	}
-}
-
-func errType(msg string) error {
-	return &NebulaError{
-		errorCode:   ERROR_TYPE,
-		errorFormat: "Type error, %s",
-		errorArgs:   []interface{}{msg},
-	}
-}
-
-func errTLS(msg string) error {
-    return &NebulaError{
-        errorCode:   ERROR_TLS_ERROR,
-        errorFormat: "TLS error: %s",
-        errorArgs:   []interface{}{msg},
-    }
-}
-
-// client internel error
-// user should not see this error
-func errInternel(msg string) error {
-	return &NebulaError{
-		errorCode:   ERROR_CLIENT_INTERNEL,
-		errorFormat: "Internel error, %s",
-		errorArgs:   []interface{}{msg},
-	}
-}
-
-func errServerResponse(code string, msg string) error {
-	// TODO should set the error code
-	return &NebulaError{
-		errorCode:   ErrorCode(code),
-		errorFormat: "%s",
-		errorArgs:   []interface{}{msg},
-	}
-}
-
-func ErrorFromBytes(c []byte) ErrorCode {
-	return ErrorCode(c)
+	nbErr.err = goerr.Wrap(nbErr.err, msg)
+	nbErr.errorMsg = fmt.Sprintf("%s: %s", msg, nbErr.errorMsg)
+	return nbErr
 }
