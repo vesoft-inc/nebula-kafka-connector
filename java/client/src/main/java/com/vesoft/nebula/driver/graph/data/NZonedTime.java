@@ -1,43 +1,60 @@
 package com.vesoft.nebula.driver.graph.data;
 
 import com.vesoft.nebula.driver.graph.utils.ZoneOffsetUtil;
-import com.vesoft.nebula.proto.common.ZonedTime;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 public class NZonedTime {
 
-    private final ZonedTime zonedTime;
+    private final int        hour;
+    private final int        minute;
+    private final int        second;
+    private final int        microSec;
+    private final ZoneOffset timeZoneOffset;
 
-    public NZonedTime(ZonedTime zonedTime) {
-        this.zonedTime = zonedTime;
+    public NZonedTime(int hour, int minute, int second, int microSec, ZoneOffset timeZoneOffset) {
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+        this.microSec = microSec;
+        this.timeZoneOffset = timeZoneOffset;
+    }
+
+    public NZonedTime(LocalTime localTime, ZoneOffset timeZoneOffset) {
+        this.hour = localTime.getHour();
+        this.minute = localTime.getMinute();
+        this.second = localTime.getSecond();
+        this.microSec = localTime.getNano() / 1000;
+        this.timeZoneOffset = timeZoneOffset;
     }
 
     /**
      * @return utc Time hour
      */
     public int getHour() {
-        return zonedTime.getHour();
+        return hour;
     }
 
     /**
      * @return utc Time minute
      */
     public int getMinute() {
-        return zonedTime.getMinute();
+        return minute;
     }
 
     /**
      * @return utc Time second
      */
     public int getSecond() {
-        return zonedTime.getSec();
+        return second;
     }
 
     /**
      * @return utc Time microsec
      */
     public int getMicrosec() {
-        return zonedTime.getMicrosec();
+        return microSec;
     }
 
     /**
@@ -46,16 +63,18 @@ public class NZonedTime {
      * @return offset
      */
     public int getOffset() {
-        return zonedTime.getOffset();
+        return timeZoneOffset.getTotalSeconds();
     }
 
 
     @Override
     public String toString() {
         return String.format("%02d:%02d:%02d.%06d%s",
-                zonedTime.getHour(), zonedTime.getMinute(),
-                zonedTime.getSec(), zonedTime.getMicrosec(),
-                ZoneOffsetUtil.buildOffset(zonedTime.getOffset()));
+                             hour,
+                             minute,
+                             second,
+                             microSec,
+                             ZoneOffsetUtil.buildOffset(getOffset()));
     }
 
     @Override
@@ -67,14 +86,15 @@ public class NZonedTime {
             return false;
         }
         NZonedTime that = (NZonedTime) o;
-        return zonedTime.getHour() == that.getHour()
-                && zonedTime.getHour() == that.getMinute()
-                && zonedTime.getSec() == that.getSecond()
-                && zonedTime.getMicrosec() == that.getMicrosec();
+        return hour == that.getHour()
+                && minute == that.getMinute()
+                && second == that.getSecond()
+                && microSec == that.getMicrosec()
+                && getOffset() == that.getOffset();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(zonedTime, getOffset());
+        return Objects.hash(hour, minute, second, microSec, getOffset());
     }
 }

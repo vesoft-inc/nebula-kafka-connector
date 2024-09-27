@@ -1,14 +1,16 @@
 package com.vesoft.nebula.driver.graph.data;
 
 import com.google.common.base.Charsets;
-import com.google.protobuf.ByteString;
 import com.vesoft.nebula.driver.graph.ErrorCode;
+import com.vesoft.nebula.driver.graph.decode.ResultTable;
+import com.vesoft.nebula.driver.graph.decode.Row;
 import com.vesoft.nebula.proto.common.Value;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.QueryStats;
-import com.vesoft.nebula.proto.graph.Row;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -18,30 +20,31 @@ import java.util.function.Consumer;
 
 public class ResultSet {
     private final ExecuteResponse response;
-    private final List<String> columnNames = new ArrayList<>();
-    private final Charset charset = Charsets.UTF_8;
+    private final ResultTable     resultTable;
+    private final List<String>    columnNames = new ArrayList<>();
+    private final Charset         charset     = Charsets.UTF_8;
 
     private boolean isEmpty = false;
 
     private volatile AtomicInteger index = new AtomicInteger(0);
 
-    private final int size;
+    private final long size;
 
     public static class Record implements Iterable<ValueWrapper> {
-        private final List<ValueWrapper> colValues = new ArrayList<>();
-        private List<String> columnNames = new ArrayList<>();
+        private final List<ValueWrapper> colValues   = new ArrayList<>();
+        private       List<String>       columnNames = new ArrayList<>();
 
         public Record(List<String> columnNames, Row row) {
             if (columnNames == null) {
                 return;
             }
 
-            if (row == null || row.getValuesList().isEmpty()) {
+            if (row == null || row.getValues().isEmpty()) {
                 return;
             }
 
-            for (Value value : row.getValuesList()) {
-                this.colValues.add(new ValueWrapper(value));
+            for (ValueWrapper value : row.getValues()) {
+                this.colValues.add(value);
             }
 
             this.columnNames = columnNames;
@@ -70,7 +73,7 @@ public class ResultSet {
                 valueStr.add(v.toString());
             }
             return String.format("ColumnName: %s, Values: %s",
-                    columnNames.toString(), valueStr.toString());
+                                 columnNames.toString(), valueStr.toString());
         }
 
         /**
@@ -137,14 +140,13 @@ public class ResultSet {
         if (resp == null) {
             throw new RuntimeException("got null object for server's response");
         }
+        this.resultTable = new ResultTable(resp.getResult());
         this.response = resp;
         if (!resp.hasResult()) {
             size = 0;
         } else {
-            for (ByteString column : resp.getResult().getColumnNamesList()) {
-                this.columnNames.add(column.toString(charset));
-            }
-            size = resp.getResult().getRecordsCount();
+            this.columnNames.addAll(resultTable.getColumnNames());
+            size = resultTable.getTotalNumRecords();
         }
         isEmpty = size == 0;
     }
@@ -221,7 +223,7 @@ public class ResultSet {
      *
      * @return int
      */
-    public int rowSize() {
+    public long rowSize() {
         if (isEmpty) {
             return 0;
         }
@@ -245,30 +247,9 @@ public class ResultSet {
         if (!hasNext()) {
             throw new NoSuchElementException("no more row record data");
         }
-        Row row = response.getResult().getRecords(index.getAndIncrement());
+        Row row = this.resultTable.next();
+        index.getAndIncrement();
         return new Record(columnNames, row);
-    }
-
-    /**
-     * get col values on the column key
-     *
-     * @param columnName the column name
-     * @return the list of ValueWrapper
-     */
-    public List<ValueWrapper> colValues(String columnName) {
-        if (isEmpty) {
-            throw new RuntimeException("Empty data");
-        }
-        int index = columnNames.indexOf(columnName);
-        if (index < 0) {
-            throw new ArrayIndexOutOfBoundsException();
-        }
-        List<ValueWrapper> values = new ArrayList<>();
-        List<Row> records = response.getResult().getRecordsList();
-        for (int i = 0; i < records.size(); i++) {
-            values.add(new ValueWrapper(records.get(i).getValues(index)));
-        }
-        return values;
     }
 
 
@@ -281,7 +262,7 @@ public class ResultSet {
         if (!response.hasSummary()) {
             return new ExtraInfo();
         }
-        ExtraInfo extraInfo = new ExtraInfo();
+        ExtraInfo  extraInfo  = new ExtraInfo();
         QueryStats queryStats = response.getSummary().getQueryStats();
         extraInfo.setAffectedNodes(queryStats.getNumAffectedNodes());
         extraInfo.setAffectedEdges(queryStats.getNumAffectedEdges());
@@ -290,19 +271,13 @@ public class ResultSet {
     }
 
     @Override
+    // TODO remove the print for data
     public String toString() {
         if (!isSucceeded()) {
             return response.getStatus().getMessage().toString(charset);
         }
         List<String> rowStrs = new ArrayList<>();
-        for (Row row : response.getResult().getRecordsList()) {
-            List<String> valueStrs = new ArrayList<>();
-            for (Value value : row.getValuesList()) {
-                valueStrs.add((new ValueWrapper(value)).toString());
-            }
-            String values = "[" + String.join(",", valueStrs) + "]";
-            rowStrs.add(values);
-        }
+        rowStrs.toString();
         return String.format("ColumnName: %s,\n Rows: %s", columnNames, rowStrs);
     }
 }

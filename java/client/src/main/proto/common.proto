@@ -218,11 +218,12 @@ message HostAddress {
 }
 
 enum ServiceType {
-    UNKNOWN = 0;
-    STORAGE = 1;
-    GRAPH   = 2;
-    META    = 3;
-    ALL     = 4;
+    UNKNOWN  = 0;
+    STORAGE  = 1;
+    GRAPH    = 2;
+    META     = 3;
+    ANALYTIC = 4;
+    ALL      = 5;
 }
 
 message Status {

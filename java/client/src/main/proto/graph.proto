@@ -17,6 +17,8 @@
 syntax = "proto3";
 
 import "common.proto";
+import "vector.proto";
+
 /**
  * Data structures defined in this file is mainly for data exchanging.
  * On the server side, the compute engine has its own data representations,
@@ -38,15 +40,6 @@ service GraphService {
     rpc Authenticate(AuthRequest) returns (AuthResponse) {}
     rpc Execute(ExecuteRequest) returns (ExecuteResponse) {}
     rpc StreamingExecute(ExecuteRequest) returns (stream ExecuteResponse) {}
-}
-
-message Row {
-    repeated nebula.proto.common.Value values = 1;
-}
-
-message ResultTable {
-    repeated bytes column_names = 1;
-    repeated Row   records      = 2;
 }
 
 message QueryStats {
@@ -85,6 +78,7 @@ message Summary {
     bytes       explain_type = 2;
     PlanInfo    plan_info    = 3;
     QueryStats  query_stats  = 4;
+    bytes       log_stream   = 5;
 }
 
 message ExecuteRequest {
@@ -93,10 +87,10 @@ message ExecuteRequest {
 }
 
 message ExecuteResponse {
-    nebula.proto.common.Status status  = 1;
-    ResultTable                result  = 2;
-    Summary                    summary = 3;
-    bytes                      cursor  = 4;
+    nebula.proto.common.Status               status  = 1;
+    nebula.proto.vector.VectorResultTable    result  = 2;
+    Summary                                  summary = 3;
+    bytes                                    cursor  = 4;
 }
 
 message AuthRequest {

@@ -1,5 +1,8 @@
 package nebula;
 
+import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.net.NebulaClient;
+import org.junit.Assert;
 import org.ldbcouncil.snb.driver.workloads.interactive.*;
 import org.ldbcouncil.snb.impls.workloads.converter.Converter;
 import org.ldbcouncil.snb.impls.workloads.interactive.InteractiveTest;
@@ -8,6 +11,8 @@ import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -17,9 +22,9 @@ public class NebulaInteractiveTest extends InteractiveTest {
         return new NebulaConverter();
     }
 
-    String endpoint = "127.0.0.1:3713";
-    String user = "nebula";
-    String password = "123";
+    String endpoint = "192.168.8.6:5820";
+    String user = "root";
+    String password = "Nebula123";
     String queryDir = "queries";
     String requestTimeout = "500";
 
@@ -45,19 +50,43 @@ public class NebulaInteractiveTest extends InteractiveTest {
 
     @Test
     public void testConvertTime() throws ParseException {
-        System.out.println(NebulaConverter.convertDateTimesToEpoch("2012-09-13T02:40:59.360000"));
+        System.out.println(NebulaConverter.convertDateToEpoch("2012-09-13"));
     }
 
     @Test
     public void testLongToDateTime() throws ParseException {
-        String str = getConverter().convertDateTime(new Date(1331569323280L));
-        System.out.println(str);
-        Long origin = NebulaConverter.convertDateTimesToEpoch(str);
+        Long origin = NebulaConverter.convertDateToEpoch(new Date(1331569323280L));
         System.out.println(origin);
+        System.out.println(new Date(1331569323280L));
 
         System.out.println(getConverter().convertDateTime(new Date(1331569323028L)));
         System.out.println(getConverter().convertDateTime(new Date(1347532512905L)));
 
+    }
+
+    @Test
+    public void testDateToLong(){
+
+        // TODO NODE 属性中的Date 解析有问题 查看下valueParser
+        NebulaConverter converter = new NebulaConverter();
+        Date date = new Date(492480000000L);
+
+        try {
+            long value = NebulaConverter.convertDateToEpoch(converter.convertDate(date));
+            NebulaClient client = NebulaClient.builder("192.168.15.8:9669","root","nebula").build();
+            ResultSet    res    = client.execute("use sf10 match(v:Person) where v.id=10995116304675 return v.birthday");
+            while(res.hasNext()){
+                ResultSet.Record record        = res.next();
+                LocalDate        birthday      = record.get(0).asDate();
+                String           formatPattern = "yyyy-MM-dd";
+                SimpleDateFormat sdf           = new SimpleDateFormat(formatPattern);
+                String           formattedDate = sdf.format(converter.convertLocalDateToDate(birthday));
+                System.out.println(formattedDate);
+            }
+            Assert.assertEquals(492480000000L, NebulaConverter.convertDateToEpoch(converter.convertDate(date)));
+        }catch (Exception e){
+            Assert.fail(e.getMessage());
+        }
     }
 
     @Test

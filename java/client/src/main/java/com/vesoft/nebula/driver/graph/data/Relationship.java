@@ -1,26 +1,69 @@
 package com.vesoft.nebula.driver.graph.data;
 
-import com.vesoft.nebula.proto.common.Edge;
-import com.vesoft.nebula.proto.common.Value;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EDGE_TYPE_ID_SIZE;
+
+import com.vesoft.nebula.driver.graph.decode.struct.ResultGraphSchemas;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Relationship extends BaseDataObject {
-    private final Edge edge;
+
+    private final int                       graphId;
+    private final String                    graphName;
+    private final int                       edgeTypeId;
+    private final String                    edgeTypeName;
+    private final List<String>              labels;
+    private final long                      rank;
+    private final long                      srcId;
+    private final long                      dstId;
+    private final Direction                 direction;
+    private final Map<String, ValueWrapper> properties;
+
 
     /**
      * Relationship is a wrapper around the Edge type returned by nebula-graph
-     *
-     * @param edge the Edge type returned by nebula-graph
      */
-    public Relationship(Edge edge) {
-        if (edge == null) {
-            throw new RuntimeException("Input an null edge object");
+    public Relationship(int graphId,
+                        int edgeTypeId,
+                        long rank,
+                        long srcId,
+                        long dstId,
+                        Map<String, ValueWrapper> properties,
+                        ResultGraphSchemas graphSchemas) {
+        this.graphId = graphId;
+        this.graphName = graphSchemas.getGraphSchema(graphId).getGraphName();
+        this.edgeTypeId = edgeTypeId;
+        this.edgeTypeName = graphSchemas
+                .getGraphSchema(graphId)
+                .getEdgeSchema(edgeTypeId)
+                .getEdgeTypeName();
+        this.labels = graphSchemas
+                .getGraphSchema(graphId)
+                .getEdgeSchema(edgeTypeId)
+                .getEdgeLabels();
+        this.rank = rank;
+        this.srcId = srcId;
+        this.dstId = dstId;
+        this.properties = properties;
+
+        int edgeTypeMoveBits = EDGE_TYPE_ID_SIZE * 8 - 2;
+        int directionBits    = (edgeTypeId >> edgeTypeMoveBits) & 0x3;
+        switch (directionBits) {
+            case 0x0:
+                this.direction = Direction.OUTGOING;
+                break;
+            case 0x1:
+                this.direction = Direction.INCOMING;
+                break;
+            case 0x2:
+            case 0x3:
+                this.direction = Direction.UNDIRECTED;
+                break;
+            default:
+                this.direction = Direction.KNOWN;
         }
-        this.edge = edge;
     }
 
     /**
@@ -29,7 +72,7 @@ public class Relationship extends BaseDataObject {
      * @return String
      */
     public String getGraph() {
-        return edge.getGraph();
+        return graphName;
     }
 
     /**
@@ -38,7 +81,14 @@ public class Relationship extends BaseDataObject {
      * @return String
      */
     public String getType() {
-        return edge.getType();
+        return edgeTypeName;
+    }
+
+    /**
+     * get edge type id
+     */
+    public int getEdgeTypeId() {
+        return edgeTypeId;
     }
 
     /**
@@ -47,7 +97,7 @@ public class Relationship extends BaseDataObject {
      * @return true if edge is directed
      */
     public boolean isDirected() {
-        return edge.getDirection() == Edge.Direction.DIRECTED;
+        return direction == Direction.OUTGOING || direction == Direction.INCOMING;
     }
 
     /**
@@ -56,7 +106,7 @@ public class Relationship extends BaseDataObject {
      * @return list of edge labels
      */
     public List<String> getLabels() {
-        return edge.getLabelsList();
+        return labels;
     }
 
     /**
@@ -65,7 +115,7 @@ public class Relationship extends BaseDataObject {
      * @return long
      */
     public long getSrcId() {
-        return edge.getSrcId();
+        return srcId;
     }
 
     /**
@@ -74,7 +124,7 @@ public class Relationship extends BaseDataObject {
      * @return long
      */
     public long getDstId() {
-        return edge.getDstId();
+        return dstId;
     }
 
     /**
@@ -83,7 +133,7 @@ public class Relationship extends BaseDataObject {
      * @return long
      */
     public long getRank() {
-        return edge.getRank();
+        return rank;
     }
 
     /**
@@ -92,7 +142,7 @@ public class Relationship extends BaseDataObject {
      * @return the List of property names
      */
     public List<String> getColumnNames() {
-        return new ArrayList<>(edge.getPropertiesMap().keySet());
+        return new ArrayList<>(properties.keySet());
     }
 
     /**
@@ -102,8 +152,8 @@ public class Relationship extends BaseDataObject {
      */
     public List<ValueWrapper> getPropertyValues() {
         List<ValueWrapper> values = new ArrayList<>();
-        for (Map.Entry<String, Value> kv : edge.getPropertiesMap().entrySet()) {
-            values.add(new ValueWrapper(kv.getValue()));
+        for (Map.Entry<String, ValueWrapper> kv : properties.entrySet()) {
+            values.add(kv.getValue());
         }
         return values;
     }
@@ -113,11 +163,7 @@ public class Relationship extends BaseDataObject {
      *
      * @return HashMap, property name -> property value
      */
-    public HashMap<String, ValueWrapper> getProperties() {
-        HashMap<String, ValueWrapper> properties = new HashMap<>();
-        for (String key : edge.getPropertiesMap().keySet()) {
-            properties.put(key, new ValueWrapper(edge.getPropertiesMap().get(key)));
-        }
+    public Map<String, ValueWrapper> getProperties() {
         return properties;
     }
 
@@ -130,48 +176,46 @@ public class Relationship extends BaseDataObject {
             return false;
         }
         Relationship that = (Relationship) o;
-        if (edge.getDirection() == Edge.Direction.DIRECTED) {
-            return getRank() == that.getRank()
-                    && getSrcId() == that.getSrcId()
-                    && getDstId() == that.getDstId()
-                    && Objects.equals(getType(), that.getType());
-        } else {
-            return getRank() == that.getRank()
-                    && ((getSrcId() == that.getSrcId() && getDstId() == that.getDstId())
-                    || (getSrcId() == that.getDstId() && getDstId() == that.getSrcId()))
-                    && Objects.equals(getType(), that.getType());
-        }
+
+        return getRank() == that.getRank()
+                && ((getSrcId() == that.getSrcId() && getDstId() == that.getDstId())
+                || (getSrcId() == that.getDstId() && getDstId() == that.getSrcId()))
+                && Objects.equals(getType(), that.getType());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(edge, getDecodeType());
+        return Objects.hash(graphId, edgeTypeId, rank, srcId, dstId, getDecodeType());
     }
 
     @Override
     public String toString() {
-        List<String> propStrs = new ArrayList<>();
-        Map<String, ValueWrapper> props = getProperties();
+        List<String>              propStrs = new ArrayList<>();
+        Map<String, ValueWrapper> props    = getProperties();
         for (String key : props.keySet()) {
             propStrs.add(key + ":" + props.get(key).toString());
         }
-        if (edge.getDirection() == Edge.Direction.DIRECTED) {
+        if (direction != Direction.UNDIRECTED) {
             return String.format("(%d)-[%d@%s:%s{%s}]->(%d)",
-                    getSrcId(),
-                    getRank(),
-                    getType(),
-                    String.join("&", getLabels()),
-                    String.join(",", propStrs),
-                    getDstId());
+                                 getSrcId(),
+                                 getRank(),
+                                 getType(),
+                                 String.join("&", getLabels()),
+                                 String.join(",", propStrs),
+                                 getDstId());
         } else {
             return String.format("(%d)~[%d@%s:%s{%s}]~(%d)",
-                    getSrcId(),
-                    getRank(),
-                    getType(),
-                    String.join("&", getLabels()),
-                    String.join(", ", propStrs),
-                    getDstId());
+                                 getSrcId(),
+                                 getRank(),
+                                 getType(),
+                                 String.join("&", getLabels()),
+                                 String.join(", ", propStrs),
+                                 getDstId());
         }
 
+    }
+
+    enum Direction {
+        OUTGOING, INCOMING, UNDIRECTED, KNOWN;
     }
 }

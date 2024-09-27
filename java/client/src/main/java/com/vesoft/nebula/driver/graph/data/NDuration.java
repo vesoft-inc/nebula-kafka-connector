@@ -1,13 +1,33 @@
 package com.vesoft.nebula.driver.graph.data;
 
-import com.vesoft.nebula.proto.common.Duration;
 import java.util.Objects;
 
 public class NDuration {
-    private final Duration duration;
+    private final boolean isMonthBased;
+    private final int     year;
+    private final int     month;
+    private final int     day;
+    private final int     hour;
+    private final int     minute;
+    private final int     second;
+    private final int     microSec;
 
-    public NDuration(Duration duration) {
-        this.duration = duration;
+    public NDuration(boolean isMonthBased,
+                     int year,
+                     int month,
+                     int day,
+                     int hour,
+                     int minute,
+                     int second,
+                     int microSec) {
+        this.isMonthBased = isMonthBased;
+        this.year = year;
+        this.month = month;
+        this.day = day;
+        this.hour = hour;
+        this.minute = minute;
+        this.second = second;
+        this.microSec = microSec;
     }
 
 
@@ -15,56 +35,56 @@ public class NDuration {
      * @return whether the duration is month-based duration type
      */
     public boolean isMonthBased() {
-        return duration.getIsMonthBased();
+        return isMonthBased;
     }
 
     /**
      * @return duration year
      */
     public int getYear() {
-        return duration.getYear();
+        return year;
     }
 
     /**
      * @return duration month
      */
     public int getMonth() {
-        return duration.getMonth();
+        return month;
     }
 
     /**
      * @return duration year
      */
     public int getDay() {
-        return duration.getDay();
+        return day;
     }
 
     /**
      * @return duration hour
      */
     public int getHour() {
-        return duration.getHour();
+        return hour;
     }
 
     /**
      * @return duration minute
      */
     public int getMinute() {
-        return duration.getMinute();
+        return minute;
     }
 
     /**
      * @return duration seconds
      */
     public int getSecond() {
-        return duration.getSec();
+        return second;
     }
 
     /**
      * @return duration microseconds
      */
     public int getMicrosecond() {
-        return duration.getMicrosec();
+        return microSec;
     }
 
     @Override
@@ -95,12 +115,12 @@ public class NDuration {
                 if (getMicrosecond() == 0) {
                     durationStr.append(getSecond()).append("S");
                 } else {
-                    int totalMicroseconds = getSecond() * 1000000 + getMicrosecond();
-                    boolean isMinus = totalMicroseconds < 0;
+                    int     totalMicroseconds = getSecond() * 1000000 + getMicrosecond();
+                    boolean isMinus           = totalMicroseconds < 0;
                     if (isMinus) {
                         totalMicroseconds = -totalMicroseconds;
                     }
-                    int seconds = totalMicroseconds / 1000000;
+                    int seconds  = totalMicroseconds / 1000000;
                     int microSec = totalMicroseconds % 1000000;
                     if (isMinus) {
                         durationStr
@@ -128,18 +148,18 @@ public class NDuration {
             return false;
         }
         NDuration that = (NDuration) o;
-        return duration.getIsMonthBased() == that.isMonthBased()
-                && duration.getYear() == that.getYear()
-                && duration.getMonth() == that.getMonth()
-                && duration.getDay() == that.getDay()
-                && duration.getHour() == that.getHour()
-                && duration.getMinute() == that.getMinute()
-                && duration.getSec() == that.getSecond()
-                && duration.getMicrosec() == that.getMicrosecond();
+        return isMonthBased == that.isMonthBased()
+                && year == that.getYear()
+                && month == that.getMonth()
+                && day == that.getDay()
+                && hour == that.getHour()
+                && minute == that.getMinute()
+                && second == that.getSecond()
+                && microSec == that.getMicrosecond();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(duration);
+        return Objects.hash(isMonthBased, year, month, day, hour, minute, second, microSec);
     }
 }

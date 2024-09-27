@@ -2,77 +2,81 @@ package com.vesoft.nebula.driver.graph.data;
 
 import com.vesoft.nebula.driver.graph.utils.ZoneOffsetUtil;
 import com.vesoft.nebula.proto.common.ZonedDatetime;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Objects;
 
 public class NZonedDateTime {
-    private final ZonedDatetime zonedDateTime;
+    private final LocalDateTime localDateTime;
+    private final ZoneOffset    zoneOffset;
 
-    public NZonedDateTime(ZonedDatetime zonedDateTime) {
-        this.zonedDateTime = zonedDateTime;
+    public NZonedDateTime(LocalDateTime localDateTime, ZoneOffset zoneOffset) {
+        this.localDateTime = localDateTime;
+        this.zoneOffset = zoneOffset;
     }
 
     /**
      * @return utc datetime year
      */
     public int getYear() {
-        return zonedDateTime.getYear();
+        return localDateTime.getYear();
     }
 
     /**
      * @return utc datetime month
      */
     public int getMonth() {
-        return zonedDateTime.getMonth();
+        return localDateTime.getMonth().getValue();
     }
 
     /**
      * @return datetime day
      */
     public int getDay() {
-        return zonedDateTime.getDay();
+        return localDateTime.getDayOfMonth();
     }
 
     /**
      * @return datetime hour
      */
     public int getHour() {
-        return zonedDateTime.getHour();
+        return localDateTime.getHour();
     }
 
     /**
      * @return datetime minute
      */
     public int getMinute() {
-        return zonedDateTime.getMinute();
+        return localDateTime.getMinute();
     }
 
     /**
      * @return utc datetime second
      */
     public int getSecond() {
-        return zonedDateTime.getSec();
+        return localDateTime.getSecond();
     }
 
     /**
      * @return utc datetime microsec
      */
     public int getMicrosec() {
-        return zonedDateTime.getMicrosec();
+        return localDateTime.getNano() / 1000;
     }
 
     /**
      * @return zoned offset in seconds
      */
     public int getOffset() {
-        return zonedDateTime.getOffset();
+        return zoneOffset.getTotalSeconds();
     }
 
     @Override
     public String toString() {
         return String.format("%d-%02d-%02dT%02d:%02d:%02d.%06d%s",
-                zonedDateTime.getYear(), zonedDateTime.getMonth(), zonedDateTime.getDay(),
-                zonedDateTime.getHour(), zonedDateTime.getMinute(), zonedDateTime.getSec(),
-                zonedDateTime.getMicrosec(), ZoneOffsetUtil.buildOffset(zonedDateTime.getOffset()));
+                             getYear(), getMonth(), getDay(),
+                             getHour(), getMinute(), getSecond(),
+                             getMicrosec(), ZoneOffsetUtil.buildOffset(getOffset()));
     }
 
     @Override
@@ -84,17 +88,18 @@ public class NZonedDateTime {
             return false;
         }
         NZonedDateTime that = (NZonedDateTime) o;
-        return zonedDateTime.getYear() == that.getYear()
-                && zonedDateTime.getMonth() == that.getMonth()
-                && zonedDateTime.getDay() == that.getDay()
-                && zonedDateTime.getHour() == that.getHour()
-                && zonedDateTime.getMinute() == that.getMinute()
-                && zonedDateTime.getSec() == that.getSecond()
-                && zonedDateTime.getMicrosec() == that.getMicrosec();
+        return getYear() == that.getYear()
+                && getMonth() == that.getMonth()
+                && getDay() == that.getDay()
+                && getHour() == that.getHour()
+                && getMinute() == that.getMinute()
+                && getSecond() == that.getSecond()
+                && getMicrosec() == that.getMicrosec()
+                && getOffset() == that.getOffset();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(zonedDateTime, getOffset());
+        return Objects.hash(localDateTime, getOffset());
     }
 }

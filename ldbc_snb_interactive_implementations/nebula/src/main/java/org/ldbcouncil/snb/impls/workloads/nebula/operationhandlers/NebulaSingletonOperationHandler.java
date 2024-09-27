@@ -6,6 +6,7 @@ import org.ldbcouncil.snb.driver.Operation;
 import org.ldbcouncil.snb.driver.ResultReporter;
 import org.ldbcouncil.snb.impls.workloads.nebula.NebulaDbConnectionState;
 import org.ldbcouncil.snb.impls.workloads.nebula.NewNebulaPool;
+import org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter;
 import org.ldbcouncil.snb.impls.workloads.operationhandlers.SingletonOperationHandler;
 
 import java.io.UnsupportedEncodingException;
@@ -20,6 +21,8 @@ import org.slf4j.LoggerFactory;
 public abstract class NebulaSingletonOperationHandler<TOperation extends Operation<TOperationResult>, TOperationResult>
         implements SingletonOperationHandler<TOperationResult, TOperation, NebulaDbConnectionState> {
     private static final Logger LOGGER = LoggerFactory.getLogger(NebulaSingletonOperationHandler.class);
+
+    protected NebulaConverter converter = new NebulaConverter();
 
     public abstract TOperationResult toResult(ResultSet.Record record) throws ParseException, UnsupportedEncodingException;
 

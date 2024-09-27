@@ -1,6 +1,7 @@
 package com.vesoft.nebula.driver.graph.data;
 
 import com.vesoft.nebula.proto.common.Date;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class NDate {

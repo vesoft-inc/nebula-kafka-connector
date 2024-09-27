@@ -22,7 +22,7 @@ import java.util.Collections;
 
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 
-import static org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter.convertDateTimesToEpoch;
+import static org.ldbcouncil.snb.impls.workloads.nebula.converter.NebulaConverter.convertDateTimeToEpoch;
 
 public class NebulaDb extends BaseDb<NebulaQueryStore>
 {
@@ -92,8 +92,8 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long friendId = getLongValue(record.get(0));
             String friendLastName = record.get( 1 ).asString();
             int distanceFromPerson = getIntValue(record.get(2));
-            long friendBirthday = NebulaConverter.convertDateToEpoch(record.get( 3 ).asDate().toString());
-            long friendCreationDate = NebulaConverter.convertDateTimesToEpoch(record.get( 4 ).asLocalDateTime().toString());
+            long friendBirthday = NebulaConverter.convertDateToEpoch(converter.convertDate(converter.convertLocalDateToDate(record.get( 3 ).asDate())));
+            long friendCreationDate = convertDateTimeToEpoch(record.get( 4 ).asLocalDateTime());
             String friendGender = record.get( 5 ).asString();
             String friendBrowserUsed = record.get( 6 ).asString();
             String friendLocationIp = record.get( 7 ).asString();
@@ -136,7 +136,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             String personLastName = record.get( 2 ).asString();
             long messageId = getLongValue(record.get(3));
             String messageContent = record.get( 4 ).asString();
-            long messageCreationDate = convertDateTimesToEpoch(record.get(5).asLocalDateTime().toString());
+            long messageCreationDate = convertDateTimeToEpoch(record.get(5).asLocalDateTime());
 
             return new LdbcQuery2Result(
                     personId,
@@ -260,11 +260,12 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = getLongValue(record.get(0));
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
-            long likeCreationDate = convertDateTimesToEpoch(record.get(3).asLocalDateTime().toString());
+            long likeCreationDate = convertDateTimeToEpoch(record.get(3).asLocalDateTime());
             long messageId = getLongValue(record.get(4));
             String messageContent = record.get( 5 ).asString();
             int minutesLatency = NebulaConverter.convertStartAndEndDateToLatency(
-                    record.get(6).asLocalDateTime().toString(), record.get(3).asLocalDateTime().toString());
+                    record.get(6).asLocalDateTime(),
+                    record.get(3).asLocalDateTime());
             boolean isNew = record.get( 7 ).asBoolean();
             return new LdbcQuery7Result(
                     personId,
@@ -296,7 +297,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = getLongValue(record.get(0));
             String personFirstName = record.get( 1 ).asString();
             String personLastName = record.get( 2 ).asString();
-            long commentCreationDate = convertDateTimesToEpoch(record.get(3).asLocalDateTime().toString());
+            long commentCreationDate = convertDateTimeToEpoch(record.get(3).asLocalDateTime());
             long commentId = getLongValue(record.get(4));
             String commentContent = record.get( 5 ).asString();
             return new LdbcQuery8Result(
@@ -329,7 +330,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             String personLastName = record.get( 2 ).asString();
             long messageId = getLongValue(record.get(3));
             String messageContent = record.get( 4 ).asString();
-            long messageCreationDate = convertDateTimesToEpoch(record.get(5).asLocalDateTime().toString());
+            long messageCreationDate = convertDateTimeToEpoch(record.get(5).asLocalDateTime());
             return new LdbcQuery9Result(
                     personId,
                     personFirstName,
@@ -492,6 +493,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
     // Interactive short reads
     public static class ShortQuery1PersonProfile extends NebulaSingletonOperationHandler<LdbcShortQuery1PersonProfile,LdbcShortQuery1PersonProfileResult>
     {
+        NebulaConverter converter = new NebulaConverter();
         @Override
         public String getQueryString(NebulaDbConnectionState state, LdbcShortQuery1PersonProfile operation) {
             // return state.getQueryStore().getParameterizedQuery(QueryType.InteractiveShortQuery1);
@@ -508,12 +510,12 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             if (record != null) {
                 String firstName = record.get( 0 ).asString();
                 String lastName = record.get( 1 ).asString();
-                long birthday = NebulaConverter.convertDateToEpoch(record.get(2).asDate().toString());
+                long birthday = NebulaConverter.convertDateToEpoch(converter.convertDate(converter.convertLocalDateToDate(record.get(2).asDate())));
                 String locationIP = record.get( 3 ).asString();
                 String browserUsed = record.get( 4 ).asString();
                 long cityId = getLongValue(record.get(5));
                 String gender = record.get( 6 ).asString();
-                long creationDate = convertDateTimesToEpoch(record.get(7).asLocalDateTime().toString());
+                long creationDate = convertDateTimeToEpoch(record.get(7).asLocalDateTime());
                 return new LdbcShortQuery1PersonProfileResult(
                         firstName,
                         lastName,
@@ -548,7 +550,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             if (record != null){
                 long messageId = getLongValue(record.get(0));
                 String messageContent = record.get( 1 ).asString();
-                long messageCreationDate = convertDateTimesToEpoch(record.get(2).asLocalDateTime().toString());
+                long messageCreationDate = convertDateTimeToEpoch(record.get(2).asLocalDateTime());
                 long originalPostId = getLongValue(record.get(3));
                 long originalPostAuthorId = getLongValue(record.get(4));
                 String originalPostAuthorFirstName = record.get( 5 ).asString();
@@ -585,7 +587,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
             long personId = getLongValue(record.get(0));
             String firstName = record.get( 1 ).asString();
             String lastName = record.get( 2 ).asString();
-            long friendshipCreationDate = convertDateTimesToEpoch(record.get(3).asLocalDateTime().toString());
+            long friendshipCreationDate = convertDateTimeToEpoch(record.get(3).asLocalDateTime());
             return new LdbcShortQuery3PersonFriendsResult(
                     personId,
                     firstName,
@@ -611,7 +613,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         public LdbcShortQuery4MessageContentResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
             if (record != null){
                 // Pay attention, the spec's and the implementation's parameter orders are different.
-                long messageCreationDate = convertDateTimesToEpoch(record.get(0).asLocalDateTime().toString());
+                long messageCreationDate = convertDateTimeToEpoch(record.get(0).asLocalDateTime());
                 String messageContent = record.get( 1 ).asString();
                 return new LdbcShortQuery4MessageContentResult(messageContent, messageCreationDate);
             } else {
@@ -699,7 +701,7 @@ public class NebulaDb extends BaseDb<NebulaQueryStore>
         public LdbcShortQuery7MessageRepliesResult toResult(ResultSet.Record record ) throws ParseException, UnsupportedEncodingException {
             long commentId = getLongValue(record.get(0));
             String commentContent = record.get( 1 ).asString();
-            long commentCreationDate = convertDateTimesToEpoch(record.get(2).asLocalDateTime().toString());
+            long commentCreationDate = convertDateTimeToEpoch(record.get(2).asLocalDateTime());
             long replyAuthorId = getLongValue(record.get(3));
             String replyAuthorFirstName = record.get( 4 ).asString();
             String replyAuthorLastName = record.get( 5 ).asString();

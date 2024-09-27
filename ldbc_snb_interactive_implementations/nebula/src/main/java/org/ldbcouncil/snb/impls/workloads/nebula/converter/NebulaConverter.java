@@ -5,7 +5,12 @@ import org.ldbcouncil.snb.driver.workloads.interactive.LdbcUpdate1AddPerson;
 import org.ldbcouncil.snb.impls.workloads.converter.Converter;
 
 import java.text.ParseException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.text.SimpleDateFormat;
@@ -45,8 +50,7 @@ public class NebulaConverter extends Converter {
     @Override
     public String convertDateTime(Date date) {
         final SimpleDateFormat sdf = new SimpleDateFormat(DATETIME_FORMAT);
-        // sdf.setTimeZone(TimeZone.getTimeZone("Etc/GMT+0"));
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        sdf.setTimeZone(TimeZone.getTimeZone("Etc/GMT+0"));
         return "'" + sdf.format(date) + "'";
     }
 
@@ -57,21 +61,33 @@ public class NebulaConverter extends Converter {
         return "'" + sdf.format(date) + "'";
     }
 
-    public static long convertDateTimesToEpoch(String date) throws ParseException {
-        final SimpleDateFormat sdf = new SimpleDateFormat(DATETIME_FORMAT);
-        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return sdf.parse(date.substring(0, date.length() - 3)).toInstant().toEpochMilli();
+
+    public Date convertLocalDateToDate(LocalDate localDate){
+        ZoneId zoneId = ZoneId.of("GMT");
+        return Date.from(localDate.atStartOfDay(zoneId).toInstant());
+    }
+    public static long convertDateTimeToEpoch(LocalDateTime dateTime) {
+        ZoneId zoneId = ZoneId.of("GMT");
+        return dateTime.atZone(zoneId).toInstant().toEpochMilli();
+    }
+
+    public static long convertDateToEpoch(Date date) throws ParseException {
+        TimeZone zone = TimeZone.getTimeZone("GMT");
+        Calendar calendar = Calendar.getInstance(zone);
+        calendar.setTime(date);
+         calendar.getTimeInMillis();
+         return date.toInstant().toEpochMilli();
     }
 
     public static long convertDateToEpoch(String date) throws ParseException {
         final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
         sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
-        return sdf.parse(date).toInstant().toEpochMilli();
+        return sdf.parse(date.substring(1, date.length() - 1)).toInstant().toEpochMilli();
     }
 
-    public static int convertStartAndEndDateToLatency(String from, String to) throws ParseException {
-        long fromEpoch = convertDateTimesToEpoch(from);
-        long toEpoch = convertDateTimesToEpoch(to);
+    public static int convertStartAndEndDateToLatency(LocalDateTime from, LocalDateTime to) throws ParseException {
+        long fromEpoch = convertDateTimeToEpoch(from);
+        long toEpoch = convertDateTimeToEpoch(to);
         return (int)((toEpoch - fromEpoch) / 1000 / 60);
     }
 }

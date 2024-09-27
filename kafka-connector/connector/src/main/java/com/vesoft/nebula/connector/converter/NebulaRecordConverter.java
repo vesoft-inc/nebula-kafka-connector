@@ -286,7 +286,7 @@ public class NebulaRecordConverter {
      * @return Object
      */
     private static Object convertValueWrapper2KafkaValue(ValueWrapper value) {
-        if (value.isEmpty()) {
+        if (value.isNull()) {
             return null;
         }
         if (value.isInt()) {

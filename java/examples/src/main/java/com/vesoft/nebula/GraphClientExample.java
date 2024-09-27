@@ -266,8 +266,6 @@ public class GraphClientExample {
                 // process each property for one line
                 if (valueWrapper.isNull()) {
                     System.out.printf("%15s |", "");
-                } else if (valueWrapper.isEmpty()) {
-                    System.out.printf("%15s |", "_EMPTY_");
                 } else if (valueWrapper.isInt()) {
                     System.out.printf("%15s |", valueWrapper.asInt());
                 } else if (valueWrapper.isLong()) {

@@ -1,29 +1,41 @@
 package com.vesoft.nebula.driver.graph.data;
 
-import com.vesoft.nebula.proto.common.Node;
-import com.vesoft.nebula.proto.common.Value;
+import com.vesoft.nebula.driver.graph.decode.struct.ResultGraphSchemas;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
 public class Vertex extends BaseDataObject {
-    private final Node node;
+    private final int                       graphId;
+    private final String                    graphName;
+    private final int                       nodeTypeId;
+    private final String                    nodeTypeName;
+    private final List<String>              labels;
+    private final long                      nodeId;
+    private final Map<String, ValueWrapper> properties;
 
-
-    /**
-     * Node is a wrapper around the Vertex type returned by nebula-graph
-     *
-     * @param node the vertex returned by nebula-graph
-     */
-    public Vertex(Node node) {
-        if (node == null) {
-            throw new RuntimeException("Input an null node object");
-        }
-        this.node = node;
+    public Vertex(int graphId,
+                  int nodeTypeId,
+                  long nodeId,
+                  Map<String, ValueWrapper> properties,
+                  ResultGraphSchemas graphSchemas) {
+        this.graphId = graphId;
+        this.graphName = graphSchemas.getGraphSchema(graphId).getGraphName();
+        this.nodeTypeId = nodeTypeId;
+        this.nodeTypeName = graphSchemas
+                .getGraphSchema(graphId)
+                .getNodeSchema(nodeTypeId)
+                .getNodeTypeName();
+        this.labels = graphSchemas
+                .getGraphSchema(graphId)
+                .getNodeSchema(nodeTypeId)
+                .getNodeLabels();
+        this.nodeId = nodeId;
+        this.properties = properties;
     }
+
 
     /**
      * get graph
@@ -31,7 +43,7 @@ public class Vertex extends BaseDataObject {
      * @return String
      */
     public String getGraph() {
-        return node.getGraph();
+        return graphName;
     }
 
 
@@ -41,7 +53,14 @@ public class Vertex extends BaseDataObject {
      * @return String
      */
     public String getType() {
-        return node.getType();
+        return nodeTypeName;
+    }
+
+    /**
+     * get node type id
+     */
+    public int getNodeTypeId() {
+        return nodeTypeId;
     }
 
 
@@ -51,7 +70,7 @@ public class Vertex extends BaseDataObject {
      * @return list of label
      */
     public List<String> getLabels() {
-        return node.getLabelsList();
+        return labels;
     }
 
     /**
@@ -60,7 +79,7 @@ public class Vertex extends BaseDataObject {
      * @return long id
      */
     public long getId() {
-        return node.getNodeId();
+        return nodeId;
     }
 
 
@@ -71,10 +90,7 @@ public class Vertex extends BaseDataObject {
      * @throws UnsupportedEncodingException decode error exception
      */
     public List<String> getColumnNames() throws UnsupportedEncodingException {
-        List<String> keys = new ArrayList<>();
-        for (String name : node.getPropertiesMap().keySet()) {
-            keys.add(new String(name));
-        }
+        List<String> keys = new ArrayList<>(properties.keySet());
         return keys;
     }
 
@@ -85,8 +101,8 @@ public class Vertex extends BaseDataObject {
      */
     public List<ValueWrapper> getValues() {
         List<ValueWrapper> values = new ArrayList<>();
-        for (Map.Entry<String, Value> kv : node.getPropertiesMap().entrySet()) {
-            values.add(new ValueWrapper(kv.getValue()));
+        for (Map.Entry<String, ValueWrapper> kv : properties.entrySet()) {
+            values.add(kv.getValue());
         }
         return values;
     }
@@ -97,11 +113,7 @@ public class Vertex extends BaseDataObject {
      * @return HashMap, property name -> property value
      */
     public Map<String, ValueWrapper> getProperties() {
-        Map<String, ValueWrapper> props = new HashMap<>();
-        for (Map.Entry<String, Value> p : node.getPropertiesMap().entrySet()) {
-            props.put(p.getKey(), new ValueWrapper(p.getValue()));
-        }
-        return props;
+        return properties;
     }
 
     @Override
@@ -118,20 +130,20 @@ public class Vertex extends BaseDataObject {
 
     @Override
     public int hashCode() {
-        return Objects.hash(node, getDecodeType());
+        return Objects.hash(graphId, nodeTypeId, nodeId, getDecodeType());
     }
 
     @Override
     public String toString() {
-        Map<String, ValueWrapper> props = getProperties();
-        List<String> propStrs = new ArrayList<>();
+        Map<String, ValueWrapper> props    = getProperties();
+        List<String>              propStrs = new ArrayList<>();
         for (String propName : props.keySet()) {
             propStrs.add(propName + ":" + props.get(propName).toString());
         }
         return String.format("(%d@%s:%s{%s})",
-                getId(),
-                getType(),
-                String.join("&", getLabels()),
-                String.join(",", propStrs));
+                             getId(),
+                             getType(),
+                             String.join("&", getLabels()),
+                             String.join(",", propStrs));
     }
 }

@@ -1,252 +1,306 @@
 package com.vesoft.nebula.driver.graph.data;
 
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_BOOL;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_DATE;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_DECIMAL;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_DURATION;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_EDGE;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_FLOAT32;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_FLOAT64;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_INT16;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_INT32;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_INT64;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_INT8;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_LIST;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_LOCALDATETIME;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_LOCALTIME;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_NODE;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_PATH;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_RECORD;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_STRING;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_UINT16;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_UINT32;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_UINT64;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_UINT8;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_ZONEDDATETIME;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_ZONEDTIME;
+
 import com.google.common.base.Charsets;
+import com.vesoft.nebula.driver.graph.decode.ColumnType;
 import com.vesoft.nebula.driver.graph.exception.InvalidValueException;
-import com.vesoft.nebula.proto.common.Value;
-import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.OffsetTime;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Vector;
 
 public class ValueWrapper {
 
-    private final Value   value;
-    private final Charset charset = Charsets.UTF_8;
+    private final Object     value;
+    private final ColumnType type;
+    private final Charset    charset = Charsets.UTF_8;
+
+    public ValueWrapper(Object value, ColumnType type) {
+        this.value = value;
+        this.type = type;
+    }
 
     public String getDataType() {
-        if (value.getDataCase() == Value.DataCase.DATA_NOT_SET) {
-            return "DATA_NOT_SET";
+        switch (type) {
+            case COLUMN_TYPE_BOOL:
+                return "BOOLEAN";
+            case COLUMN_TYPE_UINT8:
+                return "UINT8";
+            case COLUMN_TYPE_INT8:
+                return "INT8";
+            case COLUMN_TYPE_UINT16:
+                return "UINT16";
+            case COLUMN_TYPE_INT16:
+                return "INT16";
+            case COLUMN_TYPE_UINT32:
+                return "UINT32";
+            case COLUMN_TYPE_INT32:
+                return "INT32";
+            case COLUMN_TYPE_UINT64:
+                return "UINT64";
+            case COLUMN_TYPE_INT64:
+                return "INT64";
+            case COLUMN_TYPE_FLOAT32:
+                return "FLOAT";
+            case COLUMN_TYPE_FLOAT64:
+                return "DOUBLE";
+            case COLUMN_TYPE_STRING:
+                return "STRING";
+            case COLUMN_TYPE_NODE:
+                return "NODE";
+            case COLUMN_TYPE_EDGE:
+                return "EDGE";
+            case COLUMN_TYPE_LIST:
+                return "LIST";
+            case COLUMN_TYPE_DURATION:
+                return "DURATION";
+            case COLUMN_TYPE_LOCALTIME:
+                return "LOCAL_TIME";
+            case COLUMN_TYPE_LOCALDATETIME:
+                return "LOCAL_DATETIME";
+            case COLUMN_TYPE_ZONEDTIME:
+                return "ZONED_TIME";
+            case COLUMN_TYPE_ZONEDDATETIME:
+                return "ZONED_DATETIME";
+            case COLUMN_TYPE_DATE:
+                return "DATE";
+            case COLUMN_TYPE_RECORD:
+                return "RECORD";
+            case COLUMN_TYPE_PATH:
+                return "PATH";
+            case COLUMN_TYPE_DECIMAL:
+                return "DECIMAL";
+            case COLUMN_TYPE_ANY:
+                return "ANY";
+            default:
+                throw new IllegalArgumentException("Unknown data type: " + type);
         }
-        if (value.getDataCase() == Value.DataCase.BOOL_VALUE) {
-            return "BOOLEAN";
-        }
-        if (value.getDataCase() == Value.DataCase.INT8_VALUE
-                || value.getDataCase() == Value.DataCase.UINT8_VALUE) {
-            return "BYTE";
-        }
-        if (value.getDataCase() == Value.DataCase.INT16_VALUE
-                || value.getDataCase() == Value.DataCase.UINT16_VALUE) {
-            return "SHORT";
-        }
-        if (value.getDataCase() == Value.DataCase.INT32_VALUE
-                || value.getDataCase() == Value.DataCase.UINT32_VALUE) {
-            return "INT";
-        }
-        if (value.getDataCase() == Value.DataCase.INT64_VALUE
-                || value.getDataCase() == Value.DataCase.UINT64_VALUE) {
-            return "LONG";
-        }
-        if (value.getDataCase() == Value.DataCase.FLOAT_VALUE) {
-            return "FLOAT";
-        }
-        if (value.getDataCase() == Value.DataCase.DOUBLE_VALUE) {
-            return "DOUBLE";
-        }
-        if (value.getDataCase() == Value.DataCase.STRING_VALUE) {
-            return "STRING";
-        }
-        if (value.getDataCase() == Value.DataCase.NODE_VALUE) {
-            return "NODE";
-        }
-        if (value.getDataCase() == Value.DataCase.EDGE_VALUE) {
-            return "EDGE";
-        }
-        if (value.getDataCase() == Value.DataCase.LIST_VALUE) {
-            return "LIST";
-        }
-        if (value.getDataCase() == Value.DataCase.DURATION_VALUE) {
-            return "DURATION";
-        }
-        if (value.getDataCase() == Value.DataCase.LOCAL_TIME_VALUE) {
-            return "LOCAL_TIME";
-        }
-        if (value.getDataCase() == Value.DataCase.LOCAL_DATETIME_VALUE) {
-            return "LOCAL_DATETIME";
-        }
-        if (value.getDataCase() == Value.DataCase.ZONED_TIME_VALUE) {
-            return "ZONED_TIME";
-        }
-        if (value.getDataCase() == Value.DataCase.ZONED_DATETIME_VALUE) {
-            return "ZONED_DATETIME";
-        }
-        if (value.getDataCase() == Value.DataCase.DATE_VALUE) {
-            return "DATE";
-        }
-        if (value.getDataCase() == Value.DataCase.RECORD_VALUE) {
-            return "RECORD";
-        }
-        if (value.getDataCase() == Value.DataCase.PATH_VALUE) {
-            return "PATH";
-        }
-        if (value.getDataCase() == Value.DataCase.DECIMAL_VALUE) {
-            return "DECIMAL";
-        }
-        if (value.getDataCase() == Value.DataCase.VECTOR_VALUE) {
-            return "VECTOR";
-        }
-        throw new IllegalArgumentException("Unknown field id " + value.getDataCase());
     }
 
-    /**
-     * @param value the Value get from service
-     */
-    public ValueWrapper(Value value) {
-        this.value = value;
-    }
 
     /**
-     * get the original data structure, the Value is the return from nebula-graph
+     * get the Object value
      *
-     * @return Value
+     * @return Object
      */
-    public Value getValue() {
+    public Object getValue() {
         return value;
     }
 
     /**
-     * judge the Value is Empty type, the Empty type is the nebula's type
+     * if the value is null
      *
-     * @return boolean
+     * @return true if value is null
      */
-    public boolean isEmpty() {
-        return value.getDataCase() == Value.DataCase.DATA_NOT_SET;
-    }
-
     public boolean isNull() {
         return value == null;
     }
 
     /**
-     * judge the Value is Boolean type
+     * check if the Value is Boolean type
      *
-     * @return boolean
+     * @return true if Value's type is COLUMN_TYPE_BOOL
      */
     public boolean isBoolean() {
-        return value.getDataCase() == Value.DataCase.BOOL_VALUE;
+        return type == COLUMN_TYPE_BOOL;
     }
 
     /**
-     * judge the Value is Long type
+     * check if the Value is Long type
      *
-     * @return boolean
+     * @return true if Value's type is COLUMN_TYPE_UINT64 or COLUMN_TYPE_INT64
      */
     public boolean isLong() {
-        return value.getDataCase() == Value.DataCase.INT64_VALUE
-                || value.getDataCase() == Value.DataCase.UINT64_VALUE;
+        return type == COLUMN_TYPE_UINT64 || type == COLUMN_TYPE_INT64;
     }
 
     /**
-     * judge the Value is Int type
+     * check if the Value is Int type
      *
-     * @return boolean
+     * @return true if Value's type is COLUMN_TYPE_UINT8 or COLUMN_TYPE_INT8 or COLUMN_TYPE_UINT16
+     *         or COLUMN_TYPE_INT16 or COLUMN_TYPE_UINT32 or COLUMN_TYPE_INT32
      */
     public boolean isInt() {
-        return value.getDataCase() == Value.DataCase.INT32_VALUE
-                || value.getDataCase() == Value.DataCase.UINT32_VALUE
-                || value.getDataCase() == Value.DataCase.INT16_VALUE
-                || value.getDataCase() == Value.DataCase.UINT16_VALUE
-                || value.getDataCase() == Value.DataCase.INT8_VALUE
-                || value.getDataCase() == Value.DataCase.UINT8_VALUE;
+        return type == COLUMN_TYPE_UINT8 || type == COLUMN_TYPE_INT8
+                || type == COLUMN_TYPE_UINT16 || type == COLUMN_TYPE_INT16
+                || type == COLUMN_TYPE_UINT32 || type == COLUMN_TYPE_INT32;
     }
 
     /**
-     * judge the Value is Float type
+     * check if the Value is Float type
      *
-     * @return boolean
+     * @return true if Value's type is COLUMN_TYPE_FLOAT32
      */
     public boolean isFloat() {
-        return value.getDataCase() == Value.DataCase.FLOAT_VALUE;
+        return type == COLUMN_TYPE_FLOAT32;
     }
 
 
     /**
-     * judge the Value is Double type
+     * check if the Value is Double type
      *
-     * @return boolean
+     * @return true if the type is COLUMN_TYPE_FLOAT64
      */
     public boolean isDouble() {
-        return value.getDataCase() == Value.DataCase.DOUBLE_VALUE;
+        return type == COLUMN_TYPE_FLOAT64;
     }
 
     /**
-     * judge the Value is String type
+     * check if the Value is String type
      *
-     * @return boolean
+     * @return true if Value's type is COLUMN_TYPE_STRING
      */
     public boolean isString() {
-        return value.getDataCase() == Value.DataCase.STRING_VALUE;
+        return type == COLUMN_TYPE_STRING;
     }
 
     /**
-     * judge the Value is List type, the List type is the nebula's type
+     * check if the Value is List type
      *
-     * @return boolean
+     * @return true if Value's type is COLUMN_TYPE_LIST
      */
     public boolean isList() {
-        return value.getDataCase() == Value.DataCase.LIST_VALUE;
-    }
-
-
-    public boolean isNode() {
-        return value.getDataCase() == Value.DataCase.NODE_VALUE;
-    }
-
-    public boolean isEdge() {
-        return value.getDataCase() == Value.DataCase.EDGE_VALUE;
-    }
-
-    public boolean isLocalTime() {
-        return value.getDataCase() == Value.DataCase.LOCAL_TIME_VALUE;
-    }
-
-    public boolean isZonedTime() {
-        return value.getDataCase() == Value.DataCase.ZONED_TIME_VALUE;
-    }
-
-    public boolean isLocalDateTime() {
-        return value.getDataCase() == Value.DataCase.LOCAL_DATETIME_VALUE;
-    }
-
-    public boolean isZonedDateTime() {
-        return value.getDataCase() == Value.DataCase.ZONED_DATETIME_VALUE;
-    }
-
-    public boolean isDate() {
-        return value.getDataCase() == Value.DataCase.DATE_VALUE;
-    }
-
-    public boolean isRecord() {
-        return value.getDataCase() == Value.DataCase.RECORD_VALUE;
-    }
-
-    public boolean isDuration() {
-        return value.getDataCase() == Value.DataCase.DURATION_VALUE;
-    }
-
-    public boolean isPath() {
-        return value.getDataCase() == Value.DataCase.PATH_VALUE;
-    }
-
-    public boolean isDecimal() {
-        return value.getDataCase() == Value.DataCase.DECIMAL_VALUE;
-    }
-
-    public boolean isVector() {
-        return value.getDataCase() == Value.DataCase.RECORD_VALUE;
+        return type == COLUMN_TYPE_LIST;
     }
 
     /**
-     * Convert the original data type Value to boolean
+     * check if the Value is Node type
      *
-     * @return boolean
-     * @throws InvalidValueException if the value type is not boolean
+     * @return true if Value's type is COLUMN_TYPE_NODE
+     */
+    public boolean isNode() {
+        return type == COLUMN_TYPE_NODE;
+    }
+
+    /**
+     * check if the Value is Edge type
+     *
+     * @return true if Value's type is COLUMN_TYPE_EDGE
+     */
+    public boolean isEdge() {
+        return type == COLUMN_TYPE_EDGE;
+    }
+
+    /**
+     * check if the Value is Local Time type
+     *
+     * @return true if Value's type is COLUMN_TYPE_LOCALTIME
+     */
+    public boolean isLocalTime() {
+        return type == COLUMN_TYPE_LOCALTIME;
+    }
+
+    /**
+     * check if the Value is Zoned Time type
+     *
+     * @return true if Value's type is COLUMN_TYPE_ZONEDTIME
+     */
+    public boolean isZonedTime() {
+        return type == COLUMN_TYPE_ZONEDTIME;
+    }
+
+    /**
+     * check if the Value is Local Datetime type
+     *
+     * @return true if Value's type is COLUMN_TYPE_LOCALDATETIME
+     */
+    public boolean isLocalDateTime() {
+        return type == COLUMN_TYPE_LOCALDATETIME;
+    }
+
+    /**
+     * check if the Value is Zoned Datetime type
+     *
+     * @return true if Value's type is COLUMN_TYPE_ZONEDDATETIME
+     */
+    public boolean isZonedDateTime() {
+        return type == COLUMN_TYPE_ZONEDDATETIME;
+    }
+
+    /**
+     * check if the Value is Date type
+     *
+     * @return true if Value's type is COLUMN_TYPE_DATE
+     */
+    public boolean isDate() {
+        return type == COLUMN_TYPE_DATE;
+    }
+
+    /**
+     * check if the Value is Record type
+     *
+     * @return true if Value's type is COLUMN_TYPE_RECORD
+     */
+    public boolean isRecord() {
+        return type == COLUMN_TYPE_RECORD;
+    }
+
+    /**
+     * check if the Value is Duration type
+     *
+     * @return true if Value's type is COLUMN_TYPE_DURATION
+     */
+    public boolean isDuration() {
+        return type == COLUMN_TYPE_DURATION;
+    }
+
+    /**
+     * check if the Value is Path type
+     *
+     * @return true if Value's type is COLUMN_TYPE_PATH
+     */
+    public boolean isPath() {
+        return type == COLUMN_TYPE_PATH;
+    }
+
+    /**
+     * check if the Value is Decimal type
+     *
+     * @return true if Value's type is COLUMN_TYPE_DECIMAL
+     */
+    public boolean isDecimal() {
+        return type == COLUMN_TYPE_DECIMAL;
+    }
+
+    /**
+     * Convert the original Value to boolean
+     *
+     * @return boolean value
+     * @throws InvalidValueException if the value type is not bool
      */
     public boolean asBoolean() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.BOOL_VALUE) {
-            return value.getBoolValue();
+        if (type == COLUMN_TYPE_BOOL) {
+            return (java.lang.Boolean) value;
         }
         throw new InvalidValueException(
                 "Cannot get field `boolean` because value's type is " + getDataType());
@@ -254,146 +308,141 @@ public class ValueWrapper {
 
 
     /**
-     * Convert the original data type Value to int
+     * Convert the original int8/uint8/int16/uint16/int32/uint32 Value to int
      *
-     * @return int
-     * @throws InvalidValueException if the value type is not int32
+     * <p>if the value in NebulaGraph is uint32 type and is negative, you can convert it to Long:
+     *
+     * <p>Integer.toUnsignedLong((int)value)
+     *
+     * @return int value
+     * @throws InvalidValueException if the value type is not int
      */
     public int asInt() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.INT8_VALUE) {
-            return value.getInt8Value();
-        } else if (value.getDataCase() == Value.DataCase.INT16_VALUE) {
-            return value.getInt16Value();
-        } else if (value.getDataCase() == Value.DataCase.INT32_VALUE) {
-            return value.getInt32Value();
-        } else if (value.getDataCase() == Value.DataCase.UINT8_VALUE) {
-            return value.getUint8Value();
-        } else if (value.getDataCase() == Value.DataCase.UINT16_VALUE) {
-            return value.getUint16Value();
-        } else if (value.getDataCase() == Value.DataCase.UINT32_VALUE) {
-            return value.getUint32Value();
-        } else {
-            throw new InvalidValueException(
-                    "Cannot get field `int` because value's type is " + getDataType());
+        if (type == COLUMN_TYPE_INT8 || type == COLUMN_TYPE_UINT8
+                || type == COLUMN_TYPE_UINT16 || type == COLUMN_TYPE_INT16
+                || type == COLUMN_TYPE_UINT32 || type == COLUMN_TYPE_INT32) {
+            return (int) value;
         }
+        throw new InvalidValueException(
+                "Cannot get field `int` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to long
+     * Convert the original int64/uint64 Value to long
+     *
+     * <p>if the value in NebulaGraph is uint64 and is negative, you can convert it to BigInteger:
+     *
+     * <p>if (value >= 0) {
+     * return BigInteger.valueOf(value);
+     * } else {
+     * return BigInteger.valueOf((long)value & Long.MAX_VALUE).setBit(63);
+     * }
      *
      * @return long
-     * @throws InvalidValueException if the value type is not long
+     * @throws InvalidValueException if the value type is not int64 or uint64
      */
     public long asLong() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.INT64_VALUE) {
-            return value.getInt64Value();
-        } else if (value.getDataCase() == Value.DataCase.UINT64_VALUE) {
-            return value.getUint64Value();
-        } else {
-            throw new InvalidValueException(
-                    "Cannot get field `long` because value's type is " + getDataType());
+        if (type == COLUMN_TYPE_INT64 || type == COLUMN_TYPE_UINT64) {
+            return (long) value;
         }
+        throw new InvalidValueException(
+                "Cannot get field `long` because value's type is " + getDataType());
     }
 
 
     /**
      * Convert the original data type Value to String
      *
-     * @return String
-     * @throws InvalidValueException        if the value type is not string
-     * @throws UnsupportedEncodingException if decode failed
+     * @return String value
+     * @throws InvalidValueException if the value type is not string
      */
     public String asString() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.STRING_VALUE) {
-            return value.getStringValue().toString(charset);
+        if (type == COLUMN_TYPE_STRING) {
+            return (java.lang.String) value;
         }
         throw new InvalidValueException(
                 "Cannot get field `string` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to float
+     * Convert the original Value to float
      *
-     * @return float
+     * @return float value
      * @throws InvalidValueException if the value type is not float
      */
     public float asFloat() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.FLOAT_VALUE) {
-            return value.getFloatValue();
+        if (type == COLUMN_TYPE_FLOAT32) {
+            return (float) value;
         }
         throw new InvalidValueException(
                 "Cannot get field `float` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to double
+     * Convert the original Value to double
      *
-     * @return double
+     * @return double value
      * @throws InvalidValueException if the value type is not double
      */
     public double asDouble() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.DOUBLE_VALUE) {
-            return value.getDoubleValue();
+        if (type == COLUMN_TYPE_FLOAT64) {
+            return (double) value;
         }
         throw new InvalidValueException(
                 "Cannot get field `double` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link List}
+     * Convert the original Value to list
      *
-     * @return list
+     * @return list value
      * @throws InvalidValueException if the value type is not list
      */
     public List<ValueWrapper> asList() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.LIST_VALUE) {
-            List<ValueWrapper> values = new ArrayList<>();
-            for (Value value : value.getListValue().getValuesList()) {
-                values.add(new ValueWrapper(value));
-            }
-            return values;
+        if (type == COLUMN_TYPE_LIST) {
+            return (List<ValueWrapper>) value;
         }
         throw new InvalidValueException(
                 "Cannot get field `list` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link Vertex}
+     * Convert the original Value to Vertex
      *
-     * @return Vertex
+     * @return Vertex value
      * @throws InvalidValueException if the value type is not node
      */
     public Vertex asNode() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.NODE_VALUE) {
-            return new Vertex(value.getNodeValue());
+        if (type == COLUMN_TYPE_NODE) {
+            return (Vertex) value;
         }
         throw new InvalidValueException(
                 "cannot get field `node` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link Relationship}
+     * Convert the original data Value to Relationship
      *
-     * @return Relationship
+     * @return Relationship value
      * @throws InvalidValueException if the value type is not edge
      */
     public Relationship asEdge() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.EDGE_VALUE) {
-            return new Relationship(value.getEdgeValue());
+        if (type == COLUMN_TYPE_EDGE) {
+            return (Relationship) value;
         }
         throw new InvalidValueException(
                 "cannot get field `edge` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link NTime}
+     * Convert the original data Value to LocalTime
      *
-     * @return NTime
+     * @return {@link LocalTime} value
      * @throws InvalidValueException if the value type is not localtime
      */
-    public NTime asLocalTime() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.LOCAL_TIME_VALUE) {
-            return new NTime(value.getLocalTimeValue());
+    public LocalTime asLocalTime() throws InvalidValueException {
+        if (type == COLUMN_TYPE_LOCALTIME) {
+            return (LocalTime) value;
         }
         throw new InvalidValueException(
                 "cannot get field `localtime` because value's type is " + getDataType());
@@ -401,14 +450,14 @@ public class ValueWrapper {
 
 
     /**
-     * Convert the original data type Value to {@link NZonedTime}
+     * Convert the original data type Value to OffsetTime
      *
-     * @return NTime
-     * @throws InvalidValueException if the value type is not localtime
+     * @return {@link OffsetTime} time with zone information
+     * @throws InvalidValueException if the value type is not Zoned time
      */
-    public NZonedTime asZonedTime() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.ZONED_TIME_VALUE) {
-            return new NZonedTime(value.getZonedTimeValue());
+    public OffsetTime asZonedTime() throws InvalidValueException {
+        if (type == COLUMN_TYPE_ZONEDTIME) {
+            return (OffsetTime) value;
         }
         throw new InvalidValueException(
                 "cannot get field `zonedtime` because value's type is " + getDataType());
@@ -416,89 +465,111 @@ public class ValueWrapper {
 
 
     /**
-     * Convert the original data type Value to {@link NDate}
+     * Convert the original data type Value to LocalDate
      *
-     * @return NDate
-     * @throws InvalidValueException if the value type is not localtime
+     * @return {@link LocalDate} value
+     * @throws InvalidValueException if the value type is not date
      */
-    public NDate asDate() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.DATE_VALUE) {
-            return new NDate(value.getDateValue());
+    public LocalDate asDate() throws InvalidValueException {
+        if (type == COLUMN_TYPE_DATE) {
+            return (LocalDate) value;
         }
         throw new InvalidValueException(
                 "cannot get field `date` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link NDateTime}
+     * Convert the original data Value to LocalDateTime
      *
-     * @return NDateTime
-     * @throws InvalidValueException if the value type is not localDatetime
+     * @return {@link LocalDateTime}
+     * @throws InvalidValueException if the value type is not Local Datetime
      */
-    public NDateTime asLocalDateTime() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.LOCAL_DATETIME_VALUE) {
-            return new NDateTime(value.getLocalDatetimeValue());
+    public LocalDateTime asLocalDateTime() throws InvalidValueException {
+        if (type == COLUMN_TYPE_LOCALDATETIME) {
+            return (LocalDateTime) value;
         }
         throw new InvalidValueException(
                 "cannot get field `localdatetime` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link NZonedDateTime}
+     * Convert the original data Value to ZonedDateTime
      *
-     * @return NZonedDateTime
-     * @throws InvalidValueException if the value type is not localDatetime
+     * @return {@link ZonedDateTime}
+     * @throws InvalidValueException if the value type is not Zoned Datetime
      */
-    public NZonedDateTime asZonedDateTime() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.ZONED_DATETIME_VALUE) {
-            return new NZonedDateTime(value.getZonedDatetimeValue());
+    public ZonedDateTime asZonedDateTime() throws InvalidValueException {
+        if (type == COLUMN_TYPE_ZONEDDATETIME) {
+            return (ZonedDateTime) value;
         }
         throw new InvalidValueException(
                 "cannot get field `zoneddatetime` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data type Value to {@link NDuration}
+     * Convert the original data type Value to NDuration
      *
-     * @return NDuration
+     * @return {@link NDuration}
      * @throws InvalidValueException if the value type is not duration
      */
     public NDuration asDuration() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.DURATION_VALUE) {
-            return new NDuration(value.getDurationValue());
+        if (type == COLUMN_TYPE_DURATION) {
+            return (NDuration) value;
         }
         throw new InvalidValueException(
                 "cannot get field `duration` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to NRecord
+     *
+     * @return {@link NRecord}
+     * @throws InvalidValueException if the value type is not Record
+     */
     public NRecord asRecord() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.RECORD_VALUE) {
-            return new NRecord(value.getRecordValue());
+        if (type == COLUMN_TYPE_RECORD) {
+            return (NRecord) value;
         }
         throw new InvalidValueException(
                 "cannot get field `record` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to NPath
+     *
+     * @return {@link NPath}
+     * @throws InvalidValueException if the value type is not Path
+     */
     public NPath asPath() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.PATH_VALUE) {
-            return new NPath(value.getPathValue());
+        if (type == COLUMN_TYPE_PATH) {
+            return (NPath) value;
         }
         throw new InvalidValueException(
                 "cannot get field `path` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to BigDecimal
+     *
+     * @return {@link BigDecimal}
+     * @throws InvalidValueException if the value type is not decimal
+     */
     public BigDecimal asDecimal() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.DECIMAL_VALUE) {
-            return new BigDecimal(value.getDecimalValue().getSval());
+        if (type == COLUMN_TYPE_DECIMAL) {
+            return BigDecimal.valueOf((double) value);
         }
         throw new InvalidValueException(
                 "cannot get field `decimal` because value's type is " + getDataType());
     }
 
+    /**
+     * Convert the original data type Value to Vector
+     *
+     * @return {@link Vector}
+     * @throws InvalidValueException if the value type is not Vector
+     */
     public Vector asVector() throws InvalidValueException {
-        if (value.getDataCase() == Value.DataCase.VECTOR_VALUE) {
-            return new java.util.Vector(value.getVectorValue().getValuesList());
-        }
+        // TODO parse value to Vector
         throw new InvalidValueException(
                 "cannot get field `vector` because value's type is " + getDataType());
     }
@@ -527,9 +598,7 @@ public class ValueWrapper {
      */
     @Override
     public String toString() {
-        if (isEmpty()) {
-            return "";
-        } else if (isNull()) {
+        if (isNull()) {
             return null;
         } else if (isBoolean()) {
             return String.valueOf(asBoolean());
@@ -567,8 +636,6 @@ public class ValueWrapper {
             return asPath().toString();
         } else if (isDecimal()) {
             return asDecimal().toString();
-        } else if (isVector()) {
-            return asVector().toString();
         } else if (isRecord()) {
             return asRecord().toString();
         }

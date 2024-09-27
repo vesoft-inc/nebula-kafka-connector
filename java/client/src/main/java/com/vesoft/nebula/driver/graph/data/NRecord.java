@@ -1,5 +1,6 @@
 package com.vesoft.nebula.driver.graph.data;
 
+import com.vesoft.nebula.driver.graph.decode.ColumnType;
 import com.vesoft.nebula.proto.common.Record;
 import com.vesoft.nebula.proto.common.Value;
 import java.util.HashMap;
@@ -7,10 +8,11 @@ import java.util.Map;
 import java.util.Objects;
 
 public class NRecord {
-    private Record record;
+    private       ColumnType                type = ColumnType.COLUMN_TYPE_RECORD;
+    private final Map<String, ValueWrapper> map  = new HashMap<>();
 
-    public NRecord(Record record) {
-        this.record = record;
+    public NRecord(Map<String, ValueWrapper> map) {
+        this.map.putAll(map);
     }
 
     /**
@@ -24,7 +26,7 @@ public class NRecord {
         if (key == null) {
             throw new NullPointerException("null map key");
         }
-        return record.containsValues(key);
+        return map.containsKey(key);
     }
 
 
@@ -38,7 +40,7 @@ public class NRecord {
         if (!containsKey(key)) {
             return null;
         }
-        return new ValueWrapper(record.getValuesOrDefault(key, null));
+        return map.get(key);
     }
 
     /**
@@ -47,7 +49,7 @@ public class NRecord {
      * @return true if this record contains no key-value mappings
      */
     public boolean isEmpty() {
-        return record.getValuesCount() == 0;
+        return map == null || map.isEmpty();
     }
 
     /**
@@ -56,7 +58,7 @@ public class NRecord {
      * @return the number of key-value mappings in this record
      */
     public int size() {
-        return record.getValuesCount();
+        return map.size();
     }
 
     /**
@@ -65,16 +67,12 @@ public class NRecord {
      * @return Map for this record
      */
     public Map<String, ValueWrapper> getValuesMap() {
-        Map<String, ValueWrapper> values = new HashMap<>();
-        for (Map.Entry<String, Value> entry : record.getValuesMap().entrySet()) {
-            values.put(entry.getKey(), new ValueWrapper(entry.getValue()));
-        }
-        return values;
+        return map;
     }
 
     @Override
     public String toString() {
-        return record.getValuesMap().toString();
+        return map.toString();
     }
 
     @Override
@@ -87,11 +85,11 @@ public class NRecord {
         }
 
         NRecord that = (NRecord) o;
-        return record.getValuesMap().equals(that.record.getValuesMap());
+        return map.equals(that.getValuesMap());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(record.getValuesMap());
+        return Objects.hash(map);
     }
 }

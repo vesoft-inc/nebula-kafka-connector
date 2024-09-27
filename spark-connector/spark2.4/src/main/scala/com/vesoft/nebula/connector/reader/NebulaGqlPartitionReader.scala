@@ -54,9 +54,6 @@ class NebulaGqlPartitionReader extends InputPartitionReader[InternalRow] {
       if (value.isNull) {
         mutableRow.setNullAt(i)
       }
-      if (value.isEmpty) {
-        mutableRow.setNullAt(i)
-      }
       if (value.isString) {
         getters(i).apply(value.asString(), mutableRow, i)
       }

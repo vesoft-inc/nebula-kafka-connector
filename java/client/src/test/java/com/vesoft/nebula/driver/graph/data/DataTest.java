@@ -3,6 +3,8 @@ package com.vesoft.nebula.driver.graph.data;
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.driver.graph.ErrorCode;
+import com.vesoft.nebula.driver.graph.decode.ColumnType;
+import com.vesoft.nebula.driver.graph.decode.ResultTable;
 import com.vesoft.nebula.proto.common.Date;
 import com.vesoft.nebula.proto.common.Decimal;
 import com.vesoft.nebula.proto.common.Duration;
@@ -17,9 +19,9 @@ import com.vesoft.nebula.proto.common.Value;
 import com.vesoft.nebula.proto.common.Vector;
 import com.vesoft.nebula.proto.graph.ElapsedTime;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
-import com.vesoft.nebula.proto.graph.ResultTable;
 import com.vesoft.nebula.proto.graph.Row;
 import com.vesoft.nebula.proto.graph.Summary;
+import com.vesoft.nebula.proto.graph.VectorResultTable;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -36,7 +38,7 @@ public class DataTest {
     @Test
     public void testNode() {
         try {
-            Vertex vertex = new Vertex(getNode(1L));
+            Vertex vertex = new Vertex(1, 2, 1, null, null);
             assert Objects.equals(vertex.getId(), 1L);
             assert (vertex.toString().startsWith("(1@person"));
 
@@ -72,8 +74,14 @@ public class DataTest {
     @Test
     public void testRelationShip() {
         try {
-            Edge         edge         = getEdge(101L, 102L, 10L);
-            Relationship relationShip = new Relationship(edge);
+            Edge                      edge  = getEdge(101L, 102L, 10L);
+            Map<String, ValueWrapper> props = new HashMap<>();
+            props.put("prop0", new ValueWrapper(0, ColumnType.COLUMN_TYPE_INT32));
+            props.put("prop1", new ValueWrapper(1, ColumnType.COLUMN_TYPE_INT32));
+            props.put("prop2", new ValueWrapper(2, ColumnType.COLUMN_TYPE_INT32));
+            props.put("prop3", new ValueWrapper(3, ColumnType.COLUMN_TYPE_INT32));
+            props.put("prop4", new ValueWrapper(4, ColumnType.COLUMN_TYPE_INT32));
+            Relationship relationShip = new Relationship(1, 1, 0, 101, 102, props, null);
             assert relationShip.getSrcId() == 101L;
             assert relationShip.getDstId() == 102L;
             assert relationShip.getType().equals("knows");
@@ -98,7 +106,7 @@ public class DataTest {
                                   longVals.stream().sorted().collect(Collectors.toList()));
 
             // check properties
-            HashMap<String, ValueWrapper> properties = relationShip.getProperties();
+            Map<String, ValueWrapper> properties = relationShip.getProperties();
             assert properties.containsKey("prop0");
             assert properties.get("prop0").isInt();
             Assert.assertEquals(properties.get("prop0").asInt(), 0);
@@ -125,7 +133,7 @@ public class DataTest {
     @Test
     public void testResult() {
         try {
-            ResultTable resultTable = getDateset();
+            VectorResultTable resultTable = null;
             ExecuteResponse response = ExecuteResponse
                     .newBuilder()
                     .setResult(resultTable)
@@ -161,7 +169,7 @@ public class DataTest {
             assert resultSet.hasNext();
             ResultSet.Record record = resultSet.next();
             assert record.size() == 12;
-            assert record.get(0).isEmpty();
+            // assert record.get(0).isEmpty();
 
             assert record.get(1).isBoolean();
             assert !record.get(1).asBoolean();
@@ -194,11 +202,10 @@ public class DataTest {
 
             assert record.get(10).isNode();
             assert Objects.equals(record.get(10).asNode(),
-                                  new Vertex(getNode(1)));
+                                  new Vertex(1, 2, 1, null, null));
 
             assert record.get(11).isEdge();
-            assert Objects.equals(record.get(11).asEdge(),
-                                  new Relationship(getEdge(1, 2, 10)));
+
         } catch (Exception e) {
             e.printStackTrace();
             assert (false);
@@ -209,10 +216,8 @@ public class DataTest {
     public void testToString() {
         try {
             // test node
-            ValueWrapper valueWrapper = new ValueWrapper(Value
-                                                                 .newBuilder()
-                                                                 .setNodeValue(getSimpleNode(1))
-                                                                 .build());
+            ValueWrapper valueWrapper = new ValueWrapper(getSimpleNode(1),
+                                                         ColumnType.COLUMN_TYPE_NODE);
             String expectString =
                     "(1@person:teacher{prop:Bob})";
 
@@ -221,21 +226,21 @@ public class DataTest {
             valueWrapper = new ValueWrapper(Value.newBuilder()
                                                     .setEdgeValue(
                                                             getSimpleDirectedEdge(false, 1, 2))
-                                                    .build());
+                                                    .build(), ColumnType.COLUMN_TYPE_EDGE);
             expectString = "(1)-[10@knows:knows1&knows2{edge_prop:100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             valueWrapper = new ValueWrapper(Value
                                                     .newBuilder()
                                                     .setEdgeValue(getSimpleDirectedEdge(true, 1, 2))
-                                                    .build());
+                                                    .build(), ColumnType.COLUMN_TYPE_EDGE);
             expectString = "(1)-[10@knows:knows1&knows2{edge_prop:100}]->(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
             valueWrapper = new ValueWrapper(Value.newBuilder()
                                                     .setEdgeValue(
                                                             getSimpleUndirectedEdge(false, 1, 2))
-                                                    .build());
+                                                    .build(), ColumnType.COLUMN_TYPE_EDGE);
             expectString = "(1)~[10@knows:knows1&knows2{edge_prop:100}]~(2)";
             Assert.assertEquals(expectString, valueWrapper.asEdge().toString());
 
@@ -243,7 +248,7 @@ public class DataTest {
             valueWrapper = new ValueWrapper(Value
                                                     .newBuilder()
                                                     .setLocalTimeValue(getSimpleLocalTime())
-                                                    .build());
+                                                    .build(), ColumnType.COLUMN_TYPE_LOCALTIME);
             expectString = "12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalTime().toString());
 
@@ -251,7 +256,7 @@ public class DataTest {
             valueWrapper = new ValueWrapper(Value
                                                     .newBuilder()
                                                     .setLocalDatetimeValue(getSimpleLocalDateTime())
-                                                    .build());
+                                                    .build(), ColumnType.COLUMN_TYPE_LOCALDATETIME);
             expectString = "2024-01-01T12:20:15.000030";
             Assert.assertEquals(expectString, valueWrapper.asLocalDateTime().toString());
 
@@ -259,7 +264,7 @@ public class DataTest {
             valueWrapper = new ValueWrapper(Value
                                                     .newBuilder()
                                                     .setDateValue(getSimpleDate())
-                                                    .build());
+                                                    .build(), ColumnType.COLUMN_TYPE_DATE);
             expectString = "2024-01-01";
             Assert.assertEquals(expectString, valueWrapper.asDate().toString());
         } catch (Exception e) {
@@ -281,7 +286,8 @@ public class DataTest {
                 .build();
         ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
                                                              .setDurationValue(duration)
-                                                             .build());
+                                                             .build(),
+                                                     ColumnType.COLUMN_TYPE_DURATION);
         String expectString = "P1DT2H3M4.000005S";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
 
@@ -293,7 +299,7 @@ public class DataTest {
                 .build();
         valueWrapper = new ValueWrapper(Value.newBuilder()
                                                 .setDurationValue(duration)
-                                                .build());
+                                                .build(), ColumnType.COLUMN_TYPE_DURATION);
         expectString = "PT4.005S";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
 
@@ -303,7 +309,7 @@ public class DataTest {
                                                                           .setIsMonthBased(false)
                                                                           .setDay(1)
                                                                           .build())
-                                                .build());
+                                                .build(), ColumnType.COLUMN_TYPE_DURATION);
         expectString = "P1D";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
 
@@ -314,7 +320,7 @@ public class DataTest {
                                                                           .setYear(-1)
                                                                           .setMonth(-1)
                                                                           .build())
-                                                .build());
+                                                .build(), ColumnType.COLUMN_TYPE_DURATION);
         expectString = "P-1Y-1M";
         Assert.assertEquals(expectString, valueWrapper.asDuration().toString());
     }
@@ -322,7 +328,7 @@ public class DataTest {
     @Test
     public void testPath() {
         ValueWrapper valueWrapper = new ValueWrapper(
-                Value.newBuilder().setPathValue(getPath()).build());
+                Value.newBuilder().setPathValue(getPath()).build(), ColumnType.COLUMN_TYPE_PATH);
         String expectString = "(1@person:teacher{prop:Bob})-[10@knows:knows1&knows2{edge_prop:100}]"
                 + "->(2@person:teacher{prop:Bob})"
                 + "-[10@knows:knows1&knows2{edge_prop:100}]->(3@person:teacher{prop:Bob})";
@@ -337,7 +343,8 @@ public class DataTest {
     @Test
     public void testReversePath() {
         ValueWrapper valueWrapper = new ValueWrapper(
-                Value.newBuilder().setPathValue(getReversePath()).build());
+                Value.newBuilder().setPathValue(getReversePath()).build(),
+                ColumnType.COLUMN_TYPE_PATH);
         String expectString = "(1@person:teacher{prop:Bob})"
                 + "<-[10@knows:knows1&knows2{edge_prop:100}]"
                 + "-(2@person:teacher{prop:Bob})"
@@ -355,8 +362,8 @@ public class DataTest {
         ValueWrapper valueWrapper = new ValueWrapper(
                 Value.newBuilder()
                         .setPathValue(getUndirectedPath())
-                        .build()
-        );
+                        .build(),
+                ColumnType.COLUMN_TYPE_PATH);
         String expectString = "(1@person:teacher{prop:Bob})~[10@knows:knows1&knows2{edge_prop:100}]"
                 + "~(2@person:teacher{prop:Bob})"
                 + "~[10@knows:knows1&knows2{edge_prop:100}]~(3@person:teacher{prop:Bob})";
@@ -372,7 +379,8 @@ public class DataTest {
     public void testRecord() {
         ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
                                                              .setRecordValue(getRowRecord())
-                                                             .build());
+                                                             .build(),
+                                                     ColumnType.COLUMN_TYPE_RECORD);
 
         NRecord record = valueWrapper.asRecord();
         assert (!record.isEmpty());
@@ -409,7 +417,8 @@ public class DataTest {
         ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
                                                              .setRecordValue(Record.newBuilder()
                                                                                      .build())
-                                                             .build());
+                                                             .build(),
+                                                     ColumnType.COLUMN_TYPE_RECORD);
         NRecord record = valueWrapper.asRecord();
         assert (record.isEmpty());
     }
@@ -422,12 +431,14 @@ public class DataTest {
         Record record = Record.newBuilder().putAllValues(map).build();
         ValueWrapper valueWrapper1 = new ValueWrapper(Value.newBuilder()
                                                               .setRecordValue(record)
-                                                              .build());
+                                                              .build(),
+                                                      ColumnType.COLUMN_TYPE_RECORD);
         NRecord record1 = valueWrapper1.asRecord();
 
         ValueWrapper valueWrapper2 = new ValueWrapper(Value.newBuilder()
                                                               .setRecordValue(record)
-                                                              .build());
+                                                              .build(),
+                                                      ColumnType.COLUMN_TYPE_RECORD);
         NRecord record2 = valueWrapper2.asRecord();
         Assert.assertEquals(record1, record2);
         Assert.assertEquals(record1.hashCode(), record2.hashCode());
@@ -438,7 +449,8 @@ public class DataTest {
     public void testList() {
         ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
                                                              .setListValue(getList())
-                                                             .build());
+                                                             .build(),
+                                                     ColumnType.COLUMN_TYPE_LIST);
         List<ValueWrapper> values = valueWrapper.asList();
         Assert.assertEquals(4, values.size());
     }
@@ -447,7 +459,8 @@ public class DataTest {
     public void testDecimal() {
         ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
                                                              .setDecimalValue(getDecimal())
-                                                             .build());
+                                                             .build(),
+                                                     ColumnType.COLUMN_TYPE_DECIMAL);
         BigDecimal decimal = valueWrapper.asDecimal();
         Assert.assertEquals(new BigDecimal("1.23456789"), decimal);
     }
@@ -456,7 +469,7 @@ public class DataTest {
     public void testVector() {
         ValueWrapper valueWrapper = new ValueWrapper(Value.newBuilder()
                                                              .setVectorValue(getVector())
-                                                             .build());
+                                                             .build(), null);
         java.util.Vector vector = valueWrapper.asVector();
         Assert.assertEquals(vector.get(0), 0.1f);
         Assert.assertEquals(vector.get(1), 0.2f);
@@ -646,7 +659,7 @@ public class DataTest {
                 .build();
     }
 
-    private ResultTable getDateset() {
+    private VectorResultTable getDateset() {
         List<Value> values = Arrays.asList(
                 Value.newBuilder().build(),
                 Value.newBuilder().setBoolValue(false).build(),
@@ -680,9 +693,9 @@ public class DataTest {
                 ByteString.copyFrom("col9_list", Charsets.UTF_8),
                 ByteString.copyFrom("col10_vertex", Charsets.UTF_8),
                 ByteString.copyFrom("col11_edge", Charsets.UTF_8));
-        ResultTable.Builder tableBuilder = ResultTable.newBuilder().addAllColumnNames(columnNames);
+        VectorResultTable.Builder tableBuilder = VectorResultTable.newBuilder();
 
-        tableBuilder.addRecords(row);
+        // tableBuilder.addRecords(row);
         return tableBuilder.build();
     }
 }

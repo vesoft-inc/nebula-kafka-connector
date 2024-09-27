@@ -1,5 +1,6 @@
 package com.vesoft.nebula.driver.graph.data;
 
+import com.vesoft.nebula.driver.graph.decode.ColumnType;
 import com.vesoft.nebula.proto.common.Path;
 import com.vesoft.nebula.proto.common.Value;
 import java.util.ArrayList;
@@ -7,25 +8,20 @@ import java.util.List;
 import java.util.Map;
 
 public class NPath {
-    private Path path;
     private String decodeType = "utf-8";
 
-    private List<Vertex> nodes = new ArrayList<>();
-    private List<Relationship> relationships = new ArrayList<>();
-    private List<ValueWrapper> values = new ArrayList<>();
+    private List<ValueWrapper> values;
 
-    public NPath(Path path) {
-        if (path == null) {
-            return;
-        }
-        this.path = path;
-        for (Value value : path.getValuesList()) {
-            values.add(new ValueWrapper(value));
-            if (new ValueWrapper(value).isNode()) {
-                nodes.add(new Vertex(value.getNodeValue()));
-            }
-            if (new ValueWrapper(value).isEdge()) {
-                relationships.add(new Relationship(value.getEdgeValue()));
+    private List<ValueWrapper> nodes = new ArrayList<>();
+    private List<ValueWrapper> edges = new ArrayList<>();
+
+    public NPath(List<ValueWrapper> values) {
+        this.values = values;
+        for (ValueWrapper value : values) {
+            if (value.isNode()) {
+                nodes.add(value);
+            } else {
+                edges.add(value);
             }
         }
     }
@@ -37,7 +33,7 @@ public class NPath {
      * @return a List of all nodes in this path
      */
     public List<Vertex> nodes() {
-        return nodes;
+        return null;
     }
 
 
@@ -48,7 +44,7 @@ public class NPath {
      * @return a List of all relationships in this path
      */
     public List<Relationship> relationships() {
-        return relationships;
+        return null;
     }
 
     /**
@@ -79,27 +75,42 @@ public class NPath {
         return values.hashCode();
     }
 
-    public String toString() {
-        List<String> edgeStrs = new ArrayList<>();
-        for (int i = 0; i < relationships.size(); i++) {
-            Relationship relationship = relationships.get(i);
 
-            List<String> edgePropStrs = new ArrayList<>();
-            Map<String, ValueWrapper> props = relationship.getProperties();
+    public String toString() {
+        if (values.size() == 0) {
+            return null;
+        }
+
+        Vertex                    prefixNode         = nodes.get(0).asNode();
+        List<String>              prefixNodePropStrs = new ArrayList<>();
+        Map<String, ValueWrapper> prefixNodeProps    = prefixNode.getProperties();
+        for (String key : prefixNodeProps.keySet()) {
+            prefixNodePropStrs.add(key + ":" + prefixNodeProps.get(key).toString());
+        }
+
+        // just one node in the path
+        if (edges.size() == 0) {
+            String template = "(%d@%s:%s{%s})";
+            return String.format(template, prefixNode.getId(),
+                                 prefixNode.getType(),
+                                 String.join("&", prefixNode.getLabels()),
+                                 String.join(",", prefixNodePropStrs));
+        }
+
+        List<String> edgeStrs = new ArrayList<>();
+        for (int i = 0; i < edges.size(); i++) {
+            Relationship relationship = edges.get(i).asEdge();
+
+            List<String>              edgePropStrs = new ArrayList<>();
+            Map<String, ValueWrapper> props        = relationship.getProperties();
             for (String key : props.keySet()) {
                 edgePropStrs.add(key + ":" + props.get(key).toString());
             }
 
-            Vertex prefixNode = nodes.get(i);
-            List<String> prefixNodePropStrs = new ArrayList<>();
-            Map<String, ValueWrapper> prefixNodeProps = prefixNode.getProperties();
-            for (String key : prefixNodeProps.keySet()) {
-                prefixNodePropStrs.add(key + ":" + prefixNodeProps.get(key).toString());
-            }
 
-            Vertex suffixNode = nodes.get(i + 1);
-            List<String> suffixNodePropStrs = new ArrayList<>();
-            Map<String, ValueWrapper> suffixNodeProps = suffixNode.getProperties();
+            Vertex                    suffixNode         = nodes.get(i + 1).asNode();
+            List<String>              suffixNodePropStrs = new ArrayList<>();
+            Map<String, ValueWrapper> suffixNodeProps    = suffixNode.getProperties();
             for (String key : suffixNodeProps.keySet()) {
                 suffixNodePropStrs.add(key + ":" + suffixNodeProps.get(key).toString());
             }
@@ -115,18 +126,18 @@ public class NPath {
                 }
 
                 edgeStrs.add(String.format(template,
-                        prefixNode.getId(),
-                        prefixNode.getType(),
-                        String.join("&", prefixNode.getLabels()),
-                        String.join(",", prefixNodePropStrs),
-                        relationship.getRank(),
-                        relationship.getType(),
-                        String.join("&", relationship.getLabels()),
-                        String.join(",", edgePropStrs),
-                        suffixNode.getId(),
-                        suffixNode.getType(),
-                        String.join("&", suffixNode.getLabels()),
-                        String.join(",", suffixNodePropStrs)));
+                                           prefixNode.getId(),
+                                           prefixNode.getType(),
+                                           String.join("&", prefixNode.getLabels()),
+                                           String.join(",", prefixNodePropStrs),
+                                           relationship.getRank(),
+                                           relationship.getType(),
+                                           String.join("&", relationship.getLabels()),
+                                           String.join(",", edgePropStrs),
+                                           suffixNode.getId(),
+                                           suffixNode.getType(),
+                                           String.join("&", suffixNode.getLabels()),
+                                           String.join(",", suffixNodePropStrs)));
             } else {
                 template = "~[%d@%s:%s{%s}]~(%d@%s:%s{%s})";
                 if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
@@ -136,16 +147,17 @@ public class NPath {
                     template = "<-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
                 }
                 edgeStrs.add(String.format(template,
-                        relationship.getRank(),
-                        relationship.getType(),
-                        String.join("&", relationship.getLabels()),
-                        String.join(",", edgePropStrs),
-                        suffixNode.getId(),
-                        suffixNode.getType(),
-                        String.join("&", suffixNode.getLabels()),
-                        String.join(",", suffixNodePropStrs)));
+                                           relationship.getRank(),
+                                           relationship.getType(),
+                                           String.join("&", relationship.getLabels()),
+                                           String.join(",", edgePropStrs),
+                                           suffixNode.getId(),
+                                           suffixNode.getType(),
+                                           String.join("&", suffixNode.getLabels()),
+                                           String.join(",", suffixNodePropStrs)));
             }
         }
         return String.join("", edgeStrs);
     }
+
 }
