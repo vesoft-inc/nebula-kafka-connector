@@ -1052,6 +1052,6 @@ func init() {
 		types.ColumnTypeZonedDatetime: d.decodeBasiceValue(types.ColumnTypeZonedDatetime),
 		types.ColumnTypeDate:          d.decodeBasiceValue(types.ColumnTypeDate),
 		types.ColumnTypeDuration:      d.decodeBasiceValue(types.ColumnTypeDuration),
-		types.ColumnTypeAny:           nil,
+		types.ColumnTypeAny:           d.decodeAnyValue(),
 	}
 }
