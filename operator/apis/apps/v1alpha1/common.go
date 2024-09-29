@@ -36,6 +36,7 @@ const (
 	NebulaRoleName           = "nebula-role"
 	NebulaRoleBindingName    = "nebula-rolebinding"
 	defaultAlpineImage       = "vesoft/nebula-alpine:latest"
+	defaultConsoleImage      = "vesoft/ngql"
 
 	ZoneSuffix = "zone"
 
@@ -119,6 +120,17 @@ func getTopologySpreadConstraints(constraints []TopologySpreadConstraint, labels
 		tscs = append(tscs, tsc)
 	}
 	return tscs
+}
+
+func getConsoleImage(console *ConsoleSpec) string {
+	image := defaultConsoleImage
+	if console.Image != "" {
+		image = console.Image
+	}
+	if console.Version != "" {
+		image = fmt.Sprintf("%s:%s", image, console.Version)
+	}
+	return image
 }
 
 func parseCustomPort(defaultPort int32, customPort string) (int32, error) {
@@ -275,7 +287,74 @@ func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *co
 	containers = append(containers, baseContainer)
 	containers = mergeSidecarContainers(containers, c.ComponentSpec().SidecarContainers())
 
+	if c.ComponentType() == GraphdComponentType {
+		projection := nc.Spec.Graphd.GraphProjection
+		if projection != nil {
+			projectionCmd := []string{"/bin/sh", "-ecx"}
+			script := `
+set -exo pipefail
+
+sleep %d
+echo -e "%s" > /tmp/gql
+ngql -H %s -P %s -u ${USERNAME} -p ${PASSWORD} -f /tmp/gql
+if [ $? -eq 0 ]
+then
+  echo "create projected graph succeeded!"
+  sleep infinity
+fi
+  echo "create projected graph failed!"
+`
+			gql := generateGQL(nc.Spec.Graphd.GraphProjection)
+			script = fmt.Sprintf(script, *projection.CreationWaitingSeconds, gql, nc.GetGraphdServiceName(),
+				strconv.Itoa(int(nc.GraphdComponent().GetPort(GraphdPortNameGRPC))))
+			projectionContainer := corev1.Container{
+				Name:    "projection",
+				Image:   getConsoleImage(nc.Spec.Console),
+				Command: projectionCmd,
+				Args:    []string{`echo "$SCRIPT" > /tmp/gql-script && sh /tmp/gql-script`},
+				Env: []corev1.EnvVar{
+					{
+						Name:  "SCRIPT",
+						Value: script,
+					},
+					{
+						Name: "USERNAME",
+						ValueFrom: &corev1.EnvVarSource{
+							SecretKeyRef: &corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: nc.Spec.CredentialSecret,
+								},
+								Key: "username",
+							},
+						},
+					},
+					{
+						Name: "PASSWORD",
+						ValueFrom: &corev1.EnvVarSource{
+							SecretKeyRef: &corev1.SecretKeySelector{
+								LocalObjectReference: corev1.LocalObjectReference{
+									Name: nc.Spec.CredentialSecret,
+								},
+								Key: "password",
+							},
+						},
+					},
+				},
+				ImagePullPolicy: *c.ImagePullPolicy(),
+			}
+			containers = append(containers, projectionContainer)
+		}
+	}
+
 	return containers
+}
+
+func generateGQL(projection *GraphProjection) string {
+	gql := "CREATE GRAPH PROJECTION " + projection.ProjectionName
+	if projection.GraphSource.GraphReference != nil {
+		gql += " OF " + *projection.GraphSource.GraphReference
+	}
+	return gql
 }
 
 func generateStatefulSet(c NebulaComponent, metadEndpoints []string, cm *corev1.ConfigMap) (*appsv1.StatefulSet, error) {

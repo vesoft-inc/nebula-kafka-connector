@@ -251,3 +251,20 @@ type SSLCertsSpec struct {
 	// +optional
 	AutoMountServerCerts *bool `json:"autoMountServerCerts,omitempty"`
 }
+
+type GraphProjection struct {
+	ProjectionName string `json:"projectionName"`
+
+	GraphSource *GraphSource `json:"graphSource,omitempty"`
+
+	// Optional duration in seconds the container needs to wait before create graph projection.
+	// Value must be a positive integer.
+	// +kubebuilder:default=30
+	// +optional
+	CreationWaitingSeconds *int64 `json:"creationWaitingSeconds,omitempty"`
+}
+
+type GraphSource struct {
+	// +optional
+	GraphReference *string `json:"graphReference,omitempty"`
+}

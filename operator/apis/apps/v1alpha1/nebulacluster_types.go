@@ -149,6 +149,11 @@ type AgentContainerSpec struct {
 type GraphdSpec struct {
 	ComponentSpec `json:",inline"`
 
+	// GraphProjection defines a main-memory volatile projection
+	// of a durable data-source graph from the storage.
+	// +optional
+	GraphProjection *GraphProjection `json:"graphProjection,omitempty"`
+
 	// Config defines a graphd configuration load into ConfigMap
 	Config map[string]string `json:"config,omitempty"`
 

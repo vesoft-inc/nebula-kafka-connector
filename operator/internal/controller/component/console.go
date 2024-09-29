@@ -17,7 +17,6 @@ limitations under the License.
 package component
 
 import (
-	"fmt"
 	"strconv"
 
 	corev1 "k8s.io/api/core/v1"
@@ -106,7 +105,7 @@ func (c *nebulaConsole) generatePod(nc *v1alpha1.NebulaCluster) (*corev1.Pod, er
 
 	container := corev1.Container{
 		Name:            "console",
-		Image:           getConsoleImage(nc.Spec.Console),
+		Image:           nc.GetConsoleImage(),
 		ImagePullPolicy: corev1.PullAlways,
 		Command:         cmd,
 		VolumeMounts:    mounts,
@@ -153,17 +152,6 @@ func (c *nebulaConsole) getNodeSelector(nc *v1alpha1.NebulaCluster) map[string]s
 		}
 	}
 	return selector
-}
-
-func getConsoleImage(console *v1alpha1.ConsoleSpec) string {
-	image := defaultConsoleImage
-	if console.Image != "" {
-		image = console.Image
-	}
-	if console.Version != "" {
-		image = fmt.Sprintf("%s:%s", image, console.Version)
-	}
-	return image
 }
 
 func getConsolePodName(clusterName string) string {
