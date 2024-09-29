@@ -305,19 +305,7 @@ func (v *vectorWrapper) decodeValue(index uint32) (*nebulaValue, error) {
 	if v.vectorType == vectorTypeConst && v.constValue != nil {
 		return v.constValue, nil
 	}
-	var (
-		value *nebulaValue
-		err   error
-	)
-	switch v.vectorType {
-	case vectorTypeFlat:
-		value, err = v.decoder.decodeFlatValue(v.decodeContext, v.vector, index, v.typ)
-	case vectorTypeConst:
-		r := newBytesReader(v.vector.VectorData)
-		value, err = v.decoder.decodeConstValue(v.decodeContext, r, v.typ.getType())
-	default:
-		return nil, errInvalidVectorType
-	}
+	value, err := v.decoder.decodeValue(v.decodeContext, v.vector, v.vectorType, index, v.typ)
 	if err != nil {
 		return nil, err
 	}

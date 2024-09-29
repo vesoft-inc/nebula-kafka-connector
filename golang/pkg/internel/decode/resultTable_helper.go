@@ -65,10 +65,7 @@ type decodeFlatFn func(dctx *decodeContext, v *vector.NestedVector, index uint32
 
 type decoder interface {
 	// decodeValue decodes the value from the vector
-	decodeFlatValue(dctx *decodeContext, v *vector.NestedVector, index uint32, columnType typeSchema) (*nebulaValue, error)
-
-	// decodeConstValue only need the column type
-	decodeConstValue(dctx *decodeContext, r *bytesReader, columnType types.ColumnType) (*nebulaValue, error)
+	decodeValue(dctx *decodeContext, v *vector.NestedVector, t vectorType, index uint32, columnType typeSchema) (*nebulaValue, error)
 }
 type vectorDecoder struct {
 	decodeFlatFns map[types.ColumnType]decodeFlatFn
@@ -89,13 +86,26 @@ func (c *vectorDecoder) getCommonBytes(v *vector.NestedVector, typ types.ColumnT
 	return v.VectorData[int(index)*size : int(index)*size+size], nil
 }
 
-func (c *vectorDecoder) decodeFlatValue(dctx *decodeContext, v *vector.NestedVector, index uint32,
-	columnType typeSchema) (*nebulaValue, error) {
+func (c *vectorDecoder) decodeValue(dctx *decodeContext, v *vector.NestedVector, t vectorType,
+	index uint32, columnType typeSchema) (*nebulaValue, error) {
 	if v.NullBitMap != nil {
 		if v.NullBitMap[index/8]&kOneBitmasks[index%8] == 0 {
 			return &nebulaValue{data: nil}, nil
 		}
 	}
+	switch t {
+	case vectorTypeFlat:
+		return c.decodeFlatValue(dctx, v, index, columnType)
+	case vectorTypeConst:
+		r := newBytesReader(v.VectorData)
+		return c.decodeConstValue(dctx, r, columnType.getType())
+	default:
+		return nil, errInvalidVectorType
+	}
+}
+
+func (c *vectorDecoder) decodeFlatValue(dctx *decodeContext, v *vector.NestedVector,
+	index uint32, columnType typeSchema) (*nebulaValue, error) {
 	typ := columnType.getType()
 	if fn, ok := c.decodeFlatFns[typ]; ok {
 		return fn(dctx, v, index, columnType)
