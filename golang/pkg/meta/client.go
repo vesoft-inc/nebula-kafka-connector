@@ -3,11 +3,8 @@ package meta
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io/ioutil"
 	"math"
 	"strconv"
 	"strings"
@@ -17,10 +14,10 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/grpcutil"
 	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 )
 
 var defaultMsgSize = math.MaxInt64
@@ -84,6 +81,7 @@ type (
 		user           string
 		password       string
 		enableTLS      bool
+		tlsConfig      *tls.Config
 		ca             string
 		cert           string
 		key            string
@@ -170,16 +168,17 @@ func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
 		}
 
 		var tlsCfg *tls.Config
-		tlsCfg, err = client.newTLSConfig(host)
-		if err != nil {
-			continue
+		if client.enableTLS {
+			tlsCfg, err = grpcutil.NewTLSConfig(host, client.ca, client.cert, client.key, client.peerName, client.peerNameVerify)
+			if err != nil {
+				continue
+			}
 		}
-
+		client.tlsConfig = tlsCfg
 		err = client.open(host, port, client.requestTimeout, tlsCfg)
 		if err != nil {
 			continue
 		}
-
 		break
 	}
 
@@ -191,97 +190,13 @@ func NewMetaClient(addresses string, opts ...WithOption) (Client, error) {
 }
 
 func (c *metaClient) open(host string, port int, timeout time.Duration, tlsCfg *tls.Config) error {
-	var (
-		err  error
-		conn *grpc.ClientConn
-		cred grpc.DialOption
-	)
-
-	if tlsCfg != nil {
-		cred = grpc.WithTransportCredentials(credentials.NewTLS(tlsCfg))
-	} else {
-		cred = grpc.WithInsecure()
-	}
-
-	duration := time.Duration(timeout)
-	conn, err = grpc.Dial(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
-		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
-
+	conn, err := grpcutil.NewGrpcClient(host, port, timeout, tlsCfg)
 	if err != nil {
 		return err
 	}
-
 	c.clientConn = conn
 	c.client = admin.NewAdminServiceClient(conn)
 	return nil
-}
-
-func (c *metaClient) newTLSConfig(host string) (*tls.Config, error) {
-	if !c.enableTLS {
-		return nil, nil
-	}
-
-	if c.ca == "" {
-		return nil, errors.New("No CA certificate provide")
-	}
-
-	peer := c.peerName
-	if !c.peerNameVerify {
-		peer = ""
-	} else if peer == "" {
-		peer = host
-	}
-
-	tlsCfg := &tls.Config{
-		InsecureSkipVerify: true,
-		ServerName:         peer,
-		MinVersion:         tls.VersionTLS13,
-	}
-
-	CAs := x509.NewCertPool()
-	if ca, err := ioutil.ReadFile(c.ca); err == nil {
-		if !CAs.AppendCertsFromPEM(ca) {
-			return nil, err
-		}
-		tlsCfg.RootCAs = CAs
-	} else {
-		return nil, err
-	}
-
-	if c.cert != "" || c.key != "" {
-		if cert, err := tls.LoadX509KeyPair(c.cert, c.key); err != nil {
-			return nil, err
-		} else {
-			tlsCfg.Certificates = []tls.Certificate{cert}
-		}
-	}
-
-	tlsCfg.VerifyPeerCertificate = func(certificates [][]byte, _ [][]*x509.Certificate) error {
-		certs := make([]*x509.Certificate, len(certificates))
-		for i, data := range certificates {
-			cert, err := x509.ParseCertificate(data)
-			if err != nil {
-				return err
-			}
-			certs[i] = cert
-		}
-
-		opts := x509.VerifyOptions{
-			Roots:         tlsCfg.RootCAs,
-			DNSName:       tlsCfg.ServerName,
-			Intermediates: x509.NewCertPool(),
-		}
-
-		for _, cert := range certs[1:] {
-			opts.Intermediates.AddCert(cert)
-		}
-
-		_, err := certs[0].Verify(opts)
-
-		return err
-	}
-
-	return tlsCfg, nil
 }
 
 func (c *metaClient) Login() (*LoginResponse, error) {
@@ -290,7 +205,7 @@ func (c *metaClient) Login() (*LoginResponse, error) {
 	}
 	resp, err := c.authWithPassword(c.user, c.password)
 	if err != nil {
-		return nil, err
+		return nil, grpcutil.GetGrpcError(c.address, err)
 	}
 	c.token = resp.Token
 	return resp, nil
@@ -333,7 +248,7 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) (*LoginR
 		}
 		c.Close()
 		c.address = fmt.Sprintf("%s:%d", leader.GetHost(), leader.GetPort())
-		err := c.open(string(leader.GetHost()), int(leader.GetPort()), c.connectTimeout, nil)
+		err := c.open(string(leader.GetHost()), int(leader.GetPort()), c.connectTimeout, c.tlsConfig)
 		if err != nil {
 			return nil, err
 		}
@@ -377,7 +292,7 @@ func (c *metaClient) execute(fn func() (responseHeader, error)) (responseHeader,
 	)
 	resp, err = fn()
 	if err != nil {
-		return nil, err
+		return nil, grpcutil.GetGrpcError(c.address, err)
 	}
 	header := resp.GetHeader()
 	if internel_error.ErrorFromBytes(header.GetStatus().GetCode()) == nebulaErr.ERROR_SUCCESSFUL_COMPLETION {

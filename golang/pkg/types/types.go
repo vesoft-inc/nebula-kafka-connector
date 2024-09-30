@@ -106,5 +106,5 @@ const (
 	ColumnTypeDate
 	ColumnTypeDuration
 	ColumnTypeDecimal
-	ColumnTypeAny = 0xFF
+	ColumnTypeAny ColumnType = 0xFF
 )

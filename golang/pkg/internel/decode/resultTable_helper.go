@@ -132,16 +132,22 @@ func (c *vectorDecoder) decodeConstValue(dctx *decodeContext, r *bytesReader, co
 		return &nebulaValue{
 			data: decodeBasicValue(bs, typ, offset),
 		}, nil
-	case types.ColumnTypeString:
+	case types.ColumnTypeString, types.ColumnTypeDecimal:
 		var bs []byte
 		bs = r.readUtilZero()
 		// no zero fount, return all
 		if r.error() != nil {
 			bs = r.readPeddingAll()
 		}
-		return &nebulaValue{
-			data: decodeBasicValue(bs, types.ColumnTypeString, offset),
-		}, nil
+		if typ == types.ColumnTypeDecimal {
+			return &nebulaValue{
+				data: &NebulaDecimal{Sval: string(bs)},
+			}, nil
+		} else {
+			return &nebulaValue{
+				data: decodeBasicValue(bs, types.ColumnTypeString, offset),
+			}, nil
+		}
 	case types.ColumnTypeList:
 		// size + [value]
 		bs := r.readN(4)
@@ -232,6 +238,31 @@ func (c *vectorDecoder) decodeStringValue() decodeFlatFn {
 		offset := dctx.timezoneOffset
 		return &nebulaValue{
 			data: &NebulaString{Value: decodeBasicValue(data, types.ColumnTypeString, offset).(*NebulaString).Value},
+		}, nil
+	}
+}
+
+func (c *vectorDecoder) decodeDecimalValue() decodeFlatFn {
+	// same with string
+	return func(dctx *decodeContext, v *vector.NestedVector, index uint32, columnType typeSchema) (*nebulaValue, error) {
+		// uint32 length + prefix string + uint32 chunk offset + uint32 chunk index
+		// if the string is less then 12 bytes, no need to get data from chunk
+		length := 4 + 4 + 4 + 4
+		header := v.VectorData[index*uint32(length) : index*(uint32(length))+uint32(length)]
+		strLen := bytesToUint32(header[:4])
+
+		if strLen <= 12 {
+			return &nebulaValue{
+				data: &NebulaString{Value: string(header[4 : 4+strLen])},
+			}, nil
+		}
+		chunkIndex := bytesToUint32(header[12:16])
+		chunkOffset := bytesToUint32(header[8:12])
+		chunk := v.NestedVectors[chunkIndex]
+		data := chunk.VectorData[chunkOffset : chunkOffset+strLen]
+		offset := dctx.timezoneOffset
+		return &nebulaValue{
+			data: &NebulaDecimal{Sval: decodeBasicValue(data, types.ColumnTypeString, offset).(*NebulaString).Value},
 		}, nil
 	}
 }
@@ -656,7 +687,12 @@ func (c *vectorDecoder) decodeAnyValue() decodeFlatFn {
 				data: v,
 			}, nil
 		}
-		r := newBytesReader(dataBytes)
+		chunkIndexBytes, chunkOffsetBytes := dataBytes[:4], dataBytes[4:8]
+		chunkIndex := bytesToUint32(chunkIndexBytes)
+		chunkOffset := bytesToUint32(chunkOffsetBytes)
+		r := newBytesReader(v.NestedVectors[chunkIndex+1].VectorData)
+		r.index = int(chunkOffset)
+
 		return decodeAnyCompositeValue(dctx, r, dataType, true)
 	}
 }
@@ -687,6 +723,8 @@ func decodeBasicValue(bs []byte, typ types.ColumnType, offset int64) valuer {
 		return &NebulaDouble{Value: math.Float64frombits(order.Uint64(bs[:8]))}
 	case types.ColumnTypeString:
 		return &NebulaString{Value: string(bs)}
+	case types.ColumnTypeDecimal:
+		return &NebulaDecimal{Sval: string(bs)}
 	case types.ColumnTypeDate:
 		year := int16(bytesToInt16(bs[:2]))
 		month := bytesToInt8(bs[2:3])
@@ -812,7 +850,6 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 	offset := dctx.timezoneOffset
 	gsm := dctx.graphsSchema
 	if isBasicColumnType(typ) {
-
 		size, ok := sizeMap[typ]
 		if !ok {
 			return nil, errInvalidColumnType
@@ -829,22 +866,28 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 	switch typ {
 	case types.ColumnTypeUnknown:
 		return &nebulaValue{data: nil}, nil
-	case types.ColumnTypeString:
-		sizeBytes := r.readN(4)
+	case types.ColumnTypeString, types.ColumnTypeDecimal:
+		sizeBytes := r.readN(2)
 		if r.error() != nil {
 			return nil, r.error()
 		}
-		size := int(bytesToInt32(sizeBytes))
+		size := int(bytesToInt16(sizeBytes))
 		bs := r.readN(size)
 		if r.error() != nil {
 			return nil, r.error()
 		}
-		return &nebulaValue{
-			data: &NebulaString{Value: string(bs)},
-		}, nil
+		if typ == types.ColumnTypeDecimal {
+			return &nebulaValue{
+				data: &NebulaDecimal{Sval: string(bs)},
+			}, nil
+		} else {
+			return &nebulaValue{
+				data: &NebulaString{Value: string(bs)},
+			}, nil
+		}
 	case types.ColumnTypeList:
 		typeBytes := r.readN(1)
-		sizeBytes := r.readN(4)
+		sizeBytes := r.readN(2)
 		if r.error() != nil {
 			return nil, r.error()
 		}
@@ -852,7 +895,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		if !ok {
 			return nil, errInvalidColumnType
 		}
-		size := int(bytesToInt32(sizeBytes))
+		size := int(bytesToInt16(sizeBytes))
 		l := make([]*nebulaValue, 0, size)
 		for i := 0; i < size; i++ {
 			v, err := decodeAnyCompositeValue(dctx, r, subType, false)
@@ -1052,6 +1095,7 @@ func init() {
 		types.ColumnTypeZonedDatetime: d.decodeBasiceValue(types.ColumnTypeZonedDatetime),
 		types.ColumnTypeDate:          d.decodeBasiceValue(types.ColumnTypeDate),
 		types.ColumnTypeDuration:      d.decodeBasiceValue(types.ColumnTypeDuration),
+		types.ColumnTypeDecimal:       d.decodeAnyValue(),
 		types.ColumnTypeAny:           d.decodeAnyValue(),
 	}
 }

@@ -34,6 +34,7 @@ var columnTypeMap = map[uint8]types.ColumnType{
 	0x18: types.ColumnTypeLocalDatetime,
 	0x19: types.ColumnTypeZonedTime,
 	0x20: types.ColumnTypeZonedDatetime,
+	0x22: types.ColumnTypeDecimal,
 	0xFE: types.ColumnTypeAny,
 	0xFF: types.ColumnTypeInvalid,
 }

@@ -82,7 +82,7 @@ func (c *metaClient) ChangePassword(req *ChangePasswordReq) error {
 	}
 	c.Close()
 	c.address = fmt.Sprintf("%s:%d", leader.GetHost(), leader.GetPort())
-	err = c.open(string(leader.GetHost()), int(leader.GetPort()), c.connectTimeout, nil)
+	err = c.open(string(leader.GetHost()), int(leader.GetPort()), c.connectTimeout, c.tlsConfig)
 	if err != nil {
 		return err
 	}

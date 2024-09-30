@@ -109,7 +109,9 @@ func TestPoolRetry(t *testing.T) {
 		defer p.Close()
 		pool, _ := p.(*driverPool)
 		pool.connMaxLifeTime = tc.maxLifeTime
+		pool.mu.Lock()
 		pool.minOpen = 0
+		pool.mu.Unlock()
 		pool.connCfg = &connConfig{
 			requestTimeout: 10 * time.Second,
 		}
