@@ -736,6 +736,9 @@ func (d *NebulaDuration) String() string {
 		if d.GetMonth() != 0 {
 			prefix += fmt.Sprintf("%dM", d.GetMonth())
 		}
+		if d.GetYear() == 0 && d.GetMonth() == 0 {
+			prefix += "0M"
+		}
 	} else {
 		if d.GetDay() != 0 {
 			prefix += fmt.Sprintf("%dD", d.GetDay())
@@ -767,6 +770,9 @@ func (d *NebulaDuration) String() string {
 				prefix = strings.TrimRight(prefix, "0")
 				prefix += "S"
 			}
+		}
+		if d.GetDay() == 0 && d.GetHour() == 0 && d.GetMinute() == 0 && d.GetSecond() == 0 && d.GetMicrosecond() == 0 {
+			prefix += "T0S"
 		}
 	}
 	return prefix

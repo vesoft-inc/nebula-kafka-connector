@@ -142,8 +142,9 @@ func NewResultTable(table *vector.VectorResultTable) (*ResultTable, error) {
 	t := &ResultTable{table: table, decoder: defaultDecoder}
 	// construct graph schema
 	gsm := t.constructGraphsSchema()
+	timeZone := int32(table.Meta.TimeZoneOffset)
 	dctx := &decodeContext{
-		timezoneOffset: int64(table.Meta.TimeZoneOffset) * int64(time.Minute/time.Second),
+		timezoneOffset: int64(timeZone) * int64(time.Minute/time.Second),
 		graphsSchema:   gsm,
 	}
 	t.decodeContext = dctx
