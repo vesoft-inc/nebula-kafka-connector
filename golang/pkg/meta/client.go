@@ -259,12 +259,14 @@ func (c *metaClient) auth(user string, authInfo map[string]interface{}) (*LoginR
 		if nebulaErr.ErrorCode(response.Header.GetStatus().GetCode()) != nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
 			return nil, nebulaErr.NewNebulaError(
 				nebulaErr.ErrorCode(string(response.Header.GetStatus().GetCode())),
+				"%s",
 				string(response.Header.GetStatus().GetMessage()),
 			)
 		}
 	} else if nebulaErr.ErrorCode(response.Header.GetStatus().GetCode()) != nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
 		return nil, nebulaErr.NewNebulaError(
 			nebulaErr.ErrorCode(string(response.Header.GetStatus().GetCode())),
+			"%s",
 			string(response.Header.GetStatus().GetMessage()),
 		)
 	}
@@ -300,6 +302,7 @@ func (c *metaClient) execute(fn func() (responseHeader, error)) (responseHeader,
 	} else {
 		return nil, nebulaErr.NewNebulaError(
 			nebulaErr.ErrorCode(string(header.GetStatus().GetCode())),
+			"%s",
 			string(header.GetStatus().GetMessage()),
 		)
 	}

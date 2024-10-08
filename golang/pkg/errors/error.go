@@ -468,6 +468,6 @@ func Wrap(err error, msg string) error {
 		return goerr.Wrap(err, msg)
 	}
 	nbErr.err = goerr.Wrap(nbErr.err, msg)
-	nbErr.errorMsg = fmt.Sprintf("%s: %s", msg, nbErr.errorMsg)
+	nbErr.errorMsg = fmt.Sprintf("%s: %s", nbErr.errorMsg, msg)
 	return nbErr
 }

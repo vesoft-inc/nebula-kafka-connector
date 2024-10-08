@@ -17,7 +17,7 @@ type (
 )
 
 func (h *HeaderResponse) GetStatus() error {
-	return errors.NewNebulaError(h.Code, h.Msg)
+	return errors.NewNebulaError(h.Code, "%s", h.Msg)
 }
 
 func (h *HeaderResponse) GetErrorCode() errors.ErrorCode {

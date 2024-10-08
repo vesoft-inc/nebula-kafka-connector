@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"math"
+	"net"
+	"strconv"
 	"time"
 
 	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
@@ -103,9 +105,17 @@ func NewTLSConfig(host string, ca, cert, key string, peerName string, peerNameVe
 }
 
 func GetGrpcError(address string, err error) error {
-	var host string
-	var port int
-	if _, err := fmt.Sscanf(address, "%s:%d", &host, &port); err != nil {
+	var (
+		host string
+		port int
+	)
+	h, p, err2 := net.SplitHostPort(address)
+	if err2 != nil {
+		// ignore
+	}
+	port, err2 = strconv.Atoi(p)
+	host = h
+	if err2 != nil {
 		//ignore
 	}
 	rpcErr, ok := grpcstatus.FromError(err)

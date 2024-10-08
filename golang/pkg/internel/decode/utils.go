@@ -24,7 +24,7 @@ func newBytesReader(bs []byte) *bytesReader {
 
 func (r *bytesReader) readN(n int) []byte {
 	if r.index+n > len(r.bs) {
-		r.err = errOutOfRange
+		r.err = errors.Wrap(errOutOfRange, "")
 		return nil
 	}
 	bs := r.bs[r.index : r.index+n]

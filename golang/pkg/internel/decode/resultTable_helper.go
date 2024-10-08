@@ -1,6 +1,7 @@
 package decode
 
 import (
+	"fmt"
 	"math"
 	"time"
 
@@ -78,10 +79,10 @@ var defaultDecoder decoder = &vectorDecoder{}
 func (c *vectorDecoder) getCommonBytes(v *vector.NestedVector, typ types.ColumnType, index uint32) ([]byte, error) {
 	size, ok := sizeMap[typ]
 	if !ok {
-		return nil, errInvalidColumnType
+		return nil, errors.Wrap(errInvalidColumnType, "")
 	}
 	if len(v.VectorData) < int(index)*size+size {
-		return nil, errOutOfRange
+		return nil, errors.Wrap(errOutOfRange, "")
 	}
 	return v.VectorData[int(index)*size : int(index)*size+size], nil
 }
@@ -110,7 +111,7 @@ func (c *vectorDecoder) decodeFlatValue(dctx *decodeContext, v *vector.NestedVec
 	if fn, ok := c.decodeFlatFns[typ]; ok {
 		return fn(dctx, v, index, columnType)
 	} else {
-		return nil, errInvalidColumnType
+		return nil, errors.Wrap(errInvalidColumnType, "")
 	}
 }
 
@@ -118,6 +119,8 @@ func (c *vectorDecoder) decodeConstValue(dctx *decodeContext, r *bytesReader, co
 	typ := columnType
 	offset := dctx.timezoneOffset
 	switch typ {
+	case types.ColumnTypeUnknown:
+		return &nebulaValue{data: nil}, nil
 	case types.ColumnTypeBool:
 		fallthrough
 	case types.ColumnTypeInt8, types.ColumnTypeUint8, types.ColumnTypeInt16, types.ColumnTypeUint16, types.ColumnTypeInt32, types.ColumnTypeUint32, types.ColumnTypeInt64, types.ColumnTypeUint64:
@@ -165,7 +168,7 @@ func (c *vectorDecoder) decodeConstValue(dctx *decodeContext, r *bytesReader, co
 			}
 			subColumnType, ok := columnTypeMap[bs[0]]
 			if !ok {
-				return nil, errInvalidColumnType
+				return nil, errors.Wrap(errInvalidColumnType, "")
 			}
 			v, err := c.decodeConstValue(dctx, r, subColumnType)
 			if err != nil {
@@ -201,7 +204,7 @@ func (c *vectorDecoder) decodeConstValue(dctx *decodeContext, r *bytesReader, co
 			}
 			subColumnType, ok := columnTypeMap[bs[0]]
 			if !ok {
-				return nil, errInvalidColumnType
+				return nil, errors.Wrap(errInvalidColumnType, "")
 			}
 
 			v, err := c.decodeConstValue(dctx, r, subColumnType)
@@ -214,7 +217,7 @@ func (c *vectorDecoder) decodeConstValue(dctx *decodeContext, r *bytesReader, co
 			data: mm,
 		}, nil
 	default:
-		return nil, errInvalidColumnType
+		return nil, errors.Wrap(errInvalidColumnType, fmt.Sprintf("%d", typ))
 	}
 }
 
@@ -253,7 +256,7 @@ func (c *vectorDecoder) decodeDecimalValue() decodeFlatFn {
 
 		if strLen <= 12 {
 			return &nebulaValue{
-				data: &NebulaString{Value: string(header[4 : 4+strLen])},
+				data: &NebulaDecimal{Sval: string(header[4 : 4+strLen])},
 			}, nil
 		}
 		chunkIndex := bytesToUint32(header[12:16])
@@ -295,7 +298,7 @@ func (c *vectorDecoder) decodeListValue() decodeFlatFn {
 			return nil, errTypeAssertion
 		}
 		for i := uint32(0); i < size; i++ {
-			vv, err := c.decodeFlatValue(dctx, v.NestedVectors[0], offset+i, schema.subSchema)
+			vv, err := c.decodeValue(dctx, v.NestedVectors[0], vectorTypeFlat, offset+i, schema.subSchema)
 			if err != nil {
 				return nil, err
 			}
@@ -332,7 +335,7 @@ func (c *vectorDecoder) decodeRecordValue() decodeFlatFn {
 			if !ok {
 				return nil, errPropNotFound
 			}
-			value, err := c.decodeFlatValue(dctx, v.NestedVectors[i], index, s)
+			value, err := c.decodeValue(dctx, v.NestedVectors[i], vectorTypeFlat, index, s)
 			if err != nil {
 				return nil, err
 			}
@@ -386,7 +389,7 @@ func (c *vectorDecoder) decodeNodeValue() decodeFlatFn {
 		node.Properties = make(map[string]*nebulaValue)
 		for _, prop := range nodeProps {
 			vw := v.NestedVectors[prop.vectorIndex]
-			value, err := c.decodeFlatValue(dctx, vw, index, prop.typ)
+			value, err := c.decodeValue(dctx, vw, vectorTypeFlat, index, prop.typ)
 			if err != nil {
 				return nil, err
 			}
@@ -439,7 +442,7 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 		e.Properties = make(map[string]*nebulaValue)
 		for _, prop := range props {
 			vw := v.NestedVectors[prop.vectorIndex]
-			value, err := c.decodeFlatValue(dctx, vw, index, prop.typ)
+			value, err := c.decodeValue(dctx, vw, vectorTypeFlat, index, prop.typ)
 			if err != nil {
 				return nil, err
 			}
@@ -517,9 +520,9 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 
 			var data *nebulaValue
 			if sentinelType == types.ColumnTypeNode {
-				data, err = c.decodeFlatValue(dctx, dataVector, sentinelOffset, nodeSchema)
+				data, err = c.decodeValue(dctx, dataVector, vectorTypeFlat, sentinelOffset, nodeSchema)
 			} else {
-				data, err = c.decodeFlatValue(dctx, dataVector, sentinelOffset, edgeSchema)
+				data, err = c.decodeValue(dctx, dataVector, vectorTypeFlat, sentinelOffset, edgeSchema)
 			}
 			if err != nil {
 				return nil, err
@@ -528,7 +531,7 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 			if len(path.Values) == int(totalNum) {
 				break
 			}
-			pathHeaderValue, err = c.decodeFlatValue(dctx, adjVector, (sentinelOffset), pathHeaderSchema)
+			pathHeaderValue, err = c.decodeValue(dctx, adjVector, vectorTypeFlat, sentinelOffset, pathHeaderSchema)
 			if err != nil {
 				return nil, err
 			}
@@ -678,7 +681,7 @@ func (c *vectorDecoder) decodeAnyValue() decodeFlatFn {
 		dataType, ok := columnTypeMap[typeBytes[0]]
 		offset := dctx.timezoneOffset
 		if !ok {
-			return nil, errInvalidColumnType
+			return nil, errors.Wrap(errInvalidColumnType, "")
 		}
 		dataBytes := v.VectorData[dateHeaderLength*index : dateHeaderLength*(index+1)]
 		if isBasicColumnType(dataType) {
@@ -844,7 +847,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 	if first {
 		// first byte is the type
 		if isBasicColumnType(typ) {
-			return nil, errInvalidColumnType
+			return nil, errors.Wrap(errInvalidColumnType, "")
 		}
 	}
 	offset := dctx.timezoneOffset
@@ -852,7 +855,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 	if isBasicColumnType(typ) {
 		size, ok := sizeMap[typ]
 		if !ok {
-			return nil, errInvalidColumnType
+			return nil, errors.Wrap(errInvalidColumnType, "")
 		}
 		bs := r.readN(size)
 		if r.error() != nil {
@@ -893,7 +896,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		}
 		subType, ok := columnTypeMap[typeBytes[0]]
 		if !ok {
-			return nil, errInvalidColumnType
+			return nil, errors.Wrap(errInvalidColumnType, "")
 		}
 		size := int(bytesToInt16(sizeBytes))
 		l := make([]*nebulaValue, 0, size)
@@ -926,7 +929,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			}
 			subType, ok := columnTypeMap[typeBytes[0]]
 			if !ok {
-				return nil, errInvalidColumnType
+				return nil, errors.Wrap(errInvalidColumnType, "")
 			}
 			v, err := decodeAnyCompositeValue(dctx, r, subType, false)
 			if err != nil {
@@ -952,11 +955,11 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		propSize := bytesToInt16(propSizeBytes)
 		props := make(map[string]*nebulaValue, 0)
 		for i := 0; i < int(propSize); i++ {
-			nameSizeBytes := r.readN(4)
+			nameSizeBytes := r.readN(2)
 			if r.error() != nil {
 				return nil, r.error()
 			}
-			nameSize := int(bytesToInt32(nameSizeBytes))
+			nameSize := int(bytesToInt16(nameSizeBytes))
 			nameBytes := r.readN(nameSize)
 			typeBytes := r.readN(1)
 			if r.error() != nil {
@@ -964,7 +967,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			}
 			subType, ok := columnTypeMap[typeBytes[0]]
 			if !ok {
-				return nil, errInvalidColumnType
+				return nil, errors.Wrap(errInvalidColumnType, "")
 			}
 			v, err := decodeAnyCompositeValue(dctx, r, subType, false)
 			if err != nil {
@@ -1012,7 +1015,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			}
 			subType, ok := columnTypeMap[typeBytes[0]]
 			if !ok {
-				return nil, errInvalidColumnType
+				return nil, errors.Wrap(errInvalidColumnType, "")
 			}
 			v, err := decodeAnyCompositeValue(dctx, r, subType, false)
 			if err != nil {
@@ -1051,7 +1054,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			}
 			subType, ok := columnTypeMap[subTypeBytes[0]]
 			if !ok {
-				return nil, errInvalidColumnType
+				return nil, errors.Wrap(errInvalidColumnType, "")
 			}
 			element, err := decodeAnyCompositeValue(dctx, r, subType, false)
 			if err != nil {
@@ -1063,7 +1066,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			data: p,
 		}, nil
 	default:
-		return nil, errInvalidColumnType
+		return nil, errors.Wrap(errInvalidColumnType, "")
 	}
 }
 
@@ -1095,7 +1098,7 @@ func init() {
 		types.ColumnTypeZonedDatetime: d.decodeBasiceValue(types.ColumnTypeZonedDatetime),
 		types.ColumnTypeDate:          d.decodeBasiceValue(types.ColumnTypeDate),
 		types.ColumnTypeDuration:      d.decodeBasiceValue(types.ColumnTypeDuration),
-		types.ColumnTypeDecimal:       d.decodeAnyValue(),
+		types.ColumnTypeDecimal:       d.decodeDecimalValue(),
 		types.ColumnTypeAny:           d.decodeAnyValue(),
 	}
 }

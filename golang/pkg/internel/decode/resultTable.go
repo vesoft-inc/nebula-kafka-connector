@@ -4,6 +4,7 @@ import (
 	"io"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/vector"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
@@ -283,7 +284,7 @@ func (b *batch) numRecords() uint32 {
 
 func (b *batch) getRowByIndex(index uint32) ([]*nebulaValue, error) {
 	if index >= b.numRecords() {
-		return nil, errOutOfRange
+		return nil, errors.Wrap(errOutOfRange, "")
 	}
 	var row []*nebulaValue
 	for _, v := range b.vectors {

@@ -65,7 +65,7 @@ func ErrInternel(msg string) error {
 }
 
 func ErrServerResponse(code string, msg string) error {
-	return errors.NewNebulaError(errors.ErrorCode(code), msg)
+	return errors.NewNebulaError(errors.ErrorCode(code), "%s", msg)
 }
 
 func ErrorFromBytes(c []byte) errors.ErrorCode {
