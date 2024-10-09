@@ -44,7 +44,7 @@ func (r *bytesReader) readUtilZero() []byte {
 			return bs
 		}
 	}
-	r.err = errNoZeroString
+	r.err = errors.Wrap(errNoZeroString, "")
 	return nil
 }
 

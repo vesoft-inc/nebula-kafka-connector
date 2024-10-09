@@ -373,7 +373,7 @@ func (c *vectorDecoder) decodeNodeValue() decodeFlatFn {
 		nodeTypeID := (int32)(nodeID >> 48)
 		nodeProps, ok := allNodeProps[nodeTypeID]
 		if !ok {
-			return nil, errElementTypeNotFount
+			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
 		gsm := dctx.graphsSchema
 		graphName, typeName, labels, err := getSchemaName(gsm, graphID, nodeTypeID, true)
@@ -424,7 +424,7 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 		edgeTypeID := bytesToInt32(header[28:32])
 		props, ok := allGraphElementProps[edgeTypeID]
 		if !ok {
-			return nil, errElementTypeNotFount
+			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
 		gsm := dctx.graphsSchema
 		graphName, typeName, labels, err := getSchemaName(gsm, graphID, edgeTypeID, false)
@@ -503,11 +503,11 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 		headNodeType := int32(headNodeID >> 48)
 		pairIndex, ok := meta.nodeTypeIndex[headNodeType]
 		if !ok {
-			return nil, errElementTypeNotFount
+			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
 		sentinelPair, ok := meta.nodeIndexPair[pairIndex]
 		if !ok {
-			return nil, errElementTypeNotFount
+			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
 		sentinelType := types.ColumnTypeNode
 		sentinelOffset := headOffset
@@ -549,12 +549,12 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 			if sentinelType == types.ColumnTypeNode {
 				sentinelPair, ok = meta.nodeIndexPair[pathPairIndex(pathHeader.nextVectorIndex)]
 				if !ok {
-					return nil, errElementTypeNotFount
+					return nil, errors.Wrap(errElementTypeNotFount, "")
 				}
 			} else {
 				sentinelPair, ok = meta.edgeIndexPair[pathPairIndex(pathHeader.nextVectorIndex)]
 				if !ok {
-					return nil, errElementTypeNotFount
+					return nil, errors.Wrap(errElementTypeNotFount, "")
 				}
 			}
 		}
@@ -612,7 +612,7 @@ func decodePropVectorIndex(elemmentTypes graphElementProps, bs []byte, isNode bo
 			vectorIndex := bytesToInt32(vectorIndexBytes)
 			nodeType, ok := elemmentTypes[elementId]
 			if !ok {
-				return errElementTypeNotFount
+				return errors.Wrap(errElementTypeNotFount, "")
 			}
 			prop, ok := nodeType[propList[vectorIndex]]
 			if !ok {
@@ -900,12 +900,24 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		}
 		size := int(bytesToInt16(sizeBytes))
 		l := make([]*nebulaValue, 0, size)
+		bitSize := size/8 + 1
+		nullBitByte := r.readN(bitSize)
+		if r.error() != nil {
+			return nil, r.error()
+		}
+		if r.error() != nil {
+			return nil, r.error()
+		}
 		for i := 0; i < size; i++ {
-			v, err := decodeAnyCompositeValue(dctx, r, subType, false)
-			if err != nil {
-				return nil, err
+			if nullBitByte[i/8]&(1<<(i%8)) == 0 {
+				l = append(l, &nebulaValue{data: nil})
+			} else {
+				v, err := decodeAnyCompositeValue(dctx, r, subType, false)
+				if err != nil {
+					return nil, err
+				}
+				l = append(l, v)
 			}
-			l = append(l, v)
 		}
 		return &nebulaValue{
 			data: &NebulaList{
