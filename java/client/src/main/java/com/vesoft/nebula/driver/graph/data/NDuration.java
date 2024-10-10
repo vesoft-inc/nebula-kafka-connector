@@ -95,7 +95,7 @@ public class NDuration {
             if (getYear() != 0) {
                 durationStr.append(getYear()).append("Y");
             }
-            if (getMonth() != 0) {
+            if (getMonth() != 0 || getYear() == 0) {
                 durationStr.append(getMonth()).append("M");
             }
         } else {
@@ -111,7 +111,9 @@ public class NDuration {
             if (getMinute() != 0) {
                 durationStr.append(getMinute()).append("M");
             }
-            if (getSecond() != 0 || getMicrosecond() != 0) {
+            if (getSecond() != 0
+                    || getMicrosecond() != 0
+                    || (getDay() == 0 && getHour() == 0 || getMinute() == 0 || getSecond() == 0)) {
                 if (getMicrosecond() == 0) {
                     durationStr.append(getSecond()).append("S");
                 } else {
