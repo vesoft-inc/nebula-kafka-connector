@@ -113,7 +113,7 @@ public class NDuration {
             }
             if (getSecond() != 0
                     || getMicrosecond() != 0
-                    || (getDay() == 0 && getHour() == 0 || getMinute() == 0 || getSecond() == 0)) {
+                    || (getDay() == 0 && getHour() == 0 && getMinute() == 0 && getSecond() == 0)) {
                 if (getMicrosecond() == 0) {
                     durationStr.append(getSecond()).append("S");
                 } else {

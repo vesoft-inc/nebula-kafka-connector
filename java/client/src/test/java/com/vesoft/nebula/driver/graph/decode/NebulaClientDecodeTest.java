@@ -26,9 +26,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class NebulaClientDecodeTest {
-    String addresses = "192.168.8.6:5820";
+    String addresses = "192.168.8.6:10010";
     String user      = "root";
-    String passwd    = "Nebula123";
+    String passwd    = "NebulaGraph01";
 
     NebulaClient client = null;
 
@@ -77,7 +77,9 @@ public class NebulaClientDecodeTest {
                     + "match(v1:person) where v1.id=r.src match(v2:person) where v2.id=r.dst "
                     + "insert or ignore(v1)-[@friend{degree:r.degree}]->(v2)";
             res = client.execute(insertEdge);
+            assert res.isSucceeded();
 
+            res = client.execute("SESSION SET TIME ZONE \"Asia/Shanghai\"");
             assert res.isSucceeded();
         } catch (Exception e) {
             e.printStackTrace();
@@ -964,40 +966,49 @@ public class NebulaClientDecodeTest {
     public void testDecodeAnyResult() {
         System.out.println("<==== testDecodeAnyResult ====>");
         try {
+            ResultSet r = client.execute("DESCRIBE graph type decode_type");
+            while (r.hasNext()) {
+                r.next();
+            }
             // set parameters with different data type
-            ResultSet res = client.execute("SESSION SET $a=true");
+            ResultSet res = client.execute("SESSION SET value $a=true");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $b=1");
+            res = client.execute("SESSION SET value $b=1");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $c=CAST(2 AS INT64)");
+            res = client.execute("SESSION SET value $c=CAST(2 AS INT64)");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $d=CAST(1.0 AS FLOAT)");
+            res = client.execute("SESSION SET value $d=CAST(1.0 AS FLOAT)");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $e=CAST(2.0 AS DOUBLE)");
+            res = client.execute("SESSION SET value $e=CAST(2.0 AS DOUBLE)");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $f=\"test\"");
+            res = client.execute("SESSION SET value $f=\"test\"");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $g=date(\"2024-01-01\")");
+            res = client.execute("SESSION SET value $g=date(\"2024-01-01\")");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $h=local_datetime(\"2024-01-01T12:01:01\")");
+            res = client.execute("SESSION SET value $h=local_datetime(\"2024-01-01T12:01:01\")");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $i=zoned_datetime(\"2024-01-01T12:01:02+0800\")");
+            res = client.execute(
+                    "SESSION SET value $i=zoned_datetime(\"2024-01-01T12:01:02+0800\")");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $j=local_time(\"10:10:10\")");
+            res = client.execute("SESSION SET value $j=local_time(\"10:10:10\")");
             Assert.assertTrue(res.isSucceeded());
-            res = client.execute("SESSION SET $k=zoned_time(\"10:10:20+0800\")");
-            Assert.assertTrue(res.isSucceeded());
-
-            res = client.execute("SESSION SET $l=List[1,2]");
+            res = client.execute("SESSION SET value $k=zoned_time(\"10:10:20+0800\")");
             Assert.assertTrue(res.isSucceeded());
 
-            res = client.execute("SESSION SET $m=RECORD{a:1,"
+            res = client.execute("SESSION SET value $l=List[1,2]");
+            Assert.assertTrue(res.isSucceeded());
+
+            res = client.execute("SESSION SET value $m=RECORD{a:1,"
                                          + "b:1.0,"
                                          + "c:false,"
                                          + "d:\"test\","
                                          + "e:date(\"2024-01-01\"),"
                                          + "f:local_datetime(\"2024-01-01T10:10:10\")}");
             Assert.assertTrue(res.isSucceeded());
+
+            res = client.execute("SESSION SET value $n=List[\"a\",\"b\"]");
+            Assert.assertTrue(res.isSucceeded());
+
 
             res = client.execute("SHOW PARAMETERS");
             List<ResultSet.Record> records = new ArrayList<>();
@@ -1085,6 +1096,14 @@ public class NebulaClientDecodeTest {
                                             record.getValue("e").asDate());
                         Assert.assertEquals(LocalDateTime.of(2024, 1, 1, 10, 10, 10),
                                             record.getValue("f").asLocalDateTime());
+                        break;
+                    case "n":
+                        List<ValueWrapper> listValues = value.asList();
+                        Assert.assertEquals(2, listValues.size());
+                        Assert.assertTrue(listValues.contains(
+                                new ValueWrapper("a", ColumnType.COLUMN_TYPE_STRING)));
+                        Assert.assertTrue(listValues.contains(
+                                new ValueWrapper("b", ColumnType.COLUMN_TYPE_STRING)));
                         break;
                     default:
                         System.out.println("not defined.");

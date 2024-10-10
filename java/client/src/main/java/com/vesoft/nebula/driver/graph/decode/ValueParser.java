@@ -873,9 +873,16 @@ public class ValueParser {
                         bytesToInt8(reader.read(VALUE_TYPE_SIZE)));
                 int listSize = bytesToInt16(
                         reader.read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
+                int nullBitSize = (listSize % 8 == 0) ? (listSize / 8) : (listSize / 8 + 1);
+                ByteString nullBitBytes = reader.read(nullBitSize);
                 List<ValueWrapper> values = new ArrayList<>();
                 for (int i = 0; i < listSize; i++) {
-                    values.add(new ValueWrapper(decodeAnyCompositeValue(reader, eleType), eleType));
+                    if ((nullBitBytes.byteAt(i / 8) & (1 << (i % 8))) == 0) {
+                        values.add(null);
+                    } else {
+                        values.add(new ValueWrapper(decodeAnyCompositeValue(reader, eleType),
+                                                    eleType));
+                    }
                 }
                 return values;
             case COLUMN_TYPE_RECORD:
@@ -883,10 +890,10 @@ public class ValueParser {
                         reader.read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
                 Map<String, ValueWrapper> map = new HashMap<>();
                 for (int i = 0; i < recordSize; i++) {
-                    String     fieldName  = reader.readSizedString(byteOrder);
-                    ColumnType fieldType  = ColumnType.getColumnType(
+                    String fieldName = reader.readSizedString(byteOrder);
+                    ColumnType fieldType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object     fieldValue = decodeAnyCompositeValue(reader, fieldType);
+                    Object fieldValue = decodeAnyCompositeValue(reader, fieldType);
                     map.put(fieldName, new ValueWrapper(fieldValue, fieldType));
                 }
                 return new NRecord(map);
@@ -899,10 +906,10 @@ public class ValueParser {
                         reader.read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
                 Map<String, ValueWrapper> nodeProperties = new HashMap<>();
                 for (int i = 0; i < nodePropNum; i++) {
-                    String     propName  = reader.readSizedString(byteOrder);
-                    ColumnType propType  = ColumnType.getColumnType(
+                    String propName = reader.readSizedString(byteOrder);
+                    ColumnType propType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object     propValue = decodeAnyCompositeValue(reader, propType);
+                    Object propValue = decodeAnyCompositeValue(reader, propType);
                     nodeProperties.put(propName, new ValueWrapper(propValue, propType));
                 }
                 return new Vertex(nodeGraphId, nodeTypeId, nodeId, nodeProperties, graphSchemas);
@@ -917,10 +924,10 @@ public class ValueParser {
                         reader.read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
                 Map<String, ValueWrapper> edgeProperties = new HashMap<>();
                 for (int i = 0; i < edgePropNum; i++) {
-                    String     propName  = reader.readSizedString(byteOrder);
-                    ColumnType propType  = ColumnType.getColumnType(
+                    String propName = reader.readSizedString(byteOrder);
+                    ColumnType propType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object     propValue = decodeAnyCompositeValue(reader, propType);
+                    Object propValue = decodeAnyCompositeValue(reader, propType);
                     edgeProperties.put(propName, new ValueWrapper(propValue, propType));
                 }
                 return new Relationship(edgeGraphId,
@@ -937,7 +944,7 @@ public class ValueParser {
                 for (int i = 0; i < elementNum; i++) {
                     ColumnType elementType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object     element     = decodeAnyCompositeValue(reader, elementType);
+                    Object element = decodeAnyCompositeValue(reader, elementType);
                     eleValues.add(new ValueWrapper(element, elementType));
                 }
                 return new NPath(eleValues);
