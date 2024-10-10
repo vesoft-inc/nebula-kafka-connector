@@ -58,10 +58,14 @@ public class ValueTypeParser {
             case COLUMN_TYPE_LOCALDATETIME:
             case COLUMN_TYPE_ZONEDDATETIME:
             case COLUMN_TYPE_DURATION:
-            case COLUMN_TYPE_DECIMAL:
             case COLUMN_TYPE_REFERENCE:
             case COLUMN_TYPE_ANY:
             case COLUMN_TYPE_INVALID:
+                return new BasicType(type);
+            case COLUMN_TYPE_DECIMAL:
+                // skip two value for decimal: 2 byte precision and 2 byte scale
+                // these two value is useless for client, just read skip them
+                reader.read(4);
                 return new BasicType(type);
             case COLUMN_TYPE_NODE:
                 Map<Integer, Map<String, DataType>> nodeTypes =
