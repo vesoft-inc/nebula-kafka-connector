@@ -153,6 +153,16 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			}
 		}
 		return &typ, nil
+	case types.ColumnTypeDecimal:
+		// precision + scale
+		_ = r.readN(2)
+		_ = r.readN(2)
+		if r.error() != nil {
+			return nil, r.error()
+		}
+		return &columnTypeSchemaBasic{
+			typ: t,
+		}, nil
 	default:
 		return &columnTypeSchemaBasic{
 			typ: t,

@@ -422,22 +422,31 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 		rank := bytesToInt64(header[16:24])
 		graphID := bytesToInt32(header[24:28])
 		edgeTypeID := bytesToInt32(header[28:32])
-		props, ok := allGraphElementProps[edgeTypeID]
+		noDirectType := edgeTypeID & 0x3FFFFFFF
+		direction := getEdgeDirection(uint8(edgeTypeID >> 30))
+		props, ok := allGraphElementProps[noDirectType]
 		if !ok {
 			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
 		gsm := dctx.graphsSchema
-		graphName, typeName, labels, err := getSchemaName(gsm, graphID, edgeTypeID, false)
+		graphName, typeName, labels, err := getSchemaName(gsm, graphID, noDirectType, false)
 		if err != nil {
 			return nil, err
 		}
 		e := &NebulaEdge{
-			SrcId:  srcID,
-			DstId:  dstID,
-			Rank:   rank,
-			Graph:  graphName,
-			Type:   typeName,
-			Labels: labels,
+			Rank:      rank,
+			Graph:     graphName,
+			Type:      typeName,
+			Labels:    labels,
+			Direction: direction,
+		}
+		switch direction {
+		case EdgeInComingDirection:
+			e.SrcId = dstID
+			e.DstId = srcID
+		default:
+			e.SrcId = srcID
+			e.DstId = dstID
 		}
 		e.Properties = make(map[string]*nebulaValue)
 		for _, prop := range props {
@@ -1015,10 +1024,12 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		srcNodeId := bytesToInt64(srcNodeIDBytes)
 		dstNodeId := bytesToInt64(dstNodeIDBytes)
 		graphId := bytesToInt32(graphIdBytes)
-		edgeTypeId := bytesToInt32(edgeTypeIdBytes)
+		edgeTypeID := bytesToInt32(edgeTypeIdBytes)
 		edgeRank := bytesToInt64(edgeRankBytes)
 		propSize := bytesToInt16(propSizeBytes)
 		props := make(map[string]*nebulaValue, 0)
+		noDirectType := edgeTypeID & 0x3FFFFFFF
+		direction := getEdgeDirection(uint8(edgeTypeID >> 30))
 		for i := 0; i < int(propSize); i++ {
 			nameSizeBytes := r.readN(4)
 			if r.error() != nil {
@@ -1040,20 +1051,28 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			}
 			props[string(nameBytes)] = v
 		}
-		graphName, typeName, labels, err := getSchemaName(gsm, graphId, edgeTypeId, false)
+		graphName, typeName, labels, err := getSchemaName(gsm, graphId, noDirectType, false)
 		if err != nil {
 			return nil, errors.Wrap(err, "")
 		}
+		e := &NebulaEdge{
+			Rank:       edgeRank,
+			Graph:      graphName,
+			Type:       typeName,
+			Labels:     labels,
+			Properties: props,
+			Direction:  direction,
+		}
+		switch direction {
+		case EdgeInComingDirection:
+			e.SrcId = dstNodeId
+			e.DstId = srcNodeId
+		default:
+			e.SrcId = srcNodeId
+			e.DstId = dstNodeId
+		}
 		return &nebulaValue{
-			data: &NebulaEdge{
-				SrcId:      srcNodeId,
-				DstId:      dstNodeId,
-				Rank:       edgeRank,
-				Graph:      graphName,
-				Type:       typeName,
-				Labels:     labels,
-				Properties: props,
-			},
+			data: e,
 		}, nil
 	case types.ColumnTypePath:
 		elementNumBytes := r.readN(2)
