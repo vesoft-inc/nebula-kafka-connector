@@ -900,7 +900,12 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		}
 		size := int(bytesToInt16(sizeBytes))
 		l := make([]*nebulaValue, 0, size)
-		bitSize := size/8 + 1
+		var bitSize int
+		if size%8 != 0 {
+			bitSize = size/8 + 1
+		} else {
+			bitSize = size / 8
+		}
 		nullBitByte := r.readN(bitSize)
 		if r.error() != nil {
 			return nil, r.error()
