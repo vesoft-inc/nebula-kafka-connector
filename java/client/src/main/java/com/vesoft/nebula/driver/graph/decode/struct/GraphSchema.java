@@ -5,6 +5,8 @@
 
 package com.vesoft.nebula.driver.graph.decode.struct;
 
+import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.charset;
+
 import com.google.common.base.Charsets;
 import com.vesoft.nebula.proto.graph.EdgeType;
 import com.vesoft.nebula.proto.graph.NodeType;
@@ -14,7 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GraphSchema {
-    private static Charset charset = Charsets.UTF_8;
 
     private int                      graphId;
     private String                   graphName;

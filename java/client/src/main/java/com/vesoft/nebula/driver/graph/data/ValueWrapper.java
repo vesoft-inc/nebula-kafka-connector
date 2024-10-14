@@ -35,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetTime;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Vector;
@@ -43,14 +44,24 @@ public class ValueWrapper {
 
     private final Object     value;
     private final ColumnType type;
-    private final Charset    charset = Charsets.UTF_8;
+
+    DateTimeFormatter zonedDateTimeFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSSXXXXX");
+    DateTimeFormatter localDateTimeFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSSSS");
+    DateTimeFormatter zonedTimeFormatter     = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSSXXXXX");
+    DateTimeFormatter localTimeFormatter     = DateTimeFormatter.ofPattern("HH:mm:ss.SSSSSS");
 
     public ValueWrapper(Object value, ColumnType type) {
         this.value = value;
         this.type = type;
     }
 
-    public String getDataType() {
+    public ColumnType getDataType() {
+        return type;
+    }
+
+    public String getDataTypeString() {
         switch (type) {
             case COLUMN_TYPE_BOOL:
                 return "BOOLEAN";
@@ -148,7 +159,7 @@ public class ValueWrapper {
      * check if the Value is Int type
      *
      * @return true if Value's type is COLUMN_TYPE_UINT8 or COLUMN_TYPE_INT8 or COLUMN_TYPE_UINT16
-     *         or COLUMN_TYPE_INT16 or COLUMN_TYPE_UINT32 or COLUMN_TYPE_INT32
+     *     or COLUMN_TYPE_INT16 or COLUMN_TYPE_UINT32 or COLUMN_TYPE_INT32
      */
     public boolean isInt() {
         return type == COLUMN_TYPE_UINT8 || type == COLUMN_TYPE_INT8
@@ -321,7 +332,7 @@ public class ValueWrapper {
         if (type == COLUMN_TYPE_INT8 || type == COLUMN_TYPE_UINT8
                 || type == COLUMN_TYPE_UINT16 || type == COLUMN_TYPE_INT16
                 || type == COLUMN_TYPE_UINT32 || type == COLUMN_TYPE_INT32) {
-            return (int) value;
+            return Integer.parseInt(value.toString());
         }
         throw new InvalidValueException(
                 "Cannot get field `int` because value's type is " + getDataType());
@@ -556,7 +567,7 @@ public class ValueWrapper {
      */
     public BigDecimal asDecimal() throws InvalidValueException {
         if (type == COLUMN_TYPE_DECIMAL) {
-            return BigDecimal.valueOf((double) value);
+            return new BigDecimal((String) value);
         }
         throw new InvalidValueException(
                 "cannot get field `decimal` because value's type is " + getDataType());
@@ -621,13 +632,13 @@ public class ValueWrapper {
         } else if (isEdge()) {
             return asEdge().toString();
         } else if (isLocalTime()) {
-            return asLocalTime().toString();
+            return asLocalTime().format(localTimeFormatter);
         } else if (isZonedTime()) {
-            return asZonedTime().toString();
+            return asZonedTime().format(zonedTimeFormatter);
         } else if (isLocalDateTime()) {
-            return asLocalDateTime().toString();
+            return asLocalDateTime().format(localDateTimeFormatter);
         } else if (isZonedDateTime()) {
-            return asZonedDateTime().toString();
+            return asZonedDateTime().format(zonedDateTimeFormatter);
         } else if (isDate()) {
             return asDate().toString();
         } else if (isDuration()) {
@@ -636,8 +647,6 @@ public class ValueWrapper {
             return asPath().toString();
         } else if (isDecimal()) {
             return asDecimal().toString();
-        } else if (isRecord()) {
-            return asRecord().toString();
         }
         return "Unknown type: " + getDataType();
     }

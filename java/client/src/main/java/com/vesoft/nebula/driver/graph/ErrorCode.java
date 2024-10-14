@@ -350,7 +350,7 @@ public enum ErrorCode {
     UNKNOWN_FOR_CLIENT(null);
 
 
-    public final String code;
+    public String code;
 
     ErrorCode(String c) {
         code = c;
@@ -369,6 +369,7 @@ public enum ErrorCode {
         if (errorCodeMap.containsKey(code)) {
             return errorCodeMap.get(code);
         } else {
+            UNKNOWN_FOR_CLIENT.code = code;
             return UNKNOWN_FOR_CLIENT;
         }
     }

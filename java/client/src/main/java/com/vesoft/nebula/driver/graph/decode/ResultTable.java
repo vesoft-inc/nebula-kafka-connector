@@ -19,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ResultTable {
-    private static final Charset charset = Charsets.UTF_8;
 
     private final VectorResultTable resultTable;
     private       ByteOrder         byteOrder;

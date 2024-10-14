@@ -102,7 +102,8 @@ public class NDuration {
             if (getDay() != 0) {
                 durationStr.append(getDay()).append("D");
             }
-            if (getHour() != 0 || getMinute() != 0 || getSecond() != 0 || getMicrosecond() != 0) {
+            if (getDay() == 0 || getHour() != 0 || getMinute() != 0
+                    || getSecond() != 0 || getMicrosecond() != 0) {
                 durationStr.append("T");
             }
             if (getHour() != 0) {

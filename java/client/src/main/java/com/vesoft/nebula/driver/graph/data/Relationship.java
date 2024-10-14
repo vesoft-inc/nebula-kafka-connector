@@ -35,17 +35,16 @@ public class Relationship extends BaseDataObject {
         this.graphId = graphId;
         this.graphName = graphSchemas.getGraphSchema(graphId).getGraphName();
         this.edgeTypeId = edgeTypeId;
+        int noDirectedTypeId = edgeTypeId & 0x3FFFFFFF;
         this.edgeTypeName = graphSchemas
                 .getGraphSchema(graphId)
-                .getEdgeSchema(edgeTypeId)
+                .getEdgeSchema(noDirectedTypeId)
                 .getEdgeTypeName();
         this.labels = graphSchemas
                 .getGraphSchema(graphId)
-                .getEdgeSchema(edgeTypeId)
+                .getEdgeSchema(noDirectedTypeId)
                 .getEdgeLabels();
         this.rank = rank;
-        this.srcId = srcId;
-        this.dstId = dstId;
         this.properties = properties;
 
         int edgeTypeMoveBits = EDGE_TYPE_ID_SIZE * 8 - 2;
@@ -63,6 +62,13 @@ public class Relationship extends BaseDataObject {
                 break;
             default:
                 this.direction = Direction.KNOWN;
+        }
+        if (this.direction == Direction.INCOMING) {
+            this.srcId = dstId;
+            this.dstId = srcId;
+        } else {
+            this.srcId = srcId;
+            this.dstId = dstId;
         }
     }
 

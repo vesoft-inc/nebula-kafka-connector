@@ -1,5 +1,7 @@
 package com.vesoft.nebula.driver.graph.data;
 
+import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.charset;
+
 import com.google.common.base.Charsets;
 import com.vesoft.nebula.proto.graph.PlanInfo;
 import java.io.Serializable;
@@ -48,7 +50,6 @@ public class PlanInfoNode implements Serializable {
     // the children plan info nodes.
     private List<PlanInfoNode> children;
 
-    private final Charset charset = Charsets.UTF_8;
 
     protected PlanInfoNode(PlanInfo planInfo) {
         this.planInfo = planInfo;

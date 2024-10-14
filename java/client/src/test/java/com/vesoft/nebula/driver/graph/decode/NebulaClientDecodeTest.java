@@ -152,6 +152,10 @@ public class NebulaClientDecodeTest {
 
             Assert.assertEquals(1, rowList.size());
             Assert.assertEquals("abc", rowList.get(0));
+
+
+            res = client.execute("return \"中文\"");
+            Assert.assertEquals("中文", res.next().get(0).asString());
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -660,6 +664,22 @@ public class NebulaClientDecodeTest {
                 Assert.assertEquals(prefix + i, strs.get(i - 1));
             }
 
+            strs.clear();
+            res = client.execute(
+                    "let a=\"中文\" for i in range(1,10) return a || cast(i as STRING) as c");
+            while (res.hasNext()) {
+                List<ValueWrapper> values = res.next().values();
+                if (values.get(0).isNull()) {
+                    strs.add(null);
+                } else {
+                    strs.add(values.get(0).asString());
+                }
+            }
+            Assert.assertEquals(10, strs.size());
+            prefix = "中文";
+            for (int i = 1; i <= 10; i++) {
+                Assert.assertEquals(prefix + i, strs.get(i - 1));
+            }
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -1006,7 +1026,7 @@ public class NebulaClientDecodeTest {
                                          + "f:local_datetime(\"2024-01-01T10:10:10\")}");
             Assert.assertTrue(res.isSucceeded());
 
-            res = client.execute("SESSION SET value $n=List[\"a\",\"b\"]");
+            res = client.execute("SESSION SET value $n=List[\"a\",\"b\",\"中文\"]");
             Assert.assertTrue(res.isSucceeded());
 
 
@@ -1099,11 +1119,13 @@ public class NebulaClientDecodeTest {
                         break;
                     case "n":
                         List<ValueWrapper> listValues = value.asList();
-                        Assert.assertEquals(2, listValues.size());
+                        Assert.assertEquals(3, listValues.size());
                         Assert.assertTrue(listValues.contains(
                                 new ValueWrapper("a", ColumnType.COLUMN_TYPE_STRING)));
                         Assert.assertTrue(listValues.contains(
                                 new ValueWrapper("b", ColumnType.COLUMN_TYPE_STRING)));
+                        Assert.assertTrue(listValues.contains(
+                                new ValueWrapper("中文", ColumnType.COLUMN_TYPE_STRING)));
                         break;
                     default:
                         System.out.println("not defined.");
@@ -1175,6 +1197,88 @@ public class NebulaClientDecodeTest {
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
+        }
+    }
+
+
+    @Test
+    public void testCases() {
+        try {
+            String    gql = "for i in [9223372036854775808,-9223372036854775809] "
+                    + "return max(i) as a group by ()";
+            ResultSet res = client.execute(gql);
+            print(res);
+
+            gql = "use sf0_1 match (v:Person{speaks:\"mg,en\"})-[e:STUDY_AT]->(u:University)"
+                    + " return v.creationDate.year as a,e.classYear as b order by a,b"
+                    + " NEXT return a,collect(b) group by a";
+            res = client.execute(gql);
+            print(res);
+
+            gql = "use sf0_1 match p=(v1:Person{id:465})-[e:STUDY_AT]->(u1:University) "
+                    + "return p,v1,e,u1";
+            res = client.execute(gql);
+            print(res);
+
+            gql = " return local_datetime(\"2012-03-04T05:06:07.0890\") as dt1,"
+                    + "zoned_datetime(\"2012-03-04T05:06:07.012345 -0200\") as dt2,"
+                    + "date(\"2023-01-10\") as dt3 next return dt1.year as ldt_year,"
+                    + "dt1.month as ldt_month,dt1.day as ldt_day,dt2.year as zdt_year,"
+                    + "dt2.month as zdt_month,dt2.day as zdt_day, dt3.year as date_year,"
+                    + "dt3.month as date_month,dt3.day as date_day";
+            res = client.execute(gql);
+            print(res);
+
+            gql = "LET v = CAST(256 AS uint16) return  CAST (v AS UINT16) as _result";
+            res = client.execute(gql);
+            print(res);
+
+            gql = "use sf0_1 match p=(v:Person{id:26388279067671})-[e:KNOWS]->{1}(v1:Person) "
+                    + "return collect(distinct v1.birthday.year) as a group by () "
+                    + "Next for i in a return i as b";
+            res = client.execute(gql);
+            print(res);
+
+
+            gql = "use no_labels_graph match (v)-[e]->(v) return *";
+            res = client.execute(gql);
+            print(res);
+
+            gql = "return 10/0.000001";
+            res = client.execute(gql);
+            print(res);
+
+            gql = "return -9e308 as myMAXSCI";
+            res = client.execute(gql);
+            print(res);
+
+            gql = " use sf0_1 match p=(v1:Person{id:465})-[e:STUDY_AT]->(u1:University) "
+                    + "return p,v1,e,u1";
+            res = client.execute(gql);
+            print(res);
+
+
+            gql = "return zoned_time(\"06:36:07.0890\", \"%H:%M:%S\")";
+            res = client.execute(gql);
+            print(res);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+
+    }
+
+    private void print(ResultSet res) {
+        List<List<ValueWrapper>> values = new ArrayList<>();
+        while (res.hasNext()) {
+            values.add(res.next().values());
+        }
+        for (List<ValueWrapper> valueWrappers : values) {
+            for (ValueWrapper v : valueWrappers) {
+                System.out.print(v.toString());
+                System.out.println(",");
+            }
+            System.out.println();
         }
     }
 }

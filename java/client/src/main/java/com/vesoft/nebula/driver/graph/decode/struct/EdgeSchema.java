@@ -5,6 +5,8 @@
 
 package com.vesoft.nebula.driver.graph.decode.struct;
 
+import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.charset;
+
 import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.proto.graph.EdgeType;
@@ -13,7 +15,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EdgeSchema {
-    private static Charset      charset    = Charsets.UTF_8;
     private        int          edgeTypeId;
     private        String       edgeTypeName;
     private        List<String> edgeLabels = new ArrayList<>();

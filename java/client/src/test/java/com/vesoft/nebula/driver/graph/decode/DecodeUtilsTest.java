@@ -15,7 +15,6 @@ import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt8;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToString;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt16;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt32;
-import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt64;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt8;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.getVectorType;
 import static org.junit.Assert.assertEquals;
@@ -315,59 +314,6 @@ public class DecodeUtilsTest {
                 new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
         assertThrows(BufferUnderflowException.class, () -> {
             bytesToInt64(insufficientData, ByteOrder.BIG_ENDIAN);
-        });
-    }
-
-
-    @Test
-    public void testBytesToUInt64() {
-        // test positive Value BigEndian
-        // 383 in decimal (big-endian)
-        ByteString data = ByteString.copyFrom(
-                new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x7F});
-        BigInteger result = bytesToUInt64(data, ByteOrder.BIG_ENDIAN);
-        assertEquals(new BigInteger("383"), result);
-
-        // test positive Value LittleEndian
-        // 383 in decimal (little-endian)
-        data = ByteString.copyFrom(new byte[]{0x7F, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00});
-        result = bytesToUInt64(data, ByteOrder.LITTLE_ENDIAN);
-        assertEquals(new BigInteger("383"), result);
-
-        // test negative Value BigEndian
-        // -128 in signed, 18446744073709551488 in unsigned (big-endian)
-        data = ByteString.copyFrom(
-                new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
-                           (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0x80});
-        result = bytesToUInt64(data, ByteOrder.BIG_ENDIAN);
-        assertEquals(new BigInteger("18446744073709551488"), result);
-
-        // test negative Value LittleEndian
-        // -128 in signed, 18446744073709551488 in unsigned (little-endian)
-        data = ByteString.copyFrom(
-                new byte[]{(byte) 0x80, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
-                           (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF});
-        result = bytesToUInt64(data, ByteOrder.LITTLE_ENDIAN);
-        assertEquals(new BigInteger("18446744073709551488"), result);
-
-        // test boundary Values LittleEndian
-        // 9223372036854775807 in decimal (little-endian)
-        ByteString maxPositive = ByteString.copyFrom(
-                new byte[]{(byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF, (byte) 0xFF,
-                           (byte) 0xFF, (byte) 0xFF, 0x7F});
-        // -9223372036854775808 in signed, 9223372036854775808 in unsigned (little-endian)
-        ByteString maxNegative = ByteString.copyFrom(
-                new byte[]{0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, (byte) 0x80});
-        assertEquals(new BigInteger("9223372036854775807"),
-                     bytesToUInt64(maxPositive, ByteOrder.LITTLE_ENDIAN));
-        assertEquals(new BigInteger("9223372036854775808"),
-                     bytesToUInt64(maxNegative, ByteOrder.LITTLE_ENDIAN));
-
-        // test insufficient Data
-        ByteString insufficientData = ByteString.copyFrom(
-                new byte[]{0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07});
-        assertThrows(BufferUnderflowException.class, () -> {
-            bytesToUInt64(insufficientData, ByteOrder.BIG_ENDIAN);
         });
     }
 

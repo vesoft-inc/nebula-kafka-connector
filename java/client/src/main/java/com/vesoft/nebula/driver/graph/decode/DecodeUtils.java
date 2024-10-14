@@ -10,11 +10,13 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ELEMENT_
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.driver.graph.decode.datatype.VectorType;
 import com.vesoft.nebula.proto.graph.NestedVector;
-import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.Charset;
+import org.apache.commons.codec.Charsets;
 
 public class DecodeUtils {
+    public static final Charset charset = Charsets.UTF_8;
 
     /**
      * decode binary to byte
@@ -90,16 +92,6 @@ public class DecodeUtils {
         return buffer.order(order).getLong();
     }
 
-    /**
-     * decode binary to unsigned long
-     *
-     * @param data binary data
-     * @return long value
-     */
-    public static BigInteger bytesToUInt64(ByteString data, ByteOrder order) {
-        ByteBuffer buffer = ByteBuffer.wrap(data.toByteArray()).order(order);
-        return new BigInteger(1, buffer.array());
-    }
 
 
     /**
