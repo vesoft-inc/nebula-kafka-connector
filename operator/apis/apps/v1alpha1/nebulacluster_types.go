@@ -40,6 +40,10 @@ type NebulaClusterSpec struct {
 	// +kubebuilder:default=1
 	ReplicaFactor int32 `json:"replicaFactor,omitempty"`
 
+	// tenant cluster owner
+	// +kubebuilder:default=root
+	Owner string `json:"owner"`
+
 	Zones []string `json:"zones,omitempty"`
 
 	// CredentialSecret contains user login info.

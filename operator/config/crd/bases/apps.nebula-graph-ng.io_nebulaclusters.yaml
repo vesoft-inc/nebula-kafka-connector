@@ -6123,6 +6123,9 @@ spec:
                 additionalProperties:
                   type: string
                 type: object
+              owner:
+                default: root
+                type: string
               replicaFactor:
                 default: 1
                 format: int32
@@ -8990,6 +8993,7 @@ spec:
             required:
             - graphd
             - metadRef
+            - owner
             - storaged
             type: object
           status:

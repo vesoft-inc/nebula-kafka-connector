@@ -211,7 +211,7 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v1alpha1.NebulaClu
 	}()
 
 	if !nc.Status.CreatedDone {
-		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.ReplicaFactor), "root", nc.Spec.Zones)
+		req := meta.NewCreateClusterReq(nc.Name, int(nc.Spec.ReplicaFactor), nc.Spec.Owner, nc.Spec.Zones)
 		if err = metaClient.CreateCluster(req); err != nil {
 			if ne, ok := err.(*nebulaErr.NebulaError); ok {
 				if ne.Code() != nebulaErr.ERROR_META_CLUSTER_ALREADY_EXISTS {
