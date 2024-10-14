@@ -204,14 +204,14 @@ func (v *nebulaValue) String() string {
 		return fmt.Sprintf("%d", d)
 	case types.ValueTypeFloat:
 		d, _ := v.AsFloat()
-		fStr := strconv.FormatFloat(float64(d), 'g', -1, 32)
+		fStr := strconv.FormatFloat(float64(d), 'f', -1, 32)
 		if !strings.Contains(fStr, ".") {
 			fStr = fStr + ".0"
 		}
 		return fStr
 	case types.ValueTypeDouble:
 		d, _ := v.AsDouble()
-		fStr := strconv.FormatFloat(float64(d), 'g', -1, 64)
+		fStr := strconv.FormatFloat(float64(d), 'f', -1, 64)
 		if !strings.Contains(fStr, ".") {
 			fStr = fStr + ".0"
 		}
