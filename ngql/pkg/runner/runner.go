@@ -11,14 +11,16 @@ import (
 	"time"
 
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/cli"
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/printer"
 )
 
-var default_pager = true
-var default_pagerLimit = 200
-var default_pagerCommand = "less"
+const default_pager = true
+const default_pagerLimit = 200
+const default_pagerCommand = "less"
+const maxRetryTimes = 1
 
 type (
 	Runner struct {
@@ -53,7 +55,6 @@ type (
 		pager          bool
 		pagerLimit     int
 		pagerCommand   string
-		schema         string
 		enableTLS      bool
 		ca             string
 		cert           string
@@ -66,7 +67,6 @@ type (
 )
 
 func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
-	var err error
 	var runOpts runnerOption
 	// test less command
 	cmd := exec.Command(default_pagerCommand)
@@ -96,27 +96,8 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	if !r.option.enableOutput {
 		r.stdout = io.Discard
 	}
-
-	r.client, err = nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password,
-		nebula.WithClientRequestTimeout(time.Duration(r.option.timeoutSec)*time.Second),
-		nebula.WithClientTLS(r.option.enableTLS, r.option.ca, r.option.cert, r.option.key, r.option.peerNameVerify, r.option.peerName),
-	)
-	if err != nil {
+	if err := r.openNebulaClient(); err != nil {
 		return nil, err
-	}
-	id, err := r.client.GetSessionId()
-	if err != nil {
-		return nil, err
-	}
-	r.sessionId = id
-	if err := r.client.Ping(); err != nil {
-		return nil, err
-	}
-	// set schema for playing data
-	if r.option.schema != "" {
-		if _, err := r.client.Execute(fmt.Sprintf("SESSION SET SCHEMA \"%s\"", r.option.schema)); err != nil {
-			return nil, err
-		}
 	}
 	var c cli.Cli
 	if r.option.interactive {
@@ -201,11 +182,6 @@ func WithSignalChan(signalChan <-chan os.Signal) runnerOptionsFn {
 		o.signalChan = signalChan
 	}
 }
-func WithSchema(schema string) runnerOptionsFn {
-	return func(o *runnerOption) {
-		o.schema = schema
-	}
-}
 
 func (r *Runner) welcome() {
 	if !r.option.interactive {
@@ -247,6 +223,17 @@ func (r *Runner) loop() error {
 			if r.option.failFast {
 				return err
 			}
+			// if session is not found, or connection error, should exit
+			// otherwise do not exit, and continue to execute next statement
+			ne, ok := err.(*errors.NebulaError)
+			if ok {
+				switch ne.Code() {
+				case errors.ERROR_SESSION_NOT_FOUND:
+					fallthrough
+				case errors.ERROR_CONN_IS_BROKEN, errors.ERROR_CONN_IS_CLOSED:
+					return err
+				}
+			}
 			r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
 			continue
 		}
@@ -278,13 +265,24 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 		line = strings.TrimSuffix(line, "\\G")
 	}
 	start := time.Now()
-	resp, err := r.client.Execute(line)
+	resp, err := r.executeGQLWithRetry(line, 0, maxRetryTimes)
 	if err != nil {
 		if r.option.failFast {
 			return true, err
 		}
-		// do not exit, and continue to execute next statement
-		r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
+
+		// if session is not found, or connection error, should exit
+		// otherwise do not exit, and continue to execute next statement
+		ne, ok := err.(*errors.NebulaError)
+		if ok {
+			switch ne.Code() {
+			case errors.ERROR_SESSION_NOT_FOUND:
+				fallthrough
+			case errors.ERROR_CONN_IS_BROKEN, errors.ERROR_CONN_IS_CLOSED:
+				return true, err
+			default:
+			}
+		}
 	}
 	duration := time.Since(start)
 	if resp == nil {
@@ -337,6 +335,66 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 	r.printBoth(fmt.Sprintf("%s\n\n", time.Now().In(time.Local).Format(time.RFC1123)))
 
 	return false, nil
+}
+
+func (r *Runner) executeGQLWithRetry(stmt string, retryTimes, retryLimit int) (types.Result, error) {
+	if r.client == nil {
+		if err := r.openNebulaClient(); err != nil {
+			return nil, err
+		}
+	}
+	resp, err := r.client.Execute(stmt)
+	if err == nil {
+		return resp, nil
+	}
+	ne, ok := err.(*errors.NebulaError)
+	if !ok {
+		return nil, err
+	}
+	if retryTimes+1 > retryLimit {
+		return nil, err
+	}
+	switch ne.Code() {
+	//retry for session not found
+	case errors.ERROR_SESSION_NOT_FOUND:
+		fallthrough
+
+	//retry for connection error
+	case errors.ERROR_CONN_IS_BROKEN, errors.ERROR_CONN_IS_CLOSED:
+		if err := r.reopenNebulaClient(); err != nil {
+			return nil, err
+		}
+		return r.executeGQLWithRetry(stmt, retryTimes+1, retryLimit)
+	default:
+		return nil, err
+	}
+}
+
+func (r *Runner) reopenNebulaClient() error {
+	if r.client != nil {
+		r.client.Close()
+	}
+	return r.openNebulaClient()
+}
+
+func (r *Runner) openNebulaClient() error {
+	var err error
+	r.client, err = nebula.NewNebulaClient(r.option.address, r.option.user, r.option.password,
+		nebula.WithClientRequestTimeout(time.Duration(r.option.timeoutSec)*time.Second),
+		nebula.WithClientTLS(r.option.enableTLS, r.option.ca, r.option.cert, r.option.key, r.option.peerNameVerify, r.option.peerName),
+	)
+	if err != nil {
+		return err
+	}
+	id, err := r.client.GetSessionId()
+	if err != nil {
+		return err
+	}
+	r.sessionId = id
+	if err := r.client.Ping(); err != nil {
+		return err
+	}
+	return nil
 }
 
 func (r *Runner) Run() error {

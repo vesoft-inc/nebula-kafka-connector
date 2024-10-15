@@ -211,8 +211,12 @@ func playFn(r *Runner, args []string) error {
 		WithOutput(false),
 		WithFailFast(true),
 		WithNebula(r.option.address, r.option.user, r.option.password),
-		WithSchema(scehma),
 	)
+	if err != nil {
+		return err
+	}
+	// set playing schema
+	_, err = r.execute(fmt.Sprintf("SESSION SET SCHEMA \"%s\"", scehma))
 	if err != nil {
 		return err
 	}

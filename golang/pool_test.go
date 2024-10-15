@@ -122,10 +122,12 @@ func TestPool(t *testing.T) {
 	defer p.Close()
 	pool, _ := p.(*driverPool)
 	defer pool.Close()
+	pool.mu.Lock()
 	pool.tickerDuration = 100 * time.Millisecond
 	pool.connCfg = &connConfig{
 		requestTimeout: 10 * time.Second,
 	}
+	pool.mu.Unlock()
 
 	c, err := pool.GetClient()
 	if err != nil {
@@ -189,10 +191,12 @@ func TestPoolPut(t *testing.T) {
 		}
 		defer p.Close()
 		pool, _ := p.(*driverPool)
+		pool.mu.Lock()
 		pool.minOpen = 0
 		pool.connCfg = &connConfig{
 			requestTimeout: 10 * time.Second,
 		}
+		pool.mu.Unlock()
 		c, err := pool.GetClient()
 		if err != nil {
 			t.Fatal(err)
