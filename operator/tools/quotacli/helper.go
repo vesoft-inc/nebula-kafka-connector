@@ -58,25 +58,6 @@ func encodeToString(fileName string) string {
 	return base64.StdEncoding.EncodeToString(data)
 }
 
-func validate(opts *Options) error {
-	if opts.QuotaUser == "" {
-		return ErrUserNameIsEmpty
-	}
-	if opts.QuotaNamespace == "" {
-		return ErrNamespaceIsEmpty
-	}
-	if opts.ClusterName == "" {
-		return ErrClusterIsEmpty
-	}
-	if opts.ResourceRequests == "" {
-		return ErrResourceRequestsIsEmpty
-	}
-	if opts.ResourceLimits == "" {
-		return ErrResourceLimitsIsEmpty
-	}
-	return nil
-}
-
 func handleResourceRequirementsV1(params map[string]string) (corev1.ResourceRequirements, error) {
 	result := corev1.ResourceRequirements{}
 	limits, err := populateResourceListV1(params["limits"])
@@ -108,4 +89,18 @@ func populateResourceListV1(spec string) (corev1.ResourceList, error) {
 		result[resourceName] = resourceQuantity
 	}
 	return result, nil
+}
+
+type SortableResourceNames []corev1.ResourceName
+
+func (list SortableResourceNames) Len() int {
+	return len(list)
+}
+
+func (list SortableResourceNames) Swap(i, j int) {
+	list[i], list[j] = list[j], list[i]
+}
+
+func (list SortableResourceNames) Less(i, j int) bool {
+	return list[i] < list[j]
 }
