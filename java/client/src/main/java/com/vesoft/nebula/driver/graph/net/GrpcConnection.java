@@ -25,11 +25,11 @@ import org.slf4j.LoggerFactory;
 
 public class GrpcConnection extends Connection {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(GrpcConnection.class);
-    private ManagedChannel channel;
-    private GraphServiceGrpc.GraphServiceBlockingStub stub;
-    private long connectTimeout = 0;
-    private long requestTimeout = 0;
+    private static final Logger                                    LOGGER         = LoggerFactory.getLogger(GrpcConnection.class);
+    private              ManagedChannel                            channel;
+    private              GraphServiceGrpc.GraphServiceBlockingStub stub;
+    private              long                                      connectTimeout = 0;
+    private              long                                      requestTimeout = 0;
 
     private final Charset charset = Charsets.UTF_8;
 
@@ -67,9 +67,9 @@ public class GrpcConnection extends Connection {
             ClientInfo clientInfo = ClientInfo.newBuilder()
                     .setLang(ClientInfo.Language.JAVA)
                     .setProtocolVersion(Common
-                            .getDescriptor()
-                            .getOptions()
-                            .getExtension(Common.protocolVersion))
+                                                .getDescriptor()
+                                                .getOptions()
+                                                .getExtension(Common.protocolVersion))
                     .setVersion(ByteString.copyFrom(ClientVersion.clientVersion, charset))
                     .build();
             String authInfoString = JSON.toJSONString(authOptions);
@@ -95,6 +95,9 @@ public class GrpcConnection extends Connection {
 
     public ExecuteResponse execute(long sessionID, String stmt, long timeout)
             throws IOErrorException {
+        if (stmt == null) {
+            throw new NullPointerException("statement is null.");
+        }
         try {
             ExecuteRequest request = ExecuteRequest.newBuilder()
                     .setSessionId(sessionID)
