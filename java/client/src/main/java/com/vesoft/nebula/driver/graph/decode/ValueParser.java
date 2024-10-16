@@ -616,7 +616,23 @@ public class ValueParser {
      * @return {@link OffsetTime}value
      */
     private OffsetTime bytesToZonedTime(ByteString data) {
-        LocalTime localUtcTime = bytesToLocalTime(data).plusMinutes(timeZoneOffset);
+        ByteBuffer buffer = ByteBuffer.wrap(data.toByteArray()).order(byteOrder);
+        int        hour   = buffer.get();
+        int currentOffset = timeZoneOffset;
+        if (hour < 0) {
+            hour = -(24 + hour) + (currentOffset / 60);
+            currentOffset = currentOffset % 60;
+        }
+        if (hour < 0) {
+            hour = -hour;
+        }
+        int        minute = buffer.get();
+        int        second = buffer.get();
+        buffer.get(); // Skip the padding byte
+        int microsecond = buffer.getInt();
+        LocalTime localUtcTime = LocalTime
+                .of(hour, minute, second, microsecond * 1000)
+                .plusMinutes(currentOffset);
         ZoneOffset offset = ZoneOffset.ofTotalSeconds(timeZoneOffset * 60);
         return OffsetTime.of(localUtcTime, offset);
     }
