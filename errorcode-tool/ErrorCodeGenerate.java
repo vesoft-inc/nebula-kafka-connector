@@ -21,14 +21,16 @@ import java.util.regex.Pattern;
  */
 public class ErrorCodeGenerate {
     public static void main(String[] args) throws IOException {
-        String          codeFileName      = args[0];
-        String          codeclassFileName = args[1];
-        String          messageFileName   = args[2];
-        List<ErrorCode> codes             = constructErrorCode(codeFileName, codeclassFileName, messageFileName);
-        List<ErrorCode> codesWithInternalError = update(codes);
+        String                codeFileName           = args[0];
+        String                codeclassFileName      = args[1];
+        String                messageFileName        = args[2];
+        String                docDescFileName        = args[3];
+        List<ErrorCode>       codes                  = constructErrorCode(codeFileName, codeclassFileName, messageFileName);
+        Map<String, CodeDesc> codeDesc               = getCodeDesc(docDescFileName);
+        List<ErrorCode>       codesWithInternalError = update(codes);
         writeCodeForJava(codesWithInternalError);
         writeCodeForGo(codesWithInternalError);
-        writeCodeForYaml(codesWithInternalError);
+        writeCodeForYaml(codesWithInternalError, codeDesc);
         System.out.println("Finished.");
     }
 
@@ -80,26 +82,54 @@ public class ErrorCodeGenerate {
         }
     }
 
-    public static void writeCodeForYaml(List<ErrorCode> codes) {
-        String javaCodeFile = "errorcode_yaml.txt";
+    public static void writeCodeForYaml(List<ErrorCode> codes, Map<String, CodeDesc> codeDescMap) {
+        String enDescYaml = "errorcode_doc_en.txt";
+        String chDescYaml = "errorcode_doc_ch.txt";
 
-        StringBuilder sb = new StringBuilder();
+        StringBuilder englishDesc = new StringBuilder();
+        StringBuilder chineseDesc = new StringBuilder();
         for (ErrorCode code : codes) {
-            sb.append("- name: ").append(code.getName()).append("\n");
-            sb.append("  code: ").append(code.getCode()).append("\n");
-            sb.append("  msg: ").append(code.getMessage()).append("\n");
+            englishDesc.append("- Name: ").append(code.getName()).append("\n");
+            englishDesc.append("  Code: ").append(code.getCode()).append("\n");
+            englishDesc.append("  Message: ").append(code.getMessage()).append("\n");
+            String desc = null;
+            if (codeDescMap.get(code.getCode()) != null) {
+                desc = codeDescMap.get(code.getCode()).getEnglishDesc();
+            }
+            englishDesc.append("  Description: ").append(desc).append("\n");
+
+            chineseDesc.append("- 错误名: ").append(code.getName()).append("\n");
+            chineseDesc.append("  错误码: ").append(code.getCode()).append("\n");
+            chineseDesc.append("  错误消息: ").append(code.getMessage()).append("\n");
+            desc = null;
+            if (codeDescMap.get(code.getCode()) != null) {
+                desc = codeDescMap.get(code.getCode()).getChineseDes();
+            }
+            chineseDesc.append("  描述: ").append(desc).append("\n");
         }
-        FileWriter writer = null;
+        FileWriter englishDescWriter = null;
+        FileWriter chineseDescWriter = null;
         try {
-            writer = new FileWriter(javaCodeFile);
-            writer.write(sb.toString());
+            englishDescWriter = new FileWriter(enDescYaml);
+            englishDescWriter.write(englishDesc.toString());
+
+            chineseDescWriter = new FileWriter(chDescYaml);
+            chineseDescWriter.write(chineseDesc.toString());
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
-            if (writer != null) {
+            if (englishDescWriter != null) {
                 try {
-                    writer.flush();
-                    writer.close();
+                    englishDescWriter.flush();
+                    englishDescWriter.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+            if (chineseDescWriter != null) {
+                try {
+                    chineseDescWriter.flush();
+                    chineseDescWriter.close();
                 } catch (Exception e) {
                     // ignore
                 }
@@ -201,11 +231,29 @@ public class ErrorCodeGenerate {
         return errorCodeMsg;
     }
 
+    public static Map<String, CodeDesc> getCodeDesc(String filePath) {
+        Map<String, CodeDesc> codeDescMap = new HashMap<>();
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String         line;
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().startsWith("|") || line.trim().startsWith("| Code") || line.trim().startsWith("|----")) {
+                    continue;
+                }
 
-    public static List<ErrorCode> update(List<ErrorCode> codes){
+                String[] codeDesc = line.trim().split("\\|");
+                codeDescMap.put(codeDesc[1].trim(), new CodeDesc(codeDesc[1].trim(), codeDesc[2].trim(), codeDesc[3].trim()));
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return codeDescMap;
+    }
+
+    public static List<ErrorCode> update(List<ErrorCode> codes) {
         List<ErrorCode> filterCodes = new ArrayList<>();
-        for(ErrorCode code:codes){
-            if(isInternal(code)){
+        for (ErrorCode code : codes) {
+            if (isInternal(code)) {
                 code.setMessage("Internal Server Error");
             }
             filterCodes.add(code);
@@ -271,6 +319,30 @@ public class ErrorCodeGenerate {
 
         public String getPrefixCode() {
             return prefixCode;
+        }
+    }
+
+    static class CodeDesc {
+        private String code;
+        private String englishDesc;
+        private String chineseDes;
+
+        CodeDesc(String code, String englishDesc, String chineseDes) {
+            this.code = code;
+            this.englishDesc = englishDesc;
+            this.chineseDes = chineseDes;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getEnglishDesc() {
+            return englishDesc;
+        }
+
+        public String getChineseDes() {
+            return chineseDes;
         }
     }
 }

@@ -1,0 +1,2360 @@
+- 错误名: SUCCESSFUL_COMPLETION
+  错误码: 00000
+  错误消息: SUCCESS
+  描述: 操作成功。
+- 错误名: OMITTED_RESULT
+  错误码: 00001
+  错误消息: Omitted result
+  描述: 结果被省略。
+- 错误名: WARNING
+  错误码: 01000
+  错误消息: WARNING: {}
+  描述: 发生一般警告。
+- 错误名: WARNING_STRING_DATA_RIGHT_TRUNCATION
+  错误码: 01004
+  错误消息: Warning: string data right truncation: {}
+  描述: 字符串右侧被修剪。
+- 错误名: CATALOG_GRAPH_NOT_FOUND
+  错误码: 01G03
+  错误消息: Graph not found: `{}`
+  描述: 指定图在 Catalog 中未找到。
+- 错误名: CATALOG_GRAPH_TYPE_NOT_FOUND
+  错误码: 01G04
+  错误消息: Graph type not found: `{}`
+  描述: 指定图类型在 Catalog 中未找到。
+- 错误名: CATALOG_PLUGIN_NOT_FOUND
+  错误码: 01G05
+  错误消息: Plugin not found: `{}`
+  描述: 指定插件在 Catalog 中未找到。
+- 错误名: NULL_VALUE_ELIMINATED_IN_SET_FUNCTION
+  错误码: 01G11
+  错误消息: Null value eliminated in set function: {}
+  描述: NULL 值在 SET 函数中被消除。
+- 错误名: NO_DATA
+  错误码: 02000
+  错误消息: No data
+  描述: 没有数据。
+- 错误名: INFORMATIONAL
+  错误码: 03000
+  错误消息: Info: {}
+  描述: 提示信息。
+- 错误名: CONNECTION_EXCEPTION
+  错误码: 08000
+  错误消息: Connection exception: {}
+  描述: 发生连接异常。
+- 错误名: TRANSACTION_RESOLUTION_UNKNOWN
+  错误码: 08007
+  错误消息: Transaction resolution unknown: {}
+  描述: 事务解析未知。
+- 错误名: DATA_EXCEPTION
+  错误码: 22000
+  错误消息: Data exception
+  描述: 发生数据异常。
+- 错误名: DATA_STRING_DATA_RIGHT_TRUNCATION
+  错误码: 22001
+  错误消息: Data string data right truncation: {}
+  描述: 字符串右侧被修剪。
+- 错误名: NUMERIC_VALUE_OUT_OF_RANGE
+  错误码: 22003
+  错误消息: Numeric value out of range: `{}`, type: `{}`
+  描述: 数值超出范围。
+- 错误名: NULL_VALUE_NOT_ALLOWED
+  错误码: 22004
+  错误消息: Null value not allowed in `{}`
+  描述: NULL 值不被允许。
+- 错误名: INVALID_DATE_TIME_OR_DATETIME_FORMAT
+  错误码: 22007
+  错误消息: Invalid format: `{}` is not a valid `{}`
+  描述: 日期或时间格式无效。
+- 错误名: DATETIME_FIELD_OVERFLOW
+  错误码: 22008
+  错误消息: Datetime field overflow: {}
+  描述: 日期时间字段溢出。
+- 错误名: PARSE_TEMPORAL_FAIL
+  错误码: 22009
+  错误消息: Parse {}: `{}` fail
+  描述: 解析时间点失败。
+- 错误名: SUBSTRING_ERROR
+  错误码: 22011
+  错误消息: Substring error, invalid length `{}`, must greater than or equal to 0
+  描述: 子字符串错误，无效长度。
+- 错误名: DIVISION_BY_ZERO
+  错误码: 22012
+  错误消息: Division by zero: `{}`, type: `{}`
+  描述: 发生除零错误。
+- 错误名: INTERVAL_FIELD_OVERFLOW
+  错误码: 22015
+  错误消息: Interval field overflow: {}
+  描述: 间隔字段溢出。
+- 错误名: INVALID_CHARACTER_VALUE_FOR_CAST
+  错误码: 22018
+  错误消息: Invalid character value cast from `{}`:`{}` to `{}`
+  描述: 无效字符值转换。
+- 错误名: INVALID_ARGUMENT_FOR_NATURAL_LOGARITHM
+  错误码: 2201E
+  错误消息: Invalid argument for natural logarithm: {}
+  描述: 自然对数函数的参数无效。
+- 错误名: INVALID_ARGUMENT_FOR_POWER_FUNCTION
+  错误码: 2201F
+  错误消息: Invalid argument for power function: {}.
+  描述: 幂函数的参数无效。
+- 错误名: INVALID_ARGUMENT_FOR_LOG
+  错误码: 22020
+  错误消息: {}
+  描述: 对数函数的参数无效。
+- 错误名: TRIM_ERROR
+  错误码: 22027
+  错误消息: Trim error: {}
+  描述: 修剪错误。
+- 错误名: ARRAY_DATA_RIGHT_TRUNCATION
+  错误码: 2202F
+  错误消息: Array data right truncation: {}
+  描述: 数组右侧被修剪。
+- 错误名: NEGATIVE_LIMIT_VALUE
+  错误码: 22G02
+  错误消息: Negative limit value: {}
+  描述: 限制值为负数。
+- 错误名: INVALID_VALUE_TYPE
+  错误码: 22G03
+  错误消息: Invalid value type: {}
+  描述: 无效值类型。
+- 错误名: VALUES_NOT_COMPARABLE
+  错误码: 22G04
+  错误消息: {} is not comparable
+  描述: 值不可比较。
+- 错误名: INVALID_DATE_TIME_OR_DATETIME_FUNCTION_FIELD_NAME
+  错误码: 22G05
+  错误消息: Invalid date time or datetime function field name: {}
+  描述: 日期或时间函数字段名无效。
+- 错误名: INVALID_DATETIME_FUNCTION_VALUE
+  错误码: 22G06
+  错误消息: Invalid datetime function value: {}
+  描述: 日期时间函数值无效。
+- 错误名: INVALID_DURATION_FUNCTION_FIELD_NAME
+  错误码: 22G07
+  错误消息: Invalid duration field name: `{}` is not a valid `{}`{}
+  描述: 时间段函数字段名无效。
+- 错误名: LIST_DATA_RIGHT_TRUNCATION
+  错误码: 22G0B
+  错误消息: List data right truncation: {}
+  描述: 列表右侧被修剪。
+- 错误名: LIST_ELEMENT_ERROR
+  错误码: 22G0C
+  错误消息: List element error: {}
+  描述: 列表元素错误。
+- 错误名: INVALID_NUMBER_OF_PATHS_OR_GROUPS
+  错误码: 22G0F
+  错误消息: Invalid number of paths or groups: {}
+  描述: 路径或组的数量无效。
+- 错误名: INVALID_DURATION_FORMAT
+  错误码: 22G0H
+  错误消息: Invalid duration format: {}
+  描述: 时间段格式无效。
+- 错误名: MULTIPLE_ASSIGNMENTS_TO_A_GRAPH_ELEMENT_PROPERTY
+  错误码: 22G0M
+  错误消息: Multiple assignments to a graph element property: {}
+  描述: 对同一图元素的属性多次赋值。
+- 错误名: DATA_NUMBER_OF_NODE_LABELS_BELOW_SUPPORTED_MINIMUM
+  错误码: 22G0N
+  错误消息: Data number of node labels below supported minimum
+  描述: 点标签数量低于支持的最小值。
+- 错误名: DATA_NUMBER_OF_NODE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 22G0P
+  错误消息: Data number of node labels exceeds supported maximum
+  描述: 点标签数量超过支持的最大值。
+- 错误名: DATA_NUMBER_OF_EDGE_LABELS_BELOW_SUPPORTED_MINIMUM
+  错误码: 22G0Q
+  错误消息: Data number of edge labels below supported minimum
+  描述: 边标签数量低于支持的最小值。
+- 错误名: DATA_NUMBER_OF_EDGE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 22G0R
+  错误消息: Data number of edge labels exceeds supported maximum
+  描述: 边标签数量超过支持的最大值。
+- 错误名: DATA_NUMBER_OF_NODE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 22G0S
+  错误消息: Data number of node properties exceeds supported maximum
+  描述: 点属性数量超过支持的最大值。
+- 错误名: DATA_NUMBER_OF_EDGE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 22G0T
+  错误消息: Data number of edge properties exceeds supported maximum
+  描述: 边属性数量超过支持的最大值。
+- 错误名: RECORD_FIELDS_DO_NOT_MATCH
+  错误码: 22G0U
+  错误消息: Record fields do not match: {}
+  描述: 记录字段不匹配。
+- 错误名: REFERENCE_VALUE_INVALID_BASE_TYPE
+  错误码: 22G0V
+  错误消息: Reference value invalid base type: {}
+  描述: 引用值的基本类型无效。
+- 错误名: REFERENCE_VALUE_INVALID_CONSTRAINED_TYPE
+  错误码: 22G0W
+  错误消息: Reference value invalid constrained type: {}
+  描述: 引用值的约束类型无效。
+- 错误名: RECORD_DATA_FIELD_UNASSIGNABLE
+  错误码: 22G0X
+  错误消息: Record data field unassignable: {}
+  描述: 记录字段不可分配。
+- 错误名: RECORD_DATA_FIELD_MISSING
+  错误码: 22G0Y
+  错误消息: Record data field missing: {}
+  描述: 记录字段缺失。
+- 错误名: MALFORMED_PATH
+  错误码: 22G0Z
+  错误消息: Malformed path: {}
+  描述: 路径格式错误。
+- 错误名: PATH_DATE_RIGHT_TRUNCATION
+  错误码: 22G10
+  错误消息: Path date right truncation: {}
+  描述: 路径右侧被修剪。
+- 错误名: REFERENCE_VALUE_REFERENT_DELETED
+  错误码: 22G11
+  错误消息: Reference value referent deleted: {}
+  描述: 引用值的引用已删除。
+- 错误名: INVALID_GROUP_VARIABLE_VALUE
+  错误码: 22G13
+  错误消息: Invalid group variable value: {}
+  描述: 组变量值无效。
+- 错误名: INCOMPATIBLE_TEMPORAL_DURATION_UNIT_GROUPS
+  错误码: 22G14
+  错误消息: Incompatible temporal duration unit groups: {}
+  描述: 时间段和时间点的单位组不兼容。
+- 错误名: VALUE_OUT_OF_LIMITS
+  错误码: 22G15
+  错误消息: `{}` value {} out of limits: [`{}`, `{}`]
+  描述: 指定值超出限制。
+- 错误名: INVALID_TRANSACTION_STATE
+  错误码: 25000
+  错误消息: Invalid transaction state: {}
+  描述: 事务状态无效。
+- 错误名: ACTIVE_GQL_TRANSACTION
+  错误码: 25G01
+  错误消息: Active GQL transaction: {}
+  描述: 已存在活跃的 GQL 事务。
+- 错误名: CATALOG_AND_DATA_STATEMENT_MIXING_NOT_SUPPORTED
+  错误码: 25G02
+  错误消息: Catalog and data statement mixing not supported: {}
+  描述: 不支持混合使用 Catalog 和数据语句。
+- 错误名: READ_ONLY_GQL_TRANSACTION
+  错误码: 25G03
+  错误消息: Read only GQL transaction: {}
+  描述: 只读 GQL 事务。
+- 错误名: ACCESSING_MULTIPLE_GRAPHS_NOT_SUPPORTED
+  错误码: 25G04
+  错误消息: Accessing multiple graphs not supported: {}
+  描述: 不支持访问多个图。
+- 错误名: INVALID_TRANSACTION_TERMINATION
+  错误码: 2D000
+  错误消息: Invalid transaction termination: {}
+  描述: 事务终止无效。
+- 错误名: TRANSACTION_ROLLBACK
+  错误码: 40000
+  错误消息: Transaction rollback
+  描述: 事务被回滚。
+- 错误名: STATEMENT_COMPLETION_UNKNOWN
+  错误码: 40003
+  错误消息: Statement completion unknown:{}
+  描述: 语句是否完成未知。
+- 错误名: SYNTAX_ERROR_OR_ACCESS_RULE_VIOLATION
+  错误码: 42000
+  错误消息: Syntax error or access rule violation: {}
+  描述: 发生语法错误或访问规则违规。
+- 错误名: INVALID_SYNTAX
+  错误码: 42001
+  错误消息: Invalid syntax: {}
+  描述: 语法无效。
+- 错误名: INVALID_REFERENCE
+  错误码: 42002
+  错误消息: Invalid reference: {}
+  描述: 引用无效。
+- 错误名: USE_OF_VISUALLY_CONFUSABLE_IDENTIFIERS
+  错误码: 42004
+  错误消息: Use of visually confusable identifiers: {}
+  描述: 标识符存在视觉混淆。
+- 错误名: SYNTAX_NUMBER_OF_EDGE_LABELS_BELOW_SUPPORTED_MINIMUM
+  错误码: 42006
+  错误消息: Number of edge labels below supported minimum
+  描述: 边标签数量低于支持的最小值。
+- 错误名: SYNTAX_NUMBER_OF_EDGE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 42007
+  错误消息: Number of edge labels exceeds supported maximum
+  描述: 边标签数量超过支持的最大值。
+- 错误名: SYNTAX_NUMBER_OF_EDGE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 42008
+  错误消息: Number of edge properties exceeds supported maximum
+  描述: 边属性数量超过支持的最大值。
+- 错误名: SYNTAX_NUMBER_OF_NODE_LABELS_BELOW_SUPPORTED_MINIMUM
+  错误码: 42009
+  错误消息: Syntax number of node labels below supported minimum
+  描述: 点标签数量低于支持的最小值。
+- 错误名: SYNTAX_NUMBER_OF_NODE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 42010
+  错误消息: Syntax number of node labels exceeds supported maximum
+  描述: 点标签数量超过支持的最大值。
+- 错误名: SYNTAX_NUMBER_OF_NODE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 42011
+  错误消息: Syntax number of node properties exceeds supported maximum
+  描述: 点属性数量超过支持的最大值。
+- 错误名: NUMBER_OF_NODE_TYPE_KEY_LABELS_BELOW_SUPPORTED_MINIMUM
+  错误码: 42012
+  错误消息: Number of node type key labels below supported minimum
+  描述: 点类型键标签数量低于支持的最小值。
+- 错误名: NUMBER_OF_NODE_TYPE_KEY_LABELS_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 42013
+  错误消息: Number of node type key labels exceeds supported maximum
+  描述: 点类型键标签数量超过支持的最大值。
+- 错误名: NUMBER_OF_EDGE_TYPE_KEY_LABELS_BELOW_SUPPORTED_MINIMUM
+  错误码: 42014
+  错误消息: Number of edge type key labels below supported minimum
+  描述: 边类型键标签数量低于支持的最小值。
+- 错误名: NUMBER_OF_EDGE_TYPE_KEY_LABELS_EXCEEDS_SUPPORTED_MAXIMUM
+  错误码: 42015
+  错误消息: Number of edge type key labels exceeds supported maximum
+  描述: 边类型键标签数量超过支持的最大值。
+- 错误名: EMPTY_STATEMENT
+  错误码: 42N01
+  错误消息: Empty statement
+  描述: 空语句。
+- 错误名: INVALID_SYNTAX_NOT_FOUND_IN_PROPS
+  错误码: 42N03
+  错误消息: Invalid syntax, {} `{}` not found in properties list
+  描述: 未在属性列表中找到指定的属性。
+- 错误名: INVALID_SYNTAX_DST_TYPE_OF_EDGE_NOT_SPECIFIED
+  错误码: 42N05
+  错误消息: Invalid syntax, destination node type of edge type `{}` not specified
+  描述: 边的目标点类型未指定。
+- 错误名: INVALID_SYNTAX_UNKNOWN_ELEMENT_TYPE
+  错误码: 42N06
+  错误消息: Invalid syntax, unknown element type
+  描述: 元素类型未知。
+- 错误名: INVALID_SYNTAX_DUPLICATE_PROPERTY
+  错误码: 42N08
+  错误消息: Invalid syntax, duplicate property: `{}`
+  描述: 属性重复。
+- 错误名: INVALID_SYNTAX_NEST_QUERY_LAST_STATEMENT_ERROR
+  错误码: 42N09
+  错误消息: Invalid syntax, last statement in value query expression is not a query statement: `{}`
+  描述: 嵌套查询中的最后一个语句无效。
+- 错误名: INVALID_SYNTAX_NEST_QUERY_RESULT_STATEMENT_ERROR
+  错误码: 42N10
+  错误消息: Invalid syntax, result statement in value query expression should be linear query statement
+  描述: 嵌套查询中的结果语句无效。
+- 错误名: INVALID_SYNTAX_NEST_QUERY_RETURN_AGG_ERROR
+  错误码: 42N12
+  错误消息: Invalid syntax, result of expression should generated by aggregate function without group by, but got: `{}`
+  描述: 嵌套查询返回中的聚合函数无效。
+- 错误名: INVALID_SYNTAX_NEST_QUERY_RETURN_LIMIT_ERROR
+  错误码: 42N13
+  错误消息: Invalid syntax, result in value query expression should be aggregate expression without group by or add limit 1 clause in return statement
+  描述: 嵌套查询返回中的限制无效。
+- 错误名: INVALID_SYNTAX_VAR_TYPE_CONFLICT
+  错误码: 42N14
+  错误消息: Invalid syntax, variable `{}` defined with conflicting type
+  描述: 变量存在类型冲突。
+- 错误名: INVALID_SYNTAX_EQUI_JOIN_ON_CONDITIONAL_VAR
+  错误码: 42N15
+  错误消息: Invalid syntax, implicit equi-joins on conditional variable `{}` are prohibited
+  描述: 禁止在条件变量上使用隐式等值连接。
+- 错误名: INVALID_SYNTAX_EQUI_JOIN_ON_GROUP_VAR
+  错误码: 42N16
+  错误消息: Invalid syntax, implicit equi-joins on group variable `{}` are prohibited
+  描述: 禁止在组变量上使用隐式等值连接。
+- 错误名: INVALID_SYNTAX_VAR_TYPE_ERROR
+  错误码: 42N17
+  错误消息: Invalid syntax, type of Variable `{}` is not {}
+  描述: 变量类型无效。
+- 错误名: INVALID_SYNTAX_VAR_NOT_DEFINED
+  错误码: 42N18
+  错误消息: Invalid syntax, variable `{}` not defined
+  描述: 变量未定义。
+- 错误名: INVALID_SYNTAX_INSERT_BOUND_NODE
+  错误码: 42N19
+  错误消息: Invalid syntax, cannot insert bound node `{}`
+  描述: 插入语句中的绑定点无效。
+- 错误名: INVALID_SYNTAX_VAR_INVALID_NODE_TYPE
+  错误码: 42N20
+  错误消息: Invalid syntax, `{}` does not refer to a valid node type
+  描述: 变量未引用有效的点类型。
+- 错误名: INVALID_SYNTAX_VAR_REFER_MULTIPLE_NODE_TYPE
+  错误码: 42N21
+  错误消息: Invalid syntax, `{}` shouldn't refer to multiple node types
+  描述: 变量不应引用多个点类型。
+- 错误名: INVALID_SYNTAX_REDEFINED_VAR
+  错误码: 42N22
+  错误消息: Invalid syntax, redefined variable: `{}`
+  描述: 变量重定义。
+- 错误名: INVALID_SYNTAX_CONFLICT_VAR_TYPE
+  错误码: 42N23
+  错误消息: Invalid syntax, redefined variable: `{}` with conflict type(`{}` vs `{}`)
+  描述: 重定义的变量存在类型冲突。
+- 错误名: INVALID_SYNTAX_YIELD_ITEM_TYPE
+  错误码: 42N24
+  错误消息: Invalid syntax, yield item should be NODE, EDGE or PATH type
+  描述: Yield 项的类型无效。
+- 错误名: INVALID_SYNTAX_MULTIPLE_NODE_INSERT
+  错误码: 42N25
+  错误消息: Invalid syntax, cannot insert node `{}` more than once
+  描述: 不能多次插入同个点。
+- 错误名: INVALID_SYNTAX_DUPLICATED_PROPERTY_NAME
+  错误码: 42N26
+  错误消息: Invalid syntax, duplicate property names in `{}`
+  描述: 属性名重复。
+- 错误名: INVALID_SYNTAX_DUPLICATED_INDEX_PROPERTY
+  错误码: 42N27
+  错误消息: Invalid syntax, duplicate index property names in `{}`
+  描述: 索引属性名重复。
+- 错误名: INVALID_SYNTAX_ALTER_ELEMENT_MULTI_TIME
+  错误码: 42N29
+  错误消息: Invalid syntax, `{}` cannot occur more than once in an alter graph type statement.
+  描述: 指定操作不能在同一条图类型修改语句中出现多次。
+- 错误名: INVALID_SYNTAX_ADD_PRIMARY_KEY_OR_MULTI_EDGE_KEY
+  错误码: 42N30
+  错误消息: Invalid syntax, adding PRIMARY KEY or MULTI EDGE KEY `{}` is not allowed.
+  描述: 不允许添加主键或多边键。
+- 错误名: INVALID_SYNTAX_ADD_INVALID_PROPERTY
+  错误码: 42N31
+  错误消息: Invalid syntax, add not nullable property {} without default value is not allowed.
+  描述: 不允许添加未指定默认值的非 NULL 属性。
+- 错误名: INVALID_SYNTAX_ILLEGAL_BYTE_STRING
+  错误码: 42N33
+  错误消息: Invalid syntax, illegal byte string: {}
+  描述: 字节字符串无效。
+- 错误名: INVALID_SYNTAX_LABEL_EXPR_ELEMENT_TYPE_EXPR_COEXIST
+  错误码: 42N34
+  错误消息: Invalid syntax, label expression and type expression cannot coexist in single {} pattern `{}`
+  描述: 标签表达式和类型表达式不能同时存在。
+- 错误名: INVALID_IDENTIFIER
+  错误码: 42N35
+  错误消息: Invalid syntax, illegal identifier: `{}`, error: {}
+  描述: 标识符无效。
+- 错误名: INVALID_SYNTAX_FIELD_NUMBER_MISMATCH
+  错误码: 42N36
+  错误消息: Invalid syntax, the number of fields in `{}` does not match with `{}`.
+  描述: 字段数量不匹配。
+- 错误名: INVALID_SYNTAX_FIELD_NOT_FOUND
+  错误码: 42N37
+  错误消息: Invalid syntax, field `{}` not found in table.
+  描述: 字段未找到。
+- 错误名: INVALID_SYNTAX_OPTION_REDEFINITION
+  错误码: 42N38
+  错误消息: Invalid syntax, multiple {} options for {} `{}` are not allowed.
+  描述: 不允许为同一选项指定多个值。
+- 错误名: INVALID_SYNTAX_ILLEGAL_OPTION
+  错误码: 42N39
+  错误消息: Invalid syntax, option {} cannot used for {} `{}`.
+  描述: 选项无效。
+- 错误名: INVALID_SYNTAX_NEST_QUERY_RETURN_ITEM_ERROR
+  错误码: 42N40
+  错误消息: Invalid syntax, result in value query expression should contain exactly one column
+  描述: 值查询表达式中的结果只能包含一个列。
+- 错误名: INVALID_SYNTAX_NESTED_VECTOR_TYPE
+  错误码: 42N41
+  错误消息: Invalid syntax, nested VECTOR type property `{}` of `{}` is not allowed
+  描述: null
+- 错误名: INCONSISTENT_QUERY_CONJUNCTION
+  错误码: 42N42
+  错误消息: Invalid syntax, all directly contained query conjunctions within a composite query expression must be the same
+  描述: 复合查询表达式中的所有连接词必须相同。
+- 错误名: INVALID_SYNTAX_NEST_QUERY_RETURN_GRAPH_ERROR
+  错误码: 42N43
+  错误消息: Invalid syntax, result in nested query should be graph element, but got: `{}`
+  描述: 嵌套查询返回的结果无效。
+- 错误名: INVALID_SYNTAX_BUILD_GRAPH_ERROR
+  错误码: 42N44
+  错误消息: Invalid syntax, {}
+  描述: 语法无效。
+- 错误名: DEPENDENT_OBJECT_ERROR
+  错误码: G1000
+  错误消息: Dependent object error, node {} can not be deleted, {} edge connected
+  描述: 因为存在连接的边，无法删除指定点。
+- 错误名: EDGES_STILL_EXIST
+  错误码: G1001
+  错误消息: Edges still exist
+  描述: 边仍然存在。
+- 错误名: ENDPOINT_NODE_IS_DELETED
+  错误码: G1002
+  错误消息: Endpoint node is deleted
+  描述: 末端点已删除。
+- 错误名: ENDPOINT_NODE_NOT_IN_CURRENT_WORKING_GRAPH
+  错误码: G1003
+  错误消息: Endpoint node is not in current working graph
+  描述: 末端点不在当前工作图中。
+- 错误名: GRAPH_TYPE_VIOLATION
+  错误码: G2000
+  错误消息: Graph type violation: {}
+  描述: 图类型违规。
+- 错误名: PART_NOT_FOUND
+  错误码: ND001
+  错误消息: Partition `{}` not found
+  描述: 未找到指定分区。
+- 错误名: NODE_ALREADY_EXIST
+  错误码: ND002
+  错误消息: Node already exist, id: `{}`
+  描述: 点已存在。
+- 错误名: EDGE_ALREADY_EXIST
+  错误码: ND003
+  错误消息: Edge already exist
+  描述: 边已存在。
+- 错误名: PROPERTY_NOT_FOUND
+  错误码: ND004
+  错误消息: Property `{}` of type `{}` not found
+  描述: 未找到指定类型的属性。
+- 错误名: LEADER_CHANGED
+  错误码: ND005
+  错误消息: Leader changed
+  描述: Leader 已更改。
+- 错误名: BINDING_TABLE_WRITE_FAILED
+  错误码: ND006
+  错误消息: Binding table write failed: {}
+  描述: 写入表失败。
+- 错误名: BINDING_TABLE_NO_SPACE
+  错误码: ND007
+  错误消息: Binding table no space: {}
+  描述: 表空间不足。
+- 错误名: PROPERTY_NOT_NULLABLE
+  错误码: ND008
+  错误消息: Property `{}` of type `{}` is not nullable
+  描述: 属性不可为 NULL。
+- 错误名: TRIM_LIST_OUT_OF_RANGE
+  错误码: NQ001
+  错误消息: Trim list out of range, list size: `{}`, trim number: `{}`
+  描述: 列表修剪超出范围。
+- 错误名: INVALID_TEMPORAL_INSTANT_SUBTRACTION
+  错误码: NQ002
+  错误消息: Invalid temporal instant subtraction: {}
+  描述: 时间点间的减法无效。
+- 错误名: KVSTORE_ERROR
+  错误码: NK000
+  错误消息: Internal Server Error
+  描述: 键值存储错误。
+- 错误名: KVSTORE_BATCH_WRITE_FAILED
+  错误码: NK001
+  错误消息: Internal Server Error
+  描述: 批量写入键值存储失败。
+- 错误名: KVSTORE_GET_PROPERTY_FAILED
+  错误码: NK002
+  错误消息: Internal Server Error
+  描述: 从键值存储获取属性失败。
+- 错误名: KVSTORE_SET_OPTION_FAILED
+  错误码: NK003
+  错误消息: Internal Server Error
+  描述: 设置键值存储选项失败。
+- 错误名: KVSTORE_KEY_NOT_FOUND
+  错误码: NK004
+  错误消息: Internal Server Error
+  描述: 未在键值存储中找到指定键。
+- 错误名: KVSTORE_COMMIT_FAILED
+  错误码: NK005
+  错误消息: Internal Server Error
+  描述: 提交键值存储失败。
+- 错误名: KVSTORE_GET_FAILED
+  错误码: NK006
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Get 操作失败。
+- 错误名: KVSTORE_PUT_FAILED
+  错误码: NK007
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Put 操作失败。
+- 错误名: KVSTORE_REMOVE_FAILED
+  错误码: NK008
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Remove 操作失败。
+- 错误名: KVSTORE_INGEST_FAILED
+  错误码: NK009
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Ingest 操作失败。
+- 错误名: KVSTORE_COMPACT_FAILED
+  错误码: NK010
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Compact 操作失败。
+- 错误名: KVSTORE_FLUSH_FAILED
+  错误码: NK011
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Flush 操作失败。
+- 错误名: KVSTORE_CHECKPOINT_FAILED
+  错误码: NK012
+  错误消息: Internal Server Error
+  描述: 在键值存储执行 Checkpoint 操作失败。
+- 错误名: KVSTORE_COLUMN_FAMILY_NOT_FOUND
+  错误码: NK013
+  错误消息: Internal Server Error
+  描述: 未在键值存储中找到指定列族。
+- 错误名: KVSTORE_OPEN_FAILED
+  错误码: NK014
+  错误消息: Internal Server Error
+  描述: 打开键值存储失败。
+- 错误名: KVSTORE_OPTIONS_INVALID
+  错误码: NK015
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: KVSTORE_LOCK_FAILED
+  错误码: NK016
+  错误消息: Internal Server Error
+  描述: 在键值存储中执行 Lock 操作失败。
+- 错误名: KVSTORE_EXPORT_TABLE_FAILED
+  错误码: NK017
+  错误消息: Internal Server Error
+  描述: 从键值存储导出表失败。
+- 错误名: KVSTORE_OPEN_SST_FAILED
+  错误码: NK018
+  错误消息: Internal Server Error
+  描述: 打开键值存储中的 SST 文件失败。
+- 错误名: KVSTORE_PREFIX_INVALID
+  错误码: NK019
+  错误消息: Internal Server Error
+  描述: 键值存储前缀无效。
+- 错误名: CATALOG_ERROR
+  错误码: NC000
+  错误消息: Catalog error: {}
+  描述: Catalog 错误。
+- 错误名: CATALOG_DIRECTORY_NOT_FOUND
+  错误码: NC001
+  错误消息: Catalog directory not found: `{}`
+  描述: 未找到指定 Catalog 目录。
+- 错误名: CATALOG_SCHEMA_NOT_FOUND
+  错误码: NC002
+  错误消息: Catalog schema not found: `{}`
+  描述: 未找到指定 Catalog Schema。
+- 错误名: CATALOG_NODE_TYPE_NOT_FOUND
+  错误码: NC003
+  错误消息: Node type not found: `{}`
+  描述: 未在 Catalog 中找到指定点类型。
+- 错误名: CATALOG_EDGE_TYPE_NOT_FOUND
+  错误码: NC004
+  错误消息: Edge type not found: `{}`
+  描述: 未在 Catalog 中找到指定边类型。
+- 错误名: CATALOG_PRIMARY_KEY_NOT_FOUND
+  错误码: NC005
+  错误消息: Primary key of node type `{}` not found
+  描述: 未在 Catalog 中找到指定点类型的主键。
+- 错误名: CATALOG_PROPERTY_NOT_FOUND
+  错误码: NC006
+  错误消息: Property `{}` of type `{}` not found
+  描述: 未在 Catalog 中找到指定类型的属性。
+- 错误名: CATALOG_INDEX_NOT_FOUND
+  错误码: NC007
+  错误消息: Catalog index not found: `{}`
+  描述: 未在 Catalog 中找到指定索引。
+- 错误名: CATALOG_PRIMARY_KEY_PROPERTY_NOT_FOUND
+  错误码: NC008
+  错误消息: Primary key property not found: `{}`
+  描述: 未在 Catalog 中找到指定主键属性。
+- 错误名: CATALOG_ELEMENT_TYPE_FOR_INSERT_NOT_FOUND
+  错误码: NC009
+  错误消息: Element type matching `{}` not found
+  描述: 未找到匹配指定类型的元素。
+- 错误名: CATALOG_EPOCH_ERROR
+  错误码: NC010
+  错误消息: Unable to find Catalog with epoch as {}
+  描述: 未在指定时间找到 Catalog。
+- 错误名: CATALOG_LABEL_NOT_FOUND
+  错误码: NC011
+  错误消息: Label not found: `{}.{}`
+  描述: 未在 Catalog 中找到指定标签。
+- 错误名: CATALOG_NODE_TTL_NOT_SUPPORTED
+  错误码: NC012
+  错误消息: Node `{}` ttl not supported
+  描述: 不支持在点上设置 TTL。
+- 错误名: CATALOG_TTL_PROPERTY_EXIST
+  错误码: NC013
+  错误消息: `{}` already has a ttl property `{}`
+  描述: 指定图元素已有 TTL 属性。
+- 错误名: CATALOG_SCHEMA_ALREADY_EXISTS
+  错误码: NC101
+  错误消息: Catalog schema already exists: `{}`
+  描述: 指定 Catalog Schema 已存在。
+- 错误名: CATALOG_EDGE_TYPE_ALREADY_EXIST
+  错误码: NC102
+  错误消息: Edge type already exist: `{}`
+  描述: 指定边类型已存在。
+- 错误名: CATALOG_NODE_TYPE_ALREADY_EXIST
+  错误码: NC103
+  错误消息: Node type already exist: `{}`
+  描述: 指定点类型已存在。
+- 错误名: CATALOG_GRAPH_TYPE_ALREADY_EXIST
+  错误码: NC104
+  错误消息: Graph type already exist: `{}`
+  描述: 指定图类型在 Catalog 中已存在。
+- 错误名: CATALOG_GRAPH_ALREADY_EXIST
+  错误码: NC105
+  错误消息: Graph already exist: `{}`
+  描述: 指定图在 Catalog 中已存在。
+- 错误名: CATALOG_PROPERTY_ALREADY_EXIST
+  错误码: NC106
+  错误消息: Property `{}.{}` already exists
+  描述: 指定属性已存在。
+- 错误名: CATALOG_NODE_INDEX_ALREADY_EXISTS
+  错误码: NC107
+  错误消息: Node index already exists: {}
+  描述: 指定点索引已存在。
+- 错误名: CATALOG_EDGE_INDEX_ALREADY_EXISTS
+  错误码: NC108
+  错误消息: Edge index already exists: {}
+  描述: 指定边索引已存在。
+- 错误名: CATALOG_LABEL_ALREADY_EXIST
+  错误码: NC109
+  错误消息: Label already exist: `{}.{}`
+  描述: 指定标签已存在。
+- 错误名: CATALOG_PLUGIN_ALREADY_EXIST
+  错误码: NC110
+  错误消息: Plugin already exist: `{}`
+  描述: 指定插件在 Catalog 中已存在。
+- 错误名: CATALOG_NODE_VECTOR_INDEX_ALREADY_EXISTS
+  错误码: NC111
+  错误消息: Node vector index already exists: {}
+  描述: null
+- 错误名: CATALOG_EDGE_VECTOR_INDEX_ALREADY_EXISTS
+  错误码: NC112
+  错误消息: Edge vector index already exists: {}
+  描述: null
+- 错误名: CATALOG_GRAPH_TYPE_MISMATCH
+  错误码: NC201
+  错误消息: Graph type mismatch: {}
+  描述: 图类型不匹配。
+- 错误名: CATALOG_PRIMARY_KEY_NULLABLE
+  错误码: NC202
+  错误消息: Property `{}` of node type `{}` is nullable, can't be primary index property
+  描述: 指定点类型的属性可为 NULL，不能作为主键索引属性。
+- 错误名: CATALOG_INDEX_PROPERTY_TYPE_NOT_SUPPORTED
+  错误码: NC203
+  错误消息: Index property type `{}` not supported
+  描述: 不支持指定的索引属性类型。
+- 错误名: CATALOG_PROPERTY_INVALID
+  错误码: NC204
+  错误消息: Catalog property invalid: `{}`
+  描述: 指定属性在 Catalog 中无效。
+- 错误名: CATALOG_NODE_TYPE_USED
+  错误码: NC205
+  错误消息: NodeType {} is used by EdgeType
+  描述: 指定点类型已被使用。
+- 错误名: CATALOG_CANCEL_JOB_FAILED
+  错误码: NC301
+  错误消息: Catalog cancel job failed: {}
+  描述: 取消 Catalog 作业失败。
+- 错误名: CATALOG_STATE_PERMISSION_DENIED
+  错误码: NC302
+  错误消息: Catalog state permission denied
+  描述: 访问 Catalog 状态被拒绝。
+- 错误名: CATALOG_VERSION_RETIRED
+  错误码: NC303
+  错误消息: Catalog version retired: {}
+  描述: Catalog 版本已停用。
+- 错误名: CATALOG_DDL_TIMEOUT
+  错误码: NC304
+  错误消息: Catalog ddl is executing in background
+  描述: Catalog DDL 操作在后台执行。
+- 错误名: CATALOG_DDL_ILLEGAL
+  错误码: NC305
+  错误消息: Illegal DDL: {}
+  描述: 非法 DDL 操作。
+- 错误名: CATALOG_REORG_FAILED
+  错误码: NC306
+  错误消息: Reorg failed
+  描述: 重组失败。
+- 错误名: CATALOG_MAXIMUM_PENDING_DDL_EXCEEDED
+  错误码: NC307
+  错误消息: Pending ddl exceeds maximum threshold
+  描述: 待处理的 DDL 操作超过最大阈值。
+- 错误名: CATALOG_JOB_PENDING
+  错误码: NC308
+  错误消息: Catalog job not completed, job id is {}
+  描述: Catalog 中存在未完成的作业。
+- 错误名: CATALOG_NOT_READY
+  错误码: NC309
+  错误消息: Catalog is not ready
+  描述: Catalog 尚未准备就绪。
+- 错误名: CATALOG_REORG_INTERRUPT
+  错误码: NC310
+  错误消息: Reorg interrupt
+  描述: 重组中断。
+- 错误名: RPC_FAILED
+  错误码: NN001
+  错误消息: Internal Server Error
+  描述: RPC 调用失败。
+- 错误名: RPC_REQUEST_INVALID
+  错误码: NN002
+  错误消息: Internal Server Error
+  描述: RPC 请求无效。
+- 错误名: RPC_REQUEST_HANDLER_NOT_FOUND
+  错误码: NN003
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: RPC_RETRY_FAILED
+  错误码: NN004
+  错误消息: Internal Server Error
+  描述: RPC 重试失败。
+- 错误名: RPC_DESERIALIZE_ERROR
+  错误码: NN005
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: RPC_DESERIALIZE_OBJECT_TYPE_ERROR
+  错误码: NN006
+  错误消息: Internal Server Error
+  描述: RPC 反序列化错误，未知对象类型。
+- 错误名: RPC_STORAGE_SERVICE_NOT_FOUND
+  错误码: NN007
+  错误消息: Internal Server Error
+  描述: Storage 服务未找到。
+- 错误名: INVALID_PARAMETER
+  错误码: NI000
+  错误消息: Invalid parameter: {}
+  描述: 无效参数。
+- 错误名: META_CLUSTER_ALREADY_EXISTS
+  错误码: NI001
+  错误消息: Cluster already exists: {}
+  描述: 集群已存在。
+- 错误名: META_CLUSTER_NOT_FOUND
+  错误码: NI002
+  错误消息: Cluster not found: {}
+  描述: 集群未找到。
+- 错误名: META_CLUSTER_NAME_INVALID
+  错误码: NI003
+  错误消息: Cluster name is invalid
+  描述: 集群名称无效。
+- 错误名: META_CLUSTER_IS_NOT_EMPTY
+  错误码: NI004
+  错误消息: Cluster is not empty: `{}`
+  描述: 集群不为空。
+- 错误名: META_SERVICE_HOST_NOT_ADDED
+  错误码: NI101
+  错误消息: No matched service from host: {}
+  描述: 未在主机中找到匹配的服务。
+- 错误名: META_SERVICE_REPORT_NOT_MATCH_ADDED
+  错误码: NI102
+  错误消息: Report service not match added
+  描述: 报告的服务与添加的服务不匹配。
+- 错误名: META_SERVICE_ALREADY_EXISTS
+  错误码: NI103
+  错误消息: Service for host already exists
+  描述: 主机已存在指定服务。
+- 错误名: META_HOST_ALREADY_EXISTS
+  错误码: NI104
+  错误消息: Host already exists: {}
+  描述: 主机已存在。
+- 错误名: META_HOST_NOT_FOUND
+  错误码: NI105
+  错误消息: Host not found: {}
+  描述: 主机未找到。
+- 错误名: META_AGENT_ALREADY_EXISTS
+  错误码: NI106
+  错误消息: Agent already exists: {}
+  描述: agent 已存在。
+- 错误名: META_SERVICE_STATIC_PORT_ALREADY_EXISTS
+  错误码: NI107
+  错误消息: Service with static port already exists
+  描述: 具备指定静态端口的服务已存在。
+- 错误名: META_SERVICE_DYNAMIC_PORT_ALREADY_EXISTS
+  错误码: NI108
+  错误消息: Service with dynamic port already exists
+  描述: 具备指定动态端口的服务已存在。
+- 错误名: META_FAILED_ADD_SERVICE
+  错误码: NI109
+  错误消息: Failed to add service: {}
+  描述: 添加服务失败。
+- 错误名: META_SERVICE_NOT_ADDED
+  错误码: NI110
+  错误消息: Service not added
+  描述: 服务未添加。
+- 错误名: META_SERVICE_IN_USE
+  错误码: NI111
+  错误消息: Service is in part
+  描述: 服务在使用中。
+- 错误名: META_SERVICE_NOT_IN_CLUSTER
+  错误码: NI112
+  错误消息: Service not in cluster
+  描述: 服务不在集群中。
+- 错误名: META_ACTIVE_SERVICE_NOT_ENOUGH
+  错误码: NI113
+  错误消息: Active service not enough
+  描述: 活跃的服务数量不足。
+- 错误名: META_INSUFFICIENT_SERVICE
+  错误码: NI114
+  错误消息: Meta insufficient service
+  描述: 服务数量不足。
+- 错误名: META_PART_CONFIG_INVALID
+  错误码: NI201
+  错误消息: Can't find proper replica number under given parts per service config
+  描述: 基于给定的 max_parts_per_service 配置找不到足够的副本数量。
+- 错误名: META_NOT_ENOUGH_LOCATION
+  错误码: NI202
+  错误消息: No enough services({}) to hold replica({})
+  描述: 服务数量不足以容纳指定数量的副本。
+- 错误名: META_PART_ALREADY_EXIST
+  错误码: NI203
+  错误消息: Meta Part {} already exist
+  描述: 指定分片已存在。
+- 错误名: META_PART_LEADER_NOT_ENOUGH
+  错误码: NI204
+  错误消息: Meta Part with leader not enough
+  描述: 分片 Leader 数量不足。
+- 错误名: META_PART_NOT_ENOUGH
+  错误码: NI205
+  错误消息: Meta Part not enough
+  描述: 分片数量不足。
+- 错误名: META_BALANCE_PART_RUNNING
+  错误码: NI206
+  错误消息: Meta balance part is running
+  描述: 分片平衡操作正在运行。
+- 错误名: META_BALANCE_LEADER_RUNNING
+  错误码: NI207
+  错误消息: Meta balance leader is running
+  描述: 分片 Leader 平衡操作正在运行。
+- 错误名: META_NO_PART
+  错误码: NI208
+  错误消息: There is no part, may be need init
+  描述: 未找到分片，可能需要初始化。
+- 错误名: STORAGE_EXECUTOR_PARAMETER_INVALID
+  错误码: NI301
+  错误消息: Storage executor invalid parameter
+  描述: Storage 服务执行器参数无效。
+- 错误名: STORAGE_EXECUTOR_PARAMETER_TYPE_INVALID
+  错误码: NI302
+  错误消息: {} should be int64, but got: `{}`, value: `{}`
+  描述: Storage 服务执行器参数的类型无效。
+- 错误名: CONFIGURATION_INVALID
+  错误码: NI401
+  错误消息: Configuration invalid: `{}`
+  描述: 配置无效。
+- 错误名: CONFIGURATION_ITEM_NOT_FOUND
+  错误码: NI402
+  错误消息: Configuration item `{}` not found
+  描述: 指定配置项未找到。
+- 错误名: CONFIGURATION_ITEM_TYPE_INVALID
+  错误码: NI403
+  错误消息: Invalid config value type `{}` for key `{}`, expect `{}`
+  描述: 指定配置项的值类型无效。
+- 错误名: CONFIGURATION_ITEM_RANGE_INVALID
+  错误码: NI404
+  错误消息: Invalid config value `{}`, valid range: `{}` for key `{}`
+  描述: 指定配置项的值超出范围。
+- 错误名: CONFIGURATION_INFO_FILE_FORMAT_ILLEGAL
+  错误码: NI405
+  错误消息: Info file format illegal
+  描述: 配置文件格式无效。
+- 错误名: CONFIGURATION_INVALID_CONFIG_KEY
+  错误码: NI406
+  错误消息: Invalid config key `{}`
+  描述: 配置键无效。
+- 错误名: CONFIGURATION_INVALID_AUDIT_CATEGORY
+  错误码: NI407
+  错误消息: Invalid audit log category `{}`
+  描述: 配置中的审计日志类别无效。
+- 错误名: CONFIGURATION_MISSING_CONFIG_KEY
+  错误码: NI408
+  错误消息: Missing `{}` configuration
+  描述: 指定配置缺失。
+- 错误名: CONFIGURATION_ILLEGAL_FORMAT
+  错误码: NI409
+  错误消息: Configuration illegal format: {}
+  描述: 配置格式无效。
+- 错误名: GRAPH_COMPUTE_ERROR
+  错误码: NG000
+  错误消息: Graph compute error: {}
+  描述: 图计算错误。
+- 错误名: EDGE_PROPERTY_NOT_FOUND
+  错误码: NG001
+  错误消息: Algorithm `{}`, edge property not found: {}
+  描述: 边属性未找到。
+- 错误名: INVALID_EDGE_DISTANCE
+  错误码: NG002
+  错误消息: Algorithm `{}`, invalid edge distance: {}
+  描述: 边距离无效。
+- 错误名: PLUGIN_ERROR
+  错误码: NP000
+  错误消息: Plugin error: {}
+  描述: 插件错误。
+- 错误名: PLUGIN_INVALID_TYPE
+  错误码: NP001
+  错误消息: Invalid plugin type `{}` for {}
+  描述: 插件类型无效。
+- 错误名: PLUGIN_MULTIPLE_PLUGIN
+  错误码: NP002
+  错误消息: Multiple plugins found, {} found for {}
+  描述: 找到多个插件。
+- 错误名: PLUGIN_CONFIG_NOT_FOUND
+  错误码: NP003
+  错误消息: Plugin `{}`, configuration not found: `{}`
+  描述: 未找到插件配置。
+- 错误名: PLUGIN_CONFIG_PARSE_ERROR
+  错误码: NP004
+  错误消息: Plugin `{}`, parse configuration error: `{}`
+  描述: 解析插件配置错误。
+- 错误名: PLUGIN_INIT_ERROR
+  错误码: NP005
+  错误消息: Plugin `{}`, init error: `{}`
+  描述: 初始化插件错误。
+- 错误名: PLUGIN_DESTROY_ERROR
+  错误码: NP006
+  错误消息: Plugin `{}`, destroy error: `{}`
+  描述: 销毁插件错误。
+- 错误名: PLUGIN_UNSUPPORT_AUTH_TYPE
+  错误码: NP007
+  错误消息: Unsupported authentication plugin: {}
+  描述: 不支持的认证插件。
+- 错误名: REPORT_PLUGIN_STATUS_FAILED
+  错误码: NP008
+  错误消息: The service `{}` failed to report plugin status: {}
+  描述: 服务上报插件状态失败。
+- 错误名: GET_PLUGIN_STATUS_FAILED
+  错误码: NP009
+  错误消息: Get plugin status failed: {}
+  描述: 获取插件状态失败。
+- 错误名: PROCEDURE_ERROR
+  错误码: NP101
+  错误消息: Procedure error: {}
+  描述: 过程错误。
+- 错误名: PROCEDURE_INVALID_ARGUMENT
+  错误码: NP102
+  错误消息: Invalid argument for procedure `{}`: {}
+  描述: 过程入参无效。
+- 错误名: PROCEDURE_NOT_FOUND
+  错误码: NP103
+  错误消息: Procedure `{}` not found
+  描述: 过程未找到。
+- 错误名: PROCEDURE_INVALID_ARGUMENT_ENCODE
+  错误码: NP104
+  错误消息: Invalid encoding of `{}` argument: `{}`, expect encoding:`{}`, error: {}
+  描述: 过程参数编码无效。
+- 错误名: PROCEDURE_YIELD_COLUMN_ERROR
+  错误码: NP105
+  错误消息: The yield column `{}` of procedure `{}` conflicts with previous variables. Please use a unique alias to distinguish them
+  描述: 过程的 yield 列与之前的变量冲突。请使用唯一别名以区分它们。
+- 错误名: PROCEDURE_UNKNOWN_YIELD_COLUMN
+  错误码: NP106
+  错误消息: Unknown yield column `{}` for procedure `{}`
+  描述: 过程的 yield 列未知。
+- 错误名: UDF_ERROR
+  错误码: NP201
+  错误消息: UDF error: {}
+  描述: UDF 错误。
+- 错误名: MODULE_ERROR
+  错误码: NP301
+  错误消息: Module error: {}
+  描述: 模块错误。
+- 错误名: MODULE_ALREADY_LOADED
+  错误码: NP302
+  错误消息: Module already loaded: `{}`
+  描述: 模块已加载。
+- 错误名: MODULE_NOT_FOUND
+  错误码: NP303
+  错误消息: Module not found: `{}`
+  描述: 模块未找到。
+- 错误名: MODULE_BEING_USED
+  错误码: NP304
+  错误消息: Module is being used: `{}`
+  描述: 模块正在使用中。
+- 错误名: MODULE_INVALID_PROC_NAME
+  错误码: NP305
+  错误消息: Invalid procedure name: `{}`
+  描述: 模块的过程名称无效。
+- 错误名: MODULE_INVALID_FUNC_NAME
+  错误码: NP306
+  错误消息: Invalid function name: `{}`
+  描述: 模块的函数名称无效。
+- 错误名: MODULE_INVALID_PLUGIN_NAME
+  错误码: NP307
+  错误消息: Invalid plugin name: `{}`
+  描述: 模块的插件名称无效。
+- 错误名: MODULE_INVALID_PLUGIN_API_VERSION
+  错误码: NP308
+  错误消息: Invalid plugin api version: `{}`
+  描述: 模块的插件 API 版本无效。
+- 错误名: MODULE_INVALID_NULL_PLUGIN
+  错误码: NP309
+  错误消息: Invalid null plugin
+  描述: 空插件无效。
+- 错误名: MODULE_DLOPEN_ERROR
+  错误码: NP310
+  错误消息: Module dlopen failed: {}
+  描述: 打开模块的动态链接库失败。
+- 错误名: MODULE_CANNOT_UNLOAD
+  错误码: NP311
+  错误消息: The Module `{}` can not be unloaded or reloaded
+  描述: 无法卸载或重新加载模块。
+- 错误名: MODULE_INVALID_REGISTER
+  错误码: NP312
+  错误消息: Invalid register `{}` for module: `{}`
+  描述: 模块的注册无效。
+- 错误名: AUTH_INVALID_PASSWORD
+  错误码: NH001
+  错误消息: The password must be at least 8 characters long and should include at least one digit, one lowercase letter, and one uppercase letter
+  描述: 密码无效。
+- 错误名: AUTH_USER_EXIST
+  错误码: NH002
+  错误消息: User `{}` exist
+  描述: 用户已存在。
+- 错误名: AUTH_USER_NOT_EXIST
+  错误码: NH003
+  错误消息: User `{}` not exist
+  描述: 用户不存在。
+- 错误名: AUTH_USER_DISABLED
+  错误码: NH004
+  错误消息: User `{}` disabled
+  描述: 用户已禁用。
+- 错误名: AUTH_USER_LOCKED
+  错误码: NH005
+  错误消息: Login blocked for {} seconds due to too many failed attempts
+  描述: 用户因登录失败次数过多而被锁定。
+- 错误名: AUTH_INVALID_USERNAME
+  错误码: NH006
+  错误消息: The username should be between 4 and 32 characters in length and can only include letters, numbers, and underscores
+  描述: 用户名无效。
+- 错误名: AUTH_INVALID_USERNAME_OR_PASSWORD
+  错误码: NH007
+  错误消息: Authenticate error: invalid username or password
+  描述: 用户名或密码无效。
+- 错误名: AUTH_CANNOT_DISABLE_SYSTEM_USER
+  错误码: NH008
+  错误消息: Authenticate error: cannot disable system user
+  描述: 系统用户无法被禁用。
+- 错误名: AUTH_NEED_CHANGE_PASSWORD
+  错误码: NH009
+  错误消息: Authenticate error: need to change password
+  描述: 必须更改密码。
+- 错误名: AUTH_DROP_ROOT_ERROR
+  错误码: NH010
+  错误消息: Authenticate error: cannot drop system user `root`
+  描述: 带有角色`root`的用户无法被删除。
+- 错误名: AUTH_INVALID_AUTH_INFO
+  错误码: NH101
+  错误消息: Authenticate error: invalid config {}
+  描述: 认证配置无效。
+- 错误名: AUTH_INVALID_TOKEN
+  错误码: NH201
+  错误消息: Authenticate error: invalid token
+  描述: 认证令牌无效。
+- 错误名: AUTH_INIT_ERROR
+  错误码: NH301
+  错误消息: AuthenticatorManager init error: `{}`
+  描述: 初始化认证管理器错误。
+- 错误名: AUTHORIZE_ERROR
+  错误码: NB000
+  错误消息: Authorization error: `{}`
+  描述: 授权错误。
+- 错误名: AUTHORIZE_INVALID_ROLENAME
+  错误码: NB001
+  错误消息: Authorization error: The role name should be between 4 and 32 characters in length and can only include letters, numbers, and underscores
+  描述: 角色名称无效。
+- 错误名: AUTHORIZE_INVALID_OBJECT
+  错误码: NB002
+  错误消息: Authorization error: Invalid object name `{}`
+  描述: 对象名称无效。
+- 错误名: AUTHORIZE_ROLE_EXIST
+  错误码: NB003
+  错误消息: Role `{}` exist
+  描述: 角色已存在。
+- 错误名: AUTHORIZE_ROLE_NOT_EXIST
+  错误码: NB004
+  错误消息: Role `{}` not exist
+  描述: 角色不存在。
+- 错误名: AUTHORIZE_USER_NOT_EXIST
+  错误码: NB005
+  错误消息: User `{}` not exist in current cluster
+  描述: 用户在当前集群不存在。
+- 错误名: AUTHORIZE_USER_EXIST
+  错误码: NB006
+  错误消息: User `{}` exist in current cluster
+  描述: 用户在当前集群已存在。
+- 错误名: AUTHORIZE_INSUFFICIENT_PRIVILEGE
+  错误码: NB101
+  错误消息: Insufficient privilege: `{}`
+  描述: 权限不足。
+- 错误名: AUTHORIZE_CONSTRAINT
+  错误码: NB102
+  错误消息: Invalid action `{}` on `{}`
+  描述: 对指定对象执行的操作无效。
+- 错误名: AUTHORIZE_TOO_MANY_ROLES
+  错误码: NB103
+  错误消息: Exceeded maximum number of roles for user: {}
+  描述: 用户的角色数量超过最大限制。
+- 错误名: AUTHORIZE_TOO_LONG_COMMENT
+  错误码: NB104
+  错误消息: Exceeded maximum length of comment for role: {}
+  描述: 角色的注释长度超过最大限制。
+- 错误名: AUTHORIZE_SHOW_ROLE_ERROR
+  错误码: NB105
+  错误消息: Only ADMIN or User {} can execute SHOW ROLES FOR USER {}
+  描述: 用户无权执行 SHOW ROLES FOR USER 语句。
+- 错误名: AUTHORIZE_SHOW_PRIVILEGE_ERROR
+  错误码: NB106
+  错误消息: Only ADMIN or User {} can execute SHOW PRIVILEGES FOR USER {}
+  描述: 用户无权执行 SHOW PRIVILEGES FOR USER 语句。
+- 错误名: AUTHORIZE_ALTER_OWNER_ERROR
+  错误码: NB107
+  错误消息: Only ADMIN or object's owner can execute ALTER OWNER
+  描述: 用户无权执行 ALTER OWNER 语句。
+- 错误名: SESSION_ERROR
+  错误码: NE000
+  错误消息: Session error: {}
+  描述: 发生了一个会话错误。
+- 错误名: CREATE_SESSION_FAILED
+  错误码: NE001
+  错误消息: Failed to create session, {}
+  描述: 创建会话失败。
+- 错误名: UNSUPPORTED_PROTOCOL_VERSION
+  错误码: NE002
+  错误消息: Your client protocol version({}) is unsupported. Please use one of the following supported protocol version clients to access: {}.
+  描述: 协议版本不受支持。
+- 错误名: CONFIG_ERROR
+  错误码: NV000
+  错误消息: Config error: {}
+  描述: 发生了一个配置错误。
+- 错误名: CONFIG_NOT_EXIST
+  错误码: NV001
+  错误消息: Config `{}` not exist
+  描述: 配置不存在。
+- 错误名: CONFIG_TYPE_ERROR
+  错误码: NV002
+  错误消息: Config `{}` required type {}, but got {}
+  描述: 配置类型不正确。
+- 错误名: CONFIG_DATA_ERROR
+  错误码: NV003
+  错误消息: Config data error: {}
+  描述: 配置数据中存在错误。
+- 错误名: CONFIG_SET_SCOPE_ERROR
+  错误码: NV004
+  错误消息: Config `{}` cannot be set by {}
+  描述: 配置不能由指定实体设置。
+- 错误名: CONFIG_DEPRECATED
+  错误码: NV005
+  错误消息: Config `{}` has been deprecated
+  描述: 配置已被弃用。
+- 错误名: CONFIG_IMMUTABLE
+  错误码: NV006
+  错误消息: Config `{}` is immutable
+  描述: 配置是不可变的。
+- 错误名: ANALYTIC_ERROR
+  错误码: AN000
+  错误消息: Analytic error: {}
+  描述: An analytic error occurred.
+- 错误名: ANALYTIC_COMMUNICATION_ERROR
+  错误码: AN001
+  错误消息: Analytic communication error: {}
+  描述: There was a communication error in analytics.
+- 错误名: ANALYTIC_INVALID_PARTITION_METHOD
+  错误码: AN101
+  错误消息: Analytic error, invalid partition method: {}
+  描述: The partition method used in analytics is invalid.
+- 错误名: ANALYTIC_TASK_ERROR
+  错误码: AN102
+  错误消息: Analytic error, task on {} failed, error:{}
+  描述: The analytic task failed on a specific node.
+- 错误名: ANALYTIC_LOG_EXCEED_LIMIT
+  错误码: AN103
+  错误消息: Analytic error, log exceed max size: {}
+  描述: The analytic log exceeded the maximum size limit.
+- 错误名: ANALYTIC_WORKER_EXIST
+  错误码: AN201
+  错误消息: Analytic error, worker {} already exist
+  描述: The analytic worker already exists.
+- 错误名: ANALYTIC_WORKER_NOT_FOUND
+  错误码: AN202
+  错误消息: Analytic error, worker {} not found
+  描述: The analytic worker was not found.
+- 错误名: ANALYTIC_READER_ERROR
+  错误码: AN203
+  错误消息: Analytic reader error: {}
+  描述: There was an error with the analytic reader.
+- 错误名: ANALYTIC_ACCUMULATOR_NOT_FOUND
+  错误码: AN301
+  错误消息: Analytic error, accum {} not found
+  描述: The specified accumulator was not found.
+- 错误名: ANALYTIC_ACCUMULATOR_EXIST
+  错误码: AN302
+  错误消息: Analytic error, accum {} already exist
+  描述: The specified accumulator already exists.
+- 错误名: META_NOT_SUPPORTED
+  错误码: NM001
+  错误消息: Internal Server Error
+  描述: 操作类型不受支持。
+- 错误名: META_NOT_INIT
+  错误码: NM002
+  错误消息: Internal Server Error
+  描述: 未初始化 Meta 服务。
+- 错误名: META_RESP_NOT_SET
+  错误码: NM003
+  错误消息: Internal Server Error
+  描述: The response was not set in the metadata.
+- 错误名: META_WRITE_KV_FAILED
+  错误码: NM004
+  错误消息: Internal Server Error
+  描述: Writing key-value data to the metadata failed.
+- 错误名: META_SERVICE_NOT_FOUND
+  错误码: NM005
+  错误消息: Internal Server Error
+  描述: 未找到 Meta 服务。
+- 错误名: META_SERVICE_ID_ERROR
+  错误码: NM006
+  错误消息: Internal Server Error
+  描述: Meta 服务 ID 获取失败。
+- 错误名: META_GET_KV_PREFIX_FAILED
+  错误码: NM007
+  错误消息: Internal Server Error
+  描述: 获取键值前缀失败。
+- 错误名: META_PUT_SERVICE_ADDRESS_FAILED
+  错误码: NM008
+  错误消息: Internal Server Error
+  描述: 放置服务地址失败。
+- 错误名: META_LIST_SERVICE_FAILED
+  错误码: NM009
+  错误消息: Internal Server Error
+  描述: 列出服务失败。
+- 错误名: META_CANNOT_FIND_SERVICE
+  错误码: NM010
+  错误消息: Internal Server Error
+  描述: 无法找到服务。
+- 错误名: GET_META_CLIENT_FAILED
+  错误码: NM011
+  错误消息: Internal Server Error
+  描述: 获取 Meta 客户端失败。
+- 错误名: META_UNSUPPORTED_SERVICE
+  错误码: NM012
+  错误消息: Internal Server Error
+  描述: 服务类型不受支持。
+- 错误名: META_SERVICE_FAIL_TO_ALLOC_ID
+  错误码: NM013
+  错误消息: Internal Server Error
+  描述: 分配服务 ID 失败。
+- 错误名: STORAGE_CODEC_PROPERTY_NOT_NULLABLE
+  错误码: NO001
+  错误消息: Property not nullable: {}
+  描述: 属性在存储编解码器中不能为`NULL`。
+- 错误名: STORAGE_CODEC_PROPERTY_NOT_SET
+  错误码: NO002
+  错误消息: Property not set: {}
+  描述: 属性在存储编解码器中未设置。
+- 错误名: STORAGE_CODEC_PROPERTY_NOT_FOUND
+  错误码: NO003
+  错误消息: Property not found: {}
+  描述: 属性在存储编解码器中未找到。
+- 错误名: STORAGE_CODEC_PROPERTY_TYPE_NOT_MATCH
+  错误码: NO004
+  错误消息: Property type not match, property: `{}`:`{}`, got: `{}`
+  描述: 属性类型在存储编解码器中不匹配。
+- 错误名: STORAGE_CODEC_PROPERTY_OUT_OF_RANGE
+  错误码: NO005
+  错误消息: Property out of range, property: `{}`:`{}` got: `{}`
+  描述: 属性在存储编解码器中超出了范围。
+- 错误名: STORAGE_CODEC_PROPERTY_UNABLE_TO_ENCODE
+  错误码: NO006
+  错误消息: Property type unable to encode: `{}`
+  描述: 无法在存储编解码器中对属性进行编码。
+- 错误名: STORAGE_CODEC_INDEX_ILLEGAL
+  错误码: NO007
+  错误消息: Index corruption: index illegal
+  描述: 索引在存储编解码器中非法。
+- 错误名: STORAGE_CODEC_INDEX_PROPERTIES_ILLEGAL
+  错误码: NO008
+  错误消息: Index property type illegal
+  描述: 索引属性在存储编解码器中非法。
+- 错误名: STORAGE_CODEC_INDEX_PROPERTY_NOT_REQUIRED
+  错误码: NO009
+  错误消息: Index property not required
+  描述: 索引属性在存储编解码器中不是必需的。
+- 错误名: STORAGE_CODEC_DECODE_FAILED
+  错误码: NO010
+  错误消息: Storage codec decode failed: {}
+  描述: 存储编码解码失败。
+- 错误名: STORAGE_CODEC_PROPERTY_LIST_NEST_TYPE_NOT_FOUND
+  错误码: NO011
+  错误消息: Property list nested property not found: {}
+  描述: 列表嵌套类型属性在存储编解码器中未找到。
+- 错误名: STORAGE_CODEC_INDEX_CORRUPTION_NO_TERMINATOR
+  错误码: NO012
+  错误消息: Index corruption: no terminator found
+  描述: 索引损坏且存储编码中没有终止符。
+- 错误名: STORAGE_CODEC_INDEX_PROPERTIES_ILLEGAL_PROPERTY_NOT_EXIST
+  错误码: NO013
+  错误消息: The required property does not exist in index: {}
+  描述: 必需的属性在索引中不存在。
+- 错误名: STORAGE_CODEC_INDEX_ILLEGAL_NOT_RESERVED_PROPERTY
+  错误码: NO014
+  错误消息: `{}` is not a reserved properties
+  描述: 在存储编码未保留该属性。
+- 错误名: STORAGE_CODEC_WRITE_VECTOR_FAILED
+  错误码: NO015
+  错误消息: Storage codec write vector failed: {}
+  描述: null
+- 错误名: GET_ALL_PART_FAILED
+  错误码: NO101
+  错误消息: Get all partitions failed
+  描述: 获取所有分片失败。
+- 错误名: GET_PART_ROUTER_FAILED
+  错误码: NO102
+  错误消息: Get partition router failed
+  描述: 获取分片路由失败。
+- 错误名: GET_ALL_LEADER_FAILED
+  错误码: NO103
+  错误消息: Get all leaders failed
+  描述: 获取所有的分片 Leader 失败。
+- 错误名: RAFT_INVALID_PEER
+  错误码: NA001
+  错误消息: Internal Server Error
+  描述: 副本在 Raft 操作中无效。
+- 错误名: RAFT_RPC_EXCEPTION
+  错误码: NA002
+  错误消息: Internal Server Error
+  描述: An exception occurred during the Raft RPC.
+- 错误名: RAFT_TIMEOUT
+  错误码: NA003
+  错误消息: Internal Server Error
+  描述: The Raft operation timed out.
+- 错误名: RAFT_CATCHUP
+  错误码: NA004
+  错误消息: Internal Server Error
+  描述: The Raft catch-up operation failed.
+- 错误名: RAFT_LEADER_REMOVED
+  错误码: NA005
+  错误消息: Internal Server Error
+  描述: The leader was removed in the Raft operation.
+- 错误名: RAFT_SET_PEER
+  错误码: NA006
+  错误消息: Internal Server Error
+  描述: Setting the peer in the Raft operation failed.
+- 错误名: RAFT_NODE_STOP
+  错误码: NA007
+  错误消息: Internal Server Error
+  描述: The Raft node has stopped.
+- 错误名: RAFT_HIGHER_TERM_REQUEST
+  错误码: NA008
+  错误消息: Internal Server Error
+  描述: A higher term request was received in the Raft operation.
+- 错误名: RAFT_HIGHER_TERM_RESPONSE
+  错误码: NA009
+  错误消息: Internal Server Error
+  描述: A higher term response was received in the Raft operation.
+- 错误名: RAFT_BAD_NODE
+  错误码: NA010
+  错误消息: Internal Server Error
+  描述: The node was bad in the Raft operation.
+- 错误名: RAFT_VOTE_FOR_CANDIDATE
+  错误码: NA011
+  错误消息: Internal Server Error
+  描述: Voting for the candidate in the Raft operation failed.
+- 错误名: RAFT_NEW_LEADER
+  错误码: NA012
+  错误消息: Internal Server Error
+  描述: A new leader was elected in the Raft operation.
+- 错误名: RAFT_LEADER_CONFLICT
+  错误码: NA013
+  错误消息: Internal Server Error
+  描述: 在 Raft 操作中有 Leader 冲突。
+- 错误名: RAFT_TRANSFER_LEADER
+  错误码: NA014
+  错误消息: Internal Server Error
+  描述: Transferring the leader in the Raft operation failed.
+- 错误名: RAFT_STOP
+  错误码: NA015
+  错误消息: Internal Server Error
+  描述: The Raft operation stopped.
+- 错误名: RAFT_BUSY
+  错误码: NA016
+  错误消息: Internal Server Error
+  描述: Raft 操作繁忙。
+- 错误名: RAFT_INVALID
+  错误码: NA017
+  错误消息: Internal Server Error
+  描述: The Raft operation was invalid.
+- 错误名: RAFT_FAILED
+  错误码: NA018
+  错误消息: Internal Server Error
+  描述: The Raft operation failed.
+- 错误名: RAFT_SNAPSHOT_FAILED
+  错误码: NA019
+  错误消息: Internal Server Error
+  描述: The Raft snapshot operation failed.
+- 错误名: EXPR_EVAL_FAILED
+  错误码: 22N02
+  错误消息: Failed to evaluate expression: `{}`, exception: {}
+  描述: null
+- 错误名: RUNTIME_ERROR
+  错误码: NR000
+  错误消息: An error occurred at runtime: {}
+  描述: 发生了运行时错误。
+- 错误名: EXPR_ERROR
+  错误码: NR001
+  错误消息: Expression error: {}
+  描述: 表达式错误。
+- 错误名: UNDEFINED_FUNCTION
+  错误码: NR002
+  错误消息: Undefined function: `{}`
+  描述: 函数未定义。
+- 错误名: INVALID_FUNCTION_ARGUMENT
+  错误码: NR003
+  错误消息: Invalid function argument: {}
+  描述: 函数入参无效。
+- 错误名: INVALID_LOGICAL_EXPRESSION
+  错误码: NR004
+  错误消息: Invalid logical expression, only support bool type, expression `{}`, type: `{}`
+  描述: 逻辑表达式无效，只支持布尔类型。
+- 错误名: EXPR_COMPILE_FAILED
+  错误码: NR005
+  错误消息: Failed to compile expression, expr: `{}`, error: {}
+  描述: 表达式编译失败。
+- 错误名: RESOLVE_FUNCTION_FAILED
+  错误码: NR006
+  错误消息: Resolve function failed: `{}`
+  描述: 解析函数失败。
+- 错误名: EXPR_TYPE_INFER_FAILED
+  错误码: NR007
+  错误消息: Expression type infer failed, expression: `{}`
+  描述: 推断表达式类型失败。
+- 错误名: INVALID_CAST_EXPR
+  错误码: NR008
+  错误消息: Invalid cast expression: `{}`, can not cast from `{}` to `{}`
+  描述: 类型转换表达式无效。
+- 错误名: INVALID_CONST_EXPR
+  错误码: NR009
+  错误消息: Invalid const expression: `{}`
+  描述: 常量表达式无效。
+- 错误名: INVALID_CONSTRUCT_PATH_EXPR_INPUT
+  错误码: NR010
+  错误消息: Path constructor only accepts nodes, edges, or lists of nodes or edges
+  描述: 路径构造器只接受点、边或点/边的列表。
+- 错误名: INVALID_CASE_EXPR_WHEN_INPUT
+  错误码: NR011
+  错误消息: The when operand of case expression should be type of boolean, but got {}: {}
+  描述: CASE 表达式的 WHEN 子句输入无效。
+- 错误名: INVALID_EXPRESSION_TYPE
+  错误码: NR012
+  错误消息: Invalid expression type: `{}`, expect: `{}`
+  描述: 表达式类型无效。
+- 错误名: INVALID_CONSTRUCT_LIST_EXPR_INPUT
+  错误码: NR013
+  错误消息: All elements of list constructor must have compatible types
+  描述: 列表构造器的所有元素必须具有兼容的类型。
+- 错误名: INVALID_CASE_EXPR_THEN_INPUT
+  错误码: NR014
+  错误消息: The then/else operands of case expression should have compatible types, but got: {}
+  描述: CASE 表达式的 THEN 子句输入无效。
+- 错误名: INVALID_CONSTRUCT_RECORD_EXPR_INPUT
+  错误码: NR015
+  错误消息: Record could only contain unique field names
+  描述: 记录只能包含唯一的字段名。
+- 错误名: EXCEED_MAX_STRING_BYTES
+  错误码: NR016
+  错误消息: String should be no more than {} bytes, but got {} bytes
+  描述: 字符串长度超过了最大允许字节数。
+- 错误名: EXCEED_MAX_LIST_LENGTH
+  错误码: NR017
+  错误消息: List should be no longer than {}
+  描述: 列表长度超过了最大允许长度。
+- 错误名: EXCEED_MAX_DECIMAL_DIGITS
+  错误码: NR018
+  错误消息: Decimal digits should be no more than {}, but got {}
+  描述: 小数位数超过了最大允许位数。
+- 错误名: INVALID_DECIMAL_INPUT
+  错误码: NR019
+  错误消息: Invalid decimal input: {}
+  描述: 无效的小数输入。
+- 错误名: DECIMAL_OUT_OF_RANGE
+  错误码: NR020
+  错误消息: Decimal out of range: {}
+  描述: 小数超出范围。
+- 错误名: FLOAT_OUT_OF_RANGE
+  错误码: NR021
+  错误消息: Float out of range: {}
+  描述: 浮点数超出范围。
+- 错误名: INVALID_DATA_TYPE_INPUT
+  错误码: NR022
+  错误消息: Invalid data type input: {}
+  描述: 数据类型输入无效。
+- 错误名: INVALID_LAMBDA_EXPRESSION
+  错误码: NR023
+  错误消息: Lambda expression cannot contain aggregates or subqueries
+  描述: Lambda 表达式不能包含聚合或子查询。
+- 错误名: INVALID_DECIMAL_TYPE
+  错误码: NR024
+  错误消息: Invalid decimal type: {}
+  描述: 无效的小数类型。
+- 错误名: DDL_FAILED
+  错误码: NR100
+  错误消息: DDL failed: {}
+  描述: DDL 操作失败。
+- 错误名: DROP_REFERENCED_SCHEMA
+  错误码: NR101
+  错误消息: Can not drop schema `{}` while still having graph types or graph
+  描述: 删除引用的 Schema 失败。
+- 错误名: DROP_REFERENCED_GRAPH_TYPE
+  错误码: NR102
+  错误消息: Can not drop graph type `{}` that is referenced by graph `{}`
+  描述: 删除引用的图类型失败。
+- 错误名: INVALID_SCHEMA_PATH
+  错误码: NR103
+  错误消息: Invalid schema path, it should be a canonical path
+  描述: Schema 路径无效。
+- 错误名: PROPERTY_TYPE_CONSTRAINT_VIOLATION
+  错误码: NR111
+  错误消息: Properties with the same name must have the same type. `{}.{}`: `{}`, `{}.{}`: `{}`.
+  描述: 违背属性类型约束。
+- 错误名: ELEMENT_TYPE_NAME_CONSTRAINT_VIOLATION
+  错误码: NR112
+  错误消息: Element type name `{}` cannot be defined multiple times.
+  描述: 违背元素类型名称约束。
+- 错误名: MODIFY_PROPERTY_TYPE_FAILED
+  错误码: NR113
+  错误消息: Property `{}` of element type `{}` cannot be modified from `{}` to `{}`
+  描述: 修改属性类型失败。
+- 错误名: GRAPH_PROJECTION_BASE_NOT_FOUND
+  错误码: NR121
+  错误消息: Graph projection base not found: `{}`
+  描述: 图投影的基图在 Catalog 中未找到。
+- 错误名: MEMORY_GRAPH_ALREADY_EXIST
+  错误码: NR122
+  错误消息: Memory graph already existed: `{}`
+  描述: 该图投影已经在 Catalog 中存在。
+- 错误名: MEMORY_GRAPH_NOT_FOUND
+  错误码: NR123
+  错误消息: Memory graph not found: `{}`
+  描述: 该图投影在 Catalog 中未找到。
+- 错误名: MEMORY_GRAPH_BUILD_FAILED
+  错误码: NR124
+  错误消息: Failed to build memory graph: {}
+  描述: 图投影构建失败。
+- 错误名: CREATE_PLUGIN_FAILED
+  错误码: NR131
+  错误消息: Create plugin failed: `{}`
+  描述: 加载插件失败。
+- 错误名: DROP_PLUGIN_FAILED
+  错误码: NR132
+  错误消息: Drop plugin failed: `{}`
+  描述: 删除插件失败。
+- 错误名: GET_NODE_ID_FAILED
+  错误码: NR201
+  错误消息: Get node id failed: {}
+  描述: 获取点 ID 失败。
+- 错误名: SRC_NODE_NOT_EXISTED
+  错误码: NR202
+  错误消息: Source node not existed
+  描述: 源点不存在。
+- 错误名: DST_NODE_NOT_EXISTED
+  错误码: NR203
+  错误消息: Destination node not existed
+  描述: 目标点不存在。
+- 错误名: DML_NUM_OF_PROPERTY_NOT_MATCH
+  错误码: NR204
+  错误消息: Insert number of properties of type `{}` does not match, expect: {}, got: {}
+  描述: 属性数量不匹配。
+- 错误名: PRIMARY_KEY_CONSTRAINT_VIOLATION
+  错误码: NR205
+  错误消息: Insert node failed, primary key constraint violation for node `{}`
+  描述: 违背主键约束。
+- 错误名: MULTIEDGE_KEY_CONSTRAINT_VIOLATION
+  错误码: NR206
+  错误消息: Insert edge failed, multi-edge key constraint violation for edge `{}`
+  描述: 违背多边键约束。
+- 错误名: NODE_IS_MISSING
+  错误码: NR207
+  错误消息: Insert edge failed, node `{}` is missing.
+  描述: 指定点缺失。
+- 错误名: GET_NODE_ID_FROM_PRIMARY_KEY_FAILED
+  错误码: NR208
+  错误消息: Get node id from primary key failed : in part={}, nodeType={}, primary key first={}
+  描述: 从主键获取点 ID 失败。
+- 错误名: INSERT_INFER_MORE_THAN_ONE_TYPE
+  错误码: NR209
+  错误消息: Type inference for `{}` failed, multiple types inferred: `{}`, `{}`
+  描述: 类型推断失败，推断出多个类型。
+- 错误名: ENDPOINT_NODE_TYPES_MISMATCH
+  错误码: NR210
+  错误消息: Endpoint node types of edge type `{}` mismatch
+  描述: 终点类型不匹配。
+- 错误名: INSERT_PROPERTY_NOT_FOUND
+  错误码: NR211
+  错误消息: Insert failed, property `{}` of type `{}` not found
+  描述: 插入失败，未找到指定属性。
+- 错误名: ELEMENT_NOT_IN_CURRENT_GRAPH
+  错误码: NR212
+  错误消息: `{}` of graph `{}` is not in current working graph `{}`
+  描述: 点不属于当前工作图。
+- 错误名: MULTI_GET_NODE_ID_FROM_PRIMARY_KEY_FAILED
+  错误码: NR213
+  错误消息: Get id from primary keys failed in part {}
+  描述: 从主键获取 ID 失败。
+- 错误名: SET_INVALID_TYPE
+  错误码: NR231
+  错误消息: The type of element {} updated in the set statement must be Node or Edge
+  描述: 在语句`SET`中指定了无效的类型。
+- 错误名: INVALID_DELETE_TYPE
+  错误码: NR251
+  错误消息: Invalid delete type, `{}` should be Node or Edge
+  描述: 在语句`DELETE`中指定了无效的类型。
+- 错误名: MEMORY_EXCEEDED
+  错误码: NR301
+  错误消息: Memory exceeded
+  描述: 查询超出了内存限制。
+- 错误名: QUERY_CANCELED
+  错误码: NR302
+  错误消息: Query is canceled by user
+  描述: 查询被用户或系统取消。
+- 错误名: BAD_PLAN_NODE_TYPE
+  错误码: NR303
+  错误消息: Bad plan node type
+  描述: 计划包含无效的点类型。
+- 错误名: SPLIT_PLAN_TO_STORAGE_FAILED
+  错误码: NR304
+  错误消息: Split plan to storage failed
+  描述: 将执行计划分配给存储层时失败。
+- 错误名: KILL_QUERY_FAILED
+  错误码: NR401
+  错误消息: Kill query failed: {}
+  描述: 终止指定查询失败。
+- 错误名: KILL_SESSION_FAILED
+  错误码: NR402
+  错误消息: Kill session failed: {}
+  描述: 终止指定会话失败。
+- 错误名: QUERY_ID_NOT_FOUND
+  错误码: NR403
+  错误消息: Query id not found: {}
+  描述: 未找到指定的查询 ID。
+- 错误名: QUERY_TIMEOUT
+  错误码: NR404
+  错误消息: Query was killed because timeout.
+  描述: 查询因超时而被终止。
+- 错误名: SESSION_NOT_FOUND
+  错误码: NR405
+  错误消息: Session not found: {}
+  描述: 未找到指定的会话。
+- 错误名: SESSION_IS_BUSY
+  错误码: NR406
+  错误消息: Session is busy, running query id: {}
+  描述: 会话当前忙碌，无法中断。
+- 错误名: CONNECTOR_PLUGIN_NOT_FOUND
+  错误码: NR501
+  错误消息: Connector plugin not found {}
+  描述: null
+- 错误名: VECTOR_DIMENSION_MISSMATCHED
+  错误码: NW501
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: UNSUPPORTED_VECTOR_METRIC_TYPE
+  错误码: NW502
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: UNSUPPORTED_VECTOR_DISTANCE_TYPE
+  错误码: NW503
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_CREATE_FAILED
+  错误码: NW504
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_BUILD_FAILED
+  错误码: NW505
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_ALREADY_EXIST
+  错误码: NW506
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_NOT_FOUND
+  错误码: NW507
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_ADD_FAILED
+  错误码: NW508
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_SEARCH_FAILED
+  错误码: NW509
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_WRITE_FAILED
+  错误码: NW510
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_READ_FAILED
+  错误码: NW511
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_REMOVE_FAILED
+  错误码: NW512
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_MANAGER_ADD_FAILED
+  错误码: NW513
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: ANN_INDEX_MANAGER_REMOVE_FAILED
+  错误码: NW514
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: SEMANTIC_ERROR
+  错误码: NS000
+  错误消息: Semantic error: {}
+  描述: 一般性的语义错误。
+- 错误名: UNDEFINED_VARIABLE
+  错误码: NS001
+  错误消息: Semantic error, undefined variable: `{}`
+  描述: 查询中使用的变量未定义。
+- 错误名: DUPLICATE_DEFINE_VARIABLE
+  错误码: NS002
+  错误消息: Semantic error, duplicate defined variable: `{}`
+  描述: 变量被重复定义。
+- 错误名: UNDEFINED_PARAMETER
+  错误码: NS003
+  错误消息: Semantic error, undefined parameter: `{}`
+  描述: 查询中使用的参数未定义。
+- 错误名: SEMANTIC_LINEAR_QUERY_COLUMN_SIZE_MISMATCH
+  错误码: NS004
+  错误消息: Semantic error, column size `{}` vs. `{}` mismatched for the linear query of composite query statement: `{}`
+  描述: 组合查询语句中的线性查询列大小不匹配。
+- 错误名: SEMANTIC_FILTER_CLAUSE_MUST_BE_BOOL_TYPE
+  错误码: NS005
+  错误消息: Semantic error, filter clause must be type of bool
+  描述: 过滤子句必须是布尔类型。
+- 错误名: SEMANTIC_INVALID_EXPRESSION_TYPE
+  错误码: NS006
+  错误消息: Semantic error, invalid expression type, expect `{}` but got `{}` at expression: `{}`
+  描述: 表达式的类型无效。
+- 错误名: SEMANTIC_LINEAR_QUERY_COLUMN_NAME_MISMATCH
+  错误码: NS007
+  错误消息: Semantic error, column name `{}` vs. `{}` mismatched for the linear query of composite query statement: `{}`
+  描述: 组合查询语句中的线性查询列名不匹配。
+- 错误名: SEMANTIC_INCONSISTENT_GROUP_VARIABLE_DEFINITION
+  错误码: NS008
+  错误消息: Semantic error, variable {} cannot be defined as both group variable and {}
+  描述: 变量定义不一致。
+- 错误名: SEMANTIC_GROUP_VARIABLE_REDEFINITION
+  错误码: NS009
+  错误消息: Semantic error, group variable redefinition {}
+  描述: 组变量被重新定义。
+- 错误名: SEMANTIC_LINEAR_QUERY_COLUMN_TYPE_INCOMPATIBLE
+  错误码: NS010
+  错误消息: Semantic error, column `{}` has incompatible types: {}
+  描述: 数据类型不兼容。
+- 错误名: SEMANTIC_CONFLICT_GRAPHS
+  错误码: NS011
+  错误消息: Semantic error, variable `{}` declared for different graphs: {}, {}
+  描述: null
+- 错误名: SEMANTIC_NODE_PRIMARY_KEY_PROPERTY_NUM_MISMATCH
+  错误码: NS101
+  错误消息: Semantic error, node properties mismatched primary index, expect `{}` but got `{}`
+  描述: 点的主键属性数目不匹配。
+- 错误名: SEMANTIC_NODE_PRIMARY_KEY_PROPERTY_NOT_FOUND
+  错误码: NS102
+  错误消息: Semantic error, primary index property not found: `{}`
+  描述: 未找到点的主键属性。
+- 错误名: SEMANTIC_GRAPH_PATTERN_QUANTIFIER_EXCEED_LOW_BOUND
+  错误码: NS103
+  错误消息: Semantic error, the value of upper bound of graph pattern quantifier shall be greater than 0
+  描述: 图模式量词的上限值应大于 0。
+- 错误名: SEMANTIC_GRAPH_PATTERN_QUANTIFIER_LOW_BOUND_EXCEED_UP_BOUND
+  错误码: NS104
+  错误消息: Semantic error, lower bound of graph pattern quantifier shall be less than or equal to upper bound
+  描述: 图模式量词的下限值不应超过上限值。
+- 错误名: SEMANTIC_INVALID_EDGE_PATTERN
+  错误码: NS105
+  错误消息: Semantic error, expect the path primary to be EdgePattern, but got: {}
+  描述: 边模式无效。
+- 错误名: SEMANTIC_RETURN_ALL_WITH_GROUPBY
+  错误码: NS106
+  错误消息: Semantic error, return all can't be used with user specified group bys
+  描述: `RETURN *`不能与指定的`GROUP BY`一起使用。
+- 错误名: SEMANTIC_RETURN_ALL_WITH_NO_VARS_IN_SCOPE
+  错误码: NS107
+  错误消息: RETURN * is not allowed when there are no iterated variables in scope
+  描述: 当作用域内没有定义变量时，不允许使用`RETURN *`。
+- 错误名: SEMANTIC_RETURN_ALL_WITH_EMPTY_GROUPBY
+  错误码: NS108
+  错误消息: Semantic error, return all can't be used with empty group by
+  描述: `RETURN *`不能与空的子句`GROUP BY`一起使用。
+- 错误名: SEMANTIC_RETURN_DUPLICATE_COLUMN
+  错误码: NS109
+  错误消息: Semantic error, duplicate column name in return statement: `{}`
+  描述: 子句`RETURN`中有重复的列名。
+- 错误名: SEMANTIC_INVALID_EDGE_PREDICATE
+  错误码: NS110
+  错误消息: Semantic error, The predicate can only refer to the binding variable itself `{}` in element pattern: {}
+  描述: 元素模式中的谓词无效。
+- 错误名: PATTERN_NOT_SUPPORTED
+  错误码: NS111
+  错误消息: Pattern not supported: `{}`
+  描述: 指定的模式不受支持。
+- 错误名: SEMANTIC_EMPTY_GROUPBY_MISMATCH
+  错误码: NS201
+  错误消息: Semantic error, empty group by mismatched
+  描述: `GROUP BY`子句为空且不符合查询上下文。
+- 错误名: SEMANTIC_NO_AGG_FOUND_WITH_GROUPBY
+  错误码: NS202
+  错误消息: Semantic error, no aggregates found but specified group bys
+  描述: `GROUP BY`中未发现聚合函数。
+- 错误名: SEMANTIC_GROUPBY_NO_BINDING
+  错误码: NS203
+  错误消息: Semantic error, user specified group bys must be binding variable: `{}`
+  描述: `GROUP BY`中未发现绑定变量。
+- 错误名: SEMANTIC_GROUPBY_CONTAIN_AGG_EXPR
+  错误码: NS204
+  错误消息: Semantic error, group by item `{}` can't contain aggregate expressions: `{}`
+  描述: `GROUP BY`包含聚合表达式。
+- 错误名: SEMANTIC_GROUPBY_MISMATCH
+  错误码: NS205
+  错误消息: Semantic error, group bys mismatched
+  描述: `GROUP BY`子句不符合查询上下文。
+- 错误名: SEMANTIC_IMPLICIT_AGG_IN_RETURN
+  错误码: NS206
+  错误消息: Semantic error, implicit aggregation is not allowed in return statement
+  描述: 子句`RETURN`中存在隐式聚合。
+- 错误名: SEMANTIC_VAR_PROP_SETITEM_ERROR
+  错误码: NS207
+  错误消息: Variable and property name between any two SetPropertyItem should not be the same
+  描述: 变量设置项属性中的错误。
+- 错误名: SEMANTIC_ASSIGN_EXPR_TYPE_ERROR
+  错误码: NS208
+  错误消息: The type of `{}({})` cannot be assigned to `{}({})`
+  描述: 赋值表达式中的类型错误。
+- 错误名: SEMANTIC_CURRENT_WORKING_GRAPH_NOT_FOUND
+  错误码: NS209
+  错误消息: Current working graph not found
+  描述: 当前工作图未找到。
+- 错误名: INVALID_LABEL_EXPR_INPUT
+  错误码: NS210
+  错误消息: Invalid label expression input: `{}`, expect NODE or EDGE type but got `{}`
+  描述: 标签表达式输入无效。
+- 错误名: INVALID_TYPE_EXPR_INPUT
+  错误码: NS211
+  错误消息: Invalid type expression input: `{}`, expect NODE or EDGE type but got `{}`
+  描述: 类型表达式输入无效。
+- 错误名: INVALID_OFFSET_EXPR_TYPE
+  错误码: NS212
+  错误消息: Invalid type OFFSET expression type: `{}`, expect `{}`
+  描述: OFFSET 表达式类型无效。
+- 错误名: INVALID_LIMIT_EXPR_TYPE
+  错误码: NS213
+  错误消息: Invalid type LIMIT expression type: `{}`, expect `{}`
+  描述: LIMIT 表达式输出的数据类型无效。
+- 错误名: INVALID_NUM_OF_PATHS_EXPR_TYPE
+  错误码: NS214
+  错误消息: Invalid type NUMBER OF PATHS expression type: `{}`, expect `{}`
+  描述: 路径数量表达式输出的数据类型无效。
+- 错误名: INVALID_NUM_OF_GROUPS_EXPR_TYPE
+  错误码: NS215
+  错误消息: Invalid type NUMBER OF GROUPS expression type: `{}`, expect `{}`
+  描述: 组数表达式输出数据类型无效。
+- 错误名: SEMANTIC_RETURN_COLUMN_CONFLICT
+  错误码: NS216
+  错误消息: The returned column `{}` conflicts with parent scope variables. Please use a unique alias to distinguish them
+  描述: 结果集中列名与父级作用域中的变量或列名有命名冲突。
+- 错误名: SEMANTIC_IF_STATEMENT_BRANCH_MISMATCH
+  错误码: NS217
+  错误消息: All branches of the if statement must have the same column names and compatible types
+  描述: null
+- 错误名: SEMANTIC_INVALID_VALUE_QUERY_EXPRESSION
+  错误码: NS218
+  错误消息: Invalid value query expression
+  描述: 无效的值查询表达式。
+- 错误名: PLAN_GENERATE_FAILED
+  错误码: NZ001
+  错误消息: Execution plan generation failed due to disabled optimizer rules. Check configs or consult documentation
+  描述: 由于禁用的优化器规则导致执行计划生成失败，请检查配置或查阅文档。
+- 错误名: UNSUPPORTED
+  错误码: NT000
+  错误消息: Unsupported: {}
+  描述: 该操作尚不支持。
+- 错误名: UNSUPPORTED_INDEX_PROPERTY_TYPE
+  错误码: NT001
+  错误消息: Index property type `{}` not supported
+  描述: 该索引属性类型不支持。
+- 错误名: UNSUPPORTED_NODE_TYPE_WITHOUT_PRIMARY_KEY
+  错误码: NT002
+  错误消息: Unsupported, node type without primary key: `{}`
+  描述: 无主键的点类型不支持。
+- 错误名: UNSUPPORTED_GRAPH_TYPE_SOURCE
+  错误码: NT003
+  错误消息: Unsupported graph type source: `{}`
+  描述: 该图类型的源不支持。
+- 错误名: UNSUPPORTED_EDGE_DIRECTION
+  错误码: NT004
+  错误消息: Unsupported edge direction: `{}`
+  描述: 该边方向不支持。
+- 错误名: UNSUPPORTED_PRIMARY_KEY
+  错误码: NT005
+  错误消息: Unsupported primary key type of `{}` in node type `{}`
+  描述: 指定的主键不支持。
+- 错误名: UNSUPPORTED_MODIFY_PRIMARY_KEY
+  错误码: NT006
+  错误消息: Modifying the primary key is not supported, node type: `{}`, property name: `{}`
+  描述: 修改主键的操作不支持。
+- 错误名: UNSUPPORTED_MODIFY_MULTIEDGE_KEY
+  错误码: NT007
+  错误消息: Modifying the multiedge key is not supported, edge type: `{}`, property name: `{}`
+  描述: 修改多边键的操作支持。
+- 错误名: UNSUPPORTED_MODIFY_PROPERTY_USED_BY_INDEX
+  错误码: NT008
+  错误消息: Modifying property used by index is not supported, element type: `{}`, property name: `{}`
+  描述: 修改索引使用的属性不支持。
+- 错误名: UNSUPPORTED_MODIFY_PROPERTY_NULLABLE_TO_NON_NULLABLE
+  错误码: NT009
+  错误消息: Modifying the property from nullable to non-nullable is not supported, element type: `{}`, property name: `{}`
+  描述: 更改属性从可为`NULL`到`NOT NULL`不支持。
+- 错误名: UNSUPPORTED_DEFINE_DEFAULT_VALUE_ON_PRIMARY_KEY
+  错误码: NT010
+  错误消息: Defining default value on primary key is not supported, node type: `{}`, property name: `{}`
+  描述: 在主键上定义默认值不支持。
+- 错误名: UNSUPPORTED_DEFINE_DEFAULT_VALUE_ON_MULTIEDGE_KEY
+  错误码: NT011
+  错误消息: Defining default value on multiedge key is not supported, edge type: `{}`, property name: `{}`
+  描述: 在多边键上定义默认值不支持。
+- 错误名: UNSUPPORTED_NULLABLE_PRIMARY_KEY
+  错误码: NT012
+  错误消息: Primary key must be not nullable, node type: `{}`, property name: `{}`
+  描述: 主键必须不可为`NULL`。
+- 错误名: UNSUPPORTED_NULLABLE_MULTIEDGE_KEY
+  错误码: NT013
+  错误消息: Multiedge key must be not nullable, edge type: `{}`, property name: `{}`
+  描述: 多边键必须不可为`NULL`。
+- 错误名: UNSUPPORTED_MULTIEDGE_KEY
+  错误码: NT014
+  错误消息: Unsupported multiple edge key of `{}` in edge type `{}`
+  描述: 该数据类型作为多边键不支持。
+- 错误名: UNSUPPORTED_INSERT_EDGE_STATEMENT
+  错误码: NT101
+  错误消息: InsertEdge Statement doesn't support pattern like `{}`
+  描述: 用于插入边的模式不支持。
+- 错误名: UNSUPPORTED_INSERT_NODE_STATEMENT
+  错误码: NT102
+  错误消息: InsertNode Statement doesn't support pattern like `{}`
+  描述: 用于插入点的模式不支持。
+- 错误名: UNSUPPORTED_DATE_MODIFY_STATEMENT
+  错误码: NT103
+  错误消息: Adding any statement after data modify statement is not supported.
+  描述: 在数据修改语句之后不支持添加任何语句。
+- 错误名: UNSUPPORTED_MULTIPLE_PATH_PATTERN
+  错误码: NT104
+  错误消息: Not supported path pattern with more than one path term
+  描述: 不支持指定多个路径模式。
+- 错误名: UNSUPPORTED_UPDATE_PRIMARY_KEY
+  错误码: NT105
+  错误消息: Updating the primary key is not supported, node type: `{}`, property name: `{}`
+  描述: 更新主键不支持。
+- 错误名: UNSUPPORTED_SET_ALL_SET_LABEL
+  错误码: NT106
+  错误消息: SetAllProperties and kSetLabel are not supported yet
+  描述: 设置所有属性或设置标签（kSetLabel）尚不支持。
+- 错误名: UNSUPPORTED_UPDATE_MULTIEDGE_KEY
+  错误码: NT107
+  错误消息: Updating the multiedge key is not supported, edge type: `{}`, property name: `{}`
+  描述: 更新多边键不支持。
+- 错误名: UNSUPPORTED_UPDATE_VECTOR_PROPERTY
+  错误码: NT108
+  错误消息: Updating the vector type property is not supported, element type: `{}`, property name: `{}`
+  描述: null
+- 错误名: UNSUPPORTED_AGGREGATION_EXPRESSION
+  错误码: NT201
+  错误消息: Unsupported, aggregate expressions: `{}`
+  描述: 指定的聚合表达式不支持。
+- 错误名: UNSUPPORTED_AGGREGATION_EXPRESSION_NESTED
+  错误码: NT202
+  错误消息: Unsupported, aggregate expressions cannot be nested: `{}`
+  描述: 嵌套的聚合表达式不支持。
+- 错误名: AGGREGATION_EXPRESSION_NOT_ALLOWED
+  错误码: NT203
+  错误消息: Aggregate function `{}` is not allowed in this context
+  描述: 在此上下文中不允许使用聚合函数。
+- 错误名: UNDEFINED_AGG_FUNCTION
+  错误码: NT204
+  错误消息: Unknown aggregate function `{}`
+  描述: 指定的聚合函数未定义。
+- 错误名: UNSUPPORTED_TRIM_NON_ASCII_CHAR
+  错误码: NT205
+  错误消息: Trim functions with custom trim characters and non-ASCII inputs are not supported yet
+  描述: 使用自定义修剪字符及非 ASCII 输入的修剪函数目前不支持。
+- 错误名: UNSUPPORTED_TYPE_GET_PROP
+  错误码: NT206
+  错误消息: ValueType {} can't get property
+  描述: 获取属性时不支持指定的类型。
+- 错误名: UNSUPPORTED_PATH_FACTOR
+  错误码: NT301
+  错误消息: Not supported path factor: {}
+  描述: 指定的路径不支持。
+- 错误名: UNSUPPORTED_CHARSET
+  错误码: NT401
+  错误消息: Charset `{}` not support
+  描述: 指定的字符集不支持。
+- 错误名: UNSUPPORTED_COLLATION
+  错误码: NT402
+  错误消息: Collation `{}` not support
+  描述: 指定的校对规则不支持。
+- 错误名: UNSUPPORTED_CHARSET_COLLATION_NOT_MATCH
+  错误码: NT403
+  错误消息: Charset `{}` and Collation `{}` not match
+  描述: 字符集与校对规则不匹配。
+- 错误名: SYSTEM_ERROR
+  错误码: NY000
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: NO_VALIDATOR
+  错误码: NY001
+  错误消息: Internal Server Error
+  描述: 未发现校验器。
+- 错误名: STATS_ERROR
+  错误码: NY002
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: FILE_ERROR
+  错误码: NY101
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: FILE_NOT_FOUND
+  错误码: NY102
+  错误消息: Internal Server Error
+  描述: 指定的文件未找到。
+- 错误名: FILE_IS_EMPTY
+  错误码: NY103
+  错误消息: Internal Server Error
+  描述: 文件为空。
+- 错误名: FILE_READ_PERMISSION
+  错误码: NY104
+  错误消息: Internal Server Error
+  描述: 读取文件的权限被拒绝。
+- 错误名: FILE_READ_LINK
+  错误码: NY105
+  错误消息: Internal Server Error
+  描述: 读取文件链接时出错。
+- 错误名: FILE_READ_PATH
+  错误码: NY106
+  错误消息: Internal Server Error
+  描述: 读取文件路径时出错。
+- 错误名: FILE_OPEN_DIR
+  错误码: NY107
+  错误消息: Internal Server Error
+  描述: 打开目录时出错。
+- 错误名: FILE_OPEN_FILE
+  错误码: NY108
+  错误消息: Internal Server Error
+  描述: 打开文件时出错。
+- 错误名: FILE_TYPE_NOT_SUPPORT
+  错误码: NY109
+  错误消息: Internal Server Error
+  描述: 文件类型不支持。
+- 错误名: FILE_FILE_STATE
+  错误码: NY110
+  错误消息: Internal Server Error
+  描述: 获取文件状态失败。
+- 错误名: FILE_CREATE_DIR_FAILED
+  错误码: NY111
+  错误消息: Internal Server Error
+  描述: 创建目录失败。
+- 错误名: FILE_READ_SERVICE_ID_FILE_ERROR
+  错误码: NY112
+  错误消息: Internal Server Error
+  描述: 读取服务 ID 文件时出错。
+- 错误名: FILE_PARSE_SERVICE_ID_FILE_ERROR
+  错误码: NY113
+  错误消息: Internal Server Error
+  描述: 解析服务 ID 文件时出错。
+- 错误名: FILE_SAVE_SERVICE_ID_FILE_ERROR
+  错误码: NY114
+  错误消息: Internal Server Error
+  描述: 保存服务 ID 到文件时出错。
+- 错误名: FILE_REMOVE_DIR_FAILED
+  错误码: NY115
+  错误消息: Internal Server Error
+  描述: 删除目录失败。
+- 错误名: MEMORY_ERROR
+  错误码: NY201
+  错误消息: Internal Server Error
+  描述: General memory error.
+- 错误名: MEMORY_CONFIG_ERROR
+  错误码: NY202
+  错误消息: Internal Server Error
+  描述: 配置的最大内存超过了系统的总内存。
+- 错误名: MEMORY_BACKGROUND_CHECK
+  错误码: NY203
+  错误消息: Internal Server Error
+  描述: 启动后台内存检查线程失败。
+- 错误名: MEMORY_SYSTEM_INFO
+  错误码: NY204
+  错误消息: Internal Server Error
+  描述: 从`/proc/meminfo`读取系统内存信息失败。
+- 错误名: MEMORY_VECTOR_INVALID_SIZE
+  错误码: NY205
+  错误消息: Internal Server Error
+  描述: Invalid size for memory vector.
+- 错误名: NETWORK_ERROR
+  错误码: NY301
+  错误消息: Internal Server Error
+  描述: 一般网络错误。
+- 错误名: NETWORK_CREATE_SOCKET
+  错误码: NY302
+  错误消息: Internal Server Error
+  描述: 创建网络套接字失败。
+- 错误名: NETWORK_UNKNOWN_ADDR
+  错误码: NY303
+  错误消息: Internal Server Error
+  描述: 未知网络地址。
+- 错误名: NETWORK_BIND_FAILED
+  错误码: NY304
+  错误消息: Internal Server Error
+  描述: 绑定网络地址失败。
+- 错误名: NETWORK_LISTEN_FAILED
+  错误码: NY305
+  错误消息: Internal Server Error
+  描述: 监听网络地址失败。
+- 错误名: NETWORK_NBIO_STOPPED
+  错误码: NY306
+  错误消息: Internal Server Error
+  描述: 非阻塞 I/O 已停止。
+- 错误名: NETWORK_CONN_CLOSED
+  错误码: NY307
+  错误消息: Internal Server Error
+  描述: 网络连接被远程主机关闭。
+- 错误名: NETWORK_PROTOCOL
+  错误码: NY308
+  错误消息: Internal Server Error
+  描述: 网络协议错误。
+- 错误名: NETWORK_TIMEOUT
+  错误码: NY309
+  错误消息: Internal Server Error
+  描述: 网络超时。
+- 错误名: NETWORK_DISCONNECTED
+  错误码: NY310
+  错误消息: Internal Server Error
+  描述: 网络断开连接。
+- 错误名: NETWORK_ADDR_NOT_FOUND
+  错误码: NY311
+  错误消息: Internal Server Error
+  描述: 找不到网络地址。
+- 错误名: NETWORK_INVALID_HOST
+  错误码: NY312
+  错误消息: Internal Server Error
+  描述: 无效的网络主机地址。
+- 错误名: NETWORK_TLS_ERROR
+  错误码: NY313
+  错误消息: Internal Server Error
+  描述: TLS 连接错误。
+- 错误名: READ_METRIC_FAILED
+  错误码: NY401
+  错误消息: Internal Server Error
+  描述: 读取指标失败。
+- 错误名: THREAD_ERROR
+  错误码: NY501
+  错误消息: Internal Server Error
+  描述: null
+- 错误名: THREAD_CREATE_FAILED
+  错误码: NY502
+  错误消息: Internal Server Error
+  描述: 创建线程失败。
+- 错误名: LICENSE_ENCRYPTION_ERROR
+  错误码: NL001
+  错误消息: License encryption error: {}
+  描述: License 加密错误。
+- 错误名: LICENSE_MANAGER_ERROR
+  错误码: NL101
+  错误消息: License Manager error: {}
+  描述: LM 错误。
+- 错误名: LICENSE_QUOTA_EXCEEDED
+  错误码: NL201
+  错误消息: License quota exceeded: {}
+  描述: 超出 License 配额。
+- 错误名: LICENSE_EXPIRED
+  错误码: NL202
+  错误消息: License expired error: {}
+  描述: License 过期。
+- 错误名: LICENSE_INVALID
+  错误码: NL203
+  错误消息: Invalid license: {}
+  描述: 无效 License。
+- 错误名: LOAD_LM_RESP_FROM_KV_FAILED
+  错误码: NL301
+  错误消息: Failed to load License Manager response from meta store: {}
+  描述: null
+- 错误名: JOB_ERROR
+  错误码: NJ000
+  错误消息: JOB_ERROR: `{}`
+  描述: 作业错误。
+- 错误名: JOB_TYPE_UNKNOWN
+  错误码: NJ001
+  错误消息: Job type unknown: `{}`
+  描述: 未知作业类型。
+- 错误名: JOB_NOT_FOUND
+  错误码: NJ002
+  错误消息: Can't find job: `{}`
+  描述: 找不到作业。
+- 错误名: JOB_TASK_NOT_FOUND
+  错误码: NJ003
+  错误消息: Can't find task {} of job {}
+  描述: 找不到作业任务。
+- 错误名: JOB_IS_NOT_RUNNING
+  错误码: NJ004
+  错误消息: Job is not running: `{}`
+  描述: 作业无法运行。
+- 错误名: JOB_DESCRIPTION_INVALID
+  错误码: NJ005
+  错误消息: Job description invalid: `{}`
+  描述: 作业描述无效。
+- 错误名: JOB_ALREADY_STOPPED
+  错误码: NJ006
+  错误消息: Job has already stopped: `{}`
+  描述: 作业已停止。
+- 错误名: JOB_MANAGER_NOT_RUNNING
+  错误码: NJ007
+  错误消息: JobManager is not running, please try again later
+  描述: 作业管理器未运行，请稍后再试。
+- 错误名: JOB_TASK_NOT_ACTIVE
+  错误码: NJ008
+  错误消息: Task {} of job {} is not active
+  描述: 作业任务未激活。
+- 错误名: TASK_NOT_FOUND_IN_STORAGE
+  错误码: NJ011
+  错误消息: Task {} of job {} is not found in storage
+  描述: 找不到存储中的作业任务。
+- 错误名: TASK_STOPPED
+  错误码: NJ012
+  错误消息: Task {} of job {} is stopped
+  描述: 作业任务已停止。
+- 错误名: TASK_STILL_RUNNING
+  错误码: NJ013
+  错误消息: Task {} of job {} is still queuing or running
+  描述: 作业任务仍在排队或运行中。
+- 错误名: TASK_REPORT_FAILED
+  错误码: NJ014
+  错误消息: Task {} of job {} reports to meta failed: `{}`
+  描述: 作业任务上报失败。
+- 错误名: BACKUP_ERROR
+  错误码: NF000
+  错误消息: Backup error: {}
+  描述: 一般备份错误。
+- 错误名: BACKUP_RECORD_EXISTS
+  错误码: NF001
+  错误消息: A valid backup with same name already exists: `{}`
+  描述: 备份记录已存在。
+- 错误名: BACKUP_RUNNING_JOBS
+  错误码: NF002
+  错误消息: Cannot do backup now, some conflict jobs are running
+  描述: 由于某些冲突作业正在运行，无法进行备份。
+- 错误名: BACKUP_META_TABLE_EMPTY
+  错误码: NF003
+  错误消息: Meta table `{}` is empty
+  描述: Meta 服务中的元数据为空。
+- 错误名: BACKUP_LOST_PART
+  错误码: NF004
+  错误消息: Some parts are lost, should be {}, actually {}
+  描述: 一些分片丢失。
+- 错误名: BACKUP_DUPLICATE_PART
+  错误码: NF005
+  错误消息: Part {} is duplicate backed up
+  描述: 分片被重复备份。
+- 错误名: BACKUP_RESTORE_INVALID_REQUEST
+  错误码: NF006
+  错误消息: Invalid Restore request: {}
+  描述: 无效的恢复请求。
+- 错误名: BACKUP_REMAP_PART_FAILED
+  错误码: NF007
+  错误消息: Part info does not match when restore
+  描述: 恢复时分片信息不匹配。
+- 错误名: BACKUP_RESTORE_TABLE_FAILED
+  错误码: NF008
+  错误消息: Restore table failed: {}
+  描述: 恢复元数据失败。
+- 错误名: BACKUP_DROP_NAME_EMPTY
+  错误码: NF009
+  错误消息: Empty backup name to drop
+  描述: 要删除的备份名称为空。
+- 错误名: BACKUP_DROP_NAME_NOT_EXIST
+  错误码: NF010
+  错误消息: Backup name `{}` doesn't exist
+  描述: 备份名称不存在。
+- 错误名: UNKNOWN
+  错误码: NU000
+  错误消息: Internal Server Error
+  描述: 未知错误。
