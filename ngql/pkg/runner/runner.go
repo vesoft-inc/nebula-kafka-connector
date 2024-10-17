@@ -280,13 +280,12 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 				fallthrough
 			case errors.ERROR_CONN_IS_BROKEN, errors.ERROR_CONN_IS_CLOSED:
 				return true, err
-			default:
 			}
 		}
 	}
 	duration := time.Since(start)
 	if resp == nil {
-		return false, nil
+		return false, err
 	}
 	var out io.WriteCloser
 	var execCmd *exec.Cmd
@@ -334,7 +333,7 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 	}
 	r.printBoth(fmt.Sprintf("%s\n\n", time.Now().In(time.Local).Format(time.RFC1123)))
 
-	return false, nil
+	return false, err
 }
 
 func (r *Runner) executeGQLWithRetry(stmt string, retryTimes, retryLimit int) (types.Result, error) {

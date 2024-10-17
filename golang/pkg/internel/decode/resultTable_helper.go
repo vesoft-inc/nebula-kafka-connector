@@ -765,7 +765,13 @@ func decodeBasicValue(bs []byte, typ types.ColumnType, offset int64) valuer {
 		// pedding
 		microsecond := bytesToInt32(bs[4:8])
 		n := time.Now()
-		t := time.Date(n.Year(), n.Month(), n.Day(), int(hour), int(minute), int(second), int(microsecond)*int(time.Microsecond), time.UTC)
+		var h int
+		if hour < 0 {
+			h = -int(hour)
+		} else {
+			h = int(hour)
+		}
+		t := time.Date(n.Year(), n.Month(), n.Day(), h, int(minute), int(second), int(microsecond)*int(time.Microsecond), time.UTC)
 		zonedT := t.In(time.FixedZone("", int(offset)))
 		return &NebulaZonedTime{
 			Hour:     int8(zonedT.Hour()),
