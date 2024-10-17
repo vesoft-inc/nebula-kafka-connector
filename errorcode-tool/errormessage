@@ -1,0 +1,669 @@
+EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
+        EMSG(OMITTED_RESULT, "Omitted result");
+
+        // WARNING
+        EMSG(WARNING, "WARNING: {}");
+        EMSG(NULL_VALUE_ELIMINATED_IN_SET_FUNCTION, "Null value eliminated in set function: {}");
+        EMSG(WARNING_STRING_DATA_RIGHT_TRUNCATION, "Warning: string data right truncation: {}");
+
+        EMSG(NO_DATA, "No data");
+
+        EMSG(INFORMATIONAL, "Info: {}");
+
+        EMSG(EMPTY_STATEMENT, "Empty statement");
+        EMSG(GET_ALL_PART_FAILED, "Get all partitions failed");
+        EMSG(GET_ALL_LEADER_FAILED, "Get all leaders failed");
+        EMSG(PART_NOT_FOUND, "Partition `{}` not found");
+        EMSG(PROPERTY_NOT_FOUND, "Property `{}` of type `{}` not found");
+        EMSG(LEADER_CHANGED, "Leader changed");
+        EMSG(BAD_PLAN_NODE_TYPE, "Bad plan node type");
+        EMSG(SPLIT_PLAN_TO_STORAGE_FAILED, "Split plan to storage failed");
+        EMSG(PROPERTY_NOT_NULLABLE, "Property `{}` of type `{}` is not nullable");
+        EMSG(VALUES_NOT_COMPARABLE, "{} is not comparable");
+        EMSG(BINDING_TABLE_WRITE_FAILED, "Binding table write failed: {}");
+        EMSG(BINDING_TABLE_NO_SPACE, "Binding table no space: {}");
+
+        // CONNECTION
+        EMSG(CONNECTION_EXCEPTION, "Connection exception: {}");
+        EMSG(TRANSACTION_RESOLUTION_UNKNOWN, "Transaction resolution unknown: {}");
+
+        // TRANSACTION
+        EMSG(TRANSACTION_ROLLBACK, "Transaction rollback");
+        EMSG(STATEMENT_COMPLETION_UNKNOWN, "Statement completion unknown:{}");
+        EMSG(INVALID_TRANSACTION_STATE, "Invalid transaction state: {}");
+        EMSG(INVALID_TRANSACTION_TERMINATION, "Invalid transaction termination: {}");
+        EMSG(ACTIVE_GQL_TRANSACTION, "Active GQL transaction: {}");
+        EMSG(READ_ONLY_GQL_TRANSACTION, "Read only GQL transaction: {}");
+        EMSG(ACCESSING_MULTIPLE_GRAPHS_NOT_SUPPORTED, "Accessing multiple graphs not supported: {}");
+
+        // UNSUPPORTED
+        EMSG(UNSUPPORTED_INDEX_PROPERTY_TYPE, "Index property type `{}` not supported");
+
+        // DML
+        EMSG(DML_NUM_OF_PROPERTY_NOT_MATCH, "Insert number of properties of type `{}` does not match, expect: {}, got: {}");
+        EMSG(INVALID_DELETE_TYPE, "Invalid delete type, `{}` should be Node or Edge");
+        EMSG(INSERT_INFER_MORE_THAN_ONE_TYPE, "Type inference for `{}` failed, multiple types inferred: `{}`, `{}`");
+        EMSG(ENDPOINT_NODE_TYPES_MISMATCH, "Endpoint node types of edge type `{}` mismatch");
+        EMSG(INSERT_PROPERTY_NOT_FOUND, "Insert failed, property `{}` of type `{}` not found");
+        EMSG(ELEMENT_NOT_IN_CURRENT_GRAPH, "`{}` of graph `{}` is not in current working graph `{}`");
+
+        // ANN
+        EMSG(VECTOR_DIMENSION_MISSMATCHED, "The dimension of vectors mismatched, expect: {}, got: {}");
+        EMSG(UNSUPPORTED_VECTOR_METRIC_TYPE, "Unsupported vector metric type: {}");
+        EMSG(UNSUPPORTED_VECTOR_DISTANCE_TYPE, "Unsupported vector distance type: {}");
+        EMSG(ANN_INDEX_CREATE_FAILED, "Create ANN index `{}` failed: {}");
+        EMSG(ANN_INDEX_BUILD_FAILED, "Build ANN index `{}` failed: {}");
+        EMSG(ANN_INDEX_ALREADY_EXIST, "ANN index `{}` already exists");
+        EMSG(ANN_INDEX_NOT_FOUND, "ANN index `{}` not found");
+        EMSG(ANN_INDEX_ADD_FAILED, "Add to ANN index `{}` failed: {}");
+        EMSG(ANN_INDEX_WRITE_FAILED, "Write ANN index `{}` failed: {}");
+        EMSG(ANN_INDEX_READ_FAILED, "Read ANN index `{}` failed: {}");
+        EMSG(ANN_INDEX_MANAGER_ADD_FAILED, "Failed to add ANN index to index manager: {}");
+        EMSG(ANN_INDEX_MANAGER_REMOVE_FAILED, "Failed to remove ANN index from index manager: {}");
+
+        // CATALOG
+        EMSG(CATALOG_ERROR, "Catalog error: {}");
+        EMSG(CATALOG_NODE_TYPE_NOT_FOUND, "Node type not found: `{}`");
+        EMSG(CATALOG_EDGE_TYPE_NOT_FOUND, "Edge type not found: `{}`");
+        EMSG(CATALOG_PRIMARY_KEY_PROPERTY_NOT_FOUND, "Primary key property not found: `{}`");
+        EMSG(CATALOG_PRIMARY_KEY_NULLABLE, "Property `{}` of node type `{}` is nullable, can't be primary index property");
+        EMSG(CATALOG_PRIMARY_KEY_NOT_FOUND, "Primary key of node type `{}` not found");
+        EMSG(CATALOG_PROPERTY_NOT_FOUND, "Property `{}` of type `{}` not found");
+        EMSG(CATALOG_ELEMENT_TYPE_FOR_INSERT_NOT_FOUND, "Element type matching `{}` not found");
+        EMSG(CATALOG_INDEX_NOT_FOUND, "Catalog index not found: `{}`");
+        EMSG(CATALOG_NODE_TYPE_ALREADY_EXIST, "Node type already exist: `{}`");
+        EMSG(CATALOG_EDGE_TYPE_ALREADY_EXIST, "Edge type already exist: `{}`");
+        EMSG(CATALOG_LABEL_ALREADY_EXIST, "Label already exist: `{}.{}`");
+        EMSG(CATALOG_LABEL_NOT_FOUND, "Label not found: `{}.{}`");
+        EMSG(CATALOG_NODE_TTL_NOT_SUPPORTED, "Node `{}` ttl not supported");
+        EMSG(CATALOG_TTL_PROPERTY_EXIST, "`{}` already has a ttl property `{}`");
+        EMSG(INVALID_SCHEMA_PATH, "Invalid schema path, it should be a canonical path");
+        EMSG(CATALOG_GRAPH_TYPE_NOT_FOUND, "Graph type not found: `{}`");
+        EMSG(CATALOG_GRAPH_TYPE_ALREADY_EXIST, "Graph type already exist: `{}`");
+        EMSG(CATALOG_PLUGIN_NOT_FOUND, "Plugin not found: `{}`");
+        EMSG(CATALOG_PLUGIN_ALREADY_EXIST, "Plugin already exist: `{}`");
+        EMSG(CATALOG_GRAPH_NOT_FOUND, "Graph not found: `{}`");
+        EMSG(CATALOG_GRAPH_ALREADY_EXIST, "Graph already exist: `{}`");
+        EMSG(CATALOG_GRAPH_TYPE_MISMATCH, "Graph type mismatch: {}");
+        EMSG(CATALOG_CANCEL_JOB_FAILED, "Catalog cancel job failed: {}");
+        EMSG(CATALOG_EPOCH_ERROR, "Unable to find Catalog with epoch as {}");
+        EMSG(CATALOG_DDL_ILLEGAL, "Illegal DDL: {}");
+        EMSG(CATALOG_REORG_FAILED, "Reorg failed");
+        EMSG(CATALOG_NODE_TYPE_USED, "NodeType {} is used by EdgeType");
+        EMSG(CATALOG_PROPERTY_INVALID, "Catalog property invalid: `{}`");
+        EMSG(CATALOG_AND_DATA_STATEMENT_MIXING_NOT_SUPPORTED, "Catalog and data statement mixing not supported: {}");
+        EMSG(CATALOG_REORG_INTERRUPT, "Reorg interrupt");
+
+        EMSG(DDL_FAILED, "DDL failed: {}");
+        EMSG(DROP_REFERENCED_SCHEMA, "Can not drop schema `{}` while still having graph types or graph");
+        EMSG(DROP_REFERENCED_GRAPH_TYPE, "Can not drop graph type `{}` that is referenced by graph `{}`");
+        EMSG(CREATE_PLUGIN_FAILED, "Create plugin failed: `{}`");
+        EMSG(DROP_PLUGIN_FAILED, "Drop plugin failed: `{}`");
+        EMSG(PROPERTY_TYPE_CONSTRAINT_VIOLATION, "Properties with the same name must have the same type. `{}.{}`: `{}`, `{}.{}`: `{}`.");
+        EMSG(ELEMENT_TYPE_NAME_CONSTRAINT_VIOLATION, "Element type name `{}` cannot be defined multiple times.");
+        EMSG(MODIFY_PROPERTY_TYPE_FAILED, "Property `{}` of element type `{}` cannot be modified from `{}` to `{}`");
+        EMSG(GRAPH_PROJECTION_BASE_NOT_FOUND, "Graph projection base not found: `{}`");
+        EMSG(MEMORY_GRAPH_ALREADY_EXIST, "Memory graph already existed: `{}`");
+        EMSG(MEMORY_GRAPH_NOT_FOUND, "Memory graph not found: `{}`");
+        EMSG(MEMORY_GRAPH_BUILD_FAILED, "Failed to build memory graph: {}");
+        EMSG(CATALOG_NODE_INDEX_ALREADY_EXISTS, "Node index already exists: {}");
+        EMSG(CATALOG_EDGE_INDEX_ALREADY_EXISTS, "Edge index already exists: {}");
+        EMSG(CATALOG_NODE_VECTOR_INDEX_ALREADY_EXISTS, "Node vector index already exists: {}");
+        EMSG(CATALOG_EDGE_VECTOR_INDEX_ALREADY_EXISTS, "Edge vector index already exists: {}");
+        EMSG(CATALOG_INDEX_PROPERTY_TYPE_NOT_SUPPORTED, "Index property type `{}` not supported");
+        EMSG(CATALOG_VERSION_RETIRED, "Catalog version retired: {}");
+        EMSG(CATALOG_STATE_PERMISSION_DENIED, "Catalog state permission denied");
+        EMSG(CATALOG_SCHEMA_NOT_FOUND, "Catalog schema not found: `{}`");
+        EMSG(CATALOG_SCHEMA_ALREADY_EXISTS, "Catalog schema already exists: `{}`");
+        EMSG(CATALOG_DIRECTORY_NOT_FOUND, "Catalog directory not found: `{}`");
+        EMSG(CATALOG_PROPERTY_ALREADY_EXIST, "Property `{}.{}` already exists");
+        EMSG(CATALOG_DDL_TIMEOUT, "Catalog ddl is executing in background");
+        EMSG(CATALOG_MAXIMUM_PENDING_DDL_EXCEEDED, "Pending ddl exceeds maximum threshold");
+        EMSG(CATALOG_JOB_PENDING, "Catalog job not completed, job id is {}");
+        EMSG(CATALOG_NOT_READY, "Catalog is not ready");
+
+        // FUNCTION
+        EMSG(NUMERIC_VALUE_OUT_OF_RANGE, "Numeric value out of range: `{}`, type: `{}`");
+        EMSG(NULL_VALUE_NOT_ALLOWED, "Null value not allowed in `{}`");
+        EMSG(INTERVAL_FIELD_OVERFLOW, "Interval field overflow: {}");
+        EMSG(INVALID_ARGUMENT_FOR_POWER_FUNCTION, "Invalid argument for power function: {}.");
+        EMSG(DIVISION_BY_ZERO, "Division by zero: `{}`, type: `{}`");
+        EMSG(TRIM_LIST_OUT_OF_RANGE, "Trim list out of range, list size: `{}`, trim number: `{}`");
+        EMSG(INVALID_CHARACTER_VALUE_FOR_CAST, "Invalid character value cast from `{}`:`{}` to `{}`");
+        EMSG(LIST_ELEMENT_ERROR, "List element error: {}");
+        EMSG(INVALID_FUNCTION_ARGUMENT, "Invalid function argument: {}");
+        EMSG(SUBSTRING_ERROR, "Substring error, invalid length `{}`, must greater than or equal to 0");
+        EMSG(INVALID_DATE_TIME_OR_DATETIME_FORMAT, "Invalid format: `{}` is not a valid `{}`");
+        EMSG(INVALID_DURATION_FUNCTION_FIELD_NAME, "Invalid duration field name: `{}` is not a valid `{}`{}");
+        EMSG(INVALID_DURATION_FORMAT, "Invalid duration format: {}");
+        EMSG(INCOMPATIBLE_TEMPORAL_DURATION_UNIT_GROUPS, "Incompatible temporal duration unit groups: {}");
+        EMSG(INVALID_TEMPORAL_INSTANT_SUBTRACTION, "Invalid temporal instant subtraction: {}");
+        EMSG(PARSE_TEMPORAL_FAIL, "Parse {}: `{}` fail");
+        EMSG(INVALID_LOGICAL_EXPRESSION, "Invalid logical expression, only support bool type, expression `{}`, type: `{}`");
+        EMSG(EXPR_COMPILE_FAILED, "Failed to compile expression, expr: `{}`, error: {}");
+        EMSG(EXPR_EVAL_FAILED, "Failed to evaluate expression: `{}`, exception: {}");
+        EMSG(RUNTIME_ERROR, "An error occurred at runtime: {}");
+        EMSG(EXPR_ERROR, "Expression error: {}");
+        EMSG(UNDEFINED_FUNCTION, "Undefined function: `{}`");
+        EMSG(GET_NODE_ID_FAILED, "Get node id failed: {}");
+        EMSG(RESOLVE_FUNCTION_FAILED, "Resolve function failed: `{}`");
+        EMSG(EXPR_TYPE_INFER_FAILED, "Expression type infer failed, expression: `{}`");
+        EMSG(INVALID_CAST_EXPR, "Invalid cast expression: `{}`, can not cast from `{}` to `{}`");
+        EMSG(INVALID_CONST_EXPR, "Invalid const expression: `{}`");
+        EMSG(INVALID_CONSTRUCT_PATH_EXPR_INPUT, "Path constructor only accepts nodes, edges, or lists of nodes or edges");
+        EMSG(INVALID_CONSTRUCT_LIST_EXPR_INPUT, "All elements of list constructor must have compatible types");
+        EMSG(INVALID_CONSTRUCT_RECORD_EXPR_INPUT, "Record could only contain unique field names");
+        EMSG(INVALID_EXPRESSION_TYPE, "Invalid expression type: `{}`, expect: `{}`");
+        EMSG(INVALID_CASE_EXPR_WHEN_INPUT, "The when operand of case expression should be type of boolean, but got {}: {}");
+        EMSG(INVALID_CASE_EXPR_THEN_INPUT, "The then/else operands of case expression should have compatible types, but got: {}");
+        EMSG(EXCEED_MAX_STRING_BYTES, "String should be no more than {} bytes, but got {} bytes");
+        EMSG(EXCEED_MAX_LIST_LENGTH, "List should be no longer than {}");
+        EMSG(EXCEED_MAX_DECIMAL_DIGITS, "Decimal digits should be no more than {}, but got {}");
+        EMSG(INVALID_DECIMAL_INPUT, "Invalid decimal input: {}");
+        EMSG(DECIMAL_OUT_OF_RANGE, "Decimal out of range: {}");
+        EMSG(FLOAT_OUT_OF_RANGE, "Float out of range: {}");
+        EMSG(INVALID_DATA_TYPE_INPUT, "Invalid data type input: {}");
+        EMSG(INVALID_LAMBDA_EXPRESSION, "Lambda expression cannot contain aggregates or subqueries");
+        EMSG(INVALID_DECIMAL_TYPE, "Invalid decimal type: {}");
+
+        // SEMANTIC
+        EMSG(UNDEFINED_VARIABLE, "Semantic error, undefined variable: `{}`");
+        EMSG(DUPLICATE_DEFINE_VARIABLE, "Semantic error, duplicate defined variable: `{}`");
+        EMSG(UNDEFINED_PARAMETER, "Semantic error, undefined parameter: `{}`");
+        EMSG(SEMANTIC_ERROR, "Semantic error: {}");
+        EMSG(SEMANTIC_LINEAR_QUERY_COLUMN_SIZE_MISMATCH, "Semantic error, column size `{}` vs. `{}` mismatched for the linear query of composite query statement: `{}`");
+        EMSG(SEMANTIC_FILTER_CLAUSE_MUST_BE_BOOL_TYPE, "Semantic error, filter clause must be type of bool");
+        EMSG(SEMANTIC_INVALID_EXPRESSION_TYPE, "Semantic error, invalid expression type, expect `{}` but got `{}` at expression: `{}`");
+        EMSG(SEMANTIC_LINEAR_QUERY_COLUMN_NAME_MISMATCH, "Semantic error, column name `{}` vs. `{}` mismatched for the linear query of composite query statement: `{}`");
+        EMSG(SEMANTIC_LINEAR_QUERY_COLUMN_TYPE_INCOMPATIBLE, "Semantic error, column `{}` has incompatible types: {}");
+        EMSG(SEMANTIC_CONFLICT_GRAPHS, "Semantic error, variable `{}` declared for different graphs: {}, {}");
+        EMSG(SEMANTIC_NODE_PRIMARY_KEY_PROPERTY_NUM_MISMATCH, "Semantic error, node properties mismatched primary index, expect `{}` but got `{}`");
+        EMSG(SEMANTIC_NODE_PRIMARY_KEY_PROPERTY_NOT_FOUND, "Semantic error, primary index property not found: `{}`");
+        EMSG(SEMANTIC_GRAPH_PATTERN_QUANTIFIER_EXCEED_LOW_BOUND, "Semantic error, the value of upper bound of graph pattern quantifier shall be greater than 0");
+        EMSG(SEMANTIC_GRAPH_PATTERN_QUANTIFIER_LOW_BOUND_EXCEED_UP_BOUND, "Semantic error, lower bound of graph pattern quantifier shall be less than or equal to upper bound");
+        EMSG(SEMANTIC_INVALID_EDGE_PATTERN, "Semantic error, expect the path primary to be EdgePattern, but got: {}");
+        EMSG(SEMANTIC_INCONSISTENT_GROUP_VARIABLE_DEFINITION, "Semantic error, variable {} cannot be defined as both group variable and {}");
+        EMSG(SEMANTIC_GROUP_VARIABLE_REDEFINITION, "Semantic error, group variable redefinition {}");
+        EMSG(SEMANTIC_INVALID_EDGE_PREDICATE, "Semantic error, The predicate can only refer to the binding variable itself `{}` in element pattern: {}");
+        EMSG(PATTERN_NOT_SUPPORTED, "Pattern not supported: `{}`");
+        EMSG(SEMANTIC_RETURN_ALL_WITH_GROUPBY, "Semantic error, return all can't be used with user specified group bys");
+        EMSG(SEMANTIC_RETURN_ALL_WITH_NO_VARS_IN_SCOPE, "RETURN * is not allowed when there are no iterated variables in scope");
+        EMSG(SEMANTIC_RETURN_ALL_WITH_EMPTY_GROUPBY, "Semantic error, return all can't be used with empty group by");
+        EMSG(SEMANTIC_RETURN_DUPLICATE_COLUMN, "Semantic error, duplicate column name in return statement: `{}`");
+        EMSG(SEMANTIC_EMPTY_GROUPBY_MISMATCH, "Semantic error, empty group by mismatched");
+        EMSG(SEMANTIC_NO_AGG_FOUND_WITH_GROUPBY, "Semantic error, no aggregates found but specified group bys");
+        EMSG(SEMANTIC_GROUPBY_NO_BINDING, "Semantic error, user specified group bys must be binding variable: `{}`");
+        EMSG(SEMANTIC_GROUPBY_CONTAIN_AGG_EXPR, "Semantic error, group by item `{}` can't contain aggregate expressions: `{}`");
+        EMSG(SEMANTIC_GROUPBY_MISMATCH, "Semantic error, group bys mismatched");
+        EMSG(SEMANTIC_IMPLICIT_AGG_IN_RETURN, "Semantic error, implicit aggregation is not allowed in return statement");
+        EMSG(SEMANTIC_VAR_PROP_SETITEM_ERROR, "Variable and property name between any two SetPropertyItem should not be the same");
+        EMSG(SEMANTIC_ASSIGN_EXPR_TYPE_ERROR, "The type of `{}({})` cannot be assigned to `{}({})`");
+        EMSG(SEMANTIC_CURRENT_WORKING_GRAPH_NOT_FOUND, "Current working graph not found");
+        EMSG(SEMANTIC_RETURN_COLUMN_CONFLICT, "The returned column `{}` conflicts with parent scope variables. Please use a unique alias to distinguish them");
+        EMSG(SEMANTIC_IF_STATEMENT_BRANCH_MISMATCH, "All branches of the if statement must have the same column names and compatible types");
+        EMSG(SEMANTIC_INVALID_VALUE_QUERY_EXPRESSION, "Invalid value query expression");
+
+        EMSG(DATA_EXCEPTION, "Data exception");
+        EMSG(VALUE_OUT_OF_LIMITS, "`{}` value {} out of limits: [`{}`, `{}`]");
+        EMSG(SYNTAX_ERROR_OR_ACCESS_RULE_VIOLATION, "Syntax error or access rule violation: {}");
+        EMSG(INVALID_SYNTAX, "Invalid syntax: {}");
+        EMSG(INVALID_REFERENCE, "Invalid reference: {}");
+        EMSG(INVALID_NUMBER_OF_PATHS_OR_GROUPS, "Invalid number of paths or groups: {}");
+        EMSG(INVALID_ARGUMENT_FOR_NATURAL_LOGARITHM, "Invalid argument for natural logarithm: {}");
+        EMSG(INVALID_ARGUMENT_FOR_LOG, "{}");
+        EMSG(TRIM_ERROR, "Trim error: {}");
+        EMSG(USE_OF_VISUALLY_CONFUSABLE_IDENTIFIERS, "Use of visually confusable identifiers: {}");
+        EMSG(MALFORMED_PATH, "Malformed path: {}");
+        EMSG(ARRAY_DATA_RIGHT_TRUNCATION, "Array data right truncation: {}");
+        EMSG(NEGATIVE_LIMIT_VALUE, "Negative limit value: {}");
+        EMSG(LIST_DATA_RIGHT_TRUNCATION, "List data right truncation: {}");
+        EMSG(DATETIME_FIELD_OVERFLOW, "Datetime field overflow: {}");
+        EMSG(INVALID_DATETIME_FUNCTION_VALUE, "Invalid datetime function value: {}");
+        EMSG(INVALID_DATE_TIME_OR_DATETIME_FUNCTION_FIELD_NAME, "Invalid date time or datetime function field name: {}");
+        EMSG(INVALID_VALUE_TYPE, "Invalid value type: {}");
+        EMSG(INVALID_GROUP_VARIABLE_VALUE, "Invalid group variable value: {}");
+        EMSG(DATA_STRING_DATA_RIGHT_TRUNCATION, "Data string data right truncation: {}");
+        EMSG(DATA_NUMBER_OF_EDGE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM, "Data number of edge labels exceeds supported maximum");
+        EMSG(DATA_NUMBER_OF_EDGE_LABELS_BELOW_SUPPORTED_MINIMUM, "Data number of edge labels below supported minimum");
+        EMSG(DATA_NUMBER_OF_NODE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM, "Data number of node labels exceeds supported maximum");
+        EMSG(DATA_NUMBER_OF_NODE_LABELS_BELOW_SUPPORTED_MINIMUM, "Data number of node labels below supported minimum");
+        EMSG(DATA_NUMBER_OF_NODE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM, "Data number of node properties exceeds supported maximum");
+        EMSG(DATA_NUMBER_OF_EDGE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM, "Data number of edge properties exceeds supported maximum");
+        EMSG(SYNTAX_NUMBER_OF_NODE_LABELS_BELOW_SUPPORTED_MINIMUM, "Syntax number of node labels below supported minimum");
+        EMSG(SYNTAX_NUMBER_OF_NODE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM, "Syntax number of node labels exceeds supported maximum");
+        EMSG(SYNTAX_NUMBER_OF_NODE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM, "Syntax number of node properties exceeds supported maximum");
+        EMSG(SYNTAX_NUMBER_OF_EDGE_LABELS_EXCEEDS_SUPPORTED_MAXIMUM, "Number of edge labels exceeds supported maximum");
+        EMSG(SYNTAX_NUMBER_OF_EDGE_LABELS_BELOW_SUPPORTED_MINIMUM, "Number of edge labels below supported minimum");
+        EMSG(SYNTAX_NUMBER_OF_EDGE_PROPERTIES_EXCEEDS_SUPPORTED_MAXIMUM, "Number of edge properties exceeds supported maximum");
+        EMSG(MULTIPLE_ASSIGNMENTS_TO_A_GRAPH_ELEMENT_PROPERTY, "Multiple assignments to a graph element property: {}");
+        EMSG(NUMBER_OF_NODE_TYPE_KEY_LABELS_BELOW_SUPPORTED_MINIMUM, "Number of node type key labels below supported minimum");
+        EMSG(NUMBER_OF_NODE_TYPE_KEY_LABELS_EXCEEDS_SUPPORTED_MAXIMUM, "Number of node type key labels exceeds supported maximum");
+        EMSG(NUMBER_OF_EDGE_TYPE_KEY_LABELS_BELOW_SUPPORTED_MINIMUM, "Number of edge type key labels below supported minimum");
+        EMSG(NUMBER_OF_EDGE_TYPE_KEY_LABELS_EXCEEDS_SUPPORTED_MAXIMUM, "Number of edge type key labels exceeds supported maximum");
+        EMSG(RECORD_FIELDS_DO_NOT_MATCH, "Record fields do not match: {}");
+        EMSG(RECORD_DATA_FIELD_MISSING, "Record data field missing: {}");
+        EMSG(RECORD_DATA_FIELD_UNASSIGNABLE, "Record data field unassignable: {}");
+        EMSG(REFERENCE_VALUE_INVALID_CONSTRAINED_TYPE, "Reference value invalid constrained type: {}");
+        EMSG(REFERENCE_VALUE_INVALID_BASE_TYPE, "Reference value invalid base type: {}");
+        EMSG(REFERENCE_VALUE_REFERENT_DELETED, "Reference value referent deleted: {}");
+        EMSG(PATH_DATE_RIGHT_TRUNCATION, "Path date right truncation: {}");
+
+        EMSG(INVALID_LABEL_EXPR_INPUT, "Invalid label expression input: `{}`, expect NODE or EDGE type but got `{}`");
+        EMSG(INVALID_TYPE_EXPR_INPUT, "Invalid type expression input: `{}`, expect NODE or EDGE type but got `{}`");
+        EMSG(INVALID_OFFSET_EXPR_TYPE, "Invalid type OFFSET expression type: `{}`, expect `{}`");
+        EMSG(INVALID_LIMIT_EXPR_TYPE, "Invalid type LIMIT expression type: `{}`, expect `{}`");
+        EMSG(INVALID_NUM_OF_PATHS_EXPR_TYPE, "Invalid type NUMBER OF PATHS expression type: `{}`, expect `{}`");
+        EMSG(INVALID_NUM_OF_GROUPS_EXPR_TYPE, "Invalid type NUMBER OF GROUPS expression type: `{}`, expect `{}`");
+        EMSG(INVALID_SYNTAX_NOT_FOUND_IN_PROPS, "Invalid syntax, {} `{}` not found in properties list");
+        EMSG(INVALID_SYNTAX_NESTED_VECTOR_TYPE, "Invalid syntax, nested VECTOR type property `{}` of `{}` is not allowed");
+        EMSG(INVALID_SYNTAX_DST_TYPE_OF_EDGE_NOT_SPECIFIED, "Invalid syntax, destination node type of edge type `{}` not specified");
+        EMSG(INVALID_SYNTAX_UNKNOWN_ELEMENT_TYPE, "Invalid syntax, unknown element type");
+        EMSG(INVALID_SYNTAX_DUPLICATE_PROPERTY, "Invalid syntax, duplicate property: `{}`");
+        EMSG(INVALID_SYNTAX_NEST_QUERY_LAST_STATEMENT_ERROR, "Invalid syntax, last statement in value query expression is not a query statement: `{}`");
+        EMSG(INVALID_SYNTAX_NEST_QUERY_RESULT_STATEMENT_ERROR, "Invalid syntax, result statement in value query expression should be linear query statement");
+        EMSG(INVALID_SYNTAX_NEST_QUERY_RETURN_AGG_ERROR, "Invalid syntax, result of expression should generated by aggregate function without group by, but got: `{}`");
+        EMSG(INVALID_SYNTAX_NEST_QUERY_RETURN_LIMIT_ERROR, "Invalid syntax, result in value query expression should be aggregate expression without group by or add limit 1 clause in return statement");
+        EMSG(INVALID_SYNTAX_NEST_QUERY_RETURN_GRAPH_ERROR, "Invalid syntax, result in nested query should be graph element, but got: `{}`");
+        EMSG(INVALID_SYNTAX_BUILD_GRAPH_ERROR, "Invalid syntax, {}");
+        EMSG(INVALID_SYNTAX_VAR_TYPE_CONFLICT, "Invalid syntax, variable `{}` defined with conflicting type");
+        EMSG(INVALID_SYNTAX_EQUI_JOIN_ON_CONDITIONAL_VAR, "Invalid syntax, implicit equi-joins on conditional variable `{}` are prohibited");
+        EMSG(INVALID_SYNTAX_EQUI_JOIN_ON_GROUP_VAR, "Invalid syntax, implicit equi-joins on group variable `{}` are prohibited");
+        EMSG(INVALID_SYNTAX_VAR_TYPE_ERROR, "Invalid syntax, type of Variable `{}` is not {}");
+        EMSG(INVALID_SYNTAX_VAR_NOT_DEFINED, "Invalid syntax, variable `{}` not defined");
+        EMSG(INVALID_SYNTAX_INSERT_BOUND_NODE, "Invalid syntax, cannot insert bound node `{}`");
+        EMSG(INVALID_SYNTAX_VAR_INVALID_NODE_TYPE, "Invalid syntax, `{}` does not refer to a valid node type");
+        EMSG(INVALID_SYNTAX_VAR_REFER_MULTIPLE_NODE_TYPE, "Invalid syntax, `{}` shouldn't refer to multiple node types");
+        EMSG(INVALID_SYNTAX_REDEFINED_VAR, "Invalid syntax, redefined variable: `{}`");
+        EMSG(INVALID_SYNTAX_CONFLICT_VAR_TYPE, "Invalid syntax, redefined variable: `{}` with conflict type(`{}` vs `{}`)");
+        EMSG(INVALID_SYNTAX_YIELD_ITEM_TYPE, "Invalid syntax, yield item should be NODE, EDGE or PATH type");
+        EMSG(INVALID_SYNTAX_MULTIPLE_NODE_INSERT, "Invalid syntax, cannot insert node `{}` more than once");
+        EMSG(INVALID_SYNTAX_DUPLICATED_PROPERTY_NAME, "Invalid syntax, duplicate property names in `{}`");
+        EMSG(INVALID_SYNTAX_DUPLICATED_INDEX_PROPERTY, "Invalid syntax, duplicate index property names in `{}`");
+        EMSG(INVALID_SYNTAX_ALTER_ELEMENT_MULTI_TIME, "Invalid syntax, `{}` cannot occur more than once in an alter graph type statement.");
+        EMSG(INVALID_SYNTAX_ADD_PRIMARY_KEY_OR_MULTI_EDGE_KEY, "Invalid syntax, adding PRIMARY KEY or MULTI EDGE KEY `{}` is not allowed.");
+        EMSG(INVALID_SYNTAX_ADD_INVALID_PROPERTY, "Invalid syntax, add not nullable property {} without default value is not allowed.");
+        EMSG(INVALID_SYNTAX_ILLEGAL_BYTE_STRING, "Invalid syntax, illegal byte string: {}");
+        EMSG(INVALID_SYNTAX_LABEL_EXPR_ELEMENT_TYPE_EXPR_COEXIST, "Invalid syntax, label expression and type expression cannot coexist in single {} pattern `{}`");
+        EMSG(INVALID_SYNTAX_FIELD_NUMBER_MISMATCH, "Invalid syntax, the number of fields in `{}` does not match with `{}`.");
+        EMSG(INVALID_SYNTAX_FIELD_NOT_FOUND, "Invalid syntax, field `{}` not found in table.");
+        EMSG(INVALID_IDENTIFIER, "Invalid syntax, illegal identifier: `{}`, error: {}");
+        EMSG(INVALID_SYNTAX_OPTION_REDEFINITION, "Invalid syntax, multiple {} options for {} `{}` are not allowed.");
+        EMSG(INVALID_SYNTAX_ILLEGAL_OPTION, "Invalid syntax, option {} cannot used for {} `{}`.");
+        EMSG(INCONSISTENT_QUERY_CONJUNCTION, "Invalid syntax, all directly contained query conjunctions within a composite query expression must be the same");
+
+        // MUTATE
+        EMSG(DEPENDENT_OBJECT_ERROR, "Dependent object error, node {} can not be deleted, {} edge connected");
+        EMSG(PRIMARY_KEY_CONSTRAINT_VIOLATION, "Insert node failed, primary key constraint violation for node `{}`");
+        EMSG(MULTIEDGE_KEY_CONSTRAINT_VIOLATION, "Insert edge failed, multi-edge key constraint violation for edge `{}`");
+        EMSG(NODE_IS_MISSING, "Insert edge failed, node `{}` is missing.");
+        EMSG(GET_NODE_ID_FROM_PRIMARY_KEY_FAILED, "Get node id from primary key failed : in part={}, nodeType={}, primary key first={}");
+        EMSG(MULTI_GET_NODE_ID_FROM_PRIMARY_KEY_FAILED, "Get id from primary keys failed in part {}");
+        EMSG(SRC_NODE_NOT_EXISTED, "Source node not existed");
+        EMSG(DST_NODE_NOT_EXISTED, "Destination node not existed");
+        EMSG(SET_INVALID_TYPE, "The type of element {} updated in the set statement must be Node or Edge");
+        EMSG(NODE_ALREADY_EXIST, "Node already exist, id: `{}`");
+        EMSG(ENDPOINT_NODE_IS_DELETED, "Endpoint node is deleted");
+        EMSG(ENDPOINT_NODE_NOT_IN_CURRENT_WORKING_GRAPH, "Endpoint node is not in current working graph");
+        EMSG(EDGES_STILL_EXIST, "Edges still exist");
+
+        EMSG(GRAPH_TYPE_VIOLATION, "Graph type violation: {}");
+
+        // TODO (codesigner) return edge key
+        EMSG(EDGE_ALREADY_EXIST, "Edge already exist");
+
+        // STORAGE
+        EMSG(STORAGE_EXECUTOR_PARAMETER_INVALID, "Storage executor invalid parameter");
+        EMSG(STORAGE_EXECUTOR_PARAMETER_TYPE_INVALID, "{} should be int64, but got: `{}`, value: `{}`");
+        EMSG(STORAGE_CODEC_PROPERTY_NOT_NULLABLE, "Property not nullable: {}");
+        EMSG(STORAGE_CODEC_PROPERTY_NOT_SET, "Property not set: {}");
+        EMSG(STORAGE_CODEC_PROPERTY_NOT_FOUND, "Property not found: {}");
+        EMSG(STORAGE_CODEC_PROPERTY_TYPE_NOT_MATCH, "Property type not match, property: `{}`:`{}`, got: `{}`");
+        EMSG(STORAGE_CODEC_PROPERTY_UNABLE_TO_ENCODE, "Property type unable to encode: `{}`");
+        EMSG(STORAGE_CODEC_PROPERTY_OUT_OF_RANGE, "Property out of range, property: `{}`:`{}` got: `{}`");
+        EMSG(STORAGE_CODEC_PROPERTY_LIST_NEST_TYPE_NOT_FOUND, "Property list nested property not found: {}");
+        EMSG(STORAGE_CODEC_INDEX_CORRUPTION_NO_TERMINATOR, "Index corruption: no terminator found");
+        EMSG(STORAGE_CODEC_INDEX_PROPERTY_NOT_REQUIRED, "Index property not required");
+        EMSG(STORAGE_CODEC_INDEX_PROPERTIES_ILLEGAL, "Index property type illegal");
+        EMSG(STORAGE_CODEC_INDEX_ILLEGAL, "Index corruption: index illegal");
+        EMSG(STORAGE_CODEC_INDEX_PROPERTIES_ILLEGAL_PROPERTY_NOT_EXIST, "The required property does not exist in index: {}");
+        EMSG(STORAGE_CODEC_INDEX_ILLEGAL_NOT_RESERVED_PROPERTY, "`{}` is not a reserved properties");
+        EMSG(STORAGE_CODEC_DECODE_FAILED, "Storage codec decode failed: {}");
+        EMSG(STORAGE_CODEC_WRITE_VECTOR_FAILED, "Storage codec write vector failed: {}");
+
+        EMSG(KVSTORE_ERROR, "kvstore error: {}");
+        EMSG(KVSTORE_OPEN_FAILED, "Open kvstore failed: {}");
+        EMSG(KVSTORE_LOCK_FAILED, "KVStore lock failed");
+        EMSG(KVSTORE_COLUMN_FAMILY_NOT_FOUND, "KVStore column family `{}` not found");
+        EMSG(KVSTORE_INGEST_FAILED, "KVStore ingest failed");
+        EMSG(KVSTORE_SET_OPTION_FAILED, "KVStore set option `{}` failed");
+        EMSG(KVSTORE_GET_PROPERTY_FAILED, "KVStore get property `{}` failed");
+        EMSG(KVSTORE_COMPACT_FAILED, "KVStore compact failed");
+        EMSG(KVSTORE_FLUSH_FAILED, "KVStore flush failed");
+        EMSG(KVSTORE_CHECKPOINT_FAILED, "KVStore checkpoint failed, {}");
+        EMSG(KVSTORE_BATCH_WRITE_FAILED, "KVStore batch write failed");
+        EMSG(KVSTORE_COMMIT_FAILED, "KVStore commit failed");
+        EMSG(KVSTORE_KEY_NOT_FOUND, "KVStore key not found");
+        EMSG(KVSTORE_GET_FAILED, "KVStore get failed");
+        EMSG(KVSTORE_PUT_FAILED, "KVStore put failed");
+        EMSG(KVSTORE_REMOVE_FAILED, "KVStore remove failed");
+        EMSG(KVSTORE_EXPORT_TABLE_FAILED, "KVStore export table failed, {}");
+        EMSG(KVSTORE_OPEN_SST_FAILED, "KVStore open sst file `{}` failed");
+        EMSG(KVSTORE_PREFIX_INVALID, "KVStore prefix is invalid");
+        EMSG(KVSTORE_OPTIONS_INVALID, "");
+
+        EMSG(RAFT_BUSY, "Raft busy");
+        EMSG(RAFT_INVALID_PEER, "Raft invalid peer");
+        EMSG(RAFT_LEADER_CONFLICT, "Raft leader conflict");
+        EMSG(RAFT_CATCHUP, "");
+        EMSG(RAFT_TRANSFER_LEADER, "");
+        EMSG(RAFT_TIMEOUT, "");
+        EMSG(RAFT_NEW_LEADER, "");
+        EMSG(RAFT_SET_PEER, "");
+        EMSG(RAFT_FAILED, "");
+        EMSG(RAFT_HIGHER_TERM_REQUEST, "");
+        EMSG(RAFT_HIGHER_TERM_RESPONSE, "");
+        EMSG(RAFT_STOP, "");
+        EMSG(RAFT_NODE_STOP, "");
+        EMSG(RAFT_BAD_NODE, "");
+        EMSG(RAFT_VOTE_FOR_CANDIDATE, "");
+        EMSG(RAFT_RPC_EXCEPTION, "");
+        EMSG(RAFT_INVALID, "");
+        EMSG(RAFT_LEADER_REMOVED, "");
+
+        // CONFIGURATION
+        EMSG(CONFIGURATION_INVALID, "Configuration invalid: `{}`");
+        EMSG(CONFIGURATION_ITEM_NOT_FOUND, "Configuration item `{}` not found");
+        EMSG(CONFIGURATION_ITEM_TYPE_INVALID, "Invalid config value type `{}` for key `{}`, expect `{}`");
+        EMSG(CONFIGURATION_ITEM_RANGE_INVALID, "Invalid config value `{}`, valid range: `{}` for key `{}`");
+        EMSG(CONFIGURATION_INFO_FILE_FORMAT_ILLEGAL, "Info file format illegal");
+        EMSG(CONFIGURATION_INVALID_CONFIG_KEY, "Invalid config key `{}`");
+        EMSG(CONFIGURATION_INVALID_AUDIT_CATEGORY, "Invalid audit log category `{}`");
+        EMSG(CONFIGURATION_MISSING_CONFIG_KEY, "Missing `{}` configuration");
+        EMSG(CONFIGURATION_ILLEGAL_FORMAT, "Configuration illegal format: {}");
+
+        // PROCEDURE
+        EMSG(PROCEDURE_ERROR, "Procedure error: {}");
+        EMSG(PROCEDURE_NOT_FOUND, "Procedure `{}` not found");
+        EMSG(PROCEDURE_INVALID_ARGUMENT, "Invalid argument for procedure `{}`: {}");
+        EMSG(PROCEDURE_INVALID_ARGUMENT_ENCODE, "Invalid encoding of `{}` argument: `{}`, expect encoding:`{}`, error: {}");
+        EMSG(PROCEDURE_YIELD_COLUMN_ERROR, "The yield column `{}` of procedure `{}` conflicts with previous variables. Please use a unique alias to distinguish them");
+        EMSG(PROCEDURE_UNKNOWN_YIELD_COLUMN, "Unknown yield column `{}` for procedure `{}`");
+        EMSG(GET_PART_ROUTER_FAILED, "Get partition router failed");
+        EMSG(GET_META_CLIENT_FAILED, "Get meta client failed");
+
+        EMSG(INVALID_PARAMETER, "Invalid parameter: {}");
+        // META
+        EMSG(META_CLUSTER_ALREADY_EXISTS, "Cluster already exists: {}");
+        EMSG(META_CLUSTER_NOT_FOUND, "Cluster not found: {}");
+        EMSG(META_CLUSTER_NAME_INVALID, "Cluster name is invalid");
+        EMSG(META_GET_KV_PREFIX_FAILED, "MetaStore::prefix failed");
+        EMSG(META_SERVICE_HOST_NOT_ADDED, "No matched service from host: {}");
+        EMSG(META_SERVICE_ALREADY_EXISTS, "Service for host already exists");
+        EMSG(META_HOST_ALREADY_EXISTS, "Host already exists: {}");
+        EMSG(META_HOST_NOT_FOUND, "Host not found: {}");
+        EMSG(META_AGENT_ALREADY_EXISTS, "Agent already exists: {}");
+        EMSG(META_SERVICE_STATIC_PORT_ALREADY_EXISTS, "Service with static port already exists");
+        EMSG(META_SERVICE_DYNAMIC_PORT_ALREADY_EXISTS, "Service with dynamic port already exists");
+        EMSG(META_FAILED_ADD_SERVICE, "Failed to add service: {}");
+        EMSG(META_PUT_SERVICE_ADDRESS_FAILED, "Put service address failed");
+        EMSG(META_LIST_SERVICE_FAILED, "List services failed");
+        EMSG(META_SERVICE_REPORT_NOT_MATCH_ADDED, "Report service not match added");
+        EMSG(META_PART_CONFIG_INVALID, "Can't find proper replica number under given parts per service config");
+        EMSG(META_NOT_ENOUGH_LOCATION, "No enough services({}) to hold replica({})");
+        EMSG(META_NOT_SUPPORTED, "Meta not support, Unknown opType: {}");
+        EMSG(META_NOT_INIT, "Meta not init");
+        EMSG(META_SERVICE_NOT_FOUND, "Service not found: {}");
+        EMSG(META_SERVICE_NOT_ADDED, "Service not added");
+        EMSG(META_SERVICE_IN_USE, "Service is in part");
+        EMSG(META_SERVICE_NOT_IN_CLUSTER, "Service not in cluster");
+        EMSG(META_PART_ALREADY_EXIST, "Meta Part {} already exist");
+        EMSG(META_PART_LEADER_NOT_ENOUGH, "Meta Part with leader not enough");
+        EMSG(META_PART_NOT_ENOUGH, "Meta Part not enough");
+        EMSG(META_ACTIVE_SERVICE_NOT_ENOUGH, "Active service not enough");
+        EMSG(META_CANNOT_FIND_SERVICE, "Can't find service: {}");
+        EMSG(META_SERVICE_ID_ERROR, "Failed to fetch service id from meta: {}");
+        EMSG(META_UNSUPPORTED_SERVICE, "Unsupported service type");
+        EMSG(META_SERVICE_FAIL_TO_ALLOC_ID, "Failed to allocate service id: {}");
+        EMSG(META_CLUSTER_IS_NOT_EMPTY, "Cluster is not empty: `{}`");
+        EMSG(META_RESP_NOT_SET, "");
+        EMSG(META_INSUFFICIENT_SERVICE, "Meta insufficient service");
+        EMSG(META_WRITE_KV_FAILED, "");
+        EMSG(META_NO_PART, "There is no part, may be need init");
+        EMSG(META_BALANCE_PART_RUNNING, "Meta balance part is running");
+        EMSG(META_BALANCE_LEADER_RUNNING, "Meta balance leader is running");
+
+        // UNSUPPORTED
+        EMSG(UNSUPPORTED, "Unsupported: {}");
+        EMSG(UNSUPPORTED_NODE_TYPE_WITHOUT_PRIMARY_KEY, "Unsupported, node type without primary key: `{}`");
+        EMSG(UNSUPPORTED_GRAPH_TYPE_SOURCE, "Unsupported graph type source: `{}`");
+        EMSG(UNSUPPORTED_EDGE_DIRECTION, "Unsupported edge direction: `{}`");
+        EMSG(UNSUPPORTED_MODIFY_PRIMARY_KEY, "Modifying the primary key is not supported, node type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_MODIFY_MULTIEDGE_KEY, "Modifying the multiedge key is not supported, edge type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_MODIFY_PROPERTY_USED_BY_INDEX, "Modifying property used by index is not supported, element type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_MODIFY_PROPERTY_NULLABLE_TO_NON_NULLABLE, "Modifying the property from nullable to non-nullable is not supported, element type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_DEFINE_DEFAULT_VALUE_ON_PRIMARY_KEY, "Defining default value on primary key is not supported, node type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_DEFINE_DEFAULT_VALUE_ON_MULTIEDGE_KEY, "Defining default value on multiedge key is not supported, edge type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_NULLABLE_PRIMARY_KEY, "Primary key must be not nullable, node type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_NULLABLE_MULTIEDGE_KEY, "Multiedge key must be not nullable, edge type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_PRIMARY_KEY, "Unsupported primary key type of `{}` in node type `{}`");
+        EMSG(UNSUPPORTED_MULTIEDGE_KEY, "Unsupported multiple edge key of `{}` in edge type `{}`");
+        EMSG(UNSUPPORTED_INSERT_EDGE_STATEMENT, "InsertEdge Statement doesn't support pattern like `{}`");
+        EMSG(UNSUPPORTED_INSERT_NODE_STATEMENT, "InsertNode Statement doesn't support pattern like `{}`");
+        EMSG(UNSUPPORTED_DATE_MODIFY_STATEMENT, "Adding any statement after data modify statement is not supported.");
+        EMSG(UNSUPPORTED_MULTIPLE_PATH_PATTERN, "Not supported path pattern with more than one path term");
+        EMSG(UNSUPPORTED_PATH_FACTOR, "Not supported path factor: {}");
+        EMSG(UNSUPPORTED_UPDATE_PRIMARY_KEY, "Updating the primary key is not supported, node type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_SET_ALL_SET_LABEL, "SetAllProperties and kSetLabel are not supported yet");
+        EMSG(UNSUPPORTED_UPDATE_MULTIEDGE_KEY, "Updating the multiedge key is not supported, edge type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_UPDATE_VECTOR_PROPERTY, "Updating the vector type property is not supported, element type: `{}`, property name: `{}`");
+        EMSG(UNSUPPORTED_TRIM_NON_ASCII_CHAR, "Trim functions with custom trim characters and non-ASCII inputs are not supported yet");
+        EMSG(UNSUPPORTED_TYPE_GET_PROP, "ValueType {} can't get property");
+        EMSG(UNSUPPORTED_AGGREGATION_EXPRESSION_NESTED, "Unsupported, aggregate expressions cannot be nested: `{}`");
+        // TODO (jie.wang) refine error message
+        EMSG(AGGREGATION_EXPRESSION_NOT_ALLOWED, "Aggregate function `{}` is not allowed in this context");
+        EMSG(UNDEFINED_AGG_FUNCTION, "Unknown aggregate function `{}`");
+        EMSG(UNSUPPORTED_CHARSET, "Charset `{}` not support");
+        EMSG(UNSUPPORTED_COLLATION, "Collation `{}` not support");
+        EMSG(UNSUPPORTED_CHARSET_COLLATION_NOT_MATCH, "Charset `{}` and Collation `{}` not match");
+        EMSG(UNSUPPORTED_AGGREGATION_EXPRESSION, "Unsupported, aggregate expressions: `{}`");
+
+        // SESSION
+        EMSG(SESSION_ERROR, "Session error: {}");
+        EMSG(QUERY_ID_NOT_FOUND, "Query id not found: {}");
+        EMSG(SESSION_NOT_FOUND, "Session not found: {}");
+        EMSG(SESSION_IS_BUSY, "Session is busy, running query id: {}");
+        EMSG(KILL_QUERY_FAILED, "Kill query failed: {}");
+        EMSG(QUERY_TIMEOUT, "Query was killed because timeout.");
+        EMSG(KILL_SESSION_FAILED, "Kill session failed: {}");
+
+        // CONNECTOR
+        EMSG(CONNECTOR_PLUGIN_NOT_FOUND, "Connector plugin not found {}");
+
+        // CONFIG
+        EMSG(CONFIG_ERROR, "Config error: {}");
+        EMSG(CONFIG_NOT_EXIST, "Config `{}` not exist");
+        EMSG(CONFIG_TYPE_ERROR, "Config `{}` required type {}, but got {}");
+        EMSG(CONFIG_DATA_ERROR, "Config data error: {}");
+        EMSG(CONFIG_SET_SCOPE_ERROR, "Config `{}` cannot be set by {}");
+        EMSG(CONFIG_DEPRECATED, "Config `{}` has been deprecated");
+        EMSG(CONFIG_IMMUTABLE, "Config `{}` is immutable");
+
+        // ANALYTIC
+        EMSG(ANALYTIC_ERROR, "Analytic error: {}");
+        EMSG(ANALYTIC_COMMUNICATION_ERROR, "Analytic communication error: {}");
+        EMSG(ANALYTIC_INVALID_PARTITION_METHOD, "Analytic error, invalid partition method: {}");
+        EMSG(ANALYTIC_TASK_ERROR, "Analytic error, task on {} failed, error:{}");
+        EMSG(ANALYTIC_LOG_EXCEED_LIMIT, "Analytic error, log exceed max size: {}");
+        EMSG(ANALYTIC_WORKER_EXIST, "Analytic error, worker {} already exist");
+        EMSG(ANALYTIC_WORKER_NOT_FOUND, "Analytic error, worker {} not found");
+        EMSG(ANALYTIC_READER_ERROR, "Analytic reader error: {}");
+        EMSG(ANALYTIC_ACCUMULATOR_NOT_FOUND, "Analytic error, accum {} not found");
+        EMSG(ANALYTIC_ACCUMULATOR_EXIST, "Analytic error, accum {} already exist");
+
+
+        // GRAPH COMPUTING
+        EMSG(GRAPH_COMPUTE_ERROR, "Graph compute error: {}");
+        EMSG(EDGE_PROPERTY_NOT_FOUND, "Algorithm `{}`, edge property not found: {}");
+        EMSG(INVALID_EDGE_DISTANCE, "Algorithm `{}`, invalid edge distance: {}");
+
+        // PLUGIN
+        EMSG(PLUGIN_ERROR, "Plugin error: {}");
+        EMSG(UDF_ERROR, "UDF error: {}");
+        EMSG(PLUGIN_INVALID_TYPE, "Invalid plugin type `{}` for {}");
+        EMSG(PLUGIN_MULTIPLE_PLUGIN, "Multiple plugins found, {} found for {}");
+        EMSG(PLUGIN_CONFIG_NOT_FOUND, "Plugin `{}`, configuration not found: `{}`");
+        EMSG(PLUGIN_CONFIG_PARSE_ERROR, "Plugin `{}`, parse configuration error: `{}`");
+        EMSG(PLUGIN_INIT_ERROR, "Plugin `{}`, init error: `{}`");
+        EMSG(PLUGIN_DESTROY_ERROR, "Plugin `{}`, destroy error: `{}`");
+        EMSG(PLUGIN_UNSUPPORT_AUTH_TYPE, "Unsupported authentication plugin: {}");
+        EMSG(REPORT_PLUGIN_STATUS_FAILED, "The service `{}` failed to report plugin status: {}");
+        EMSG(GET_PLUGIN_STATUS_FAILED, "Get plugin status failed: {}");
+
+        // MODULE
+        EMSG(MODULE_ERROR, "Module error: {}");
+        EMSG(MODULE_ALREADY_LOADED, "Module already loaded: `{}`");
+        EMSG(MODULE_NOT_FOUND, "Module not found: `{}`");
+        EMSG(MODULE_BEING_USED, "Module is being used: `{}`");
+        EMSG(MODULE_INVALID_PROC_NAME, "Invalid procedure name: `{}`");
+        EMSG(MODULE_INVALID_FUNC_NAME, "Invalid function name: `{}`");
+        EMSG(MODULE_INVALID_PLUGIN_NAME, "Invalid plugin name: `{}`");
+        EMSG(MODULE_INVALID_PLUGIN_API_VERSION, "Invalid plugin api version: `{}`");
+        EMSG(MODULE_INVALID_NULL_PLUGIN, "Invalid null plugin");
+        EMSG(MODULE_INVALID_REGISTER, "Invalid register `{}` for module: `{}`");
+        EMSG(MODULE_DLOPEN_ERROR, "Module dlopen failed: {}");
+        EMSG(MODULE_CANNOT_UNLOAD, "The Module `{}` can not be unloaded or reloaded");
+
+        // Authenticate
+        EMSG(AUTH_INVALID_PASSWORD, "The password must be at least 8 characters long and should include at least one digit, one lowercase letter, and one uppercase letter");
+        EMSG(AUTH_USER_EXIST, "User `{}` exist");
+        EMSG(AUTH_USER_NOT_EXIST, "User `{}` not exist");
+        EMSG(AUTH_USER_DISABLED, "User `{}` disabled");
+        EMSG(AUTH_USER_LOCKED, "Login blocked for {} seconds due to too many failed attempts");
+        EMSG(AUTH_INVALID_USERNAME, "The username should be between 4 and 32 characters in length and can only include letters, numbers, and underscores");
+        EMSG(AUTH_INVALID_USERNAME_OR_PASSWORD, "Authenticate error: invalid username or password");
+        EMSG(AUTH_CANNOT_DISABLE_SYSTEM_USER, "Authenticate error: cannot disable system user");
+        EMSG(AUTH_DROP_ROOT_ERROR, "Authenticate error: cannot drop system user `root`");
+        EMSG(AUTH_NEED_CHANGE_PASSWORD, "Authenticate error: need to change password");
+        EMSG(AUTH_INVALID_AUTH_INFO, "Authenticate error: invalid config {}");
+        EMSG(AUTH_INVALID_TOKEN, "Authenticate error: invalid token");
+        EMSG(AUTH_INIT_ERROR, "AuthenticatorManager init error: `{}`");
+
+        // Authorization
+        EMSG(AUTHORIZE_ERROR, "Authorization error: `{}`");
+        EMSG(AUTHORIZE_INVALID_ROLENAME, "Authorization error: The role name should be between 4 and 32 characters in length and can only include letters, numbers, and underscores");
+        EMSG(AUTHORIZE_INVALID_OBJECT, "Authorization error: Invalid object name `{}`");
+        EMSG(AUTHORIZE_ROLE_EXIST, "Role `{}` exist");
+        EMSG(AUTHORIZE_ROLE_NOT_EXIST, "Role `{}` not exist");
+        EMSG(AUTHORIZE_USER_EXIST, "User `{}` exist in current cluster");
+        EMSG(AUTHORIZE_USER_NOT_EXIST, "User `{}` not exist in current cluster");
+        EMSG(AUTHORIZE_INSUFFICIENT_PRIVILEGE, "Insufficient privilege: `{}`");
+        EMSG(AUTHORIZE_CONSTRAINT, "Invalid action `{}` on `{}`");
+        EMSG(AUTHORIZE_TOO_MANY_ROLES, "Exceeded maximum number of roles for user: {}");
+        EMSG(AUTHORIZE_TOO_LONG_COMMENT, "Exceeded maximum length of comment for role: {}");
+        EMSG(AUTHORIZE_SHOW_ROLE_ERROR, "Only ADMIN or User {} can execute SHOW ROLES FOR USER {}");
+        EMSG(AUTHORIZE_SHOW_PRIVILEGE_ERROR, "Only ADMIN or User {} can execute SHOW PRIVILEGES FOR USER {}");
+        EMSG(AUTHORIZE_ALTER_OWNER_ERROR, "Only ADMIN or object's owner can execute ALTER OWNER");
+
+        // Session
+        EMSG(CREATE_SESSION_FAILED, "Failed to create session, {}");
+        EMSG(UNSUPPORTED_PROTOCOL_VERSION, "Your client protocol version({}) is unsupported. Please use one of the following supported protocol version clients to access: {}.");
+        EMSG(INVALID_SYNTAX_NEST_QUERY_RETURN_ITEM_ERROR, "Invalid syntax, result in value query expression should contain exactly one column");
+
+        // RPC
+        EMSG(RPC_FAILED, "RPC failed, {}");
+        EMSG(RPC_REQUEST_INVALID, "{}");
+        EMSG(RPC_RETRY_FAILED, "RPC retry failed, {}");
+        EMSG(RPC_DESERIALIZE_ERROR, "");
+        EMSG(RPC_REQUEST_HANDLER_NOT_FOUND, "");
+        EMSG(RPC_DESERIALIZE_OBJECT_TYPE_ERROR, "RPC deserialize error, unknown object type: `{}` ");
+        EMSG(RPC_STORAGE_SERVICE_NOT_FOUND, "Storage service not found, service id: {}");
+
+        // SYSTEM
+        EMSG(SYSTEM_ERROR, "System error: {}");
+        EMSG(STATS_ERROR, "");
+        EMSG(NO_VALIDATOR, "No validator implemented for `{}`");
+        EMSG(QUERY_CANCELED, "Query is canceled by user");
+
+        EMSG(FILE_ERROR, "");
+        EMSG(FILE_CREATE_DIR_FAILED, "Create `{}` directory failed");
+        EMSG(FILE_READ_SERVICE_ID_FILE_ERROR, "Failed to read service id file");
+        EMSG(FILE_PARSE_SERVICE_ID_FILE_ERROR, "Failed to parse service id file");
+        EMSG(FILE_SAVE_SERVICE_ID_FILE_ERROR, "Failed to save service id to file");
+        EMSG(FILE_REMOVE_DIR_FAILED, "Remove `{}` directory failed");
+        EMSG(FILE_NOT_FOUND, "File not found: `{}`");
+        EMSG(FILE_IS_EMPTY, "File is empty: `{}`");
+        EMSG(FILE_READ_PERMISSION, "No permission to read file `{}`");
+        EMSG(FILE_READ_LINK, "Read link failed {}: {}");
+        EMSG(FILE_READ_PATH, "Read path failed {}: {}");
+        EMSG(FILE_OPEN_DIR, "Open dir failed `{}`: {}");
+        EMSG(FILE_OPEN_FILE, "Open file failed `{}`: {}");
+        EMSG(FILE_TYPE_NOT_SUPPORT, "File type not supported `{}`: {}");
+        EMSG(FILE_FILE_STATE, "Get file state failed of `{}`");
+
+        EMSG(MEMORY_ERROR, "");
+        EMSG(MEMORY_EXCEEDED, "Memory exceeded");
+        EMSG(MEMORY_CONFIG_ERROR, "Configured max memory {} MiB, exceed system total memory {}");
+        EMSG(MEMORY_BACKGROUND_CHECK, "Memory background thread start failed");
+        EMSG(MEMORY_SYSTEM_INFO, "Read system memory info from /proc/meminfo failed");
+        EMSG(MEMORY_VECTOR_INVALID_SIZE, "Invalid vector size, which should be [0, 134217727], but got {}");
+
+        EMSG(NETWORK_ERROR, "Network error: {}: {}");
+        EMSG(NETWORK_CREATE_SOCKET, "Create socket failed: {}");
+        EMSG(NETWORK_UNKNOWN_ADDR, "Unknown address family: {}");
+        EMSG(NETWORK_BIND_FAILED, "Failed to bind on {}: {}");
+        EMSG(NETWORK_LISTEN_FAILED, "Failed to listen on {}: {}");
+        EMSG(NETWORK_NBIO_STOPPED, "NBIO is not started or has been stopped");
+        EMSG(NETWORK_CONN_CLOSED, "{}: Connection closed by remote host");
+        EMSG(NETWORK_PROTOCOL, "{}: Protocol Error");
+        EMSG(NETWORK_TIMEOUT, "Timeout");
+        EMSG(NETWORK_DISCONNECTED, "{}: Connection was disconnected");
+        EMSG(NETWORK_ADDR_NOT_FOUND, "No IPv4 address found for `{}`");
+        EMSG(NETWORK_INVALID_HOST, "Invalid host address: {}");
+        EMSG(NETWORK_TLS_ERROR, "{}");
+
+        EMSG(READ_METRIC_FAILED, "Read metric {} failed");
+
+        EMSG(THREAD_ERROR, "");
+        EMSG(THREAD_CREATE_FAILED, "Failed to create thread: {}");
+
+        EMSG(JOB_ERROR, "JOB_ERROR: `{}`");
+        EMSG(JOB_TYPE_UNKNOWN, "Job type unknown: `{}`");
+        EMSG(JOB_NOT_FOUND, "Can't find job: `{}`");
+        EMSG(JOB_TASK_NOT_FOUND, "Can't find task {} of job {}");
+        EMSG(JOB_IS_NOT_RUNNING, "Job is not running: `{}`");
+        EMSG(JOB_DESCRIPTION_INVALID, "Job description invalid: `{}`");
+        EMSG(JOB_ALREADY_STOPPED, "Job has already stopped: `{}`");
+        EMSG(JOB_MANAGER_NOT_RUNNING, "JobManager is not running, please try again later");
+        EMSG(JOB_TASK_NOT_ACTIVE, "Task {} of job {} is not active");
+
+        EMSG(TASK_NOT_FOUND_IN_STORAGE, "Task {} of job {} is not found in storage");
+        EMSG(TASK_STOPPED, "Task {} of job {} is stopped");
+        EMSG(TASK_STILL_RUNNING, "Task {} of job {} is still queuing or running");
+        EMSG(TASK_REPORT_FAILED, "Task {} of job {} reports to meta failed: `{}`");
+
+        // LICENSE
+        EMSG(LICENSE_QUOTA_EXCEEDED, "License quota exceeded: {}");
+        EMSG(LICENSE_EXPIRED, "License expired error: {}");
+        EMSG(LICENSE_MANAGER_ERROR, "License Manager error: {}");
+        EMSG(LICENSE_INVALID, "Invalid license: {}");
+        EMSG(LICENSE_ENCRYPTION_ERROR, "License encryption error: {}");
+        EMSG(LOAD_LM_RESP_FROM_KV_FAILED, "Failed to load License Manager response from meta store: {}");
+
+        // Optimizer
+        EMSG(PLAN_GENERATE_FAILED, "Execution plan generation failed due to disabled optimizer rules. Check configs or consult documentation");
+
+        // Backup
+        EMSG(BACKUP_ERROR, "Backup error: {}");
+        EMSG(BACKUP_RECORD_EXISTS, "A valid backup with same name already exists: `{}`");
+        EMSG(BACKUP_RUNNING_JOBS, "Cannot do backup now, some conflict jobs are running");
+        EMSG(BACKUP_META_TABLE_EMPTY, "Meta table `{}` is empty");
+        EMSG(BACKUP_LOST_PART, "Some parts are lost, should be {}, actually {}");
+        EMSG(BACKUP_DUPLICATE_PART, "Part {} is duplicate backed up");
+        EMSG(BACKUP_RESTORE_INVALID_REQUEST, "Invalid Restore request: {}");
+        EMSG(BACKUP_REMAP_PART_FAILED, "Part info does not match when restore");
+        EMSG(BACKUP_RESTORE_TABLE_FAILED, "Restore table failed: {}");
+        EMSG(BACKUP_DROP_NAME_EMPTY, "Empty backup name to drop");
+        EMSG(BACKUP_DROP_NAME_NOT_EXIST, "Backup name `{}` doesn't exist");
+
+        // UNKNOWN
+        EMSG(UNKNOWN, "Unknown error: {}");

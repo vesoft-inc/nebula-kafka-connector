@@ -6,7 +6,12 @@
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -15,144 +20,257 @@ import java.util.regex.Pattern;
  * definition
  */
 public class ErrorCodeGenerate {
-
     public static void main(String[] args) throws IOException {
+        String          codeFileName      = args[0];
+        String          codeclassFileName = args[1];
+        String          messageFileName   = args[2];
+        List<ErrorCode> codes             = constructErrorCode(codeFileName, codeclassFileName, messageFileName);
+        List<ErrorCode> codesWithInternalError = update(codes);
+        writeCodeForJava(codesWithInternalError);
+        writeCodeForGo(codesWithInternalError);
+        writeCodeForYaml(codesWithInternalError);
+        System.out.println("Finished.");
+    }
 
-        String codeFileName = args[0];
-        String client = args[1];
-        if (client == null) {
-            client = "java";
-        }
-        Pattern pattern = Pattern.compile("DEFINE_ERRORCODE\\((.*), \"(.*)\", (.*?)\\),");
 
-        File file = new File(codeFileName);
-        FileReader fr = new FileReader(file);
-        BufferedReader br = new BufferedReader(fr);
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            String error = line.trim();
-            if (error.isEmpty() || error.startsWith("//")) {
-                // System.out.println();
-                continue;
+    public static void writeCodeForJava(List<ErrorCode> codes) {
+        String     javaCodeFile = "errorcode_java.txt";
+        FileWriter writer       = null;
+        try {
+            writer = new FileWriter(javaCodeFile);
+            for (ErrorCode code : codes) {
+                String codeString = String.format("%s(\"%s\"),\n", code.getName(), code.getCode());
+                writer.write(codeString);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+    }
 
-            Matcher matcher = pattern.matcher(error);
-            if (matcher.find()) {
-                String errorPrefix = getCodePrefix(matcher.group(1));
-                if (errorPrefix == null) {
+
+    public static void writeCodeForGo(List<ErrorCode> codes) {
+        String     javaCodeFile = "errorcode_golang.txt";
+        FileWriter writer       = null;
+        try {
+            writer = new FileWriter(javaCodeFile);
+            for (ErrorCode code : codes) {
+                String codeString = String.format("ERROR_%s ErrorCode = \"%s\"\n", code.getName(), code.getCode());
+                writer.write(codeString);
+            }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+    public static void writeCodeForYaml(List<ErrorCode> codes) {
+        String javaCodeFile = "errorcode_yaml.txt";
+
+        StringBuilder sb = new StringBuilder();
+        for (ErrorCode code : codes) {
+            sb.append("- name: ").append(code.getName()).append("\n");
+            sb.append("  code: ").append(code.getCode()).append("\n");
+            sb.append("  msg: ").append(code.getMessage()).append("\n");
+        }
+        FileWriter writer = null;
+        try {
+            writer = new FileWriter(javaCodeFile);
+            writer.write(sb.toString());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (writer != null) {
+                try {
+                    writer.flush();
+                    writer.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+        }
+    }
+
+
+    public static List<ErrorCode> constructErrorCode(String codePath, String codeclassPath, String messageFilePath) {
+
+        Map<String, String> codeClassPrefix = getCodePrefix(codeclassPath);
+        Map<String, String> codeNameMessage = getCodeMessage(messageFilePath);
+        return getErrorCodes(codePath, codeClassPrefix, codeNameMessage);
+    }
+
+
+    public static List<ErrorCode> getErrorCodes(String filePath,
+                                                Map<String, String> codeClassPrefix,
+                                                Map<String, String> codeNameMessage) {
+        List<ErrorCode> errorCodes = new ArrayList<>();
+        try {
+            // read errorcode file and construct ErrorCode struct
+            Pattern pattern = Pattern.compile("DEFINE_ERRORCODE\\((.*), \"(.*)\", (.*?)\\),");
+
+            File           file = new File(filePath);
+            FileReader     fr   = new FileReader(file);
+            BufferedReader br   = new BufferedReader(fr);
+            String         line;
+            while ((line = br.readLine()) != null) {
+                String error = line.trim();
+                if (error.isEmpty() || error.startsWith("//")) {
                     continue;
                 }
-                String errorCode = matcher.group(2);
-                String errorName = matcher.group(3);
-                String newCode = "";
-                switch (client) {
-                    case "java":
-                        newCode = String.format("%s(\"%s\"),",
-                                errorName, errorPrefix + errorCode);
-                        break;
-                    case "golang":
-                        newCode = String.format("ERROR_%s ErrorCode = \"%s\"",
-                                errorName, errorPrefix + errorCode);
-                        break;
+                Matcher matcher = pattern.matcher(error);
+                if (matcher.find()) {
+                    String    codeClass    = matcher.group(1);
+                    String    errorSubCode = matcher.group(2);
+                    String    errorName    = matcher.group(3);
+                    ErrorCode code         = new ErrorCode(errorName, codeClassPrefix.get(codeClass), errorSubCode, codeNameMessage.get(errorName));
+                    errorCodes.add(code);
+                } else {
+                    System.out.println("===== cannot parse the error code, " + error);
                 }
-                System.out.println(newCode);
-            } else {
-                System.out.println("===== cannot parse the error code, " + error);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
+        return errorCodes;
     }
 
-    public static String getCodePrefix(String code) {
-        switch (code.trim()) {
-            case "SUCCESSFUL_COMPLETION":
-                return "00";
-            case "WARNING":
-                return "01";
-            case "NO_DATA":
-                return "02";
-            case "INFORMATIONAL":
-                return "03";
-            case "CONNECTION_EXCEPTION":
-                return "08";
-            case "DATA_EXCEPTION":
-                return "22";
-            case "INVALID_TRANSACTION_STATE":
-                return "25";
-            case "INVALID_TRANSACTION_TERMINATION":
-                return "2D";
-            case "TRANSACTION_ROLLBACK":
-                return "40";
-            case "SYNTAX_ERROR_OR_ACCESS_RULE_VIOLATION":
-                return "42";
-            case "DEPENDENT_OBJECT_ERROR":
-                return "G1";
-            case "GRAPH_TYPE_VIOLATION":
-                return "G2";
 
-            /* Extended */
-            /* exceptions */
-            case "RUNTIME_ERROR":
-                return "NR";
-            case "SEMANTIC_ERROR":
-                return "NS";
-            case "STORAGE_ERROR":
-                return "NO";
-            case "CATALOG_ERROR":
-                return "NC";
-            case "DATA_READ_WRITE_ERROR":
-                return "ND";
-            case "INVALID_PARAMETER":
-                return "NI";
-            case "GRAPH_COMPUTE_ERROR":
-                return "NG";
-            case "PLUGIN_ERROR":
-                return "NP";
-            case "SESSION_ERROR":
-                return "NE";
-            case "UNSUPPORTED":
-                return "NT";
-            case "AUTHENTICATE_ERROR":
-                return "NH";
-            case "JOB_ERROR":
-                return "NJ";
-            case "LICENSE_ERROR":
-                return "NL";
-            /* internal errors */
-            /*
-             * case "METADATA_ERROR":
-             * return "NM";
-             * case "RPC_ERROR":
-             * return "NN";
-             * case "KVSTORE_ERROR":
-             * return "NK";
-             * case "RAFT_ERROR":
-             * return "NA";
-             * case "SYSTEM_ERROR":
-             * return "NY";
-             * case "JOB_ERROR":
-             * return "NJ";
-             * case "LICENSE_ERROR":
-             * return "NL";
-             * case "UNKNOWN":
-             * return "NU";
-             */
-            default:
-                return null;
+    public static Map<String, String> getCodePrefix(String filePath) {
+        Map<String, String> codeClassPrefix = new HashMap<>();
+        Pattern             pattern         = Pattern.compile("(.*)= CLASS\\(\"(.*)\"\\),");
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String         line;
+            while ((line = br.readLine()) != null) {
+                if (!line.contains("= CLASS")) {
+                    continue;
+                }
+                String  codeClass = line.trim();
+                Matcher matcher   = pattern.matcher(codeClass);
+
+                if (matcher.matches()) {
+                    String key   = matcher.group(1).trim();
+                    String value = matcher.group(2).trim();
+                    codeClassPrefix.put(key, value);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+        return codeClassPrefix;
     }
 
-    public static boolean isInternal(String code) {
-        if (code.startsWith("NM")
-                || code.startsWith("NN")
-                || code.startsWith("NK")
-                || code.startsWith("NA")
-                || code.startsWith("NY")
-                || code.startsWith("NJ")
-                || code.startsWith("NL")
-                || code.startsWith("NU")) {
+
+    public static Map<String, String> getCodeMessage(String filePath) {
+        Map<String, String> errorCodeMsg = new HashMap<>();
+        Pattern             pattern      = Pattern.compile("EMSG\\((.*), \"(.*)\"\\);");
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(filePath));
+            String         line;
+            while ((line = br.readLine()) != null) {
+                if (!line.trim().startsWith("EMSG")) {
+                    continue;
+                }
+                String  codeMsg = line.trim();
+                Matcher matcher = pattern.matcher(codeMsg);
+                if (matcher.find()) {
+                    String name = matcher.group(1);
+                    String msg  = matcher.group(2);
+                    errorCodeMsg.put(name, msg);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return errorCodeMsg;
+    }
+
+
+    public static List<ErrorCode> update(List<ErrorCode> codes){
+        List<ErrorCode> filterCodes = new ArrayList<>();
+        for(ErrorCode code:codes){
+            if(isInternal(code)){
+                code.setMessage("Internal Server Error");
+            }
+            filterCodes.add(code);
+        }
+        return filterCodes;
+
+    }
+
+    public static boolean isInternal(ErrorCode code) {
+        String prefixCode = code.getPrefixCode();
+        if (prefixCode.startsWith("NM")
+                || prefixCode.startsWith("NN")
+                || prefixCode.startsWith("NK")
+                || prefixCode.startsWith("NA")
+                || prefixCode.startsWith("NY")
+                || prefixCode.startsWith("NW")
+                || prefixCode.startsWith("NU")) {
             return true;
         }
         return false;
+    }
+
+
+    static class ErrorCode {
+        private String name;
+        private String prefixCode;
+        private String subCode;
+        private String code; // prefixCode + subCode
+
+        private String message;
+
+        ErrorCode(String name, String prefixCode, String subCode, String msg) {
+            this.name = name;
+            this.prefixCode = prefixCode;
+            this.subCode = subCode;
+            this.code = prefixCode + subCode;
+            this.message = msg;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
+
+        public void setCode(String code) {
+            this.code = code;
+        }
+
+        public void setMessage(String message) {
+            this.message = message;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        public String getPrefixCode() {
+            return prefixCode;
+        }
     }
 }
