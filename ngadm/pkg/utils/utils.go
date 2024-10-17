@@ -10,14 +10,14 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
 
-func GetUserClusterPath(installPath string, agentPath string) string {
+func GetUserServiceGroupPath(installPath string, agentPath string) string {
 	if agentPath != "" {
 		return path.Join(agentPath, "cluster/")
 	}
 	return path.Join(installPath, "cluster/")
 }
 
-func GetClusterPath(installPath string) string {
+func GetServiceGroupPath(installPath string) string {
 	return path.Join(installPath, "cluster/")
 }
 func GetDownloadPath(installPath string) string {
@@ -151,7 +151,7 @@ func GetAllAgents(spec *types.JobSpec) []*types.Agent {
 		for _, host := range spec.Spec.Metad.Hosts {
 			allHosts = append(allHosts, host.Agent)
 		}
-		for _, cluster := range spec.Spec.Metad.Clusters {
+		for _, cluster := range spec.Spec.Metad.ServiceGroups {
 			for _, host := range cluster.Graphd.Hosts {
 				allHosts = append(allHosts, host.Agent)
 			}

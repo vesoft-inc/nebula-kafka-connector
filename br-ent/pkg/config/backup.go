@@ -19,7 +19,7 @@ func AddBackupFlags(flags *pflag.FlagSet) {
 	flags.Int(flagConcurrency, 5, "Max concurrency for download data and data playback")
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
-	flags.Int64(flagClusterId, 0, "Specify the backup cluster id")
+	flags.Int64(flagServiceGroupId, 0, "Specify the backup cluster id")
 	flags.String(FlagConfig, "", "The config file for ngctl to backup")
 
 	// support tls
@@ -31,7 +31,7 @@ func AddBackupFlags(flags *pflag.FlagSet) {
 	flags.String(flagServerName, "", "The subject alternative name (SAN) of the peer server to verify")
 
 	cobra.MarkFlagRequired(flags, FlagStorage)
-	cobra.MarkFlagRequired(flags, flagClusterId)
+	cobra.MarkFlagRequired(flags, flagServiceGroupId)
 	cobra.MarkFlagRequired(flags, FlagMetaAddr)
 	cobra.MarkFlagRequired(flags, FlagAgentsAddr)
 	cobra.MarkFlagRequired(flags, FlagConfig)
@@ -41,7 +41,7 @@ type BackupConfig struct {
 	BackupName  string
 	MetaAddr    string
 	AgentsAddr  string
-	ClusterId   int64
+	ServiceGroupId   int64
 	Concurrency int
 	Backend     *agentstorage.Backend // Backend is associated with the root uri
 	TLSConfig   *tls.Config
@@ -68,7 +68,7 @@ func (b *BackupConfig) ParseFullFlags(flags *pflag.FlagSet) error {
 		return err
 	}
 
-	b.ClusterId, err = flags.GetInt64(flagClusterId)
+	b.ServiceGroupId, err = flags.GetInt64(flagServiceGroupId)
 	if err != nil {
 		return err
 	}

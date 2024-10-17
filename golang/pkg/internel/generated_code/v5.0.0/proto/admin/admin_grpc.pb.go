@@ -23,29 +23,29 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AdminService_SetMetaAgent_FullMethodName   = "/nebula.proto.admin.AdminService/SetMetaAgent"
-	AdminService_ShowMetaInfo_FullMethodName   = "/nebula.proto.admin.AdminService/ShowMetaInfo"
-	AdminService_AddHost_FullMethodName        = "/nebula.proto.admin.AdminService/AddHost"
-	AdminService_DropHost_FullMethodName       = "/nebula.proto.admin.AdminService/DropHost"
-	AdminService_ListHosts_FullMethodName      = "/nebula.proto.admin.AdminService/ListHosts"
-	AdminService_AddService_FullMethodName     = "/nebula.proto.admin.AdminService/AddService"
-	AdminService_DropService_FullMethodName    = "/nebula.proto.admin.AdminService/DropService"
-	AdminService_ShowService_FullMethodName    = "/nebula.proto.admin.AdminService/ShowService"
-	AdminService_CreateCluster_FullMethodName  = "/nebula.proto.admin.AdminService/CreateCluster"
-	AdminService_ShowCluster_FullMethodName    = "/nebula.proto.admin.AdminService/ShowCluster"
-	AdminService_AlterCluster_FullMethodName   = "/nebula.proto.admin.AdminService/AlterCluster"
-	AdminService_InitStorage_FullMethodName    = "/nebula.proto.admin.AdminService/InitStorage"
-	AdminService_DropCluster_FullMethodName    = "/nebula.proto.admin.AdminService/DropCluster"
-	AdminService_CreateBackup_FullMethodName   = "/nebula.proto.admin.AdminService/CreateBackup"
-	AdminService_Restore_FullMethodName        = "/nebula.proto.admin.AdminService/Restore"
-	AdminService_DropBackup_FullMethodName     = "/nebula.proto.admin.AdminService/DropBackup"
-	AdminService_CreateUser_FullMethodName     = "/nebula.proto.admin.AdminService/CreateUser"
-	AdminService_DropUser_FullMethodName       = "/nebula.proto.admin.AdminService/DropUser"
-	AdminService_AlterUser_FullMethodName      = "/nebula.proto.admin.AdminService/AlterUser"
-	AdminService_ListUser_FullMethodName       = "/nebula.proto.admin.AdminService/ListUser"
-	AdminService_Login_FullMethodName          = "/nebula.proto.admin.AdminService/Login"
-	AdminService_Logout_FullMethodName         = "/nebula.proto.admin.AdminService/Logout"
-	AdminService_ChangePassword_FullMethodName = "/nebula.proto.admin.AdminService/ChangePassword"
+	AdminService_SetMetaAgent_FullMethodName       = "/nebula.proto.admin.AdminService/SetMetaAgent"
+	AdminService_ShowMetaInfo_FullMethodName       = "/nebula.proto.admin.AdminService/ShowMetaInfo"
+	AdminService_AddHost_FullMethodName            = "/nebula.proto.admin.AdminService/AddHost"
+	AdminService_DropHost_FullMethodName           = "/nebula.proto.admin.AdminService/DropHost"
+	AdminService_ListHosts_FullMethodName          = "/nebula.proto.admin.AdminService/ListHosts"
+	AdminService_AddService_FullMethodName         = "/nebula.proto.admin.AdminService/AddService"
+	AdminService_DropService_FullMethodName        = "/nebula.proto.admin.AdminService/DropService"
+	AdminService_ShowService_FullMethodName        = "/nebula.proto.admin.AdminService/ShowService"
+	AdminService_CreateServiceGroup_FullMethodName = "/nebula.proto.admin.AdminService/CreateServiceGroup"
+	AdminService_ShowServiceGroup_FullMethodName   = "/nebula.proto.admin.AdminService/ShowServiceGroup"
+	AdminService_AlterServiceGroup_FullMethodName  = "/nebula.proto.admin.AdminService/AlterServiceGroup"
+	AdminService_InitStorage_FullMethodName        = "/nebula.proto.admin.AdminService/InitStorage"
+	AdminService_DropServiceGroup_FullMethodName   = "/nebula.proto.admin.AdminService/DropServiceGroup"
+	AdminService_CreateBackup_FullMethodName       = "/nebula.proto.admin.AdminService/CreateBackup"
+	AdminService_Restore_FullMethodName            = "/nebula.proto.admin.AdminService/Restore"
+	AdminService_DropBackup_FullMethodName         = "/nebula.proto.admin.AdminService/DropBackup"
+	AdminService_CreateUser_FullMethodName         = "/nebula.proto.admin.AdminService/CreateUser"
+	AdminService_DropUser_FullMethodName           = "/nebula.proto.admin.AdminService/DropUser"
+	AdminService_AlterUser_FullMethodName          = "/nebula.proto.admin.AdminService/AlterUser"
+	AdminService_ListUser_FullMethodName           = "/nebula.proto.admin.AdminService/ListUser"
+	AdminService_Login_FullMethodName              = "/nebula.proto.admin.AdminService/Login"
+	AdminService_Logout_FullMethodName             = "/nebula.proto.admin.AdminService/Logout"
+	AdminService_ChangePassword_FullMethodName     = "/nebula.proto.admin.AdminService/ChangePassword"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -60,11 +60,11 @@ type AdminServiceClient interface {
 	AddService(ctx context.Context, in *AddServiceRequest, opts ...grpc.CallOption) (*AddServiceResponse, error)
 	DropService(ctx context.Context, in *DropServiceRequest, opts ...grpc.CallOption) (*DropServiceResponse, error)
 	ShowService(ctx context.Context, in *ShowServiceRequest, opts ...grpc.CallOption) (*ShowServiceResponse, error)
-	CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error)
-	ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error)
-	AlterCluster(ctx context.Context, in *AlterClusterRequest, opts ...grpc.CallOption) (*AlterClusterResponse, error)
+	CreateServiceGroup(ctx context.Context, in *CreateServiceGroupRequest, opts ...grpc.CallOption) (*CreateServiceGroupResponse, error)
+	ShowServiceGroup(ctx context.Context, in *ShowServiceGroupRequest, opts ...grpc.CallOption) (*ShowServiceGroupResponse, error)
+	AlterServiceGroup(ctx context.Context, in *AlterServiceGroupRequest, opts ...grpc.CallOption) (*AlterServiceGroupResponse, error)
 	InitStorage(ctx context.Context, in *InitStorageRequest, opts ...grpc.CallOption) (*InitStorageResponse, error)
-	DropCluster(ctx context.Context, in *DropClusterRequest, opts ...grpc.CallOption) (*DropClusterResponse, error)
+	DropServiceGroup(ctx context.Context, in *DropServiceGroupRequest, opts ...grpc.CallOption) (*DropServiceGroupResponse, error)
 	// backup
 	CreateBackup(ctx context.Context, in *CreateBackupRequest, opts ...grpc.CallOption) (*CreateBackupResponse, error)
 	Restore(ctx context.Context, in *RestoreRequest, opts ...grpc.CallOption) (*RestoreResponse, error)
@@ -160,27 +160,27 @@ func (c *adminServiceClient) ShowService(ctx context.Context, in *ShowServiceReq
 	return out, nil
 }
 
-func (c *adminServiceClient) CreateCluster(ctx context.Context, in *CreateClusterRequest, opts ...grpc.CallOption) (*CreateClusterResponse, error) {
-	out := new(CreateClusterResponse)
-	err := c.cc.Invoke(ctx, AdminService_CreateCluster_FullMethodName, in, out, opts...)
+func (c *adminServiceClient) CreateServiceGroup(ctx context.Context, in *CreateServiceGroupRequest, opts ...grpc.CallOption) (*CreateServiceGroupResponse, error) {
+	out := new(CreateServiceGroupResponse)
+	err := c.cc.Invoke(ctx, AdminService_CreateServiceGroup_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *adminServiceClient) ShowCluster(ctx context.Context, in *ShowClusterRequest, opts ...grpc.CallOption) (*ShowClusterResponse, error) {
-	out := new(ShowClusterResponse)
-	err := c.cc.Invoke(ctx, AdminService_ShowCluster_FullMethodName, in, out, opts...)
+func (c *adminServiceClient) ShowServiceGroup(ctx context.Context, in *ShowServiceGroupRequest, opts ...grpc.CallOption) (*ShowServiceGroupResponse, error) {
+	out := new(ShowServiceGroupResponse)
+	err := c.cc.Invoke(ctx, AdminService_ShowServiceGroup_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *adminServiceClient) AlterCluster(ctx context.Context, in *AlterClusterRequest, opts ...grpc.CallOption) (*AlterClusterResponse, error) {
-	out := new(AlterClusterResponse)
-	err := c.cc.Invoke(ctx, AdminService_AlterCluster_FullMethodName, in, out, opts...)
+func (c *adminServiceClient) AlterServiceGroup(ctx context.Context, in *AlterServiceGroupRequest, opts ...grpc.CallOption) (*AlterServiceGroupResponse, error) {
+	out := new(AlterServiceGroupResponse)
+	err := c.cc.Invoke(ctx, AdminService_AlterServiceGroup_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -196,9 +196,9 @@ func (c *adminServiceClient) InitStorage(ctx context.Context, in *InitStorageReq
 	return out, nil
 }
 
-func (c *adminServiceClient) DropCluster(ctx context.Context, in *DropClusterRequest, opts ...grpc.CallOption) (*DropClusterResponse, error) {
-	out := new(DropClusterResponse)
-	err := c.cc.Invoke(ctx, AdminService_DropCluster_FullMethodName, in, out, opts...)
+func (c *adminServiceClient) DropServiceGroup(ctx context.Context, in *DropServiceGroupRequest, opts ...grpc.CallOption) (*DropServiceGroupResponse, error) {
+	out := new(DropServiceGroupResponse)
+	err := c.cc.Invoke(ctx, AdminService_DropServiceGroup_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -307,11 +307,11 @@ type AdminServiceServer interface {
 	AddService(context.Context, *AddServiceRequest) (*AddServiceResponse, error)
 	DropService(context.Context, *DropServiceRequest) (*DropServiceResponse, error)
 	ShowService(context.Context, *ShowServiceRequest) (*ShowServiceResponse, error)
-	CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error)
-	ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error)
-	AlterCluster(context.Context, *AlterClusterRequest) (*AlterClusterResponse, error)
+	CreateServiceGroup(context.Context, *CreateServiceGroupRequest) (*CreateServiceGroupResponse, error)
+	ShowServiceGroup(context.Context, *ShowServiceGroupRequest) (*ShowServiceGroupResponse, error)
+	AlterServiceGroup(context.Context, *AlterServiceGroupRequest) (*AlterServiceGroupResponse, error)
 	InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error)
-	DropCluster(context.Context, *DropClusterRequest) (*DropClusterResponse, error)
+	DropServiceGroup(context.Context, *DropServiceGroupRequest) (*DropServiceGroupResponse, error)
 	// backup
 	CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error)
 	Restore(context.Context, *RestoreRequest) (*RestoreResponse, error)
@@ -356,20 +356,20 @@ func (UnimplementedAdminServiceServer) DropService(context.Context, *DropService
 func (UnimplementedAdminServiceServer) ShowService(context.Context, *ShowServiceRequest) (*ShowServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShowService not implemented")
 }
-func (UnimplementedAdminServiceServer) CreateCluster(context.Context, *CreateClusterRequest) (*CreateClusterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateCluster not implemented")
+func (UnimplementedAdminServiceServer) CreateServiceGroup(context.Context, *CreateServiceGroupRequest) (*CreateServiceGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateServiceGroup not implemented")
 }
-func (UnimplementedAdminServiceServer) ShowCluster(context.Context, *ShowClusterRequest) (*ShowClusterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ShowCluster not implemented")
+func (UnimplementedAdminServiceServer) ShowServiceGroup(context.Context, *ShowServiceGroupRequest) (*ShowServiceGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ShowServiceGroup not implemented")
 }
-func (UnimplementedAdminServiceServer) AlterCluster(context.Context, *AlterClusterRequest) (*AlterClusterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AlterCluster not implemented")
+func (UnimplementedAdminServiceServer) AlterServiceGroup(context.Context, *AlterServiceGroupRequest) (*AlterServiceGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AlterServiceGroup not implemented")
 }
 func (UnimplementedAdminServiceServer) InitStorage(context.Context, *InitStorageRequest) (*InitStorageResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method InitStorage not implemented")
 }
-func (UnimplementedAdminServiceServer) DropCluster(context.Context, *DropClusterRequest) (*DropClusterResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method DropCluster not implemented")
+func (UnimplementedAdminServiceServer) DropServiceGroup(context.Context, *DropServiceGroupRequest) (*DropServiceGroupResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropServiceGroup not implemented")
 }
 func (UnimplementedAdminServiceServer) CreateBackup(context.Context, *CreateBackupRequest) (*CreateBackupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateBackup not implemented")
@@ -558,56 +558,56 @@ func _AdminService_ShowService_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_CreateCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateClusterRequest)
+func _AdminService_CreateServiceGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateServiceGroupRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).CreateCluster(ctx, in)
+		return srv.(AdminServiceServer).CreateServiceGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AdminService_CreateCluster_FullMethodName,
+		FullMethod: AdminService_CreateServiceGroup_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).CreateCluster(ctx, req.(*CreateClusterRequest))
+		return srv.(AdminServiceServer).CreateServiceGroup(ctx, req.(*CreateServiceGroupRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_ShowCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ShowClusterRequest)
+func _AdminService_ShowServiceGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ShowServiceGroupRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).ShowCluster(ctx, in)
+		return srv.(AdminServiceServer).ShowServiceGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AdminService_ShowCluster_FullMethodName,
+		FullMethod: AdminService_ShowServiceGroup_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).ShowCluster(ctx, req.(*ShowClusterRequest))
+		return srv.(AdminServiceServer).ShowServiceGroup(ctx, req.(*ShowServiceGroupRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_AlterCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AlterClusterRequest)
+func _AdminService_AlterServiceGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AlterServiceGroupRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).AlterCluster(ctx, in)
+		return srv.(AdminServiceServer).AlterServiceGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AdminService_AlterCluster_FullMethodName,
+		FullMethod: AdminService_AlterServiceGroup_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).AlterCluster(ctx, req.(*AlterClusterRequest))
+		return srv.(AdminServiceServer).AlterServiceGroup(ctx, req.(*AlterServiceGroupRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -630,20 +630,20 @@ func _AdminService_InitStorage_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AdminService_DropCluster_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DropClusterRequest)
+func _AdminService_DropServiceGroup_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropServiceGroupRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AdminServiceServer).DropCluster(ctx, in)
+		return srv.(AdminServiceServer).DropServiceGroup(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AdminService_DropCluster_FullMethodName,
+		FullMethod: AdminService_DropServiceGroup_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AdminServiceServer).DropCluster(ctx, req.(*DropClusterRequest))
+		return srv.(AdminServiceServer).DropServiceGroup(ctx, req.(*DropServiceGroupRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -868,24 +868,24 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AdminService_ShowService_Handler,
 		},
 		{
-			MethodName: "CreateCluster",
-			Handler:    _AdminService_CreateCluster_Handler,
+			MethodName: "CreateServiceGroup",
+			Handler:    _AdminService_CreateServiceGroup_Handler,
 		},
 		{
-			MethodName: "ShowCluster",
-			Handler:    _AdminService_ShowCluster_Handler,
+			MethodName: "ShowServiceGroup",
+			Handler:    _AdminService_ShowServiceGroup_Handler,
 		},
 		{
-			MethodName: "AlterCluster",
-			Handler:    _AdminService_AlterCluster_Handler,
+			MethodName: "AlterServiceGroup",
+			Handler:    _AdminService_AlterServiceGroup_Handler,
 		},
 		{
 			MethodName: "InitStorage",
 			Handler:    _AdminService_InitStorage_Handler,
 		},
 		{
-			MethodName: "DropCluster",
-			Handler:    _AdminService_DropCluster_Handler,
+			MethodName: "DropServiceGroup",
+			Handler:    _AdminService_DropServiceGroup_Handler,
 		},
 		{
 			MethodName: "CreateBackup",

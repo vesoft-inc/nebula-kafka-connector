@@ -15,8 +15,8 @@ import (
 type Fix struct {
 	r           *Restore
 	amg         *clients.AgentManager
-	clusters    *utils.NebulaClusters
-	metaCluster []*clients.ServiceInfo
+	clusters    *utils.NebulaServiceGroups
+	metaServiceGroup []*clients.ServiceInfo
 	backSuffix  string
 }
 
@@ -30,7 +30,7 @@ func NewFixFrom(r *Restore) (*Fix, error) {
 		amg:         r.amg,
 		backSuffix:  r.backSuffix,
 		clusters:    r.clusters,
-		metaCluster: r.metaCluster,
+		metaServiceGroup: r.metaServiceGroup,
 	}, nil
 }
 
@@ -224,13 +224,13 @@ func (f *Fix) fixServices(services []*clients.ServiceInfo) error {
 
 func (f *Fix) Fix() error {
 	// fix metad cluster
-	if err := f.fixServices(f.metaCluster); err != nil {
+	if err := f.fixServices(f.metaServiceGroup); err != nil {
 		return err
 	}
 
 	// fix clusters
-	for id, cluster := range f.clusters.GetClusters() {
-		if id == f.r.cfg.ClusterId {
+	for id, cluster := range f.clusters.GetServiceGroups() {
+		if id == f.r.cfg.ServiceGroupId {
 			if err := f.fixServices(cluster); err != nil {
 				return err
 			}

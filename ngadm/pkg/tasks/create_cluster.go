@@ -8,16 +8,16 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
-type CreateClusterParams struct {
-	ClusterSpec       *types.Cluster
+type CreateServiceGroupParams struct {
+	ServiceGroupSpec  *types.ServiceGroup
 	MetaSpec          *types.MetadSpec
 	MetaServerAddress string
 	Username          string
 	Password          string
 }
 
-func NewCreateCluster(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
-	params, ok := taskSpec.Params.(*CreateClusterParams)
+func NewCreateServiceGroup(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
+	params, ok := taskSpec.Params.(*CreateServiceGroupParams)
 	if !ok {
 		return nil, fmt.Errorf("unexpected type for params: %T", taskSpec.Params)
 	}
@@ -32,32 +32,32 @@ func NewCreateCluster(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, 
 		return nil, fmt.Errorf("login meta server failed: %s", err)
 	}
 
-	return &CreateCluster{
+	return &CreateServiceGroup{
 		JobContext:  taskContext,
 		taskSpec:    taskSpec,
-		clusterSpec: params.ClusterSpec,
+		clusterSpec: params.ServiceGroupSpec,
 		metaSpec:    params.MetaSpec,
 		metaClient:  client,
 	}, nil
 }
 
-type CreateCluster struct {
+type CreateServiceGroup struct {
 	JobContext  *JobContext
 	taskSpec    *types.TaskSpec
-	clusterSpec *types.Cluster
+	clusterSpec *types.ServiceGroup
 	metaSpec    *types.MetadSpec
 	metaClient  meta.Client
 }
 
-func (d *CreateCluster) Execute() error {
+func (d *CreateServiceGroup) Execute() error {
 	if d.metaClient == nil {
 		return fmt.Errorf("meta client is nil")
 	}
 
 	//1. create cluster
 	// TODO should modify owner
-	req := meta.NewCreateClusterReq(d.clusterSpec.Name, d.clusterSpec.Replica, "", d.clusterSpec.ZoneList)
-	if err := d.metaClient.CreateCluster(req); err != nil {
+	req := meta.NewCreateServiceGroupReq(d.clusterSpec.Name, d.clusterSpec.Replica, "", d.clusterSpec.ZoneList)
+	if err := d.metaClient.CreateServiceGroup(req); err != nil {
 		return fmt.Errorf("create cluster failed: %s", err)
 	}
 	if d.ifExited() {
@@ -97,23 +97,23 @@ func (d *CreateCluster) Execute() error {
 		return fmt.Errorf("exited signal received")
 	}
 	//3. init cluster
-	initReq := meta.NewInitClusterReq(d.clusterSpec.Name)
-	if err := d.metaClient.InitCluster(initReq); err != nil {
+	initReq := meta.NewInitServiceGroupReq(d.clusterSpec.Name)
+	if err := d.metaClient.InitServiceGroup(initReq); err != nil {
 		return fmt.Errorf("init cluster failed: %s", err)
 	}
 	d.JobContext.Logger.Info("init cluster success: " + d.clusterSpec.Name)
 	return nil
 }
 
-func (d *CreateCluster) Rollback() error {
+func (d *CreateServiceGroup) Rollback() error {
 	return nil
 }
 
-func (d *CreateCluster) String() string {
-	return "CreateCluster"
+func (d *CreateServiceGroup) String() string {
+	return "CreateServiceGroup"
 }
 
-func (d *CreateCluster) ifExited() bool {
+func (d *CreateServiceGroup) ifExited() bool {
 	select {
 	case <-d.JobContext.Sigs:
 		return true

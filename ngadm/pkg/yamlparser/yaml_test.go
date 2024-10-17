@@ -25,7 +25,7 @@ func TestParseYamlByPath(t *testing.T) {
 	if jobSpec.Spec.Metad.Hosts == nil {
 		t.Error("metad hosts is nil")
 	}
-	if jobSpec.Spec.Metad.Clusters == nil {
+	if jobSpec.Spec.Metad.ServiceGroups == nil {
 		t.Error("metad clusters is nil")
 	}
 	if jobSpec.Spec.Metad.Config == nil {

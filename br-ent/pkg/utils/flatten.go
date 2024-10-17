@@ -8,7 +8,7 @@ import (
 
 // PartInfo save a unique part's information for FlattenBackupMeta
 type PartInfo struct {
-	ClusterId      int64
+	ServiceGroupId      int64
 	ServiceId      int64
 	PartId         int64
 	Host           string
@@ -18,23 +18,23 @@ type PartInfo struct {
 
 type FlattenedParts map[string]*PartInfo
 
-func FlattenClusterMap(resp *meta.CreateBackupResp) map[int64][]*meta.StorageCheckpointInfo {
+func FlattenServiceGroupMap(resp *meta.CreateBackupResp) map[int64][]*meta.StorageCheckpointInfo {
 	clusterMap := make(map[int64][]*meta.StorageCheckpointInfo)
-	for _, cluster := range resp.ClusterBackupInfos {
-		clusterMap[cluster.ClusterId] = cluster.StorageInfos
+	for _, cluster := range resp.ServiceGroupBackupInfos {
+		clusterMap[cluster.ServiceGroupId] = cluster.StorageInfos
 	}
 	return clusterMap
 }
 
-// FlattenClusterBackupInfo flatten backup resp to a map for convenience
+// FlattenServiceGroupBackupInfo flatten backup resp to a map for convenience
 // because of (clusterId + partId) can specify a unique part
-func FlattenClusterBackupInfo(backupInfo *meta.ClusterBackupInfo) FlattenedParts {
+func FlattenServiceGroupBackupInfo(backupInfo *meta.ServiceGroupBackupInfo) FlattenedParts {
 	backupMap := make(map[string]*PartInfo)
 	for _, storage := range backupInfo.StorageInfos {
 		for _, part := range storage.CkptInfos {
-			key := GenPartKey(backupInfo.ClusterId, part.PartId)
+			key := GenPartKey(backupInfo.ServiceGroupId, part.PartId)
 			backupMap[key] = &PartInfo{
-				ClusterId:      backupInfo.ClusterId,
+				ServiceGroupId:      backupInfo.ServiceGroupId,
 				ServiceId:      storage.ServiceId,
 				Host:           storage.Host,
 				Port:           storage.Port,

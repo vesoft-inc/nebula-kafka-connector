@@ -10,7 +10,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
-func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if args == nil {
 		args = map[string]any{}
 	}
@@ -27,9 +27,9 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 		return nil, fmt.Errorf("password is required")
 	}
 
-	metaCluster := spec.Spec.Metad
+	metaServiceGroup := spec.Spec.Metad
 	metaHosts := spec.Spec.Metad.Hosts
-	metaServerAddress := utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config))
+	metaServerAddress := utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaServiceGroup.Config))
 
 	uploadTasks := []*types.TaskSpec{}
 	connectTasks := []*types.TaskSpec{}
@@ -37,7 +37,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	if !ok {
 		force = false
 	}
-	needHosts := GetClusterNeedHosts(spec)
+	needHosts := GetServiceGroupNeedHosts(spec)
 	for _, agent := range needHosts {
 		if agent.SSHConfig == nil {
 			connectTasks = append(connectTasks, &types.TaskSpec{
@@ -55,7 +55,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 		}
 
 		// TODO: check if the host already has nebula installed
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -78,14 +78,14 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 			},
 		})
 		//2.upload
-		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaCluster.PackagePath))
+		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaServiceGroup.PackagePath))
 		uploadTasks = append(uploadTasks, &types.TaskSpec{
 			Type: "serial",
 			SubTasks: []*types.TaskSpec{
 				{
 					Type: "upload",
 					Params: &tasks.UploadParams{
-						SrcPath: utils.GetUserPackagePath(metaCluster.PackagePath, agent.PackagePath),
+						SrcPath: utils.GetUserPackagePath(metaServiceGroup.PackagePath, agent.PackagePath),
 						DstPath: dstPath,
 						Host:    agent.Host,
 					},
@@ -103,10 +103,10 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	}
 	//3. config and start needed processes
 	startNeededProcessesTask := []*types.TaskSpec{}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		// 3.1 start graphd
 		for _, host := range cluster.Graphd.Hosts {
-			installPath := utils.GetUserClusterPath(spec.InstallPath, host.Agent.InstallPath)
+			installPath := utils.GetUserServiceGroupPath(spec.InstallPath, host.Agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start graphd",
@@ -138,7 +138,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 					//		Config: map[string]any{
 					//			"installPath": installPath,
 					//			"host":        utils.GetHostIP(agent.Host),
-					//			"port":        utils.GetConfigPort(metaCluster.Config),
+					//			"port":        utils.GetConfigPort(metaServiceGroup.Config),
 					//		},
 					//	},
 					//},
@@ -147,7 +147,7 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 		}
 		// .2 start storaged
 		for _, host := range cluster.Storaged.Hosts {
-			installPath := utils.GetUserClusterPath(spec.InstallPath, host.Agent.InstallPath)
+			installPath := utils.GetUserServiceGroupPath(spec.InstallPath, host.Agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start storaged",
@@ -179,13 +179,13 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 	}
 
 	// 4.init cluster
-	createClusterTasks := []*types.TaskSpec{}
-	for _, cluster := range spec.Spec.Metad.Clusters {
-		createClusterTasks = append(createClusterTasks, &types.TaskSpec{
+	createServiceGroupTasks := []*types.TaskSpec{}
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
+		createServiceGroupTasks = append(createServiceGroupTasks, &types.TaskSpec{
 			Type: "create_cluster",
-			Params: &tasks.CreateClusterParams{
-				ClusterSpec:       &cluster,
-				MetaSpec:          metaCluster,
+			Params: &tasks.CreateServiceGroupParams{
+				ServiceGroupSpec:       &cluster,
+				MetaSpec:          metaServiceGroup,
 				MetaServerAddress: metaServerAddress,
 				Username:          username,
 				Password:          password,
@@ -219,19 +219,19 @@ func InstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, 
 			},
 			{
 				Type:     "serial",
-				SubTasks: createClusterTasks,
+				SubTasks: createServiceGroupTasks,
 			},
 		},
 	}, nil
 }
 
-func GetClusterNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
+func GetServiceGroupNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	allNeedHosts := make(map[string]*types.Agent, 0)
 	for _, host := range spec.Spec.Metad.Hosts {
 		agentCopy := host.Agent
 		allNeedHosts[host.Agent.Host] = &agentCopy
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, host := range cluster.Graphd.Hosts {
 			agentCopy := host.Agent
 			allNeedHosts[host.Agent.Host] = &agentCopy

@@ -38,7 +38,7 @@ func TestInstall(t *testing.T) {
 	// Add more assertions for the workflow.Tasks if needed
 }
 
-func TestClusterInstall(t *testing.T) {
+func TestServiceGroupInstall(t *testing.T) {
 	tasks.Init()
 
 	args := map[string]interface{}{
@@ -50,7 +50,7 @@ func TestClusterInstall(t *testing.T) {
 	delete(spec.UtilsProcesses, "license-manager")
 	spec.Rollback = true
 	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.31.sh"
-	// spec.Spec.Metad.Clusters = []types.Cluster{}
+	// spec.Spec.Metad.ServiceGroups = []types.ServiceGroup{}
 	workflow, err := buildinworkflow.Install(args, spec)
 	assert.NoError(t, err)
 	assert.NotNil(t, workflow)

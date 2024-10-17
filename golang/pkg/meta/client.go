@@ -31,7 +31,7 @@ type (
 		Login() (*LoginResponse, error)
 		Logout() error
 		UserClient
-		ClusterClient
+		ServiceGroupClient
 		BackupRestoreClient
 	}
 
@@ -50,12 +50,12 @@ type (
 		DropUser(req *DropUserReq) error
 	}
 
-	ClusterClient interface {
-		CreateCluster(req *CreateClusterReq) error
-		AlterCluster(req *AlterClusterReq) error
-		DropCluster(req *DropClusterReq) error
-		InitCluster(req *InitClusterReq) error
-		ListClusters(req *ListClustersReq) (*ListClustersResp, error)
+	ServiceGroupClient interface {
+		CreateServiceGroup(req *CreateServiceGroupReq) error
+		AlterServiceGroup(req *AlterServiceGroupReq) error
+		DropServiceGroup(req *DropServiceGroupReq) error
+		InitServiceGroup(req *InitServiceGroupReq) error
+		ListServiceGroups(req *ListServiceGroupsReq) (*ListServiceGroupsResp, error)
 		AddHost(req *AddHostReq) error
 		DropHost(req *DropHostReq) error
 		ListHosts(req *ListHostsReq) (*ListHostsResp, error)

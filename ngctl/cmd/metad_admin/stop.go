@@ -1,4 +1,4 @@
-package supercluster_admin
+package metad_admin
 
 import (
 	"fmt"
@@ -9,17 +9,17 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/service_admin"
 )
 
-// By default, we stop all the metad services in a supercluster.
+// By default, we stop all the metad services in a metad.
 var stopCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop a supercluster",
-	Long:  `Stop a supercluster without deleting its data`,
+	Short: "Stop a metad",
+	Long:  `Stop a metad without deleting its data`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := common.CheckInConfigFile(superclusterFlags.configFile)
+		err := common.CheckInConfigFile(metadFlags.configFile)
 		if err != nil {
 			return common.NgctlError("Failed to check in config file", err.Error())
 		}
-		// TODO(Xuntao): check the status of graphd/storaged services in the supercluster
+		// TODO(Xuntao): check the status of graphd/storaged services in the metad
 		for _, metad_host := range common.ConfigSpec.Spec.Metad.Hosts {
 			agent_host := metad_host.Agent.Host
 			path := common.ConfigSpec.InstallPath
@@ -34,5 +34,5 @@ var stopCmd = &cobra.Command{
 }
 
 func init() {
-	stopCmd.Flags().StringVarP(&superclusterFlags.configFile, "config", "f", "", "The config file used to create the supercluster")
+	stopCmd.Flags().StringVarP(&metadFlags.configFile, "config", "f", "", "The config file used to create the metad")
 }

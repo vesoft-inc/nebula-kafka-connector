@@ -1,10 +1,10 @@
 ## ngctl host add
 
-Add a host into a cluster.
+Add a host into a srvgrp.
 
 ### Synopsis
 
-Add a host into a cluster. A host is identified by its IP address. The port of the deployed agent is also needed.
+Add a host into a srvgrp. A host is identified by its IP address. The port of the deployed agent is also needed.
 
 ```
 ngctl host add [flags]
@@ -13,10 +13,10 @@ ngctl host add [flags]
 ### Options
 
 ```
-  -c, --cluster string   cluster name
+  -c, --srvgrp string   srvgrp name
   -f, --config string    config file
   -h, --help             help for add
-  -H, --host string      the host to be added to a cluster
+  -H, --host string      the host to be added to a srvgrp
 ```
 
 ### SEE ALSO

@@ -11,7 +11,7 @@ type ServiceFlagsType struct {
 	serviceType       string
 	host              string
 	port              int32
-	clusterName       string
+	srvgrpName        string
 	configFile        string
 	serviceConfigFile string
 	agent             types.Agent
@@ -22,8 +22,8 @@ var ServiceFlags ServiceFlagsType
 
 var ServiceAdminCmd = &cobra.Command{
 	Use:   "service",
-	Short: "Run commands managing services.",
-	Long:  `Run commands managing services.`,
+	Short: "Run commands managing services in the group",
+	Long:  `Run commands managing services in the group`,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := cmd.Help()
 		if err != nil {
@@ -46,8 +46,8 @@ func init() {
 // if configFile is provided, then host, port, serviceType should not be provided
 func validateServiceFlags() error {
 	var flags = ServiceFlags
-	if flags.clusterName == "" {
-		return common.NgctlError("cluster name is empty", "")
+	if flags.srvgrpName == "" {
+		return common.NgctlError("srvgrp name is empty", "")
 	}
 	if flags.configFile == "" {
 		if flags.host == "" || flags.port < 0 || flags.serviceType == "" {

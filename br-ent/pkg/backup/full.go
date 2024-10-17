@@ -28,7 +28,7 @@ backup_root/backup_name
 */
 func (b *Backup) FullBackup() (string, error) {
 	// call the meta service, create backup files in each local
-	backupRes, err := b.meta.CreateFullBackup(b.cfg.BackupName, b.cfg.ClusterId)
+	backupRes, err := b.meta.CreateFullBackup(b.cfg.BackupName, b.cfg.ServiceGroupId)
 	if err != nil {
 		if backupRes != nil {
 			return backupRes.BackupName, nil
@@ -36,7 +36,7 @@ func (b *Backup) FullBackup() (string, error) {
 		return "", err
 	}
 
-	if len(backupRes.ClusterBackupInfos) == 0 {
+	if len(backupRes.ServiceGroupBackupInfos) == 0 {
 		return "", fmt.Errorf("no backup info returned")
 	}
 
@@ -114,8 +114,8 @@ func (b *Backup) FullBackup() (string, error) {
 func (b *Backup) uploadFullStorage(backupRes *meta.CreateBackupResp, targetUri string) error {
 	group := async.NewGroup(context.TODO(), b.cfg.Concurrency, "full upload storaged partition")
 
-	for _, bakCluster := range backupRes.ClusterBackupInfos {
-		parts := utils.FlattenClusterBackupInfo(bakCluster)
+	for _, bakServiceGroup := range backupRes.ServiceGroupBackupInfos {
+		parts := utils.FlattenServiceGroupBackupInfo(bakServiceGroup)
 		for _, part := range parts {
 			agent, err := b.amg.GetAgent(part.Host)
 			if err != nil {
@@ -124,7 +124,7 @@ func (b *Backup) uploadFullStorage(backupRes *meta.CreateBackupResp, targetUri s
 
 			// source: {nebulaDataPath}/checkpoints/{backupName}/{partId}
 			// target: {backupRoot}/{backupName}/data/{clusterId}/{partId}
-			target, _ := utils.UriJoin(targetUri, strconv.Itoa(int(part.ClusterId)), strconv.Itoa(int(part.PartId)))
+			target, _ := utils.UriJoin(targetUri, strconv.Itoa(int(part.ServiceGroupId)), strconv.Itoa(int(part.PartId)))
 			source := part.CheckpointPath
 			backend, err := b.sto.GetDir(b.ctx, target)
 			if err != nil {

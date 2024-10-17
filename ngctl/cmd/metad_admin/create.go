@@ -1,4 +1,4 @@
-package supercluster_admin
+package metad_admin
 
 import (
 	"fmt"
@@ -14,23 +14,23 @@ import (
 
 var createCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create a supercluster",
-	Long:  `Create a supercluster with the metad install and started on a host`,
+	Short: "Create a metad",
+	Long:  `Create a metad with the metad install and started on a host`,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if superclusterFlags.configFile == "" {
+		if metadFlags.configFile == "" {
 			return common.NgctlError("config file is empty", "")
 		}
-		if superclusterFlags.withInstall {
+		if metadFlags.withInstall {
 			return common.NgctlError("withInstall must be set to true", "")
 		}
-		err := common.CheckInConfigFile(superclusterFlags.configFile)
+		err := common.CheckInConfigFile(metadFlags.configFile)
 		if err != nil {
 			return common.NgctlError("Failed to check in config file", err.Error())
 		}
 		if err := host_admin.InstallOnHost(nil, true); err != nil {
 			return common.NgctlError("Failed to install on the host", err.Error())
 		}
-		dstConfigFilePath := common.ConfigSpec.InstallPath + "cluster/etc/"
+		dstConfigFilePath := common.ConfigSpec.InstallPath + "srvgrp/etc/"
 		// The addrs of all metad hosts as configured
 		hosts := common.ConfigSpec.Spec.Metad.Hosts
 		metaAddrs := []common.IPAndPort{}
@@ -43,9 +43,9 @@ var createCmd = &cobra.Command{
 			return common.NgctlError("Failed to get current folder", err.Error())
 		}
 		currentFolder = strings.TrimSuffix(currentFolder, "/")
-		if superclusterFlags.serviceConfigFile == "" {
-			superclusterFlags.serviceConfigFile = currentFolder + "/nebula-metad.conf.default"
-			err := common.GenerateDefaultConfigFile(superclusterFlags.serviceConfigFile, "metad")
+		if metadFlags.serviceConfigFile == "" {
+			metadFlags.serviceConfigFile = currentFolder + "/nebula-metad.conf.default"
+			err := common.GenerateDefaultConfigFile(metadFlags.serviceConfigFile, "metad")
 			if err != nil {
 				return common.NgctlError("Failed to generate default config file", err.Error())
 			}
@@ -54,7 +54,7 @@ var createCmd = &cobra.Command{
 		for _, host := range hosts {
 			localConfigFilePath := currentFolder + "/nebula-metad.conf"
 			backupLocalConfigFilePath := currentFolder + "/nebula-metad-" + host.IP + "-" + fmt.Sprint(host.Port) + ".conf.bak"
-			if err := common.GenerateMetadConfigFile(superclusterFlags.serviceConfigFile, localConfigFilePath, common.IPAndPort{IP: host.IP, Port: host.Port}, metaAddrs); err != nil {
+			if err := common.GenerateMetadConfigFile(metadFlags.serviceConfigFile, localConfigFilePath, common.IPAndPort{IP: host.IP, Port: host.Port}, metaAddrs); err != nil {
 				return common.NgctlError("Failed to generate metad config file", err.Error())
 			}
 			if err := common.BackupFile(localConfigFilePath, backupLocalConfigFilePath); err != nil {
@@ -83,8 +83,8 @@ var createCmd = &cobra.Command{
 }
 
 func init() {
-	createCmd.Flags().StringVarP(&superclusterFlags.configFile, "config", "f", "", "The config file for ngctl to create the supercluster")
-	createCmd.Flags().StringVarP(&superclusterFlags.serviceConfigFile, "service_config_file", "F", "", "config file for the service to start")
-	createCmd.Flags().BoolVar(&superclusterFlags.withInstall, "with_install", false, "Install and start the metad on the host")
+	createCmd.Flags().StringVarP(&metadFlags.configFile, "config", "f", "", "The config file for ngctl to create the metad")
+	createCmd.Flags().StringVarP(&metadFlags.serviceConfigFile, "service_config_file", "F", "", "config file for the service to start")
+	createCmd.Flags().BoolVar(&metadFlags.withInstall, "with_install", false, "Install and start the metad on the host")
 	createCmd.Flags().Lookup("with_install").NoOptDefVal = "false"
 }

@@ -12,7 +12,7 @@ func Uninstall(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, e
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
-	uninstallTask, err := UninstallCluster(args, spec)
+	uninstallTask, err := UninstallServiceGroup(args, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -29,7 +29,7 @@ func Uninstall(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, e
 	return workflow, nil
 }
 
-func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func UninstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if spec.Spec.Metad == nil {
 		return nil, nil
 	}
@@ -42,7 +42,7 @@ func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec
 		SubTasks: []*types.TaskSpec{},
 	}
 	// stop first
-	stopTasks, err := OperationCluster(spec, "stop", "all", "", killWait)
+	stopTasks, err := OperationServiceGroup(spec, "stop", "all", "", killWait)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +51,7 @@ func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec
 	}
 	// delete data
 	drain, _ := args["drain"].(bool)
-	clusters := spec.Spec.Metad.Clusters
+	clusters := spec.Spec.Metad.ServiceGroups
 	deletedMap := make(map[string]*types.TaskSpec)
 	for _, cluster := range clusters {
 		storaged := cluster.Storaged
@@ -60,7 +60,7 @@ func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec
 				Type: "delete_nebula_data",
 				Params: &tasks.DeleteNebulaDataParams{
 					Host:  storage.Agent.Host,
-					Path:  utils.GetClusterPath(spec.InstallPath),
+					Path:  utils.GetServiceGroupPath(spec.InstallPath),
 					Drain: drain,
 				},
 			}
@@ -74,7 +74,7 @@ func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec
 				Type: "delete_nebula_data",
 				Params: &tasks.DeleteNebulaDataParams{
 					Host:  graphd.Agent.Host,
-					Path:  utils.GetClusterPath(spec.InstallPath),
+					Path:  utils.GetServiceGroupPath(spec.InstallPath),
 					Drain: true, //for graph delete all data
 				},
 			}
@@ -89,7 +89,7 @@ func UninstallCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec
 			Type: "delete_nebula_data",
 			Params: &tasks.DeleteNebulaDataParams{
 				Host:  metad.Agent.Host,
-				Path:  utils.GetClusterPath(spec.InstallPath),
+				Path:  utils.GetServiceGroupPath(spec.InstallPath),
 				Drain: drain,
 			},
 		}

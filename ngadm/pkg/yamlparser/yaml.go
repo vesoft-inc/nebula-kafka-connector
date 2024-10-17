@@ -80,13 +80,13 @@ func CheckMetaSpec(metaSpec *types.MetadSpec) error {
 	if metaSpec.Hosts == nil {
 		return fmt.Errorf("metad hosts is nil")
 	}
-	if metaSpec.Clusters == nil {
+	if metaSpec.ServiceGroups == nil {
 		return fmt.Errorf("metad clusters is nil")
 	}
 	if metaSpec.Config == nil {
 		metaSpec.Config = make(map[string]any)
 	}
-	for _, cluster := range metaSpec.Clusters {
+	for _, cluster := range metaSpec.ServiceGroups {
 		if cluster.Graphd.Hosts == nil {
 			return fmt.Errorf("graphd hosts is nil")
 		}

@@ -9,8 +9,8 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	req := meta.NewCreateClusterReq("root", 3, "root", nil)
-	err = c.CreateCluster(req)
+	req := meta.NewCreateServiceGroupReq("root", 3, "root", nil)
+	err = c.CreateServiceGroup(req)
 	if err != nil {
 		panic(err)
 	}

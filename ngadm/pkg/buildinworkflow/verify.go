@@ -33,7 +33,7 @@ func VerifyAgents(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 	for _, host := range metaHosts {
 		allNeedHosts[host.Agent.Host] = &host.Agent
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, host := range cluster.Graphd.Hosts {
 			allNeedHosts[host.Agent.Host] = &host.Agent
 		}

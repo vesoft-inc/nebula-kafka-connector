@@ -104,24 +104,24 @@ type ServiceInfo struct {
 	DataPaths   []string
 }
 
-type ClusterServiceInfo struct {
-	ClusterId int64
+type ServiceGroupServiceInfo struct {
+	ServiceGroupId int64
 	Services  []*ServiceInfo
 }
 
-func (m *NebulaMeta) ListClusters(amg *AgentManager, clusterId int64, spec *types.JobSpec) ([]*ClusterServiceInfo, error) {
-	clusterResp, err := m.client.ListClusters(meta.NewListClustersReq(""))
+func (m *NebulaMeta) ListServiceGroups(amg *AgentManager, clusterId int64, spec *types.JobSpec) ([]*ServiceGroupServiceInfo, error) {
+	clusterResp, err := m.client.ListServiceGroups(meta.NewListServiceGroupsReq(""))
 	if err != nil {
 		return nil, err
 	}
 
-	clusters := make([]*ClusterServiceInfo, 0)
-	for _, c := range clusterResp.Clusters {
+	clusters := make([]*ServiceGroupServiceInfo, 0)
+	for _, c := range clusterResp.ServiceGroups {
 		if c.Id != clusterId {
 			continue
 		}
-		cluster := &ClusterServiceInfo{
-			ClusterId: c.Id,
+		cluster := &ServiceGroupServiceInfo{
+			ServiceGroupId: c.Id,
 			Services:  make([]*ServiceInfo, 0),
 		}
 

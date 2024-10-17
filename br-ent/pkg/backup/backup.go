@@ -3,11 +3,12 @@ package backup
 import (
 	"context"
 	"fmt"
-	"github.com/vesoft-inc/nebula-ng-tools/br-ent/pkg/async"
 	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/vesoft-inc/nebula-ng-tools/br-ent/pkg/async"
 
 	agentstorage "github.com/vesoft-inc/nebula-ng-tools/agent/api/agent/pkg/storage"
 	"github.com/vesoft-inc/nebula-ng-tools/br-ent/pkg/clients"
@@ -22,7 +23,7 @@ type Backup struct {
 	meta *clients.NebulaMeta
 	amg  *clients.AgentManager
 
-	clusters []*clients.ClusterServiceInfo
+	clusters []*clients.ServiceGroupServiceInfo
 	sto      agentstorage.ExternalStorage
 }
 
@@ -48,7 +49,7 @@ func NewBackup(ctx context.Context, cfg *config.BackupConfig) (*Backup, error) {
 		return nil, fmt.Errorf("create storage failed: %w", err)
 	}
 
-	clusters, err := b.meta.ListClusters(b.amg, b.cfg.ClusterId, b.cfg.Spec)
+	clusters, err := b.meta.ListServiceGroups(b.amg, b.cfg.ServiceGroupId, b.cfg.Spec)
 	if err != nil {
 		return nil, fmt.Errorf("list cluster failed: %w", err)
 	}
@@ -71,15 +72,15 @@ func (b *Backup) uploadMeta(backupRes *meta.CreateBackupResp, targetUri string) 
 		return err
 	}
 
-	for _, bakCluster := range backupRes.ClusterBackupInfos {
-		if len(bakCluster.MetaBackups) == 0 {
+	for _, bakServiceGroup := range backupRes.ServiceGroupBackupInfos {
+		if len(bakServiceGroup.MetaBackups) == 0 {
 			return fmt.Errorf("meta backup files are empty")
 		}
 
 		// source: {metaDataPath}/checkpoint/{backupName}/{cluster_id}
 		// target: {backupRoot}/{backupName}/meta/{clusterId}
-		target, _ := utils.UriJoin(targetUri, strconv.Itoa(int(bakCluster.ClusterId)))
-		source := path.Dir(bakCluster.MetaBackups[0])
+		target, _ := utils.UriJoin(targetUri, strconv.Itoa(int(bakServiceGroup.ServiceGroupId)))
+		source := path.Dir(bakServiceGroup.MetaBackups[0])
 		backend, err := b.sto.GetDir(b.ctx, target)
 		if err != nil {
 			return fmt.Errorf("get storage backend for %s failed: %w", targetUri, err)

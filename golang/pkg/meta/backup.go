@@ -3,17 +3,18 @@ package meta
 import (
 	"context"
 	"fmt"
+
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 )
 
 type (
-	ListBackupClustersReq struct{}
+	ListBackupServiceGroupsReq struct{}
 
-	ListBackupClustersResp struct {
+	ListBackupServiceGroupsResp struct {
 		*HeaderResponse
-		MetaCluster []*ServiceInfo
-		Clusters    []*ClusterServiceInfo
+		MetaServiceGroup []*ServiceInfo
+		ServiceGroups    []*ServiceGroupServiceInfo
 	}
 
 	CkptInfo struct {
@@ -28,24 +29,24 @@ type (
 		CkptInfos []CkptInfo
 	}
 
-	ClusterBackupInfo struct {
-		ClusterId     int64
-		PartitionNum  int32
-		ReplicaFactor int32
-		MetaBackups   []string
-		StorageInfos  []*StorageCheckpointInfo
+	ServiceGroupBackupInfo struct {
+		ServiceGroupId int64
+		PartitionNum   int32
+		ReplicaFactor  int32
+		MetaBackups    []string
+		StorageInfos   []*StorageCheckpointInfo
 	}
 
 	CreateBackupReq struct {
-		BackupName string
-		ClusterIds []int64
+		BackupName      string
+		ServiceGroupIds []int64
 	}
 
 	CreateBackupResp struct {
 		*HeaderResponse
-		BackupName         string
-		CreateTime         int64
-		ClusterBackupInfos []*ClusterBackupInfo
+		BackupName              string
+		CreateTime              int64
+		ServiceGroupBackupInfos []*ServiceGroupBackupInfo
 	}
 
 	DropBackupReq struct {
@@ -56,17 +57,17 @@ type (
 		*HeaderResponse
 	}
 
-	ClusterRestoreInfo struct {
-		NewClusterId int64
-		MetaBackups  []string
-		ServiceMap   map[int64]int64
-		CatalogOwner string
+	ServiceGroupRestoreInfo struct {
+		NewServiceGroupId int64
+		MetaBackups       []string
+		ServiceMap        map[int64]int64
+		CatalogOwner      string
 	}
 
 	RestoreReq struct {
-		ClusterMap          map[int64]int64
-		ClusterRestoreInfos []*ClusterRestoreInfo
-		Force               bool
+		ServiceGroupMap          map[int64]int64
+		ServiceGroupRestoreInfos []*ServiceGroupRestoreInfo
+		Force                    bool
 	}
 
 	RestoreResp struct {
@@ -84,9 +85,9 @@ func (c *metaClient) CreateBackup(req *CreateBackupReq) (*CreateBackupResp, erro
 	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 	in := &admin.CreateBackupRequest{
-		Header:     &admin.RequestHeader{Token: c.token},
-		BackupName: []byte(req.BackupName),
-		ClusterIds: req.ClusterIds,
+		Header:          &admin.RequestHeader{Token: c.token},
+		BackupName:      []byte(req.BackupName),
+		ServiceGroupIds: req.ServiceGroupIds,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.CreateBackup(ctx, in)
@@ -106,8 +107,8 @@ func (c *metaClient) CreateBackup(req *CreateBackupReq) (*CreateBackupResp, erro
 		return nil, fmt.Errorf("get response header failed: %w", err)
 	}
 
-	clusterBackupInfos := make([]*ClusterBackupInfo, 0, len(response.ClusterInfos))
-	for _, cbInfo := range response.ClusterInfos {
+	ServiceGroupBackupInfos := make([]*ServiceGroupBackupInfo, 0, len(response.ServiceGroupInfos))
+	for _, cbInfo := range response.ServiceGroupInfos {
 		storageInfos := make([]*StorageCheckpointInfo, 0, len(cbInfo.StorageInfos))
 		for _, storage := range cbInfo.StorageInfos {
 			ckptInfos := make([]CkptInfo, 0, len(storage.CkptParts))
@@ -126,20 +127,20 @@ func (c *metaClient) CreateBackup(req *CreateBackupReq) (*CreateBackupResp, erro
 			})
 		}
 
-		clusterBackupInfos = append(clusterBackupInfos, &ClusterBackupInfo{
-			ClusterId:     cbInfo.ClusterId,
-			PartitionNum:  cbInfo.PartitionNum,
-			ReplicaFactor: cbInfo.ReplicaFactor,
-			MetaBackups:   bytesToStrings(cbInfo.MetaBackups),
-			StorageInfos:  storageInfos,
+		ServiceGroupBackupInfos = append(ServiceGroupBackupInfos, &ServiceGroupBackupInfo{
+			ServiceGroupId: cbInfo.ServiceGroupId,
+			PartitionNum:   cbInfo.PartitionNum,
+			ReplicaFactor:  cbInfo.ReplicaFactor,
+			MetaBackups:    bytesToStrings(cbInfo.MetaBackups),
+			StorageInfos:   storageInfos,
 		})
 	}
 
 	return &CreateBackupResp{
-		HeaderResponse:     header,
-		BackupName:         string(response.BackupName),
-		CreateTime:         response.CreateTime,
-		ClusterBackupInfos: clusterBackupInfos,
+		HeaderResponse:          header,
+		BackupName:              string(response.BackupName),
+		CreateTime:              response.CreateTime,
+		ServiceGroupBackupInfos: ServiceGroupBackupInfos,
 	}, nil
 }
 
@@ -176,22 +177,22 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
 	defer cancel()
 
-	clusterInfos := make([]*admin.ClusterRestoreInfo, 0)
-	for _, info := range req.ClusterRestoreInfos {
-		clusterInfos = append(clusterInfos, &admin.ClusterRestoreInfo{
-			NewClusterId: info.NewClusterId,
-			MetaBackups:  stringsToBytes(info.MetaBackups),
-			ServiceMap:   info.ServiceMap,
-			CatalogOwner: []byte(info.CatalogOwner),
+	ServiceGroupInfos := make([]*admin.ServiceGroupRestoreInfo, 0)
+	for _, info := range req.ServiceGroupRestoreInfos {
+		ServiceGroupInfos = append(ServiceGroupInfos, &admin.ServiceGroupRestoreInfo{
+			NewServiceGroupId: info.NewServiceGroupId,
+			MetaBackups:       stringsToBytes(info.MetaBackups),
+			ServiceMap:        info.ServiceMap,
+			CatalogOwner:      []byte(info.CatalogOwner),
 		})
 
 	}
 
 	in := &admin.RestoreRequest{
-		Header:       &admin.RequestHeader{Token: c.token},
-		ClusterMap:   req.ClusterMap,
-		ClusterInfos: clusterInfos,
-		Force:        req.Force,
+		Header:            &admin.RequestHeader{Token: c.token},
+		ServiceGroupIdMap: req.ServiceGroupMap,
+		ServiceGroupInfos: ServiceGroupInfos,
+		Force:             req.Force,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.Restore(ctx, in)
@@ -277,10 +278,10 @@ func stringsToBytes(s []string) [][]byte {
 	return b
 }
 
-func NewCreateBackupReq(backupName string, clusterIds []int64) *CreateBackupReq {
+func NewCreateBackupReq(backupName string, ServiceGroupIds []int64) *CreateBackupReq {
 	return &CreateBackupReq{
-		BackupName: backupName,
-		ClusterIds: clusterIds,
+		BackupName:      backupName,
+		ServiceGroupIds: ServiceGroupIds,
 	}
 }
 

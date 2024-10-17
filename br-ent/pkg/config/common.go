@@ -31,7 +31,7 @@ const (
 	flagConcurrency        = "concurrency"
 	flagUsername           = "username"
 	flagPassword           = "password"
-	flagClusterId          = "clusterId"
+	flagServiceGroupId          = "clusterId"
 	flagCatalogOwner       = "catalog-owner"
 	flagForce              = "force"
 

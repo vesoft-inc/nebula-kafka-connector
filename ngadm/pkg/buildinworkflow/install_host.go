@@ -20,7 +20,7 @@ func InstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec,
 	if spec.Spec.Metad == nil {
 		return nil, nil
 	}
-	metaCluster := spec.Spec.Metad
+	metaServiceGroup := spec.Spec.Metad
 	uploadTasks := []*types.TaskSpec{}
 	connectTasks := []*types.TaskSpec{}
 	force, ok := args["force"].(bool)
@@ -39,7 +39,7 @@ func InstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec,
 		allNeedHosts = GetMetadSelectedHosts(selectedHost, spec)
 	}
 	for _, agent := range allNeedHosts {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -62,14 +62,14 @@ func InstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec,
 			},
 		})
 		//2.upload
-		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaCluster.PackagePath))
+		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaServiceGroup.PackagePath))
 		uploadTasks = append(uploadTasks, &types.TaskSpec{
 			Type: "serial",
 			SubTasks: []*types.TaskSpec{
 				{
 					Type: "upload",
 					Params: &tasks.UploadParams{
-						SrcPath: utils.GetUserPackagePath(metaCluster.PackagePath, agent.PackagePath),
+						SrcPath: utils.GetUserPackagePath(metaServiceGroup.PackagePath, agent.PackagePath),
 						DstPath: dstPath,
 						Host:    agent.Host,
 					},

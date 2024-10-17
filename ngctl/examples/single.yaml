@@ -15,9 +15,9 @@ spec:
         agentPort: 6688
         agents:
           host: "127.0.0.1:6688"
-    clusters:
+    srvgrps:
       - zoneList: [zone1]
-        name: testcluster
+        name: testsrvgrp
         replica: 1
         graphd:
           hosts:

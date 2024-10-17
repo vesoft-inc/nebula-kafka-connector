@@ -14,7 +14,7 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
-	//installTask, err := InstallMetaCluster(args, spec)
+	//installTask, err := InstallMetaServiceGroup(args, spec)
 	//if err != nil {
 	//	return nil, err
 	//}
@@ -22,7 +22,7 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 	//	workflow.Tasks = append(workflow.Tasks, installTask)
 	//}
 
-	installTask, err := InstallCluster(args, spec)
+	installTask, err := InstallServiceGroup(args, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -41,14 +41,14 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 	return workflow, nil
 }
 
-func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func InstallMetaServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if args == nil {
 		args = map[string]any{}
 	}
 	if spec.Spec.Metad == nil {
 		return nil, nil
 	}
-	metaCluster := spec.Spec.Metad
+	metaServiceGroup := spec.Spec.Metad
 	metaHosts := spec.Spec.Metad.Hosts
 
 	uploadTasks := []*types.TaskSpec{}
@@ -59,7 +59,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	}
 	allNeedHosts := GetMetadAllNeedHosts(spec)
 	for _, agent := range allNeedHosts {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -82,14 +82,14 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 			},
 		})
 		//2.upload
-		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaCluster.PackagePath))
+		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaServiceGroup.PackagePath))
 		uploadTasks = append(uploadTasks, &types.TaskSpec{
 			Type: "serial",
 			SubTasks: []*types.TaskSpec{
 				{
 					Type: "upload",
 					Params: &tasks.UploadParams{
-						SrcPath: utils.GetUserPackagePath(metaCluster.PackagePath, agent.PackagePath),
+						SrcPath: utils.GetUserPackagePath(metaServiceGroup.PackagePath, agent.PackagePath),
 						DstPath: dstPath,
 						Host:    agent.Host,
 					},
@@ -108,7 +108,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 	//3. config and start needed processes
 	startNeededProcessesTask := []*types.TaskSpec{}
 	for _, host := range metaHosts {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, host.Agent.PackagePath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, host.Agent.PackagePath)
 		startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 			Type:        "serial",
 			Description: "start metad",
@@ -117,9 +117,9 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 					Type: "init_config",
 					Params: &tasks.InitConfigParams{
 						Host: host.Agent.Host,
-						ChangeMap: utils.MergeNebulaConfigMap(metaCluster.Config, map[string]string{
+						ChangeMap: utils.MergeNebulaConfigMap(metaServiceGroup.Config, map[string]string{
 							"local_ip":          utils.GetHostIP(host.Agent.Host),
-							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaCluster.Config)),
+							"meta_server_addrs": utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaServiceGroup.Config)),
 						}),
 						Dst: path.Join(installPath, "etc/nebula-metad.conf"),
 					},
@@ -141,7 +141,7 @@ func InstallMetaCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSp
 				//		Config: map[string]any{
 				//			"installPath": installPath,
 				//			"host":        utils.GetHostIP(agent.Host),
-				//			"port":        utils.GetConfigPort(metaCluster.Config),
+				//			"port":        utils.GetConfigPort(metaServiceGroup.Config),
 				//		},
 				//	},
 				//},
@@ -176,7 +176,7 @@ func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 		agentCopy := host.Agent
 		allNeedHosts[host.Agent.Host] = &agentCopy
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, host := range cluster.Graphd.Hosts {
 			agentCopy := host.Agent
 			allNeedHosts[host.Agent.Host] = &agentCopy
@@ -199,7 +199,7 @@ func GetMetadSelectedHosts(selectedHost []string, spec *types.JobSpec) map[strin
 			}
 		}
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, host := range cluster.Graphd.Hosts {
 			for _, h := range selectedHost {
 				if host.IP == h {

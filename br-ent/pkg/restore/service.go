@@ -6,8 +6,8 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
 
-func (r *Restore) stopClusterGraph(clusterId int64) error {
-	for id, cluster := range r.clusters.GetClusters() {
+func (r *Restore) stopServiceGroupGraph(clusterId int64) error {
+	for id, cluster := range r.clusters.GetServiceGroups() {
 		if id == clusterId {
 			for _, service := range cluster {
 				if service.ServiceType == meta.ServiceTypeGraphd {
@@ -31,8 +31,8 @@ func (r *Restore) stopClusterGraph(clusterId int64) error {
 	return nil
 }
 
-func (r *Restore) startClusterGraph(clusterId int64) error {
-	for id, cluster := range r.clusters.GetClusters() {
+func (r *Restore) startServiceGroupGraph(clusterId int64) error {
+	for id, cluster := range r.clusters.GetServiceGroups() {
 		if id == clusterId {
 			for _, service := range cluster {
 				if service.ServiceType == meta.ServiceTypeGraphd {
@@ -56,8 +56,8 @@ func (r *Restore) startClusterGraph(clusterId int64) error {
 	return nil
 }
 
-func (r *Restore) stopClusterStorage(clusterId int64) error {
-	for id, cluster := range r.clusters.GetClusters() {
+func (r *Restore) stopServiceGroupStorage(clusterId int64) error {
+	for id, cluster := range r.clusters.GetServiceGroups() {
 		if id == clusterId {
 			for _, service := range cluster {
 				if service.ServiceType == meta.ServiceTypeStoraged {
@@ -81,8 +81,8 @@ func (r *Restore) stopClusterStorage(clusterId int64) error {
 	return nil
 }
 
-func (r *Restore) startClusterStorage(clusterId int64) error {
-	for id, cluster := range r.clusters.GetClusters() {
+func (r *Restore) startServiceGroupStorage(clusterId int64) error {
+	for id, cluster := range r.clusters.GetServiceGroups() {
 		if id == clusterId {
 			for _, service := range cluster {
 				if service.ServiceType == meta.ServiceTypeStoraged {
@@ -106,48 +106,48 @@ func (r *Restore) startClusterStorage(clusterId int64) error {
 	return nil
 }
 
-func (r *Restore) stopAllClusterGraph() error {
-	for id := range r.clusters.GetClusters() {
-		if err := r.stopClusterGraph(id); err != nil {
+func (r *Restore) stopAllServiceGroupGraph() error {
+	for id := range r.clusters.GetServiceGroups() {
+		if err := r.stopServiceGroupGraph(id); err != nil {
 			return fmt.Errorf("stop graphd cluster %d failed: %w", id, err)
 		}
 	}
 	return nil
 }
 
-func (r *Restore) startAllClusterGraph() error {
-	for id := range r.clusters.GetClusters() {
-		if err := r.startClusterGraph(id); err != nil {
+func (r *Restore) startAllServiceGroupGraph() error {
+	for id := range r.clusters.GetServiceGroups() {
+		if err := r.startServiceGroupGraph(id); err != nil {
 			return fmt.Errorf("start graphd cluster %d failed: %w", id, err)
 		}
 	}
 	return nil
 }
 
-func (r *Restore) stopAllClusterStorage() error {
-	for id := range r.clusters.GetClusters() {
-		if err := r.stopClusterStorage(id); err != nil {
+func (r *Restore) stopAllServiceGroupStorage() error {
+	for id := range r.clusters.GetServiceGroups() {
+		if err := r.stopServiceGroupStorage(id); err != nil {
 			return fmt.Errorf("stop storaged cluster %d failed: %w", id, err)
 		}
 	}
 	return nil
 }
 
-func (r *Restore) startAllClusterStorage() error {
-	for id := range r.clusters.GetClusters() {
-		if err := r.startClusterStorage(id); err != nil {
+func (r *Restore) startAllServiceGroupStorage() error {
+	for id := range r.clusters.GetServiceGroups() {
+		if err := r.startServiceGroupStorage(id); err != nil {
 			return fmt.Errorf("start storaged cluster %d failed: %w", id, err)
 		}
 	}
 	return nil
 }
 
-func (r *Restore) stopAllClusters() error {
-	if err := r.stopAllClusterGraph(); err != nil {
+func (r *Restore) stopAllServiceGroups() error {
+	if err := r.stopAllServiceGroupGraph(); err != nil {
 		return fmt.Errorf("stop graphd cluster failed: %w", err)
 	}
 
-	if err := r.stopAllClusterStorage(); err != nil {
+	if err := r.stopAllServiceGroupStorage(); err != nil {
 		return fmt.Errorf("stop storaged cluster failed: %w", err)
 	}
 
@@ -155,7 +155,7 @@ func (r *Restore) stopAllClusters() error {
 }
 
 func (r *Restore) stopStorageds() error {
-	//if err := r.stopAllClusterStorage(); err != nil {
+	//if err := r.stopAllServiceGroupStorage(); err != nil {
 	//	return fmt.Errorf("stop storaged cluster failed: %w", err)
 	//}
 

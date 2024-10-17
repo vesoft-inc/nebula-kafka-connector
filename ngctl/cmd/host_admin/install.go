@@ -20,8 +20,8 @@ var installHostCmd = &cobra.Command{
 		if configError != nil {
 			return common.NgctlError("config file error", configError.Error())
 		}
-		// install on metad is managed by supercluster_admin, not managed here.
-		hostList, err := common.DeriveHostList(flags.host, flags.clusterName, false)
+		// install on metad is managed by metad_admin, not managed here.
+		hostList, err := common.DeriveHostList(flags.host, flags.srvgrpName, false)
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
@@ -29,7 +29,7 @@ var installHostCmd = &cobra.Command{
 			ResourceType:        "hosts",
 			OperationOnResource: "add",
 			ResourceList:        make([]common.IPAndPort, 0),
-			ClusterName:         flags.clusterName,
+			ClusterName:         flags.srvgrpName,
 		}
 		for _, host := range hostList {
 			hostResrouces.ResourceList = append(hostResrouces.ResourceList, host)
@@ -61,8 +61,8 @@ var uninstallHostCmd = &cobra.Command{
 		if configError != nil {
 			return common.NgctlError("config file error", configError.Error())
 		}
-		// install on metad is managed by supercluster_admin, not managed here.
-		hostList, err := common.DeriveHostList(flags.host, flags.clusterName, false)
+		// install on metad is managed by metad_admin, not managed here.
+		hostList, err := common.DeriveHostList(flags.host, flags.srvgrpName, false)
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
@@ -70,7 +70,7 @@ var uninstallHostCmd = &cobra.Command{
 			ResourceType:        "hosts",
 			OperationOnResource: "add",
 			ResourceList:        make([]common.IPAndPort, 0),
-			ClusterName:         flags.clusterName,
+			ClusterName:         flags.srvgrpName,
 		}
 		for _, host := range hostList {
 			hostResrouces.ResourceList = append(hostResrouces.ResourceList, host)
@@ -91,10 +91,10 @@ var uninstallHostCmd = &cobra.Command{
 
 func init() {
 	installHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "on which host to install the NebulaGraph package")
-	installHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
+	installHostCmd.Flags().StringVarP(&hostFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
 	installHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
 
 	uninstallHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "on which host to uninstall the NebulaGraph package")
-	uninstallHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
+	uninstallHostCmd.Flags().StringVarP(&hostFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
 	uninstallHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
 }

@@ -21,7 +21,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	flags.Int(flagConcurrency, 5, "Max concurrency for upload, download and playback data")
 	flags.String(flagUsername, "", "Username for login metad service")
 	flags.String(flagPassword, "", "Password for login metad service")
-	flags.Int64(flagClusterId, 0, "Specify the restore cluster id")
+	flags.Int64(flagServiceGroupId, 0, "Specify the restore cluster id")
 	flags.String(flagCatalogOwner, "root", "Specify the restore cluster catalog owner")
 	flags.Bool(flagForce, false, "Force to restore data")
 	flags.String(FlagConfig, "", "The config file for ngctl to restore")
@@ -37,7 +37,7 @@ func AddRestoreFlags(flags *pflag.FlagSet) {
 	cobra.MarkFlagRequired(flags, FlagAgentsAddr)
 	cobra.MarkFlagRequired(flags, FlagStorage)
 	cobra.MarkFlagRequired(flags, flagBackupName)
-	cobra.MarkFlagRequired(flags, flagClusterId)
+	cobra.MarkFlagRequired(flags, flagServiceGroupId)
 	cobra.MarkFlagRequired(flags, FlagConfig)
 }
 
@@ -45,7 +45,7 @@ type RestoreConfig struct {
 	BackupName   string
 	MetaAddr     string
 	AgentsAddr   string
-	ClusterId    int64
+	ServiceGroupId    int64
 	Concurrency  int
 	Backend      *agentstorage.Backend // Backend is associated with the root uri
 	TLSConfig    *tls.Config
@@ -75,7 +75,7 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 		return err
 	}
 
-	r.ClusterId, err = flags.GetInt64(flagClusterId)
+	r.ServiceGroupId, err = flags.GetInt64(flagServiceGroupId)
 	if err != nil {
 		return err
 	}
@@ -126,7 +126,7 @@ func (r *RestoreConfig) ParseFlags(flags *pflag.FlagSet) error {
 	return nil
 }
 
-func parseClusterIdMapping(clusterIdMappingStr string) (map[int64]int64, error) {
+func parseServiceGroupIdMapping(clusterIdMappingStr string) (map[int64]int64, error) {
 	clusterIdMapping := make(map[int64]int64)
 	mapping := strings.Split(clusterIdMappingStr, ",")
 	for _, m := range mapping {
@@ -134,15 +134,15 @@ func parseClusterIdMapping(clusterIdMappingStr string) (map[int64]int64, error) 
 		if len(ids) != 2 {
 			return nil, fmt.Errorf("invalid cluster id mapping: %s", m)
 		}
-		oldClusterId, err := strconv.Atoi(ids[0])
+		oldServiceGroupId, err := strconv.Atoi(ids[0])
 		if err != nil {
 			return nil, fmt.Errorf("parse old cluster id failed: %w", err)
 		}
-		newClusterId, err := strconv.Atoi(ids[1])
+		newServiceGroupId, err := strconv.Atoi(ids[1])
 		if err != nil {
 			return nil, fmt.Errorf("parse new cluster id failed: %w", err)
 		}
-		clusterIdMapping[int64(oldClusterId)] = int64(newClusterId)
+		clusterIdMapping[int64(oldServiceGroupId)] = int64(newServiceGroupId)
 	}
 
 	return clusterIdMapping, nil

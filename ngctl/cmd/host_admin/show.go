@@ -11,8 +11,8 @@ import (
 
 var showHostsCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show hosts in cluster.",
-	Long:  `Show all hosts currently in a cluster.`,
+	Short: "Show hosts in srvgrp.",
+	Long:  `Show all hosts currently in a srvgrp.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -21,11 +21,11 @@ var showHostsCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		cluster := hostFlags.clusterName
-		if cluster == "" {
-			return common.NgctlError("cluster name is empty", "")
+		srvgrp := hostFlags.srvgrpName
+		if srvgrp == "" {
+			return common.NgctlError("srvgrp name is empty", "")
 		}
-		req := meta.NewShowHostsReq(cluster)
+		req := meta.NewShowHostsReq(srvgrp)
 		resp, err := common.MetaClient.ListHosts(req)
 		if err != nil {
 			return common.NgctlError("Show hosts failed", err.Error())
@@ -52,6 +52,6 @@ var showHostsCmd = &cobra.Command{
 }
 
 func init() {
-	// show all the hosts of a cluster
-	showHostsCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
+	// show all the hosts of a srvgrp
+	showHostsCmd.Flags().StringVarP(&hostFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
 }

@@ -34,7 +34,7 @@ func Operation(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, e
 
 	// append nebula component operation
 	if isNebulaComponent(component) {
-		operationTask, err := OperationCluster(spec, operation, component, host, killWait)
+		operationTask, err := OperationServiceGroup(spec, operation, component, host, killWait)
 		if err != nil {
 			return nil, err
 		}
@@ -140,7 +140,7 @@ func addNeedOperation(allNeedOperations *map[string]map[types.NebulaServiceCompo
 	return flag
 }
 
-func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait string) (*types.TaskSpec, error) {
+func OperationServiceGroup(spec *types.JobSpec, operation, component, host, KillWait string) (*types.TaskSpec, error) {
 	componentType := types.NebulaServiceComponentMap[component]
 	if spec.Spec.Metad == nil {
 		return nil, fmt.Errorf("metad spec is nil")
@@ -151,7 +151,7 @@ func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait 
 	for _, _host := range metaHosts {
 		addNeedOperation(&allNeedOperations, types.Metad, componentType, _host.Agent.Host, host)
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, _host := range cluster.Graphd.Hosts {
 			addNeedOperation(&allNeedOperations, types.Graphd, componentType, _host.Agent.Host, host)
 		}
@@ -173,7 +173,7 @@ func OperationCluster(spec *types.JobSpec, operation, component, host, KillWait 
 	}
 	//2. operation
 	for host, components := range allNeedOperations {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agentsMap[host].InstallPath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agentsMap[host].InstallPath)
 		// aggregate operation task
 		if (components[types.Metad] && components[types.Graphd] && components[types.Storaged]) || components[types.AllNebulaSerivce] {
 			operationTasks = append(operationTasks, &types.TaskSpec{

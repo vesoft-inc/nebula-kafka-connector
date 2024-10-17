@@ -19,9 +19,9 @@ ngctl service [flags]
 ### SEE ALSO
 
 * [ngctl](ngctl.md)	 - Execute ngctl commands in cli mode.
-* [ngctl service add](ngctl_service_add.md)	 - Add a service into a cluster.
-* [ngctl service drop](ngctl_service_drop.md)	 - Drop a service from a cluster.
-* [ngctl service show](ngctl_service_show.md)	 - Show services in a cluster.
+* [ngctl service add](ngctl_service_add.md)	 - Add a service into a srvgrp.
+* [ngctl service drop](ngctl_service_drop.md)	 - Drop a service from a srvgrp.
+* [ngctl service show](ngctl_service_show.md)	 - Show services in a srvgrp.
 * [ngctl service start](ngctl_service_start.md)	 - Start a service on a host.
 * [ngctl service stop](ngctl_service_stop.md)	 - Stop a service on a host.
 

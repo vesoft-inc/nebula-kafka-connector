@@ -9,31 +9,31 @@ import (
 )
 
 type (
-	CreateClusterReq struct {
-		clusterName string
-		replica     int
-		zones       []string
-		owner       string
+	CreateServiceGroupReq struct {
+		serviceGroupName string
+		replica          int
+		zones            []string
+		owner            string
 	}
 
-	AlterClusterReq struct {
-		clusterName string
-		owner       string
+	AlterServiceGroupReq struct {
+		serviceGroupName string
+		owner            string
 	}
 
 	AddHostReq struct {
-		host        string
-		clustername string
-		agentPort   uint32
+		host             string
+		serviceGroupname string
+		agentPort        uint32
 	}
 
 	DropHostReq struct {
-		host        string
-		clustername string
+		host             string
+		serviceGroupname string
 	}
 
 	ListHostsReq struct {
-		clustername string
+		serviceGroupname string
 	}
 
 	HostInfo struct {
@@ -46,22 +46,22 @@ type (
 	}
 
 	AddServiceReq struct {
-		host        string
-		port        uint32
-		serviceType ServiceType
-		clustername string
+		host             string
+		port             uint32
+		serviceType      ServiceType
+		serviceGroupname string
 	}
 
 	DropServiceReq struct {
-		host        string
-		port        uint32
-		serviceType ServiceType
-		clustername string
+		host             string
+		port             uint32
+		serviceType      ServiceType
+		serviceGroupname string
 	}
 
 	ServiceType int8
 
-	ClusterInfo struct {
+	ServiceGroupInfo struct {
 		Id              int64    `json:"id"`
 		Name            string   `json:"name"`
 		ReplicaRefactor uint32   `json:"replica_refactor"`
@@ -69,12 +69,12 @@ type (
 		Owner           string   `json:"owner"`
 	}
 
-	ListClustersReq struct {
-		clusterName string
+	ListServiceGroupsReq struct {
+		serviceGroupName string
 	}
 
-	ListClustersResp struct {
-		Clusters []*ClusterInfo `json:"clusters"`
+	ListServiceGroupsResp struct {
+		ServiceGroups []*ServiceGroupInfo `json:"serviceGroups"`
 	}
 
 	ServiceInfo struct {
@@ -85,25 +85,25 @@ type (
 	}
 
 	ListServicesReq struct {
-		clusterName string
+		serviceGroupName string
 	}
 
 	ListServicesResp struct {
 		Services []*ServiceInfo `json:"services"`
 	}
 
-	InitClusterReq struct {
-		clustername string
+	InitServiceGroupReq struct {
+		serviceGroupname string
 	}
 
-	DropClusterReq struct {
-		clustername string
-		force       bool
+	DropServiceGroupReq struct {
+		serviceGroupname string
+		force            bool
 	}
 
-	ClusterServiceInfo struct {
-		ClusterId int64
-		Services  []*ServiceInfo
+	ServiceGroupServiceInfo struct {
+		ServiceGroupId int64
+		Services       []*ServiceInfo
 	}
 )
 
@@ -115,97 +115,97 @@ const (
 	ServiceTypeSearch
 )
 
-func NewCreateClusterReq(clusterName string, replic int, owner string, zones []string) *CreateClusterReq {
-	return &CreateClusterReq{
-		clusterName: clusterName,
-		replica:     replic,
-		zones:       zones,
-		owner:       owner,
+func NewCreateServiceGroupReq(serviceGroupName string, replic int, owner string, zones []string) *CreateServiceGroupReq {
+	return &CreateServiceGroupReq{
+		serviceGroupName: serviceGroupName,
+		replica:          replic,
+		zones:            zones,
+		owner:            owner,
 	}
 }
 
-func NewAlterClusterReq(clusterName string, owner string) *AlterClusterReq {
-	return &AlterClusterReq{
-		clusterName: clusterName,
-		owner:       owner,
+func NewAlterServiceGroupReq(serviceGroupName string, owner string) *AlterServiceGroupReq {
+	return &AlterServiceGroupReq{
+		serviceGroupName: serviceGroupName,
+		owner:            owner,
 	}
 }
 
-func NewAddHostReq(host string, clusterName string, agentPort uint32) *AddHostReq {
+func NewAddHostReq(host string, serviceGroupName string, agentPort uint32) *AddHostReq {
 	return &AddHostReq{
-		host:        host,
-		clustername: clusterName,
-		agentPort:   agentPort,
+		host:             host,
+		serviceGroupname: serviceGroupName,
+		agentPort:        agentPort,
 	}
 }
 
-func NewDropHostReq(host string, clusterName string) *DropHostReq {
+func NewDropHostReq(host string, serviceGroupName string) *DropHostReq {
 	return &DropHostReq{
-		host:        host,
-		clustername: clusterName,
+		host:             host,
+		serviceGroupname: serviceGroupName,
 	}
 }
 
-func NewShowHostsReq(clusterName string) *ListHostsReq {
+func NewShowHostsReq(serviceGroupName string) *ListHostsReq {
 	return &ListHostsReq{
-		clustername: clusterName,
+		serviceGroupname: serviceGroupName,
 	}
 }
 
-func NewAddServiceReq(host string, port uint32, serviceType ServiceType, clusterName string) *AddServiceReq {
+func NewAddServiceReq(host string, port uint32, serviceType ServiceType, serviceGroupName string) *AddServiceReq {
 	return &AddServiceReq{
-		host:        host,
-		port:        port,
-		serviceType: serviceType,
-		clustername: clusterName,
+		host:             host,
+		port:             port,
+		serviceType:      serviceType,
+		serviceGroupname: serviceGroupName,
 	}
 }
 
-func NewListClustersReq(clusterName string) *ListClustersReq {
-	return &ListClustersReq{
-		clusterName: clusterName,
+func NewListServiceGroupsReq(serviceGroupName string) *ListServiceGroupsReq {
+	return &ListServiceGroupsReq{
+		serviceGroupName: serviceGroupName,
 	}
 }
 
-func NewInitClusterReq(clusterName string) *InitClusterReq {
-	return &InitClusterReq{
-		clustername: clusterName,
+func NewInitServiceGroupReq(serviceGroupName string) *InitServiceGroupReq {
+	return &InitServiceGroupReq{
+		serviceGroupname: serviceGroupName,
 	}
 }
 
-func NewListServicesReq(clusterName string) *ListServicesReq {
+func NewListServicesReq(serviceGroupName string) *ListServicesReq {
 	return &ListServicesReq{
-		clusterName: clusterName,
+		serviceGroupName: serviceGroupName,
 	}
 }
 
-func NewDropServiceReq(host string, port uint32, serviceType ServiceType, clusterName string) *DropServiceReq {
+func NewDropServiceReq(host string, port uint32, serviceType ServiceType, serviceGroupName string) *DropServiceReq {
 	return &DropServiceReq{
-		host:        host,
-		port:        port,
-		serviceType: serviceType,
-		clustername: clusterName,
+		host:             host,
+		port:             port,
+		serviceType:      serviceType,
+		serviceGroupname: serviceGroupName,
 	}
 }
 
-func (c *metaClient) CreateCluster(req *CreateClusterReq) error {
+func (c *metaClient) CreateServiceGroup(req *CreateServiceGroupReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	zones := make([][]byte, 0)
 	for _, z := range req.zones {
 		zones = append(zones, []byte(z))
 	}
-	in := &admin.CreateClusterRequest{
+	in := &admin.CreateServiceGroupRequest{
 		Header: &admin.RequestHeader{Token: c.token},
-		ClusterDesc: &admin.ClusterDesc{
-			ClusterName:   []byte(req.clusterName),
+		ServiceGroupDesc: &admin.ServiceGroupDesc{
+			ServiceGroup:  []byte(req.serviceGroupName),
 			ReplicaFactor: uint32(req.replica),
 			Zones:         zones,
 			Owner:         []byte(req.owner),
 		},
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.CreateCluster(ctx, in)
+		return c.client.CreateServiceGroup(ctx, in)
 	})
 	if err != nil {
 		return err
@@ -218,7 +218,7 @@ func (c *metaClient) AddHost(req *AddHostReq) error {
 	defer cancel()
 	in := &admin.AddHostRequest{
 		Header:   &admin.RequestHeader{Token: c.token},
-		HostInfo: &admin.HostInfo{HostName: []byte(req.host), ClusterName: []byte(req.clustername), AgentPort: req.agentPort},
+		HostInfo: &admin.HostInfo{HostName: []byte(req.host), ServiceGroup: []byte(req.serviceGroupname), AgentPort: req.agentPort},
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AddHost(ctx, in)
@@ -233,9 +233,9 @@ func (c *metaClient) DropHost(req *DropHostReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.RemoveHostRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		HostName:    []byte(req.host),
-		ClusterName: []byte(req.clustername),
+		Header:       &admin.RequestHeader{Token: c.token},
+		HostName:     []byte(req.host),
+		ServiceGroup: []byte(req.serviceGroupname),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropHost(ctx, in)
@@ -250,8 +250,8 @@ func (c *metaClient) ListHosts(req *ListHostsReq) (*ListHostsResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ListHostsRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		ClusterName: []byte(req.clustername),
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupname),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ListHosts(ctx, in)
@@ -283,11 +283,11 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 	defer cancel()
 
 	in := &admin.AddServiceRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		Host:        []byte(req.host),
-		Port:        req.port,
-		Type:        common.ServiceType(req.serviceType),
-		ClusterName: []byte(req.clustername),
+		Header:       &admin.RequestHeader{Token: c.token},
+		Host:         []byte(req.host),
+		Port:         req.port,
+		Type:         common.ServiceType(req.serviceType),
+		ServiceGroup: []byte(req.serviceGroupname),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AddService(ctx, in)
@@ -301,8 +301,8 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.ShowServiceRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		ClusterName: []byte(req.clusterName),
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ShowService(ctx, in)
@@ -335,16 +335,16 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 	}, nil
 }
 
-func (c *metaClient) AlterCluster(req *AlterClusterReq) error {
+func (c *metaClient) AlterServiceGroup(req *AlterServiceGroupReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
-	in := &admin.AlterClusterRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		ClusterName: []byte(req.clusterName),
-		Owner:       []byte(req.owner),
+	in := &admin.AlterServiceGroupRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
+		Owner:        []byte(req.owner),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.AlterCluster(ctx, in)
+		return c.client.AlterServiceGroup(ctx, in)
 	})
 	if err != nil {
 		return err
@@ -352,12 +352,12 @@ func (c *metaClient) AlterCluster(req *AlterClusterReq) error {
 	return responseIsErr(resp)
 }
 
-func (c *metaClient) InitCluster(req *InitClusterReq) error {
+func (c *metaClient) InitServiceGroup(req *InitServiceGroupReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.InitStorageRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		ClusterName: []byte(req.clustername),
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupname),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.InitStorage(ctx, in)
@@ -368,15 +368,15 @@ func (c *metaClient) InitCluster(req *InitClusterReq) error {
 	return responseIsErr(resp)
 }
 
-func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, error) {
+func (c *metaClient) ListServiceGroups(req *ListServiceGroupsReq) (*ListServiceGroupsResp, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
-	in := &admin.ShowClusterRequest{
-		Header:      &admin.RequestHeader{Token: c.token},
-		ClusterName: []byte(req.clusterName),
+	in := &admin.ShowServiceGroupRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.ShowCluster(ctx, in)
+		return c.client.ShowServiceGroup(ctx, in)
 	})
 	if err != nil {
 		return nil, err
@@ -384,26 +384,26 @@ func (c *metaClient) ListClusters(req *ListClustersReq) (*ListClustersResp, erro
 	if err := responseIsErr(resp); err != nil {
 		return nil, err
 	}
-	response, ok := resp.(*admin.ShowClusterResponse)
+	response, ok := resp.(*admin.ShowServiceGroupResponse)
 	if !ok {
 		return nil, fmt.Errorf("invalid response")
 	}
-	clusters := make([]*ClusterInfo, 0)
-	for _, c := range response.Clusters {
-		cluster := &ClusterInfo{
-			Id:              c.ClusterId,
-			Name:            string(c.Desc.ClusterName),
+	serviceGroups := make([]*ServiceGroupInfo, 0)
+	for _, c := range response.ServiceGroups {
+		serviceGroup := &ServiceGroupInfo{
+			Id:              c.ServiceGroupId,
+			Name:            string(c.Desc.ServiceGroup),
 			ReplicaRefactor: c.Desc.ReplicaFactor,
 			Zones:           make([]string, 0),
 			Owner:           string(c.Desc.Owner),
 		}
 		for _, z := range c.Desc.Zones {
-			cluster.Zones = append(cluster.Zones, string(z))
+			serviceGroup.Zones = append(serviceGroup.Zones, string(z))
 		}
-		clusters = append(clusters, cluster)
+		serviceGroups = append(serviceGroups, serviceGroup)
 	}
-	return &ListClustersResp{
-		Clusters: clusters,
+	return &ListServiceGroupsResp{
+		ServiceGroups: serviceGroups,
 	}, nil
 }
 
@@ -411,11 +411,11 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.DropServiceRequest{
-		Header:  &admin.RequestHeader{Token: c.token},
-		Name:    []byte(req.host),
-		Port:    req.port,
-		Type:    common.ServiceType(req.serviceType),
-		Cluster: []byte(req.clustername),
+		Header:       &admin.RequestHeader{Token: c.token},
+		Name:         []byte(req.host),
+		Port:         req.port,
+		Type:         common.ServiceType(req.serviceType),
+		ServiceGroup: []byte(req.serviceGroupname),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropService(ctx, in)
@@ -426,23 +426,23 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 	return responseIsErr(resp)
 }
 
-func NewDropClusterReq(clusterName string, force bool) *DropClusterReq {
-	return &DropClusterReq{
-		clustername: clusterName,
-		force:       force,
+func NewDropServiceGroupReq(serviceGroupName string, force bool) *DropServiceGroupReq {
+	return &DropServiceGroupReq{
+		serviceGroupname: serviceGroupName,
+		force:            force,
 	}
 }
 
-func (c *metaClient) DropCluster(req *DropClusterReq) error {
+func (c *metaClient) DropServiceGroup(req *DropServiceGroupReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
-	in := &admin.DropClusterRequest{
-		Header:  &admin.RequestHeader{Token: c.token},
-		Cluster: []byte(req.clustername),
-		Force:   req.force,
+	in := &admin.DropServiceGroupRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupname),
+		Force:        req.force,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.DropCluster(ctx, in)
+		return c.client.DropServiceGroup(ctx, in)
 	})
 	if err != nil {
 		return err

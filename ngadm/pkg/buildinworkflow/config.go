@@ -14,7 +14,7 @@ func Config(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
-	configTask, err := ConfigCluster(args, spec)
+	configTask, err := ConfigServiceGroup(args, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -32,7 +32,7 @@ func Config(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 	return workflow, nil
 }
 
-func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func ConfigServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if spec.Spec.Metad == nil {
 		return nil, nil
 	}
@@ -65,13 +65,13 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 						Host:   host.Agent.Host,
 						Config: spec.Spec.Metad.Config,
 						Type:   "nebulagraph",
-						Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-metad.conf"),
+						Dst:    path.Join(utils.GetServiceGroupPath(spec.InstallPath), "etc/nebula-metad.conf"),
 					},
 				},
 			},
 		})
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, host := range cluster.Graphd.Hosts {
 			configTask = append(configTask, &types.TaskSpec{
 				Type:        "serial",
@@ -83,7 +83,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 							Host:   host.Agent.Host,
 							Config: cluster.Graphd.Config,
 							Type:   "nebulagraph",
-							Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-graphd.conf"),
+							Dst:    path.Join(utils.GetServiceGroupPath(spec.InstallPath), "etc/nebula-graphd.conf"),
 						},
 					},
 				},
@@ -100,7 +100,7 @@ func ConfigCluster(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, e
 						Params: &tasks.ConfigParams{
 							Host:   host.Agent.Host,
 							Config: cluster.Storaged.Config,
-							Dst:    path.Join(utils.GetClusterPath(spec.InstallPath), "etc/nebula-storaged.conf"),
+							Dst:    path.Join(utils.GetServiceGroupPath(spec.InstallPath), "etc/nebula-storaged.conf"),
 							Type:   "nebulagraph",
 						},
 					},

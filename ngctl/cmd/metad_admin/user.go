@@ -1,4 +1,4 @@
-package supercluster_admin
+package metad_admin
 
 import (
 	"encoding/json"

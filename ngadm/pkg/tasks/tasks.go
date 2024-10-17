@@ -20,7 +20,7 @@ func Init() {
 		"parallel":           NewParallel,
 		"config":             NewConfig,
 		"init_config":        NewInitConfig,
-		"create_cluster":     NewCreateCluster,
+		"create_cluster":     NewCreateServiceGroup,
 		"nebula_operation":   NewNebulaOperation,
 		"extract":            NewExtract,
 		"check_dir":          NewCheckDir,

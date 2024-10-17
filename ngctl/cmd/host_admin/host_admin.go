@@ -11,7 +11,7 @@ import (
 
 type hostFlagsType struct {
 	host          string
-	clusterName   string
+	srvgrpName    string
 	agentPort     uint32
 	withInstall   bool
 	withUninstall bool
@@ -23,8 +23,8 @@ var hostFlags hostFlagsType
 
 var HostCmd = &cobra.Command{
 	Use:   "host",
-	Short: `Run commands managing hosts.`,
-	Long:  `Run commands managing hosts.`,
+	Short: `Run commands managing hosts`,
+	Long:  `Run commands managing hosts`,
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -32,7 +32,7 @@ var HostCmd = &cobra.Command{
 
 func InstallOnHost(hosts []common.IPAndPort, force bool) (err error) {
 	var jobName = "install-host"
-	log.Print("install nebulagraph cluster.")
+	log.Print("install nebulagraph srvgrp.")
 	job := runner.NewJob(jobName)
 	selectedHosts := make([]string, len(hosts))
 	if hosts != nil {
@@ -48,7 +48,7 @@ func InstallOnHost(hosts []common.IPAndPort, force bool) (err error) {
 	return err
 }
 
-// drain, if delete the cluster data
+// drain, if delete the srvgrp data
 func UninstallOnHost(hosts []common.IPAndPort) (err error) {
 	var jobName = "uninstall-host"
 	if err != nil {

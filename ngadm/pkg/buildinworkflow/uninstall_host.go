@@ -28,7 +28,7 @@ func UninstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpe
 		allNeedHosts = GetMetadSelectedHosts(selectedHost, spec)
 	}
 	for _, agent := range allNeedHosts {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
 		// connect and uninstall
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -43,8 +43,8 @@ func UninstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpe
 				{
 					Type: "rm",
 					Params: &tasks.RMParams{
-						Host:  agent.Host,
-						Path:  installPath,
+						Host: agent.Host,
+						Path: installPath,
 					},
 				},
 			},

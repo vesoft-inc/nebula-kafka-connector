@@ -11,8 +11,8 @@ import (
 
 var dropServiceCmd = &cobra.Command{
 	Use:   "drop",
-	Short: `Drop a service from a cluster.`,
-	Long:  `Drop a service from a cluster.`,
+	Short: `Drop a service from a srvgrp.`,
+	Long:  `Drop a service from a srvgrp.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -30,7 +30,7 @@ var dropServiceCmd = &cobra.Command{
 			err         error
 		)
 		if flags.configFile != "" {
-			serviceList, err = common.DeriveServiceList(flags.clusterName)
+			serviceList, err = common.DeriveServiceList(flags.srvgrpName)
 		} else {
 			serviceList = append(serviceList, common.IPAndPort{
 				IP:          flags.host,
@@ -58,7 +58,7 @@ var dropServiceCmd = &cobra.Command{
 			} else {
 				return common.NgctlError("Invalid service type.", "")
 			}
-			req := meta.NewDropServiceReq(service.IP, uint32(port), serviceType, flags.clusterName)
+			req := meta.NewDropServiceReq(service.IP, uint32(port), serviceType, flags.srvgrpName)
 			if err := common.MetaClient.DropService(req); err != nil {
 				return common.NgctlError("Drop service failed", err.Error())
 			}
@@ -72,5 +72,5 @@ func init() {
 	dropServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	dropServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "service host")
 	dropServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "service port")
-	dropServiceCmd.Flags().StringVarP(&ServiceFlags.clusterName, "cluster", "c", "", "cluster name")
+	dropServiceCmd.Flags().StringVarP(&ServiceFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
 }

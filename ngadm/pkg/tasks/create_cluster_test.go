@@ -10,7 +10,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/yamlparser"
 )
 
-func TestCreateCluster(t *testing.T) {
+func TestCreateServiceGroup(t *testing.T) {
 	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
@@ -25,10 +25,10 @@ func TestCreateCluster(t *testing.T) {
 	spec.Spec.Metad.PackagePath = "../../bin/nebula-graph-5.0-x86_64-glibc-2.17.sh"
 
 	job := runner.NewJob("test")
-	task, err := tasks.NewCreateCluster(&types.TaskSpec{
+	task, err := tasks.NewCreateServiceGroup(&types.TaskSpec{
 		Type: "create_cluster",
-		Params: &tasks.CreateClusterParams{
-			ClusterSpec: &spec.Spec.Metad.Clusters[0],
+		Params: &tasks.CreateServiceGroupParams{
+			ServiceGroupSpec: &spec.Spec.Metad.ServiceGroups[0],
 			MetaSpec:    spec.Spec.Metad,
 		},
 	}, job.Context)

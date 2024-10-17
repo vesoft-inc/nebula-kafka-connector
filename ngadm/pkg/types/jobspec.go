@@ -40,7 +40,7 @@ type Process struct {
 	ConfigPath    string         `yaml:"configPath,omitempty"`
 	InstallPath   string         `yaml:"installPath,omitempty"`
 	Config        map[string]any `yaml:"config,omitempty"`
-	Hosts         []Host        `yaml:"hosts,omitempty"`
+	Hosts         []Host         `yaml:"hosts,omitempty"`
 	StartType     string         `yaml:"startType,omitempty"`     //systemd, shell
 	ExecShellPath string         `yaml:"execShellPath,omitempty"` // exec path
 	ExecStartPath string         `yaml:"execStartPath,omitempty"` // bin path
@@ -49,7 +49,7 @@ type Process struct {
 
 type MetadSpec struct {
 	Process  `yaml:",inline"`
-	Clusters []Cluster `yaml:"clusters,omitempty"`
+	ServiceGroups []ServiceGroup `yaml:"clusters,omitempty"`
 }
 
 type Agent struct {
@@ -61,13 +61,13 @@ type Agent struct {
 }
 
 type Host struct {
-	IP  string `yaml:"ip"`
-	Port string `yaml:"port"`
+	IP        string `yaml:"ip"`
+	Port      string `yaml:"port"`
 	AgentPort string `yaml:"agentPort,omitempty"`
-	Agent Agent `yaml:"agents,omitempty"`
+	Agent     Agent  `yaml:"agents,omitempty"`
 }
 
-type Cluster struct {
+type ServiceGroup struct {
 	ZoneList []string `yaml:"zoneList,omitempty"`
 	Name     string   `yaml:"name,omitempty"`
 	Replica  int      `yaml:"replica,omitempty"`

@@ -28,10 +28,10 @@ func TestUninstall(t *testing.T) {
 	}
 	assert.NoError(t, err)
 }
-func TestUninstallCluster(t *testing.T) {
+func TestUninstallServiceGroup(t *testing.T) {
 	tasks.Init()
 	spec := GetNebulaYaml(t)
-	// spec.Spec.Metad.Clusters = []types.Cluster{} // remove all clusters for only uninstall metad
+	// spec.Spec.Metad.ServiceGroups = []types.ServiceGroup{} // remove all clusters for only uninstall metad
 	delete(spec.UtilsProcesses, "license-manager")
 	job := runner.NewJob("test uninstall")
 	err := job.Run("uninstall", map[string]any{

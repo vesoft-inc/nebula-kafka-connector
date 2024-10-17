@@ -18,7 +18,7 @@ func Status(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 	}
 	// append nebula component status
 	if isNebulaComponent(component) {
-		statusTask, err := StatusCluster(spec, component, "")
+		statusTask, err := StatusServiceGroup(spec, component, "")
 		if err != nil {
 			return nil, err
 		}
@@ -37,7 +37,7 @@ func Status(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, erro
 	return workflow, nil
 }
 
-func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec, error) {
+func StatusServiceGroup(spec *types.JobSpec, component, host string) (*types.TaskSpec, error) {
 	componentType := types.NebulaServiceComponentMap[component]
 	if spec.Spec.Metad == nil {
 		return nil, nil
@@ -48,7 +48,7 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 	for _, _host := range metaHosts {
 		addNeedOperation(&allNeedOperations, types.Metad, componentType, _host.Agent.Host, host)
 	}
-	for _, cluster := range spec.Spec.Metad.Clusters {
+	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, _host := range cluster.Graphd.Hosts {
 			addNeedOperation(&allNeedOperations, types.Graphd, componentType, _host.Agent.Host, host)
 		}
@@ -70,7 +70,7 @@ func StatusCluster(spec *types.JobSpec, component, host string) (*types.TaskSpec
 	}
 	//2. status
 	for host, components := range allNeedOperations {
-		installPath := utils.GetUserClusterPath(spec.InstallPath, agentsMap[host].InstallPath)
+		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agentsMap[host].InstallPath)
 		// aggregate status task
 		if (components[types.Metad] && components[types.Graphd] && components[types.Storaged]) || components[types.AllNebulaSerivce] {
 			statusTasks = append(statusTasks, &types.TaskSpec{

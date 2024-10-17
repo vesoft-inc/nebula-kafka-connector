@@ -26,11 +26,11 @@ func getValidAgentPort(hostIP string) (uint32, error) {
 
 var addHostCmd = &cobra.Command{
 	Use:   "add",
-	Short: "Add a host into a cluster.",
-	Long: `Add a host into a cluster. A host is identified by its IP address. The port of the deployed agent is also needed.
+	Short: "Add a host into a srvgrp.",
+	Long: `Add a host into a srvgrp. A host is identified by its IP address. The port of the deployed agent is also needed.
 
-Either provides the config file, all hosts in the config file will be added into the cluster.
-Or provides the host info, the host will be added into the cluster.
+Either provides the config file, all hosts in the config file will be added into the srvgrp.
+Or provides the host info, the host will be added into the srvgrp.
 	`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
@@ -69,7 +69,7 @@ Or provides the host info, the host will be added into the cluster.
 			if err != nil {
 				return err
 			}
-			req := meta.NewAddHostReq(host.IP, hostFlags.clusterName, uint32(agentPort))
+			req := meta.NewAddHostReq(host.IP, hostFlags.srvgrpName, uint32(agentPort))
 			if err := common.MetaClient.AddHost(req); err != nil {
 				return common.NgctlError("Add host failed", err.Error())
 			}
@@ -85,7 +85,7 @@ func getHostDirectly() (*common.ResourceInfo, error) {
 		ResourceType:        "hosts",
 		OperationOnResource: "add",
 		ResourceList:        make([]common.IPAndPort, 0),
-		ClusterName:         flags.clusterName,
+		ClusterName:         flags.srvgrpName,
 	}
 	hostResrouces.ResourceList = append(
 		hostResrouces.ResourceList,
@@ -100,9 +100,9 @@ func getHostsWithConfig() (*common.ResourceInfo, error) {
 		ResourceType:        "hosts",
 		OperationOnResource: "add",
 		ResourceList:        make([]common.IPAndPort, 0),
-		ClusterName:         flags.clusterName,
+		ClusterName:         flags.srvgrpName,
 	}
-	hostList, err := common.DeriveHostList("", flags.clusterName, false)
+	hostList, err := common.DeriveHostList("", flags.srvgrpName, false)
 	if err != nil {
 		return nil, common.NgctlError("Failed to derive host list", err.Error())
 	}
@@ -115,8 +115,8 @@ func getHostsWithConfig() (*common.ResourceInfo, error) {
 
 func validateAddFlags() error {
 	var flags = hostFlags
-	if flags.clusterName == "" {
-		return common.NgctlError("cluster name is empty", "")
+	if flags.srvgrpName == "" {
+		return common.NgctlError("srvgrp name is empty", "")
 	}
 	if flags.configFile == "" {
 		if flags.host == "" {
@@ -136,8 +136,8 @@ func validateAddFlags() error {
 
 func init() {
 	// add host
-	addHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be added to a cluster")
-	addHostCmd.Flags().StringVarP(&hostFlags.clusterName, "cluster", "c", "", "cluster name")
+	addHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be added to a srvgrp")
+	addHostCmd.Flags().StringVarP(&hostFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
 	addHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 6688, "agent port")
 	addHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
 }

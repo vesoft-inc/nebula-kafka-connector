@@ -17,13 +17,13 @@ var ConfigFile string
 var ConfigSpec types.JobSpec
 
 func GetAgentForHost(hostIP string) (agent types.Agent, err error) {
-	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
-		for _, h := range cluster.Graphd.Hosts {
+	for _, srvgrp := range ConfigSpec.Spec.Metad.ServiceGroups {
+		for _, h := range srvgrp.Graphd.Hosts {
 			if h.IP == hostIP {
 				return h.Agent, nil
 			}
 		}
-		for _, h := range cluster.Storaged.Hosts {
+		for _, h := range srvgrp.Storaged.Hosts {
 			if h.IP == hostIP {
 				return h.Agent, nil
 			}
@@ -69,17 +69,17 @@ func CheckInConfigFile(filepath string) (err error) {
 }
 
 // checking all hosts in the config file, including the metad, storaged, and graphd
-func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad bool) (hostList []IPAndPort, err error) {
+func DeriveHostList(hostFromCmdLineOption string, srvgrpName string, needMetad bool) (hostList []IPAndPort, err error) {
 	// hosts for metad
 	dict := map[string]IPAndPort{}
 	hosts := make([]types.Host, 0)
 	if needMetad {
 		hosts = append(hosts, ConfigSpec.Spec.Metad.Hosts...)
 	}
-	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
-		if cluster.Name == clusterName {
-			hosts = append(hosts, cluster.Graphd.Hosts...)
-			hosts = append(hosts, cluster.Storaged.Hosts...)
+	for _, srvgrp := range ConfigSpec.Spec.Metad.ServiceGroups {
+		if srvgrp.Name == srvgrpName {
+			hosts = append(hosts, srvgrp.Graphd.Hosts...)
+			hosts = append(hosts, srvgrp.Storaged.Hosts...)
 		}
 	}
 	if len(hosts) == 0 {
@@ -109,14 +109,14 @@ func DeriveHostList(hostFromCmdLineOption string, clusterName string, needMetad 
 }
 
 // checking all services in the config file, including only storaged and graphd
-func DeriveServiceList(clusterName string) (serviceList []IPAndPort, err error) {
-	// graphd and storaged are organized in clusters
-	for _, cluster := range ConfigSpec.Spec.Metad.Clusters {
-		if cluster.Name == clusterName {
-			for _, host := range cluster.Graphd.Hosts {
+func DeriveServiceList(srvgrpName string) (serviceList []IPAndPort, err error) {
+	// graphd and storaged are organized in srvgrps
+	for _, srvgrp := range ConfigSpec.Spec.Metad.ServiceGroups {
+		if srvgrp.Name == srvgrpName {
+			for _, host := range srvgrp.Graphd.Hosts {
 				serviceList = append(serviceList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort, ServiceType: "graphd"})
 			}
-			for _, host := range cluster.Storaged.Hosts {
+			for _, host := range srvgrp.Storaged.Hosts {
 				serviceList = append(serviceList, IPAndPort{IP: host.IP, Port: host.Port, AgentPort: host.AgentPort, ServiceType: "storaged"})
 			}
 		}

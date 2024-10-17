@@ -5,11 +5,11 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 )
 
-type NebulaClusters struct {
+type NebulaServiceGroups struct {
 	clusters map[int64][]*clients.ServiceInfo // clusterId -> ([storaged, graphd])
 }
 
-func NewNebulaClusters(clusters []*clients.ClusterServiceInfo, amg *clients.AgentManager) (*NebulaClusters, error) {
+func NewNebulaServiceGroups(clusters []*clients.ServiceGroupServiceInfo, amg *clients.AgentManager) (*NebulaServiceGroups, error) {
 	clusterMap := make(map[int64][]*clients.ServiceInfo)
 	for _, cluster := range clusters {
 		services := make([]*clients.ServiceInfo, 0)
@@ -25,14 +25,14 @@ func NewNebulaClusters(clusters []*clients.ClusterServiceInfo, amg *clients.Agen
 			})
 		}
 
-		clusterMap[cluster.ClusterId] = cluster.Services
+		clusterMap[cluster.ServiceGroupId] = cluster.Services
 	}
-	return &NebulaClusters{
+	return &NebulaServiceGroups{
 		clusters: clusterMap,
 	}, nil
 }
 
-func (c *NebulaClusters) GetStorages(clusterId int64) []*clients.ServiceInfo {
+func (c *NebulaServiceGroups) GetStorages(clusterId int64) []*clients.ServiceInfo {
 	var storages []*clients.ServiceInfo
 	for _, service := range c.clusters[clusterId] {
 		if service.ServiceType == meta.ServiceTypeStoraged {
@@ -42,7 +42,7 @@ func (c *NebulaClusters) GetStorages(clusterId int64) []*clients.ServiceInfo {
 	return storages
 }
 
-func (c *NebulaClusters) GetGraphs(clusterId int64) []*clients.ServiceInfo {
+func (c *NebulaServiceGroups) GetGraphs(clusterId int64) []*clients.ServiceInfo {
 	var graphs []*clients.ServiceInfo
 	for _, service := range c.clusters[clusterId] {
 		if service.ServiceType == meta.ServiceTypeGraphd {
@@ -52,11 +52,11 @@ func (c *NebulaClusters) GetGraphs(clusterId int64) []*clients.ServiceInfo {
 	return graphs
 }
 
-func (c *NebulaClusters) GetServices(clusterId int64) []*clients.ServiceInfo {
+func (c *NebulaServiceGroups) GetServices(clusterId int64) []*clients.ServiceInfo {
 	return c.clusters[clusterId]
 }
 
-func (c *NebulaClusters) GetClusterIds() []int64 {
+func (c *NebulaServiceGroups) GetServiceGroupIds() []int64 {
 	var ids []int64
 	for id := range c.clusters {
 		ids = append(ids, id)
@@ -64,6 +64,6 @@ func (c *NebulaClusters) GetClusterIds() []int64 {
 	return ids
 }
 
-func (c *NebulaClusters) GetClusters() map[int64][]*clients.ServiceInfo {
+func (c *NebulaServiceGroups) GetServiceGroups() map[int64][]*clients.ServiceInfo {
 	return c.clusters
 }

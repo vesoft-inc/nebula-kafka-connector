@@ -30,42 +30,42 @@ echo "INSTALL_PATH set to: ${INSTALL_PATH}"
 
 echo "PACKAGE_PATH set to: ${PACKAGE_PATH}"
 
-../ngctl supercluster create --config ./config.yaml
+../ngctl metad create --config ./config.yaml
 
-../ngctl supercluster login -P 49559 -u root
+../ngctl metad login -P 49559 -u root
 
-../ngctl cluster create -c testcluster
+../ngctl srvgrp create -c testsrvgrp
 
-../ngctl host add -f ./config.yaml -c testcluster
+../ngctl host add -f ./config.yaml -c testsrvgrp
 
-../ngctl host install -f ./config.yaml -c testcluster
+../ngctl host install -f ./config.yaml -c testsrvgrp
 
-../ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testcluster
+../ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testsrvgrp
 
-../ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testcluster
+../ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testsrvgrp
 
 ../ngctl service start -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 
 ../ngctl service start -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
-../ngctl service show -c testcluster
+../ngctl service show -c testsrvgrp
 
 ../ngctl service stop -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 
 ../ngctl service stop -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
-../ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testcluster
+../ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testsrvgrp
 
-../ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testcluster
+../ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testsrvgrp
 
-../ngctl host drop -f ./config.yaml -c testcluster
+../ngctl host drop -f ./config.yaml -c testsrvgrp
 
-../ngctl host uninstall -f ./config.yaml -c testcluster
+../ngctl host uninstall -f ./config.yaml -c testsrvgrp
 
-../ngctl host show -c testcluster
+../ngctl host show -c testsrvgrp
 
-../ngctl supercluster stop --config ./config.yaml
+../ngctl metad stop --config ./config.yaml
 
-# logout to the supercluster
-../ngctl supercluster logout
+# logout to the metad
+../ngctl metad logout
 
