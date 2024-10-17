@@ -5,6 +5,7 @@
   1288612800000 AS minDate
 }
 */
+CONFIGS optimizer_rules = "enhanced_column_pruner=on"
 USE $graphName
 MATCH (person:Person {id : $personId})<-[:KNOWS]->{1,2}(otherPerson:Person)
     WHERE person <> otherPerson
