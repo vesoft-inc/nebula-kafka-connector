@@ -137,7 +137,7 @@ public class VectorWrapper {
             // compute all the property names index and jump the length of all property names
             String[] propNames = new String[propertyNum];
             for (int i = 0; i < propertyNum; i++) {
-                propNames[i] = reader.readString();
+                propNames[i] = reader.readSizedString(byteOrder);
             }
             // node/edge type nums, 4 bytes
             int typeNum = bytesToInt32(reader.read(INT32_SIZE), byteOrder);

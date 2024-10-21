@@ -91,7 +91,7 @@ public class ValueTypeParser {
                         reader.read(RECORD_FIELD_NUM_SIZE), byteOrder);
                 Map<String, DataType> fieldTypes = new HashMap<>();
                 for (int i = 0; i < fieldNum; i++) {
-                    String fieldName = reader.readString();
+                    String fieldName = reader.readSizedString(byteOrder);
                     fieldTypes.put(fieldName, decodeValueType(reader));
                 }
                 return new RecordType(fieldTypes);
@@ -125,7 +125,7 @@ public class ValueTypeParser {
             Map<String, DataType> propertyAndType = new HashMap<>();
             //read the property name and data type for node or edge type, property name end with \0.
             for (int j = 0; j < typePropertyNum; j++) {
-                String propertyName = reader.readString();
+                String propertyName = reader.readSizedString(byteOrder);
                 // data type, 1 byte
                 DataType dataType = decodeValueType(reader);
                 propertyAndType.put(propertyName, dataType);

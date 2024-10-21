@@ -30,21 +30,6 @@ public class BytesReader {
         return byteString;
     }
 
-    public String readString() {
-        int length     = 0;
-        int startIndex = index;
-        for (int propCharIndex = index; propCharIndex < data.size(); propCharIndex++) {
-            if (data.byteAt(propCharIndex) == '\0') {
-                index++;
-                break;
-            }
-            length++;
-        }
-        index += length;
-        ByteString strBytes = data.substring(startIndex, startIndex + length);
-        return strBytes.toString(DecodeUtils.charset);
-    }
-
     public String readSizedString(ByteOrder byteOrder) {
         int length     = bytesToInt16(read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
         int startIndex = index;

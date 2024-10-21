@@ -126,25 +126,6 @@ public class DecodeUtils {
         return data.byteAt(0) == 0x01;
     }
 
-    /**
-     * decode binary to string
-     * decode the binary until meet '\0' or read all the binary from position
-     *
-     * @param data     binary data
-     * @param startPos start position for the string
-     * @return String value
-     */
-    public static String bytesToString(ByteString data, int startPos) {
-        StringBuilder sb = new StringBuilder();
-        for (int propCharIndex = startPos; propCharIndex < data.size(); propCharIndex++) {
-            if (data.byteAt(propCharIndex) == '\0') {
-                break;
-            }
-            sb.append((char) data.byteAt(propCharIndex));
-        }
-        return sb.toString();
-    }
-
 
     /**
      * decode binary to String with specific size. Used for Any vector.

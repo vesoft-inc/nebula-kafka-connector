@@ -35,7 +35,6 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.INT32_SI
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.INT64_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.INT8_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.LIST_HEADER_SIZE;
-import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.LIST_SIZE_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.LOCAL_TIME_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.MICRO_SECONDS_OF_DAY;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.MICRO_SECONDS_OF_HOUR;
@@ -45,7 +44,6 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.MONTH_SI
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.NODE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.NODE_TYPE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.RANK_SIZE;
-import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.RECORD_FIELD_NUM_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.STRING_MAX_VALUE_LENGTH_IN_HEADER;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.STRING_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.STRING_VALUE_LENGTH_SIZE;
@@ -57,7 +55,6 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.YEAR_SIZ
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ZONED_DATE_TIME_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ZONED_TIME_SIZE;
 
-import com.google.common.base.Charsets;
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.driver.graph.data.NDuration;
 import com.vesoft.nebula.driver.graph.data.NPath;
@@ -266,7 +263,7 @@ public class ValueParser {
                 // parse each field of record
                 BytesReader reader = new BytesReader(specialMetaData);
                 for (int i = 0; i < fieldAndDataType.size(); i++) {
-                    String fieldName = reader.readString();
+                    String fieldName = reader.readSizedString(byteOrder);
                     Object value = decodeValue(vector.getVectorWrapper(i),
                                                fieldAndDataType.get(fieldName),
                                                rowIndex);
@@ -436,96 +433,20 @@ public class ValueParser {
 
     private Object decodeConstValue(BytesReader reader,
                                     ColumnType type) {
-        ByteString valueData;
-        switch (type) {
-            case COLUMN_TYPE_NULL:
-                return null;
-            case COLUMN_TYPE_INT8:
-                valueData = reader.read(INT8_SIZE);
-                return bytesToInt8(valueData);
-            case COLUMN_TYPE_UINT8:
-                valueData = reader.read(INT8_SIZE);
-                return bytesToUInt8(valueData);
-            case COLUMN_TYPE_INT16:
-                valueData = reader.read(INT16_SIZE);
-                return bytesToInt16(valueData, byteOrder);
-            case COLUMN_TYPE_UINT16:
-                valueData = reader.read(INT16_SIZE);
-                return bytesToUInt16(valueData, byteOrder);
-            case COLUMN_TYPE_INT32:
-            case COLUMN_TYPE_UINT32:
-                valueData = reader.read(INT32_SIZE);
-                return bytesToInt32(valueData, byteOrder);
-            case COLUMN_TYPE_INT64:
-            case COLUMN_TYPE_UINT64:
-                valueData = reader.read(INT64_SIZE);
-                return bytesToInt64(valueData, byteOrder);
-            case COLUMN_TYPE_FLOAT32:
-                valueData = reader.read(FLOAT_SIZE);
-                return bytesToFloat(valueData, byteOrder);
-            case COLUMN_TYPE_FLOAT64:
-                valueData = reader.read(DOUBLE_SIZE);
-                return bytesToDouble(valueData, byteOrder);
-            case COLUMN_TYPE_BOOL:
-                valueData = reader.read(BOOL_SIZE);
-                return bytesToBool(valueData);
-            case COLUMN_TYPE_DECIMAL:
-            case COLUMN_TYPE_STRING:
-                return reader.readString();
-            case COLUMN_TYPE_DATE:
-                valueData = reader.read(DATE_SIZE);
-                return bytesToDate(valueData);
-            case COLUMN_TYPE_LOCALTIME:
-                valueData = reader.read(LOCAL_TIME_SIZE);
-                return bytesToLocalTime(valueData);
-            case COLUMN_TYPE_ZONEDTIME:
-                valueData = reader.read(ZONED_TIME_SIZE);
-                return bytesToZonedTime(valueData);
-            case COLUMN_TYPE_LOCALDATETIME:
-                valueData = reader.read(DATE_TIME_SIZE);
-                return bytesToLocalDateTime(valueData);
-            case COLUMN_TYPE_ZONEDDATETIME:
-                valueData = reader.read(ZONED_DATE_TIME_SIZE);
-                return bytesToZonedDateTime(valueData);
-            case COLUMN_TYPE_DURATION:
-                valueData = reader.read(DURATION_SIZE);
-                return bytesToDuration(valueData);
-            case COLUMN_TYPE_LIST:
-                List<ValueWrapper> list = new ArrayList<>();
-                // get the size of the list
-                int listSize = bytesToInt32(reader.read(LIST_SIZE_SIZE), byteOrder);
-                for (int i = 0; i < listSize; i++) {
-                    // get the data type of each element
-                    ColumnType eleType = ColumnType.getColumnType(
-                            bytesToInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object value = decodeConstValue(reader, eleType);
-                    list.add(new ValueWrapper(value, eleType));
-                }
-                return list;
-            case COLUMN_TYPE_RECORD:
-                Map<String, ValueWrapper> map = new HashMap<>();
-                // [field num] + [field names] + [field type + field value]
-                // get the num of record field
-                int fieldNum = bytesToInt32(reader.read(RECORD_FIELD_NUM_SIZE), byteOrder);
-                String[] fieldNames = new String[fieldNum];
-                for (int i = 0; i < fieldNum; i++) {
-                    String fieldName = reader.readString();
-                    fieldNames[i] = fieldName;
-                }
-
-                for (int i = 0; i < fieldNum; i++) {
-                    ColumnType fieldType = ColumnType.getColumnType(
-                            bytesToInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object value = decodeConstValue(reader, fieldType);
-                    map.put(fieldNames[i], new ValueWrapper(value, fieldType));
-                }
-                return new NRecord(map);
-            case COLUMN_TYPE_ANY:
-                return bytesToConstAny(reader);
-            default:
-                throw new RuntimeException("do not support type:" + type);
+        Object     obj;
+        if (ColumnType.isBasic(type)) {
+            obj = bytesBasicToObject(reader, type);
+        } else if (type == ColumnType.COLUMN_TYPE_DECIMAL
+                || type == ColumnType.COLUMN_TYPE_STRING) {
+            obj = reader.readSizedString(byteOrder);
+        } else if (ColumnType.isComposite(type)) {
+            obj = decodeCompositeValue(reader, type);
+        } else if (type == ColumnType.COLUMN_TYPE_ANY) {
+            obj = bytesToConstAny(reader);
+        } else {
+            throw new RuntimeException("do not support type:" + type);
         }
-
+        return obj;
     }
 
 
@@ -616,9 +537,9 @@ public class ValueParser {
      * @return {@link OffsetTime}value
      */
     private OffsetTime bytesToZonedTime(ByteString data) {
-        ByteBuffer buffer = ByteBuffer.wrap(data.toByteArray()).order(byteOrder);
-        int        hour   = buffer.get();
-        int currentOffset = timeZoneOffset;
+        ByteBuffer buffer        = ByteBuffer.wrap(data.toByteArray()).order(byteOrder);
+        int        hour          = buffer.get();
+        int        currentOffset = timeZoneOffset;
         if (hour < 0) {
             hour = -(24 + hour) + (currentOffset / 60);
             currentOffset = currentOffset % 60;
@@ -626,8 +547,8 @@ public class ValueParser {
         if (hour < 0) {
             hour = -hour;
         }
-        int        minute = buffer.get();
-        int        second = buffer.get();
+        int minute = buffer.get();
+        int second = buffer.get();
         buffer.get(); // Skip the padding byte
         int microsecond = buffer.getInt();
         LocalTime localUtcTime = LocalTime
@@ -729,7 +650,7 @@ public class ValueParser {
 
         if (ColumnType.isBasic(valueType)) {
             BytesReader basicReader = new BytesReader(value);
-            obj = bytesBasicToAny(basicReader, valueType);
+            obj = bytesBasicToObject(basicReader, valueType);
         }
         if (valueType == ColumnType.COLUMN_TYPE_STRING) {
             VectorWrapper stringVec = vector.getVectorWrapper((int) anyHeader.getChunkIndex());
@@ -743,7 +664,7 @@ public class ValueParser {
                     subVector
                             .getVectorData()
                             .substring((int) anyHeader.getOffset()));
-            obj = decodeAnyCompositeValue(reader, valueType);
+            obj = decodeCompositeValue(reader, valueType);
         }
         return new AnyValue(obj, valueType);
     }
@@ -757,22 +678,22 @@ public class ValueParser {
     private AnyValue bytesToConstAny(BytesReader reader) {
         ColumnType columnType = ColumnType.getColumnType(
                 bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-        Object obj = null;
+        Object obj;
         if (ColumnType.isBasic(columnType)) {
-            obj = bytesBasicToAny(reader, columnType);
-        }
-        if (columnType == ColumnType.COLUMN_TYPE_DECIMAL
+            obj = bytesBasicToObject(reader, columnType);
+        } else if (columnType == ColumnType.COLUMN_TYPE_DECIMAL
                 || columnType == ColumnType.COLUMN_TYPE_STRING) {
             obj = reader.readSizedString(byteOrder);
-        }
-        if (ColumnType.isComposite(columnType)) {
-            obj = decodeAnyCompositeValue(reader, columnType);
+        } else if (ColumnType.isComposite(columnType)) {
+            obj = decodeCompositeValue(reader, columnType);
+        } else {
+            throw new RuntimeException("do not support type:" + columnType);
         }
         return new AnyValue(obj, columnType);
     }
 
 
-    private Object bytesBasicToAny(BytesReader reader, ColumnType type) {
+    private Object bytesBasicToObject(BytesReader reader, ColumnType type) {
         Object obj = null;
         switch (type) {
             case COLUMN_TYPE_NULL:
@@ -832,13 +753,13 @@ public class ValueParser {
 
 
     /**
-     * decode binary to any object for composite type
+     * decode binary to object for composite type
      *
      * @param reader BinaryReader with cursor
      * @param type   ColumnType for the element
      * @return Object value
      */
-    private Object decodeAnyCompositeValue(BytesReader reader, ColumnType type) {
+    private Object decodeCompositeValue(BytesReader reader, ColumnType type) {
         switch (type) {
             case COLUMN_TYPE_NULL:
                 return null;
@@ -889,7 +810,7 @@ public class ValueParser {
                     if ((nullBitBytes.byteAt(i / 8) & (1 << (i % 8))) == 0) {
                         values.add(null);
                     } else {
-                        values.add(new ValueWrapper(decodeAnyCompositeValue(reader, eleType),
+                        values.add(new ValueWrapper(decodeCompositeValue(reader, eleType),
                                                     eleType));
                     }
                 }
@@ -902,7 +823,7 @@ public class ValueParser {
                     String fieldName = reader.readSizedString(byteOrder);
                     ColumnType fieldType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object fieldValue = decodeAnyCompositeValue(reader, fieldType);
+                    Object fieldValue = decodeCompositeValue(reader, fieldType);
                     map.put(fieldName, new ValueWrapper(fieldValue, fieldType));
                 }
                 return new NRecord(map);
@@ -918,17 +839,17 @@ public class ValueParser {
                     String propName = reader.readSizedString(byteOrder);
                     ColumnType propType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object propValue = decodeAnyCompositeValue(reader, propType);
+                    Object propValue = decodeCompositeValue(reader, propType);
                     nodeProperties.put(propName, new ValueWrapper(propValue, propType));
                 }
                 return new Vertex(nodeGraphId, nodeTypeId, nodeId, nodeProperties, graphSchemas);
             case COLUMN_TYPE_EDGE:
-                // srcNodeID 8B+dstNodeID 8B+graphId 4B+edgeTypeID 4B+edgeRank 8B+prop_size 2B
+                // srcNodeID 8B+dstNodeID 8B+edgeRank 8B+graphId 4B+edgeTypeID 4B+prop_size 2B
                 long srcNodeId = bytesToInt64(reader.read(NODE_ID_SIZE), byteOrder);
                 long dstNodeId = bytesToInt64(reader.read(NODE_ID_SIZE), byteOrder);
+                long rank = bytesToInt64(reader.read(RANK_SIZE), byteOrder);
                 int edgeGraphId = bytesToInt32(reader.read(GRAPH_ID_SIZE), byteOrder);
                 int edgeTypeId = bytesToInt32(reader.read(EDGE_TYPE_ID_SIZE), byteOrder);
-                long rank = bytesToInt64(reader.read(RANK_SIZE), byteOrder);
                 int edgePropNum = bytesToInt16(
                         reader.read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
                 Map<String, ValueWrapper> edgeProperties = new HashMap<>();
@@ -936,7 +857,7 @@ public class ValueParser {
                     String propName = reader.readSizedString(byteOrder);
                     ColumnType propType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object propValue = decodeAnyCompositeValue(reader, propType);
+                    Object propValue = decodeCompositeValue(reader, propType);
                     edgeProperties.put(propName, new ValueWrapper(propValue, propType));
                 }
                 return new Relationship(edgeGraphId,
@@ -953,7 +874,7 @@ public class ValueParser {
                 for (int i = 0; i < elementNum; i++) {
                     ColumnType elementType = ColumnType.getColumnType(
                             bytesToUInt8(reader.read(VALUE_TYPE_SIZE)));
-                    Object element = decodeAnyCompositeValue(reader, elementType);
+                    Object element = decodeCompositeValue(reader, elementType);
                     eleValues.add(new ValueWrapper(element, elementType));
                 }
                 return new NPath(eleValues);

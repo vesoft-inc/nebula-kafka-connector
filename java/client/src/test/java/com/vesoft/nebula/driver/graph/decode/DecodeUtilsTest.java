@@ -12,7 +12,6 @@ import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt16;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt32;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt64;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt8;
-import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToString;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt16;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt32;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToUInt8;
@@ -420,41 +419,6 @@ public class DecodeUtilsTest {
             bytesToBool(emptyData);
         });
     }
-
-    @Test
-    public void testBytesToString() {
-        // test normal string
-        ByteString data   = ByteString.copyFromUtf8("Hello, world!\0");
-        String     result = bytesToString(data, 0);
-        assertEquals("Hello, world!", result);
-
-        // test String Without \0 Terminator
-        data = ByteString.copyFromUtf8("Hello, world!");
-        result = bytesToString(data, 0);
-        assertEquals("Hello, world!", result);
-
-        // test Empty String
-        data = ByteString.copyFromUtf8("\0");
-        result = bytesToString(data, 0);
-        assertEquals("", result);
-
-        // test String With StartPos
-        data = ByteString.copyFromUtf8("Hello, world!\0");
-        result = bytesToString(data, 7);
-        assertEquals("world!", result);
-
-        // test String with startPos and no \0 terminator
-        data = ByteString.copyFromUtf8("Hello, world!");
-        result = bytesToString(data, 7);
-        assertEquals("world!", result);
-
-        // test String with \0 in middle
-        data = ByteString.copyFrom(
-                new byte[]{'H', 'e', 'l', 'l', 'o', '\0', 'w', 'o', 'r', 'l', 'd', '\0'});
-        result = bytesToString(data, 0);
-        assertEquals("Hello", result);
-    }
-
 
     @Test
     public void testBytesToSizedString() {

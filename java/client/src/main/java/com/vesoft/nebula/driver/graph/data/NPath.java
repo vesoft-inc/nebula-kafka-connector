@@ -12,16 +12,16 @@ public class NPath {
 
     private List<ValueWrapper> values;
 
-    private List<ValueWrapper> nodes = new ArrayList<>();
-    private List<ValueWrapper> edges = new ArrayList<>();
+    private List<Vertex> nodes = new ArrayList<>();
+    private List<Relationship> edges = new ArrayList<>();
 
     public NPath(List<ValueWrapper> values) {
         this.values = values;
         for (ValueWrapper value : values) {
             if (value.isNode()) {
-                nodes.add(value);
+                nodes.add(value.asNode());
             } else {
-                edges.add(value);
+                edges.add(value.asEdge());
             }
         }
     }
@@ -33,7 +33,7 @@ public class NPath {
      * @return a List of all nodes in this path
      */
     public List<Vertex> nodes() {
-        return null;
+        return nodes;
     }
 
 
@@ -44,7 +44,7 @@ public class NPath {
      * @return a List of all relationships in this path
      */
     public List<Relationship> relationships() {
-        return null;
+        return edges;
     }
 
     /**
@@ -81,7 +81,7 @@ public class NPath {
             return null;
         }
 
-        Vertex                    prefixNode         = nodes.get(0).asNode();
+        Vertex                    prefixNode         = nodes.get(0);
         List<String>              prefixNodePropStrs = new ArrayList<>();
         Map<String, ValueWrapper> prefixNodeProps    = prefixNode.getProperties();
         for (String key : prefixNodeProps.keySet()) {
@@ -99,7 +99,7 @@ public class NPath {
 
         List<String> edgeStrs = new ArrayList<>();
         for (int i = 0; i < edges.size(); i++) {
-            Relationship relationship = edges.get(i).asEdge();
+            Relationship relationship = edges.get(i);
 
             List<String>              edgePropStrs = new ArrayList<>();
             Map<String, ValueWrapper> props        = relationship.getProperties();
@@ -108,7 +108,7 @@ public class NPath {
             }
 
 
-            Vertex                    suffixNode         = nodes.get(i + 1).asNode();
+            Vertex                    suffixNode         = nodes.get(i + 1);
             List<String>              suffixNodePropStrs = new ArrayList<>();
             Map<String, ValueWrapper> suffixNodeProps    = suffixNode.getProperties();
             for (String key : suffixNodeProps.keySet()) {
