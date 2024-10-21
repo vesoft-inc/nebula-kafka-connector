@@ -1,5 +1,8 @@
 package com.vesoft.nebula.driver.graph.net;
 
+import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_ENABLE_TLS;
+import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_TLS_PEER_NAME_VERIFY;
+
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.utils.AddressUtil;
@@ -40,12 +43,7 @@ public class NebulaPool implements Serializable {
         }
         this.maxWaitMills = builder.maxWaitMills;
 
-        this.loadBalancer = new RoundRobinLoadBalancer(
-                builder.address,
-                builder.userName,
-                builder.authOptions,
-                builder.strictlyServerHealthy,
-                builder.healthCheckTimeMills);
+        this.loadBalancer = new RoundRobinLoadBalancer(builder);
 
         if (!loadBalancer.isServersOK()) {
             loadBalancer.close();
@@ -69,15 +67,7 @@ public class NebulaPool implements Serializable {
 
         ClientPoolFactory factory = new ClientPoolFactory(
                 loadBalancer,
-                builder.userName,
-                builder.authOptions,
-                builder.connectTimeoutMills,
-                builder.requestTimeoutMills,
-                builder.scanParallel,
-                builder.workingGraph,
-                builder.timeZone,
-                builder.schemaName,
-                builder.parameters);
+                builder);
         pool = new GenericObjectPool<>(factory, objConfig);
         hasInit.compareAndSet(false, true);
     }
@@ -142,45 +132,51 @@ public class NebulaPool implements Serializable {
 
 
     public static class Builder {
-        private final List<HostAddress>   address;
-        private final String              userName;
-        private final String              password;
-        private       Map<String, Object> authOptions = new HashMap<>();
+        protected final List<HostAddress>   address;
+        protected final String              userName;
+        protected final String              password;
+        protected       Map<String, Object> authOptions = new HashMap<>();
 
-        private int maxClientSize = Constants.DEFAULT_MAX_CLIENT_SIZE;
-        private int minClientSize = Constants.DEFAULT_MIN_CLIENT_SIZE;
+        protected int maxClientSize = Constants.DEFAULT_MAX_CLIENT_SIZE;
+        protected int minClientSize = Constants.DEFAULT_MIN_CLIENT_SIZE;
 
-        private long connectTimeoutMills = Constants.DEFAULT_CONNECT_TIMEOUT_MS;
-        private long requestTimeoutMills = Constants.DEFAULT_REQUEST_TIMEOUT_MS;
+        protected long connectTimeoutMills = Constants.DEFAULT_CONNECT_TIMEOUT_MS;
+        protected long requestTimeoutMills = Constants.DEFAULT_REQUEST_TIMEOUT_MS;
 
         // The healthCheckTime for schedule check the health of session, unit: millisecond
-        private long healthCheckTimeMills = Constants.DEFAULT_HEALTH_CHECK_TIME_MS;
+        protected long healthCheckTimeMills = Constants.DEFAULT_HEALTH_CHECK_TIME_MS;
 
         // if block when session is exhausted, if false, throw exception.
-        private boolean blockWhenExhausted = Constants.DEFAULT_BLOCK_WHEN_EXHAUSTED;
+        protected boolean blockWhenExhausted = Constants.DEFAULT_BLOCK_WHEN_EXHAUSTED;
 
         // the max wait time if blockWhenExhausted is true. if value is less than 0, always wait.
         // unit: millisecond
-        private long maxWaitMills = Constants.DEFAULT_MAX_WAIT_MS;
+        protected long maxWaitMills = Constants.DEFAULT_MAX_WAIT_MS;
 
         // the schedule time for test the idle session and evict it. if value is less than 0,
         // never evict the idle sessions.
-        private long idleEvictScheduleMills = Constants.DEFAULT_IDLE_EVICT_SCHEDULE_MS;
+        protected long idleEvictScheduleMills = Constants.DEFAULT_IDLE_EVICT_SCHEDULE_MS;
 
         // the min idle time for idle session
-        private long minEvictableIdleTimeMillis = Constants.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MS;
+        protected long minEvictableIdleTimeMillis = Constants.DEFAULT_MIN_EVICTABLE_IDLE_TIME_MS;
 
         // if need all servers are strictly healthy.
         // if true, all addresses must be available, if false, at least one address is available.
-        private boolean strictlyServerHealthy = Constants.DEFAULT_STRICT_SERVER_HEALTHY;
+        protected boolean strictlyServerHealthy = Constants.DEFAULT_STRICT_SERVER_HEALTHY;
 
-        private String workingGraph = null;
+        protected String workingGraph = null;
 
         // the time zone, used to parse ZonedTime and ZonedDatetime
-        private ZoneId              timeZone     = null;
-        private String              schemaName   = null;
-        private Map<String, String> parameters   = new HashMap<>();
-        private int                 scanParallel = Constants.DEFAULT_SCAN_PARALLEL;
+        protected ZoneId              timeZone          = null;
+        protected String              schemaName        = null;
+        protected Map<String, String> parameters        = new HashMap<>();
+        protected int                 scanParallel      = Constants.DEFAULT_SCAN_PARALLEL;
+        protected boolean             enableTls         = DEFAULT_ENABLE_TLS;
+        protected String              tlsCa;
+        protected String              tlsCert;
+        protected String              tlsKey;
+        protected boolean             tlsPeerNameVerify = DEFAULT_TLS_PEER_NAME_VERIFY;
+        protected String              tlsPeerName;
 
         /**
          * Builder for {@link NebulaPool}
@@ -421,6 +417,55 @@ public class NebulaPool implements Serializable {
             return this;
         }
 
+
+        /**
+         * config whether enable tls
+         *
+         * @param enableTls true if enable the tls
+         * @return NebulaPool.Builder
+         */
+        public NebulaPool.Builder withEnableTls(boolean enableTls) {
+            this.enableTls = enableTls;
+            return this;
+        }
+
+        /**
+         * config the ca certificate for TLS
+         *
+         * @param ca path to the trusted CA certificate file used to authenticate the server
+         * @return NebulaPool.Builder
+         */
+        public NebulaPool.Builder withTlsCa(String ca) {
+            this.tlsCa = ca;
+            return this;
+        }
+
+        /**
+         * config the TLS Cert options, necessary only if mTLS is enabled on Graph Server side
+         *
+         * @param cert certificate of client
+         * @param key  private key of client certificate
+         * @return NebulaPool.Builder
+         */
+        public NebulaPool.Builder withTlsCert(String cert, String key) {
+            this.tlsCert = cert;
+            this.tlsKey = key;
+            return this;
+        }
+
+
+        /**
+         * Peer name used to verify the CN or SAN,
+         * hostname or IP will be used if empty or not specified
+         *
+         * @param tlsPeerName peer name
+         * @return NebulaPool.Builder
+         */
+        public NebulaPool.Builder withTlsPeerName(String tlsPeerName) {
+            this.tlsPeerName = tlsPeerName;
+            return this;
+        }
+
         public void check() {
             if (address == null) {
                 throw new IllegalArgumentException("Graph addresses cannot be empty.");
@@ -431,6 +476,13 @@ public class NebulaPool implements Serializable {
             if (authOptions.isEmpty() && (password == null || password.trim().isEmpty())) {
                 throw new IllegalArgumentException(
                         "auth options and password cannot be empty at the same time.");
+            }
+            if (enableTls && tlsCa == null) {
+                throw new IllegalArgumentException("no CA certificate provide.");
+            }
+            if (enableTls && tlsPeerNameVerify && tlsPeerName == null) {
+                throw new IllegalArgumentException(
+                        "no peer name provide.");
             }
         }
 

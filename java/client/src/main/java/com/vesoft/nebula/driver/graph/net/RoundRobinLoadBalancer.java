@@ -1,5 +1,8 @@
 package com.vesoft.nebula.driver.graph.net;
 
+import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_ENABLE_TLS;
+import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_TLS_PEER_NAME_VERIFY;
+
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -15,36 +18,48 @@ import org.slf4j.LoggerFactory;
 
 public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
     private static final Logger logger = LoggerFactory.getLogger(RoundRobinLoadBalancer.class);
-    private static final int S_OK = 0;
-    private static final int                S_BAD         = 1;
-    private final List<HostAddress>         addresses     = new ArrayList<>();
-    private final Map<HostAddress, Integer> serversStatus = new ConcurrentHashMap<>();
-    private final boolean strictlyServerHealthy;
 
-    private final String userName;
+    private static final int                       S_OK          = 0;
+    private static final int                       S_BAD         = 1;
+    private final        List<HostAddress>         addresses     = new ArrayList<>();
+    private final        Map<HostAddress, Integer> serversStatus = new ConcurrentHashMap<>();
+    private final        boolean                   strictlyServerHealthy;
+
+    private final String              userName;
     private final Map<String, Object> authOptions;
 
-    private final AtomicInteger pos = new AtomicInteger(0);
-    private ScheduledExecutorService schedule;
+    private final AtomicInteger            pos = new AtomicInteger(0);
+    private       ScheduledExecutorService schedule;
 
-    public RoundRobinLoadBalancer(List<HostAddress> addresses,
-                                  String userName,
-                                  Map<String, Object> authOptions,
-                                  boolean strictlyServerHealthy,
-                                  long healthCheckTime) {
-        for (HostAddress addr : addresses) {
+    private boolean enableTls;
+    private String  tlsCa;
+    private String  tlsCert;
+    private String  tlsKey;
+    private boolean tlsPeerNameVerify;
+    private String  tlsPeerName;
+
+    public RoundRobinLoadBalancer(NebulaPool.Builder builder) {
+        for (HostAddress addr : builder.address) {
             this.addresses.add(addr);
             this.serversStatus.put(addr, S_BAD);
         }
-        this.strictlyServerHealthy = strictlyServerHealthy;
-        this.userName = userName;
-        this.authOptions = authOptions;
+        this.strictlyServerHealthy = builder.strictlyServerHealthy;
+        this.userName = builder.userName;
+        this.authOptions = builder.authOptions;
 
-        if (healthCheckTime > 0) {
+        if (builder.healthCheckTimeMills > 0) {
             schedule = Executors.newScheduledThreadPool(1);
-            schedule.scheduleAtFixedRate(this::scheduleTask, 0,
-                    healthCheckTime, TimeUnit.MILLISECONDS);
+            schedule.scheduleAtFixedRate(this::scheduleTask,
+                                         0,
+                                         builder.healthCheckTimeMills,
+                                         TimeUnit.MILLISECONDS);
         }
+        enableTls = builder.enableTls;
+        tlsCa = builder.tlsCa;
+        tlsCert = builder.tlsCert;
+        tlsKey = builder.tlsKey;
+        tlsPeerNameVerify = builder.tlsPeerNameVerify;
+        tlsPeerName = builder.tlsPeerName;
     }
 
     public void close() {
@@ -95,6 +110,10 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
             NebulaClient client = NebulaClient
                     .builder(addr.toString(), userName)
                     .withAuthOptions(authOptions)
+                    .withEnableTls(enableTls)
+                    .withTlsCa(tlsCa)
+                    .withTlsCert(tlsCert, tlsKey)
+                    .withTlsPeerName(tlsPeerName)
                     .build();
             client.close();
             return true;
@@ -106,7 +125,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
 
     public boolean isServersOK() {
         this.updateServersStatus();
-        int numServersWithOkStatus = 0;
+        int numServersWithOkStatus  = 0;
         int numServersWithBadStatus = 0;
         for (HostAddress hostAddress : addresses) {
             if (serversStatus.get(hostAddress) == S_OK) {

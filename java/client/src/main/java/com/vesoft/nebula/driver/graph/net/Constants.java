@@ -16,5 +16,7 @@ public class Constants {
     static final boolean DEFAULT_STRICT_SERVER_HEALTHY      = false;
     static final int     DEFAULT_BATCH_SIZE                 = 1000;
     static final int     DEFAULT_SCAN_PARALLEL              = 10;
+    static final boolean DEFAULT_ENABLE_TLS                 = false;
+    static final boolean DEFAULT_TLS_PEER_NAME_VERIFY           = true;
 
 }

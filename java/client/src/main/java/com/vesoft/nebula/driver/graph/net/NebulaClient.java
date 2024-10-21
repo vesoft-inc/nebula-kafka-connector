@@ -2,10 +2,12 @@ package com.vesoft.nebula.driver.graph.net;
 
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_BATCH_SIZE;
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_CONNECT_TIMEOUT_MS;
+import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_ENABLE_TLS;
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_MAX_TIMEOUT_MS;
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_PING_TIMEOUT_MS;
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_REQUEST_TIMEOUT_MS;
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_SCAN_PARALLEL;
+import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_TLS_PEER_NAME_VERIFY;
 
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
@@ -15,6 +17,9 @@ import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.scan.ScanEdgeResultIterator;
 import com.vesoft.nebula.driver.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.driver.graph.utils.AddressUtil;
+import com.vesoft.nebula.driver.graph.utils.TlsUtil;
+import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import java.io.Serializable;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -23,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.net.ssl.SSLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,19 +38,10 @@ import org.slf4j.LoggerFactory;
 public class NebulaClient implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private       List<HostAddress>   servers;
-    // ms timeout for tcp connection,
-    private       long                connectTimeout;
-    // ms timeout for rpc request, the value must be larger than 0 and smaller than 100000001000L
-    private       long                requestTimeout;
-    // NebulaGraph username
-    private final String              userName;
-    // NebulaGraph auth options, including password
-    private final Map<String, Object> authOptions;
-    private       GrpcConnection      connection;
-    private       long                sessionId;
-
-    private int scanParallel;
+    private List<HostAddress> servers;
+    private Builder           builder;
+    private GrpcConnection    connection;
+    private long              sessionId;
 
     private boolean isClosed = false;
 
@@ -56,19 +53,16 @@ public class NebulaClient implements Serializable {
         return new Builder(addresses, userName, null);
     }
 
-    private NebulaClient(NebulaClient.Builder builder) throws AuthFailedException {
+    private NebulaClient(NebulaClient.Builder builder)
+            throws AuthFailedException, IOErrorException {
         this.servers = builder.address;
-        this.userName = builder.userName;
-        this.authOptions = builder.authOptions;
-        this.connectTimeout = builder.connectTimeoutMills;
-        this.requestTimeout = builder.requestTimeoutMills;
-        this.scanParallel = builder.scanParallel;
+        this.builder = builder;
         initClient();
     }
 
 
     public ResultSet execute(String gql) throws IOErrorException {
-        return execute(gql, requestTimeout);
+        return execute(gql, builder.requestTimeoutMills);
     }
 
     public synchronized ResultSet execute(String gql, long requestTimeout) throws IOErrorException {
@@ -95,15 +89,15 @@ public class NebulaClient implements Serializable {
     }
 
     public long getConnectTimeoutMills() {
-        return connectTimeout;
+        return builder.connectTimeoutMills;
     }
 
     public long getRequestTimeoutMills() {
-        return requestTimeout;
+        return builder.requestTimeoutMills;
     }
 
     public long getScanParallel() {
-        return scanParallel;
+        return builder.scanParallel;
     }
 
     /**
@@ -165,7 +159,7 @@ public class NebulaClient implements Serializable {
         }
     }
 
-    private void initClient() throws AuthFailedException {
+    private void initClient() throws AuthFailedException, IOErrorException {
         // create connection with NebulaGraph Server
         AuthResult authResult = null;
         connection = new GrpcConnection();
@@ -173,13 +167,13 @@ public class NebulaClient implements Serializable {
         Collections.shuffle(servers);
         while (tryConnectTimes-- > 0) {
             try {
-                connection.open(servers.get(tryConnectTimes), connectTimeout, requestTimeout);
-                authResult = connection.authenticate(userName, authOptions);
+                connection.open(servers.get(tryConnectTimes), builder);
+                authResult = connection.authenticate(builder.userName, builder.authOptions);
                 sessionId = authResult.getSessionId();
                 break;
             } catch (AuthFailedException e) {
                 logger.error("create NebulaClient failed.", e);
-                throw e;
+                throw new AuthFailedException(e.getMessage());
             } catch (Exception e) {
                 if (tryConnectTimes == 0) {
                     logger.error("create NebulaClient failed.", e);
@@ -334,11 +328,11 @@ public class NebulaClient implements Serializable {
                                           propertyList,
                                           parts,
                                           batchSize,
-                                          scanParallel,
+                                          builder.scanParallel,
                                           servers,
-                                          userName,
-                                          authOptions,
-                                          requestTimeout);
+                                          builder.userName,
+                                          builder.authOptions,
+                                          builder.requestTimeoutMills);
     }
 
 
@@ -485,11 +479,11 @@ public class NebulaClient implements Serializable {
                                           propertyList,
                                           parts,
                                           batchSize,
-                                          scanParallel,
+                                          builder.scanParallel,
                                           servers,
-                                          userName,
-                                          authOptions,
-                                          requestTimeout);
+                                          builder.userName,
+                                          builder.authOptions,
+                                          builder.requestTimeoutMills);
     }
 
 
@@ -614,13 +608,20 @@ public class NebulaClient implements Serializable {
     }
 
     public static class Builder {
-        private final List<HostAddress>   address;
-        private final String              userName;
-        private final String              password;
-        private       Map<String, Object> authOptions         = new HashMap<>();
-        private       long                connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT_MS;
-        private       long                requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT_MS;
-        private       int                 scanParallel        = DEFAULT_SCAN_PARALLEL;
+        protected final List<HostAddress>   address;
+        protected final String              userName;
+        protected final String              password;
+        protected       Map<String, Object> authOptions         = new HashMap<>();
+        protected       long                connectTimeoutMills = DEFAULT_CONNECT_TIMEOUT_MS;
+        // ms timeout for rpc request, the value must be larger than 0, smaller than 100000001000L
+        protected       long                requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT_MS;
+        protected       int                 scanParallel        = DEFAULT_SCAN_PARALLEL;
+        protected        boolean             enableTls           = DEFAULT_ENABLE_TLS;
+        protected       String              tlsCa;
+        protected       String              tlsCert;
+        protected       String              tlsKey;
+        protected       boolean             tlsPeerNameVerify   = DEFAULT_TLS_PEER_NAME_VERIFY;
+        protected       String              tlsPeerName;
 
         /**
          * Builder for {@link NebulaClient}
@@ -695,6 +696,54 @@ public class NebulaClient implements Serializable {
             return this;
         }
 
+        /**
+         * config whether enable tls
+         *
+         * @param enableTls true if enable the tls
+         * @return NebulaClient.Builder
+         */
+        public Builder withEnableTls(boolean enableTls) {
+            this.enableTls = enableTls;
+            return this;
+        }
+
+        /**
+         * config the ca certificate for TLS
+         *
+         * @param ca path to the trusted CA certificate file used to authenticate the server
+         * @return NebulaClient.Builder
+         */
+        public Builder withTlsCa(String ca) {
+            this.tlsCa = ca;
+            return this;
+        }
+
+        /**
+         * config the TLS Cert options, necessary only if mTLS is enabled on Graph Server side
+         *
+         * @param cert certificate of client
+         * @param key  private key of client certificate
+         * @return NebulaClient.Builder
+         */
+        public Builder withTlsCert(String cert, String key) {
+            this.tlsCert = cert;
+            this.tlsKey = key;
+            return this;
+        }
+
+
+        /**
+         * Peer name used to verify the CN or SAN,
+         * hostname or IP will be used if empty or not specified
+         *
+         * @param tlsPeerName peer name
+         * @return NebulaClient.Builder
+         */
+        public Builder withTlsPeerName(String tlsPeerName) {
+            this.tlsPeerName = tlsPeerName;
+            return this;
+        }
+
         public void check() {
             if (address == null) {
                 throw new IllegalArgumentException("Graph addresses cannot be empty.");
@@ -705,6 +754,13 @@ public class NebulaClient implements Serializable {
             if (authOptions.isEmpty() && (password == null || password.trim().isEmpty())) {
                 throw new IllegalArgumentException(
                         "auth options and password cannot be empty at the same time.");
+            }
+            if (enableTls && tlsCa == null) {
+                throw new IllegalArgumentException("TLS is enable, tlsCa cannot be empty.");
+            }
+            if (enableTls && tlsPeerNameVerify && tlsPeerName == null) {
+                throw new IllegalArgumentException(
+                        "TLS is enable, tlsPeerName cannot be empty.");
             }
         }
 

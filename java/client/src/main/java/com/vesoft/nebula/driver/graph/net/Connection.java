@@ -2,7 +2,9 @@ package com.vesoft.nebula.driver.graph.net;
 
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import java.io.Serializable;
+import javax.net.ssl.SSLException;
 
 public abstract class Connection implements Serializable {
 
@@ -14,8 +16,9 @@ public abstract class Connection implements Serializable {
         return this.serverAddr;
     }
 
-    public abstract void open(HostAddress address, long connectTimeout, long requestTimeout)
-            throws IOErrorException;
+    public abstract void open(HostAddress address,
+                              NebulaClient.Builder builder) throws IOErrorException;
+
 
     public abstract void close();
 

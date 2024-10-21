@@ -19,38 +19,14 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         implements Serializable {
     private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    private final LoadBalancer        loadBalancer;
-    private       String              userName;
-    private       Map<String, Object> authOptions;
-    private       long                connectTimeoutMs;
-    private       long                requestTimeoutMs;
-    private       int                 scanParallel;
-    private       String              workingGraph;
-    private       ZoneId              timeZone;
-    private       String              schemaName;
-    private       Map<String, String> parameters;
+    private final LoadBalancer       loadBalancer;
+    private final NebulaPool.Builder builder;
 
     public ClientPoolFactory(
             LoadBalancer loadBalancer,
-            String userName,
-            Map<String, Object> authOptions,
-            long connectTimeoutMs,
-            long requestTimeoutMs,
-            int scanParallel,
-            String workingGraph,
-            ZoneId zoneId,
-            String schemaName,
-            Map<String, String> parameters) {
+            NebulaPool.Builder builder) {
         this.loadBalancer = loadBalancer;
-        this.userName = userName;
-        this.authOptions = authOptions;
-        this.connectTimeoutMs = connectTimeoutMs;
-        this.requestTimeoutMs = requestTimeoutMs;
-        this.scanParallel = scanParallel;
-        this.workingGraph = workingGraph;
-        this.timeZone = zoneId;
-        this.schemaName = schemaName;
-        this.parameters = parameters;
+        this.builder = builder;
     }
 
 
@@ -68,23 +44,36 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
                 .collect(Collectors.joining(","));
 
         NebulaClient client = NebulaClient
-                .builder(addrStr, userName)
-                .withAuthOptions(authOptions)
-                .withConnectTimeoutMills(connectTimeoutMs)
-                .withRequestTimeoutMills(requestTimeoutMs)
-                .withScanParallel(scanParallel)
+                .builder(addrStr, builder.userName)
+                .withAuthOptions(builder.authOptions)
+                .withConnectTimeoutMills(builder.connectTimeoutMills)
+                .withRequestTimeoutMills(builder.requestTimeoutMills)
+                .withScanParallel(builder.scanParallel)
+                .withEnableTls(builder.enableTls)
+                .withTlsCa(builder.tlsCa)
+                .withTlsCert(builder.tlsCert, builder.tlsKey)
+                .withTlsPeerName(builder.tlsPeerName)
                 .build();
 
         // set the working graph and time zone
         StringBuilder sessionSetStatement = new StringBuilder();
-        if (workingGraph != null) {
-            sessionSetStatement.append("SESSION SET GRAPH `").append(workingGraph).append("` ");
+        if (builder.workingGraph != null) {
+            sessionSetStatement
+                    .append("SESSION SET GRAPH `")
+                    .append(builder.workingGraph)
+                    .append("` ");
         }
-        if (timeZone != null) {
-            sessionSetStatement.append("SESSION SET TIME ZONE \"").append(timeZone).append("\"");
+        if (builder.timeZone != null) {
+            sessionSetStatement
+                    .append("SESSION SET TIME ZONE \"")
+                    .append(builder.timeZone)
+                    .append("\"");
         }
-        if (schemaName != null) {
-            sessionSetStatement.append("SESSION SET SCHEMA `").append(schemaName).append("` ");
+        if (builder.schemaName != null) {
+            sessionSetStatement
+                    .append("SESSION SET SCHEMA `")
+                    .append(builder.schemaName)
+                    .append("` ");
         }
 
         if (!sessionSetStatement.toString().isEmpty()) {
@@ -93,7 +82,7 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
                 throw new RuntimeException("SESSION SET failed for " + result.getErrorMessage());
             }
         }
-        for (Map.Entry<String, String> parameter : parameters.entrySet()) {
+        for (Map.Entry<String, String> parameter : builder.parameters.entrySet()) {
             String setParameterStatement = String.format("SESSION SET VALUE $%s=%s",
                                                          parameter.getKey(),
                                                          parameter.getValue());

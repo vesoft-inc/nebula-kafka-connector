@@ -5,6 +5,8 @@ import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.util.ProcessUtil;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
@@ -221,5 +223,30 @@ public class NebulaClientTest {
             Assert.fail(e.getMessage());
         }
         assert client.ping();
+    }
+
+    @Test
+    public void testTls() {
+        System.out.println("<==== testTls ====>");
+        String address = "192.168.8.6:4820";
+
+
+        String tlsCa   = "src/test/resources/tls/ca.pem";
+        String tlsCert = "src/test/resources/tls/client/client.cert";
+        String tlsKey  = "src/test/resources/tls/client/client-private.key";
+
+        try {
+            NebulaClient client = NebulaClient
+                    .builder(address, "root", "Nebula123")
+                    .withEnableTls(true)
+                    .withTlsCa(tlsCa)
+                    .withTlsCert(tlsCert, tlsKey)
+                    .withTlsPeerName("NICOLE")
+                    .build();
+            client.execute("RETURN 1");
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert false;
+        }
     }
 }

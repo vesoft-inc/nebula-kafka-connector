@@ -16,6 +16,8 @@ public class IOErrorException extends Exception {
 
     public static final int E_NO_OPEN = 5;
 
+    public static final int E_SSL_ERROR = 6;
+
     private int type = E_UNKNOWN;
 
     public IOErrorException(int errorType, String message) {

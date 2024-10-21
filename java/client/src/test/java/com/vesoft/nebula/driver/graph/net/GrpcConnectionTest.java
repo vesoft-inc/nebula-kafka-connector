@@ -4,6 +4,9 @@ import com.google.common.base.Charsets;
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.util.MockGraph;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.Assert;
@@ -19,9 +22,16 @@ public class GrpcConnectionTest {
     private final        String user     = "root";
     private final        String password = "NebulaGraph01";
 
+    private NebulaClient.Builder builder;
+
     @Before
     public void setup() {
         MockGraph.mockGraphData();
+        builder = NebulaClient
+                .builder(host + ":" + port, "root", "Nebula123")
+                .withConnectTimeoutMills(1000)
+                .withRequestTimeoutMills(1000)
+                .withEnableTls(false);
     }
 
 
@@ -30,7 +40,12 @@ public class GrpcConnectionTest {
         try {
             // Test open
             GrpcConnection connection = new GrpcConnection();
-            connection.open(new HostAddress(host, port), 1000, 1000);
+            NebulaClient.Builder builder = NebulaClient
+                    .builder(host + port, "root", "Nebula123")
+                    .withConnectTimeoutMills(1000)
+                    .withRequestTimeoutMills(1000)
+                    .withEnableTls(false);
+            connection.open(new HostAddress(host, port), builder);
 
             // Test authenticate
             Map<String, Object> authInfo = new HashMap<>();
@@ -80,11 +95,11 @@ public class GrpcConnectionTest {
 
         try {
             connection1 = new GrpcConnection();
-            connection1.open(new HostAddress(host, port), 1000, 1000);
+            connection1.open(new HostAddress(host, port), builder);
             AuthResult authResult = connection1.authenticate(user, authInfo);
 
             connection2 = new GrpcConnection();
-            connection2.open(new HostAddress(host, port), 1000, 1000);
+            connection2.open(new HostAddress(host, port), builder);
             authResult = connection2.authenticate(user, authInfo);
 
             Thread.sleep(3000);
@@ -101,6 +116,37 @@ public class GrpcConnectionTest {
             if (connection2 != null) {
                 connection2.close();
             }
+        }
+    }
+
+    @Test
+    public void testTlsConnection() {
+        String              host     = "192.168.8.6";
+        int                 port     = 4820;
+        Map<String, Object> authInfo = new HashMap<>();
+        authInfo.put("password", "Nebula123");
+
+        String tlsCa   = "src/test/resources/tls/ca.pem";
+        String tlsCert = "src/test/resources/tls/client/client.cert";
+        String tlsKey  = "src/test/resources/tls/client/client-private.key";
+
+        NebulaClient.Builder tlsBuilder = NebulaClient
+                .builder(host + ":" + port, "root", "Nebula123")
+                .withConnectTimeoutMills(1000)
+                .withRequestTimeoutMills(1000)
+                .withEnableTls(true)
+                .withTlsCa(tlsCa)
+                .withTlsCert(tlsCert, tlsKey)
+                .withTlsPeerName("NICOLE");
+
+        try {
+            GrpcConnection connection = new GrpcConnection();
+            connection.open(new HostAddress(host, port), tlsBuilder);
+            AuthResult authResult = connection.authenticate(user, authInfo);
+            assert true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert (false);
         }
     }
 }

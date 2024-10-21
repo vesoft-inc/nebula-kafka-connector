@@ -8,6 +8,7 @@ import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.utils.ClientVersion;
+import com.vesoft.nebula.driver.graph.utils.TlsUtil;
 import com.vesoft.nebula.proto.common.ClientInfo;
 import com.vesoft.nebula.proto.common.Common;
 import com.vesoft.nebula.proto.graph.AuthRequest;
@@ -17,9 +18,13 @@ import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.GraphServiceGrpc;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.netty.shaded.io.grpc.netty.NegotiationType;
+import io.grpc.netty.shaded.io.grpc.netty.NettyChannelBuilder;
+import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import javax.net.ssl.SSLException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,15 +40,30 @@ public class GrpcConnection extends Connection {
     private final Charset charset = Charsets.UTF_8;
 
     @Override
-    public void open(HostAddress address, long connectTimeout, long requestTimeout) {
+    public void open(HostAddress address,
+                     NebulaClient.Builder builder) throws IOErrorException {
         this.serverAddr = address;
-        this.connectTimeout = connectTimeout;
-        this.requestTimeout = requestTimeout;
-        channel = ManagedChannelBuilder
-                .forAddress(address.getHost(), address.getPort())
-                .usePlaintext()
-                .maxInboundMessageSize(Integer.MAX_VALUE)
-                .build();
+        this.connectTimeout = builder.connectTimeoutMills;
+        this.requestTimeout = builder.requestTimeoutMills;
+        if (builder.enableTls) {
+            NettyChannelBuilder channelBuilder = NettyChannelBuilder
+                    .forAddress(address.getHost(), address.getPort())
+                    .useTransportSecurity()
+                    .sslContext(TlsUtil.getSslContext(builder.tlsCa,
+                                                      builder.tlsCert,
+                                                      builder.tlsKey))
+                    .maxInboundMessageSize(Integer.MAX_VALUE);
+            if (builder.tlsPeerNameVerify) {
+                channelBuilder.overrideAuthority(builder.tlsPeerName);
+            }
+            channel = channelBuilder.build();
+        } else {
+            channel = NettyChannelBuilder
+                    .forAddress(address.getHost(), address.getPort())
+                    .usePlaintext()
+                    .maxInboundMessageSize(Integer.MAX_VALUE)
+                    .build();
+        }
         stub = GraphServiceGrpc.newBlockingStub(channel);
     }
 

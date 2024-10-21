@@ -170,4 +170,31 @@ public class NebulaPoolTest {
             }
         }
     }
+
+    @Test
+    public void testTls() {
+        System.out.println("<==== testTls ====>");
+        String address = "192.168.8.6:4820";
+
+
+        String tlsCa   = "src/test/resources/tls/ca.pem";
+        String tlsCert = "src/test/resources/tls/client/client.cert";
+        String tlsKey  = "src/test/resources/tls/client/client-private.key";
+
+        try {
+            NebulaPool pool = NebulaPool
+                    .builder(address, "root", "Nebula123")
+                    .withEnableTls(true)
+                    .withTlsCa(tlsCa)
+                    .withTlsCert(tlsCert, tlsKey)
+                    .withTlsPeerName("NICOLE")
+                    .build();
+            NebulaClient client = pool.getClient();
+            client.execute("RETURN 1");
+            assert true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            assert false;
+        }
+    }
 }
