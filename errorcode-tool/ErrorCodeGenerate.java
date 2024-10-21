@@ -30,6 +30,7 @@ public class ErrorCodeGenerate {
         List<ErrorCode>       codesWithInternalError = update(codes);
         writeCodeForJava(codesWithInternalError);
         writeCodeForGo(codesWithInternalError);
+        writeCodeForDoc(codesWithInternalError, codeDesc);
         writeCodeForYaml(codesWithInternalError, codeDesc);
         System.out.println("Finished.");
     }
@@ -82,30 +83,35 @@ public class ErrorCodeGenerate {
         }
     }
 
-    public static void writeCodeForYaml(List<ErrorCode> codes, Map<String, CodeDesc> codeDescMap) {
-        String enDescYaml = "errorcode_doc_en.txt";
-        String chDescYaml = "errorcode_doc_ch.txt";
+
+    public static void writeCodeForDoc(List<ErrorCode> codes, Map<String, CodeDesc> codeDescMap) {
+        String enDescYaml = "errorcode_doc_en.md";
+        String chDescYaml = "errorcode_doc_ch.md";
 
         StringBuilder englishDesc = new StringBuilder();
         StringBuilder chineseDesc = new StringBuilder();
+
+        englishDesc.append("| Code | Message | Description|\n");
+        englishDesc.append("|-----|-----|-----|\n");
+
+        chineseDesc.append("| 错误码 | 错误信息 | 描述 |\n");
+        chineseDesc.append("|-----|-----|-----|\n");
         for (ErrorCode code : codes) {
-            englishDesc.append("- Name: ").append(code.getName()).append("\n");
-            englishDesc.append("  Code: ").append(code.getCode()).append("\n");
-            englishDesc.append("  Message: ").append(code.getMessage()).append("\n");
             String desc = null;
             if (codeDescMap.get(code.getCode()) != null) {
                 desc = codeDescMap.get(code.getCode()).getEnglishDesc();
             }
-            englishDesc.append("  Description: ").append(desc).append("\n");
+            englishDesc.append("|").append(code.getCode())
+                    .append("|").append(code.getMessage())
+                    .append("|").append(desc).append("|\n");
 
-            chineseDesc.append("- 错误名: ").append(code.getName()).append("\n");
-            chineseDesc.append("  错误码: ").append(code.getCode()).append("\n");
-            chineseDesc.append("  错误消息: ").append(code.getMessage()).append("\n");
             desc = null;
             if (codeDescMap.get(code.getCode()) != null) {
                 desc = codeDescMap.get(code.getCode()).getChineseDes();
             }
-            chineseDesc.append("  描述: ").append(desc).append("\n");
+            chineseDesc.append("|").append(code.getCode())
+                    .append("|").append(code.getMessage())
+                    .append("|").append(desc).append("|\n");
         }
         FileWriter englishDescWriter = null;
         FileWriter chineseDescWriter = null;
@@ -136,6 +142,37 @@ public class ErrorCodeGenerate {
             }
         }
     }
+
+
+    public static void writeCodeForYaml(List<ErrorCode> codes, Map<String, CodeDesc> codeDescMap) {
+        String codeYaml = "errorcode.yaml";
+
+        StringBuilder sb = new StringBuilder();
+        for (ErrorCode code : codes) {
+            sb.append("- Name: \"").append(code.getName()).append("\"\n");
+            sb.append("  Code: \"").append(code.getCode()).append("\"\n");
+            sb.append("  Message: \"").append(code.getMessage()).append("\"\n\n");
+        }
+        FileWriter codeWriter = null;
+        try {
+            codeWriter = new FileWriter(codeYaml);
+            codeWriter.write(sb.toString());
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (codeWriter != null) {
+                try {
+                    codeWriter.flush();
+                    codeWriter.close();
+                } catch (Exception e) {
+                    // ignore
+                }
+            }
+
+        }
+    }
+
 
 
     public static List<ErrorCode> constructErrorCode(String codePath, String codeclassPath, String messageFilePath) {

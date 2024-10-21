@@ -1,9 +1,9 @@
 #!/bin/bash
 
-errorCodeFilePath=errorcode
-errorClassFilePath=errorcode_class
-errorMessageFilePath=errormessage
-codeDescFilePath=code_description.md
+errorCodeFilePath=source_file/errorcode
+errorClassFilePath=source_file/errorcode_class
+errorMessageFilePath=source_file/errormessage
+codeDescFilePath=source_file/code_description.md
 
 
 export CLASSPATH=$CLASSPATH:.
