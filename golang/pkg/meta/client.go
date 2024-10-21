@@ -15,7 +15,7 @@ import (
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
 	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/grpcutil"
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
 )
@@ -297,7 +297,7 @@ func (c *metaClient) execute(fn func() (responseHeader, error)) (responseHeader,
 		return nil, grpcutil.GetGrpcError(c.address, err)
 	}
 	header := resp.GetHeader()
-	if internel_error.ErrorFromBytes(header.GetStatus().GetCode()) == nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
+	if internal_error.ErrorFromBytes(header.GetStatus().GetCode()) == nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
 		return resp, nil
 	} else {
 		return nil, nebulaErr.NewNebulaError(
@@ -314,7 +314,7 @@ func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {
 		return nil, fmt.Errorf("invalid response")
 	}
 	leader := header.GetLeader()
-	errorCode := internel_error.ErrorFromBytes(header.GetStatus().GetCode())
+	errorCode := internal_error.ErrorFromBytes(header.GetStatus().GetCode())
 	result := &HeaderResponse{
 		Code: errorCode,
 		Msg:  string(header.GetStatus().GetMessage()),

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -325,11 +325,11 @@ func (v *nebulaValue) IsNull() bool {
 func asValue[T valuer](v *nebulaValue, valueTyp types.ValueType) (T, error) {
 	var t T
 	if v.GetType() != valueTyp {
-		return t, internel_error.ErrType("value is not " + valueTyp.String())
+		return t, internal_error.ErrType("value is not " + valueTyp.String())
 	}
 	data, ok := v.data.(T)
 	if !ok {
-		return t, internel_error.ErrType("value is not " + valueTyp.String())
+		return t, internal_error.ErrType("value is not " + valueTyp.String())
 	}
 	return data, nil
 }

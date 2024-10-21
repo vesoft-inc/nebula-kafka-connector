@@ -10,7 +10,7 @@ import (
 	"strconv"
 	"time"
 
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"google.golang.org/grpc"
 	grpccodes "google.golang.org/grpc/codes"
 	"google.golang.org/grpc/credentials"
@@ -35,14 +35,14 @@ func NewGrpcClient(host string, port int, timeout time.Duration, tlsCfg *tls.Con
 	grpcConn, err = grpc.NewClient(fmt.Sprintf("%s:%d", host, port), cred, grpc.WithBlock(), grpc.WithTimeout(duration),
 		grpc.WithDefaultCallOptions(grpc.MaxCallSendMsgSize(defaultMsgSize), grpc.MaxCallRecvMsgSize(defaultMsgSize)))
 	if err != nil {
-		return nil, internel_error.ErrConnCannotOpen(host, port, err.Error())
+		return nil, internal_error.ErrConnCannotOpen(host, port, err.Error())
 	}
 	return grpcConn, nil
 }
 
 func NewTLSConfig(host string, ca, cert, key string, peerName string, peerNameVerify bool) (*tls.Config, error) {
 	if ca == "" {
-		return nil, internel_error.ErrTLS("No CA certificate provide")
+		return nil, internal_error.ErrTLS("No CA certificate provide")
 	}
 
 	peer := peerName
@@ -61,16 +61,16 @@ func NewTLSConfig(host string, ca, cert, key string, peerName string, peerNameVe
 	CAs := x509.NewCertPool()
 	if ca, err := ioutil.ReadFile(ca); err == nil {
 		if !CAs.AppendCertsFromPEM(ca) {
-			return nil, internel_error.ErrTLS("AppendCertsFromPEM failed")
+			return nil, internal_error.ErrTLS("AppendCertsFromPEM failed")
 		}
 		tlsCfg.RootCAs = CAs
 	} else {
-		return nil, internel_error.ErrTLS(err.Error())
+		return nil, internal_error.ErrTLS(err.Error())
 	}
 
 	if cert != "" || key != "" {
 		if cert, err := tls.LoadX509KeyPair(cert, key); err != nil {
-			return nil, internel_error.ErrTLS(err.Error())
+			return nil, internal_error.ErrTLS(err.Error())
 		} else {
 			tlsCfg.Certificates = []tls.Certificate{cert}
 		}
@@ -81,7 +81,7 @@ func NewTLSConfig(host string, ca, cert, key string, peerName string, peerNameVe
 		for i, data := range certificates {
 			cert, err := x509.ParseCertificate(data)
 			if err != nil {
-				return internel_error.ErrTLS(err.Error())
+				return internal_error.ErrTLS(err.Error())
 			}
 			certs[i] = cert
 		}
@@ -124,9 +124,9 @@ func GetGrpcError(address string, err error) error {
 	}
 	switch rpcErr.Code() {
 	case grpccodes.DeadlineExceeded, grpccodes.Canceled:
-		return internel_error.ErrConnRequestTimeout(host, port)
+		return internal_error.ErrConnRequestTimeout(host, port)
 	case grpccodes.Unavailable:
-		return internel_error.ErrConnUnavailable(host, port)
+		return internal_error.ErrConnUnavailable(host, port)
 	}
 	return err
 }

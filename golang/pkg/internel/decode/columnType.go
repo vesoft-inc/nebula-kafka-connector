@@ -1,8 +1,7 @@
 package decode
 
 import (
-	"fmt"
-
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -57,8 +56,7 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 	}
 	t, ok := columnTypeMap[b[0]]
 	if !ok {
-		//TODO
-		return nil, fmt.Errorf("unknown column type %d", b[0])
+		return nil, internal_error.ErrUnknownColumnType(int(b[0]))
 	}
 	switch t {
 	case types.ColumnTypeList:
@@ -80,7 +78,15 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 		}
 		numFields := bytesToInt32(numFieldsBytes)
 		for i := int32(0); i < numFields; i++ {
-			nameBytes := r.readUtilZero()
+			sizeBytes := r.readN(2)
+			if r.error() != nil {
+				return nil, r.error()
+			}
+			size := bytesToInt16(sizeBytes)
+			nameBytes := r.readN(int(size))
+			if r.error() != nil {
+				return nil, r.error()
+			}
 			if r.error() != nil {
 				return nil, r.error()
 			}
@@ -233,7 +239,15 @@ func decodeElementTypes(r *bytesReader, isNode bool) (graphElementProps, error) 
 		}
 		numProps := bytesToInt32(numPropsBytes)
 		for j := 0; j < int(numProps); j++ {
-			propNameBytes := r.readUtilZero()
+			sizeBytes := r.readN(2)
+			if r.error() != nil {
+				return nil, r.error()
+			}
+			size := bytesToInt16(sizeBytes)
+			propNameBytes := r.readN(int(size))
+			if r.error() != nil {
+				return nil, r.error()
+			}
 			if r.error() != nil {
 				return nil, r.error()
 			}

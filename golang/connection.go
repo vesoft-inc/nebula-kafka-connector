@@ -15,7 +15,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/grpcutil"
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
@@ -104,7 +104,7 @@ func (cn *connection) authenticate(ctx context.Context, username, password strin
 	}
 	respErr := resp.GetStatus()
 	if string(respErr.GetCode()) != string(errors.ERROR_SUCCESSFUL_COMPLETION) {
-		return internel_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
+		return internal_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
 	cn.sessionId = resp.GetSessionId()
 	return nil
@@ -154,7 +154,7 @@ func (cn *connection) ExecuteContext(ctx context.Context, stmt string) (types.Re
 func (cn *connection) isSucceed(resp *graph.ExecuteResponse) error {
 	respErr := resp.GetStatus()
 	if string(respErr.GetCode()) != string(errors.ERROR_SUCCESSFUL_COMPLETION) {
-		return internel_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
+		return internal_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
 	return nil
 }

@@ -33,6 +33,7 @@ var (
 	ERROR_TYPE                 ErrorCode = "99008"
 	ERROR_CLIENT_INTERNEL      ErrorCode = "99009"
 	ERROR_TLS_ERROR            ErrorCode = "99010"
+	ERROR_UNKNOWN_COLUMN_TYPE  ErrorCode = "99011"
 
 	// Error in server side
 

@@ -32,22 +32,6 @@ func (r *bytesReader) readN(n int) []byte {
 	return bs
 }
 
-func (r *bytesReader) readPeddingAll() []byte {
-	return r.bs[r.index:]
-}
-
-func (r *bytesReader) readUtilZero() []byte {
-	for i := r.index; i < len(r.bs); i++ {
-		if r.bs[i] == 0 {
-			bs := r.bs[r.index:i]
-			r.index = i + 1
-			return bs
-		}
-	}
-	r.err = errors.Wrap(errNoZeroString, "")
-	return nil
-}
-
 func (r *bytesReader) error() error {
 	return r.err
 }

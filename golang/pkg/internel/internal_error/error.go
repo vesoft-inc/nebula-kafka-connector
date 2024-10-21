@@ -1,4 +1,4 @@
-package internel_error
+package internal_error
 
 import (
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
@@ -74,4 +74,8 @@ func ErrorFromBytes(c []byte) errors.ErrorCode {
 
 func ErrTLS(msg string) error {
 	return errors.NewNebulaError(errors.ERROR_TLS_ERROR, "TLS error, %s", msg)
+}
+
+func ErrUnknownColumnType(columnType int) error {
+	return errors.NewNebulaError(errors.ERROR_UNKNOWN_COLUMN_TYPE, "unknown column type %d", columnType)
 }

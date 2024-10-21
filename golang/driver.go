@@ -6,7 +6,7 @@ import (
 	"math/rand"
 	"time"
 
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -148,7 +148,7 @@ func (dc *driverConn) Execute(stmt string) (types.Result, error) {
 
 func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (types.Result, error) {
 	if dc.isClosed {
-		return nil, internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return nil, internal_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	if ctx.Err() != nil {
 		return nil, ctx.Err()
@@ -163,14 +163,14 @@ func (dc *driverConn) ExecuteContext(ctx context.Context, stmt string) (types.Re
 
 func (dc *driverConn) Ping() error {
 	if dc.IsClosed() {
-		return internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return internal_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	return dc.conn.Ping()
 }
 
 func (dc *driverConn) PingContext(ctx context.Context) error {
 	if dc.IsClosed() {
-		return internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return internal_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 	return dc.conn.PingContext(ctx)
 }
@@ -219,7 +219,7 @@ func (dc *driverConn) replaceFromPool() error {
 	newConn, ok := conn.(*driverConn)
 	if !ok {
 		// not reachable
-		return internel_error.ErrInternel("invalid connection type")
+		return internal_error.ErrInternel("invalid connection type")
 	}
 	dc.conn = newConn.conn
 	dc.currentHost = newConn.currentHost
@@ -230,7 +230,7 @@ func (dc *driverConn) replaceFromPool() error {
 
 func (dc *driverConn) GetSessionId() (int64, error) {
 	if dc.IsClosed() {
-		return 0, internel_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
+		return 0, internal_error.ErrConnIsClosed(dc.currentHost.host, dc.currentHost.port)
 	}
 
 	return dc.conn.GetSessionId()

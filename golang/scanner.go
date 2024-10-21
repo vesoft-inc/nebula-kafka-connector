@@ -3,7 +3,7 @@ package nebula_ng
 import (
 	"fmt"
 
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -152,7 +152,7 @@ func (n *NullInt) scan(value types.Value) error {
 		case types.ValueTypeInt64:
 			i, err = value.AsInt64()
 		default:
-			return 0, internel_error.ErrType(fmt.Sprintf("value type not match"))
+			return 0, internal_error.ErrType(fmt.Sprintf("value type not match"))
 		}
 		if err != nil {
 			return 0, err
@@ -207,7 +207,7 @@ func (n *NullUInt) scan(value types.Value) error {
 		case types.ValueTypeInt64:
 			i, err = value.AsUInt64()
 		default:
-			return 0, internel_error.ErrType(fmt.Sprintf("value type not match"))
+			return 0, internal_error.ErrType(fmt.Sprintf("value type not match"))
 		}
 		if err != nil {
 			return 0, err
@@ -259,7 +259,7 @@ func (n *NullDouble) scan(value types.Value) error {
 		case types.ValueTypeDouble:
 			d, err = value.AsDouble()
 		default:
-			return 0, internel_error.ErrType(fmt.Sprintf("value type not match"))
+			return 0, internal_error.ErrType(fmt.Sprintf("value type not match"))
 		}
 		if err != nil {
 			return 0, err

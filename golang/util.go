@@ -6,17 +6,17 @@ import (
 	"strings"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
-	internel_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 )
 
 func parseHostPort(address string) (string, int, error) {
 	host, port, err := net.SplitHostPort(address)
 	if err != nil {
-		return "", 0, internel_error.ErrAddressNotValid(address, err.Error())
+		return "", 0, internal_error.ErrAddressNotValid(address, err.Error())
 	}
 	p, err := strconv.Atoi(port)
 	if err != nil {
-		return "", 0, internel_error.ErrAddressNotValid(address, err.Error())
+		return "", 0, internal_error.ErrAddressNotValid(address, err.Error())
 	}
 
 	return host, p, nil
