@@ -15,7 +15,7 @@ Users can bakcup the data of a svcgrp and restore a svcgrp from backup files. Us
 ### Options inherited from parent commands
 
 ```
-  -c, --svcgrp string   Cluster name
+  -c, --svcgrp string   Service group name
 ```
 
 ### SEE ALSO

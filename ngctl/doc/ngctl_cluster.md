@@ -13,7 +13,7 @@ ngctl svcgrp [flags]
 ### Options
 
 ```
-  -c, --svcgrp string   Cluster name
+  -c, --svcgrp string   Service group name
   -h, --help             help for svcgrp
 ```
 

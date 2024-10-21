@@ -20,7 +20,7 @@ ngctl svcgrp br restore full [flags]
       --ca-path string         Specify CA file path (default "/usr/local/certs/ca.crt")
       --catalog-owner string   Specify the restore svcgrp catalog owner (default "root")
       --cert-path string       Specify cert file path (default "/usr/local/certs/client.crt")
-  -c, --svcgrp string         Cluster name
+  -c, --svcgrp string         Service group name
       --svcgrpId int          Specify the restore svcgrp id
       --concurrency int        Max concurrency for upload, download and playback data (default 5)
       --debug                  Output log in debug level or not

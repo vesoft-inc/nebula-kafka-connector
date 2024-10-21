@@ -18,7 +18,7 @@ ngctl svcgrp br backup full [flags]
       --agents string          Specify agents address, eg: 192.168.8.1:6688,192.168.8.2:6688,192.168.8.3:6688
       --ca-path string         Specify CA file path (default "/usr/local/certs/ca.crt")
       --cert-path string       Specify cert file path (default "/usr/local/certs/client.crt")
-  -c, --svcgrp string         Cluster name
+  -c, --svcgrp string         Service group name
       --svcgrpId int          Specify the backup svcgrp id
       --concurrency int        Max concurrency for download data and data playback (default 5)
       --debug                  Output log in debug level or not

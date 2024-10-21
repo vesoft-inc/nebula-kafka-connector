@@ -24,7 +24,7 @@ var SvcgrpCmd = &cobra.Command{
 }
 
 func init() {
-	SvcgrpCmd.PersistentFlags().StringVarP(&svcgrpFlags.svcgrpName, "svcgrp", "s", "", "Cluster name")
+	SvcgrpCmd.PersistentFlags().StringVarP(&svcgrpFlags.svcgrpName, "svcgrp", "s", "", "Service group name")
 	SvcgrpCmd.AddCommand(createsvcgrpCmd)
 	SvcgrpCmd.AddCommand(initsvcgrpCmd)
 	SvcgrpCmd.AddCommand(showsvcgrpCmd)

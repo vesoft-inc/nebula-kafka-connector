@@ -38,7 +38,7 @@ Restore data files, notice that it will restart the svcgrp
 ### Options inherited from parent commands
 
 ```
-  -c, --svcgrp string   Cluster name
+  -c, --svcgrp string   Service group name
 ```
 
 ### SEE ALSO
