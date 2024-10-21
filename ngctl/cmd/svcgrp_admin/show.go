@@ -1,4 +1,4 @@
-package srvgrp_admin
+package svcgrp_admin
 
 import (
 	"fmt"
@@ -9,7 +9,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
-var showSrvgrpCmd = &cobra.Command{
+var showsvcgrpCmd = &cobra.Command{
 	Use:   "show",
 	Short: "Show details of a service group.",
 	Long:  `Show details of a service group.`,
@@ -21,11 +21,11 @@ var showSrvgrpCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		srvgrp := srvgrpFlags.srvgrpName
-		req := meta.NewListServiceGroupsReq(srvgrp)
+		svcgrp := svcgrpFlags.svcgrpName
+		req := meta.NewListServiceGroupsReq(svcgrp)
 		resp, err := common.MetaClient.ListServiceGroups(req)
 		if err != nil {
-			return common.NgctlError("Show srvgrp failed", err.Error())
+			return common.NgctlError("Show svcgrp failed", err.Error())
 		}
 
 		header := []string{"Id", "Name", "Replica", "Owner"}
@@ -39,14 +39,14 @@ var showSrvgrpCmd = &cobra.Command{
 			data = append(data, row)
 		}
 
-		// order by srvgrp id
+		// order by svcgrp id
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
 		// printer.FormatTable(headers []string, data [][]string)
-		r, err := common.Format(header, data, common.OutputFormatType(srvgrpFlags.output))
+		r, err := common.Format(header, data, common.OutputFormatType(svcgrpFlags.output))
 		if err != nil {
-			return common.NgctlError("Show srvgrp failed", err.Error())
+			return common.NgctlError("Show svcgrp failed", err.Error())
 		}
 		fmt.Fprintln(common.MetaOutput, r)
 		return nil

@@ -34,35 +34,35 @@ echo "PACKAGE_PATH set to: ${PACKAGE_PATH}"
 
 ../ngctl metad login -P 49559 -u root
 
-../ngctl srvgrp create -c testsrvgrp
+../ngctl svcgrp create -c testsvcgrp
 
-../ngctl host add -f ./config.yaml -c testsrvgrp
+../ngctl host add -f ./config.yaml -c testsvcgrp
 
-../ngctl host install -f ./config.yaml -c testsrvgrp
+../ngctl host install -f ./config.yaml -c testsvcgrp
 
-../ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testsrvgrp
+../ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testsvcgrp
 
-../ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testsrvgrp
+../ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testsvcgrp
 
 ../ngctl service start -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 
 ../ngctl service start -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
-../ngctl service show -c testsrvgrp
+../ngctl service show -c testsvcgrp
 
 ../ngctl service stop -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 
 ../ngctl service stop -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
-../ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testsrvgrp
+../ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testsvcgrp
 
-../ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testsrvgrp
+../ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testsvcgrp
 
-../ngctl host drop -f ./config.yaml -c testsrvgrp
+../ngctl host drop -f ./config.yaml -c testsvcgrp
 
-../ngctl host uninstall -f ./config.yaml -c testsrvgrp
+../ngctl host uninstall -f ./config.yaml -c testsvcgrp
 
-../ngctl host show -c testsrvgrp
+../ngctl host show -c testsvcgrp
 
 ../ngctl metad stop --config ./config.yaml
 

@@ -48,8 +48,8 @@ type Process struct {
 }
 
 type MetadSpec struct {
-	Process  `yaml:",inline"`
-	ServiceGroups []ServiceGroup `yaml:"clusters,omitempty"`
+	Process       `yaml:",inline"`
+	ServiceGroups []ServiceGroup `yaml:"serviceGroups,omitempty"`
 }
 
 type Agent struct {

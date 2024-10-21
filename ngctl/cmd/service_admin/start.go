@@ -31,7 +31,7 @@ func prepareConfigFile(serviceType string, installPath string, host common.IPAnd
 	// the backup config file of the above
 	backupLocalConfigFilePath := currentFolder + "/nebula-" + serviceType + fmt.Sprintf("-%s-%s.conf", host.IP, host.Port) + ".bak"
 	// the final config file path for the service to be started in the remote host
-	dstConfigFilePath := installPath + "srvgrp/etc/"
+	dstConfigFilePath := installPath + "svcgrp/etc/"
 
 	if configFileTemplate == "" {
 		configFileTemplate = localCongfigFilePath + ".default"
@@ -66,7 +66,7 @@ func ServiceOperation(agent types.Agent, serviceType string, installPath string,
 	if operation != "start" && operation != "stop" && operation != "restart" && operation != "status" {
 		return common.NgctlError("invalid operation on service", "")
 	}
-	cmd := exec.Command(installPath+"srvgrp/scripts/nebula.service", operation, serviceType)
+	cmd := exec.Command(installPath+"svcgrp/scripts/nebula.service", operation, serviceType)
 	log.Printf("exec cmd: %v on %s", cmd, agent.Host)
 	job := runner.NewJob(fmt.Sprintf("%s_service", operation))
 	fmt.Println(cmd.String())

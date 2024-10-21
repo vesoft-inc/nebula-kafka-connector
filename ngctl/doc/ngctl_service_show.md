@@ -1,10 +1,10 @@
 ## ngctl service show
 
-Show services in a srvgrp.
+Show services in a svcgrp.
 
 ### Synopsis
 
-Show services in a srvgrp.
+Show services in a svcgrp.
 
 ```
 ngctl service show [flags]
@@ -13,7 +13,7 @@ ngctl service show [flags]
 ### Options
 
 ```
-  -c, --srvgrp string   srvgrp name
+  -c, --svcgrp string   svcgrp name
   -h, --help             help for show
 ```
 

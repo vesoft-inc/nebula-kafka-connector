@@ -1,10 +1,10 @@
 ## ngctl host show
 
-Show hosts in srvgrp.
+Show hosts in svcgrp.
 
 ### Synopsis
 
-Show all hosts currently in a srvgrp.
+Show all hosts currently in a svcgrp.
 
 ```
 ngctl host show [flags]
@@ -13,7 +13,7 @@ ngctl host show [flags]
 ### Options
 
 ```
-  -c, --srvgrp string   srvgrp name
+  -c, --svcgrp string   svcgrp name
   -h, --help             help for show
 ```
 

@@ -1,4 +1,4 @@
-package srvgrp_admin
+package svcgrp_admin
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
-var initSrvgrpCmd = &cobra.Command{
+var initsvcgrpCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize a service group in the metad.",
 	Long:  `Initialize a service group in the metad.`,
@@ -20,16 +20,16 @@ var initSrvgrpCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		srvgrp := srvgrpFlags.srvgrpName
-		if srvgrp == "" {
-			return common.NgctlError("srvgrp name is empty", "")
+		svcgrp := svcgrpFlags.svcgrpName
+		if svcgrp == "" {
+			return common.NgctlError("svcgrp name is empty", "")
 		}
-		req := meta.NewInitServiceGroupReq(srvgrp)
+		req := meta.NewInitServiceGroupReq(svcgrp)
 
 		if err := common.MetaClient.InitServiceGroup(req); err != nil {
-			return common.NgctlError("Init srvgrp failed", err.Error())
+			return common.NgctlError("Init svcgrp failed", err.Error())
 		}
-		fmt.Fprintln(common.MetaOutput, "Init srvgrp successfully.")
+		fmt.Fprintln(common.MetaOutput, "Init svcgrp successfully.")
 		return nil
 	},
 }

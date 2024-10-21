@@ -1,4 +1,4 @@
-package srvgrp_admin
+package svcgrp_admin
 
 import (
 	"github.com/spf13/cobra"

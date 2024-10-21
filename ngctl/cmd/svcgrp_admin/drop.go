@@ -1,4 +1,4 @@
-package srvgrp_admin
+package svcgrp_admin
 
 import (
 	"fmt"
@@ -8,7 +8,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
-var dropSrvgrpCmd = &cobra.Command{
+var dropsvcgrpCmd = &cobra.Command{
 	Use:   "drop",
 	Short: "Drop a service group from the metad.",
 	// what is the service group is not empty?
@@ -21,17 +21,17 @@ var dropSrvgrpCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		srvgrp := srvgrpFlags.srvgrpName
-		force := srvgrpFlags.force
-		if srvgrp == "" {
-			return common.NgctlError("srvgrp name is empty", "")
+		svcgrp := svcgrpFlags.svcgrpName
+		force := svcgrpFlags.force
+		if svcgrp == "" {
+			return common.NgctlError("svcgrp name is empty", "")
 		}
 
-		req := meta.NewDropServiceGroupReq(srvgrp, force)
+		req := meta.NewDropServiceGroupReq(svcgrp, force)
 		if err := common.MetaClient.DropServiceGroup(req); err != nil {
-			return common.NgctlError("Drop srvgrp failed", err.Error())
+			return common.NgctlError("Drop svcgrp failed", err.Error())
 		}
-		fmt.Fprintln(common.MetaOutput, "Drop srvgrp successfully.")
+		fmt.Fprintln(common.MetaOutput, "Drop svcgrp successfully.")
 		return nil
 	},
 }

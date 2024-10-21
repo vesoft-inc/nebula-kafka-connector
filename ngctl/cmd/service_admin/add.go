@@ -11,11 +11,11 @@ import (
 
 var addServiceCmd = &cobra.Command{
 	Use:   "add",
-	Short: `Add services into a srvgrp.`,
-	Long: `Add services info a srvgrp.
+	Short: `Add services into a svcgrp.`,
+	Long: `Add services info a svcgrp.
 
-Either provides the config file, all services in the config file will be added into the srvgrp.
-Or provides the service info, the service will be added into the srvgrp.
+Either provides the config file, all services in the config file will be added into the svcgrp.
+Or provides the service info, the service will be added into the svcgrp.
 `,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
@@ -68,7 +68,7 @@ func getServicesDirectly() (*common.ResourceInfo, error) {
 		ResourceType:        "services",
 		OperationOnResource: "add",
 		ResourceList:        make([]common.IPAndPort, 0),
-		ClusterName:         flags.srvgrpName,
+		ClusterName:         flags.svcgrpName,
 	}
 	serviceResource.ResourceList = append(serviceResource.ResourceList, common.IPAndPort{
 		IP:          flags.host,
@@ -81,7 +81,7 @@ func getServicesDirectly() (*common.ResourceInfo, error) {
 func getServicesWithConfig() (*common.ResourceInfo, error) {
 	var flags = ServiceFlags
 	// get all services from the config file
-	serviceList, err := common.DeriveServiceList(flags.srvgrpName)
+	serviceList, err := common.DeriveServiceList(flags.svcgrpName)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func getServicesWithConfig() (*common.ResourceInfo, error) {
 		ResourceType:        "services",
 		OperationOnResource: "add",
 		ResourceList:        make([]common.IPAndPort, 0),
-		ClusterName:         flags.srvgrpName,
+		ClusterName:         flags.svcgrpName,
 	}
 	for _, service := range serviceList {
 		serviceResource.ResourceList = append(serviceResource.ResourceList, service)
@@ -106,6 +106,6 @@ func init() {
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "service host")
 	addServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "service port")
-	addServiceCmd.Flags().StringVarP(&ServiceFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
+	addServiceCmd.Flags().StringVarP(&ServiceFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
 	addServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file")
 }

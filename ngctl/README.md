@@ -1,6 +1,6 @@
 # Nebula Graph ngctl
 
-This directory contains ngctl, a tool to connect the metad service of a metad to mange a superclsuter or srvgrps, or hosts to install and run NebulaGraph services.
+This directory contains ngctl, a tool to connect the metad service of a metad to mange a superclsuter or svcgrps, or hosts to install and run NebulaGraph services.
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ ngctl [flags]
 
 ### SEE ALSO
 
-* [ngctl srvgrp](./doc/ngctl_srvgrp.md)	 - Run commands managing a service group
+* [ngctl svcgrp](./doc/ngctl_svcgrp.md)	 - Run commands managing a service group
 * [ngctl host](./doc/ngctl_host.md)	 - Run commands managing hosts.
 * [ngctl service](./doc/ngctl_service.md)	 - Run commands managing services.
 * [ngctl metad](./doc/ngctl_metad.md)	 - Run commands managing metad.
@@ -45,30 +45,30 @@ Create a metad
 Login to the metad just created (whose port is configured to be 49559)
 ```ngctl metad login -P 49559 -u root```
 
-Create a srvgrp.
-```ngctl srvgrp create -c testsrvgrp```
+Create a svcgrp.
+```ngctl svcgrp create -c testsvcgrp```
 
 Install NebulaGraph packages on hosts configured in the config file.
-```ngctl host install -f ./config.yaml -c testsrvgrp```
+```ngctl host install -f ./config.yaml -c testsvcgrp```
 
-Add hosts into the srvgrp.
-```ngctl host add -f ./config.yaml -c testsrvgrp```
+Add hosts into the svcgrp.
+```ngctl host add -f ./config.yaml -c testsvcgrp```
 
-Add services into the srvgrp.
+Add services into the svcgrp.
 ```
-ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testsrvgrp
-ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testsrvgrp
+ngctl service add -t storaged -H 127.0.0.1 -P 49779 -c testsvcgrp
+ngctl service add -t graphd -H 127.0.0.1 -P 49669 -c testsvcgrp
 ```
 
-Start services in the srvgrp.
+Start services in the svcgrp.
 ```
 ngctl service start -t storaged -H 127.0.0.1 -P 49779 -f ./config.yaml
 ngctl service start -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 ```
 
-Show all services in the srvgrp.
+Show all services in the svcgrp.
 ```
-ngctl service show -c testsrvgrp
+ngctl service show -c testsvcgrp
 ```
 
 Stop a storaged service.
@@ -83,27 +83,27 @@ ngctl service stop -t graphd -H 127.0.0.1 -P 49669 -f ./config.yaml
 
 Drop a storaged service.
 ```
-ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testsrvgrp
+ngctl service drop -t storaged -H 127.0.0.1 -P 49779 -c testsvcgrp
 ```
 
 Drop a graphd service.
 ```
-ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testsrvgrp
+ngctl service drop -t graphd -H 127.0.0.1 -P 49669 -c testsvcgrp
 ```
 
-Drop hosts in a srvgrp.
+Drop hosts in a svcgrp.
 ```
-ngctl host drop -f ./config.yaml -c testsrvgrp
-```
-
-Uninstall packages on a NebulaGraph srvgrp.
-```
-ngctl host uninstall -f ./config.yaml -c testsrvgrp
+ngctl host drop -f ./config.yaml -c testsvcgrp
 ```
 
-Show hosts in a srvgrp.
+Uninstall packages on a NebulaGraph svcgrp.
 ```
-ngctl host show -c testsrvgrp
+ngctl host uninstall -f ./config.yaml -c testsvcgrp
+```
+
+Show hosts in a svcgrp.
+```
+ngctl host show -c testsvcgrp
 ```
 
 Stop a metad.

@@ -30,7 +30,7 @@ var createCmd = &cobra.Command{
 		if err := host_admin.InstallOnHost(nil, true); err != nil {
 			return common.NgctlError("Failed to install on the host", err.Error())
 		}
-		dstConfigFilePath := common.ConfigSpec.InstallPath + "srvgrp/etc/"
+		dstConfigFilePath := common.ConfigSpec.InstallPath + "svcgrp/etc/"
 		// The addrs of all metad hosts as configured
 		hosts := common.ConfigSpec.Spec.Metad.Hosts
 		metaAddrs := []common.IPAndPort{}

@@ -1,10 +1,10 @@
 ## ngctl host drop
 
-Drop a host from a srvgrp.
+Drop a host from a svcgrp.
 
 ### Synopsis
 
-Drop a host from a srvgrp.
+Drop a host from a svcgrp.
 
 ```
 ngctl host drop [flags]
@@ -14,10 +14,10 @@ ngctl host drop [flags]
 
 ```
   -a, --agent_port uint32   port of the agent on the host
-  -c, --srvgrp string      srvgrp name
+  -c, --svcgrp string      svcgrp name
   -f, --config string       config file
   -h, --help                help for drop
-  -H, --host string         the host to be dropped from a srvgrp
+  -H, --host string         the host to be dropped from a svcgrp
 ```
 
 ### SEE ALSO

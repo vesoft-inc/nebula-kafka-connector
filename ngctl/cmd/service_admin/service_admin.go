@@ -11,7 +11,7 @@ type ServiceFlagsType struct {
 	serviceType       string
 	host              string
 	port              int32
-	srvgrpName        string
+	svcgrpName        string
 	configFile        string
 	serviceConfigFile string
 	agent             types.Agent
@@ -46,8 +46,8 @@ func init() {
 // if configFile is provided, then host, port, serviceType should not be provided
 func validateServiceFlags() error {
 	var flags = ServiceFlags
-	if flags.srvgrpName == "" {
-		return common.NgctlError("srvgrp name is empty", "")
+	if flags.svcgrpName == "" {
+		return common.NgctlError("svcgrp name is empty", "")
 	}
 	if flags.configFile == "" {
 		if flags.host == "" || flags.port < 0 || flags.serviceType == "" {

@@ -11,8 +11,8 @@ import (
 
 var showServiceCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show services in a srvgrp.",
-	Long:  `Show services in a srvgrp.`,
+	Short: "Show services in a svcgrp.",
+	Long:  `Show services in a svcgrp.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -21,11 +21,11 @@ var showServiceCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		srvgrp := ServiceFlags.srvgrpName
-		if srvgrp == "" {
-			return common.NgctlError("srvgrp name is empty", "")
+		svcgrp := ServiceFlags.svcgrpName
+		if svcgrp == "" {
+			return common.NgctlError("svcgrp name is empty", "")
 		}
-		req := meta.NewListServicesReq(srvgrp)
+		req := meta.NewListServicesReq(svcgrp)
 
 		resp, err := common.MetaClient.ListServices(req)
 		if err != nil {
@@ -62,6 +62,6 @@ var showServiceCmd = &cobra.Command{
 }
 
 func init() {
-	showServiceCmd.Flags().StringVarP(&ServiceFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
-	showServiceCmd.MarkFlagRequired("srvgrp")
+	showServiceCmd.Flags().StringVarP(&ServiceFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
+	showServiceCmd.MarkFlagRequired("svcgrp")
 }

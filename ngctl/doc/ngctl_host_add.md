@@ -1,10 +1,10 @@
 ## ngctl host add
 
-Add a host into a srvgrp.
+Add a host into a svcgrp.
 
 ### Synopsis
 
-Add a host into a srvgrp. A host is identified by its IP address. The port of the deployed agent is also needed.
+Add a host into a svcgrp. A host is identified by its IP address. The port of the deployed agent is also needed.
 
 ```
 ngctl host add [flags]
@@ -13,10 +13,10 @@ ngctl host add [flags]
 ### Options
 
 ```
-  -c, --srvgrp string   srvgrp name
+  -c, --svcgrp string   svcgrp name
   -f, --config string    config file
   -h, --help             help for add
-  -H, --host string      the host to be added to a srvgrp
+  -H, --host string      the host to be added to a svcgrp
 ```
 
 ### SEE ALSO

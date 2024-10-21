@@ -1,10 +1,10 @@
 ## ngctl service drop
 
-Drop a service from a srvgrp.
+Drop a service from a svcgrp.
 
 ### Synopsis
 
-Drop a service from a srvgrp.
+Drop a service from a svcgrp.
 
 ```
 ngctl service drop [flags]
@@ -13,7 +13,7 @@ ngctl service drop [flags]
 ### Options
 
 ```
-  -c, --srvgrp string   srvgrp name
+  -c, --svcgrp string   svcgrp name
   -h, --help             help for drop
   -H, --host string      service host
   -P, --port uint32      service port

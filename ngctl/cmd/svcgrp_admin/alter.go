@@ -1,4 +1,4 @@
-package srvgrp_admin
+package svcgrp_admin
 
 import (
 	"fmt"
@@ -8,9 +8,9 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
-var alterSrvgrpCmd = &cobra.Command{
+var altersvcgrpCmd = &cobra.Command{
 	Use:   "alter",
-	Short: "Alter the owner of a srvgrp.",
+	Short: "Alter the owner of a svcgrp.",
 	Long:  `A service group has an owner registered in the metad. Users can alter it.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
@@ -20,18 +20,18 @@ var alterSrvgrpCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if srvgrpFlags.srvgrpName == "" {
+		if svcgrpFlags.svcgrpName == "" {
 			return common.NgctlError("ServiceGroup name is empty", "")
 		}
-		if srvgrpFlags.owner == "" {
+		if svcgrpFlags.owner == "" {
 			return common.NgctlError("Owner is invalid", "")
 		}
 		// donot need to specify zones
-		req := meta.NewAlterServiceGroupReq(srvgrpFlags.srvgrpName, srvgrpFlags.owner)
+		req := meta.NewAlterServiceGroupReq(svcgrpFlags.svcgrpName, svcgrpFlags.owner)
 		if err := common.MetaClient.AlterServiceGroup(req); err != nil {
-			return common.NgctlError("Alter srvgrp failed", err.Error())
+			return common.NgctlError("Alter svcgrp failed", err.Error())
 		}
-		fmt.Fprintln(common.MetaOutput, "Alter srvgrp successfully.")
+		fmt.Fprintln(common.MetaOutput, "Alter svcgrp successfully.")
 		return nil
 	},
 }

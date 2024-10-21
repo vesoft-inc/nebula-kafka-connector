@@ -18,7 +18,7 @@ ngctl [flags]
 
 ### SEE ALSO
 
-* [ngctl srvgrp](ngctl_srvgrp.md)	 - Run commands managing a srvgrp
+* [ngctl svcgrp](ngctl_svcgrp.md)	 - Run commands managing a svcgrp
 * [ngctl host](ngctl_host.md)	 - Run commands managing hosts.
 * [ngctl service](ngctl_service.md)	 - Run commands managing services.
 * [ngctl metad](ngctl_metad.md)	 - Run commands managing a superclsuter.

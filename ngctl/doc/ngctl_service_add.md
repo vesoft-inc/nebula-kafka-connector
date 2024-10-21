@@ -1,10 +1,10 @@
 ## ngctl service add
 
-Add a service into a srvgrp.
+Add a service into a svcgrp.
 
 ### Synopsis
 
-Add a service into a srvgrp.
+Add a service into a svcgrp.
 
 ```
 ngctl service add [flags]
@@ -13,7 +13,7 @@ ngctl service add [flags]
 ### Options
 
 ```
-  -c, --srvgrp string   srvgrp name
+  -c, --svcgrp string   svcgrp name
   -f, --config string    config file
   -h, --help             help for add
   -H, --host string      service host

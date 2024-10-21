@@ -10,8 +10,8 @@ import (
 
 var dropHostCmd = &cobra.Command{
 	Use:   "drop",
-	Short: "Drop a host from a srvgrp.",
-	Long:  `Drop a host from a srvgrp.`,
+	Short: "Drop a host from a svcgrp.",
+	Long:  `Drop a host from a svcgrp.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -21,13 +21,13 @@ var dropHostCmd = &cobra.Command{
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
 		flags := hostFlags
-		if flags.srvgrpName == "" {
-			return common.NgctlError("srvgrp name is empty", "")
+		if flags.svcgrpName == "" {
+			return common.NgctlError("svcgrp name is empty", "")
 		}
 		if err := common.CheckInConfigFile(flags.configFile); err != nil {
 			return common.NgctlError("Failed to get a valid config file", err.Error())
 		}
-		hostList, err := common.DeriveHostList(flags.host, flags.srvgrpName, false)
+		hostList, err := common.DeriveHostList(flags.host, flags.svcgrpName, false)
 		if err != nil {
 			return common.NgctlError("Failed to derive host list", err.Error())
 		}
@@ -36,7 +36,7 @@ var dropHostCmd = &cobra.Command{
 			ResourceType:        "hosts",
 			OperationOnResource: "drop",
 			ResourceList:        make([]common.IPAndPort, 0),
-			ClusterName:         flags.srvgrpName,
+			ClusterName:         flags.svcgrpName,
 		}
 		for _, host := range hostList {
 			hostResrouces.ResourceList = append(hostResrouces.ResourceList, host)
@@ -48,7 +48,7 @@ var dropHostCmd = &cobra.Command{
 			}
 		}
 		for _, host := range hostResrouces.ResourceList {
-			req := meta.NewDropHostReq(host.IP, flags.srvgrpName)
+			req := meta.NewDropHostReq(host.IP, flags.svcgrpName)
 			if err := common.MetaClient.DropHost(req); err != nil {
 				fmt.Fprintln(common.MetaOutput, fmt.Sprintf("Drop host %s failed: %s", host.IP, err.Error()))
 			} else {
@@ -62,8 +62,8 @@ var dropHostCmd = &cobra.Command{
 func init() {
 	// drop host
 	// the option list is similar to the above
-	dropHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be dropped from a srvgrp")
-	dropHostCmd.Flags().StringVarP(&hostFlags.srvgrpName, "srvgrp", "s", "", "srvgrp name")
+	dropHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be dropped from a svcgrp")
+	dropHostCmd.Flags().StringVarP(&hostFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
 	dropHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 6688, "port of the agent on the host")
 	dropHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
 }

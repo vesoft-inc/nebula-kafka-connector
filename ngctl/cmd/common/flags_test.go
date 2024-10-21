@@ -27,9 +27,9 @@ spec:
         agentPort: 6688
         agents:
           host: "192.168.15.31:6688"
-    srvgrps:
+    serviceGroups:
       - zoneList: [zone1,zone2,zone3]
-        name: srvgrp_test
+        name: svcgrp_test
         replica: 1
         graphd:
           hosts:
@@ -52,7 +52,7 @@ spec:
 	if err != nil {
 		t.Fatalf("unmarshal config failed: %v", err)
 	}
-	hostList, err := DeriveHostList("192.168.15.31", "srvgrp_test", false)
+	hostList, err := DeriveHostList("192.168.15.31", "svcgrp_test", false)
 	if err != nil {
 		t.Fatal(err)
 	}
