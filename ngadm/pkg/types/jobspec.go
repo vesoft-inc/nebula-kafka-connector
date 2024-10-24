@@ -61,10 +61,9 @@ type Agent struct {
 }
 
 type Host struct {
-	IP        string `yaml:"ip"`
-	Port      string `yaml:"port"`
-	AgentPort string `yaml:"agentPort,omitempty"`
-	Agent     Agent  `yaml:"agents,omitempty"`
+	IP    string `yaml:"ip"`
+	Port  string `yaml:"port"`
+	Agent Agent  `yaml:"agents,omitempty"`
 }
 
 type ServiceGroup struct {

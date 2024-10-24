@@ -10,8 +10,8 @@ import (
 
 var initsvcgrpCmd = &cobra.Command{
 	Use:   "init",
-	Short: "Initialize a service group in the metad.",
-	Long:  `Initialize a service group in the metad.`,
+	Short: "Initialize a service group in the metad",
+	Long:  "Initialize a service group in the metad",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

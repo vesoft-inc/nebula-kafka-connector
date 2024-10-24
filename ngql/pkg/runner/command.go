@@ -216,7 +216,7 @@ func playFn(r *Runner, args []string) error {
 		return err
 	}
 	// set playing schema
-	_, err = r.execute(fmt.Sprintf("SESSION SET SCHEMA \"%s\"", scehma))
+	_, err = r.client.Execute(fmt.Sprintf("SESSION SET SCHEMA \"%s\"", scehma))
 	if err != nil {
 		return err
 	}

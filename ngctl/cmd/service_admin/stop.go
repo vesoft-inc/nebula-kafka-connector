@@ -1,14 +1,18 @@
 package service_admin
 
 import (
+	"fmt"
+
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/config"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/job"
 )
 
 var stopServiceCmd = &cobra.Command{
 	Use:   "stop",
-	Short: `Stop a service on a host.`,
-	Long:  `Stop a service on a host.`,
+	Short: "Stop service",
+	Long:  "Stop service",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -16,36 +20,34 @@ var stopServiceCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		flags := ServiceFlags
-		if flags.port < 0 {
-			return common.NgctlError("no valid port provided", "")
+		if err := validateOperationFlags(); err != nil {
+			return err
 		}
-		if flags.serviceType == "" || (flags.serviceType != "graphd" && flags.serviceType != "storaged") {
-			return common.NgctlError("service type is wrong", "")
-		}
-		err := common.CheckInConfigFile(flags.configFile)
+		c, err := config.NewConfigFromFile(serviceFlags.configFile)
 		if err != nil {
 			return common.NgctlError("Failed to parse config file for the install path", err.Error())
 		}
-		if flags.host == "" {
-			return common.NgctlError("no valid host provided", "")
-		}
-		agent, err := common.GetAgentForHost(flags.host)
+		instances, err := c.GetServiceInstances(serviceFlags.svcgrpName,
+			serviceFlags.serviceType, serviceFlags.host)
 		if err != nil {
-			return common.NgctlError("Failed to get the agent for the service", err.Error())
+			return err
 		}
-		err = ServiceOperation(agent, flags.serviceType, common.ConfigSpec.InstallPath, "stop")
-		if err != nil {
-			return common.NgctlError("Failed to start service", err.Error())
+		hosts := make([]string, 0)
+		for _, inst := range instances {
+			hosts = append(hosts, inst.Host)
 		}
+		if err := job.NgadmJob.ServiceOperation(c, hosts, serviceFlags.serviceType, "stop"); err != nil {
+			return err
+		}
+
+		fmt.Fprintf(common.MetaOutput, "Stop service successfully.\n")
 		return nil
 	},
 }
 
 func init() {
-	stopServiceCmd.Flags().StringVarP(&ServiceFlags.serviceType, "type", "t", "", "service type")
-	stopServiceCmd.Flags().StringVarP(&ServiceFlags.host, "host", "H", "", "host")
-	stopServiceCmd.Flags().Int32VarP(&ServiceFlags.port, "port", "P", -1, "port")
-	stopServiceCmd.Flags().StringVarP(&ServiceFlags.configFile, "config", "f", "", "config file path")
-	stopServiceCmd.MarkFlagsRequiredTogether("type", "host", "port", "config")
+	stopServiceCmd.Flags().StringVarP(&serviceFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
+	stopServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
+	stopServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "host")
+	stopServiceCmd.Flags().StringVarP(&serviceFlags.configFile, "config", "f", "", "config file for ngctl")
 }

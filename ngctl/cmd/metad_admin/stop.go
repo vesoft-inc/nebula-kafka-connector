@@ -4,35 +4,40 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/service_admin"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/config"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/job"
 )
 
-// By default, we stop all the metad services in a metad.
-var stopCmd = &cobra.Command{
+var stopMetadCmd = &cobra.Command{
 	Use:   "stop",
-	Short: "Stop a metad",
-	Long:  `Stop a metad without deleting its data`,
+	Short: "Stop metad",
+	Long:  "Stop metad",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		err := common.CheckInConfigFile(metadFlags.configFile)
+		if err := validateOperationFlags(); err != nil {
+			return err
+		}
+		c, err := config.NewConfigFromFile(metadFlags.configFile)
 		if err != nil {
 			return common.NgctlError("Failed to check in config file", err.Error())
 		}
-		// TODO(Xuntao): check the status of graphd/storaged services in the metad
-		for _, metad_host := range common.ConfigSpec.Spec.Metad.Hosts {
-			agent_host := metad_host.Agent.Host
-			path := common.ConfigSpec.InstallPath
-			err = service_admin.ServiceOperation(types.Agent{Host: agent_host}, "metad", path, "stop")
-			if err != nil {
-				return common.NgctlError(fmt.Sprintf("Failed to stop the metad service at %s:%s", metad_host.IP, metad_host.Port), err.Error())
-			}
+		instance, err := c.GetServiceInstances("", "metad", metadFlags.host)
+		if err != nil {
+			return err
 		}
-
+		hosts := make([]string, 0)
+		for _, inst := range instance {
+			hosts = append(hosts, inst.Host)
+		}
+		if err := job.NgadmJob.ServiceOperation(c, hosts, "metad", "stop"); err != nil {
+			return err
+		}
+		fmt.Fprintf(common.MetaOutput, "Stop metad successfully.\n")
 		return nil
 	},
 }
 
 func init() {
-	stopCmd.Flags().StringVarP(&metadFlags.configFile, "config", "f", "", "The config file used to create the metad")
+	stopMetadCmd.Flags().StringVarP(&metadFlags.host, "host", "H", "", "host")
+	stopMetadCmd.Flags().StringVarP(&metadFlags.configFile, "config", "f", "", "config file for ngctl")
 }

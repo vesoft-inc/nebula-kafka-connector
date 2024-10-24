@@ -143,11 +143,13 @@ func TestPoolRetry2(t *testing.T) {
 	}
 	defer p.Close()
 	pool, _ := p.(*driverPool)
+	pool.mu.Lock()
 	pool.connector = connector
 	pool.minOpen = 0
 	pool.connCfg = &connConfig{
 		requestTimeout: 10 * time.Second,
 	}
+	pool.mu.Unlock()
 	client, err := pool.GetClient()
 	if err != nil {
 		t.Fatal(err)

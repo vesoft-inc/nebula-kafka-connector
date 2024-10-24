@@ -35,3 +35,7 @@ var altersvcgrpCmd = &cobra.Command{
 		return nil
 	},
 }
+
+func init() {
+	altersvcgrpCmd.Flags().StringVarP(&svcgrpFlags.owner, "owner", "o", "", "svcgrp owner")
+}

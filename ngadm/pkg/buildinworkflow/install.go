@@ -14,15 +14,15 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 		Rollback: spec.Rollback,
 		Tasks:    []*types.TaskSpec{},
 	}
-	//installTask, err := InstallMetaServiceGroup(args, spec)
-	//if err != nil {
-	//	return nil, err
-	//}
-	//if installTask != nil {
-	//	workflow.Tasks = append(workflow.Tasks, installTask)
-	//}
+	installTask, err := InstallMetad(args, spec)
+	if err != nil {
+		return nil, err
+	}
+	if installTask != nil {
+		workflow.Tasks = append(workflow.Tasks, installTask)
+	}
 
-	installTask, err := InstallServiceGroup(args, spec)
+	installTask, err = InstallServiceGroup(args, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -41,7 +41,7 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 	return workflow, nil
 }
 
-func InstallMetaServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func InstallMetad(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if args == nil {
 		args = map[string]any{}
 	}
@@ -59,7 +59,7 @@ func InstallMetaServiceGroup(args map[string]any, spec *types.JobSpec) (*types.T
 	}
 	allNeedHosts := GetMetadAllNeedHosts(spec)
 	for _, agent := range allNeedHosts {
-		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserCluster(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -108,7 +108,7 @@ func InstallMetaServiceGroup(args map[string]any, spec *types.JobSpec) (*types.T
 	//3. config and start needed processes
 	startNeededProcessesTask := []*types.TaskSpec{}
 	for _, host := range metaHosts {
-		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, host.Agent.PackagePath)
+		installPath := utils.GetUserCluster(spec.InstallPath, host.Agent.PackagePath)
 		startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 			Type:        "serial",
 			Description: "start metad",

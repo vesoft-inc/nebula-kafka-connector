@@ -1,22 +1,17 @@
 package host_admin
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	ngadm_tasks "github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
 type hostFlagsType struct {
-	host          string
-	svcgrpName    string
-	agentPort     uint32
-	withInstall   bool
-	withUninstall bool
-	configFile    string
-	output        string
+	host       string
+	svcgrpName string
+	agentPort  uint32
+	configFile string
+	output     string
+	drain      bool
 }
 
 var hostFlags hostFlagsType
@@ -30,56 +25,35 @@ var HostCmd = &cobra.Command{
 	},
 }
 
-func InstallOnHost(hosts []common.IPAndPort, force bool) (err error) {
-	var jobName = "install-host"
-	log.Print("install nebulagraph svcgrp.")
-	job := runner.NewJob(jobName)
-	selectedHosts := make([]string, len(hosts))
-	if hosts != nil {
-		for i, host := range hosts {
-			selectedHosts[i] = host.IP
-		}
+func validateAddorDropFlags() error {
+	var flags = hostFlags
+	if flags.svcgrpName == "" {
+		return common.NgctlError("svcgrp name is empty", "")
 	}
-	err = job.Run(jobName, map[string]any{
-		"installAll":   hosts == nil,
-		"force":        force,
-		"selectedHost": selectedHosts,
-	}, &common.ConfigSpec)
-	return err
+	if flags.host == "" {
+		return common.NgctlError("must provide host info", "")
+	}
+	return nil
 }
 
-// drain, if delete the svcgrp data
-func UninstallOnHost(hosts []common.IPAndPort) (err error) {
-	var jobName = "uninstall-host"
-	if err != nil {
-		log.Println("parse config file failed: ", err)
-		return
+func validateOperationFlags() error {
+	var flags = hostFlags
+
+	if flags.host == "" {
+		return common.NgctlError("must provide host info", "")
 	}
-	selectedHosts := make([]string, len(hosts))
-	if hosts != nil {
-		for i, host := range hosts {
-			selectedHosts[i] = host.IP
-		}
+	if flags.configFile == "" {
+		return common.NgctlError("config file is empty", "")
 	}
-	job := runner.NewJob(jobName)
-	err = job.Run(jobName, map[string]any{
-		"uninstallAll": hosts == nil,
-		"selectedHost": selectedHosts,
-	}, &common.ConfigSpec)
-	if err != nil {
-		log.Println("uninstall failed: ", err)
-	}
-	return
+	return nil
 }
 
 func init() {
 	HostCmd.AddCommand(addHostCmd)
 	HostCmd.AddCommand(dropHostCmd)
 	HostCmd.AddCommand(showHostsCmd)
-	showHostsCmd.Flags().StringVarP(&hostFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
 
 	HostCmd.AddCommand(installHostCmd)
 	HostCmd.AddCommand(uninstallHostCmd)
 
-	ngadm_tasks.Init()
 }

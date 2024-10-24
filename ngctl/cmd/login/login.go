@@ -1,4 +1,4 @@
-package metad_admin
+package login
 
 import (
 	"fmt"
@@ -25,10 +25,10 @@ type loginFlagsType struct {
 
 var loginFlags loginFlagsType
 
-var loginCmd = &cobra.Command{
+var LoginCmd = &cobra.Command{
 	Use:   "login",
-	Short: "Login meta server.",
-	Long:  `ngctl login --host [host] --port [port] --user [user] --password [password]`,
+	Short: "Login meta server",
+	Long:  "ngctl login --host [host] --port [port] --user [user] --password [password]",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		if loginFlags.password == "" {
 			var err error
@@ -62,11 +62,11 @@ var loginCmd = &cobra.Command{
 			}
 			// reset password and re-login
 			fmt.Fprintln(common.MetaOutput, "Please reset the password for the first login.")
-			currentPassword, newPassword, err := getPromptPassword()
+			currentPassword, newPassword, err := common.GetPromptPassword()
 			if err != nil {
 				return common.NgctlError("Cannot reset password", err.Error())
 			}
-			if err := resetPassword(
+			if err := common.ResetPassword(
 				c, loginFlags.user, currentPassword, newPassword); err != nil {
 				return common.NgctlError("Reset password failed", err.Error())
 			}
@@ -96,62 +96,15 @@ var loginCmd = &cobra.Command{
 	},
 }
 
-func resetPassword(c meta.Client, user, old, new string) error {
-	req := meta.NewChangePasswordReq(
-		user,
-		old,
-		new,
-	)
-	if err := c.ChangePassword(req); err != nil {
-		return err
-	}
-	return nil
-}
-
-func getPromptPassword() (string, string, error) {
-	currentPassword := promptui.Prompt{
-		Label:     "Current password:",
-		AllowEdit: true,
-		Mask:      rune(' '),
-	}
-	currentPasswordStr, err := currentPassword.Run()
-	if err != nil {
-		return "", "", err
-	}
-	newPassword := promptui.Prompt{
-		Label:     "New password:",
-		AllowEdit: true,
-		Mask:      rune(' '),
-	}
-	newPasswordStr, err := newPassword.Run()
-	if err != nil {
-		return "", "", err
-	}
-	confirmPassword := promptui.Prompt{
-		Label:     "Retype new password:",
-		AllowEdit: true,
-		Mask:      rune(' '),
-	}
-	confirmPasswordStr, err := confirmPassword.Run()
-	if err != nil {
-		return "", "", err
-	}
-	if newPasswordStr != confirmPasswordStr {
-		return "", "", fmt.Errorf("Sorry, the passwords you entered do not match.")
-	}
-
-	return currentPasswordStr, newPasswordStr, nil
-}
-
 func init() {
-	loginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "127.0.0.1", "meta server host")
-	loginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
-	loginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "root", "user name")
-	loginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "", "password")
-	loginCmd.Flags().BoolVarP(&loginFlags.enableTLS, "enable-tls", "", false, "Enable TLS")
-	loginCmd.Flags().StringVarP(&loginFlags.ca, "ca", "", "", "Certificate of trusted CA, in PEM format")
-	loginCmd.Flags().StringVarP(&loginFlags.cert, "cert", "", "", "Certificate of meta client, in PEM format")
-	loginCmd.Flags().StringVarP(&loginFlags.key, "key", "", "", "Private key of meta client, in PEM format")
-	loginCmd.Flags().BoolVarP(&loginFlags.peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
-	loginCmd.Flags().StringVarP(&loginFlags.peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
+	LoginCmd.Flags().StringVarP(&loginFlags.host, "host", "H", "127.0.0.1", "meta server host")
+	LoginCmd.Flags().Uint32VarP(&loginFlags.port, "port", "P", 9559, "meta server port")
+	LoginCmd.Flags().StringVarP(&loginFlags.user, "user", "u", "root", "user name")
+	LoginCmd.Flags().StringVarP(&loginFlags.password, "password", "p", "", "password")
+	LoginCmd.Flags().BoolVarP(&loginFlags.enableTLS, "enable-tls", "", false, "Enable TLS")
+	LoginCmd.Flags().StringVarP(&loginFlags.ca, "ca", "", "", "Certificate of trusted CA, in PEM format")
+	LoginCmd.Flags().StringVarP(&loginFlags.cert, "cert", "", "", "Certificate of meta client, in PEM format")
+	LoginCmd.Flags().StringVarP(&loginFlags.key, "key", "", "", "Private key of meta client, in PEM format")
+	LoginCmd.Flags().BoolVarP(&loginFlags.peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
+	LoginCmd.Flags().StringVarP(&loginFlags.peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
 }

@@ -1,37 +1,47 @@
 version: 1.0
-kind: NebulaCluster
-rollback: true
-installPath: /home/xuntao.cheng/demo/vesoft
+installPath: /data/harris/nebula-graph-5.0.0
+# packagePath: ./nebula-graph-2024.10.21-nightly-x86_64-glibc-2.31.sh
+packagePath: ./nebula-graph-5.0.0-x86_64-glibc-2.31.sh
 certFile: certs/client.crt
 keyFile: certs/client.key
 caFile: certs/ca.crt
 spec:
   metad:
-    packagePath: /home/xuntao.cheng/demo/nebula-graph-5.0.0-x86_64-glibc-2.31.sh
-    hosts:
-      - host:
-        ip: "127.0.0.1"
-        port: 49559
+    config:
+      http_port: 29559
+      port: 8559
+    instances:
+      - host: "192.168.15.11"
         agentPort: 6688
-        agents:
-          host: "127.0.0.1:6688"
-    serviceGroups:
-      - zoneList: [zone1]
-        name: testsvcgrp
-        replica: 1
-        graphd:
-          hosts:
-            - host:
-              ip: "127.0.0.1"
-              port: 49669
-              agentPort: 6688
-              agents:
-                host: "127.0.0.1:6688"
-        storaged:
-          hosts:
-            - host:
-              ip: "127.0.0.1"
-              port: 49779
-              agentPort: 6688
-              agents:
-                host: "127.0.0.1:6688"
+      - host: "192.168.15.12"
+        agentPort: 6688
+      - host: "192.168.15.13"
+        agentPort: 6688
+  serviceGroups:
+    - name: myServiceGroup
+      replicaFactor: 3
+      graphd:
+        config:
+          check_memory_interval_in_secs: 2
+          info_log_rotate_days: 14
+          http_port: 29669
+          port: 8669
+        instances:
+          - host: "192.168.15.11"
+            agentPort: 6688
+          - host: "192.168.15.12"
+            agentPort: 6688
+          - host: "192.168.15.13"
+            agentPort: 6688
+      storaged:
+        config:
+          info_log_rotate_days: 14
+          http_port: 29779
+          port: 8779
+        instances:
+          - host: "192.168.15.11"
+            agentPort: 6688
+          - host: "192.168.15.12"
+            agentPort: 6688
+          - host: "192.168.15.13"
+            agentPort: 6688

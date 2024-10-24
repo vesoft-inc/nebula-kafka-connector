@@ -6,13 +6,11 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
 func TestUninstall(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test uninstall")
 	err := job.Run("uninstall", map[string]any{
@@ -29,7 +27,6 @@ func TestUninstall(t *testing.T) {
 	assert.NoError(t, err)
 }
 func TestUninstallServiceGroup(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	// spec.Spec.Metad.ServiceGroups = []types.ServiceGroup{} // remove all clusters for only uninstall metad
 	delete(spec.UtilsProcesses, "license-manager")
@@ -49,7 +46,6 @@ func TestUninstallServiceGroup(t *testing.T) {
 }
 
 func TestUninstallUtils(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	spec.Spec.Metad = nil
 	job := runner.NewJob("test uninstall")
@@ -68,7 +64,6 @@ func TestUninstallUtils(t *testing.T) {
 }
 
 func TestUninstallUtilsSystemd(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	spec.Spec.Metad = nil
 	lm, ok := spec.UtilsProcesses["LicenseManager"]
@@ -92,7 +87,6 @@ func TestUninstallUtilsSystemd(t *testing.T) {
 }
 
 func TestUninstallAgent(t *testing.T) {
-	tasks.Init()
 	spec, err := yamlparser.ParseYamlByPath("../../examples/agent.yaml")
 	if err != nil {
 		t.Error(err)

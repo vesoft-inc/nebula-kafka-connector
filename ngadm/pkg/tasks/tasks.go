@@ -10,7 +10,7 @@ import (
 var TasksMap = map[string]TaskGernerator{}
 var mu = &sync.Mutex{}
 
-func Init() {
+func init() {
 	TasksMap = map[string]TaskGernerator{
 		"debug":              NewDebug,
 		"shell":              NewShell,

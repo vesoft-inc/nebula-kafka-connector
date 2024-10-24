@@ -81,7 +81,7 @@ func CheckMetaSpec(metaSpec *types.MetadSpec) error {
 		return fmt.Errorf("metad hosts is nil")
 	}
 	if metaSpec.ServiceGroups == nil {
-		return fmt.Errorf("metad clusters is nil")
+		return fmt.Errorf("metad service group is nil")
 	}
 	if metaSpec.Config == nil {
 		metaSpec.Config = make(map[string]any)

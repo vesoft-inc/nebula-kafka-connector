@@ -1,4 +1,4 @@
-package metad_admin
+package logout
 
 import (
 	"fmt"
@@ -7,10 +7,10 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
 )
 
-var logoutCmd = &cobra.Command{
+var LogoutCmd = &cobra.Command{
 	Use:   "logout",
-	Short: "Logout meta server.",
-	Long:  `logout`,
+	Short: "Logout meta server",
+	Long:  "logout meta server",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

@@ -7,12 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/buildinworkflow"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"gopkg.in/yaml.v3"
 )
 
 func TestVerify(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	workflow, err := buildinworkflow.Verify(nil, spec)
 	assert.NoError(t, err)

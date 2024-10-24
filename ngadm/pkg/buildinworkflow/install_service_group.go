@@ -26,6 +26,10 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 	if !ok {
 		return nil, fmt.Errorf("password is required")
 	}
+	metaPassword, ok := args["metaPassowrd"].(string)
+	if !ok {
+		return nil, fmt.Errorf("metaPassword is required")
+	}
 
 	metaServiceGroup := spec.Spec.Metad
 	metaHosts := spec.Spec.Metad.Hosts
@@ -55,7 +59,7 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 		}
 
 		// TODO: check if the host already has nebula installed
-		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserCluster(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -106,7 +110,7 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		// 3.1 start graphd
 		for _, host := range cluster.Graphd.Hosts {
-			installPath := utils.GetUserServiceGroupPath(spec.InstallPath, host.Agent.InstallPath)
+			installPath := utils.GetUserCluster(spec.InstallPath, host.Agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start graphd",
@@ -145,9 +149,9 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 				},
 			})
 		}
-		// .2 start storaged
+		// 3.2 start storaged
 		for _, host := range cluster.Storaged.Hosts {
-			installPath := utils.GetUserServiceGroupPath(spec.InstallPath, host.Agent.InstallPath)
+			installPath := utils.GetUserCluster(spec.InstallPath, host.Agent.InstallPath)
 			startNeededProcessesTask = append(startNeededProcessesTask, &types.TaskSpec{
 				Type:        "serial",
 				Description: "start storaged",
@@ -184,11 +188,12 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 		createServiceGroupTasks = append(createServiceGroupTasks, &types.TaskSpec{
 			Type: "create_cluster",
 			Params: &tasks.CreateServiceGroupParams{
-				ServiceGroupSpec:       &cluster,
+				ServiceGroupSpec:  &cluster,
 				MetaSpec:          metaServiceGroup,
 				MetaServerAddress: metaServerAddress,
 				Username:          username,
 				Password:          password,
+				NewPassowrd:       metaPassword,
 			},
 		})
 	}

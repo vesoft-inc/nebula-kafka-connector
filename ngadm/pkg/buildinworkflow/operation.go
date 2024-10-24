@@ -173,7 +173,7 @@ func OperationServiceGroup(spec *types.JobSpec, operation, component, host, Kill
 	}
 	//2. operation
 	for host, components := range allNeedOperations {
-		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agentsMap[host].InstallPath)
+		installPath := utils.GetUserCluster(spec.InstallPath, agentsMap[host].InstallPath)
 		// aggregate operation task
 		if (components[types.Metad] && components[types.Graphd] && components[types.Storaged]) || components[types.AllNebulaSerivce] {
 			operationTasks = append(operationTasks, &types.TaskSpec{

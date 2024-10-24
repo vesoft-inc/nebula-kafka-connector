@@ -6,12 +6,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"gopkg.in/yaml.v3"
 )
 
 func TestStop(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
 	err := job.Run("operation", map[string]any{
@@ -31,7 +29,6 @@ func TestStop(t *testing.T) {
 }
 
 func TestStopUtil(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
 	err := job.Run("operation", map[string]any{
@@ -50,7 +47,6 @@ func TestStopUtil(t *testing.T) {
 }
 
 func TestStart(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	spec.Rollback = false
 	job := runner.NewJob("test start")
@@ -70,7 +66,6 @@ func TestStart(t *testing.T) {
 }
 
 func TestStopWithHostComponent(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
 	err := job.Run("operation", map[string]any{

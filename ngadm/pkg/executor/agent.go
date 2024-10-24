@@ -128,6 +128,9 @@ func (a *AgentExecutor) Shell(cmd string, sudo bool) (stdout string, stderr stri
 	if respBody.Code != 0 {
 		return "", "", fmt.Errorf("code: %d, err: %s, stderr: %s", respBody.Code, respBody.Data.Err, respBody.Data.Stderr)
 	}
+	if respBody.Data.Stderr != "" {
+		return respBody.Data.Stdout, respBody.Data.Stderr, fmt.Errorf(respBody.Data.Stderr)
+	}
 
 	return respBody.Data.Stdout, respBody.Data.Stderr, nil
 }

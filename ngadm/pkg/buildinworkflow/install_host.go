@@ -39,7 +39,7 @@ func InstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec,
 		allNeedHosts = GetMetadSelectedHosts(selectedHost, spec)
 	}
 	for _, agent := range allNeedHosts {
-		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agent.InstallPath)
+		installPath := utils.GetUserCluster(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",

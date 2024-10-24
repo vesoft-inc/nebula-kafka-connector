@@ -11,8 +11,8 @@ import (
 
 var showServiceCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show services in a svcgrp.",
-	Long:  `Show services in a svcgrp.`,
+	Short: "Show services in a svcgrp",
+	Long:  "Show services in a svcgrp",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -21,7 +21,7 @@ var showServiceCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		svcgrp := ServiceFlags.svcgrpName
+		svcgrp := serviceFlags.svcgrpName
 		if svcgrp == "" {
 			return common.NgctlError("svcgrp name is empty", "")
 		}
@@ -51,7 +51,7 @@ var showServiceCmd = &cobra.Command{
 		sort.Slice(data, func(i, j int) bool {
 			return data[i][0] < data[j][0]
 		})
-		r, err := common.Format(header, data, common.OutputFormatType(ServiceFlags.output))
+		r, err := common.Format(header, data, common.OutputFormatType(serviceFlags.output))
 		if err != nil {
 			return common.NgctlError("Show service failed", err.Error())
 		}
@@ -62,6 +62,6 @@ var showServiceCmd = &cobra.Command{
 }
 
 func init() {
-	showServiceCmd.Flags().StringVarP(&ServiceFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
-	showServiceCmd.MarkFlagRequired("svcgrp")
+	showServiceCmd.Flags().StringVarP(&serviceFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
+	showServiceCmd.Flags().StringVarP(&serviceFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
 }

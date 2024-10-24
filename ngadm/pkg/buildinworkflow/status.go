@@ -70,7 +70,7 @@ func StatusServiceGroup(spec *types.JobSpec, component, host string) (*types.Tas
 	}
 	//2. status
 	for host, components := range allNeedOperations {
-		installPath := utils.GetUserServiceGroupPath(spec.InstallPath, agentsMap[host].InstallPath)
+		installPath := utils.GetUserCluster(spec.InstallPath, agentsMap[host].InstallPath)
 		// aggregate status task
 		if (components[types.Metad] && components[types.Graphd] && components[types.Storaged]) || components[types.AllNebulaSerivce] {
 			statusTasks = append(statusTasks, &types.TaskSpec{

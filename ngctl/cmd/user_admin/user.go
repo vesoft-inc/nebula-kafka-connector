@@ -1,4 +1,4 @@
-package metad_admin
+package user_admin
 
 import (
 	"encoding/json"
@@ -21,10 +21,10 @@ type userFlagsType struct {
 
 var userFlags = userFlagsType{}
 
-var userCmd = &cobra.Command{
+var UserCmd = &cobra.Command{
 	Use:   "user",
 	Short: "Process user management command",
-	Long:  `Execute user management in cli mode.`,
+	Long:  "Execute user management in cli mode",
 	Run: func(cmd *cobra.Command, args []string) {
 		cmd.Help()
 	},
@@ -32,7 +32,7 @@ var userCmd = &cobra.Command{
 
 var createUserCmd = &cobra.Command{
 	Use:   "create",
-	Short: "Create user in meta server.",
+	Short: "Create user in meta server",
 	Long: `ngctl user create --user [username] --password [password] or 
 ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -68,8 +68,8 @@ ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo
 
 var dropUserCmd = &cobra.Command{
 	Use:   "drop",
-	Short: "Drop user in meta server.",
-	Long:  `ngctl user drop --user [username]`,
+	Short: "Drop user in meta server",
+	Long:  "ngctl user drop --user [username]",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -89,7 +89,7 @@ var dropUserCmd = &cobra.Command{
 
 var alterUserCmd = &cobra.Command{
 	Use:   "alter",
-	Short: "Alter user in meta server.",
+	Short: "Alter user in meta server",
 	Long: `ngctl user alter --user [username] --auth-info [authInfo] or
 ngctl user alter --user [username] --password [password]
 	`,
@@ -127,8 +127,8 @@ ngctl user alter --user [username] --password [password]
 
 var showUserCmd = &cobra.Command{
 	Use:   "show",
-	Short: "show user in meta server.",
-	Long:  `ngctl user show --user aa,bb`,
+	Short: "show user in meta server",
+	Long:  "ngctl user show --user aa,bb",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -188,8 +188,8 @@ var showUserCmd = &cobra.Command{
 
 var disableUserCmd = &cobra.Command{
 	Use:   "disable",
-	Short: "disable user in meta server.",
-	Long:  `ngctl user disable --user aa`,
+	Short: "disable user in meta server",
+	Long:  "ngctl user disable --user aa",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -211,8 +211,8 @@ var disableUserCmd = &cobra.Command{
 
 var enableUserCmd = &cobra.Command{
 	Use:   "enable",
-	Short: "enable user in meta server.",
-	Long:  `ngctl user enable --user aa`,
+	Short: "enable user in meta server",
+	Long:  "ngctl user enable --user aa",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -233,12 +233,12 @@ var enableUserCmd = &cobra.Command{
 }
 
 func init() {
-	userCmd.AddCommand(createUserCmd)
-	userCmd.AddCommand(dropUserCmd)
-	userCmd.AddCommand(alterUserCmd)
-	userCmd.AddCommand(showUserCmd)
-	userCmd.AddCommand(disableUserCmd)
-	userCmd.AddCommand(enableUserCmd)
+	UserCmd.AddCommand(createUserCmd)
+	UserCmd.AddCommand(dropUserCmd)
+	UserCmd.AddCommand(alterUserCmd)
+	UserCmd.AddCommand(showUserCmd)
+	UserCmd.AddCommand(disableUserCmd)
+	UserCmd.AddCommand(enableUserCmd)
 
 	createUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	createUserCmd.Flags().StringVarP(&userFlags.password, "password", "p", "", "User password")

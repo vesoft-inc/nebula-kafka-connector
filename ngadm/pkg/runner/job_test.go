@@ -11,7 +11,6 @@ import (
 
 // !!! test need start a agent server
 func TestRunWorkflow(t *testing.T) {
-	tasks.Init()
 	job := NewJob("test")
 
 	workflow := &types.WorkflowSpec{
@@ -28,7 +27,6 @@ func TestRunWorkflow(t *testing.T) {
 }
 
 func TestRunTask(t *testing.T) {
-	tasks.Init()
 	job := NewJob("test")
 
 	task := &types.TaskSpec{Type: "debug", Params: make(map[string]any)}
@@ -44,7 +42,6 @@ func TestRunTask(t *testing.T) {
 }
 
 func TestAgent(t *testing.T) {
-	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
 		KeyFile: "../../certs/client.key",
@@ -71,7 +68,6 @@ func TestAgent(t *testing.T) {
 }
 
 func TestSSH(t *testing.T) {
-	tasks.Init()
 	job := NewJob("test")
 	workflow := &types.WorkflowSpec{
 		Tasks: []*types.TaskSpec{
@@ -100,7 +96,6 @@ func TestSSH(t *testing.T) {
 }
 
 func TestUpload(t *testing.T) {
-	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
 		KeyFile: "../../certs/client.key",

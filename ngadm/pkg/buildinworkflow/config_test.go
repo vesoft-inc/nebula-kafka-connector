@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/buildinworkflow"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
@@ -26,7 +25,6 @@ func GetNebulaYaml(t *testing.T) *types.JobSpec {
 }
 
 func TestConfig(t *testing.T) {
-	tasks.Init()
 	args := map[string]interface{}{
 		"force": true,
 	}

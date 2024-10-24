@@ -6,11 +6,9 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/cmd"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 )
 
 func main() {
-	tasks.Init()
 	var rootCmd = &cobra.Command{Use: "ngadm"}
 	cmd.AddConfigfileFlag(rootCmd)
 	cmd.RegisteInstallCmd(rootCmd)

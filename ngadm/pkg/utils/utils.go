@@ -10,24 +10,24 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 )
 
-func GetUserServiceGroupPath(installPath string, agentPath string) string {
+func GetUserCluster(installPath string, agentPath string) string {
 	if agentPath != "" {
-		return path.Join(agentPath, "cluster/")
+		return path.Join(agentPath, "/")
 	}
-	return path.Join(installPath, "cluster/")
+	return path.Join(installPath, "/")
 }
 
-func GetServiceGroupPath(installPath string) string {
-	return path.Join(installPath, "cluster/")
+func GetCluster(installPath string) string {
+	return path.Join(installPath, "/")
 }
 func GetDownloadPath(installPath string) string {
-	return path.Join(installPath, "download/")
+	return path.Join(installPath, "/")
 }
 func GetUserDownloadPath(installPath string, downloadPath string) string {
 	if downloadPath != "" {
-		return path.Join(downloadPath, "download/")
+		return path.Join(downloadPath, "/")
 	}
-	return path.Join(installPath, "download/")
+	return path.Join(installPath, "/")
 }
 
 func GetUserPackagePath(packagePath string, agentPackagePath string) string {

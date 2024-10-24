@@ -9,7 +9,6 @@ import (
 )
 
 func TestNewSerial(t *testing.T) {
-	Init()
 	taskSpec := &types.TaskSpec{
 		Type: "serial",
 		SubTasks: []*types.TaskSpec{
@@ -38,7 +37,6 @@ func TestNewSerial(t *testing.T) {
 }
 
 func TestShell(t *testing.T) {
-	Init()
 	taskSpec := &types.TaskSpec{
 		Type: "serial",
 		SubTasks: []*types.TaskSpec{

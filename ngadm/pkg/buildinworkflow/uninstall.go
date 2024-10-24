@@ -60,7 +60,7 @@ func UninstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.Tas
 				Type: "delete_nebula_data",
 				Params: &tasks.DeleteNebulaDataParams{
 					Host:  storage.Agent.Host,
-					Path:  utils.GetServiceGroupPath(spec.InstallPath),
+					Path:  utils.GetCluster(spec.InstallPath),
 					Drain: drain,
 				},
 			}
@@ -74,7 +74,7 @@ func UninstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.Tas
 				Type: "delete_nebula_data",
 				Params: &tasks.DeleteNebulaDataParams{
 					Host:  graphd.Agent.Host,
-					Path:  utils.GetServiceGroupPath(spec.InstallPath),
+					Path:  utils.GetCluster(spec.InstallPath),
 					Drain: true, //for graph delete all data
 				},
 			}
@@ -89,7 +89,7 @@ func UninstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.Tas
 			Type: "delete_nebula_data",
 			Params: &tasks.DeleteNebulaDataParams{
 				Host:  metad.Agent.Host,
-				Path:  utils.GetServiceGroupPath(spec.InstallPath),
+				Path:  utils.GetCluster(spec.InstallPath),
 				Drain: drain,
 			},
 		}

@@ -31,3 +31,6 @@ fmt:
 # generate box/blob.go(NOTE: `go generate` command may doesn't support cross-platform)
 gen:
 	@CGO_ENABLED=0 go generate ./...
+
+gen-doc:
+	@cd doc;go run doc.go

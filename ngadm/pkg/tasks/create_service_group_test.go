@@ -11,7 +11,6 @@ import (
 )
 
 func TestCreateServiceGroup(t *testing.T) {
-	tasks.Init()
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  "../../certs/ca.crt",
 		KeyFile: "../../certs/client.key",
@@ -29,7 +28,7 @@ func TestCreateServiceGroup(t *testing.T) {
 		Type: "create_cluster",
 		Params: &tasks.CreateServiceGroupParams{
 			ServiceGroupSpec: &spec.Spec.Metad.ServiceGroups[0],
-			MetaSpec:    spec.Spec.Metad,
+			MetaSpec:         spec.Spec.Metad,
 		},
 	}, job.Context)
 	if err != nil {

@@ -11,8 +11,8 @@ import (
 
 var showsvcgrpCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show details of a service group.",
-	Long:  `Show details of a service group.`,
+	Short: "Show details of a service group",
+	Long:  "Show details of a service group",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -51,4 +51,8 @@ var showsvcgrpCmd = &cobra.Command{
 		fmt.Fprintln(common.MetaOutput, r)
 		return nil
 	},
+}
+
+func init() {
+	showsvcgrpCmd.Flags().StringVarP(&svcgrpFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
 }

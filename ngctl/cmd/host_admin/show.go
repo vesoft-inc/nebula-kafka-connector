@@ -11,8 +11,8 @@ import (
 
 var showHostsCmd = &cobra.Command{
 	Use:   "show",
-	Short: "Show hosts in svcgrp.",
-	Long:  `Show all hosts currently in a svcgrp.`,
+	Short: "Show hosts in svcgrp",
+	Long:  "Show all hosts currently in a svcgrp",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -54,4 +54,6 @@ var showHostsCmd = &cobra.Command{
 func init() {
 	// show all the hosts of a svcgrp
 	showHostsCmd.Flags().StringVarP(&hostFlags.svcgrpName, "svcgrp", "s", "", "svcgrp name")
+	showHostsCmd.Flags().StringVarP(&hostFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
+
 }

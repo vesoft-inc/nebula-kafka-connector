@@ -10,9 +10,8 @@ import (
 
 var dropsvcgrpCmd = &cobra.Command{
 	Use:   "drop",
-	Short: "Drop a service group from the metad.",
-	// what is the service group is not empty?
-	Long: `Drop a service group from the metad.`,
+	Short: "Drop a service group from the metad",
+	Long:  "Drop a service group from the metad",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -34,4 +33,8 @@ var dropsvcgrpCmd = &cobra.Command{
 		fmt.Fprintln(common.MetaOutput, "Drop svcgrp successfully.")
 		return nil
 	},
+}
+
+func init() {
+	dropsvcgrpCmd.Flags().BoolVarP(&svcgrpFlags.force, "force", "f", false, "force drop svcgrp")
 }

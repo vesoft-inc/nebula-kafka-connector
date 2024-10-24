@@ -7,12 +7,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/cmd"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"gopkg.in/yaml.v3"
 )
 
 func TestStatus(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	job := runner.NewJob("test stop")
 	err := job.Run("status", map[string]any{
@@ -29,7 +27,6 @@ func TestStatus(t *testing.T) {
 }
 
 func TestUtilsStatus(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	spec.Spec.Metad = nil
 	job := runner.NewJob("test stop")
@@ -47,7 +44,6 @@ func TestUtilsStatus(t *testing.T) {
 }
 
 func TestSystemdStatus(t *testing.T) {
-	tasks.Init()
 	spec := GetNebulaYaml(t)
 	lm, ok := spec.UtilsProcesses["license-manager"]
 	if !ok {

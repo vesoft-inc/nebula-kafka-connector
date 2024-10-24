@@ -7,13 +7,11 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/buildinworkflow"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
-	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/yamlparser"
 	"gopkg.in/yaml.v3"
 )
 
 func TestInstall(t *testing.T) {
-	tasks.Init()
 	args := map[string]interface{}{
 		"force": true,
 	}
@@ -39,7 +37,6 @@ func TestInstall(t *testing.T) {
 }
 
 func TestServiceGroupInstall(t *testing.T) {
-	tasks.Init()
 
 	args := map[string]interface{}{
 		"force":    true,
@@ -66,7 +63,6 @@ func TestServiceGroupInstall(t *testing.T) {
 }
 
 func TestUtilsInstall(t *testing.T) {
-	tasks.Init()
 
 	args := map[string]interface{}{
 		"force": true,
@@ -91,7 +87,6 @@ func TestUtilsInstall(t *testing.T) {
 }
 
 func TestUtilsInstallSystemd(t *testing.T) {
-	tasks.Init()
 
 	args := map[string]interface{}{
 		"force": true,
@@ -117,7 +112,6 @@ func TestUtilsInstallSystemd(t *testing.T) {
 }
 
 func TestAgentInstallShell(t *testing.T) {
-	tasks.Init()
 	args := map[string]interface{}{
 		"force": true,
 	}

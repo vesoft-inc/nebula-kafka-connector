@@ -1,4 +1,4 @@
-package metad_admin
+package passwd
 
 import (
 	"fmt"
@@ -18,10 +18,10 @@ type passwdFlagsType struct {
 
 var passwdFlags passwdFlagsType
 
-var passwdCmd = &cobra.Command{
+var PasswdCmd = &cobra.Command{
 	Use:   "passwd",
-	Short: "Change the password of the user.",
-	Long:  `passwd`,
+	Short: "Change the password of the user",
+	Long:  "Change the password of the user",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		//passwd no need to login metad
 		//user can reset password first without login
@@ -42,7 +42,7 @@ var passwdCmd = &cobra.Command{
 		defer client.Close()
 		var old, new string
 		if cacheToken != nil && passwdFlags.host == "" {
-			old, new, err = getPromptPassword()
+			old, new, err = common.GetPromptPassword()
 			if err != nil {
 				return common.NgctlError("cannot change password, ", err.Error())
 			}
@@ -56,7 +56,7 @@ var passwdCmd = &cobra.Command{
 		if passwdFlags.user == "" {
 			return common.NgctlError("user cannot be empty", "")
 		}
-		if err := resetPassword(client, passwdFlags.user, old, new); err != nil {
+		if err := common.ResetPassword(client, passwdFlags.user, old, new); err != nil {
 			return common.NgctlError("reset password failed", err.Error())
 		}
 		fmt.Fprintln(common.MetaOutput, "Change password succeeded.")
@@ -66,9 +66,9 @@ var passwdCmd = &cobra.Command{
 }
 
 func init() {
-	passwdCmd.Flags().StringVarP(&passwdFlags.host, "host", "H", "127.0.0.1", "meta server host")
-	passwdCmd.Flags().Uint32VarP(&passwdFlags.port, "port", "P", 9559, "meta server port")
-	passwdCmd.Flags().StringVarP(&passwdFlags.user, "user", "u", "root", "user name")
-	passwdCmd.Flags().StringVarP(&passwdFlags.currentPasswd, "current_password", "c", "", "current password")
-	passwdCmd.Flags().StringVarP(&passwdFlags.newPasswd, "new_password", "p", "", "new password")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.host, "host", "H", "127.0.0.1", "meta server host")
+	PasswdCmd.Flags().Uint32VarP(&passwdFlags.port, "port", "P", 9559, "meta server port")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.user, "user", "u", "root", "user name")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.currentPasswd, "current_password", "c", "", "current password")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.newPasswd, "new_password", "p", "", "new password")
 }
