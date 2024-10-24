@@ -84,30 +84,37 @@ object NebulaUtils {
    * @return StructType
    */
   def getSchema(nebulaOptions: NebulaOptions): StructType = {
-    var returnCols = nebulaOptions.getReturnCols
+    var returnCols    = nebulaOptions.getReturnCols
     val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
-    val isNodeType = DataTypeEnum.NODE.toString.equalsIgnoreCase(nebulaOptions.dataType)
+    val isNodeType    = DataTypeEnum.NODE.toString.equalsIgnoreCase(nebulaOptions.dataType)
 
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
     if (isNodeType) {
       val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
-      val pk = nodeDesc.nodePkName
-      fields.append(DataTypes.createStructField(pk, DataTypes.StringType, false))
+      val pks      = nodeDesc.nodePkNames
+      pks.foreach(pk => {
+        fields.append(DataTypes.createStructField(pk, DataTypes.StringType, false))
+      })
       // if returnCols is null, read all the property of node type/edge type
       if (returnCols == null) {
         returnCols = nodeDesc.properties.keySet.toList
       }
       // add node returnCols name to Spark schema's fields
       for (propName <- returnCols) {
-        if (!propName.equals(pk)) {
+        if (!pks.contains(propName)) {
           fields.append(DataTypes.createStructField(propName, DataTypes.StringType, true))
         }
       }
       new StructType(fields.toArray)
     } else {
       val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
-      fields.append(DataTypes.createStructField(edgeDesc.srcNodePkName, DataTypes.StringType, false))
-      fields.append(DataTypes.createStructField(edgeDesc.dstNodePkName, DataTypes.StringType, false))
+      edgeDesc.srcNodePkNames.foreach(srcPk => {
+        fields.append(DataTypes.createStructField(srcPk, DataTypes.StringType, false))
+      })
+      edgeDesc.dstNodePkNames.foreach(dstPk => {
+        fields.append(DataTypes.createStructField(dstPk, DataTypes.StringType, false))
+
+      })
       // if returnCols is null, read all the property of node type/edge type
       if (returnCols == null) {
         returnCols = edgeDesc.properties.keySet.toList
@@ -116,7 +123,7 @@ object NebulaUtils {
       for (propName <- returnCols) {
         // if edge property has the same name with src/dst node's pk name, rename it with suffix $
         val finalPropName =
-          if (propName.equals(edgeDesc.srcNodePkName) || propName.equals(edgeDesc.dstNodePkName)) {
+          if (edgeDesc.srcNodePkNames.contains(propName) || edgeDesc.dstNodePkNames.contains(propName)) {
             propName + "$"
           } else {
             propName
@@ -132,16 +139,16 @@ object NebulaUtils {
    * return the qgl result schema
    */
   def getSchemaForGql(nebulaOptions: NebulaOptions): StructType = {
-    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
+    val graphProvider                   = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
 
     val gql = nebulaOptions.gql.trim
 
     val newGql =
       if (gql.toUpperCase.contains(" LIMIT ")) {
-        val lowerGql = gql.toLowerCase
+        val lowerGql   = gql.toLowerCase
         val limitIndex = lowerGql.indexOf("limit");
-        var endIndex = lowerGql.indexOf(" ", limitIndex + 6);
+        var endIndex   = lowerGql.indexOf(" ", limitIndex + 6);
         endIndex = if (endIndex > 0) endIndex else gql.length()
         gql.substring(0, limitIndex) + "limit 1 " + gql.substring(endIndex);
       } else {

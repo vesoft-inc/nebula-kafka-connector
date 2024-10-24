@@ -289,8 +289,8 @@ object WriteNebulaNodeConfig {
  */
 class WriteNebulaEdgeConfig(graphName: String,
                             edgeType: String,
-                            srcPkFiled: String,
-                            dstPkField: String,
+                            srcPkFields: List[String],
+                            dstPkFields: List[String],
                             batchSize: Int,
                             srcPkAsProp: Boolean,
                             dstPkAsProp: Boolean,
@@ -299,9 +299,9 @@ class WriteNebulaEdgeConfig(graphName: String,
   extends WriteNebulaConfig(graphName, batchSize, writeMode, disableWriteLog) {
   def getEdgeType: String = edgeType
 
-  def getSrcPkFiled: String = srcPkFiled
+  def getSrcPkFields: String = srcPkFields.mkString("&&")
 
-  def getDstPkField: String = dstPkField
+  def getDstPkFields: String = dstPkFields.mkString("&&")
 
   def getSrcAsProp: Boolean = srcPkAsProp
 
@@ -324,10 +324,10 @@ object WriteNebulaEdgeConfig {
     var disableWriteLog: Boolean = false
 
     private var edgeType: String = _
-    private var srcPkField: String = _
-    private var dstPkField: String = _
-    private var srcPkAsProp: Boolean = false
-    private var dstPkAsProp: Boolean = false
+    private var srcPkFields: ListBuffer[String] = new ListBuffer[String]
+    private var dstPkFields: ListBuffer[String] = new ListBuffer[String]
+    private var srcPksAsProp: Boolean = false
+    private var dstPksAsProp: Boolean = false
     private var batchSize: Int = 512
 
     /**
@@ -347,18 +347,41 @@ object WriteNebulaEdgeConfig {
     }
 
     /**
-     * set which field in dataframe as nebula edge's src id
+     * set which field in dataframe as nebula edge's src node's primary key
+     * use this method when src node's pk is just one property
      */
-    def withSrcPkField(srcPkField: String): WriteEdgeConfigBuilder = {
-      this.srcPkField = srcPkField
+    def withSrcPkField(srcPkField: String) :WriteEdgeConfigBuilder = {
+      this.srcPkFields.append(srcPkField)
+      this
+    }
+
+    /**
+     * set which field in dataframe as nebula edge's src node's primary key
+     * use this method when src node's pk is multiple properties
+     *
+     * @param srcPkFields list of src node primary keys property
+     * @return WriteEdgeConfigBuilder
+     */
+    def withSrcPkFields(srcPkFields: List[String]): WriteEdgeConfigBuilder = {
+      this.srcPkFields.appendAll(srcPkFields)
+      this
+    }
+
+    /**
+     * set which field in dataframe as nebula edge's dst primary key
+     * use this method when dst node's pk is just one property
+     */
+    def withDstPkField(dstIdField: String): WriteEdgeConfigBuilder = {
+      this.dstPkFields.append(dstIdField)
       this
     }
 
     /**
      * set which field in dataframe as nebula edge's dst id
+     *  use this method when dst node's pk is multiple properties
      */
-    def withDstPkField(dstIdField: String): WriteEdgeConfigBuilder = {
-      this.dstPkField = dstIdField
+    def withDstPkFields(dstIdFields: List[String]): WriteEdgeConfigBuilder = {
+      this.dstPkFields.appendAll(dstIdFields)
       this
     }
 
@@ -373,16 +396,16 @@ object WriteNebulaEdgeConfig {
     /**
      * set whether src id as property
      */
-    def withSrcPkAsProperty(srcPkAsProp: Boolean): WriteEdgeConfigBuilder = {
-      this.srcPkAsProp = srcPkAsProp
+    def withSrcPksAsProperty(srcPksAsProp: Boolean): WriteEdgeConfigBuilder = {
+      this.srcPksAsProp = srcPksAsProp
       this
     }
 
     /**
      * set whether dst id as property
      */
-    def withDstPkAsProperty(dstPkAsProp: Boolean): WriteEdgeConfigBuilder = {
-      this.dstPkAsProp = dstPkAsProp
+    def withDstPksAsProperty(dstPksAsProp: Boolean): WriteEdgeConfigBuilder = {
+      this.dstPksAsProp = dstPksAsProp
       this
     }
 
@@ -409,11 +432,11 @@ object WriteNebulaEdgeConfig {
       check()
       new WriteNebulaEdgeConfig(graphName,
         edgeType,
-        srcPkField,
-        dstPkField,
+        srcPkFields.toList,
+        dstPkFields.toList,
         batchSize,
-        srcPkAsProp,
-        dstPkAsProp,
+        srcPksAsProp,
+        dstPksAsProp,
         writeMode,
         disableWriteLog)
     }
@@ -421,8 +444,8 @@ object WriteNebulaEdgeConfig {
     private def check(): Unit = {
       assert(graphName != null && graphName.nonEmpty, s"config graphName can not be empty.")
       assert(edgeType != null && edgeType.nonEmpty, "config edgeType can not be empty")
-      assert(srcPkField != null && srcPkField.nonEmpty, "config srcPkField can not be empty.")
-      assert(dstPkField != null && dstPkField.nonEmpty, "config dstPkField can not be empty.")
+      assert(srcPkFields != null && srcPkFields.nonEmpty, "config srcPkFields can not be empty.")
+      assert(dstPkFields != null && dstPkFields.nonEmpty, "config dstPkFields can not be empty.")
       assert(batchSize > 0, s"config batchSize must be positive, your batchSize is $batchSize.")
 
       try {
@@ -440,9 +463,9 @@ object WriteNebulaEdgeConfig {
         batchSize = 1
       }
       LOG.info(
-        s"NebulaWriteEdgeConfig={graphName=$graphName,edgeType=$edgeType,srcPkField=$srcPkField," +
-          s"dstPkField=$dstPkField,batchSize=$batchSize,srcPkAsProp=$srcPkField," +
-          s"dstPkAsProp=$dstPkField,writeMode=$writeMode,disableWriteLog=$disableWriteLog}")
+        s"NebulaWriteEdgeConfig={graphName=$graphName,edgeType=$edgeType,srcPkFields=$srcPkFields," +
+          s"dstPkFields=$dstPkFields,batchSize=$batchSize,srcPkAsProp=$srcPksAsProp," +
+          s"dstPkAsProp=$dstPksAsProp,writeMode=$writeMode,disableWriteLog=$disableWriteLog}")
     }
   }
 

@@ -2,8 +2,6 @@
 package com.vesoft.nebula.connector.writer
 
 import com.vesoft.nebula.driver.graph.ErrorCode
-import com.vesoft.nebula.spark.common.exception.IllegalOptionException
-import com.vesoft.nebula.spark.common.nebula.VidType
 import com.vesoft.nebula.spark.common.writer.NebulaExecutor
 import com.vesoft.nebula.spark.common.{NebulaNode, NebulaNodes, NebulaOptions, WriteMode}
 import org.apache.spark.sql.catalyst.InternalRow
@@ -21,10 +19,10 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
   private val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
 
   val fieldTypeMap: Map[String, String] = nodeDesc.properties
-  val pkName: String = nodeDesc.nodePkName
+  private val pkNames: List[String] = nodeDesc.nodePkNames
 
   /** buffer to save batch vertices */
-  var vertices: ListBuffer[NebulaNode] = new ListBuffer()
+  private var vertices: ListBuffer[NebulaNode] = new ListBuffer()
 
   /**
    * write one node row to buffer
@@ -32,15 +30,17 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
   override def write(row: InternalRow): Unit = {
     // check the node primary key value's validation, the pkName must exist in row,
     // it's already checked in NebulaDataSourceNodeWriter.createWriterFactory
-    val pkIndexInSparkRow: Int = schema.fields.toList.map(field => field.name).zip(schema.fields.indices).toMap.get(pkName).get
-    if (row.isNullAt(pkIndexInSparkRow)) {
-      LOG.warn(s">>>> record has null value at index $pkIndexInSparkRow for primary key $pkName, ignore it. record:$row")
-      return
-    }
+    val pkIndicesInSparkRow: Map[String,Int] = schema.fields.toList.map(field => field.name).zip(schema.fields.indices).toMap
+    pkIndicesInSparkRow.foreach((pkIndex)=>{
+      if (row.isNullAt(pkIndex._2)) {
+        LOG.warn(s">>>> record has null value at index ${pkIndex._2} for primary key ${pkIndex._1}, ignore it. record:$row")
+        return
+      }
+    })
 
     val values =
       if (nebulaOptions.writeMode == WriteMode.DELETE) {
-        NebulaExecutor.assignNodePkValues(schema, row, fieldTypeMap, pkName)
+        NebulaExecutor.assignNodePkValues(schema, row, fieldTypeMap, pkNames)
       } else {
         NebulaExecutor.assignNodePropValues(schema,
           row,
@@ -123,18 +123,22 @@ class NebulaNodeWriter(nebulaOptions: NebulaOptions, schema: StructType)
   }
 
   private def getGql(nebulaVertices: List[NebulaNode]): String = {
-    val nebulaNodes = NebulaNodes(nebulaOptions.label, nebulaVertices, pkName, fieldTypeMap)
+    val nebulaNodes = NebulaNodes(nebulaOptions.label, nebulaVertices, pkNames, fieldTypeMap)
     val exec = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaNodes, "")
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaNodes, "")
       case WriteMode.INSERTREPLACE =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaNodes, "OR REPLACE")
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaNodes, "OR REPLACE")
       case WriteMode.INSERTIGNORE=>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaNodes, "OR IGNORE")
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaNodes, "OR IGNORE")
+      case WriteMode.INSERTUPDATE=>
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaNodes, "OR UPDATE")
       case WriteMode.UPDATE =>
         NebulaExecutor.toUpdateSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
       case WriteMode.DELETE =>
-        NebulaExecutor.toDeleteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes)
+        NebulaExecutor.toDeleteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes, "DELETE")
+      case WriteMode.DETACHDELETE =>
+        NebulaExecutor.toDeleteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaNodes, "DETACH DELETE")
       case _ =>
         throw new IllegalArgumentException(s"write mode ${nebulaOptions.writeMode} not supported.")
     }

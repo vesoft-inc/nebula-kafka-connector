@@ -79,18 +79,18 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 
   /** write parameters */
 
-  var srcPkField: String = _
-  var dstPkField: String = _
-  var srcPkAsProp: Boolean = _
-  var dstPkAsProp: Boolean = _
-  var writeMode: WriteMode.Value = _
+  var srcPkFields: List[String] = _
+  var dstPkFields : List[String] = _
+  var srcPksAsProp: Boolean = _
+  var dstPksAsProp: Boolean      = _
+  var writeMode   : WriteMode.Value = _
   var disableWriteLog: Boolean = _
 
   if (operaType == OperaType.WRITE) {
-    srcPkField = parameters.getOrElse(SRC_PK_FIELD, null)
-    dstPkField = parameters.getOrElse(DST_PK_FIELD, null)
-    srcPkAsProp = parameters.getOrElse(SRC_PK_AS_PROP, false).toString.toBoolean
-    dstPkAsProp = parameters.getOrElse(DST_PK_AS_PROP, false).toString.toBoolean
+    srcPkFields = parameters.getOrElse(SRC_PK_FIELD, null).split("&&").toList
+    dstPkFields = parameters.getOrElse(DST_PK_FIELD, null).split("&&").toList
+    srcPksAsProp = parameters.getOrElse(SRC_PK_AS_PROP, false).toString.toBoolean
+    dstPksAsProp = parameters.getOrElse(DST_PK_AS_PROP, false).toString.toBoolean
     writeMode =
       WriteMode.withName(parameters.getOrElse(WRITE_MODE, DEFAULT_WRITE_MODE).toString.toLowerCase)
     disableWriteLog = parameters.getOrElse(DISABLE_WRITE_LOG, false).toString.toBoolean

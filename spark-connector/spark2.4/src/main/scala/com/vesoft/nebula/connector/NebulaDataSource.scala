@@ -18,6 +18,7 @@ import org.apache.spark.sql.types.StructType
 import org.slf4j.LoggerFactory
 
 import scala.collection.JavaConversions.iterableAsScalaIterable
+import scala.collection.mutable.ListBuffer
 
 class NebulaDataSource
   extends DataSourceV2
@@ -36,7 +37,7 @@ class NebulaDataSource
    */
   override def createReader(options: DataSourceOptions): DataSourceReader = {
     val nebulaOptions = getNebulaOptions(options)
-    val dataType = nebulaOptions.dataType
+    val dataType      = nebulaOptions.dataType
     LOG.info("create NebulaGraph reader")
     val parameters = options.asMap()
     parameters.remove(NebulaOptions.PASSWD)
@@ -61,7 +62,7 @@ class NebulaDataSource
                             options: DataSourceOptions): Optional[DataSourceWriter] = {
 
     val nebulaOptions = getNebulaOptions(options)
-    val dataType = nebulaOptions.dataType
+    val dataType      = nebulaOptions.dataType
     if (mode == SaveMode.Ignore || mode == SaveMode.ErrorIfExists) {
       LOG.warn(s"Currently do not support mode")
     }
@@ -74,33 +75,28 @@ class NebulaDataSource
     if (DataTypeEnum.NODE == DataTypeEnum.withName(dataType)) {
       Optional.of(new NebulaDataSourceNodeWriter(nebulaOptions, schema))
     } else {
-      val srcPkFiled = nebulaOptions.srcPkField
-      val dstPkField = nebulaOptions.dstPkField
+      val srcPkFields     = nebulaOptions.srcPkFields
+      val dstPkFields     = nebulaOptions.dstPkFields
       val edgeFieldsIndex = {
-        var srcPkIndex: Int = -1
-        var dstPkIndex: Int = -1
-        for (i <- schema.fields.indices) {
-          if (schema.fields(i).name.equals(srcPkFiled)) {
-            srcPkIndex = i
-          }
-          if (schema.fields(i).name.equals(dstPkField)) {
-            dstPkIndex = i
-          }
-
+        val srcPkIndices = srcPkFields.flatMap { srcPkField =>
+          schema.fields.indices.find(i => schema.fields(i).name == srcPkField)
         }
-        // check src filed and dst field
-        if (srcPkIndex < 0 || dstPkIndex < 0) {
+        val dstPkIndices = dstPkFields.flatMap { dstPkField =>
+          schema.fields.indices.find(i => schema.fields(i).name == dstPkField)
+        }
+        if (srcPkIndices.isEmpty || dstPkIndices.isEmpty) {
           throw new IllegalOptionException(
-            s" src node primary key field ${srcPkFiled} or dst node primary key field ${dstPkField} do not exist in dataframe")
+            s"src node primary key fields or dst node primary key fields do not exist in dataframe"
+            )
         }
-        (srcPkIndex, dstPkIndex)
+        (srcPkIndices, dstPkIndices)
       }
 
       Optional.of(
         new NebulaDataSourceEdgeWriter(nebulaOptions,
-          edgeFieldsIndex._1,
-          edgeFieldsIndex._2,
-          schema))
+                                       edgeFieldsIndex._1.toList,
+                                       edgeFieldsIndex._2.toList,
+                                       schema))
     }
   }
 

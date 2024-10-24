@@ -3,15 +3,14 @@ package com.vesoft.nebula.spark.common.nebula
 
 
 case class NodeDesc(nodeTypeName: String,
-                    nodePkName: String,
-                    nodePkDataType: VidType.Value,
+                    nodePkNames: List[String],
                     properties: Map[String, String])
 
 case class EdgeDesc(edgeTypeName: String,
                     srcNodeTypeName: String,
-                    srcNodePkName:String,
-                    srcNodePkDataType: VidType.Value,
+                    srcNodePkNames: List[String],
+                    srcNodePkDataTypeMap: Map[String, String],
                     dstNodeTypeName: String,
-                    dstNodePkName:String,
-                    dstNodePkDataType: VidType.Value,
+                    dstNodePkNames: List[String],
+                    dstNodePkDataTypeMap: Map[String, String],
                     properties: Map[String, String])

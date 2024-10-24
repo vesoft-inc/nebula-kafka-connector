@@ -12,34 +12,6 @@ object NebulaExecutor {
 
   private val LOG = LoggerFactory.getLogger(this.getClass)
 
-  /**
-   * used to extra edge's src node primary key,dst node primary key
-   *
-   * @param schema
-   * @param record
-   * @param index
-   * @param policy
-   * @param isPkStringType true if primary key is String data type
-   */
-  def extraID(schema: StructType,
-              record: InternalRow,
-              index: Int,
-              isPkStringType: Boolean): String = {
-    val types = schema.fields.map(field => field.dataType)
-    if (record.isNullAt(index)) {
-      return null
-    }
-    val vid = record.get(index, types(index)).toString
-    if (isPkStringType) {
-      NebulaUtils.escapeUtil(vid).mkString("\"", "", "\"")
-    } else {
-      if (!NebulaUtils.isNumic(vid)) {
-        LOG.error(
-          s">>>> record has wrong value (expect numeric value) at index $index, ignore it. record:$record")
-      }
-      vid
-    }
-  }
 
   /**
    * deal with node property values
@@ -68,15 +40,18 @@ object NebulaExecutor {
    * @param schema       spark dataframe schema
    * @param record       spark dataframe row
    * @param fieldTypeMap field name and data type map in NebulaGraph
+   * @param pkNames      primary key property names
    * @return Map of pk name to property value
    */
   def assignNodePkValues(schema: StructType,
                          record: InternalRow,
                          fieldTypeMap: Map[String, String],
-                         pkName: String): Map[String, String] = {
+                         pkNames: List[String]): Map[String, String] = {
     val properties: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val index = schema.fieldIndex(pkName)
-    properties += (pkName -> extraValue(record, schema, index, fieldTypeMap))
+    pkNames.foreach(pkName => {
+      val index = schema.fieldIndex(pkName)
+      properties += (pkName -> extraValue(record, schema, index, fieldTypeMap))
+    })
     properties.toMap
   }
 
@@ -91,15 +66,15 @@ object NebulaExecutor {
    */
   def assignEdgeValues(schema: StructType,
                        record: InternalRow,
-                       srcIndex: Int,
-                       dstIndex: Int,
+                       srcIndices: List[Int],
+                       dstIndices: List[Int],
                        srcAsProp: Boolean,
                        dstAsProp: Boolean,
                        fieldTypeMap: Map[String, String]): Map[String, String] = {
     val properties: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     for {
       index <- schema.fields.indices
-      if (srcAsProp || index != srcIndex) && (dstAsProp || index != dstIndex)
+      if (srcAsProp || !srcIndices.contains(index)) && (dstAsProp || !dstIndices.contains(index))
     } yield {
       properties += (schema.fields(index).name -> extraValue(record, schema, index, fieldTypeMap))
     }
@@ -114,17 +89,17 @@ object NebulaExecutor {
    * @param index        the position of row columns
    * @param fieldTypeMap property name -> property datatype in nebula
    */
-  private[this] def extraValue(record: InternalRow,
+   def extraValue(record: InternalRow,
                                schema: StructType,
                                index: Int,
                                fieldTypeMap: Map[String, String]): String = {
     if (record.isNullAt(index)) return null
 
-    val types = schema.fields.map(field => field.dataType)
-    val propValue = record.get(index, types(index))
+    val types                  = schema.fields.map(field => field.dataType)
+    val propValue              = record.get(index, types(index))
     val propValueTypeClassName = propValue.getClass.getName
-    val simpleName = propValueTypeClassName.substring(propValueTypeClassName.lastIndexOf(".") + 1,
-      propValueTypeClassName.length)
+    val simpleName             = propValueTypeClassName.substring(propValueTypeClassName.lastIndexOf(".") + 1,
+                                                                  propValueTypeClassName.length)
 
     val fieldName = schema.fields(index).name
     fieldTypeMap(fieldName) match {
@@ -151,7 +126,7 @@ object NebulaExecutor {
    * FOR r IN t
    * INSERT (a@Person{id:r.id,firstName:r.firstName,lastName:r.lastName})
    */
-  def toExecuteSentence(graphName: String, nodes: NebulaNodes, mode:String): String = {
+  def toInsertSentence(graphName: String, nodes: NebulaNodes, mode: String): String = {
     s"""
        |TABLE t {${nodes.propNamesStr}} =
        |${nodes.getNodesStr}
@@ -168,26 +143,21 @@ object NebulaExecutor {
    * (2,3,20)
    * USE nba
    * FOR r IN t
-   * MATCH (src@Person{id:r.id1}), (dst:@Person{id:r.id2})
-   * INSERT (src)-[e@friend{degree:r.degree}]->(dst)
+   * RETURN r.id1 as id1, r.id2 as id2, r.degree as degree
+   * MATCH (src@Person) WHERE src.`id`=CAST(id1 AS INT64)
+   * MATCH (dst:@Person) WHERE dst.`id`=CAST(id2 AS INT64)
+   * INSERT (src)-[e@friend{degree:degree}]->(dst)
    */
-  def toExecuteSentence(graphName: String, edges: NebulaEdges, mode:String): String = {
-//    s"""
-//       |TABLE t {${edges.tableHeaders}} =
-//       |${edges.getEdgesStr}
-//       |USE `$graphName`
-//       |FOR r IN t
-//       |MATCH (src@`${edges.srcType}`${edges.getSrcPkStr}),(dst@`${edges.dstType}`${edges.getDstPkStr})
-//       |INSERT $mode (src)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst)
-//       |""".stripMargin
-
-    // TODO tmp statement, above statement for now has some problem, use the follow one temporary
+  def toInsertSentence(graphName: String, edges: NebulaEdges, mode: String): String = {
     s"""
        |TABLE t {${edges.tableHeaders}} =
        |${edges.getEdgesStr}
        |USE `$graphName`
        |FOR r IN t
-       |OPTIONAL MATCH (src_node@`${edges.srcType}`),(dst_node@`${edges.dstType}`) WHERE src_node.`${edges.srcPkName}`=r.${edges.dfSrcField} AND dst_node.`${edges.dstPkName}`=r.${edges.dfDstField}
+       |RETURN ${edges.getNewTableHeaders}
+       |NEXT
+       |OPTIONAL MATCH (src_node@`${edges.srcType}`) WHERE ${edges.getSrcPkStr("src_node")}
+       |OPTIONAL MATCH (dst_node@`${edges.dstType}`) WHERE ${edges.getDstPkStr("dst_node")}
        |INSERT $mode (src_node)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst_node)
        |""".stripMargin
   }
@@ -196,7 +166,14 @@ object NebulaExecutor {
    * construct update statement for node
    */
   def toUpdateSentence(graphName: String, nodeType: String, nodes: NebulaNodes): String = {
-    null
+    s"""
+       |TABLE t {${nodes.tableHeaders}} =
+       |${nodes.getNodesStr}
+       |USE `$graphName`
+       |FOR r IN t
+       |OPTIONAL MATCH(v_node@`${nodes.nodeType}`) WHERE ${nodes.getPkFieldMathStatement("v_node")}
+       |SET ${nodes.getUpdatePropNamesWithTableStr("v_node")}
+       |""".stripMargin
   }
 
 
@@ -204,7 +181,18 @@ object NebulaExecutor {
    * construct update statement for edge
    */
   def toUpdateSentence(graphName: String, edgeType: String, edges: NebulaEdges): String = {
-    null
+    s"""
+       |TABLE t {${edges.tableHeaders}} =
+       |${edges.getEdgesStr}
+       |USE `$graphName`
+       |FOR r IN t
+       |RETURN ${edges.getNewTableHeaders}
+       |NEXT
+       |MATCH (nebula_src_node_pk@`${edges.srcType}`) WHERE ${edges.getSrcPkStr("nebula_src_node_pk")}
+       |MATCH (nebula_dst_node_pk@`${edges.dstType}`) WHERE ${edges.getDstPkStr("nebula_dst_node_pk")}
+       |MATCH (nebula_src_node_pk)-[e@`${edges.edgeType}`]->(nebula_dst_node_pk)
+       |SET ${edges.getUpdatePropNamesWithTableStr}
+       |""".stripMargin
   }
 
 
@@ -212,20 +200,41 @@ object NebulaExecutor {
    * construct delete statement for node
    * USE graphName MATCH((a@nodeType where a.id in [ 1,2,3,4,5]-[r]-(b)) DETACH DELETE a
    */
-  def toDeleteSentence(graphName: String, nodeType: String, nodes: NebulaNodes): String = {
-    val nodePks = nodes.values.map(node => node.values(nodes.pkName)).mkString(",")
-    s"USE `$graphName` MATCH(a@$nodeType where a.${nodes.pkName} in [$nodePks]) DETACH DELETE a "
+  def toDeleteSentence(graphName: String, nodeType: String, nodes: NebulaNodes, deleteMode: String): String = {
+    if (nodes.pkNames.size == 1) {
+      val nodePks = nodes.values.map(node => node.values(nodes.pkNames.head)).mkString(",")
+      s"USE `$graphName` MATCH(a@$nodeType where a.${nodes.pkNames.head} in [$nodePks]) DETACH DELETE a "
+    } else {
+      s"""
+         |TABLE t {${nodes.tableHeaders}} =
+         |${nodes.getNodesStr}
+         |USE `$graphName`
+         |FOR r IN t
+         |MATCH(v_node@`${nodes.nodeType}`) WHERE ${nodes.getPkFieldMathStatement("v_node")}
+         |${deleteMode} v_node
+         |""".stripMargin
+    }
+
   }
 
 
   /**
    * construct delete statement for edge
-   * USE graphName MATCH (a@Person{id:2})-[e@edgeType]->(b@Person{id:3}) DELETE e
    */
   def toDeleteSentence(graphName: String, edgeType: String, edges: NebulaEdges): String = {
-    val edge = edges.values.iterator.next()
-    val edgeMatchStatement = s"MATCH(a@${edges.srcType}{${edges.srcPkName}:${edge.srcId}})-[e@$edgeType]-(b@${edges.dstType}{${edges.dstPkName}:${edge.dstId}}) DELETE e"
-    s"USE `$graphName` $edgeMatchStatement"
+    s"""
+       |TABLE t {${edges.tableHeaders}} =
+       |${edges.getEdgesStr}
+       |USE `$graphName`
+       |FOR r IN t
+       |RETURN ${edges.getNewTableHeaders}
+       |NEXT
+       |MATCH (nebula_src_node@`${edges.srcType}`) WHERE ${edges.getSrcPkStr("nebula_src_node")}
+       |MATCH (nebula_dst_node@`${edges.dstType}`) WHERE ${edges.getDstPkStr("nebula_dst_node")}
+       |MATCH (nebula_src_node)-[e@`${edges.edgeType}`]->(nebula_dst_node)
+       |DELETE e
+       |""".stripMargin
+
   }
 
   /**

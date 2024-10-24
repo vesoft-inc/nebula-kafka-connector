@@ -2,7 +2,6 @@
 package com.vesoft.nebula.connector.writer
 
 import com.vesoft.nebula.driver.graph.ErrorCode
-import com.vesoft.nebula.spark.common.nebula.VidType
 import com.vesoft.nebula.spark.common.writer.NebulaExecutor
 import com.vesoft.nebula.spark.common.{NebulaEdge, NebulaEdges, NebulaOptions, WriteMode}
 import org.apache.spark.sql.catalyst.InternalRow
@@ -10,16 +9,17 @@ import org.apache.spark.sql.sources.v2.writer.{DataWriter, WriterCommitMessage}
 import org.apache.spark.sql.types.StructType
 import org.slf4j.LoggerFactory
 
+import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
-                       srcIndex: Int,
-                       dstIndex: Int,
+                       dfSrcPkFieldsIndex: List[Int],
+                       dfDstPkFieldsIndex: List[Int],
                        schema: StructType)
   extends NebulaWriter(nebulaOptions)
     with DataWriter[InternalRow] {
 
-  private val LOG = LoggerFactory.getLogger(this.getClass)
+  private val LOG      = LoggerFactory.getLogger(this.getClass)
   private val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
 
   val fieldTypeMap: Map[String, String] = edgeDesc.properties
@@ -27,38 +27,45 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   /** buffer to save batch edges */
   var edges: ListBuffer[NebulaEdge] = new ListBuffer()
 
-  private val isSourceIdStringType = edgeDesc.srcNodePkDataType == VidType.STRING
-  private val isTargetIdStringType = edgeDesc.dstNodePkDataType == VidType.STRING
 
   /**
    * write one edge record to buffer
    */
   override def write(row: InternalRow): Unit = {
-    val srcId = NebulaExecutor.extraID(schema, row, srcIndex, isSourceIdStringType)
-    if (srcId == null) {
-      LOG.warn(s">>>> record has null value at index $srcIndex for primary key, ignore it. record:$row")
-      return
-    }
-    val dstId = NebulaExecutor.extraID(schema, row, dstIndex, isTargetIdStringType)
-    if (dstId == null) {
-      LOG.warn(s">>>> record has null value at index $dstIndex for primary key, ignore it. record:$row")
-      return
+    val srcIds: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
+    for (i <- dfSrcPkFieldsIndex.indices) {
+      val srcIdValue = NebulaExecutor.extraValue(row, schema, dfSrcPkFieldsIndex(i), edgeDesc.srcNodePkDataTypeMap)
+      if(srcIdValue == null){
+        LOG.warn(s">>>> record has null value at index ${dfSrcPkFieldsIndex(i)} for primary key, ignore it. record:$row")
+        return
+      }
+      srcIds.put(edgeDesc.srcNodePkNames(i), srcIdValue)
     }
 
-    val values =
+    val dstIds: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
+    for(i <- dfDstPkFieldsIndex.indices){
+      val dstIdValue = NebulaExecutor.extraValue(row, schema, dfDstPkFieldsIndex(i), edgeDesc.dstNodePkDataTypeMap)
+      if(dstIdValue == null){
+        LOG.warn(s">>>> record has null value at index ${dfDstPkFieldsIndex(i)} for primary key, ignore it. record:$row")
+        return
+      }
+      dstIds.put(edgeDesc.dstNodePkNames(i), dstIdValue)
+    }
+
+    val values     =
       if (nebulaOptions.writeMode == WriteMode.DELETE) {
         // delete mode does not need property.
         Map[String, String]()
       } else {
         NebulaExecutor.assignEdgeValues(schema,
-          row,
-          srcIndex,
-          dstIndex,
-          nebulaOptions.srcPkAsProp,
-          nebulaOptions.dstPkAsProp,
-          fieldTypeMap)
+                                        row,
+                                        dfSrcPkFieldsIndex,
+                                        dfDstPkFieldsIndex,
+                                        nebulaOptions.srcPksAsProp,
+                                        nebulaOptions.dstPksAsProp,
+                                        fieldTypeMap)
       }
-    val nebulaEdge = NebulaEdge(srcId, dstId, values)
+    val nebulaEdge = NebulaEdge(srcIds.toMap, dstIds.toMap, values)
     edges.append(nebulaEdge)
     if (edges.size >= nebulaOptions.batchSize) {
       execute()
@@ -74,7 +81,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   }
 
   def writeEdges(edges: ListBuffer[NebulaEdge]): Unit = {
-    val exec = getGql(edges.toList)
+    val exec   = getGql(edges.toList)
     val result = submit(exec)
     if (result.isSucceeded) {
       if (!nebulaOptions.disableWriteLog) {
@@ -99,7 +106,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   }
 
   def writeEdge(edge: NebulaEdge): Unit = {
-    val exec = getGql(List(edge))
+    val exec   = getGql(List(edge))
     val result = submit(exec)
     if (result.isSucceeded) {
       if (!nebulaOptions.disableWriteLog) {
@@ -109,7 +116,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     }
     // retry the write execution for RPC_ERROR(NN), LEADER_CHANGED(ND005), RAFT_ERROR(NA)
     var executeResult = result
-    var retry = 0
+    var retry         = 0
     while (retry < nebulaOptions.executionRetry &&
       (executeResult.getErrorCode.isRpcError
         || executeResult.getErrorCode == ErrorCode.LEADER_CHANGED
@@ -133,25 +140,27 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
     val nebulaEdges = NebulaEdges(
       nebulaOptions.label,
       edgeDesc.srcNodeTypeName,
-      edgeDesc.srcNodePkName,
-      edgeDesc.srcNodePkDataType,
-      nebulaOptions.srcPkField,
+      edgeDesc.srcNodePkNames,
+      edgeDesc.srcNodePkDataTypeMap,
+      nebulaOptions.srcPkFields,
       edgeDesc.dstNodeTypeName,
-      edgeDesc.dstNodePkName,
-      edgeDesc.dstNodePkDataType,
-      nebulaOptions.dstPkField,
+      edgeDesc.dstNodePkNames,
+      edgeDesc.dstNodePkDataTypeMap,
+      nebulaOptions.dstPkFields,
       edges,
       fieldTypeMap)
-    val exec = nebulaOptions.writeMode match {
+    val exec        = nebulaOptions.writeMode match {
       case WriteMode.INSERT =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaEdges, "")
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaEdges, "")
       case WriteMode.INSERTREPLACE =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaEdges, "OR REPLACE")
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaEdges, "OR REPLACE")
       case WriteMode.INSERTIGNORE =>
-        NebulaExecutor.toExecuteSentence(nebulaOptions.graphName, nebulaEdges, "OR IGNORE")
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaEdges, "OR IGNORE")
+      case WriteMode.INSERTUPDATE =>
+        NebulaExecutor.toInsertSentence(nebulaOptions.graphName, nebulaEdges, "OR UPDATE")
       case WriteMode.UPDATE =>
         NebulaExecutor.toUpdateSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
-      case WriteMode.DELETE =>
+      case WriteMode.DELETE | WriteMode.DETACHDELETE =>
         NebulaExecutor.toDeleteSentence(nebulaOptions.graphName, nebulaOptions.label, nebulaEdges)
       case _ =>
         throw new IllegalArgumentException(s"write mode ${nebulaOptions.writeMode} not supported.")

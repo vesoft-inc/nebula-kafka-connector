@@ -1,7 +1,7 @@
 
 package com.vesoft.nebula.spark.common
 
-import com.vesoft.nebula.spark.common.nebula.{GraphProvider, VidType}
+import com.vesoft.nebula.spark.common.nebula.{GraphProvider}
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
@@ -32,15 +32,10 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
 
   override def afterAll(): Unit = graphProvider.close()
 
-  test("getIdType for node") {
-    val idType = graphProvider.getIdType("nba", "node_type_player")
-    assert(idType == VidType.INT)
-  }
 
   test("getNodeDesc") {
     val nodeDesc = graphProvider.getNodeDesc("nba", "node_type_player")
     assert(nodeDesc.nodeTypeName.equals("node_type_player"))
-    assert(nodeDesc.nodePkDataType == VidType.INT)
     assert(nodeDesc.properties.size == 5)
     assert(nodeDesc.properties.keySet.contains("id"))
     assert(nodeDesc.properties.keySet.contains("name"))
@@ -54,15 +49,15 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     assert(edgeDesc.edgeTypeName.equals("edge_type_follow"))
     assert(edgeDesc.srcNodeTypeName.equals("node_type_player"))
     assert(edgeDesc.dstNodeTypeName.equals("node_type_player"))
-    assert(edgeDesc.srcNodePkDataType == VidType.INT)
-    assert(edgeDesc.dstNodePkDataType == VidType.INT)
+    assert(edgeDesc.srcNodePkDataTypeMap("id").equals("INT64"))
+    assert(edgeDesc.dstNodePkDataTypeMap("id").equals("INT64"))
     assert(edgeDesc.properties.size == 2)
     assert(edgeDesc.properties.keySet.contains("followness"))
     assert(edgeDesc.properties.keySet.contains("likeness"))
   }
 
   test("getAllParts") {
-    val parts: List[Integer] = graphProvider.getAllParts("nba").asScala.toList
+    val parts: List[Integer] = graphProvider.getAllParts.asScala.toList
     assert(parts.size() == 10)
     val expectParts = List(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
     assert(parts.containsAll(expectParts))

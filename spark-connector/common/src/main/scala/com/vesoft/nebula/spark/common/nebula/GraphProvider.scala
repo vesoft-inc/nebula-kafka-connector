@@ -4,12 +4,13 @@ package com.vesoft.nebula.spark.common.nebula
 import com.vesoft.nebula.driver.graph.data.{ResultSet, ValueWrapper}
 import com.vesoft.nebula.driver.graph.net.NebulaClient
 import com.vesoft.nebula.driver.graph.scan.{ScanEdgeResultIterator, ScanNodeResultIterator}
+import com.vesoft.nebula.spark.common.NebulaUtils
 import org.slf4j.LoggerFactory
-
 
 import java.util
 import java.util.List
 import scala.collection.mutable
+import scala.collection.mutable.ListBuffer
 
 /**
  * GraphProvider for Nebula Graph Service
@@ -83,7 +84,7 @@ class GraphProvider(addresses: String,
   /**
    * get all part list for NebulaGraph
    */
-  def getAllParts(graphName: String): List[Integer] = {
+  def getAllParts: List[Integer] = {
     val showPartitions: String    = "CALL show_partitions() RETURN *"
     var resultSet     : ResultSet = null
     try resultSet = client.execute(showPartitions)
@@ -103,10 +104,6 @@ class GraphProvider(addresses: String,
     partitions
   }
 
-  def getIdType(graphName: String, nodeType: String): VidType.Value = {
-    val nodeDesc = getNodeDesc(graphName, nodeType)
-    nodeDesc.nodePkDataType
-  }
 
   /**
    * get node's schema info
@@ -119,33 +116,26 @@ class GraphProvider(addresses: String,
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     val graphType                               = getGraphType(graphName)
 
-    val descNodeType = s"DESCRIBE NODE TYPE $nodeType OF $graphType"
+    val escapedNodeType = NebulaUtils.escapeUtil(nodeType)
+    val descNodeType = s"DESCRIBE NODE TYPE `$escapedNodeType` OF `$graphType`"
     val result       = client.execute(descNodeType)
     if (!result.isSucceeded || result.isEmpty) {
       LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
-      throw new IllegalArgumentException(s"node type $nodeType does not exist in $graphName.")
+      throw new IllegalArgumentException(s"node type $escapedNodeType does not exist in $graphName.")
     }
 
-    // for now, the pk is one property, composite pk is not support yet.
-    var pk        : String = null
-    var pkDataType: String = null
+    val pkNames = new ListBuffer[String]
 
     while (result.hasNext) {
       val record = result.next();
       schema += (record.get("property_name").asString() -> record.get("data_type").asString())
-      if ("Y".equals(record.get("primary_key").asString())) {
-        pk = record.get("property_name").asString()
-        pkDataType = record.get("data_type").asString()
-      }
     }
 
-    if (pk == null) {
+    if (pkNames.isEmpty) {
       LOG.error(s"node type $nodeType has no primary key.")
       throw new RuntimeException(s"node type $nodeType has no primary key")
     }
-    val idDataType: VidType.Value = VidType.withName(pkDataType)
-
-    NodeDesc(nodeType, pk, idDataType, schema.toMap)
+    NodeDesc(nodeType, pkNames.toList, schema.toMap)
   }
 
   /**
@@ -159,8 +149,9 @@ class GraphProvider(addresses: String,
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     val graphType                               = getGraphType(graphName)
 
+    val escapedEdgeType = NebulaUtils.escapeUtil(edgeType)
     val descEdgeType =
-      s"call describe_graph_type('$graphType') filter type_name='$edgeType' return type_pattern next call describe_edge_type('$graphType', '$edgeType') return *"
+      s"call describe_graph_type('$graphType') filter type_name='$escapedEdgeType' return type_pattern next call describe_edge_type('$graphType', '$escapedEdgeType') return *"
 
     val result = client.execute(descEdgeType)
     if (!result.isSucceeded || result.isEmpty) {
@@ -200,18 +191,24 @@ class GraphProvider(addresses: String,
       throw new RuntimeException("can not parse the edge type pattern.")
     }
 
-    val srcNodeIdDataType = getIdType(graphName, srcNodeType)
-    val dstNodeIdDataType = getIdType(graphName, dstNodeType)
+    val srcNodeDesc       = getNodeDesc(graphName, srcNodeType)
+    val dstNodeDesc       = getNodeDesc(graphName, dstNodeType)
+    val srcNodePkDataType = srcNodeDesc.properties.filterKeys(srcNodeDesc.nodePkNames.contains)
+    val dstNodeIdDataType = dstNodeDesc.properties.filterKeys(dstNodeDesc.nodePkNames.contains)
 
-    val srcNodePkName = getNodeDesc(graphName, srcNodeType).nodePkName
-    val dstNodePkName = getNodeDesc(graphName, dstNodeType).nodePkName
-
-
-    EdgeDesc(edgeType, srcNodeType, srcNodePkName, srcNodeIdDataType, dstNodeType, dstNodePkName, dstNodeIdDataType, schema.toMap)
+    EdgeDesc(edgeType,
+             srcNodeType,
+             srcNodeDesc.nodePkNames,
+             srcNodePkDataType,
+             dstNodeType,
+             dstNodeDesc.nodePkNames,
+             dstNodeIdDataType,
+             schema.toMap)
   }
 
   private def getGraphType(graphName: String): String = {
-    var resultSet = client.execute(s"DESCRIBE GRAPH $graphName")
+    val escapedGraphName = NebulaUtils.escapeUtil(graphName)
+    val resultSet = client.execute(s"DESCRIBE GRAPH `$escapedGraphName`")
     val graphType = if (resultSet.isSucceeded && !resultSet.isEmpty) {
       resultSet.next().values().get(1).asString
     } else {
@@ -221,9 +218,3 @@ class GraphProvider(addresses: String,
   }
 }
 
-object VidType extends Enumeration {
-  type Type = Value
-
-  val STRING = Value("STRING")
-  val INT    = Value("INT64")
-}
