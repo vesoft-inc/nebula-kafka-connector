@@ -31,7 +31,6 @@ func NewiCli(historyFile, user string, enableGoPrompt bool) Cli {
 		status: status{
 			historyFile:          historyFile,
 			user:                 user,
-			space:                "(none)",
 			promptLen:            -1,
 			promptColor:          -1,
 			playingData:          false,
@@ -81,18 +80,6 @@ func (l *iCli) SetRespError(msg string) {
 
 func (l *iCli) GetRespError() string {
 	return l.status.respErr
-}
-
-func (l *iCli) SetSpace(space string) {
-	if len(space) > 0 {
-		l.status.space = space
-	} else {
-		l.status.space = "(none)"
-	}
-}
-
-func (l *iCli) GetSpace() string {
-	return l.status.space
 }
 
 func (l *iCli) PlayingData(b bool) {

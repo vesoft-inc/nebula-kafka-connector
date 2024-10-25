@@ -87,6 +87,13 @@ func (dp *driverPool) openNewConn(address string) (types.Client, error) {
 	}
 	// set session config
 	var stmt string
+	if dp.sessionConfig.schema != "" {
+		stmt = fmt.Sprintf("SESSION SET SCHEMA \"%s\"", dp.sessionConfig.schema)
+		if _, err := dc.Execute(stmt); err != nil {
+			_ = dc.Close()
+			return nil, err
+		}
+	}
 	if dp.sessionConfig.graph != "" {
 		stmt = fmt.Sprintf("SESSION SET GRAPH %s", dp.sessionConfig.graph)
 		if _, err := dc.Execute(stmt); err != nil {
@@ -94,13 +101,7 @@ func (dp *driverPool) openNewConn(address string) (types.Client, error) {
 			return nil, err
 		}
 	}
-	if dp.sessionConfig.schema != "" {
-		stmt = fmt.Sprintf("SESSION SET SCHEMA %s", dp.sessionConfig.schema)
-		if _, err := dc.Execute(stmt); err != nil {
-			_ = dc.Close()
-			return nil, err
-		}
-	}
+
 	if dp.sessionConfig.timezone != "" {
 		stmt = fmt.Sprintf(`SESSION SET TIME ZONE "%s"`, dp.sessionConfig.timezone)
 		if _, err := dc.Execute(stmt); err != nil {

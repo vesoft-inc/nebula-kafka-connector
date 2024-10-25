@@ -178,5 +178,7 @@ func init() {
 }
 
 func main() {
+	// set less env for pager
+	os.Setenv("LESSCHARSET", "utf-8")
 	rootCmd.Execute()
 }

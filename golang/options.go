@@ -42,7 +42,7 @@ func withClientConnector(connector connector) clientOptionsFn {
 	}
 }
 
-// TLS options
+// Experimental: TLS options
 func WithClientTLS(enable bool, ca, cert, key string, peerNameVerify bool, peerName string) clientOptionsFn {
 	return func(conn *driverConn) {
 		conn.cfg.enableTLS = enable

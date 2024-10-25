@@ -11,7 +11,7 @@ test:
 	go test -v -race -timeout 30s  --covermode=atomic --coverprofile coverage.out
 
 e2e-up:
-	cd ../docker-compose && docker-compose up -d
+	cd ../docker-compose && docker-compose pull && docker-compose up -d
 
 e2e-down:
 	cd ../docker-compose && docker-compose down

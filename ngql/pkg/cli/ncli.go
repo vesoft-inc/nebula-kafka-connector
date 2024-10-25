@@ -18,7 +18,6 @@ func NewnCli(i io.ReadCloser, output bool, user string) Cli {
 	return &nCli{
 		status: status{
 			user:                 user,
-			space:                "(none)",
 			respErr:              "",
 			playingData:          false,
 			promptLen:            -1,
@@ -82,18 +81,6 @@ func (l *nCli) SetRespError(msg string) {
 
 func (l *nCli) GetRespError() string {
 	return l.status.respErr
-}
-
-func (l *nCli) SetSpace(space string) {
-	if len(space) > 0 {
-		l.status.space = space
-	} else {
-		l.status.space = "(none)"
-	}
-}
-
-func (l *nCli) GetSpace() string {
-	return l.status.space
 }
 
 func (l *nCli) PlayingData(b bool) {

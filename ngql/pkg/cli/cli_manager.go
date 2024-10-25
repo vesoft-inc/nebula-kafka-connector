@@ -15,7 +15,6 @@ type status struct {
 	// prompt
 	historyFile string
 	user        string
-	space       string
 	respErr     string
 	playingData bool
 	promptLen   int
@@ -72,7 +71,7 @@ func (stat *status) nebulaPrompt() string {
 		prompt += strings.Repeat(" ", stat.promptLen-3)
 		prompt += "   "
 	} else {
-		promptString := fmt.Sprintf("(%s@nebula) [%s]> ", stat.user, stat.space)
+		promptString := fmt.Sprintf("(%s@nebula)> ", stat.user)
 		stat.promptLen = len(promptString)
 		prompt += promptString
 	}
