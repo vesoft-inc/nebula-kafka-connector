@@ -35,16 +35,16 @@ public class PathType extends DataType {
         return dataTypes;
     }
 
-    public Map<Integer, Map<String, DataType>> getNodeTypes() {
-        Map<Integer, Map<String, DataType>> nodeTypesMap = new HashMap<>();
+    public Map<Integer,Map<Integer, Map<String, DataType>>> getNodeTypes() {
+        Map<Integer,Map<Integer, Map<String, DataType>>> nodeTypesMap = new HashMap<>();
         for (NodeType nodeType : nodeTypes) {
             nodeTypesMap.putAll(nodeType.getNodeTypes());
         }
         return nodeTypesMap;
     }
 
-    public Map<Integer, Map<String, DataType>> getEdgeTypes() {
-        Map<Integer, Map<String, DataType>> edgeTypesMap = new HashMap<>();
+    public Map<Integer, Map<Integer, Map<String, DataType>>> getEdgeTypes() {
+        Map<Integer,Map<Integer, Map<String, DataType>>> edgeTypesMap = new HashMap<>();
         for (EdgeType edgeType : edgeTypes) {
             edgeTypesMap.putAll(edgeType.getEdgeTypes());
         }

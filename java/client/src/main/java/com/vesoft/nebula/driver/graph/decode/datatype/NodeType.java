@@ -10,15 +10,15 @@ import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_NODE;
 import java.util.Map;
 
 public class NodeType extends DataType {
-    // nodeTypeId -> (prop name -> prop data type)
-    private final Map<Integer, Map<String, DataType>> nodeTypes;
+    // graphId -> (nodeTypeId -> (prop name -> prop data type))
+    private final Map<Integer, Map<Integer, Map<String, DataType>>> graphNodeTypes;
 
-    public NodeType(Map<Integer, Map<String, DataType>> nodeTypes) {
+    public NodeType(Map<Integer, Map<Integer, Map<String, DataType>>> graphNodeTypes) {
         super(COLUMN_TYPE_NODE);
-        this.nodeTypes = nodeTypes;
+        this.graphNodeTypes = graphNodeTypes;
     }
 
-    public Map<Integer, Map<String, DataType>> getNodeTypes() {
-        return nodeTypes;
+    public Map<Integer, Map<Integer, Map<String, DataType>>> getNodeTypes() {
+        return graphNodeTypes;
     }
 }

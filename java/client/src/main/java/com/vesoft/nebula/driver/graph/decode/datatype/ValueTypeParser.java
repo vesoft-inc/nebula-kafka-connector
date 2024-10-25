@@ -7,6 +7,7 @@ package com.vesoft.nebula.driver.graph.decode.datatype;
 
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EDGE_TYPE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ELEMENT_TYPE_NUM_SIZE;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.NODE_TYPE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.PATH_ELEMENT_NUM_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.PROPERTY_NUM_SIZE;
@@ -68,11 +69,11 @@ public class ValueTypeParser {
                 reader.read(4);
                 return new BasicType(type);
             case COLUMN_TYPE_NODE:
-                Map<Integer, Map<String, DataType>> nodeTypes =
+                Map<Integer, Map<Integer, Map<String, DataType>>> nodeTypes =
                         getPropertyNameAndTypeFromValueType(reader, NODE_TYPE_ID_SIZE, byteOrder);
                 return new NodeType(nodeTypes);
             case COLUMN_TYPE_EDGE:
-                Map<Integer, Map<String, DataType>> edgeTypes =
+                Map<Integer, Map<Integer, Map<String, DataType>>> edgeTypes =
                         getPropertyNameAndTypeFromValueType(reader, EDGE_TYPE_ID_SIZE, byteOrder);
                 return new EdgeType(edgeTypes);
             case COLUMN_TYPE_PATH:
@@ -103,17 +104,22 @@ public class ValueTypeParser {
 
     /**
      * decode value type for node and edge, get each type's property name and property data type
-     * typeId -> (propName -> prop DataType）
+     * graphId -> (typeId -> (propName -> prop DataType))
      */
-    private Map<Integer, Map<String, DataType>> getPropertyNameAndTypeFromValueType(
+    private Map<Integer, Map<Integer, Map<String, DataType>>> getPropertyNameAndTypeFromValueType(
             BytesReader reader,
             int typeIdSize,
             ByteOrder byteOrder) {
         // 1-5: node or edge type number, 4 bytes
         int typeNum = DecodeUtils.bytesToInt32(reader.read(GRAPH_ELEMENT_TYPE_NUM_SIZE), byteOrder);
 
-        Map<Integer, Map<String, DataType>> typeFields = new HashMap<>(typeNum);
+        Map<Integer, Map<Integer, Map<String, DataType>>> graphTypeFields = new HashMap<>();
         for (int i = 0; i < typeNum; i++) {
+            // graphID
+            int graphId = DecodeUtils.bytesToInt32(reader.read(GRAPH_ID_SIZE), byteOrder);
+            if (!graphTypeFields.containsKey(graphId)) {
+                graphTypeFields.put(graphId, new HashMap<Integer, Map<String, DataType>>());
+            }
             // node type ID or edge type ID
             final int typeId =
                     typeIdSize == NODE_TYPE_ID_SIZE
@@ -130,9 +136,9 @@ public class ValueTypeParser {
                 DataType dataType = decodeValueType(reader);
                 propertyAndType.put(propertyName, dataType);
             }
-            typeFields.put(typeId, propertyAndType);
+            graphTypeFields.get(graphId).put(typeId, propertyAndType);
         }
-        return typeFields;
+        return graphTypeFields;
     }
 
 }

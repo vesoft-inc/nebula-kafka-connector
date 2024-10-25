@@ -9,6 +9,7 @@ import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt16;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt32;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EDGE_TYPE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ELEMENT_TYPE_NUM_SIZE;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.NODE_TYPE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.PATH_META_DATA_NODE_EDGE_TYPE_INDEX;
 
@@ -28,13 +29,13 @@ import java.util.Map;
  */
 public class PathSpecialMetaData {
     // node type id -> pair index
-    private final Map<Integer, Integer>        nodeTypes     = new HashMap<>();
+    private final Map<Integer, Map<Integer, Integer>> graphIdAndNodeTypes = new HashMap<>();
     // edge type id -> pair index
-    private final Map<Integer, Integer>        edgeTypes     = new HashMap<>();
+    private final Map<Integer, Map<Integer, Integer>> graphIdAndEdgeTypes = new HashMap<>();
     // pair index -> node vector and adj vector pair
-    private final Map<Integer, PathVectorPair> indexAndNodes = new HashMap<>();
+    private final Map<Integer, PathVectorPair>        indexAndNodes       = new HashMap<>();
     // pair index -> edge vector and adj vector pair
-    private final Map<Integer, PathVectorPair> indexAndEdges = new HashMap<>();
+    private final Map<Integer, PathVectorPair>        indexAndEdges       = new HashMap<>();
 
     public PathSpecialMetaData(NestedVector vector, ByteOrder byteOrder) {
         ByteString  metaData          = vector.getSpecialMetaData();
@@ -43,10 +44,14 @@ public class PathSpecialMetaData {
         int nodeTypeNum = bytesToInt32(
                 reader.read(GRAPH_ELEMENT_TYPE_NUM_SIZE), byteOrder);
         for (int i = 0; i < nodeTypeNum; i++) {
+            int graphId    = bytesToInt32(reader.read(GRAPH_ID_SIZE), byteOrder);
             int nodeTypeId = bytesToInt16(reader.read(NODE_TYPE_ID_SIZE), byteOrder);
             int nodeTypePairIndex = bytesToInt16(
                     reader.read(PATH_META_DATA_NODE_EDGE_TYPE_INDEX), byteOrder);
-            nodeTypes.put(nodeTypeId, nodeTypePairIndex);
+            if (!graphIdAndNodeTypes.containsKey(graphId)) {
+                graphIdAndNodeTypes.put(graphId, new HashMap<>());
+            }
+            graphIdAndNodeTypes.get(graphId).put(nodeTypeId, nodeTypePairIndex);
             PathVectorPair pair = new PathVectorPair(
                     new VectorWrapper(vector.getNestedVectors(nestedVectorIndex++), byteOrder),
                     new VectorWrapper(vector.getNestedVectors(nestedVectorIndex++), byteOrder));
@@ -55,10 +60,14 @@ public class PathSpecialMetaData {
 
         int edgeTypeNum = bytesToInt32(reader.read(GRAPH_ELEMENT_TYPE_NUM_SIZE), byteOrder);
         for (int i = 0; i < edgeTypeNum; i++) {
+            int graphId    = bytesToInt32(reader.read(GRAPH_ID_SIZE), byteOrder);
             int edgeTypeId = bytesToInt32(reader.read(EDGE_TYPE_ID_SIZE), byteOrder);
             int edgeTypePairIndex = bytesToInt16(
                     reader.read(PATH_META_DATA_NODE_EDGE_TYPE_INDEX), byteOrder);
-            edgeTypes.put(edgeTypeId, edgeTypePairIndex);
+            if (!graphIdAndEdgeTypes.containsKey(graphId)) {
+                graphIdAndEdgeTypes.put(graphId, new HashMap<>());
+            }
+            graphIdAndEdgeTypes.get(graphId).put(edgeTypeId, edgeTypePairIndex);
             PathVectorPair pair = new PathVectorPair(
                     new VectorWrapper(vector.getNestedVectors(nestedVectorIndex++), byteOrder),
                     new VectorWrapper(vector.getNestedVectors(nestedVectorIndex++), byteOrder));
@@ -66,12 +75,12 @@ public class PathSpecialMetaData {
         }
     }
 
-    public Map<Integer, Integer> getNodeTypes() {
-        return nodeTypes;
+    public Map<Integer, Map<Integer, Integer>> getGraphIdAndNodeTypes() {
+        return graphIdAndNodeTypes;
     }
 
-    public Map<Integer, Integer> getEdgeTypes() {
-        return edgeTypes;
+    public Map<Integer, Map<Integer, Integer>> getGraphIdAndEdgeTypes() {
+        return graphIdAndEdgeTypes;
     }
 
     public Map<Integer, PathVectorPair> getIndexAndNodes() {

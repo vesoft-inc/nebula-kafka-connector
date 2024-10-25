@@ -59,7 +59,6 @@ public class SizeConstant {
     public static final int EDGE_TYPE_ID_SIZE = 4;
     public static final int NODE_ID_SIZE      = 8;
 
-    public static final int EDGE_ID_SIZE = 0;
 
     public static final int RANK_SIZE = 8;
 
@@ -85,7 +84,7 @@ public class SizeConstant {
     // size for vector
     public static final int VECTOR_NODE_HEADER_SIZE = 16;
     public static final int VECTOR_EDGE_HEADER_SIZE = 32;
-    public static final int VECTOR_PATH_HEADER_SIZE = 32;
+    public static final int VECTOR_PATH_HEADER_SIZE = 16;
     public static final int VECTOR_INDEX_SIZE       = 4;
 
     // value for time

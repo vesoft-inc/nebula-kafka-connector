@@ -7,6 +7,7 @@ package com.vesoft.nebula.driver.graph.decode;
 
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt16;
 import static com.vesoft.nebula.driver.graph.decode.DecodeUtils.bytesToInt32;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.INT32_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.PROPERTY_NUM_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.VECTOR_INDEX_SIZE;
@@ -35,9 +36,11 @@ public class VectorWrapper {
     // whether all the values in this vector is not null
     private final boolean nullAllSet;
 
-    // the map of graph element type id and its property name and property vector index,
+    // the map of graph id to graph element type id and its property name and property vector index,
     // useful for node vector and edge vector
-    private Map<Integer, Map<String, Integer>> graphElementTypeIdAndPropVectorIndexMap = null;
+    // graphId -> (nodeTypeId/edgeTypeId -> (prop name -> prop vector index))
+    private Map<Integer, Map<Integer, Map<String, Integer>>>
+            graphElementTypeIdAndPropVectorIndexMap = null;
 
     // the meta data information of path
     private PathSpecialMetaData pathSpecialMetaData = null;
@@ -125,14 +128,14 @@ public class VectorWrapper {
      * construct the property vector index map from vector's special metadata
      *
      * @param typeIdSize node type id size(2 bytes) or edge type id size(4 bytes)
-     * @return Map : node/edge type id -> (property name -> property vector index)
+     * @return Map : graphId -> (node/edge type id -> (property name -> property vector index))
      */
-    public Map<Integer, Map<String, Integer>> getGraphElementTypeIdAndPropVectorIndexMap(
-            int typeIdSize) {
+    public Map<Integer, Map<Integer, Map<String, Integer>>>
+        getGraphElementTypeIdAndPropVectorIndexMap(int typeIdSize) {
         if (graphElementTypeIdAndPropVectorIndexMap == null) {
             graphElementTypeIdAndPropVectorIndexMap = new HashMap<>();
             BytesReader reader = new BytesReader(vector.getSpecialMetaData());
-            // the first byte is total number of property name of all edge types
+            // the first 4 bytes is total number of property name of all node types or edge types
             int propertyNum = bytesToInt32(reader.read(INT32_SIZE), byteOrder);
             // compute all the property names index and jump the length of all property names
             String[] propNames = new String[propertyNum];
@@ -143,6 +146,8 @@ public class VectorWrapper {
             int typeNum = bytesToInt32(reader.read(INT32_SIZE), byteOrder);
 
             for (int i = 0; i < typeNum; i++) {
+                // get the graph id
+                int graphId = bytesToInt32(reader.read(GRAPH_ID_SIZE), byteOrder);
                 // get the node/edge type id
                 final int typeId =
                         typeIdSize == 2
@@ -155,7 +160,12 @@ public class VectorWrapper {
                     int propVectorIndex = bytesToInt32(reader.read(VECTOR_INDEX_SIZE), byteOrder);
                     propNameToVectorIndex.put(propNames[propVectorIndex], propVectorIndex);
                 }
-                graphElementTypeIdAndPropVectorIndexMap.put(typeId, propNameToVectorIndex);
+                if (!graphElementTypeIdAndPropVectorIndexMap.containsKey(graphId)) {
+                    graphElementTypeIdAndPropVectorIndexMap.put(graphId, new HashMap<>());
+                }
+                graphElementTypeIdAndPropVectorIndexMap
+                        .get(graphId)
+                        .put(typeId, propNameToVectorIndex);
             }
         }
         return graphElementTypeIdAndPropVectorIndexMap;

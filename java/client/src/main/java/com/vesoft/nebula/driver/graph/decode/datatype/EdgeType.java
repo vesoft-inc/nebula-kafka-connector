@@ -9,14 +9,15 @@ import com.vesoft.nebula.driver.graph.decode.ColumnType;
 import java.util.Map;
 
 public class EdgeType extends DataType {
-    private final Map<Integer, Map<String, DataType>> edgeTypes;
+    // graphId -> (edgeTypeId -> (prop name -> prop data type))
+    private final Map<Integer, Map<Integer, Map<String, DataType>>> graphEdgeTypes;
 
-    public EdgeType(Map<Integer, Map<String, DataType>> edgeTypes) {
+    public EdgeType(Map<Integer,Map<Integer, Map<String, DataType>>> graphEdgeTypes) {
         super(ColumnType.COLUMN_TYPE_EDGE);
-        this.edgeTypes = edgeTypes;
+        this.graphEdgeTypes = graphEdgeTypes;
     }
 
-    public Map<Integer, Map<String, DataType>> getEdgeTypes() {
-        return edgeTypes;
+    public Map<Integer, Map<Integer, Map<String, DataType>>> getEdgeTypes() {
+        return graphEdgeTypes;
     }
 }

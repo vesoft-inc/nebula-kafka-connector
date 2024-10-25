@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 /**
- * PathHeader is stored in Vector data, path header is 32 bytes.
+ * PathHeader is stored in Vector data, path header is 16 bytes.
  * headNodeId: 8 bytes
  * tailNodeId: 8 bytes
  * size: 4 bytes
@@ -19,43 +19,39 @@ import java.nio.ByteOrder;
  * tailOffset: 4 bytes
  */
 public class PathHeader {
-    private long headNodeId;
-    private long tailNodeId;
-    private int  size; // numNodes + numEdges
-    private int  length; // numEdges
+    private long size; // numNodes + numEdges, uint 32
+    private int  headNodeIndex; // uint16
+    private int  tailNodeIndex; // uint16
 
-    // head node offset in the vector
+    // head node offset in the vector, uint 32
     private int headOffset;
-    // tail node offset in the vector
+    // tail node offset in the vector, uint 32
     private int tailOffset;
 
     public PathHeader(ByteString byteString, ByteOrder order) {
         ByteBuffer buffer = ByteBuffer
                 .wrap(byteString.toByteArray())
                 .order(order);
-        this.headNodeId = buffer.getLong();
-        this.tailNodeId = buffer.getLong();
-        this.size = buffer.getInt();
-        this.length = buffer.getInt();
+        this.size = Integer.toUnsignedLong(buffer.getInt());
+        this.headNodeIndex = buffer.getShort() & 0xFFFF;
+        this.tailNodeIndex = buffer.getShort() & 0xFFFF;
         this.headOffset = buffer.getInt();
         this.tailOffset = buffer.getInt();
     }
 
-    public long getHeadNodeId() {
-        return headNodeId;
+
+    public int getHeadNodeIndex() {
+        return headNodeIndex;
     }
 
-    public long getTailNodeId() {
-        return tailNodeId;
+    public int getTailNodeIndex() {
+        return tailNodeIndex;
     }
 
-    public int getSize() {
+    public long getSize() {
         return size;
     }
 
-    public int getLength() {
-        return length;
-    }
 
     public int getHeadOffset() {
         return headOffset;

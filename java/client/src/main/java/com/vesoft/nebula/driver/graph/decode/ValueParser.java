@@ -273,10 +273,11 @@ public class ValueParser {
                 return new NRecord(map);
             case COLUMN_TYPE_NODE:
                 NodeType nodeType = (NodeType) type;
-                // nodePropColumnType: nodeTypeId -> (propName-> propType)
-                Map<Integer, Map<String, DataType>> nodePropColumnType = nodeType.getNodeTypes();
+                // nodePropColumnType: graphId->(nodeTypeId -> (propName-> propType))
+                Map<Integer, Map<Integer, Map<String, DataType>>> nodePropColumnType =
+                        nodeType.getNodeTypes();
                 // nodePropVectorIndex: nodeTypeId -> (propName -> prop vector index)
-                Map<Integer, Map<String, Integer>> nodePropVectorIndex =
+                Map<Integer, Map<Integer, Map<String, Integer>>> nodePropVectorIndex =
                         vector.getGraphElementTypeIdAndPropVectorIndexMap(NODE_TYPE_ID_SIZE);
 
                 // decode the node's nodeId and graphId from node header
@@ -285,11 +286,21 @@ public class ValueParser {
                                                           rowIndex);
                 NodeHeader nodeHeader = new NodeHeader(nodeHeaderBinary, byteOrder);
                 // decode the record node's property values from sub vectors
-                Map<String, DataType> propTypeMap =
-                        nodePropColumnType.get(nodeHeader.getNodeTypeId());
+                if (!nodePropColumnType.containsKey(nodeHeader.getGraphId())
+                        || !nodePropColumnType.get(nodeHeader.getGraphId())
+                        .containsKey(nodeHeader.getNodeTypeId())) {
+                    throw new RuntimeException(String.format(
+                            "Value type for NODE does not contain graphId %d or node type id %d",
+                            nodeHeader.getGraphId(),
+                            nodeHeader.getNodeTypeId()));
+                }
+                Map<String, DataType> propTypeMap = nodePropColumnType
+                        .get(nodeHeader.getGraphId())
+                        .get(nodeHeader.getNodeTypeId());
                 Map<String, ValueWrapper> props = new HashMap<>();
                 for (String propName : propTypeMap.keySet()) {
                     int vectorIndex = nodePropVectorIndex
+                            .get(nodeHeader.getGraphId())
                             .get(nodeHeader.getNodeTypeId())
                             .get(propName);
                     Object propValue = decodeValue(vector.getVectorWrapper(vectorIndex),
@@ -305,10 +316,11 @@ public class ValueParser {
                                   graphSchemas);
             case COLUMN_TYPE_EDGE:
                 EdgeType edgeType = (EdgeType) type;
-                // edgePropColumnType: edgeTypeId -> (propName-> propType)
-                Map<Integer, Map<String, DataType>> edgePropColumnType = edgeType.getEdgeTypes();
+                // edgePropColumnType: graphId -> (edgeTypeId -> (propName-> propType))
+                Map<Integer, Map<Integer, Map<String, DataType>>> edgePropColumnType =
+                        edgeType.getEdgeTypes();
                 // edgePropVectorIndex: edgeTypeId -> (propName -> prop vector index)
-                Map<Integer, Map<String, Integer>> edgePropVectorIndex =
+                Map<Integer, Map<Integer, Map<String, Integer>>> edgePropVectorIndex =
                         vector.getGraphElementTypeIdAndPropVectorIndexMap(EDGE_TYPE_ID_SIZE);
 
                 // decode the record edge's edgeTypeId from edge header.
@@ -320,10 +332,22 @@ public class ValueParser {
 
                 // decode the record edge's property values from sub vectors
                 int noDirectedTypeId = edgeHeader.getEdgeTypeId() & 0x3FFFFFFF;
-                Map<String, DataType> edgePropTypeMap = edgePropColumnType.get(noDirectedTypeId);
+                if (!edgePropColumnType.containsKey(edgeHeader.getGraphId())
+                        || !edgePropColumnType.get(edgeHeader.getGraphId())
+                        .containsKey(noDirectedTypeId)) {
+                    throw new RuntimeException(String.format(
+                            "Value type for NODE does not contain graphId %d or edge type id %d",
+                            edgeHeader.getGraphId(),
+                            noDirectedTypeId));
+                }
+
+                Map<String, DataType> edgePropTypeMap = edgePropColumnType
+                        .get(edgeHeader.getGraphId())
+                        .get(noDirectedTypeId);
                 Map<String, ValueWrapper> edgeProps = new HashMap<>();
                 for (String propName : edgePropTypeMap.keySet()) {
                     int vectorIndex = edgePropVectorIndex
+                            .get(edgeHeader.getGraphId())
                             .get(noDirectedTypeId)
                             .get(propName);
                     Object propValue = decodeValue(vector.getVectorWrapper(vectorIndex),
@@ -354,9 +378,11 @@ public class ValueParser {
 
                 // decode the special meta data into:
                 PathSpecialMetaData pathSpecialMetaData = vector.getPathSpecialMetaData();
-                // NodeTypeId -> vecIndex,  EdgeTypeId -> vecIndex, vecIndex->(PathVectorPair)
-                Map<Integer, Integer> nodeTypes = pathSpecialMetaData.getNodeTypes();
-                Map<Integer, Integer> edgeTypes = pathSpecialMetaData.getEdgeTypes();
+                // graphId -> (NodeTypeId -> vecIndex),  graphId -> (EdgeTypeId -> vecIndex)
+                Map<Integer,Map<Integer, Integer>> nodeTypes =
+                        pathSpecialMetaData.getGraphIdAndNodeTypes();
+                Map<Integer,Map<Integer, Integer>> edgeTypes =
+                        pathSpecialMetaData.getGraphIdAndEdgeTypes();
 
                 // construct map: uint16 pair index-> (node vector, adj vector)
                 Map<Integer, PathVectorPair> indexAndNodes = pathSpecialMetaData.getIndexAndNodes();
@@ -373,9 +399,9 @@ public class ValueParser {
                     return new NPath(elements);
                 }
                 // decode the first node of path
-                int firstNodeTypeId = getNodeTypeIdFromNodeId(pathHeader.getHeadNodeId());
-                PathVectorPair firstNodePair = indexAndNodes.get(nodeTypes.get(firstNodeTypeId));
-                VectorWrapper firstNodeVector = firstNodePair.getVector();
+                PathVectorPair firstNodePair = indexAndNodes.get(pathHeader.getHeadNodeIndex());
+                VectorWrapper firstNodeVector = vector.getVectorWrapper(
+                        pathHeader.getHeadNodeIndex());
                 VectorWrapper firstNodeAdjVector = firstNodePair.getAdjVector();
                 firstNode = decodeValue(firstNodeVector,
                                         pathType.getDataTypes().get(0),
@@ -433,7 +459,7 @@ public class ValueParser {
 
     private Object decodeConstValue(BytesReader reader,
                                     ColumnType type) {
-        Object     obj;
+        Object obj;
         if (ColumnType.isBasic(type)) {
             obj = bytesBasicToObject(reader, type);
         } else if (type == ColumnType.COLUMN_TYPE_DECIMAL
