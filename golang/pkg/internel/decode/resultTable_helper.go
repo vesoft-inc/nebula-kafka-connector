@@ -942,9 +942,9 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			},
 		}, nil
 	case types.ColumnTypeEdge:
-		// src nodeID 8B + dst nodeID 8B + graphId 4B + edge type ID 4B + edge rank 8B + prop_size 2B
-		srcNodeIDBytes, dstNodeIDBytes, graphIdBytes, edgeTypeIdBytes,
-			edgeRankBytes, propSizeBytes := r.readN(8), r.readN(8), r.readN(4), r.readN(4), r.readN(8), r.readN(2)
+		// src nodeID 8B + dst nodeID 8B + edge rank 8B + graphId 4B + edge type ID 4B  + prop_size 2B
+		srcNodeIDBytes, dstNodeIDBytes, edgeRankBytes, graphIdBytes, edgeTypeIdBytes,
+			propSizeBytes := r.readN(8), r.readN(8), r.readN(8), r.readN(4), r.readN(4), r.readN(2)
 		if r.error() != nil {
 			return nil, r.error()
 		}
@@ -958,11 +958,11 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		noDirectType := edgeTypeID & 0x3FFFFFFF
 		direction := getEdgeDirection(uint8(edgeTypeID >> 30))
 		for i := 0; i < int(propSize); i++ {
-			nameSizeBytes := r.readN(4)
+			nameSizeBytes := r.readN(2)
 			if r.error() != nil {
 				return nil, r.error()
 			}
-			nameSize := int(bytesToInt32(nameSizeBytes))
+			nameSize := int(bytesToInt16(nameSizeBytes))
 			nameBytes := r.readN(nameSize)
 			typeBytes := r.readN(1)
 			if r.error() != nil {
