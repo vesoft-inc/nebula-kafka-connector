@@ -86,28 +86,30 @@ func (dp *driverPool) openNewConn(address string) (types.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	var configStmts []string
 	var valueStmts []string
 	var stmt string
 	if dp.sessionConfig.schema != "" {
-		configStmts = append(configStmts, fmt.Sprintf("home_schema_path=\"%s\"", dp.sessionConfig.schema))
-	}
-	if dp.sessionConfig.graph != "" {
-		configStmts = append(configStmts, fmt.Sprintf("home_graph_name=\"%s\"", dp.sessionConfig.graph))
-	}
-	if dp.sessionConfig.timezone != "" {
-		configStmts = append(configStmts, fmt.Sprintf("timezone=\"%s\"", dp.sessionConfig.timezone))
-	}
-	for k, v := range dp.sessionConfig.parameters {
-		valueStmts = append(valueStmts, fmt.Sprintf("$%s=%s", k, v))
-	}
-	if len(configStmts) > 0 {
-		stmt = fmt.Sprintf("SESSION SET %s", strings.Join(configStmts, ","))
-		_, err = dc.Execute(stmt)
-		if err != nil {
+		if _, err := dc.Execute(fmt.Sprintf("SESSION SET home_schema_path=\"%s\"", dp.sessionConfig.schema)); err != nil {
 			_ = dc.Close()
 			return nil, err
 		}
+	}
+
+	if dp.sessionConfig.graph != "" {
+		if _, err := dc.Execute(fmt.Sprintf("SESSION SET home_graph_name=\"%s\"", dp.sessionConfig.graph)); err != nil {
+			_ = dc.Close()
+			return nil, err
+		}
+	}
+
+	if dp.sessionConfig.timezone != "" {
+		if _, err := dc.Execute(fmt.Sprintf("SESSION SET timezone=\"%s\"", dp.sessionConfig.timezone)); err != nil {
+			_ = dc.Close()
+			return nil, err
+		}
+	}
+	for k, v := range dp.sessionConfig.parameters {
+		valueStmts = append(valueStmts, fmt.Sprintf("$%s=%s", k, v))
 	}
 	if len(valueStmts) > 0 {
 		stmt = fmt.Sprintf("SESSION SET VALUE %s", strings.Join(valueStmts, ","))
