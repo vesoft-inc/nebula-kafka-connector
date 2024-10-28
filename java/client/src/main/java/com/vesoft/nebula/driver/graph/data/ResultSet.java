@@ -4,13 +4,10 @@ import com.google.common.base.Charsets;
 import com.vesoft.nebula.driver.graph.ErrorCode;
 import com.vesoft.nebula.driver.graph.decode.ResultTable;
 import com.vesoft.nebula.driver.graph.decode.Row;
-import com.vesoft.nebula.proto.common.Value;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
 import com.vesoft.nebula.proto.graph.QueryStats;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -277,13 +274,13 @@ public class ResultSet {
     }
 
     @Override
-    // TODO remove the print for data
     public String toString() {
         if (!isSucceeded()) {
             return response.getStatus().getMessage().toString(charset);
         }
-        List<String> rowStrs = new ArrayList<>();
-        rowStrs.toString();
-        return String.format("ColumnName: %s,\n Rows: %s", columnNames, rowStrs);
+
+        return String.format("ColumnName: %s, RowSize: %s, Latency: %d",
+                             columnNames, rowSize(),
+                             getLatency());
     }
 }

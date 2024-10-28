@@ -57,39 +57,55 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
 
         // set the working graph and time zone
         StringBuilder sessionSetStatement = new StringBuilder();
+        sessionSetStatement.append("SESSION SET ");
         if (builder.workingGraph != null) {
             sessionSetStatement
-                    .append("SESSION SET GRAPH `")
+                    .append("home_graph_name=\"")
                     .append(builder.workingGraph)
-                    .append("` ");
+                    .append("\", ");
         }
         if (builder.timeZone != null) {
             sessionSetStatement
-                    .append("SESSION SET TIME ZONE \"")
+                    .append("timezone=\"")
                     .append(builder.timeZone)
-                    .append("\"");
+                    .append("\",");
         }
         if (builder.schemaName != null) {
             sessionSetStatement
-                    .append("SESSION SET SCHEMA `")
+                    .append(" home_schema_path=\"")
                     .append(builder.schemaName)
-                    .append("` ");
+                    .append("\" ");
         }
 
         if (!sessionSetStatement.toString().isEmpty()) {
             ResultSet result = client.execute(sessionSetStatement.toString());
             if (!result.isSucceeded()) {
-                throw new RuntimeException("SESSION SET failed for " + result.getErrorMessage());
+                throw new RuntimeException(String.format("%s failed for %s",
+                                                         sessionSetStatement,
+                                                         result.getErrorMessage()));
             }
         }
+        if (builder.parameters.isEmpty()) {
+            return client;
+        }
+
+        StringBuilder parametersSetStatement = new StringBuilder();
+        parametersSetStatement.append("SESSION SET VALUE ");
         for (Map.Entry<String, String> parameter : builder.parameters.entrySet()) {
-            String setParameterStatement = String.format("SESSION SET VALUE $%s=%s",
-                                                         parameter.getKey(),
-                                                         parameter.getValue());
-            ResultSet setParamResult = client.execute(setParameterStatement);
-            if (!setParamResult.isSucceeded()) {
-                throw new RuntimeException("SESSION SET failed for "
-                                                   + setParamResult.getErrorMessage());
+            parametersSetStatement
+                    .append("$")
+                    .append(parameter.getKey())
+                    .append("=")
+                    .append(parameter.getValue())
+                    .append(",");
+        }
+        parametersSetStatement.deleteCharAt(parametersSetStatement.length() - 1);
+        if (!parametersSetStatement.toString().isEmpty()) {
+            ResultSet result = client.execute(parametersSetStatement.toString());
+            if (!result.isSucceeded()) {
+                throw new RuntimeException(String.format("%s failed for %s",
+                                                         parametersSetStatement,
+                                                         result.getErrorMessage()));
             }
         }
         return client;

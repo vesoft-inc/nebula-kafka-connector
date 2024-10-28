@@ -5,6 +5,9 @@
 
 package com.vesoft.nebula.driver.graph.decode;
 
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+
 import com.vesoft.nebula.driver.graph.data.NPath;
 import com.vesoft.nebula.driver.graph.data.NRecord;
 import com.vesoft.nebula.driver.graph.data.Relationship;
@@ -12,6 +15,7 @@ import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.data.ValueWrapper;
 import com.vesoft.nebula.driver.graph.data.Vertex;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -162,6 +166,36 @@ public class NebulaClientDecodeTest {
         }
     }
 
+    @Test
+    public void testConstVectorDecimalResult() {
+        System.out.println("<==== testConstVectorDecimalResult ====>");
+        try {
+            ResultSet  res     = client.execute("return -9223372036854775808");
+            BigDecimal decimal = res.next().values().get(0).asDecimal();
+            Assert.assertEquals("-9223372036854775808", decimal.toPlainString());
+
+            res = client.execute("return 1M / 0.0 as t next return cast(t as decimal)");
+            ResultSet finalPosInfRes = res;
+            Exception exception = assertThrows(RuntimeException.class, () ->
+                    finalPosInfRes.next().values().get(0).asDecimal());
+            assertTrue(exception.getMessage().contains("+Inf"));
+
+            res = client.execute("return 1M / -0.0 as t next return cast(t as decimal)");
+            ResultSet finalNegInfRes = res;
+            exception = assertThrows(RuntimeException.class, () ->
+                    finalNegInfRes.next().values().get(0).asDecimal());
+            assertTrue(exception.getMessage().contains("-Inf"));
+
+            res = client.execute("return cast(asin(radians(180)) as decimal) ");
+            ResultSet finalNanRes = res;
+            exception = assertThrows(RuntimeException.class, () ->
+                    finalNanRes.next().values().get(0).asDecimal());
+            assertTrue(exception.getMessage().contains("NaN"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
 
     @Test
     public void testConstVectorBoolResult() {
@@ -686,6 +720,38 @@ public class NebulaClientDecodeTest {
         }
     }
 
+
+    @Test
+    public void testDecodeDecimalResult() {
+        System.out.println("<==== testDecodeDecimalResult ====>");
+        try {
+            ResultSet  res     = client.execute("let a=-9223372036854775808 return a");
+            BigDecimal decimal = res.next().values().get(0).asDecimal();
+            Assert.assertEquals("-9223372036854775808", decimal.toPlainString());
+
+            res = client.execute("let a=1M/0.0 return cast(a as decimal)");
+            ResultSet finalPosInfRes = res;
+            Exception exception = assertThrows(RuntimeException.class, () ->
+                    finalPosInfRes.next().values().get(0).asDecimal());
+            assertTrue(exception.getMessage().contains("+Inf"));
+
+            res = client.execute("let a=-1M/0.0  return cast(a as decimal)");
+            ResultSet finalNegInfRes = res;
+            exception = assertThrows(RuntimeException.class, () ->
+                    finalNegInfRes.next().values().get(0).asDecimal());
+            assertTrue(exception.getMessage().contains("-Inf"));
+
+            res = client.execute("let a=asin(radians(180)) return cast(a as decimal) ");
+            ResultSet finalNanRes = res;
+            exception = assertThrows(RuntimeException.class, () ->
+                    finalNanRes.next().values().get(0).asDecimal());
+            assertTrue(exception.getMessage().contains("NaN"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+
     @Test
     public void testDecodeDateResult() {
         System.out.println("<==== testDecodeDateResult ====>");
@@ -1204,7 +1270,7 @@ public class NebulaClientDecodeTest {
     @Test
     public void testCases() {
         try {
-            String    gql = "for i in [9223372036854775808,-9223372036854775809] "
+            String gql = "for i in [9223372036854775808,-9223372036854775809] "
                     + "return max(i) as a group by ()";
             ResultSet res = client.execute(gql);
             print(res);

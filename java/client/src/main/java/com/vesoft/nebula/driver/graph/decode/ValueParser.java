@@ -80,6 +80,7 @@ import com.vesoft.nebula.driver.graph.decode.struct.PathSpecialMetaData;
 import com.vesoft.nebula.driver.graph.decode.struct.PathVectorPair;
 import com.vesoft.nebula.driver.graph.decode.struct.ResultGraphSchemas;
 import com.vesoft.nebula.proto.graph.NestedVector;
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.time.LocalDate;
@@ -218,6 +219,8 @@ public class ValueParser {
                 valueData = getSubBytes(vectorData, BOOL_SIZE, rowIndex);
                 return bytesToBool(valueData);
             case COLUMN_TYPE_DECIMAL:
+                valueData = getSubBytes(vectorData, STRING_SIZE, rowIndex);
+                return stringToDecimal(bytesToString(valueData, vector.getVector()));
             case COLUMN_TYPE_STRING:
                 valueData = getSubBytes(vectorData, STRING_SIZE, rowIndex);
                 return bytesToString(valueData, vector.getVector());
@@ -462,9 +465,10 @@ public class ValueParser {
         Object obj;
         if (ColumnType.isBasic(type)) {
             obj = bytesBasicToObject(reader, type);
-        } else if (type == ColumnType.COLUMN_TYPE_DECIMAL
-                || type == ColumnType.COLUMN_TYPE_STRING) {
+        } else if (type == ColumnType.COLUMN_TYPE_STRING) {
             obj = reader.readSizedString(byteOrder);
+        } else if (type == ColumnType.COLUMN_TYPE_DECIMAL) {
+            obj = bytesToDecimal(reader);
         } else if (ColumnType.isComposite(type)) {
             obj = decodeCompositeValue(reader, type);
         } else if (type == ColumnType.COLUMN_TYPE_ANY) {
@@ -678,7 +682,8 @@ public class ValueParser {
             BytesReader basicReader = new BytesReader(value);
             obj = bytesBasicToObject(basicReader, valueType);
         }
-        if (valueType == ColumnType.COLUMN_TYPE_STRING) {
+        if (valueType == ColumnType.COLUMN_TYPE_STRING
+                || valueType == ColumnType.COLUMN_TYPE_DECIMAL) {
             VectorWrapper stringVec = vector.getVectorWrapper((int) anyHeader.getChunkIndex());
             obj = DecodeUtils.bytesToSizedString(stringVec.getVectorData(),
                                                  (int) anyHeader.getOffset(),
@@ -707,9 +712,10 @@ public class ValueParser {
         Object obj;
         if (ColumnType.isBasic(columnType)) {
             obj = bytesBasicToObject(reader, columnType);
-        } else if (columnType == ColumnType.COLUMN_TYPE_DECIMAL
-                || columnType == ColumnType.COLUMN_TYPE_STRING) {
+        } else if (columnType == ColumnType.COLUMN_TYPE_STRING) {
             obj = reader.readSizedString(byteOrder);
+        } else if (columnType == ColumnType.COLUMN_TYPE_DECIMAL) {
+            obj = bytesToDecimal(reader);
         } else if (ColumnType.isComposite(columnType)) {
             obj = decodeCompositeValue(reader, columnType);
         } else {
@@ -779,6 +785,33 @@ public class ValueParser {
 
 
     /**
+     * decode binary to object for decimal
+     *
+     * @param reader BinaryReader with cursor
+     * @return Object
+     * @throws NumberFormatException if decimal is Infinity or Nan.
+     */
+    private Object bytesToDecimal(BytesReader reader) {
+        String decimalStr = reader.readSizedString(byteOrder);
+        return stringToDecimal(decimalStr);
+    }
+
+    /**
+     * convert string to decimal
+     *
+     * @param decimalStr decimal string value
+     * @return Object
+     * @throws NumberFormatException if decimal is Infinity or Nan.
+     */
+    private Object stringToDecimal(String decimalStr) {
+        if (decimalStr.equals("NaN") || decimalStr.equals("+Inf") || decimalStr.equals("-Inf")) {
+            throw new NumberFormatException(decimalStr);
+        }
+        return new BigDecimal(decimalStr);
+    }
+
+
+    /**
      * decode binary to object for composite type
      *
      * @param reader BinaryReader with cursor
@@ -822,6 +855,7 @@ public class ValueParser {
             case COLUMN_TYPE_DURATION:
                 return bytesToDuration(reader.read(DURATION_SIZE));
             case COLUMN_TYPE_DECIMAL:
+                return new BigDecimal(reader.readSizedString(byteOrder));
             case COLUMN_TYPE_STRING:
                 return reader.readSizedString(byteOrder);
             case COLUMN_TYPE_LIST:

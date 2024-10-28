@@ -76,7 +76,6 @@ public enum ColumnType {
             case COLUMN_TYPE_LOCALDATETIME:
             case COLUMN_TYPE_ZONEDDATETIME:
             case COLUMN_TYPE_DURATION:
-            case COLUMN_TYPE_DECIMAL:
                 return true;
             default:
                 return false;

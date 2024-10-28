@@ -25,11 +25,9 @@ import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_UINT8
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_ZONEDDATETIME;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_ZONEDTIME;
 
-import com.google.common.base.Charsets;
 import com.vesoft.nebula.driver.graph.decode.ColumnType;
 import com.vesoft.nebula.driver.graph.exception.InvalidValueException;
 import java.math.BigDecimal;
-import java.nio.charset.Charset;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -567,7 +565,7 @@ public class ValueWrapper {
      */
     public BigDecimal asDecimal() throws InvalidValueException {
         if (type == COLUMN_TYPE_DECIMAL) {
-            return new BigDecimal((String) value);
+            return (BigDecimal) value;
         }
         throw new InvalidValueException(
                 "cannot get field `decimal` because value's type is " + getDataType());

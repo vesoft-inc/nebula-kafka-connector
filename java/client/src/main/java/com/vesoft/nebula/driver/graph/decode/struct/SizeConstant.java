@@ -42,16 +42,15 @@ public class SizeConstant {
 
     public static final int DURATION_SIZE = 8;
 
-    public static final int DECIMAL_SIZE = 8;
 
     // list
     // list header size
     public static final int LIST_HEADER_SIZE = 8;
     // list size size
-    public static final int LIST_SIZE_SIZE = 4;
+    public static final int LIST_SIZE_SIZE   = 4;
 
     public static final int RECORD_HEADER_SIZE = 8;
-    public static final int ANY_HEADER_SIZE = 8;
+    public static final int ANY_HEADER_SIZE    = 8;
 
     // Byte size for the element
     public static final int GRAPH_ID_SIZE     = 4;
@@ -69,13 +68,13 @@ public class SizeConstant {
 
     // path
     // element num size for path
-    public static final int PATH_ELEMENT_NUM_SIZE       = 4;
+    public static final int PATH_ELEMENT_NUM_SIZE               = 4;
     // size for value for nodeTypes or edgeTypes for path: map<NodeTypeId, uint16_t> in server
     public static final int PATH_META_DATA_NODE_EDGE_TYPE_INDEX = 2;
-    public static final int PATH_HEADER_SIZE_SIZE = 4;
-    public static final int PATH_HEADER_LENGTH_SIZE = 4;
-    public static final int PATH_HEADER_HEAD_OFFSET_SIZE = 4;
-    public static final int PATH_HEADER_TAIL_OFFSET_SIZE = 4;
+    public static final int PATH_HEADER_SIZE_SIZE               = 4;
+    public static final int PATH_HEADER_LENGTH_SIZE             = 4;
+    public static final int PATH_HEADER_HEAD_OFFSET_SIZE        = 4;
+    public static final int PATH_HEADER_TAIL_OFFSET_SIZE        = 4;
 
 
     // filed num size for record

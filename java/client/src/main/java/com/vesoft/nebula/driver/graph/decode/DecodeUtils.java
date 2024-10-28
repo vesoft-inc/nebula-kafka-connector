@@ -93,7 +93,6 @@ public class DecodeUtils {
     }
 
 
-
     /**
      * decode binary to float
      *
