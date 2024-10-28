@@ -561,3 +561,4 @@
 | NF009 | Empty backup name to be dropped.                                                                                                  | 要删除的备份名称为空。                                                |
 | NF010 | Backup name does not exist.                                                                                                       | 备份名称不存在。                                                   |
 | NU000 | Unknown error.                                                                                                                    | 未知错误。                                                      |
+| NK015 | The options in the key-value store were invalid. | 键值存储中的选项无效。 |
