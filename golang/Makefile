@@ -12,6 +12,7 @@ test:
 
 e2e-up:
 	cd ../docker-compose && docker-compose pull && docker-compose up -d
+	cd e2e && go run main.go
 
 e2e-down:
 	cd ../docker-compose && docker-compose down

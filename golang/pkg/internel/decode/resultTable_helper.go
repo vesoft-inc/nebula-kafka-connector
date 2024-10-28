@@ -406,7 +406,6 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 		}
 		nodeSchema := schema.nodeSchema
 		edgeSchema := schema.edgeSchema
-		// header = headNodeId + tailNodeId + totalNum + edgeNum + headoffset + tailoffset
 		// header = totalNum + headerIdx + tailIdx + headOffset + tailOffset
 		length := 4 + 2 + 2 + 4 + 4
 		header := v.VectorData[index*uint32(length) : index*(uint32(length))+uint32(length)]
@@ -567,7 +566,7 @@ func decodePropVectorIndex(graphElementTypes graphElementProps, bs []byte, isNod
 
 func decodePathSpecialData(v *vector.NestedVector, meta *pathMetaData) error {
 	// special meta data
-	// num of node type + [node type id + pair index] + num of edge type + [edge type id + pair index]
+	// num of node type + [graph id + node type id + pair index] + num of edge type + [graph id + edge type id + pair index]
 	r := newBytesReader(v.SpecialMetaData)
 	nodeTypeNumBytes := r.readN(4)
 	if r.error() != nil {

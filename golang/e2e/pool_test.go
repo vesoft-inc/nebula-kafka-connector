@@ -57,6 +57,7 @@ func TestSessionSet(t *testing.T) {
 	p, err := nebula.NewNebulaPool(nebulaAddress, nebulaUser, nebulaPassword,
 		nebula.WithPoolGraph("test_graph"),
 		nebula.WithPoolSchema("/test_schema"),
+		nebula.WithPoolTimezone("Asia/Shanghai"),
 	)
 	if err != nil {
 		t.Fatal(err)
@@ -91,4 +92,9 @@ func TestSessionSet(t *testing.T) {
 		t.Fatal(err)
 	}
 	assert.Equal(t, v.String(), "test_graph")
+	v, err = row.GetValueByName("time_zone")
+	if err != nil {
+		t.Fatal(err)
+	}
+	assert.Equal(t, v.String(), "Asia/Shanghai")
 }

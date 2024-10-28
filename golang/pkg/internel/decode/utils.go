@@ -83,7 +83,8 @@ func isBasicColumnType(typ types.ColumnType) bool {
 	case types.ColumnTypeZonedTime, types.ColumnTypeZonedDatetime:
 		fallthrough
 	case types.ColumnTypeDate, types.ColumnTypeDuration:
-		fallthrough
+		return true
+
 	default:
 		return false
 	}
