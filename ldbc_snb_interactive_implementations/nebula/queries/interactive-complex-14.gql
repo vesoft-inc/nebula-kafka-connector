@@ -6,7 +6,7 @@
   27 AS person2Id
 }
 */
-
+CONFIGS optimizer_rules = "enhanced_column_pruner=on"
 USE $graphName
 MATCH path0 = ALL SHORTEST PATH (person1:Person {id:$person1Id})<-[:KNOWS]->*(person2:Person {id:$person2Id})
 LET pathNodes = nodes(path0)
