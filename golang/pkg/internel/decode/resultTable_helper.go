@@ -276,7 +276,7 @@ func (c *vectorDecoder) decodeNodeValue() decodeFlatFn {
 		if !ok {
 			return nil, errTypeAssertion
 		}
-		allNodeProps := nodeSchema.elemenetProps
+		allNodeProps := nodeSchema.graphElemenetProps
 		if err := decodePropVectorIndex(allNodeProps, v.SpecialMetaData, true); err != nil {
 			return nil, err
 		}
@@ -287,7 +287,11 @@ func (c *vectorDecoder) decodeNodeValue() decodeFlatFn {
 		nodeID := bytesToInt64(header[:8])
 		graphID := bytesToInt32(header[8:12])
 		nodeTypeID := (int32)(nodeID >> 48)
-		nodeProps, ok := allNodeProps[nodeTypeID]
+		nodeType, ok := allNodeProps[graphID]
+		if !ok {
+			return nil, errors.Wrap(errElementTypeNotFount, "")
+		}
+		nodeProps, ok := nodeType[nodeTypeID]
 		if !ok {
 			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
@@ -325,7 +329,7 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 		if !ok {
 			return nil, errTypeAssertion
 		}
-		allGraphElementProps := schema.elemenetProps
+		allGraphElementProps := schema.graphElemenetProps
 		if err := decodePropVectorIndex(allGraphElementProps, v.SpecialMetaData, false); err != nil {
 			return nil, err
 		}
@@ -340,7 +344,11 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 		edgeTypeID := bytesToInt32(header[28:32])
 		noDirectType := edgeTypeID & 0x3FFFFFFF
 		direction := getEdgeDirection(uint8(edgeTypeID >> 30))
-		props, ok := allGraphElementProps[noDirectType]
+		edgeType, ok := allGraphElementProps[graphID]
+		if !ok {
+			return nil, errors.Wrap(errElementTypeNotFount, "")
+		}
+		props, ok := edgeType[noDirectType]
 		if !ok {
 			return nil, errors.Wrap(errElementTypeNotFount, "")
 		}
@@ -399,15 +407,15 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 		nodeSchema := schema.nodeSchema
 		edgeSchema := schema.edgeSchema
 		// header = headNodeId + tailNodeId + totalNum + edgeNum + headoffset + tailoffset
-		length := 8 + 8 + 4 + 4 + 4 + 4
+		// header = totalNum + headerIdx + tailIdx + headOffset + tailOffset
+		length := 4 + 2 + 2 + 4 + 4
 		header := v.VectorData[index*uint32(length) : index*(uint32(length))+uint32(length)]
-		headNodeID := bytesToInt64(header[:8])
-		tailNodeID := bytesToInt64(header[8:16])
-		totalNum := bytesToInt32(header[16:20])
-		edgeNum := bytesToInt32(header[20:24])
-		headOffset := bytesToUint32(header[24:28])
-		tailOffset := bytesToInt32(header[28:32])
-		_, _, _ = edgeNum, tailNodeID, tailOffset
+		totalNum := bytesToInt32(header[:4])
+		headerIdx := bytesToUint16(header[4:6])
+		tailIdx := bytesToUint16(header[6:8])
+		headOffset := bytesToUint32(header[8:12])
+		tailOffset := bytesToUint32(header[12:16])
+		_, _ = tailIdx, tailOffset
 
 		path := &NebulaPath{
 			Values: make([]*nebulaValue, 0, totalNum),
@@ -425,11 +433,8 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 			pathHeader           *pathAdjHeader
 			err                  error
 		)
-		headNodeType := int32(headNodeID >> 48)
-		pairIndex, ok := meta.nodeTypeIndex[headNodeType]
-		if !ok {
-			return nil, errors.Wrap(errElementTypeNotFount, "")
-		}
+		pairIndex := pathPairIndex(headerIdx)
+
 		sentinelPair, ok := meta.nodeIndexPair[pairIndex]
 		if !ok {
 			return nil, errors.Wrap(errElementTypeNotFount, "")
@@ -489,8 +494,8 @@ func (c *vectorDecoder) decodePathValue() decodeFlatFn {
 	}
 }
 
-func decodePropVectorIndex(elemmentTypes graphElementProps, bs []byte, isNode bool) error {
-	// properties num + [prop names] + element type num + [element type id + prop num + [vector index]]
+func decodePropVectorIndex(graphElementTypes graphElementProps, bs []byte, isNode bool) error {
+	// properties num + [prop names] + element type num + [graph id + element type id + prop num + [vector index]]
 	// vector index is same as the order of prop names
 	elementTypeSize := 2
 	if !isNode {
@@ -521,12 +526,13 @@ func decodePropVectorIndex(elemmentTypes graphElementProps, bs []byte, isNode bo
 	}
 	nodeTypeNum := bytesToInt32(nodeTypeNumBytes)
 	for i := 0; i < int(nodeTypeNum); i++ {
+		graphIdBytes := r.readN(4)
 		elementTypeIdBytes := r.readN(elementTypeSize)
-
 		propNumBytes := r.readN(4)
 		if r.error() != nil {
 			return r.error()
 		}
+		graphId := bytesToInt32(graphIdBytes)
 		var elementId int32
 		if isNode {
 			elementId = int32(bytesToInt16(elementTypeIdBytes))
@@ -540,11 +546,16 @@ func decodePropVectorIndex(elemmentTypes graphElementProps, bs []byte, isNode bo
 				return r.error()
 			}
 			vectorIndex := bytesToInt32(vectorIndexBytes)
-			nodeType, ok := elemmentTypes[elementId]
+			elementTypes, ok := graphElementTypes[graphId]
 			if !ok {
 				return errors.Wrap(errElementTypeNotFount, "")
 			}
-			prop, ok := nodeType[propList[vectorIndex]]
+			et, ok := elementTypes[elementId]
+			if !ok {
+				return errors.Wrap(errElementTypeNotFount, "")
+			}
+
+			prop, ok := et[propList[vectorIndex]]
 			if !ok {
 				return errPropNotFound
 			}
@@ -565,11 +576,13 @@ func decodePathSpecialData(v *vector.NestedVector, meta *pathMetaData) error {
 	nodeTypeNum := bytesToInt32(nodeTypeNumBytes)
 	nestedVectorIndex := 0
 	for i := 0; i < int(nodeTypeNum); i++ {
+		graphIdTypes := r.readN(4)
 		nodeTypeIdBytes := r.readN(2)
 		pairIndexBytes := r.readN(2)
 		if r.error() != nil {
 			return r.error()
 		}
+		_ = bytesToInt32(graphIdTypes)
 		nodeTypeId := int32(bytesToUint16(nodeTypeIdBytes))
 		pairIndex := bytesToUint16(pairIndexBytes)
 		meta.nodeTypeIndex[nodeTypeId] = pathPairIndex(pairIndex)
@@ -585,11 +598,13 @@ func decodePathSpecialData(v *vector.NestedVector, meta *pathMetaData) error {
 	}
 	edgeTypeNum := bytesToInt32(edgeTypeNumBytes)
 	for i := 0; i < int(edgeTypeNum); i++ {
+		graphIdTypes := r.readN(4)
 		edgeTypeIdBytes := r.readN(4)
 		pairIndexBytes := r.readN(2)
 		if r.error() != nil {
 			return r.error()
 		}
+		_ = bytesToInt32(graphIdTypes)
 		edgeTypeId := bytesToInt32(edgeTypeIdBytes)
 		pairIndex := bytesToInt16(pairIndexBytes)
 		meta.edgeTypeIndex[edgeTypeId] = pathPairIndex(pairIndex)

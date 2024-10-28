@@ -24,8 +24,8 @@ type (
 	}
 
 	columnTypeSchemaElement struct {
-		typ           types.ColumnType
-		elemenetProps graphElementProps
+		typ                types.ColumnType
+		graphElemenetProps graphElementProps
 	}
 
 	columnTypeSchemaPath struct {
@@ -107,8 +107,8 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			return nil, err
 		}
 		typ := columnTypeSchemaElement{
-			typ:           t,
-			elemenetProps: pp,
+			typ:                t,
+			graphElemenetProps: pp,
 		}
 		return &typ, nil
 	case types.ColumnTypeEdge:
@@ -117,8 +117,8 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			return nil, err
 		}
 		typ := columnTypeSchemaElement{
-			typ:           t,
-			elemenetProps: pp,
+			typ:                t,
+			graphElemenetProps: pp,
 		}
 		return &typ, nil
 	case types.ColumnTypePath:
@@ -126,12 +126,12 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 		typ := columnTypeSchemaPath{
 			typ: t,
 			nodeSchema: &columnTypeSchemaElement{
-				typ:           types.ColumnTypeNode,
-				elemenetProps: make(graphElementProps),
+				typ:                types.ColumnTypeNode,
+				graphElemenetProps: make(graphElementProps),
 			},
 			edgeSchema: &columnTypeSchemaElement{
-				typ:           types.ColumnTypeEdge,
-				elemenetProps: make(graphElementProps),
+				typ:                types.ColumnTypeEdge,
+				graphElemenetProps: make(graphElementProps),
 			},
 		}
 		elementNumBytes := r.readN(4)
@@ -146,13 +146,27 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			}
 			if elementSchema.getType() == types.ColumnTypeNode {
 				s := elementSchema.(*columnTypeSchemaElement)
-				for k, v := range s.elemenetProps {
-					typ.nodeSchema.elemenetProps[k] = v
+				for graphId, types := range s.graphElemenetProps {
+					graph, ok := typ.nodeSchema.graphElemenetProps[graphId]
+					if !ok {
+						typ.nodeSchema.graphElemenetProps[graphId] = types
+					} else {
+						for k, v := range types {
+							graph[k] = v
+						}
+					}
 				}
 			} else if elementSchema.getType() == types.ColumnTypeEdge {
 				s := elementSchema.(*columnTypeSchemaElement)
-				for k, v := range s.elemenetProps {
-					typ.edgeSchema.elemenetProps[k] = v
+				for graphId, types := range s.graphElemenetProps {
+					graph, ok := typ.edgeSchema.graphElemenetProps[graphId]
+					if !ok {
+						typ.edgeSchema.graphElemenetProps[graphId] = types
+					} else {
+						for k, v := range types {
+							graph[k] = v
+						}
+					}
 				}
 			} else {
 				return nil, errInvalidColumnType
@@ -193,7 +207,7 @@ func (s *columnTypeSchemaElement) getType() types.ColumnType {
 }
 
 func (s *columnTypeSchemaElement) getElementProps() graphElementProps {
-	return s.elemenetProps
+	return s.graphElemenetProps
 }
 
 func (s *columnTypeSchemaPath) getType() types.ColumnType {
@@ -209,7 +223,7 @@ func (s *columnTypeSchemaPath) getEdgeSchema() *columnTypeSchemaElement {
 }
 
 func decodeElementTypes(r *bytesReader, isNode bool) (graphElementProps, error) {
-	// num of element type + [element type id + num of props + [prop name + prop type]]
+	// num of element type + [graphid + element type id + num of props + [prop name + prop type]]
 	// ignore the first byte nodeType
 	elementTypeSize := 2
 	if !isNode {
@@ -220,9 +234,14 @@ func decodeElementTypes(r *bytesReader, isNode bool) (graphElementProps, error) 
 		return nil, r.error()
 	}
 	numElementType := bytesToInt32(numElementTypeBytes)
-	elementTypes := make(graphElementProps)
+	graphElementTypes := make(graphElementProps)
 	for i := 0; i < int(numElementType); i++ {
 		var elementTypeId int32
+		graphIdTypes := r.readN(4)
+		if r.error() != nil {
+			return nil, r.error()
+		}
+		graphId := bytesToInt32(graphIdTypes)
 		elementTypeIdBytes := r.readN(elementTypeSize)
 		if r.error() != nil {
 			return nil, r.error()
@@ -232,7 +251,12 @@ func decodeElementTypes(r *bytesReader, isNode bool) (graphElementProps, error) 
 		} else {
 			elementTypeId = bytesToInt32(elementTypeIdBytes)
 		}
-		nt := make(map[string]*vectorProps)
+		var graphType elementProps
+		graphType, ok := graphElementTypes[graphId]
+		if !ok {
+			graphType = make(elementProps)
+		}
+		nt := make(props)
 		numPropsBytes := r.readN(4)
 		if r.error() != nil {
 			return nil, r.error()
@@ -257,9 +281,11 @@ func decodeElementTypes(r *bytesReader, isNode bool) (graphElementProps, error) 
 			}
 			nt[prop.name] = prop
 		}
-		elementTypes[elementTypeId] = nt
+		graphType[elementTypeId] = nt
+		graphElementTypes[graphId] = graphType
 	}
-	return elementTypes, nil
+
+	return graphElementTypes, nil
 }
 
 func decodePropNameAndType(name []byte, r *bytesReader) (*vectorProps, error) {

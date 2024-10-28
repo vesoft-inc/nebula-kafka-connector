@@ -112,7 +112,8 @@ type pathAdjHeader struct {
 	nextOffset      uint32
 }
 type props map[string]*vectorProps
-type graphElementProps map[int32]props
+type elementProps map[int32]props
+type graphElementProps map[int32]elementProps
 
 type vectorProps struct {
 	name        string
