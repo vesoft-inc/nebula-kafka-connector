@@ -84,8 +84,6 @@ func isBasicColumnType(typ types.ColumnType) bool {
 		fallthrough
 	case types.ColumnTypeDate, types.ColumnTypeDuration:
 		fallthrough
-	case types.ColumnTypeDecimal:
-		return true
 	default:
 		return false
 	}
