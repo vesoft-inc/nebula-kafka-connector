@@ -9,6 +9,7 @@ import com.vesoft.nebula.driver.graph.ErrorCode;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.util.MockGraph;
 import com.vesoft.nebula.driver.graph.util.ProcessUtil;
+import java.time.ZoneId;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,7 +20,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class NebulaPoolTest {
-    String addresses = "127.0.0.1:9669,127.0.0.1:9670,127.0.0.1:9671";
+    String addresses = "127.0.0.1:9669";
     String user      = "root";
     String passwd    = "NebulaGraph01";
 
@@ -75,27 +76,100 @@ public class NebulaPoolTest {
     }
 
     @Test
-    public void testWorkingGraph() {
-        System.out.println("<==== testWorkingGraph ====>");
+    public void testSessionSet() {
+        System.out.println("<==== testSessionSet ====>");
+        // test all session set configs
         try {
             NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
-                    .withWorkingGraph("nba")
+                    .withGraph("nba")
+                    .withSchema("/default_schema")
+                    .withTimeZone(ZoneId.systemDefault().getId())
                     .build();
-            NebulaClient client = pool.getClient();
-            client.execute("RETURN 1");
+            Assert.assertEquals("nba",
+                                pool
+                                        .getClient()
+                                        .execute("show current_session")
+                                        .next()
+                                        .get("home_graph_name")
+                                        .asString());
+            Assert.assertEquals("/default_schema",
+                                pool
+                                        .getClient()
+                                        .execute("show current_session")
+                                        .next()
+                                        .get("home_schema_path")
+                                        .asString());
+            Assert.assertEquals("Asia/Shanghai",
+                                pool
+                                        .getClient()
+                                        .execute("show current_session")
+                                        .next()
+                                        .get("time_zone")
+                                        .asString());
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        // test one session set config
+
+        try {
+            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+                    .withGraph("nba")
+                    .build();
+            Assert.assertEquals("nba",
+                                pool
+                                        .getClient()
+                                        .execute("show current_session")
+                                        .next()
+                                        .get("home_graph_name")
+                                        .asString());
+        } catch (Exception e) {
+            assert e.getMessage().contains("SESSION SET home_graph_name=\"nba_not_exist\" failed");
+        }
+
+        try {
+            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+                    .withSchema("/default_schema")
+                    .build();
+            Assert.assertEquals("/default_schema",
+                                pool
+                                        .getClient()
+                                        .execute("show current_session")
+                                        .next()
+                                        .get("home_schema_path")
+                                        .asString());
+
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         }
 
         try {
             NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
-                    .withWorkingGraph("nba_not_exist")
+                    .withTimeZone("UTC")
+                    .build();
+            Assert.assertEquals("UTC",
+                                pool
+                                        .getClient()
+                                        .execute("show current_session")
+                                        .next()
+                                        .get("time_zone")
+                                        .asString());
+
+        } catch (Exception e) {
+            Assert.fail(e.getMessage());
+        }
+
+        // test wrong graph
+        try {
+            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+                    .withGraph("nba_not_exist")
                     .build();
             pool.getClient();
             Assert.fail("get client should fail.");
         } catch (Exception e) {
-            assert e.getMessage().contains("SESSION SET failed");
+            assert e.getMessage().contains("SESSION SET home_graph_name=\"nba_not_exist\" failed");
         }
+
     }
 
 

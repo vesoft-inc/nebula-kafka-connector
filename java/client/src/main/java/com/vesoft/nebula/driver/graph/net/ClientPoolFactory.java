@@ -5,7 +5,7 @@ import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import java.io.Serializable;
-import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -58,30 +58,26 @@ public class ClientPoolFactory extends BasePooledObjectFactory<NebulaClient>
         // set the working graph and time zone
         StringBuilder sessionSetStatement = new StringBuilder();
         sessionSetStatement.append("SESSION SET ");
-        if (builder.workingGraph != null) {
-            sessionSetStatement
-                    .append("home_graph_name=\"")
-                    .append(builder.workingGraph)
-                    .append("\", ");
+
+        List<String> sessionSetParams = new ArrayList<>();
+        if (builder.graph != null) {
+            sessionSetParams.add(String.format("home_graph_name=\"%s\"", builder.graph));
         }
         if (builder.timeZone != null) {
-            sessionSetStatement
-                    .append("timezone=\"")
-                    .append(builder.timeZone)
-                    .append("\",");
+            sessionSetParams.add(String.format("timezone=\"%s\"", builder.timeZone));
         }
-        if (builder.schemaName != null) {
-            sessionSetStatement
-                    .append(" home_schema_path=\"")
-                    .append(builder.schemaName)
-                    .append("\" ");
+        if (builder.schema != null) {
+            sessionSetParams.add(String.format("home_schema_path=\"%s\"", builder.schema));
         }
 
-        if (!sessionSetStatement.toString().isEmpty()) {
-            ResultSet result = client.execute(sessionSetStatement.toString());
+        if (!sessionSetParams.isEmpty()) {
+            String stmt = sessionSetStatement
+                    .append(String.join(",", sessionSetParams))
+                    .toString();
+            ResultSet result = client.execute(stmt);
             if (!result.isSucceeded()) {
                 throw new RuntimeException(String.format("%s failed for %s",
-                                                         sessionSetStatement,
+                                                         stmt,
                                                          result.getErrorMessage()));
             }
         }

@@ -8,7 +8,6 @@ import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.utils.AddressUtil;
 import java.io.Serializable;
 import java.net.UnknownHostException;
-import java.time.ZoneId;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -164,12 +163,12 @@ public class NebulaPool implements Serializable {
         // if true, all addresses must be available, if false, at least one address is available.
         protected boolean strictlyServerHealthy = Constants.DEFAULT_STRICT_SERVER_HEALTHY;
 
-        protected String workingGraph = null;
+        protected String graph = null;
 
         // the time zone, used to parse ZonedTime and ZonedDatetime
-        protected ZoneId              timeZone          = null;
-        protected String              schemaName        = null;
-        protected Map<String, String> parameters        = new HashMap<>();
+        protected String              timeZone   = null;
+        protected String              schema     = null;
+        protected Map<String, String> parameters = new HashMap<>();
         protected int                 scanParallel      = Constants.DEFAULT_SCAN_PARALLEL;
         protected boolean             enableTls         = DEFAULT_ENABLE_TLS;
         protected String              tlsCa;
@@ -347,11 +346,11 @@ public class NebulaPool implements Serializable {
         /**
          * config the initial working graph for NebulaClient in NebulaPool
          *
-         * @param workingGraph working graph name
+         * @param graph home graph name
          * @return NebulaPool.Builder
          */
-        public Builder withWorkingGraph(String workingGraph) {
-            this.workingGraph = workingGraph;
+        public Builder withGraph(String graph) {
+            this.graph = graph;
             return this;
         }
 
@@ -361,7 +360,7 @@ public class NebulaPool implements Serializable {
          * @param zoneId zone id
          * @return NebulaPool.Builder
          */
-        public Builder withTimeZone(ZoneId zoneId) {
+        public Builder withTimeZone(String zoneId) {
             this.timeZone = zoneId;
             return this;
         }
@@ -369,11 +368,11 @@ public class NebulaPool implements Serializable {
         /**
          * config the initial schema for NebulaClient in NebulaPool
          *
-         * @param schemaName schema name
+         * @param schema home schema path
          * @return NebulaPool.Builder
          */
-        public Builder withSchemaName(String schemaName) {
-            this.schemaName = schemaName;
+        public Builder withSchema(String schema) {
+            this.schema = schema;
             return this;
         }
 
