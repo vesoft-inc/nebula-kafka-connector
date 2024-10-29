@@ -270,7 +270,7 @@ func (c *storagedComponent) GenerateHeadlessService() *corev1.Service {
 func (c *storagedComponent) GenerateConfigMap() *corev1.ConfigMap {
 	cm := generateConfigMap(c)
 	configKey := getCmKey(c.ComponentType().String())
-	cm.Data[configKey] = StoragedConfigTemplate
+	cm.Data[configKey] = StoragedDefaultConfig
 	return cm
 }
 

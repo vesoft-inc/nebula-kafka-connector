@@ -127,7 +127,7 @@ PLATFORMS = arm64 amd64
 BUILDX_PLATFORMS = linux/arm64,linux/amd64
 
 .PHONY: docker-buildx
-docker-buildx: ensure-buildx ## Build and push docker image for the manager for cross-platform support
+docker-buildx: ## Build and push docker image for the manager for cross-platform support
 	$(foreach PLATFORM,$(PLATFORMS), echo -n "$(PLATFORM)..."; GOARCH=$(PLATFORM) make build;)
 	echo "Building and pushing nebula-ng-operator image... $(BUILDX_PLATFORMS)"
 	docker buildx build \

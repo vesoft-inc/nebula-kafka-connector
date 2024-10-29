@@ -228,7 +228,7 @@ func generateNebulaContainers(c NebulaComponent, metadEndpoints []string, cm *co
 		" --local_ip=$(hostname)." + c.GetServiceFQDN() +
 		" --port=" + strconv.Itoa(int(c.GetGrpcPort())) +
 		" --daemonize=false" + dataPath +
-		" --log_dir=logs"
+		" --log_directory=logs"
 	cmd = append(cmd, fmt.Sprintf("exec /usr/local/nebula/bin/nebula-%s", componentType)+
 		fmt.Sprintf(" --flagfile=/usr/local/nebula/etc/nebula-%s.conf", componentType)+flags)
 

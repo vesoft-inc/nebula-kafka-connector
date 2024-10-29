@@ -312,7 +312,7 @@ func (m *metadComponent) GenerateHeadlessService() *corev1.Service {
 func (m *metadComponent) GenerateConfigMap() *corev1.ConfigMap {
 	cm := generateConfigMap(m)
 	configKey := getCmKey(m.ComponentType().String())
-	cm.Data[configKey] = MetadhConfigTemplate
+	cm.Data[configKey] = MetadDefaultConfig
 	return cm
 }
 

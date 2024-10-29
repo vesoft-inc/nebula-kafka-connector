@@ -216,7 +216,7 @@ func (g *graphdCluster) syncGraphdConfigMap(nc *v1alpha1.NebulaCluster) (*corev1
 	return syncConfigMap(
 		nc.GraphdComponent(),
 		g.clientSet.ConfigMap(),
-		v1alpha1.GraphdConfigTemplate,
+		v1alpha1.GraphdDefaultConfig,
 		nc.GraphdComponent().GetConfigMapKey())
 }
 

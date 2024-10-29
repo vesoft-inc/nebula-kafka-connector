@@ -213,7 +213,7 @@ func (c *metadCluster) syncMetadConfigMap(nm *v1alpha1.NebulaMetad) (*corev1.Con
 	return syncConfigMap(
 		nm.MetadComponent(),
 		c.clientSet.ConfigMap(),
-		v1alpha1.MetadhConfigTemplate,
+		v1alpha1.MetadDefaultConfig,
 		nm.MetadComponent().GetConfigMapKey())
 }
 
@@ -236,12 +236,13 @@ func (c *metadCluster) syncNebulaMetadStatus(nm *v1alpha1.NebulaMetad, oldWorklo
 }
 
 func (c *metadCluster) syncManagedClusters(mc meta.Client, nm *v1alpha1.NebulaMetad) error {
-	req := meta.NewListClustersReq("")
-	resp, err := mc.ListClusters(req)
+	req := meta.NewListServiceGroupsReq("")
+	resp, err := mc.ListServiceGroups(req)
 	if err != nil {
+		klog.Error(err)
 		return err
 	}
-	nm.Status.ManagedClusters = int32(len(resp.Clusters))
+	nm.Status.ManagedClusters = int32(len(resp.ServiceGroups))
 	return nil
 }
 

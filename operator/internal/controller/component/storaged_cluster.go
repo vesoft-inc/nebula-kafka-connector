@@ -191,7 +191,7 @@ func (s *storagedCluster) syncStoragedConfigMap(nc *v1alpha1.NebulaCluster) (*co
 	return syncConfigMap(
 		nc.StoragedComponent(),
 		s.clientSet.ConfigMap(),
-		v1alpha1.StoragedConfigTemplate,
+		v1alpha1.StoragedDefaultConfig,
 		nc.StoragedComponent().GetConfigMapKey())
 }
 
@@ -205,8 +205,8 @@ func (s *storagedCluster) syncStoragedPVC(nc *v1alpha1.NebulaCluster) error {
 }
 
 func (s *storagedCluster) initCluster(metaClient meta.Client, clusterName string) error {
-	req := meta.NewInitClusterReq(clusterName)
-	if err := metaClient.InitCluster(req); err != nil {
+	req := meta.NewInitServiceGroupReq(clusterName)
+	if err := metaClient.InitServiceGroup(req); err != nil {
 		if ne, ok := err.(*nebulaErr.NebulaError); ok {
 			if ne.Code() != "NI203" {
 				klog.Errorf("init cluster failed: %v", err)

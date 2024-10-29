@@ -221,7 +221,7 @@ func (c *graphdComponent) GenerateHeadlessService() *corev1.Service {
 func (c *graphdComponent) GenerateConfigMap() *corev1.ConfigMap {
 	cm := generateConfigMap(c)
 	configKey := getCmKey(c.ComponentType().String())
-	cm.Data[configKey] = GraphdConfigTemplate
+	cm.Data[configKey] = GraphdDefaultConfig
 	return cm
 }
 
