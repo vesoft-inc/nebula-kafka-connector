@@ -2,7 +2,10 @@ package tasks
 
 import (
 	"fmt"
+	"os"
+	"path/filepath"
 	"regexp"
+	"time"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/nebula"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
@@ -78,12 +81,14 @@ func (d *InitConfig) Execute() error {
 	// use regex to replace config ' "
 	re := regexp.MustCompile("`")
 	config = re.ReplaceAllString(config, "'")
-
-	// write config to remote
-	cmd := fmt.Sprintf(`cat>%s<<EOF
-%s
-EOF`, d.dst, config)
-	_, stderr, err := executor.Shell(cmd, d.sudo)
+	filename := filepath.Base(d.dst)
+	tempFile := fmt.Sprintf("%s_%s_%s", d.host, filename, time.Now().Format("20060102150405"))
+	if err := os.WriteFile(tempFile, []byte(config), 0644); err != nil {
+		return fmt.Errorf("write temp file error: %s", err)
+	}
+	defer os.Remove(tempFile)
+	// upload config to remote
+	_, stderr, err := executor.Upload(tempFile, d.dst)
 	if err != nil {
 		return fmt.Errorf("stderr: %s, err: %s", string(stderr), err)
 	}

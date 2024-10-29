@@ -48,7 +48,7 @@ func (d *CheckDir) Execute() error {
 		return d.RmDirs()
 	}
 	// check if the dir exists
-	cmd := fmt.Sprintf("test -d %s && ls %s", d.path, d.path)
+	cmd := fmt.Sprintf("mkdir -p %s && test -d %s && ls %s", d.path, d.path, d.path)
 	stdout, stderr, err := executor.Shell(cmd, false)
 	if err != nil {
 		return fmt.Errorf("check dir failed %s, %s, %v", stdout, stderr, err)

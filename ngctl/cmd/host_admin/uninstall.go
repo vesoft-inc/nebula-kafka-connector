@@ -36,5 +36,5 @@ var uninstallHostCmd = &cobra.Command{
 func init() {
 	uninstallHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "on which host to install the NebulaGraph package")
 	uninstallHostCmd.Flags().StringVarP(&hostFlags.configFile, "config", "f", "", "config file")
-	uninstallHostCmd.Flags().BoolVarP(&hostFlags.drain, "drain", "d", false, "whether to delete the data, default is false")
+	uninstallHostCmd.Flags().BoolVarP(&hostFlags.drain, "drain", "d", false, "whether to delete the install path, default is false")
 }

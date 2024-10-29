@@ -249,14 +249,24 @@ func newUnintallWorkflow(c *config.Config, hosts []string, drain bool) (*types.W
 				Host: addr,
 			},
 		})
+		var uninstallCmd string
+		if drain {
+			// if drain, we need to ignore the error of uninstall
+			uninstallCmd = fmt.Sprintf("echo Y | %s || echo 1", filepath.Join(c.JobSpec.InstallPath, "scripts", "nebula.uninstall"))
+		} else {
+			uninstallCmd = fmt.Sprintf("echo Y | " + filepath.Join(c.JobSpec.InstallPath, "scripts", "nebula.uninstall"))
+		}
 		uinstallTasks.SubTasks = append(uinstallTasks.SubTasks, &types.TaskSpec{
 			Type: "shell",
 			Params: &tasks.ShellParams{
 				Host:    addr,
-				Command: "echo Y | " + filepath.Join(c.JobSpec.InstallPath, "scripts", "nebula.uninstall"),
+				Command: uninstallCmd,
 			},
 		})
 		if drain {
+			if c.JobSpec.InstallPath == "" {
+				return nil, common.NgctlError("install path is empty", "")
+			}
 			deleteCmd := fmt.Sprintf("rm -rf " + c.JobSpec.InstallPath)
 			deleteTasks.SubTasks = append(deleteTasks.SubTasks, &types.TaskSpec{
 				Type: "shell",

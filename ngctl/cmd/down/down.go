@@ -35,5 +35,5 @@ var DownCmd = &cobra.Command{
 
 func init() {
 	DownCmd.Flags().StringVarP(&downFlags.configFile, "config", "f", "", "config file")
-	DownCmd.Flags().BoolVarP(&downFlags.drain, "drain", "d", false, "whether to delete the data, default is false")
+	DownCmd.Flags().BoolVarP(&downFlags.drain, "drain", "d", false, "whether to delete the install path, default is false")
 }
