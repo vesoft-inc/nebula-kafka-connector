@@ -6,7 +6,7 @@
 }
 */
 USE $graphName
-MATCH WALK (person:Person {id : $personId})<-[:KNOWS]->{2}(friend:Person WHERE (friend.birthday.month = $month AND friend.birthday.day >= 21) OR (friend.birthday.month = ($month % 12) + 1 AND friend.birthday.day < 22))-[:IS_LOCATED_IN]->(city:City)
+MATCH (person:Person {id : $personId})<-[:KNOWS]->{2}(friend:Person WHERE (friend.birthday.month = $month AND friend.birthday.day >= 21) OR (friend.birthday.month = ($month % 12) + 1 AND friend.birthday.day < 22))-[:IS_LOCATED_IN]->(city:City)
     WHERE friend <> person AND NOT EXISTS((person:Person{id : $personId})<-[:KNOWS]->(friend:Person))
 RETURN DISTINCT friend, city, person
 NEXT

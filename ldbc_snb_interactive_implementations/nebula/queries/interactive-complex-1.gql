@@ -6,7 +6,7 @@
 }
 */
 USE $graphName
-MATCH (p:Person{id:$personId})<-[e:KNOWS]->{1,3}(friend:Person{firstName : "$firstName"}) WHERE p<>friend
+MATCH TRAIL (p:Person{id:$personId})<-[e:KNOWS]->{1,3}(friend:Person{firstName : "$firstName"}) WHERE p<>friend
 RETURN min(length(e)) AS distance, friend GROUP BY friend
 NEXT USE $graphName
 ORDER BY
