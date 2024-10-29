@@ -403,8 +403,7 @@ public class ValueParser {
                 }
                 // decode the first node of path
                 PathVectorPair firstNodePair = indexAndNodes.get(pathHeader.getHeadNodeIndex());
-                VectorWrapper firstNodeVector = vector.getVectorWrapper(
-                        pathHeader.getHeadNodeIndex());
+                VectorWrapper firstNodeVector = firstNodePair.getVector();
                 VectorWrapper firstNodeAdjVector = firstNodePair.getAdjVector();
                 firstNode = decodeValue(firstNodeVector,
                                         pathType.getDataTypes().get(0),
