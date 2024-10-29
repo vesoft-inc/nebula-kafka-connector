@@ -5,14 +5,11 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: metad0
     command:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9559
       - --data_path=/data/meta
-      - --v=0
-      - --minloglevel=0
-      - --fromenv=local_ip
+      - --local_ip=metad0
     # healthcheck:
     #   test: ["CMD", "curl", "-sf", "http://${NAME}:19559/status"]
     #   interval: 30s
@@ -37,7 +34,11 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: metad1
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9559
+      - --data_path=/data/meta
+      - --local_ip=metad1
     volumes:
       - ./data/metad1:/data/meta
       - ./logs/metad1:/usr/local/nebula/logs
@@ -47,7 +48,11 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: metad2
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9559
+      - --data_path=/data/meta
+      - --local_ip=metad1
     volumes:
       - ./data/metad2:/data/meta
       - ./logs/metad2:/usr/local/nebula/logs
@@ -57,14 +62,11 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: storaged0
     command:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9779
       - --data_path=/data/storage
-      - --v=0
-      - --minloglevel=0
-      - --fromenv=local_ip
+      - --local_ip=storaged0
     depends_on:
       - metad0
       - metad1
@@ -92,7 +94,11 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: storaged1
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9779
+      - --data_path=/data/storage
+      - --local_ip=storaged1
     volumes:
       - ./data/storaged1:/data/storage
       - ./logs/storaged1:/usr/local/nebula/logs
@@ -102,7 +108,11 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: storaged2
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9779
+      - --data_path=/data/storage
+      - --local_ip=storaged2
     volumes:
       - ./data/storaged2:/data/storage
       - ./logs/storaged2:/usr/local/nebula/logs
@@ -112,13 +122,10 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: graphd0
     command:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9669
-      - --v=0
-      - --minloglevel=0
-      - --fromenv=local_ip
+      - --local_ip=graphd0
     depends_on:
       - storaged0
       - storaged1
@@ -146,7 +153,10 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: graphd1
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9669
+      - --local_ip=graphd1
     ports:
       - "9670:9669"
       - 19669
@@ -159,7 +169,10 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-      FLAGS_local_ip: graphd2
+    command:
+      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
+      - --port=9669
+      - --local_ip=graphd2
     ports:
       - "9671:9669"
       - 19669
@@ -176,20 +189,22 @@ services:
       - |
         sleep 5;
         for i in `seq 1 3`;do
-          ngctl supercluster passwd -H metad0 -P 9559 -u root -c nebula -p NebulaGraph01
+          ngctl passwd -H metad0 -P 9559 -u root -c nebula -p NebulaGraph01
           if [[ $$? == 0 ]];then
             break;
           fi;
           sleep 1;
           echo "retry to connect metad0";
         done ;
-        ngctl supercluster login -H metad0 -P 9559 -u root  -p NebulaGraph01
-        ngctl cluster create --cluster my_cluster1 --replica-factor 3
+        ngctl login -H metad0 -P 9559 -u root  -p NebulaGraph01
+        ngctl svcgrp create --svcgrp my_cluster1 --replica-factor 3
         for i in `seq 0 2`;do
-          ngctl service add --type graphd -H graphd$${i} --port 9669 --cluster my_cluster1
-          ngctl service add --type storaged -H storaged$${i} --port 9779 --cluster my_cluster1
+          ngctl host add -H graphd$${i} --svcgrp my_cluster1
+          ngctl host add -H storaged$${i} --svcgrp my_cluster1
+          ngctl service add --type graphd -H graphd$${i} --port 9669 --svcgrp my_cluster1
+          ngctl service add --type storaged -H storaged$${i} --port 9779 --svcgrp my_cluster1
         done;
-        ngctl cluster init --cluster my_cluster1
+        ngctl svcgrp init --svcgrp my_cluster1
         tail -f /dev/null;
 
     depends_on:

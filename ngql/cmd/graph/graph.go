@@ -169,12 +169,12 @@ func init() {
 	rootCmd.Flags().StringVarP(&script, "eval", "e", "", "The GQL directly")
 	rootCmd.Flags().StringVarP(&file, "file", "f", "", "The GQL script file name")
 	rootCmd.Flags().IntVarP(&widthMax, "width-max", "", 100, "The max width of the column of the execution plan")
-	rootCmd.Flags().BoolVarP(&enableTLS, "enable-tls", "", false, "Enable TLS")
-	rootCmd.Flags().StringVarP(&ca, "ca", "", "", "Certificate(s) of trusted CA, in PEM format")
-	rootCmd.Flags().StringVarP(&cert, "cert", "", "", "Client certificate, in PEM format")
-	rootCmd.Flags().StringVarP(&key, "key", "", "", "Client private key, in PEM format")
-	rootCmd.Flags().BoolVarP(&peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
-	rootCmd.Flags().StringVarP(&peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
+	// rootCmd.Flags().BoolVarP(&enableTLS, "enable-tls", "", false, "Enable TLS")
+	// rootCmd.Flags().StringVarP(&ca, "ca", "", "", "Certificate(s) of trusted CA, in PEM format")
+	// rootCmd.Flags().StringVarP(&cert, "cert", "", "", "Client certificate, in PEM format")
+	// rootCmd.Flags().StringVarP(&key, "key", "", "", "Client private key, in PEM format")
+	// rootCmd.Flags().BoolVarP(&peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
+	// rootCmd.Flags().StringVarP(&peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
 }
 
 func main() {

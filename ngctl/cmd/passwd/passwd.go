@@ -35,7 +35,14 @@ var PasswdCmd = &cobra.Command{
 		} else {
 			addr = cacheToken.Address
 		}
-		client, err := meta.NewMetaClient(addr, meta.WithTLS(cacheToken.EnableTLS, cacheToken.CA, cacheToken.Cert, cacheToken.Key, cacheToken.PeerNameVerify, cacheToken.PeerName))
+		var client meta.Client
+		if cacheToken != nil {
+			client, err = meta.NewMetaClient(addr, meta.WithTLS(cacheToken.EnableTLS, cacheToken.CA, cacheToken.Cert, cacheToken.Key, cacheToken.PeerNameVerify, cacheToken.PeerName))
+		} else {
+			//TODO passwd no need to login metad
+			// Support TLS in the future
+			client, err = meta.NewMetaClient(addr)
+		}
 		if err != nil {
 			return err
 		}
