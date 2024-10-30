@@ -58,6 +58,7 @@ public class NebulaPool implements Serializable {
         objConfig.setMaxWaitMillis(builder.maxWaitMills);
         objConfig.setTimeBetweenEvictionRunsMillis(builder.idleEvictScheduleMills);
         objConfig.setMinEvictableIdleTimeMillis(builder.minEvictableIdleTimeMillis);
+        objConfig.setTestOnBorrow(builder.testOnBorrow);
         // just test the validation when session is idle.
         if (builder.healthCheckTimeMills > 0) {
             objConfig.setTestWhileIdle(true);
@@ -145,6 +146,9 @@ public class NebulaPool implements Serializable {
         // The healthCheckTime for schedule check the health of session, unit: millisecond
         protected long healthCheckTimeMills = Constants.DEFAULT_HEALTH_CHECK_TIME_MS;
 
+        // whether to check the client when borrow from poll
+        private boolean testOnBorrow = Constants.DEFAULT_TEST_ON_BORROW;
+
         // if block when session is exhausted, if false, throw exception.
         protected boolean blockWhenExhausted = Constants.DEFAULT_BLOCK_WHEN_EXHAUSTED;
 
@@ -166,9 +170,9 @@ public class NebulaPool implements Serializable {
         protected String graph = null;
 
         // the time zone, used to parse ZonedTime and ZonedDatetime
-        protected String              timeZone   = null;
-        protected String              schema     = null;
-        protected Map<String, String> parameters = new HashMap<>();
+        protected String              timeZone          = null;
+        protected String              schema            = null;
+        protected Map<String, String> parameters        = new HashMap<>();
         protected int                 scanParallel      = Constants.DEFAULT_SCAN_PARALLEL;
         protected boolean             enableTls         = DEFAULT_ENABLE_TLS;
         protected String              tlsCa;
@@ -289,6 +293,17 @@ public class NebulaPool implements Serializable {
          */
         public Builder withBlockWhenExhausted(boolean blockWhenExhausted) {
             this.blockWhenExhausted = blockWhenExhausted;
+            return this;
+        }
+
+        /**
+         * config if check the client when borrow from pool.
+         *
+         * @param testOnBorrow if ping when borrow client from pool
+         * @return NebulaPool.Builder
+         */
+        public Builder withTestOnBorrow(boolean testOnBorrow) {
+            this.testOnBorrow = testOnBorrow;
             return this;
         }
 
