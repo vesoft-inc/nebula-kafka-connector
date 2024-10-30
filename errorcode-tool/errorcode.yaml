@@ -462,6 +462,10 @@
   Code: "42N44"
   Message: "Invalid syntax, {}"
 
+- Name: "INVALID_SYNTAX_YIELD_CLAUSE_AFTER_GRAPH_PATTERN_NOT_SUPPORTED"
+  Code: "42N45"
+  Message: "Invalid syntax, yield clause after graph pattern is not supported now."
+
 - Name: "DEPENDENT_OBJECT_ERROR"
   Code: "G1000"
   Message: "Dependent object error, node {} can not be deleted, {} edge connected"
@@ -698,14 +702,6 @@
   Code: "NC110"
   Message: "Plugin already exist: `{}`"
 
-- Name: "CATALOG_NODE_VECTOR_INDEX_ALREADY_EXISTS"
-  Code: "NC111"
-  Message: "Node vector index already exists: {}"
-
-- Name: "CATALOG_EDGE_VECTOR_INDEX_ALREADY_EXISTS"
-  Code: "NC112"
-  Message: "Edge vector index already exists: {}"
-
 - Name: "CATALOG_GRAPH_TYPE_MISMATCH"
   Code: "NC201"
   Message: "Graph type mismatch: {}"
@@ -730,40 +726,36 @@
   Code: "NC301"
   Message: "Catalog cancel job failed: {}"
 
-- Name: "CATALOG_STATE_PERMISSION_DENIED"
-  Code: "NC302"
-  Message: "Catalog state permission denied"
-
 - Name: "CATALOG_VERSION_RETIRED"
-  Code: "NC303"
+  Code: "NC302"
   Message: "Catalog version retired: {}"
 
 - Name: "CATALOG_DDL_TIMEOUT"
-  Code: "NC304"
+  Code: "NC303"
   Message: "Catalog ddl is executing in background"
 
 - Name: "CATALOG_DDL_ILLEGAL"
-  Code: "NC305"
+  Code: "NC304"
   Message: "Illegal DDL: {}"
 
 - Name: "CATALOG_REORG_FAILED"
-  Code: "NC306"
+  Code: "NC305"
   Message: "Reorg failed"
 
 - Name: "CATALOG_MAXIMUM_PENDING_DDL_EXCEEDED"
-  Code: "NC307"
+  Code: "NC306"
   Message: "Pending ddl exceeds maximum threshold"
 
 - Name: "CATALOG_JOB_PENDING"
-  Code: "NC308"
+  Code: "NC307"
   Message: "Catalog job not completed, job id is {}"
 
 - Name: "CATALOG_NOT_READY"
-  Code: "NC309"
+  Code: "NC308"
   Message: "Catalog is not ready"
 
 - Name: "CATALOG_REORG_INTERRUPT"
-  Code: "NC310"
+  Code: "NC309"
   Message: "Reorg interrupt"
 
 - Name: "RPC_FAILED"
@@ -798,21 +790,21 @@
   Code: "NI000"
   Message: "Invalid parameter: {}"
 
-- Name: "META_CLUSTER_ALREADY_EXISTS"
+- Name: "META_SERVICE_GROUP_ALREADY_EXISTS"
   Code: "NI001"
-  Message: "Cluster already exists: {}"
+  Message: "Service group already exists: {}"
 
-- Name: "META_CLUSTER_NOT_FOUND"
+- Name: "META_SERVICE_GROUP_NOT_FOUND"
   Code: "NI002"
-  Message: "Cluster not found: {}"
+  Message: "Service group not found: {}"
 
-- Name: "META_CLUSTER_NAME_INVALID"
+- Name: "META_SERVICE_GROUP_NAME_INVALID"
   Code: "NI003"
-  Message: "Cluster name is invalid"
+  Message: "Service group name is invalid"
 
-- Name: "META_CLUSTER_IS_NOT_EMPTY"
+- Name: "META_SERVICE_GROUP_IS_NOT_EMPTY"
   Code: "NI004"
-  Message: "Cluster is not empty: `{}`"
+  Message: "Service group is not empty: `{}`"
 
 - Name: "META_SERVICE_HOST_NOT_ADDED"
   Code: "NI101"
@@ -856,11 +848,11 @@
 
 - Name: "META_SERVICE_IN_USE"
   Code: "NI111"
-  Message: "Service is in part"
+  Message: "Service is still in use"
 
-- Name: "META_SERVICE_NOT_IN_CLUSTER"
+- Name: "META_SERVICE_NOT_IN_SERVICE_GROUP"
   Code: "NI112"
-  Message: "Service not in cluster"
+  Message: "Service not in service group"
 
 - Name: "META_ACTIVE_SERVICE_NOT_ENOUGH"
   Code: "NI113"
@@ -904,7 +896,7 @@
 
 - Name: "STORAGE_EXECUTOR_PARAMETER_INVALID"
   Code: "NI301"
-  Message: "Storage executor invalid parameter"
+  Message: "Invalid parameter for storage executor"
 
 - Name: "STORAGE_EXECUTOR_PARAMETER_TYPE_INVALID"
   Code: "NI302"
@@ -1148,11 +1140,11 @@
 
 - Name: "AUTHORIZE_USER_NOT_EXIST"
   Code: "NB005"
-  Message: "User `{}` not exist in current cluster"
+  Message: "User `{}` not exist in current service group"
 
 - Name: "AUTHORIZE_USER_EXIST"
   Code: "NB006"
-  Message: "User `{}` exist in current cluster"
+  Message: "User `{}` exist in current service group"
 
 - Name: "AUTHORIZE_INSUFFICIENT_PRIVILEGE"
   Code: "NB101"
@@ -1718,10 +1710,6 @@
   Code: "NR406"
   Message: "Session is busy, running query id: {}"
 
-- Name: "CONNECTOR_PLUGIN_NOT_FOUND"
-  Code: "NR501"
-  Message: "Connector plugin not found {}"
-
 - Name: "VECTOR_DIMENSION_MISSMATCHED"
   Code: "NW501"
   Message: "Internal Server Error"
@@ -1941,6 +1929,30 @@
 - Name: "SEMANTIC_INVALID_VALUE_QUERY_EXPRESSION"
   Code: "NS218"
   Message: "Invalid value query expression"
+
+- Name: "SEMANTIC_UNBOUNDED_QUANTIFIER_IN_NON_RESTRICTIVE_NON_SELECTIVE_PATH_PATTERN"
+  Code: "NS219"
+  Message: "Unbounded quantifiers in non-restrictive and non-selective path patterns may lead to infinite result sets. Consider using restrictive path modes (e.g., 'trail'), selective path search prefixes (e.g., 'any shortest'), 'different edges' match mode, or setting an upper bound."
+
+- Name: "SEMANTIC_REPEATED_EDGE_VARIABLE_IN_TRAIL_PATH_MODE"
+  Code: "NS221"
+  Message: "Repeated edge variable in a path pattern restricted by TRAIL mode will lead to no results."
+
+- Name: "SEMANTIC_REPEATED_NODE_VARIABLE_IN_ACYCLIC_PATH_MODE"
+  Code: "NS222"
+  Message: "Repeated node variable in a path pattern restricted by ACYCLIC mode will lead to no results."
+
+- Name: "SEMANTIC_REPEATED_NODE_VARIABLE_IN_SIMPLE_PATH_MODE"
+  Code: "NS223"
+  Message: "Repeated node variable in a path pattern restricted by SIMPLE mode will lead to no results unless the repeated node variables are the first and last in the path pattern."
+
+- Name: "SEMANTIC_REPEATED_EDGE_VARIABLE_IN_DIFFERENT_EDGES_MATCH_MODE"
+  Code: "NS224"
+  Message: "Repeated edge variable in a graph pattern restricted by 'different edges' match mode will lead to no results."
+
+- Name: "SEMANTIC_SINGLE_SELECTIVE_PATTERN_IN_DIFFERENT_EDGES_MATCH_MODE"
+  Code: "NS225"
+  Message: "In 'different edges' match mode, if the graph pattern contains a selective path pattern, it must not contain any other patterns."
 
 - Name: "PLAN_GENERATE_FAILED"
   Code: "NZ001"

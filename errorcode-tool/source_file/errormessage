@@ -1,4 +1,4 @@
-EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
+        EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(OMITTED_RESULT, "Omitted result");
 
         // WARNING
@@ -108,11 +108,8 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(MEMORY_GRAPH_BUILD_FAILED, "Failed to build memory graph: {}");
         EMSG(CATALOG_NODE_INDEX_ALREADY_EXISTS, "Node index already exists: {}");
         EMSG(CATALOG_EDGE_INDEX_ALREADY_EXISTS, "Edge index already exists: {}");
-        EMSG(CATALOG_NODE_VECTOR_INDEX_ALREADY_EXISTS, "Node vector index already exists: {}");
-        EMSG(CATALOG_EDGE_VECTOR_INDEX_ALREADY_EXISTS, "Edge vector index already exists: {}");
         EMSG(CATALOG_INDEX_PROPERTY_TYPE_NOT_SUPPORTED, "Index property type `{}` not supported");
         EMSG(CATALOG_VERSION_RETIRED, "Catalog version retired: {}");
-        EMSG(CATALOG_STATE_PERMISSION_DENIED, "Catalog state permission denied");
         EMSG(CATALOG_SCHEMA_NOT_FOUND, "Catalog schema not found: `{}`");
         EMSG(CATALOG_SCHEMA_ALREADY_EXISTS, "Catalog schema already exists: `{}`");
         EMSG(CATALOG_DIRECTORY_NOT_FOUND, "Catalog directory not found: `{}`");
@@ -202,6 +199,12 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(SEMANTIC_RETURN_COLUMN_CONFLICT, "The returned column `{}` conflicts with parent scope variables. Please use a unique alias to distinguish them");
         EMSG(SEMANTIC_IF_STATEMENT_BRANCH_MISMATCH, "All branches of the if statement must have the same column names and compatible types");
         EMSG(SEMANTIC_INVALID_VALUE_QUERY_EXPRESSION, "Invalid value query expression");
+        EMSG(SEMANTIC_UNBOUNDED_QUANTIFIER_IN_NON_RESTRICTIVE_NON_SELECTIVE_PATH_PATTERN, "Unbounded quantifiers in non-restrictive and non-selective path patterns may lead to infinite result sets. Consider using restrictive path modes (e.g., 'trail'), selective path search prefixes (e.g., 'any shortest'), 'different edges' match mode, or setting an upper bound.");
+        EMSG(SEMANTIC_REPEATED_EDGE_VARIABLE_IN_TRAIL_PATH_MODE, "Repeated edge variable in a path pattern restricted by TRAIL mode will lead to no results.");
+        EMSG(SEMANTIC_REPEATED_NODE_VARIABLE_IN_ACYCLIC_PATH_MODE, "Repeated node variable in a path pattern restricted by ACYCLIC mode will lead to no results.");
+        EMSG(SEMANTIC_REPEATED_NODE_VARIABLE_IN_SIMPLE_PATH_MODE, "Repeated node variable in a path pattern restricted by SIMPLE mode will lead to no results unless the repeated node variables are the first and last in the path pattern.");
+        EMSG(SEMANTIC_REPEATED_EDGE_VARIABLE_IN_DIFFERENT_EDGES_MATCH_MODE, "Repeated edge variable in a graph pattern restricted by 'different edges' match mode will lead to no results.");
+        EMSG(SEMANTIC_SINGLE_SELECTIVE_PATTERN_IN_DIFFERENT_EDGES_MATCH_MODE, "In 'different edges' match mode, if the graph pattern contains a selective path pattern, it must not contain any other patterns.");
 
         EMSG(DATA_EXCEPTION, "Data exception");
         EMSG(VALUE_OUT_OF_LIMITS, "`{}` value {} out of limits: [`{}`, `{}`]");
@@ -290,6 +293,7 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(INVALID_SYNTAX_OPTION_REDEFINITION, "Invalid syntax, multiple {} options for {} `{}` are not allowed.");
         EMSG(INVALID_SYNTAX_ILLEGAL_OPTION, "Invalid syntax, option {} cannot used for {} `{}`.");
         EMSG(INCONSISTENT_QUERY_CONJUNCTION, "Invalid syntax, all directly contained query conjunctions within a composite query expression must be the same");
+        EMSG(INVALID_SYNTAX_YIELD_CLAUSE_AFTER_GRAPH_PATTERN_NOT_SUPPORTED, "Invalid syntax, yield clause after graph pattern is not supported now.");
 
         // MUTATE
         EMSG(DEPENDENT_OBJECT_ERROR, "Dependent object error, node {} can not be deleted, {} edge connected");
@@ -312,7 +316,7 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(EDGE_ALREADY_EXIST, "Edge already exist");
 
         // STORAGE
-        EMSG(STORAGE_EXECUTOR_PARAMETER_INVALID, "Storage executor invalid parameter");
+        EMSG(STORAGE_EXECUTOR_PARAMETER_INVALID, "Invalid parameter for storage executor");
         EMSG(STORAGE_EXECUTOR_PARAMETER_TYPE_INVALID, "{} should be int64, but got: `{}`, value: `{}`");
         EMSG(STORAGE_CODEC_PROPERTY_NOT_NULLABLE, "Property not nullable: {}");
         EMSG(STORAGE_CODEC_PROPERTY_NOT_SET, "Property not set: {}");
@@ -369,6 +373,7 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(RAFT_RPC_EXCEPTION, "");
         EMSG(RAFT_INVALID, "");
         EMSG(RAFT_LEADER_REMOVED, "");
+        EMSG(RAFT_SNAPSHOT_FAILED, "");
 
         // CONFIGURATION
         EMSG(CONFIGURATION_INVALID, "Configuration invalid: `{}`");
@@ -393,9 +398,9 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
 
         EMSG(INVALID_PARAMETER, "Invalid parameter: {}");
         // META
-        EMSG(META_CLUSTER_ALREADY_EXISTS, "Cluster already exists: {}");
-        EMSG(META_CLUSTER_NOT_FOUND, "Cluster not found: {}");
-        EMSG(META_CLUSTER_NAME_INVALID, "Cluster name is invalid");
+        EMSG(META_SERVICE_GROUP_ALREADY_EXISTS, "Service group already exists: {}");
+        EMSG(META_SERVICE_GROUP_NOT_FOUND, "Service group not found: {}");
+        EMSG(META_SERVICE_GROUP_NAME_INVALID, "Service group name is invalid");
         EMSG(META_GET_KV_PREFIX_FAILED, "MetaStore::prefix failed");
         EMSG(META_SERVICE_HOST_NOT_ADDED, "No matched service from host: {}");
         EMSG(META_SERVICE_ALREADY_EXISTS, "Service for host already exists");
@@ -414,8 +419,8 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(META_NOT_INIT, "Meta not init");
         EMSG(META_SERVICE_NOT_FOUND, "Service not found: {}");
         EMSG(META_SERVICE_NOT_ADDED, "Service not added");
-        EMSG(META_SERVICE_IN_USE, "Service is in part");
-        EMSG(META_SERVICE_NOT_IN_CLUSTER, "Service not in cluster");
+        EMSG(META_SERVICE_IN_USE, "Service is still in use");
+        EMSG(META_SERVICE_NOT_IN_SERVICE_GROUP, "Service not in service group");
         EMSG(META_PART_ALREADY_EXIST, "Meta Part {} already exist");
         EMSG(META_PART_LEADER_NOT_ENOUGH, "Meta Part with leader not enough");
         EMSG(META_PART_NOT_ENOUGH, "Meta Part not enough");
@@ -424,7 +429,7 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(META_SERVICE_ID_ERROR, "Failed to fetch service id from meta: {}");
         EMSG(META_UNSUPPORTED_SERVICE, "Unsupported service type");
         EMSG(META_SERVICE_FAIL_TO_ALLOC_ID, "Failed to allocate service id: {}");
-        EMSG(META_CLUSTER_IS_NOT_EMPTY, "Cluster is not empty: `{}`");
+        EMSG(META_SERVICE_GROUP_IS_NOT_EMPTY, "Service group is not empty: `{}`");
         EMSG(META_RESP_NOT_SET, "");
         EMSG(META_INSUFFICIENT_SERVICE, "Meta insufficient service");
         EMSG(META_WRITE_KV_FAILED, "");
@@ -475,9 +480,6 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(KILL_QUERY_FAILED, "Kill query failed: {}");
         EMSG(QUERY_TIMEOUT, "Query was killed because timeout.");
         EMSG(KILL_SESSION_FAILED, "Kill session failed: {}");
-
-        // CONNECTOR
-        EMSG(CONNECTOR_PLUGIN_NOT_FOUND, "Connector plugin not found {}");
 
         // CONFIG
         EMSG(CONFIG_ERROR, "Config error: {}");
@@ -554,8 +556,8 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(AUTHORIZE_INVALID_OBJECT, "Authorization error: Invalid object name `{}`");
         EMSG(AUTHORIZE_ROLE_EXIST, "Role `{}` exist");
         EMSG(AUTHORIZE_ROLE_NOT_EXIST, "Role `{}` not exist");
-        EMSG(AUTHORIZE_USER_EXIST, "User `{}` exist in current cluster");
-        EMSG(AUTHORIZE_USER_NOT_EXIST, "User `{}` not exist in current cluster");
+        EMSG(AUTHORIZE_USER_EXIST, "User `{}` exist in current service group");
+        EMSG(AUTHORIZE_USER_NOT_EXIST, "User `{}` not exist in current service group");
         EMSG(AUTHORIZE_INSUFFICIENT_PRIVILEGE, "Insufficient privilege: `{}`");
         EMSG(AUTHORIZE_CONSTRAINT, "Invalid action `{}` on `{}`");
         EMSG(AUTHORIZE_TOO_MANY_ROLES, "Exceeded maximum number of roles for user: {}");
@@ -600,7 +602,7 @@ EMSG(SUCCESSFUL_COMPLETION, "SUCCESS");
         EMSG(FILE_TYPE_NOT_SUPPORT, "File type not supported `{}`: {}");
         EMSG(FILE_FILE_STATE, "Get file state failed of `{}`");
 
-        EMSG(MEMORY_ERROR, "");
+        EMSG(MEMORY_ERROR, "{}");
         EMSG(MEMORY_EXCEEDED, "Memory exceeded");
         EMSG(MEMORY_CONFIG_ERROR, "Configured max memory {} MiB, exceed system total memory {}");
         EMSG(MEMORY_BACKGROUND_CHECK, "Memory background thread start failed");
