@@ -247,6 +247,11 @@ func (dp *driverPool) GetClient() (types.Client, error) {
 		// ping
 		if lastErr = dc.Ping(); lastErr == nil {
 			return dc, nil
+		} else {
+			go func() {
+				dc.Close()
+				dp.PutClient(dc)
+			}()
 		}
 	}
 }
