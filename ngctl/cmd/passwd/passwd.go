@@ -9,11 +9,17 @@ import (
 )
 
 type passwdFlagsType struct {
-	host          string
-	port          uint32
-	user          string
-	currentPasswd string
-	newPasswd     string
+	host           string
+	port           uint32
+	user           string
+	currentPasswd  string
+	newPasswd      string
+	enableTLS      bool
+	ca             string
+	cert           string
+	key            string
+	peerNameVerify bool
+	peerName       string
 }
 
 var passwdFlags passwdFlagsType
@@ -37,11 +43,23 @@ var PasswdCmd = &cobra.Command{
 		}
 		var client meta.Client
 		if cacheToken != nil {
-			client, err = meta.NewMetaClient(addr, meta.WithTLS(cacheToken.EnableTLS, cacheToken.CA, cacheToken.Cert, cacheToken.Key, cacheToken.PeerNameVerify, cacheToken.PeerName))
+			client, err = meta.NewMetaClient(addr, meta.WithTLS(
+				cacheToken.EnableTLS,
+				cacheToken.CA,
+				cacheToken.Cert,
+				cacheToken.Key,
+				cacheToken.PeerNameVerify,
+				cacheToken.PeerName),
+			)
 		} else {
-			//TODO passwd no need to login metad
-			// Support TLS in the future
-			client, err = meta.NewMetaClient(addr)
+			client, err = meta.NewMetaClient(addr, meta.WithTLS(
+				passwdFlags.enableTLS,
+				passwdFlags.ca,
+				passwdFlags.cert,
+				passwdFlags.key,
+				passwdFlags.peerNameVerify,
+				passwdFlags.peerName),
+			)
 		}
 		if err != nil {
 			return err
@@ -78,4 +96,10 @@ func init() {
 	PasswdCmd.Flags().StringVarP(&passwdFlags.user, "user", "u", "root", "user name")
 	PasswdCmd.Flags().StringVarP(&passwdFlags.currentPasswd, "current_password", "c", "", "current password")
 	PasswdCmd.Flags().StringVarP(&passwdFlags.newPasswd, "new_password", "p", "", "new password")
+	PasswdCmd.Flags().BoolVarP(&passwdFlags.enableTLS, "enable-tls", "", false, "Enable TLS")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.ca, "ca", "", "", "Certificate of trusted CA, in PEM format")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.cert, "cert", "", "", "Certificate of meta client, in PEM format")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.key, "key", "", "", "Private key of meta client, in PEM format")
+	PasswdCmd.Flags().BoolVarP(&passwdFlags.peerNameVerify, "peer-name-verify", "", false, "Enable peer name verification")
+	PasswdCmd.Flags().StringVarP(&passwdFlags.peerName, "peer-name", "", "", "Peer name to override the default, i.e. domain name")
 }

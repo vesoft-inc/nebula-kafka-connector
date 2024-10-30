@@ -11,10 +11,11 @@ else
 GOBIN=$(shell go env GOBIN)
 endif
 
-all: check
+all: build
 
 build:
-	cd api/agent && $(GO_BUILD) -o bin/agent
+	@cd api/agent && $(GO_BUILD) -o bin/agent
+	@cp api/agent/bin/agent .
 
 go-generate: $(GOBIN)/mockgen
 	go generate ./...
