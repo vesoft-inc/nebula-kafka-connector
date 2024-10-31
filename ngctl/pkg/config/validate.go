@@ -40,9 +40,17 @@ func validateTLS(c *Config) error {
 	return nil
 }
 
+func validateServiceGroup(c *Config) error {
+	if c.Spec == nil || len(c.Spec.ServiceGroups) == 0 {
+		return fmt.Errorf("serviceGroups is empty")
+	}
+	return nil
+}
+
 func init() {
 	validateRules = map[string]validateRule{
 		"path": validatePath,
 		"tls":  validateTLS,
+		"sg":   validateServiceGroup,
 	}
 }

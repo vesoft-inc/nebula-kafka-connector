@@ -15,12 +15,12 @@ import (
 type valuer interface {
 	GetValue()
 }
-type EdgeDirection uint8
+type edgeDirection uint8
 
 const (
-	EdgeOutGoingDirection EdgeDirection = 0
-	EdgeInComingDirection               = 1
-	EdgeNoDirection                     = 2
+	edgeOutGoingDirection edgeDirection = 0
+	edgeInComingDirection               = 1
+	edgeNoDirection                     = 2
 )
 
 type (
@@ -151,7 +151,7 @@ type (
 		commonValue
 		SrcId      int64
 		DstId      int64
-		Direction  EdgeDirection
+		Direction  edgeDirection
 		Graph      string
 		Type       string
 		Labels     []string
@@ -611,7 +611,7 @@ func (e *NebulaEdge) GetRank() int {
 }
 
 func (e *NebulaEdge) IsDirected() bool {
-	return e.Direction != EdgeNoDirection
+	return e.Direction != edgeNoDirection
 }
 
 // (288314845273522179@City:City&Place{id:3,kind:3,name:org3,url:https://org3.com})-[288314845273522179@connected_Sub_Load:connected_Sub_Load{}]-(288315214640709633@City:City&Place{id:3,kind:city,name:Hangzhou,url:https://hangzhou.com})

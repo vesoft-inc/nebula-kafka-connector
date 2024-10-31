@@ -108,13 +108,13 @@ func getSchemaName(gsm graphsSchema, graphId int32, elementTypeId int32, isNode 
 	return gs.name, es.typeName, es.labels, nil
 }
 
-func getEdgeDirection(d uint8) EdgeDirection {
+func getEdgeDirection(d uint8) edgeDirection {
 	switch d {
 	case 0:
-		return EdgeOutGoingDirection
+		return edgeOutGoingDirection
 	case 1:
-		return EdgeInComingDirection
+		return edgeInComingDirection
 	default:
-		return EdgeNoDirection
+		return edgeNoDirection
 	}
 }

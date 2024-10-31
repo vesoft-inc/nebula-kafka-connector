@@ -365,7 +365,7 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 			Direction: direction,
 		}
 		switch direction {
-		case EdgeInComingDirection:
+		case edgeInComingDirection:
 			e.SrcId = dstID
 			e.DstId = srcID
 		default:
@@ -1005,7 +1005,7 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 			Direction:  direction,
 		}
 		switch direction {
-		case EdgeInComingDirection:
+		case edgeInComingDirection:
 			e.SrcId = dstNodeId
 			e.DstId = srcNodeId
 		default:

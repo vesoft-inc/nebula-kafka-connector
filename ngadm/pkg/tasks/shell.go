@@ -58,7 +58,10 @@ func (d *Shell) Execute() error {
 		"stdout": stdout,
 		"stderr": stderr,
 	})
-	return err
+	if err != nil {
+		return fmt.Errorf("execute shell command failed, stderr: %s, %s", stderr, err)
+	}
+	return nil
 }
 
 func (d *Shell) Rollback() error {
