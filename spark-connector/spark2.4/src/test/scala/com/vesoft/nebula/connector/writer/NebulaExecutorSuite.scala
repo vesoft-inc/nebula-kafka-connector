@@ -185,6 +185,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
          |FOR r IN t
          |RETURN r.id1 as id1,r.id2 as id2,r.col_string as col_string,r.col_fixed_string as col_fixed_string,r.col_bool as col_bool,r.col_int as col_int,r.col_int64 as col_int64,r.col_double as col_double, r.col_date as col_date
          |NEXT
+         |USE `$graphName`
          |OPTIONAL MATCH (src_node@`person`) WHERE src_node.`id`=CAST(id1 AS STRING)
          |OPTIONAL MATCH (dst_node@`person`) WHERE dst_node.`id`=CAST(id2 AS STRING)
          |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(col_string AS STRING),`col_fixed_string`:CAST(col_fixed_string AS STRING),`col_bool`:CAST(col_bool AS BOOL),`col_int`:CAST(col_int AS INT32),`col_int64`:CAST(col_int64 AS INT64),`col_double`:CAST(col_double AS DOUBLE),`col_date`:CAST(col_date AS DATE)}]->(dst_node)
@@ -242,6 +243,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
          |FOR r IN t
          |RETURN r.dfId1 as dfId1,r.dfId2 as dfId2,r.dfId3 as dfId3,r.dfId4 as dfId4,r.col_string as col_string,r.col_fixed_string as col_fixed_string,r.col_bool as col_bool,r.col_int as col_int,r.col_int64 as col_int64,r.col_double as col_double, r.col_date as col_date
          |NEXT
+         |USE `$graphName`
          |OPTIONAL MATCH (src_node@`person`) WHERE src_node.`id1`=CAST(dfId1 AS STRING) AND src_node.`id2`=CAST(dfId2 AS STRING)
          |OPTIONAL MATCH (dst_node@`person`) WHERE dst_node.`id1`=CAST(dfId3 AS STRING) AND dst_node.`id2`=CAST(dfId4 AS STRING)
          |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(col_string AS STRING),`col_fixed_string`:CAST(col_fixed_string AS STRING),`col_bool`:CAST(col_bool AS BOOL),`col_int`:CAST(col_int AS INT32),`col_int64`:CAST(col_int64 AS INT64),`col_double`:CAST(col_double AS DOUBLE),`col_date`:CAST(col_date AS DATE)}]->(dst_node)
@@ -375,6 +377,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
          |FOR r IN t
          |RETURN r.col_string as col_string,r.col_fixed_string as col_fixed_string,r.col_bool as col_bool,r.col_int as col_int,r.col_int64 as col_int64,r.col_double as col_double, r.col_date as col_date
          |NEXT
+         |USE `$graphName`
          |MATCH (nebula_src_node@`person`) WHERE nebula_src_node.`id`=CAST(col_string AS STRING)
          |MATCH (nebula_dst_node@`person`) WHERE nebula_dst_node.`id`=CAST(col_fixed_string AS STRING)
          |MATCH (nebula_src_node)-[e@`friend`]->(nebula_dst_node)

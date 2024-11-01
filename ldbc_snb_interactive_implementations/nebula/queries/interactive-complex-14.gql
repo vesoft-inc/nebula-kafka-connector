@@ -18,5 +18,6 @@ RETURN 1.0 * VALUE {MATCH (curr)<-[:HAS_CREATOR]-(:Comment)-[:REPLY_OF]->(:Post)
     + 0.5 * VALUE {MATCH (prev)<-[:HAS_CREATOR]-(:Comment)<-[:REPLY_OF]->(:Comment)-[:HAS_CREATOR]->(curr) RETURN COUNT(*) AS c GROUP BY ()}
     AS weight, pathNodes
 NEXT
+USE $graphName
 RETURN transform(pathNodes, n -> n.id) AS personIdsInPath, SUM(weight) AS pathWeight GROUP BY personIdsInPath
 ORDER BY pathWeight DESC

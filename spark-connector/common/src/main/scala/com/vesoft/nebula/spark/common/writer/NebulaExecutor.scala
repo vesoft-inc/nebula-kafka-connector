@@ -156,6 +156,7 @@ object NebulaExecutor {
        |FOR r IN t
        |RETURN ${edges.getNewTableHeaders}
        |NEXT
+       |USE `$graphName`
        |OPTIONAL MATCH (src_node@`${edges.srcType}`) WHERE ${edges.getSrcPkStr("src_node")}
        |OPTIONAL MATCH (dst_node@`${edges.dstType}`) WHERE ${edges.getDstPkStr("dst_node")}
        |INSERT $mode (src_node)-[e@`${edges.edgeType}`{${edges.propNamesWithTableStr}}]->(dst_node)
@@ -188,6 +189,7 @@ object NebulaExecutor {
        |FOR r IN t
        |RETURN ${edges.getNewTableHeaders}
        |NEXT
+       |USE `$graphName`
        |MATCH (nebula_src_node_pk@`${edges.srcType}`) WHERE ${edges.getSrcPkStr("nebula_src_node_pk")}
        |MATCH (nebula_dst_node_pk@`${edges.dstType}`) WHERE ${edges.getDstPkStr("nebula_dst_node_pk")}
        |MATCH (nebula_src_node_pk)-[e@`${edges.edgeType}`]->(nebula_dst_node_pk)
@@ -229,6 +231,7 @@ object NebulaExecutor {
        |FOR r IN t
        |RETURN ${edges.getNewTableHeaders}
        |NEXT
+       |USE `$graphName`
        |MATCH (nebula_src_node@`${edges.srcType}`) WHERE ${edges.getSrcPkStr("nebula_src_node")}
        |MATCH (nebula_dst_node@`${edges.dstType}`) WHERE ${edges.getDstPkStr("nebula_dst_node")}
        |MATCH (nebula_src_node)-[e@`${edges.edgeType}`]->(nebula_dst_node)
