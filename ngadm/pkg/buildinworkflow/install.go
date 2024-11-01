@@ -1,12 +1,16 @@
 package buildinworkflow
 
 import (
+	"fmt"
 	"path"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
+
+const defaultMetadResetTimeout = 10
+const defaultMetadUser = "root"
 
 func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {
 	workflow := &types.WorkflowSpec{
@@ -148,6 +152,29 @@ func InstallMetad(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 			},
 		})
 	}
+	//4. reset metad password
+	password, ok := args["password"].(string)
+	if !ok {
+		return nil, fmt.Errorf("password is required")
+	}
+	metaPassword, ok := args["metaPassword"].(string)
+	if !ok {
+		return nil, fmt.Errorf("metaPassword is required")
+	}
+	timeout, ok := args["timeout"].(int)
+	if !ok {
+		timeout = defaultMetadResetTimeout
+	}
+	resetPasswordTask := &types.TaskSpec{
+		Type: "reset_meta_password",
+		Params: &tasks.ResetMetaPasswordParams{
+			MetaServerAddress: utils.GetMetaAddressListString(metaHosts, utils.GetConfigPort(metaServiceGroup.Config)),
+			Username:          defaultMetadUser,
+			Password:          password,
+			NewPassword:       metaPassword,
+			TimeoutSec:        timeout,
+		},
+	}
 	mainTask := &types.TaskSpec{
 		Type: "serial",
 		SubTasks: []*types.TaskSpec{
@@ -165,6 +192,7 @@ func InstallMetad(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 				Description: "start needed processes",
 				SubTasks:    startNeededProcessesTask,
 			},
+			resetPasswordTask,
 		},
 	}
 	return mainTask, nil

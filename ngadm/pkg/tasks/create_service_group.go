@@ -14,7 +14,6 @@ type CreateServiceGroupParams struct {
 	MetaServerAddress string
 	Username          string
 	Password          string
-	NewPassowrd       string
 }
 
 func NewCreateServiceGroup(taskSpec *types.TaskSpec, taskContext *JobContext) (Task, error) {
@@ -43,16 +42,6 @@ type CreateServiceGroup struct {
 func (d *CreateServiceGroup) Execute() error {
 	client, err := meta.NewMetaClient(d.params.MetaServerAddress,
 		meta.WithUserPassword(d.params.Username, d.params.Password))
-	if err != nil {
-		return fmt.Errorf("create meta client failed: %s", err)
-	}
-	changePasswdReq := meta.NewChangePasswordReq(d.params.Username, d.params.Password, d.params.NewPassowrd)
-	if err := client.ChangePassword(changePasswdReq); err != nil {
-		return fmt.Errorf("change password failed: %s", err)
-	}
-	client.Close()
-	client, err = meta.NewMetaClient(d.params.MetaServerAddress,
-		meta.WithUserPassword(d.params.Username, d.params.NewPassowrd))
 	if err != nil {
 		return fmt.Errorf("create meta client failed: %s", err)
 	}

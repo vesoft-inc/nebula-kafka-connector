@@ -22,11 +22,7 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 	if !ok {
 		return nil, fmt.Errorf("username is required")
 	}
-	password, ok := args["password"].(string)
-	if !ok {
-		return nil, fmt.Errorf("password is required")
-	}
-	metaPassword, ok := args["metaPassowrd"].(string)
+	password, ok := args["metaPassword"].(string)
 	if !ok {
 		return nil, fmt.Errorf("metaPassword is required")
 	}
@@ -185,15 +181,15 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 	// 4.init cluster
 	createServiceGroupTasks := []*types.TaskSpec{}
 	for _, cluster := range spec.Spec.Metad.ServiceGroups {
+		r := cluster
 		createServiceGroupTasks = append(createServiceGroupTasks, &types.TaskSpec{
 			Type: "create_cluster",
 			Params: &tasks.CreateServiceGroupParams{
-				ServiceGroupSpec:  &cluster,
+				ServiceGroupSpec:  &r,
 				MetaSpec:          metaServiceGroup,
 				MetaServerAddress: metaServerAddress,
 				Username:          username,
 				Password:          password,
-				NewPassowrd:       metaPassword,
 			},
 		})
 	}
