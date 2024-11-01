@@ -1,11 +1,10 @@
 package com.vesoft.nebula;
 
-import com.vesoft.nebula.driver.graph.data.Relationship;
+import com.vesoft.nebula.driver.graph.data.Edge;
+import com.vesoft.nebula.driver.graph.data.Node;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.data.ValueWrapper;
-import com.vesoft.nebula.driver.graph.data.Vertex;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
-import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
 import com.vesoft.nebula.driver.graph.scan.ScanEdgeResult;
 import com.vesoft.nebula.driver.graph.scan.ScanEdgeResultIterator;
@@ -287,14 +286,14 @@ public class GraphClientExample {
                 } else if (valueWrapper.isRecord()) {
                     System.out.printf("%15s |", valueWrapper.asRecord());
                 } else if (valueWrapper.isNode()) {
-                    Vertex                    node       = valueWrapper.asNode();
-                    long                      nodeId     = node.getId();
+                    Node node   = valueWrapper.asNode();
+                    long nodeId = node.getId();
                     String                    nodeType   = node.getType();
                     Map<String, ValueWrapper> properties = node.getProperties();
                     System.out.printf("%15s |", valueWrapper.asNode());
                 } else if (valueWrapper.isEdge()) {
-                    Relationship              relationship = valueWrapper.asEdge();
-                    long                      srcId        = relationship.getSrcId();
+                    Edge relationship = valueWrapper.asEdge();
+                    long srcId        = relationship.getSrcId();
                     long                      dstId        = relationship.getDstId();
                     Map<String, ValueWrapper> properties   = relationship.getProperties();
                     System.out.printf("%15s |", valueWrapper.asEdge());

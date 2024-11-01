@@ -69,7 +69,7 @@ public class ScanResultIterator implements Serializable {
     }
 
     /**
-     * if iter has more vertex data
+     * if iter has more data
      *
      * @return true if the scan cursor is not at end.
      */

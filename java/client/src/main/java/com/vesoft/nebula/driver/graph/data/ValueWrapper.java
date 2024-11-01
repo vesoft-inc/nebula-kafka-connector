@@ -416,28 +416,28 @@ public class ValueWrapper {
     }
 
     /**
-     * Convert the original Value to Vertex
+     * Convert the original Value to Node
      *
-     * @return Vertex value
+     * @return Node value
      * @throws InvalidValueException if the value type is not node
      */
-    public Vertex asNode() throws InvalidValueException {
+    public Node asNode() throws InvalidValueException {
         if (type == COLUMN_TYPE_NODE) {
-            return (Vertex) value;
+            return (Node) value;
         }
         throw new InvalidValueException(
                 "cannot get field `node` because value's type is " + getDataType());
     }
 
     /**
-     * Convert the original data Value to Relationship
+     * Convert the original data Value to Edge
      *
-     * @return Relationship value
+     * @return Edge value
      * @throws InvalidValueException if the value type is not edge
      */
-    public Relationship asEdge() throws InvalidValueException {
+    public Edge asEdge() throws InvalidValueException {
         if (type == COLUMN_TYPE_EDGE) {
-            return (Relationship) value;
+            return (Edge) value;
         }
         throw new InvalidValueException(
                 "cannot get field `edge` because value's type is " + getDataType());
@@ -544,14 +544,14 @@ public class ValueWrapper {
     }
 
     /**
-     * Convert the original data type Value to NPath
+     * Convert the original data type Value to Path
      *
-     * @return {@link NPath}
+     * @return {@link Path}
      * @throws InvalidValueException if the value type is not Path
      */
-    public NPath asPath() throws InvalidValueException {
+    public Path asPath() throws InvalidValueException {
         if (type == COLUMN_TYPE_PATH) {
-            return (NPath) value;
+            return (Path) value;
         }
         throw new InvalidValueException(
                 "cannot get field `path` because value's type is " + getDataType());

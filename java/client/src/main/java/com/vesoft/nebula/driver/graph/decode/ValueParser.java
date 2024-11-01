@@ -56,12 +56,12 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ZONED_DA
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ZONED_TIME_SIZE;
 
 import com.google.protobuf.ByteString;
+import com.vesoft.nebula.driver.graph.data.Edge;
 import com.vesoft.nebula.driver.graph.data.NDuration;
-import com.vesoft.nebula.driver.graph.data.NPath;
 import com.vesoft.nebula.driver.graph.data.NRecord;
-import com.vesoft.nebula.driver.graph.data.Relationship;
+import com.vesoft.nebula.driver.graph.data.Node;
+import com.vesoft.nebula.driver.graph.data.Path;
 import com.vesoft.nebula.driver.graph.data.ValueWrapper;
-import com.vesoft.nebula.driver.graph.data.Vertex;
 import com.vesoft.nebula.driver.graph.decode.datatype.BasicType;
 import com.vesoft.nebula.driver.graph.decode.datatype.DataType;
 import com.vesoft.nebula.driver.graph.decode.datatype.EdgeType;
@@ -312,11 +312,11 @@ public class ValueParser {
                     props.put(propName, new ValueWrapper(propValue,
                                                          propTypeMap.get(propName).getType()));
                 }
-                return new Vertex(nodeHeader.getGraphId(),
-                                  nodeHeader.getNodeTypeId(),
-                                  nodeHeader.getNodeId(),
-                                  props,
-                                  graphSchemas);
+                return new Node(nodeHeader.getGraphId(),
+                                nodeHeader.getNodeTypeId(),
+                                nodeHeader.getNodeId(),
+                                props,
+                                graphSchemas);
             case COLUMN_TYPE_EDGE:
                 EdgeType edgeType = (EdgeType) type;
                 // edgePropColumnType: graphId -> (edgeTypeId -> (propName-> propType))
@@ -361,14 +361,14 @@ public class ValueParser {
                                                                      .get(propName)
                                                                      .getType()));
                 }
-                Relationship relationship = new Relationship(edgeHeader.getGraphId(),
-                                                             edgeHeader.getEdgeTypeId(),
-                                                             edgeHeader.getRank(),
-                                                             edgeHeader.getSrcId(),
-                                                             edgeHeader.getDstId(),
-                                                             edgeProps,
-                                                             graphSchemas);
-                return relationship;
+                Edge edgeValue = new Edge(edgeHeader.getGraphId(),
+                                             edgeHeader.getEdgeTypeId(),
+                                             edgeHeader.getRank(),
+                                             edgeHeader.getSrcId(),
+                                             edgeHeader.getDstId(),
+                                             edgeProps,
+                                             graphSchemas);
+                return edgeValue;
 
             case COLUMN_TYPE_PATH:
                 PathType pathType = (PathType) type;
@@ -399,7 +399,7 @@ public class ValueParser {
 
                 // if path has no element, return empty path
                 if (pathHeader.getSize() <= 0) {
-                    return new NPath(elements);
+                    return new Path(elements);
                 }
                 // decode the first node of path
                 PathVectorPair firstNodePair = indexAndNodes.get(pathHeader.getHeadNodeIndex());
@@ -447,7 +447,7 @@ public class ValueParser {
                                                  adjDataType.getType()).asLong());
                     }
                 }
-                return new NPath(elements);
+                return new Path(elements);
             case COLUMN_TYPE_ANY:
                 valueData = getSubBytes(vector.getVectorData(),
                                         ANY_HEADER_SIZE,
@@ -901,7 +901,7 @@ public class ValueParser {
                     Object propValue = decodeCompositeValue(reader, propType);
                     nodeProperties.put(propName, new ValueWrapper(propValue, propType));
                 }
-                return new Vertex(nodeGraphId, nodeTypeId, nodeId, nodeProperties, graphSchemas);
+                return new Node(nodeGraphId, nodeTypeId, nodeId, nodeProperties, graphSchemas);
             case COLUMN_TYPE_EDGE:
                 // srcNodeID 8B+dstNodeID 8B+edgeRank 8B+graphId 4B+edgeTypeID 4B+prop_size 2B
                 long srcNodeId = bytesToInt64(reader.read(NODE_ID_SIZE), byteOrder);
@@ -919,13 +919,13 @@ public class ValueParser {
                     Object propValue = decodeCompositeValue(reader, propType);
                     edgeProperties.put(propName, new ValueWrapper(propValue, propType));
                 }
-                return new Relationship(edgeGraphId,
-                                        edgeTypeId,
-                                        rank,
-                                        srcNodeId,
-                                        dstNodeId,
-                                        edgeProperties,
-                                        graphSchemas);
+                return new Edge(edgeGraphId,
+                                edgeTypeId,
+                                rank,
+                                srcNodeId,
+                                dstNodeId,
+                                edgeProperties,
+                                graphSchemas);
             case COLUMN_TYPE_PATH:
                 int elementNum = bytesToInt16(
                         reader.read(ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE), byteOrder);
@@ -936,7 +936,7 @@ public class ValueParser {
                     Object element = decodeCompositeValue(reader, elementType);
                     eleValues.add(new ValueWrapper(element, elementType));
                 }
-                return new NPath(eleValues);
+                return new Path(eleValues);
             default:
                 throw new RuntimeException("do not support type:" + type);
         }

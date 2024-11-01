@@ -8,12 +8,12 @@ package com.vesoft.nebula.driver.graph.decode;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
-import com.vesoft.nebula.driver.graph.data.NPath;
+import com.vesoft.nebula.driver.graph.data.Edge;
 import com.vesoft.nebula.driver.graph.data.NRecord;
-import com.vesoft.nebula.driver.graph.data.Relationship;
+import com.vesoft.nebula.driver.graph.data.Node;
+import com.vesoft.nebula.driver.graph.data.Path;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.data.ValueWrapper;
-import com.vesoft.nebula.driver.graph.data.Vertex;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -30,7 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class NebulaClientDecodeTest {
-    String addresses = "192.168.8.6:10010";
+    String addresses = "127.0.0.1:9669";
     String user      = "root";
     String passwd    = "NebulaGraph01";
 
@@ -549,8 +549,8 @@ public class NebulaClientDecodeTest {
     public void testDecodeNodeResult() {
         System.out.println("<==== testDecodeNodeResult ====>");
         try {
-            ResultSet    res   = client.execute("use decode match(v) return v");
-            List<Vertex> nodes = new ArrayList<>();
+            ResultSet  res   = client.execute("use decode match(v) return v");
+            List<Node> nodes = new ArrayList<>();
 
             while (res.hasNext()) {
                 List<ValueWrapper> values = res.next().values();
@@ -561,7 +561,7 @@ public class NebulaClientDecodeTest {
                 }
             }
             Assert.assertEquals(2, nodes.size());
-            for (Vertex node : nodes) {
+            for (Node node : nodes) {
                 if (node.getType().equals("player")) {
                     Assert.assertEquals(12, node.getProperties().size());
                     Assert.assertEquals(1, node.getProperties().get("id").asInt());
@@ -611,7 +611,7 @@ public class NebulaClientDecodeTest {
         try {
             ResultSet res = client.execute(
                     "use decode match(v)-[e@friend]->(v1) return e");
-            List<Relationship> edges = new ArrayList<>();
+            List<Edge> edges = new ArrayList<>();
 
             while (res.hasNext()) {
                 List<ValueWrapper> values = res.next().values();
@@ -636,7 +636,7 @@ public class NebulaClientDecodeTest {
         try {
             ResultSet res = client.execute(
                     "use decode match p=(v)-[e@friend]->(v1) return p");
-            List<NPath> paths = new ArrayList<>();
+            List<Path> paths = new ArrayList<>();
 
             while (res.hasNext()) {
                 List<ValueWrapper> values = res.next().values();
@@ -648,8 +648,8 @@ public class NebulaClientDecodeTest {
             }
             Assert.assertEquals(1, paths.size());
             Assert.assertEquals(3, paths.get(0).values().size());
-            Vertex vertex1 = paths.get(0).values().get(0).asNode();
-            Vertex vertex2 = paths.get(0).values().get(2).asNode();
+            Node vertex1 = paths.get(0).values().get(0).asNode();
+            Node vertex2 = paths.get(0).values().get(2).asNode();
             Assert.assertEquals(2, vertex1.getProperties().size());
             Assert.assertEquals(vertex1.getId(), vertex2.getId());
 
@@ -667,7 +667,7 @@ public class NebulaClientDecodeTest {
             }
             Assert.assertEquals(1, paths.size());
             Assert.assertEquals(1, paths.get(0).nodes().size());
-            Assert.assertEquals(0, paths.get(0).relationships().size());
+            Assert.assertEquals(0, paths.get(0).edges().size());
             System.out.println(paths.get(0).toString());
         } catch (Exception e) {
             e.printStackTrace();
@@ -1224,7 +1224,7 @@ public class NebulaClientDecodeTest {
             }
 
             Assert.assertEquals(1, records.size());
-            Vertex v = records.get(0).get(0).asNode();
+            Node v = records.get(0).get(0).asNode();
             Assert.assertEquals("player", v.getType());
 
         } catch (Exception e) {
@@ -1253,98 +1253,16 @@ public class NebulaClientDecodeTest {
             }
 
             Assert.assertEquals(1, records.size());
-            Vertex srcNode = records.get(0).get(0).asNode();
+            Node srcNode = records.get(0).get(0).asNode();
             Assert.assertEquals("person", srcNode.getType());
-            Relationship e       = records.get(0).get(1).asEdge();
-            Vertex       dstNode = records.get(0).get(0).asNode();
+            Edge e       = records.get(0).get(1).asEdge();
+            Node dstNode = records.get(0).get(0).asNode();
             Assert.assertEquals("person", dstNode.getType());
             Assert.assertEquals("friend", e.getType());
             Assert.assertEquals(1, e.getProperties().size());
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
-        }
-    }
-
-
-    @Test
-    public void testCases() {
-        try {
-            String gql = "for i in [9223372036854775808,-9223372036854775809] "
-                    + "return max(i) as a group by ()";
-            ResultSet res = client.execute(gql);
-            print(res);
-
-            gql = "use sf0_1 match (v:Person{speaks:\"mg,en\"})-[e:STUDY_AT]->(u:University)"
-                    + " return v.creationDate.year as a,e.classYear as b order by a,b"
-                    + " NEXT return a,collect(b) group by a";
-            res = client.execute(gql);
-            print(res);
-
-            gql = "use sf0_1 match p=(v1:Person{id:465})-[e:STUDY_AT]->(u1:University) "
-                    + "return p,v1,e,u1";
-            res = client.execute(gql);
-            print(res);
-
-            gql = " return local_datetime(\"2012-03-04T05:06:07.0890\") as dt1,"
-                    + "zoned_datetime(\"2012-03-04T05:06:07.012345 -0200\") as dt2,"
-                    + "date(\"2023-01-10\") as dt3 next return dt1.year as ldt_year,"
-                    + "dt1.month as ldt_month,dt1.day as ldt_day,dt2.year as zdt_year,"
-                    + "dt2.month as zdt_month,dt2.day as zdt_day, dt3.year as date_year,"
-                    + "dt3.month as date_month,dt3.day as date_day";
-            res = client.execute(gql);
-            print(res);
-
-            gql = "LET v = CAST(256 AS uint16) return  CAST (v AS UINT16) as _result";
-            res = client.execute(gql);
-            print(res);
-
-            gql = "use sf0_1 match p=(v:Person{id:26388279067671})-[e:KNOWS]->{1}(v1:Person) "
-                    + "return collect(distinct v1.birthday.year) as a group by () "
-                    + "Next for i in a return i as b";
-            res = client.execute(gql);
-            print(res);
-
-
-            gql = "use no_labels_graph match (v)-[e]->(v) return *";
-            res = client.execute(gql);
-            print(res);
-
-            gql = "return 10/0.000001";
-            res = client.execute(gql);
-            print(res);
-
-            gql = "return -9e308 as myMAXSCI";
-            res = client.execute(gql);
-            print(res);
-
-            gql = " use sf0_1 match p=(v1:Person{id:465})-[e:STUDY_AT]->(u1:University) "
-                    + "return p,v1,e,u1";
-            res = client.execute(gql);
-            print(res);
-
-
-            gql = "return zoned_time(\"06:36:07.0890\", \"%H:%M:%S\")";
-            res = client.execute(gql);
-            print(res);
-        } catch (Exception e) {
-            e.printStackTrace();
-            Assert.fail(e.getMessage());
-        }
-
-    }
-
-    private void print(ResultSet res) {
-        List<List<ValueWrapper>> values = new ArrayList<>();
-        while (res.hasNext()) {
-            values.add(res.next().values());
-        }
-        for (List<ValueWrapper> valueWrappers : values) {
-            for (ValueWrapper v : valueWrappers) {
-                System.out.print(v.toString());
-                System.out.println(",");
-            }
-            System.out.println();
         }
     }
 }

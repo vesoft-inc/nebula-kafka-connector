@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class Relationship extends BaseDataObject {
+public class Edge extends BaseDataObject {
 
     private final int                       graphId;
     private final String                    graphName;
@@ -23,15 +23,15 @@ public class Relationship extends BaseDataObject {
 
 
     /**
-     * Relationship is a wrapper around the Edge type returned by nebula-graph
+     * Edge is a wrapper around the Edge type returned by nebula-graph
      */
-    public Relationship(int graphId,
-                        int edgeTypeId,
-                        long rank,
-                        long srcId,
-                        long dstId,
-                        Map<String, ValueWrapper> properties,
-                        ResultGraphSchemas graphSchemas) {
+    public Edge(int graphId,
+                int edgeTypeId,
+                long rank,
+                long srcId,
+                long dstId,
+                Map<String, ValueWrapper> properties,
+                ResultGraphSchemas graphSchemas) {
         this.graphId = graphId;
         this.graphName = graphSchemas.getGraphSchema(graphId).getGraphName();
         this.edgeTypeId = edgeTypeId;
@@ -125,7 +125,7 @@ public class Relationship extends BaseDataObject {
     }
 
     /**
-     * get the dst id from the relationship
+     * get the dst id from the edge
      *
      * @return long
      */
@@ -134,7 +134,7 @@ public class Relationship extends BaseDataObject {
     }
 
     /**
-     * get rank from the relationship
+     * get rank from the edge
      *
      * @return long
      */
@@ -165,7 +165,7 @@ public class Relationship extends BaseDataObject {
     }
 
     /**
-     * get property names and values from the relationship
+     * get property names and values from the edge
      *
      * @return HashMap, property name -> property value
      */
@@ -181,7 +181,7 @@ public class Relationship extends BaseDataObject {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Relationship that = (Relationship) o;
+        Edge that = (Edge) o;
 
         return getRank() == that.getRank()
                 && ((getSrcId() == that.getSrcId() && getDstId() == that.getDstId())
@@ -215,7 +215,7 @@ public class Relationship extends BaseDataObject {
                                  getRank(),
                                  getType(),
                                  String.join("&", getLabels()),
-                                 String.join(", ", propStrs),
+                                 String.join(",", propStrs),
                                  getDstId());
         }
 

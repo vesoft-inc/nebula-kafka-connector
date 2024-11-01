@@ -1,8 +1,8 @@
 package com.vesoft.nebula.driver.graph.scan;
 
+import com.vesoft.nebula.driver.graph.data.Node;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.data.ValueWrapper;
-import com.vesoft.nebula.driver.graph.data.Vertex;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +36,8 @@ public class ScanNodeResult extends ScanResult {
                     List<ValueWrapper>        values    = record.values();
                     List<ValueWrapper>        rowValues = new ArrayList<>();
                     Map<String, ValueWrapper> properties;
-                    Vertex                    vertex    = values.get(0).asNode();
-                    properties = vertex.getProperties();
+                    Node                      node      = values.get(0).asNode();
+                    properties = node.getProperties();
                     for (String propName : propNames) {
                         rowValues.add(properties.get(propName));
                     }

@@ -366,28 +366,28 @@ public class DecodeUtilsTest {
     @Test
     public void testBytesToDouble() {
         // test positive Value BigEndian
-        // 100.1 in decimal (big-endian)
+        // 100.2 in decimal (big-endian)
         ByteString data = ByteString.copyFrom(
                 new byte[]{0x40, 0x59, 0x0C, (byte) 0xCC, (byte) 0xCC,
                            (byte) 0xCC, (byte) 0xCC, (byte) 0xCD});
         double result = bytesToDouble(data, ByteOrder.BIG_ENDIAN);
-        assertEquals(100.1, result, 0.0000001);
+        assertEquals(100.2, result, 0.0000001);
 
         // test positive Value LittleEndian
-        // 100.1 in decimal (little-endian)
+        // 100.2 in decimal (little-endian)
         data = ByteString.copyFrom(
                 new byte[]{(byte) 0xCD, (byte) 0xCC, (byte) 0xCC,
                            (byte) 0xCC, (byte) 0xCC, 0x0C, 0x59, 0x40});
         result = bytesToDouble(data, ByteOrder.LITTLE_ENDIAN);
-        assertEquals(100.1, result, 0.0000001);
+        assertEquals(100.2, result, 0.0000001);
 
         // test negative Value LittleEndian
-        // -100.1 in decimal (little-endian)
+        // -100.2 in decimal (little-endian)
         data = ByteString.copyFrom(
                 new byte[]{(byte) 0xCD, (byte) 0xCC, (byte) 0xCC, (byte) 0xCC,
                            (byte) 0xCC, 0x0C, 0x59, (byte) 0xC0});
         result = bytesToDouble(data, ByteOrder.LITTLE_ENDIAN);
-        assertEquals(-100.1, result, 0.0000001);
+        assertEquals(-100.2, result, 0.0000001);
 
         // test insufficient Data
         ByteString insufficientData = ByteString.copyFrom(new byte[]{0x01, 0x02, 0x03});

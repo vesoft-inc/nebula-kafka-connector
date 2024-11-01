@@ -1,21 +1,18 @@
 package com.vesoft.nebula.driver.graph.data;
 
-import com.vesoft.nebula.driver.graph.decode.ColumnType;
-import com.vesoft.nebula.proto.common.Path;
-import com.vesoft.nebula.proto.common.Value;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class NPath {
+public class Path {
     private String decodeType = "utf-8";
 
     private List<ValueWrapper> values;
 
-    private List<Vertex> nodes = new ArrayList<>();
-    private List<Relationship> edges = new ArrayList<>();
+    private List<Node> nodes = new ArrayList<>();
+    private List<Edge> edges = new ArrayList<>();
 
-    public NPath(List<ValueWrapper> values) {
+    public Path(List<ValueWrapper> values) {
         this.values = values;
         for (ValueWrapper value : values) {
             if (value.isNode()) {
@@ -32,25 +29,25 @@ public class NPath {
      *
      * @return a List of all nodes in this path
      */
-    public List<Vertex> nodes() {
+    public List<Node> nodes() {
         return nodes;
     }
 
 
     /**
-     * Create a list over the relationships in this path. The relationships will appear
+     * Create a list over the edge in this path. The edges will appear
      * in the same order as they appear in the path.
      *
-     * @return a List of all relationships in this path
+     * @return a List of all edges in this path
      */
-    public List<Relationship> relationships() {
+    public List<Edge> edges() {
         return edges;
     }
 
     /**
-     * Create a list over the nodes and relationships in this path. The value will appear
+     * Create a list over the nodes and edges in this path. The value will appear
      * in the same order as they appear in the path. The first value will be Node type, then the
-     * next one will be RelationShip type, and next one will be Node type.
+     * next one will be edge type, and next one will be Node type.
      *
      * @return a List of all values in this path
      */
@@ -66,7 +63,7 @@ public class NPath {
         if (obj == null || getClass() != obj.getClass()) {
             return false;
         }
-        NPath that = (NPath) obj;
+        Path that = (Path) obj;
         return values.equals(that.values);
     }
 
@@ -81,8 +78,8 @@ public class NPath {
             return null;
         }
 
-        Vertex                    prefixNode         = nodes.get(0);
-        List<String>              prefixNodePropStrs = new ArrayList<>();
+        Node         prefixNode         = nodes.get(0);
+        List<String> prefixNodePropStrs = new ArrayList<>();
         Map<String, ValueWrapper> prefixNodeProps    = prefixNode.getProperties();
         for (String key : prefixNodeProps.keySet()) {
             prefixNodePropStrs.add(key + ":" + prefixNodeProps.get(key).toString());
@@ -99,17 +96,17 @@ public class NPath {
 
         List<String> edgeStrs = new ArrayList<>();
         for (int i = 0; i < edges.size(); i++) {
-            Relationship relationship = edges.get(i);
+            Edge edge = edges.get(i);
 
             List<String>              edgePropStrs = new ArrayList<>();
-            Map<String, ValueWrapper> props        = relationship.getProperties();
+            Map<String, ValueWrapper> props        = edge.getProperties();
             for (String key : props.keySet()) {
                 edgePropStrs.add(key + ":" + props.get(key).toString());
             }
 
 
-            Vertex                    suffixNode         = nodes.get(i + 1);
-            List<String>              suffixNodePropStrs = new ArrayList<>();
+            Node         suffixNode         = nodes.get(i + 1);
+            List<String> suffixNodePropStrs = new ArrayList<>();
             Map<String, ValueWrapper> suffixNodeProps    = suffixNode.getProperties();
             for (String key : suffixNodeProps.keySet()) {
                 suffixNodePropStrs.add(key + ":" + suffixNodeProps.get(key).toString());
@@ -118,10 +115,10 @@ public class NPath {
             String template;
             if (i == 0) {
                 template = "(%d@%s:%s{%s})~[%d@%s:%s{%s}]~(%d@%s:%s{%s})";
-                if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
+                if (edge.isDirected() && edge.getSrcId() == prefixNode.getId()) {
                     template = "(%d@%s:%s{%s})-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
                 }
-                if (relationship.isDirected() && relationship.getSrcId() != prefixNode.getId()) {
+                if (edge.isDirected() && edge.getSrcId() != prefixNode.getId()) {
                     template = "(%d@%s:%s{%s})<-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
                 }
 
@@ -130,9 +127,9 @@ public class NPath {
                                            prefixNode.getType(),
                                            String.join("&", prefixNode.getLabels()),
                                            String.join(",", prefixNodePropStrs),
-                                           relationship.getRank(),
-                                           relationship.getType(),
-                                           String.join("&", relationship.getLabels()),
+                                           edge.getRank(),
+                                           edge.getType(),
+                                           String.join("&", edge.getLabels()),
                                            String.join(",", edgePropStrs),
                                            suffixNode.getId(),
                                            suffixNode.getType(),
@@ -140,16 +137,16 @@ public class NPath {
                                            String.join(",", suffixNodePropStrs)));
             } else {
                 template = "~[%d@%s:%s{%s}]~(%d@%s:%s{%s})";
-                if (relationship.isDirected() && relationship.getSrcId() == prefixNode.getId()) {
+                if (edge.isDirected() && edge.getSrcId() == prefixNode.getId()) {
                     template = "-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
                 }
-                if (relationship.isDirected() && relationship.getSrcId() != prefixNode.getId()) {
+                if (edge.isDirected() && edge.getSrcId() != prefixNode.getId()) {
                     template = "<-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
                 }
                 edgeStrs.add(String.format(template,
-                                           relationship.getRank(),
-                                           relationship.getType(),
-                                           String.join("&", relationship.getLabels()),
+                                           edge.getRank(),
+                                           edge.getType(),
+                                           String.join("&", edge.getLabels()),
                                            String.join(",", edgePropStrs),
                                            suffixNode.getId(),
                                            suffixNode.getType(),

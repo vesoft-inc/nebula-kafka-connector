@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class Vertex extends BaseDataObject {
+public class Node extends BaseDataObject {
     private final int                       graphId;
     private final String                    graphName;
     private final int                       nodeTypeId;
@@ -16,11 +16,11 @@ public class Vertex extends BaseDataObject {
     private final long                      nodeId;
     private final Map<String, ValueWrapper> properties;
 
-    public Vertex(int graphId,
-                  int nodeTypeId,
-                  long nodeId,
-                  Map<String, ValueWrapper> properties,
-                  ResultGraphSchemas graphSchemas) {
+    public Node(int graphId,
+                int nodeTypeId,
+                long nodeId,
+                Map<String, ValueWrapper> properties,
+                ResultGraphSchemas graphSchemas) {
         this.graphId = graphId;
         this.graphName = graphSchemas.getGraphSchema(graphId).getGraphName();
         this.nodeTypeId = nodeTypeId;
@@ -108,7 +108,7 @@ public class Vertex extends BaseDataObject {
     }
 
     /**
-     * get all properties for vertex
+     * get all properties for node
      *
      * @return HashMap, property name -> property value
      */
@@ -124,7 +124,7 @@ public class Vertex extends BaseDataObject {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Vertex node = (Vertex) o;
+        Node node = (Node) o;
         return getId() == node.getId();
     }
 
