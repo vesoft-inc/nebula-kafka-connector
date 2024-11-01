@@ -17,6 +17,23 @@ public class NebulaClientTest {
     String passwd    = "NebulaGraph01";
 
     @Test
+    public void testNullUser() {
+        System.out.println("<==== testNullUser =====>");
+        try {
+            NebulaClient client = NebulaClient.builder(addresses, null, null)
+                    .withConnectTimeoutMills(1111)
+                    .withRequestTimeoutMills(2222)
+                    .withScanParallel(15)
+                    .build();
+        } catch (AuthFailedException e) {
+            System.out.println("expected to here");
+            Assert.assertTrue(true);
+        } catch (Exception e) {
+            Assert.fail();
+        }
+    }
+
+    @Test
     public void testBuilder() {
         System.out.println("<==== testBuilder =====>");
         try {

@@ -1,9 +1,7 @@
 package com.vesoft.nebula.driver.graph.net;
 
-import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_ENABLE_TLS;
-import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_TLS_PEER_NAME_VERIFY;
-
 import com.vesoft.nebula.driver.graph.data.HostAddress;
+import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +83,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
         return null;
     }
 
-    public void updateServersStatus() {
+    public void updateServersStatus() throws AuthFailedException {
         for (HostAddress hostAddress : addresses) {
             if (ping(hostAddress)) {
                 serversStatus.put(hostAddress, S_OK);
@@ -105,7 +103,7 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
         return goodHosts;
     }
 
-    public boolean ping(HostAddress addr) {
+    public boolean ping(HostAddress addr) throws AuthFailedException {
         try {
             NebulaClient client = NebulaClient
                     .builder(addr.toString(), userName)
@@ -117,13 +115,16 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
                     .build();
             client.close();
             return true;
+        } catch (AuthFailedException e) {
+            logger.error("auth failed,", e);
+            throw e;
         } catch (Exception e) {
             logger.error("ping failed, ", e);
             return false;
         }
     }
 
-    public boolean isServersOK() {
+    public boolean isServersOK() throws AuthFailedException {
         this.updateServersStatus();
         int numServersWithOkStatus  = 0;
         int numServersWithBadStatus = 0;
@@ -139,6 +140,10 @@ public class RoundRobinLoadBalancer implements LoadBalancer, Serializable {
     }
 
     private void scheduleTask() {
-        updateServersStatus();
+        try {
+            updateServersStatus();
+        } catch (AuthFailedException e) {
+            logger.error("auth failed, ", e);
+        }
     }
 }

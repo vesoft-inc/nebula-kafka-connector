@@ -4,6 +4,7 @@ import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_ENABLE_TLS;
 import static com.vesoft.nebula.driver.graph.net.Constants.DEFAULT_TLS_PEER_NAME_VERIFY;
 
 import com.vesoft.nebula.driver.graph.data.HostAddress;
+import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.utils.AddressUtil;
 import java.io.Serializable;
@@ -36,7 +37,7 @@ public class NebulaPool implements Serializable {
         return new NebulaPool.Builder(addresses, userName, password);
     }
 
-    private NebulaPool(Builder builder) throws IOErrorException {
+    private NebulaPool(Builder builder) throws IOErrorException, AuthFailedException {
         if (hasInit.get()) {
             return;
         }
@@ -484,13 +485,7 @@ public class NebulaPool implements Serializable {
             if (address == null) {
                 throw new IllegalArgumentException("Graph addresses cannot be empty.");
             }
-            if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("user name cannot be empty.");
-            }
-            if (authOptions.isEmpty() && (password == null || password.trim().isEmpty())) {
-                throw new IllegalArgumentException(
-                        "auth options and password cannot be empty at the same time.");
-            }
+
             if (enableTls && tlsCa == null) {
                 throw new IllegalArgumentException("no CA certificate provide.");
             }
@@ -503,7 +498,7 @@ public class NebulaPool implements Serializable {
         /**
          * build a new {@link NebulaPool} with configs
          */
-        public NebulaPool build() throws IOErrorException {
+        public NebulaPool build() throws IOErrorException, AuthFailedException {
             check();
             if (password != null) {
                 this.authOptions.put("password", password);

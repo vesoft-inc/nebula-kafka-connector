@@ -173,7 +173,7 @@ public class NebulaClient implements Serializable {
                 break;
             } catch (AuthFailedException e) {
                 logger.error("create NebulaClient failed.", e);
-                throw new AuthFailedException(e.getMessage());
+                throw e;
             } catch (Exception e) {
                 if (tryConnectTimes == 0) {
                     logger.error("create NebulaClient failed.", e);
@@ -748,13 +748,7 @@ public class NebulaClient implements Serializable {
             if (address == null) {
                 throw new IllegalArgumentException("Graph addresses cannot be empty.");
             }
-            if (userName == null || userName.trim().isEmpty()) {
-                throw new IllegalArgumentException("user name cannot be empty.");
-            }
-            if (authOptions.isEmpty() && (password == null || password.trim().isEmpty())) {
-                throw new IllegalArgumentException(
-                        "auth options and password cannot be empty at the same time.");
-            }
+
             if (enableTls && tlsCa == null) {
                 throw new IllegalArgumentException("TLS is enable, tlsCa cannot be empty.");
             }

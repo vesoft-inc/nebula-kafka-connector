@@ -89,9 +89,11 @@ public class GrpcConnection extends Connection {
                                                 .getExtension(Common.protocolVersion))
                     .setVersion(ByteString.copyFrom(ClientVersion.clientVersion, charset))
                     .build();
+            ByteString userString = user == null ? ByteString.copyFrom("", charset)
+                    : ByteString.copyFrom(user, charset);
             String authInfoString = JSON.toJSONString(authOptions);
             AuthRequest authReq = AuthRequest.newBuilder()
-                    .setUsername(ByteString.copyFrom(user, charset))
+                    .setUsername(userString)
                     .setAuthInfo(ByteString.copyFrom(authInfoString, charset))
                     .setClientInfo(clientInfo)
                     .build();

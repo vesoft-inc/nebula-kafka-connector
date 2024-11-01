@@ -7,6 +7,7 @@ package com.vesoft.nebula.driver.graph.net;
 
 import com.vesoft.nebula.driver.graph.ErrorCode;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.util.MockGraph;
 import com.vesoft.nebula.driver.graph.util.ProcessUtil;
 import java.time.ZoneId;
@@ -27,6 +28,25 @@ public class NebulaPoolTest {
     @Before
     public void setup() {
         MockGraph.mockGraphData();
+    }
+
+    @Test
+    public void testNullUser() {
+        System.out.println("<==== testNullUser =====>");
+        try {
+            NebulaPool pool = NebulaPool.builder("127.0.0.1:9669", null, null)
+                    .withConnectTimeoutMills(1111)
+                    .withRequestTimeoutMills(2222)
+                    .withScanParallel(15)
+                    .build();
+            pool.getClient();
+        } catch (AuthFailedException e) {
+            System.out.println("expected to here");
+            Assert.assertTrue(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail();
+        }
     }
 
     @Test
