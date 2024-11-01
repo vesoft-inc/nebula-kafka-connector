@@ -275,10 +275,12 @@ func (gc *GraphClient) Execute(stmt string) (common.IGraphResponse, error) {
 		}
 	}
 	//TODO could add a flag to just decode the first row
-	for resp.HasNext() {
-		_, err := resp.Next()
-		if err != nil {
-			return nil, err
+	if rows != 0 {
+		for resp.HasNext() {
+			_, err := resp.Next()
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	responseTime := int32(time.Since(start) / 1000)
