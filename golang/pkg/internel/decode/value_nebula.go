@@ -3,6 +3,7 @@ package decode
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"sort"
 	"strconv"
 	"strings"
@@ -205,6 +206,9 @@ func (v *nebulaValue) String() string {
 	case types.ValueTypeFloat:
 		d, _ := v.AsFloat()
 		fStr := strconv.FormatFloat(float64(d), 'f', -1, 32)
+		if math.IsInf(float64(d), 1) || math.IsInf(float64(d), -1) || math.IsNaN(float64(d)) {
+			return fStr
+		}
 		if !strings.Contains(fStr, ".") {
 			fStr = fStr + ".0"
 		}
@@ -212,6 +216,9 @@ func (v *nebulaValue) String() string {
 	case types.ValueTypeDouble:
 		d, _ := v.AsDouble()
 		fStr := strconv.FormatFloat(float64(d), 'f', -1, 64)
+		if math.IsInf(float64(d), 1) || math.IsInf(float64(d), -1) || math.IsNaN(float64(d)) {
+			return fStr
+		}
 		if !strings.Contains(fStr, ".") {
 			fStr = fStr + ".0"
 		}

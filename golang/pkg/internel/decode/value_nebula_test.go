@@ -1,6 +1,7 @@
 package decode
 
 import (
+	"math"
 	"testing"
 )
 
@@ -34,8 +35,28 @@ func TestValueString(t *testing.T) {
 			expect: "16.02",
 		},
 		{
+			value:  &nebulaValue{data: &NebulaFloat{Value: float32(math.Inf(1))}},
+			expect: "+Inf",
+		},
+		{
+			value:  &nebulaValue{data: &NebulaFloat{Value: float32(math.Inf(-1))}},
+			expect: "-Inf",
+		},
+		{
 			value:  &nebulaValue{data: &NebulaDouble{Value: 16}},
 			expect: "16.0",
+		},
+		{
+			value:  &nebulaValue{data: &NebulaDouble{Value: math.Inf(1)}},
+			expect: "+Inf",
+		},
+		{
+			value:  &nebulaValue{data: &NebulaDouble{Value: math.Inf(-1)}},
+			expect: "-Inf",
+		},
+		{
+			value:  &nebulaValue{data: &NebulaDouble{Value: math.NaN()}},
+			expect: "NaN",
 		},
 		{
 			value:  &nebulaValue{data: &NebulaString{Value: "string"}},
