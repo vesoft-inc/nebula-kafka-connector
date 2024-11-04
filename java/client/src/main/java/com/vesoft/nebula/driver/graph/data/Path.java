@@ -137,10 +137,10 @@ public class Path {
                                            String.join(",", suffixNodePropStrs)));
             } else {
                 template = "~[%d@%s:%s{%s}]~(%d@%s:%s{%s})";
-                if (edge.isDirected() && edge.getSrcId() == prefixNode.getId()) {
+                if (edge.isDirected() && edge.getDstId() == suffixNode.getId()) {
                     template = "-[%d@%s:%s{%s}]->(%d@%s:%s{%s})";
                 }
-                if (edge.isDirected() && edge.getSrcId() != prefixNode.getId()) {
+                if (edge.isDirected() && edge.getDstId() != suffixNode.getId()) {
                     template = "<-[%d@%s:%s{%s}]-(%d@%s:%s{%s})";
                 }
                 edgeStrs.add(String.format(template,

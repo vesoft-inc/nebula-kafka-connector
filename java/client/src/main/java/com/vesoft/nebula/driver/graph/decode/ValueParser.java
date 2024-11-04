@@ -570,10 +570,6 @@ public class ValueParser {
         int        hour          = buffer.get();
         int        currentOffset = timeZoneOffset;
         if (hour < 0) {
-            hour = -(24 + hour) + (currentOffset / 60);
-            currentOffset = currentOffset % 60;
-        }
-        if (hour < 0) {
             hour = -hour;
         }
         int minute = buffer.get();

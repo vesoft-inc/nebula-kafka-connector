@@ -139,11 +139,8 @@ public class DecodeUtils {
                 data.substring(startPos, ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE + startPos),
                 byteOrder);
         startPos += ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE;
-        StringBuilder sb = new StringBuilder();
-        for (int propCharIndex = startPos; propCharIndex < startPos + length; propCharIndex++) {
-            sb.append((char) data.byteAt(propCharIndex));
-        }
-        return sb.toString();
+        ByteString strBytes = data.substring(startPos, startPos + length);
+        return strBytes.toString(charset);
     }
 
     /**
