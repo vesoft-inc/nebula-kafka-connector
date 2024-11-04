@@ -46,7 +46,7 @@ func (j *ngadmJobType) UpCluster(c *config.Config, metaPassword string) error {
 	args := map[string]any{
 		"username":     defaultMetadUser,
 		"password":     defaultMetadPassword,
-		"metaPassowrd": metaPassword,
+		"metaPassword": metaPassword,
 	}
 	if err := job.Run("install", args, c.JobSpec); err != nil {
 		return err
