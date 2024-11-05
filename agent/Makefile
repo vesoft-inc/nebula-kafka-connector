@@ -1,6 +1,4 @@
 export GO111MODULE := on
-GOOS := $(if $(GOOS),$(GOOS),linux)
-GOARCH := $(if $(GOARCH),$(GOARCH),amd64)
 GOENV  := GO15VENDOREXPERIMENT="1" CGO_ENABLED=0 GOOS=$(GOOS) GOARCH=$(GOARCH)
 GO     := $(GOENV) go
 GO_BUILD := $(GO) build -trimpath
