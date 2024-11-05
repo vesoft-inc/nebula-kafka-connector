@@ -34,7 +34,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
   override def write(row: InternalRow): Unit = {
     val srcIds: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     for (i <- dfSrcPkFieldsIndex.indices) {
-      val srcIdValue = NebulaExecutor.extraValue(row, schema, dfSrcPkFieldsIndex(i), edgeDesc.srcNodePkDataTypeMap)
+      val srcIdValue = NebulaExecutor.extraPrimaryKey(row, schema, dfSrcPkFieldsIndex(i), edgeDesc.srcNodePkDataTypeMap(edgeDesc.srcNodePkNames(i)))
       if(srcIdValue == null){
         LOG.warn(s">>>> record has null value at index ${dfSrcPkFieldsIndex(i)} for primary key, ignore it. record:$row")
         return
@@ -44,7 +44,7 @@ class NebulaEdgeWriter(nebulaOptions: NebulaOptions,
 
     val dstIds: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     for(i <- dfDstPkFieldsIndex.indices){
-      val dstIdValue = NebulaExecutor.extraValue(row, schema, dfDstPkFieldsIndex(i), edgeDesc.dstNodePkDataTypeMap)
+      val dstIdValue = NebulaExecutor.extraPrimaryKey(row, schema, dfDstPkFieldsIndex(i), edgeDesc.dstNodePkDataTypeMap(edgeDesc.dstNodePkNames(i)))
       if(dstIdValue == null){
         LOG.warn(s">>>> record has null value at index ${dfDstPkFieldsIndex(i)} for primary key, ignore it. record:$row")
         return

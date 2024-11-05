@@ -56,34 +56,51 @@
     </developers>
 
 
-    <build>
-        <plugins>
-            <!-- Nexus Staging Plugin -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
-
     <distributionManagement>
         <repository>
-            <id>ossrh</id>
-            <name>Nexus Release Repository</name>
-            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
+            <id>release</id>
+            <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
         </repository>
         <snapshotRepository>
-            <id>ossrh</id>
-            <name>Nexus Snapshot Repository</name>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+            <id>snapshots</id>
+            <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </snapshotRepository>
     </distributionManagement>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>1.6</version>
+                <executions>
+                    <execution>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>scala-2.11</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <scala.binary.version>2.11</scala.binary.version>
+                <scala.version>2.11.12</scala.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>scala-2.12</id>
+            <properties>
+                <scala.binary.version>2.12</scala.binary.version>
+                <scala.version>2.12.10</scala.version>
+            </properties>
+        </profile>
+    </profiles>
 </project>

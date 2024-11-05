@@ -42,7 +42,15 @@ trait NebulaReader {
     this.nebulaOptions = nebulaOptions
 
     // init graphProvider
-    graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
+    graphProvider = new GraphProvider(nebulaOptions.graphAddress,
+                                      nebulaOptions.user,
+                                      nebulaOptions.authOptions,
+                                      nebulaOptions.timeout,
+                                      nebulaOptions.schema,
+                                      nebulaOptions.zonedDatetimeFormat,
+                                      nebulaOptions.localDatetimeFormat,
+                                      nebulaOptions.zonedTimeFormat,
+                                      nebulaOptions.zonedTimeFormat)
 
     // allocate scanPart to this partition
     val totalPart = graphProvider.getAllParts.size()

@@ -19,7 +19,12 @@ class NebulaWriter(nebulaOptions: NebulaOptions) extends Serializable {
     nebulaOptions.graphAddress,
     nebulaOptions.user,
     nebulaOptions.authOptions,
-    nebulaOptions.timeout
+    nebulaOptions.timeout,
+    nebulaOptions.schema,
+    nebulaOptions.zonedDatetimeFormat,
+    nebulaOptions.localDatetimeFormat,
+    nebulaOptions.zonedTimeFormat,
+    nebulaOptions.zonedTimeFormat
   )
 
   def submit(exec: String): ResultSet = {

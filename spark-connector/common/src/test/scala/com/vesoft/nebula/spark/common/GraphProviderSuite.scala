@@ -17,7 +17,13 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     val address = "192.168.8.6:3820"
     val authOptions = new util.HashMap[String, Object]()
     authOptions.put("password", "nebula")
-    graphProvider = new GraphProvider(address, "root", authOptions, 3000)
+    graphProvider = new GraphProvider(address, "root", authOptions,
+                                      3000,
+                                      "/default_schema",
+                                      "%Y-%m-%dT%H:%M:%S %z",
+                                      "%H:%M:%S",
+                                      "%H:%M:%S %z",
+                                      "%H:%M:%S")
 
     val createSchema = "CREATE GRAPH TYPE graph_type_nba AS {" +
       "(node_type_player LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
@@ -25,6 +31,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
     val resp = graphProvider.submit(createSchema)
     if (!resp.isSucceeded) {
       System.out.println("create graph type failed, " + resp.getErrorMessage)
+      graphProvider.close()
       System.exit(1)
     }
     TimeUnit.SECONDS.sleep(5)

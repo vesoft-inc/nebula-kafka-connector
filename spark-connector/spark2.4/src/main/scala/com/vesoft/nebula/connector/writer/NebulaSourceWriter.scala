@@ -2,7 +2,7 @@
 package com.vesoft.nebula.connector.writer
 
 import com.vesoft.nebula.spark.common.NebulaOptions
-import com.vesoft.nebula.spark.common.nebula.GraphProvider
+import com.vesoft.nebula.spark.common.nebula.{EdgeDesc, GraphProvider, NodeDesc}
 import org.apache.spark.TaskContext
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.writer.{DataSourceWriter, DataWriter, DataWriterFactory, WriterCommitMessage}
@@ -35,22 +35,32 @@ class NebulaEdgeWriterFactory(nebulaOptions: NebulaOptions,
                                 taskId: Long,
                                 epochId: Long): DataWriter[InternalRow] = {
     // check if the dataFrame's schema matches NebulaGraph's schema
-    val graphProvider = new GraphProvider(
+    val graphProvider      = new GraphProvider(
       nebulaOptions.graphAddress,
       nebulaOptions.user,
       nebulaOptions.authOptions,
-      nebulaOptions.timeout)
-    val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
+      nebulaOptions.timeout,
+      nebulaOptions.schema,
+      nebulaOptions.zonedDatetimeFormat,
+      nebulaOptions.localDatetimeFormat,
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.zonedTimeFormat)
+    var edgeDesc: EdgeDesc = null
+    try {
+      edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
+    } finally {
+      graphProvider.close()
+    }
     val dataFrameFields = new ListBuffer[String]
     schema.fields.toList.foreach(field => {
-      if ((!nebulaOptions.srcPkFields.contains(field.name)|| nebulaOptions.srcPksAsProp)
+      if ((!nebulaOptions.srcPkFields.contains(field.name) || nebulaOptions.srcPksAsProp)
         && (!nebulaOptions.dstPkFields.contains(field.name) || nebulaOptions.dstPksAsProp)) {
         dataFrameFields.append(field.name)
       }
     })
     for (field <- dataFrameFields) {
       assert(edgeDesc.properties.keySet.contains(field),
-        s"the dataframe field $field does not match NebulaGraph edge ${nebulaOptions.label} properties.")
+             s"the dataframe field $field does not match NebulaGraph edge ${nebulaOptions.label} properties.")
     }
 
     new NebulaEdgeWriter(nebulaOptions, srcIndices, dstIndices, schema)
@@ -67,22 +77,32 @@ class NebulaDataSourceNodeWriter(nebulaOptions: NebulaOptions,
 
   override def createWriterFactory(): DataWriterFactory[InternalRow] = {
     // check if the dataFrame's schema matches NebulaGraph's schema
-    val graphProvider = new GraphProvider(
+    val graphProvider      = new GraphProvider(
       nebulaOptions.graphAddress,
       nebulaOptions.user,
       nebulaOptions.authOptions,
-      nebulaOptions.timeout)
-    val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
+      nebulaOptions.timeout,
+      nebulaOptions.schema,
+      nebulaOptions.zonedDatetimeFormat,
+      nebulaOptions.localDatetimeFormat,
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.zonedTimeFormat)
+    var nodeDesc: NodeDesc = null
+    try {
+      nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
+    } finally {
+      graphProvider.close()
+    }
     // check primary key name exists in dataframe's schema
     val dataFrameFields = new ListBuffer[String]
     schema.fields.toList.foreach(field => dataFrameFields.append(field.name))
-    nodeDesc.nodePkNames.foreach( pk =>{
+    nodeDesc.nodePkNames.foreach(pk => {
       assert(dataFrameFields.contains(pk), s"the dataframe does not contain the node primary key property ${pk}")
 
     })
     for (field <- dataFrameFields) {
       assert(nodeDesc.properties.keySet.contains(field),
-        s"the dataframe field $field does not match NebulaGraph node ${nebulaOptions.label} properties.")
+             s"the dataframe field $field does not match NebulaGraph node ${nebulaOptions.label} properties.")
     }
     new NebulaNodeWriterFactory(nebulaOptions, schema)
   }

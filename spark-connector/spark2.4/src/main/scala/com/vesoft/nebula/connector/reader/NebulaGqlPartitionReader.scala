@@ -33,7 +33,12 @@ class NebulaGqlPartitionReader extends InputPartitionReader[InternalRow] {
       nebulaOptions.graphAddress,
       nebulaOptions.user,
       nebulaOptions.authOptions,
-      nebulaOptions.timeout)
+      nebulaOptions.timeout,
+      nebulaOptions.schema,
+      nebulaOptions.zonedDatetimeFormat,
+      nebulaOptions.localDatetimeFormat,
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.zonedTimeFormat)
     this.resultSet = graphProvider.submit(nebulaOptions.gql)
     schema = new StructType()
     for (name <- resultSet.getColumnNames.asScala) {

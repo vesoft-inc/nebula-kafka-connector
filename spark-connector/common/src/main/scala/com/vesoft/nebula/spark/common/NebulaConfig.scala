@@ -44,13 +44,13 @@ object NebulaConnectionConfig {
   class ConfigBuilder {
     private val LOG = LoggerFactory.getLogger(this.getClass)
 
-    protected var graphAddress: String = _
-    protected var user: String = _
-    protected var passwd: String = _
-    protected var authOptions = new mutable.HashMap[String, Any]
-    protected var timeout: Int = 5
-    protected var executeRetry: Int = 3
-    protected var executeRetryIntervalMs: Int = 0
+    protected var graphAddress          : String = _
+    protected var user                  : String = _
+    protected var passwd                : String = _
+    protected var authOptions                    = new mutable.HashMap[String, Any]
+    protected var timeout               : Int    = 5
+    protected var executeRetry          : Int    = 3
+    protected var executeRetryIntervalMs: Int    = 0
 
     /**
      * set nebula graph server address, multi addresses is split by English comma
@@ -117,7 +117,7 @@ object NebulaConnectionConfig {
       assert(graphAddress != null && graphAddress.nonEmpty, "graph address cannot be blank.")
       assert(user != null && user.nonEmpty, "user cannot be blank.")
       assert((passwd != null && passwd.nonEmpty) || authOptions.nonEmpty,
-        "password and authOptions cannot be blank at the same time.")
+             "password and authOptions cannot be blank at the same time.")
       assert(timeout > 0, "timeout must be larger than 0.")
       assert(executeRetry >= 0, "retry must be equal or larger than 0.")
     }
@@ -128,12 +128,12 @@ object NebulaConnectionConfig {
     def build(): NebulaConnectionConfig = {
       check()
       new NebulaConnectionConfig(graphAddress,
-        user,
-        passwd,
-        authOptions.toMap,
-        timeout,
-        executeRetry,
-        executeRetryIntervalMs)
+                                 user,
+                                 passwd,
+                                 authOptions.toMap,
+                                 timeout,
+                                 executeRetry,
+                                 executeRetryIntervalMs)
     }
   }
 
@@ -147,11 +147,26 @@ object NebulaConnectionConfig {
  * Base config needed when write dataframe into nebula graph
  */
 class WriteNebulaConfig(graphName: String,
+                        schema: String,
+                        zonedDateTimeFormat: String,
+                        localDateTimeFormat: String,
+                        zonedTimeFormat: String,
+                        localTimeFormat: String,
                         batchSize: Int,
                         writeMode: String,
                         disableWriteLog: Boolean)
   extends Serializable {
   def getGraphName: String = graphName
+
+  def getSchema: String =  schema
+
+  def getZonedDateTimeFormat: String =  zonedDateTimeFormat
+
+  def getLocalDateTimeFormat: String = localDateTimeFormat
+
+  def getZonedTimeFormat: String =  zonedTimeFormat
+
+  def getLocalTimeFormat: String =  localTimeFormat
 
   def getBatchSize: Int = batchSize
 
@@ -170,11 +185,24 @@ class WriteNebulaConfig(graphName: String,
  * @param disableWriteLog : disable the log print for write result, such as batch size and latency
  */
 class WriteNebulaNodeConfig(graphName: String,
+                            schema: String,
+                            zonedDateTimeFormat: String,
+                            localDateTimeFormat: String,
+                            zonedTimeFormat: String,
+                            localTimeFormat: String,
                             nodeType: String,
                             batchSize: Int,
                             writeMode: String,
                             disableWriteLog: Boolean)
-  extends WriteNebulaConfig(graphName, batchSize, writeMode, disableWriteLog) {
+  extends WriteNebulaConfig(graphName,
+                            schema,
+                            zonedDateTimeFormat,
+                            localDateTimeFormat,
+                            zonedTimeFormat,
+                            localTimeFormat,
+                            batchSize,
+                            writeMode,
+                            disableWriteLog) {
   def getNodeType = nodeType
 
 }
@@ -187,17 +215,62 @@ object WriteNebulaNodeConfig {
   private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
 
   class WriteNodeConfigBuilder {
-    private var graphName: String = _
-    private var nodeType: String = _
-    private var writeMode: String = "insert"
-    private var disableWriteLog: Boolean = false
-    private var batchSize: Int = 512
+    private var graphName          : String  = _
+    private var schema             : String  = _
+    private var zonedDateTimeFormat: String  = _
+    private var localDateTimeFormat: String  = _
+    private var zonedTimeFormat    : String  = _
+    private var localTimeFormat    : String  = _
+    private var nodeType           : String  = _
+    private var writeMode          : String  = "insert"
+    private var disableWriteLog    : Boolean = false
+    private var batchSize          : Int     = 512
 
     /**
      * set graph name
      */
     def withGraphName(graphName: String): WriteNodeConfigBuilder = {
       this.graphName = graphName
+      this
+    }
+
+    /**
+     * set schema path
+     */
+    def withSchema(schema: String): WriteNodeConfigBuilder = {
+      this.schema = schema
+      this
+    }
+
+    /**
+     * set zoned datetime format
+     */
+    def withZonedDatetimeFormat(zonedDatetimeFormat: String): WriteNodeConfigBuilder = {
+      this.zonedDateTimeFormat = zonedDatetimeFormat;
+      this
+    }
+
+    /**
+     * set local datetime format
+     */
+    def withLocalDatetimeFormat(localDatetimeFormat: String): WriteNodeConfigBuilder = {
+      this.localDateTimeFormat = localDatetimeFormat;
+      this
+    }
+
+    /**
+     * set zoned time format
+     */
+    def withZonedTimeFormat(zonedTimeFormat: String): WriteNodeConfigBuilder = {
+      this.zonedTimeFormat = zonedTimeFormat;
+      this
+    }
+
+    /**
+     * set local time format
+     */
+    def withLocalTimeFormat(localTimeFormat: String): WriteNodeConfigBuilder = {
+      this.localTimeFormat = localTimeFormat;
       this
     }
 
@@ -239,10 +312,15 @@ object WriteNebulaNodeConfig {
     def build(): WriteNebulaNodeConfig = {
       check()
       new WriteNebulaNodeConfig(graphName,
-        nodeType,
-        batchSize,
-        writeMode,
-        disableWriteLog)
+                                schema,
+                                zonedDateTimeFormat,
+                                localDateTimeFormat,
+                                zonedTimeFormat,
+                                localTimeFormat,
+                                nodeType,
+                                batchSize,
+                                writeMode,
+                                disableWriteLog)
     }
 
     /**
@@ -258,9 +336,6 @@ object WriteNebulaNodeConfig {
       } catch {
         case e: Throwable =>
           assert(false, s"optional write mode: insert or update, your write mode is $writeMode")
-      }
-      if (writeMode.equalsIgnoreCase(WriteMode.UPDATE.toString)) {
-        assert(false, s"the writeMode is ${writeMode}, for now just INSERT and DELETE is supported.")
       }
 
       LOG.info(
@@ -288,6 +363,11 @@ object WriteNebulaNodeConfig {
  * @param disableWriteLog : disable the log print for write result, such as batch size and latency
  */
 class WriteNebulaEdgeConfig(graphName: String,
+                            schema: String,
+                            zonedDateTimeFormat: String,
+                            localDateTimeFormat: String,
+                            zonedTimeFormat: String,
+                            localTimeFormat: String,
                             edgeType: String,
                             srcPkFields: List[String],
                             dstPkFields: List[String],
@@ -296,7 +376,15 @@ class WriteNebulaEdgeConfig(graphName: String,
                             dstPkAsProp: Boolean,
                             writeMode: String,
                             disableWriteLog: Boolean)
-  extends WriteNebulaConfig(graphName, batchSize, writeMode, disableWriteLog) {
+  extends WriteNebulaConfig(graphName,
+                            schema,
+                            zonedDateTimeFormat,
+                            localDateTimeFormat,
+                            zonedTimeFormat,
+                            localTimeFormat,
+                            batchSize,
+                            writeMode,
+                            disableWriteLog) {
   def getEdgeType: String = edgeType
 
   def getSrcPkFields: String = srcPkFields.mkString("&&")
@@ -319,22 +407,67 @@ object WriteNebulaEdgeConfig {
    * a builder to create {@link WriteNebulaEdgeConfig}
    */
   class WriteEdgeConfigBuilder {
-    var graphName: String = _
-    var writeMode: String = WriteMode.INSERT.toString
-    var disableWriteLog: Boolean = false
+    private var graphName          : String  = _
+    private var schema             : String  = _
+    private var zonedDateTimeFormat: String  = _
+    private var localDateTimeFormat: String  = _
+    private var zonedTimeFormat    : String  = _
+    private var localTimeFormat    : String  = _
+    private var writeMode          : String  = WriteMode.INSERT.toString
+    private var disableWriteLog    : Boolean = false
 
-    private var edgeType: String = _
-    private var srcPkFields: ListBuffer[String] = new ListBuffer[String]
-    private var dstPkFields: ListBuffer[String] = new ListBuffer[String]
-    private var srcPksAsProp: Boolean = false
-    private var dstPksAsProp: Boolean = false
-    private var batchSize: Int = 512
+    private var edgeType    : String             = _
+    private var srcPkFields : ListBuffer[String] = new ListBuffer[String]
+    private var dstPkFields : ListBuffer[String] = new ListBuffer[String]
+    private var srcPksAsProp: Boolean            = false
+    private var dstPksAsProp: Boolean            = false
+    private var batchSize   : Int                = 512
 
     /**
      * set graph name
      */
     def withGraphName(graphName: String): WriteEdgeConfigBuilder = {
       this.graphName = graphName
+      this
+    }
+
+    /**
+     * set schema path
+     */
+    def withSchema(schema: String): WriteEdgeConfigBuilder = {
+      this.schema = schema
+      this
+    }
+
+    /**
+     * set zoned datetime format
+     */
+    def withZonedDatetimeFormat(zonedDatetimeFormat: String): WriteEdgeConfigBuilder = {
+      this.zonedDateTimeFormat = zonedDatetimeFormat;
+      this
+    }
+
+    /**
+     * set local datetime format
+     */
+    def withLocalDatetimeFormat(localDatetimeFormat: String): WriteEdgeConfigBuilder = {
+      this.localDateTimeFormat = localDatetimeFormat;
+      this
+    }
+
+    /**
+     * set zoned time format
+     */
+    def withZonedTimeFormat(zonedTimeFormat: String): WriteEdgeConfigBuilder = {
+      this.zonedTimeFormat = zonedTimeFormat;
+      this
+    }
+
+    /**
+     * set local time format
+     */
+    def withLocalTimeFormat(localTimeFormat: String): WriteEdgeConfigBuilder = {
+      this.localTimeFormat = localTimeFormat;
       this
     }
 
@@ -350,7 +483,7 @@ object WriteNebulaEdgeConfig {
      * set which field in dataframe as nebula edge's src node's primary key
      * use this method when src node's pk is just one property
      */
-    def withSrcPkField(srcPkField: String) :WriteEdgeConfigBuilder = {
+    def withSrcPkField(srcPkField: String): WriteEdgeConfigBuilder = {
       this.srcPkFields.append(srcPkField)
       this
     }
@@ -378,7 +511,7 @@ object WriteNebulaEdgeConfig {
 
     /**
      * set which field in dataframe as nebula edge's dst id
-     *  use this method when dst node's pk is multiple properties
+     * use this method when dst node's pk is multiple properties
      */
     def withDstPkFields(dstIdFields: List[String]): WriteEdgeConfigBuilder = {
       this.dstPkFields.appendAll(dstIdFields)
@@ -431,14 +564,19 @@ object WriteNebulaEdgeConfig {
     def build(): WriteNebulaEdgeConfig = {
       check()
       new WriteNebulaEdgeConfig(graphName,
-        edgeType,
-        srcPkFields.toList,
-        dstPkFields.toList,
-        batchSize,
-        srcPksAsProp,
-        dstPksAsProp,
-        writeMode,
-        disableWriteLog)
+                                schema,
+                                zonedDateTimeFormat,
+                                localDateTimeFormat,
+                                zonedTimeFormat,
+                                localTimeFormat,
+                                edgeType,
+                                srcPkFields.toList,
+                                dstPkFields.toList,
+                                batchSize,
+                                srcPksAsProp,
+                                dstPksAsProp,
+                                writeMode,
+                                disableWriteLog)
     }
 
     private def check(): Unit = {
@@ -453,9 +591,6 @@ object WriteNebulaEdgeConfig {
       } catch {
         case e: Throwable =>
           assert(false, s"optional write mode: insert or update, your write mode is $writeMode")
-      }
-      if (writeMode.equalsIgnoreCase(WriteMode.UPDATE.toString)) {
-        assert(false, s"the writeMode is ${writeMode}, for now just INSERT and DELETE is supported.")
       }
       // the batch size must be 1 for DELETE edge
       if (writeMode.equalsIgnoreCase(WriteMode.DELETE.toString)) {
@@ -506,11 +641,11 @@ object ReadNebulaConfig {
   }
 
   class ReadConfigBuilder {
-    private var graphName: String = _
-    private var typeName: String = _
-    private var returnCols: ListBuffer[String] = _
-    private var partitionNum: Int = 10
-    private var batchSize: Int = 2000
+    private var graphName   : String             = _
+    private var typeName    : String             = _
+    private var returnCols  : ListBuffer[String] = _
+    private var partitionNum: Int                = 10
+    private var batchSize   : Int                = 2000
 
     /**
      * config the graph name for reading

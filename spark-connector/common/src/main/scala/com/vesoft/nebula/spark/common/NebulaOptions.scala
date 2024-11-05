@@ -26,8 +26,8 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
           NebulaOptions.GRAPH_NAME -> graphName,
           NebulaOptions.TYPE -> dataType,
           NebulaOptions.LABEL -> label
-        ))
-    )
+          ))
+      )
   }
 
   val operaType = OperaType.withName(parameters(OPERATE_TYPE))
@@ -41,18 +41,18 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
     properties
   }
 
-  val timeout: Int =
+  val timeout               : Int                               =
     parameters.getOrElse(TIMEOUT, DEFAULT_CONNECTION_TIMEOUT_SECONDS).toString.toInt
-  val executionRetry: Int =
+  val executionRetry        : Int                               =
     parameters.getOrElse(EXECUTION_RETRY, DEFAULT_EXECUTION_RETRY).toString.toInt
-  val executionRetryInterval: Int =
+  val executionRetryInterval: Int                               =
     parameters.getOrElse(EXECUTION_RETRY_INTERVAL, DEFAULT_EXECUTION_RETRY_INTERVAL).toString.toInt
-  val user: String = parameters.getOrElse(USER_NAME, DEFAULT_USER_NAME)
-  val authOptions: java.util.HashMap[String, Object] = {
+  val user                  : String                            = parameters.getOrElse(USER_NAME, DEFAULT_USER_NAME)
+  val authOptions           : java.util.HashMap[String, Object] = {
     val authJsonString = parameters.getOrElse(AUTHOPTIONS, "")
     JSON.parseObject(authJsonString, classOf[java.util.HashMap[String, Object]])
   }
-  val rateLimit: Long = parameters.getOrElse(RATE_LIMIT, DEFAULT_RATE_LIMIT).toString.toLong
+  val rateLimit             : Long                              = parameters.getOrElse(RATE_LIMIT, DEFAULT_RATE_LIMIT).toString.toLong
 
   require(parameters.isDefinedAt(TYPE), s"Option '$TYPE' is required")
   val dataType: String = parameters(TYPE)
@@ -62,16 +62,16 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 
   /** nebula common parameters */
   require(parameters.isDefinedAt(GRAPH_ADDRESS),
-    s"option $GRAPH_ADDRESS is required and can not be blank")
-  var graphAddress = parameters(GRAPH_ADDRESS)
+          s"option $GRAPH_ADDRESS is required and can not be blank")
+  var graphAddress      = parameters(GRAPH_ADDRESS)
   var graphName: String = _
-  var label: String = _
+  var label    : String = _
   if (!dataType.equalsIgnoreCase(DataTypeEnum.GQL.toString)) {
     require(parameters.isDefinedAt(GRAPH_NAME) && StringUtils.isNotBlank(parameters(GRAPH_NAME)),
-      s"Option '$GRAPH_NAME' is required and can not be blank")
+            s"Option '$GRAPH_NAME' is required and can not be blank")
     graphName = parameters(GRAPH_NAME)
     require(parameters.isDefinedAt(LABEL) && StringUtils.isNotBlank(parameters(LABEL)),
-      s"Option '$LABEL' is required and can not be blank")
+            s"Option '$LABEL' is required and can not be blank")
     label = parameters(LABEL)
   }
 
@@ -79,26 +79,36 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 
   /** write parameters */
 
-  var srcPkFields: List[String] = _
-  var dstPkFields : List[String] = _
-  var srcPksAsProp: Boolean = _
-  var dstPksAsProp: Boolean      = _
-  var writeMode   : WriteMode.Value = _
-  var disableWriteLog: Boolean = _
+  var srcPkFields        : List[String]    = _
+  var dstPkFields        : List[String]    = _
+  var srcPksAsProp       : Boolean         = _
+  var dstPksAsProp       : Boolean         = _
+  var writeMode          : WriteMode.Value = _
+  var disableWriteLog    : Boolean         = _
+  var schema             : String          = _
+  var zonedDatetimeFormat: String          = _
+  var localDatetimeFormat: String          = _
+  var zonedTimeFormat    : String          = _
+  var localTimeFormat    : String          = _
 
   if (operaType == OperaType.WRITE) {
-    srcPkFields = parameters.getOrElse(SRC_PK_FIELD, null).split("&&").toList
-    dstPkFields = parameters.getOrElse(DST_PK_FIELD, null).split("&&").toList
+    srcPkFields = parameters.getOrElse(SRC_PK_FIELD, "").split("&&").toList
+    dstPkFields = parameters.getOrElse(DST_PK_FIELD, "").split("&&").toList
     srcPksAsProp = parameters.getOrElse(SRC_PK_AS_PROP, false).toString.toBoolean
     dstPksAsProp = parameters.getOrElse(DST_PK_AS_PROP, false).toString.toBoolean
     writeMode =
       WriteMode.withName(parameters.getOrElse(WRITE_MODE, DEFAULT_WRITE_MODE).toString.toLowerCase)
     disableWriteLog = parameters.getOrElse(DISABLE_WRITE_LOG, false).toString.toBoolean
+    schema = parameters.getOrElse[String](SCHEMA, null)
+    zonedDatetimeFormat = parameters.getOrElse[String](ZONED_DATETIME_FORMAT, null)
+    localDatetimeFormat = parameters.getOrElse[String](LOCAL_DATETIME_FORMAT, null)
+    zonedTimeFormat = parameters.getOrElse[String](ZONED_TIME_FORMAT, null)
+    localTimeFormat = parameters.getOrElse[String](LOCAL_TIME_FORMAT, null)
   }
 
   /** read parameters */
   var partitionNums: Int = parameters.getOrElse(PARTITION_NUMBER, "1").toInt
-  val returnCols = parameters.getOrElse(RETURN_COLS, null)
+  val returnCols         = parameters.getOrElse(RETURN_COLS, null)
 
   def getReturnCols: List[String] = {
     if (returnCols.equals("$null")) {
@@ -117,48 +127,53 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
 object NebulaOptions {
 
   /** nebula common config */
-  val GRAPH_NAME: String = "graphName"
-  val GRAPH_ADDRESS: String = "graphAddress"
-  val TYPE: String = "type"
-  val LABEL: String = "label"
-  val BATCH_SIZE: String = "batchSize"
+  val GRAPH_NAME           : String = "graph_name"
+  val SCHEMA               : String = "schema"
+  val ZONED_DATETIME_FORMAT: String = "zoned_datetime_format"
+  val LOCAL_DATETIME_FORMAT: String = "local_datetime_format"
+  val ZONED_TIME_FORMAT    : String = "zoned_time_format"
+  val LOCAL_TIME_FORMAT    : String = "local_time_format"
+  val GRAPH_ADDRESS        : String = "graph_address"
+  val TYPE                 : String = "type"
+  val LABEL                : String = "label"
+  val BATCH_SIZE           : String = "batch_size"
 
   /** connection config */
-  val TIMEOUT: String = "timeout"
-  val EXECUTION_RETRY: String = "executionRetry"
-  val EXECUTION_RETRY_INTERVAL: String = "executionRetryInterval"
-  val USER_NAME: String = "user"
-  val PASSWD: String = "passwd"
-  val AUTHOPTIONS: String = "authOptions"
+  val TIMEOUT                 : String = "timeout"
+  val EXECUTION_RETRY         : String = "execution_retry"
+  val EXECUTION_RETRY_INTERVAL: String = "execution_retry_interval"
+  val USER_NAME               : String = "user"
+  val PASSWD                  : String = "passwd"
+  val AUTHOPTIONS             : String = "auth_options"
 
-  val OPERATE_TYPE: String = "operateType"
+  val OPERATE_TYPE: String = "operate_type"
 
   /** gql config */
   val GQL: String = "gql"
 
   /** write config */
-  val RATE_LIMIT: String = "rateLimit"
-  val SRC_PK_FIELD = "srcPkField"
-  val DST_PK_FIELD = "dstPkField"
-  val SRC_PK_AS_PROP: String = "srcPkAsProp"
-  val DST_PK_AS_PROP: String = "dstPkAsProp"
-  val WRITE_MODE: String = "writeMode"
-  val DISABLE_WRITE_LOG: String = "disableWriteLog"
+  val RATE_LIMIT       : String = "rate_limit"
+  val SRC_PK_FIELD              = "src_pk_field"
+  val DST_PK_FIELD              = "dst_pk_field"
+  val SRC_PK_AS_PROP   : String = "src_pk_as_prop"
+  val DST_PK_AS_PROP   : String = "dst_pk_as_prop"
+  val WRITE_MODE       : String = "write_mode"
+  val DISABLE_WRITE_LOG: String = "disable_write_log"
 
   /** read config */
-  val PARTITION_NUMBER: String = "partitionNumber"
-  val RETURN_COLS: String = "returnCols"
+  val PARTITION_NUMBER: String = "partition_number"
+  val RETURN_COLS     : String = "return_cols"
 
-  val DEFAULT_TIMEOUT_SECONDS: Int = 10
-  val DEFAULT_CONNECTION_TIMEOUT_SECONDS: Int = 3
-  val DEFAULT_CONNECTION_RETRY: Int = 3
-  val DEFAULT_EXECUTION_RETRY: Int = 3
-  val DEFAULT_EXECUTION_RETRY_INTERVAL: Int = 0
-  val DEFAULT_USER_NAME: String = "root"
-  val DEFAULT_PASSWD: String = "nebula"
+  val DEFAULT_TIMEOUT_SECONDS           : Int    = 10
+  val DEFAULT_CONNECTION_TIMEOUT_SECONDS: Int    = 3
+  val DEFAULT_CONNECTION_RETRY          : Int    = 3
+  val DEFAULT_EXECUTION_RETRY           : Int    = 3
+  val DEFAULT_EXECUTION_RETRY_INTERVAL  : Int    = 0
+  val DEFAULT_USER_NAME                 : String = "root"
+  val DEFAULT_PASSWD                    : String = "nebula"
 
   val DEFAULT_RATE_LIMIT: Long = 1024L
-  val DEFAULT_BATCH_SIZE: Int = 1000
+  val DEFAULT_BATCH_SIZE: Int  = 1000
 
   val DEFAULT_WRITE_MODE = WriteMode.INSERT
 

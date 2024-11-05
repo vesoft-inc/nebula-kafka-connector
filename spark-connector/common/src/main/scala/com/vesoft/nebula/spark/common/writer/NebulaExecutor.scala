@@ -82,6 +82,39 @@ object NebulaExecutor {
   }
 
   /**
+   * get and convert primary key value
+   *
+   * @param record         DataFrame internal row
+   * @param schema         DataFrame schema
+   * @param index          the position of row columns
+   * @param primaryKeyType datatype of primary key in nebula
+   */
+  def extraPrimaryKey(record: InternalRow,
+                      schema: StructType,
+                      index: Int,
+                      primaryKeyType: String): String = {
+    if (record.isNullAt(index)) return null
+
+    val types                  = schema.fields.map(field => field.dataType)
+    val propValue              = record.get(index, types(index))
+    val propValueTypeClassName = propValue.getClass.getName
+    val simpleName             = propValueTypeClassName.substring(propValueTypeClassName.lastIndexOf(".") + 1,
+                                                                  propValueTypeClassName.length)
+    primaryKeyType match {
+      case "STRING" =>
+        NebulaUtils.escapeUtil(propValue.toString).mkString("\"", "", "\"")
+      case "DATE" => "date(\"" + propValue + "\")"
+      case "LOCAL DATETIME" => "local_datetime(\"" + propValue + "\")"
+      case "LOCAL TIME" => "local_time(\"" + propValue + "\")"
+      case "ZONED TIME" => "zoned_time(\"" + propValue + " \")"
+      case "ZONED DATETIME" => "zoned_datetime(\"" + propValue + " \")"
+      case _ =>
+        if (simpleName.equalsIgnoreCase("UTF8String")) propValue.toString
+        else propValue.toString
+    }
+  }
+
+  /**
    * get and convert property value
    *
    * @param record       DataFrame internal row
@@ -89,10 +122,10 @@ object NebulaExecutor {
    * @param index        the position of row columns
    * @param fieldTypeMap property name -> property datatype in nebula
    */
-   def extraValue(record: InternalRow,
-                               schema: StructType,
-                               index: Int,
-                               fieldTypeMap: Map[String, String]): String = {
+  def extraValue(record: InternalRow,
+                 schema: StructType,
+                 index: Int,
+                 fieldTypeMap: Map[String, String]): String = {
     if (record.isNullAt(index)) return null
 
     val types                  = schema.fields.map(field => field.dataType)
@@ -246,7 +279,6 @@ object NebulaExecutor {
    * @param nebulaFields nebula property name list
    * @return escaped nebula property name list
    */
-  def escapePropName(nebulaFields: List[String]): List[String] =
-    nebulaFields.map(key => s"`$key`")
+  def escapePropName(nebulaFields: List[String]): List[String] = nebulaFields.map(key => s"`$key`")
 
 }

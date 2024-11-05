@@ -9,7 +9,7 @@
         <version>5.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>common</artifactId>
+    <artifactId>common_${scala.binary.version}</artifactId>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
@@ -22,8 +22,6 @@
         <junit.version>4.13.1</junit.version>
         <codec.version>1.13</codec.version>
         <spark.version>2.4.4</spark.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <scala.version>2.11.12</scala.version>
     </properties>
 
     <dependencies>
@@ -118,18 +116,6 @@
                         <phase>deploy</phase>
                     </execution>
                 </executions>
-            </plugin>
-            <!-- nexus staging deploy -->
-            <plugin>
-                <groupId>org.sonatype.plugins</groupId>
-                <artifactId>nexus-staging-maven-plugin</artifactId>
-                <version>1.6.8</version>
-                <extensions>true</extensions>
-                <configuration>
-                    <serverId>ossrh</serverId>
-                    <nexusUrl>https://oss.sonatype.org/</nexusUrl>
-                    <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                </configuration>
             </plugin>
 
             <!-- maven-jar -->

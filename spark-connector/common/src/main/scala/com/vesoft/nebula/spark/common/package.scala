@@ -9,10 +9,10 @@ case class NebulaNode(values: Map[String, String])
 case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkNames: List[String], fieldTypeMap: Map[String, String]) {
   private val propNames = values.iterator.next().values.keySet.toSeq
 
-  /***
+  /** *
    * construct the table header
    */
-    def tableHeaders: String = propNames.mkString(",")
+  def tableHeaders: String = propNames.mkString(",")
 
   /**
    * construct the table value
@@ -43,11 +43,11 @@ case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkNames: List
   /**
    * construct the setting property mapping for update
    */
-  def getUpdatePropNamesWithTableStr(prefix:String) = {
+  def getUpdatePropNamesWithTableStr(prefix: String) = {
     val propNameMappings = new ListBuffer[String]
     for (name <- propNames) {
       if (!pkNames.contains(name)) {
-        propNameMappings.append(s"$prefix.`${}`=CAST(r.${name} AS ${fieldTypeMap(name)})")
+        propNameMappings.append(s"$prefix.`${name}`=CAST(r.${name} AS ${fieldTypeMap(name)})")
       }
     }
     propNameMappings.mkString(",")
@@ -79,7 +79,7 @@ case class NebulaEdges(edgeType: String,
   def tableHeaders: String = {
     val propNamesWithoutPks = propNames.filterNot(p => dfSrcFields.contains(p) || dfDstFields.contains(p))
     val pksAndPropNames     = dfSrcFields ++ dfDstFields ++ propNamesWithoutPks
-    pksAndPropNames.mkString(",")
+    pksAndPropNames.distinct.mkString(",")
   }
 
   def getEdgesStr = {
@@ -91,10 +91,12 @@ case class NebulaEdges(edgeType: String,
       srcPkNames.foreach(pk => {
         srcValues.append(edge.srcIds(pk))
       })
-      // construct the dst node pks value
+      // construct the dst node pks value, if dst pk has the same value with src pk, skip it.
       val dstValues = new ListBuffer[String]
       dstPkNames.foreach(pk => {
-        dstValues.append(edge.dstIds(pk))
+       if(!dfSrcFields.contains(dfDstFields(dstPkNames.indexOf(pk)))){
+         dstValues.append(edge.dstIds(pk))
+       }
       })
 
       s"(${srcValues.mkString(",")},${dstValues.mkString(",")}$delimiter" +
@@ -115,7 +117,7 @@ case class NebulaEdges(edgeType: String,
     val propNamesWithoutPks = propNames.filterNot(p => dfSrcFields.contains(p) || dfDstFields.contains(p))
       .filterNot(p => srcPkNames.contains(p) || dstPkNames.contains(p))
     val pksAndPropNames     = dfSrcFields ++ dfDstFields ++ propNamesWithoutPks
-    pksAndPropNames.map(n => s"r.$n as $n").mkString(",")
+    pksAndPropNames.distinct.map(n => s"r.$n as $n").mkString(",")
   }
 
   def getSrcPkStr(prefix: String): String = {
@@ -140,6 +142,6 @@ case class NebulaEdges(edgeType: String,
   /**
    * construct the setting property mapping for update
    */
-  def getUpdatePropNamesWithTableStr: String = propNames.map(prop => s"`$prop`=CAST($prop AS ${fieldTypeMap(prop)})").mkString(",")
+  def getUpdatePropNamesWithTableStr: String = propNames.map(prop => s"e.`$prop`=CAST($prop AS ${fieldTypeMap(prop)})").mkString(",")
 
 }

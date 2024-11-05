@@ -1,6 +1,7 @@
 
 package com.vesoft.nebula.spark.common
 
+import com.vesoft.nebula.driver.graph.data.ResultSet
 import com.vesoft.nebula.spark.common.nebula.GraphProvider
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types._
@@ -85,52 +86,63 @@ object NebulaUtils {
    */
   def getSchema(nebulaOptions: NebulaOptions): StructType = {
     var returnCols    = nebulaOptions.getReturnCols
-    val graphProvider = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
+    val graphProvider = new GraphProvider(nebulaOptions.graphAddress,
+                                          nebulaOptions.user,
+                                          nebulaOptions.authOptions,
+                                          nebulaOptions.timeout,
+                                          nebulaOptions.schema,
+                                          nebulaOptions.zonedDatetimeFormat,
+                                          nebulaOptions.localDatetimeFormat,
+                                          nebulaOptions.zonedTimeFormat,
+                                          nebulaOptions.zonedTimeFormat)
     val isNodeType    = DataTypeEnum.NODE.toString.equalsIgnoreCase(nebulaOptions.dataType)
 
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
-    if (isNodeType) {
-      val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
-      val pks      = nodeDesc.nodePkNames
-      pks.foreach(pk => {
-        fields.append(DataTypes.createStructField(pk, DataTypes.StringType, false))
-      })
-      // if returnCols is null, read all the property of node type/edge type
-      if (returnCols == null) {
-        returnCols = nodeDesc.properties.keySet.toList
-      }
-      // add node returnCols name to Spark schema's fields
-      for (propName <- returnCols) {
-        if (!pks.contains(propName)) {
-          fields.append(DataTypes.createStructField(propName, DataTypes.StringType, true))
+    try {
+      if (isNodeType) {
+        val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
+        val pks      = nodeDesc.nodePkNames
+        pks.foreach(pk => {
+          fields.append(DataTypes.createStructField(pk, DataTypes.StringType, false))
+        })
+        // if returnCols is null, read all the property of node type/edge type
+        if (returnCols == null) {
+          returnCols = nodeDesc.properties.keySet.toList
         }
-      }
-      new StructType(fields.toArray)
-    } else {
-      val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
-      edgeDesc.srcNodePkNames.foreach(srcPk => {
-        fields.append(DataTypes.createStructField(srcPk, DataTypes.StringType, false))
-      })
-      edgeDesc.dstNodePkNames.foreach(dstPk => {
-        fields.append(DataTypes.createStructField(dstPk, DataTypes.StringType, false))
-
-      })
-      // if returnCols is null, read all the property of node type/edge type
-      if (returnCols == null) {
-        returnCols = edgeDesc.properties.keySet.toList
-      }
-      // add edge returnCols name to Spark schema's fields
-      for (propName <- returnCols) {
-        // if edge property has the same name with src/dst node's pk name, rename it with suffix $
-        val finalPropName =
-          if (edgeDesc.srcNodePkNames.contains(propName) || edgeDesc.dstNodePkNames.contains(propName)) {
-            propName + "$"
-          } else {
-            propName
+        // add node returnCols name to Spark schema's fields
+        for (propName <- returnCols) {
+          if (!pks.contains(propName)) {
+            fields.append(DataTypes.createStructField(propName, DataTypes.StringType, true))
           }
-        fields.append(DataTypes.createStructField(finalPropName, DataTypes.StringType, true))
+        }
+        new StructType(fields.toArray)
+      } else {
+        val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
+        edgeDesc.srcNodePkNames.foreach(srcPk => {
+          fields.append(DataTypes.createStructField(srcPk, DataTypes.StringType, false))
+        })
+        edgeDesc.dstNodePkNames.foreach(dstPk => {
+          fields.append(DataTypes.createStructField(dstPk, DataTypes.StringType, false))
+        })
+        // if returnCols is null, read all the property of node type/edge type
+        if (returnCols == null) {
+          returnCols = edgeDesc.properties.keySet.toList
+        }
+        // add edge returnCols name to Spark schema's fields
+        for (propName <- returnCols) {
+          // if edge property has the same name with src/dst node's pk name, rename it with suffix $
+          val finalPropName =
+            if (edgeDesc.srcNodePkNames.contains(propName) || edgeDesc.dstNodePkNames.contains(propName)) {
+              propName + "$"
+            } else {
+              propName
+            }
+          fields.append(DataTypes.createStructField(finalPropName, DataTypes.StringType, true))
+        }
+        new StructType(fields.toArray)
       }
-      new StructType(fields.toArray)
+    } finally {
+      graphProvider.close()
     }
   }
 
@@ -139,7 +151,6 @@ object NebulaUtils {
    * return the qgl result schema
    */
   def getSchemaForGql(nebulaOptions: NebulaOptions): StructType = {
-    val graphProvider                   = new GraphProvider(nebulaOptions.graphAddress, nebulaOptions.user, nebulaOptions.authOptions, nebulaOptions.timeout)
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
 
     val gql = nebulaOptions.gql.trim
@@ -157,7 +168,21 @@ object NebulaUtils {
 
 
     LOG.info(s"new gql: $newGql")
-    val result = graphProvider.submit(newGql)
+    val graphProvider     = new GraphProvider(nebulaOptions.graphAddress,
+                                              nebulaOptions.user,
+                                              nebulaOptions.authOptions,
+                                              nebulaOptions.timeout,
+                                              nebulaOptions.schema,
+                                              nebulaOptions.zonedDatetimeFormat,
+                                              nebulaOptions.localDatetimeFormat,
+                                              nebulaOptions.zonedTimeFormat,
+                                              nebulaOptions.zonedTimeFormat)
+    var result: ResultSet = null
+    try {
+      result = graphProvider.submit(newGql)
+    } finally {
+      graphProvider.close()
+    }
     for (column <- result.getColumnNames.asScala) {
       fields.append(StructField(column, StringType, true))
     }

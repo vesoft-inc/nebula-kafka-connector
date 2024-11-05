@@ -12,8 +12,8 @@ package object connector {
    */
   implicit class NebulaDataFrameWriter(writer: DataFrameWriter[Row]) {
 
-    private var connectionConfig: NebulaConnectionConfig = _
-    private var writeNebulaConfig: WriteNebulaConfig = _
+    private var connectionConfig : NebulaConnectionConfig = _
+    private var writeNebulaConfig: WriteNebulaConfig      = _
 
     /**
      * config nebula connection
@@ -34,9 +34,9 @@ package object connector {
      */
     def writeVertices(): Unit = {
       assert(connectionConfig != null && writeNebulaConfig != null,
-        "nebula config is not set, please call nebula() before writeVertices")
+             "nebula config is not set, please call nebula() before writeVertices")
       val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaNodeConfig]
-      val dfWriter = writer
+      val dfWriter    = writer
         .format(classOf[NebulaDataSource].getName)
         .mode(SaveMode.Overwrite)
         .option(NebulaOptions.TYPE, DataTypeEnum.NODE.toString)
@@ -48,10 +48,27 @@ package object connector {
         .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
         .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
         .option(NebulaOptions.GRAPH_NAME, writeConfig.getGraphName)
+
         .option(NebulaOptions.LABEL, writeConfig.getNodeType)
         .option(NebulaOptions.BATCH_SIZE, writeConfig.getBatchSize)
         .option(NebulaOptions.WRITE_MODE, writeConfig.getWriteMode)
         .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
+
+      if (writeConfig.getSchema != null) {
+        dfWriter.option(NebulaOptions.SCHEMA, writeConfig.getSchema)
+      }
+      if (writeConfig.getZonedDateTimeFormat != null) {
+        dfWriter.option(NebulaOptions.ZONED_DATETIME_FORMAT, writeConfig.getZonedDateTimeFormat)
+      }
+      if (writeConfig.getLocalDateTimeFormat != null) {
+        dfWriter.option(NebulaOptions.LOCAL_DATETIME_FORMAT, writeConfig.getLocalDateTimeFormat)
+      }
+      if (writeConfig.getZonedTimeFormat != null) {
+        dfWriter.option(NebulaOptions.ZONED_TIME_FORMAT, writeConfig.getZonedTimeFormat)
+      }
+      if (writeConfig.getLocalTimeFormat != null) {
+        dfWriter.option(NebulaOptions.LOCAL_TIME_FORMAT, writeConfig.getLocalTimeFormat)
+      }
       dfWriter.save()
     }
 
@@ -61,9 +78,9 @@ package object connector {
     def writeEdges(): Unit = {
 
       assert(connectionConfig != null && writeNebulaConfig != null,
-        "nebula config is not set, please call nebula() before writeEdges")
+             "nebula config is not set, please call nebula() before writeEdges")
       val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaEdgeConfig]
-      val dfWriter = writer
+      val dfWriter    = writer
         .format(classOf[NebulaDataSource].getName)
         .mode(SaveMode.Overwrite)
         .option(NebulaOptions.TYPE, DataTypeEnum.EDGE.toString)
@@ -83,6 +100,21 @@ package object connector {
         .option(NebulaOptions.DST_PK_AS_PROP, writeConfig.getDstAsProp)
         .option(NebulaOptions.WRITE_MODE, writeConfig.getWriteMode)
         .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
+      if (writeConfig.getSchema != null) {
+        dfWriter.option(NebulaOptions.SCHEMA, writeConfig.getSchema)
+      }
+      if (writeConfig.getZonedDateTimeFormat != null) {
+        dfWriter.option(NebulaOptions.ZONED_DATETIME_FORMAT, writeConfig.getZonedDateTimeFormat)
+      }
+      if (writeConfig.getLocalDateTimeFormat != null) {
+        dfWriter.option(NebulaOptions.LOCAL_DATETIME_FORMAT, writeConfig.getLocalDateTimeFormat)
+      }
+      if (writeConfig.getZonedTimeFormat != null) {
+        dfWriter.option(NebulaOptions.ZONED_TIME_FORMAT, writeConfig.getZonedTimeFormat)
+      }
+      if (writeConfig.getLocalTimeFormat != null) {
+        dfWriter.option(NebulaOptions.LOCAL_TIME_FORMAT, writeConfig.getLocalTimeFormat)
+      }
       dfWriter.save()
     }
   }
@@ -92,7 +124,7 @@ package object connector {
    */
   implicit class NebulaDataFrameReader(reader: DataFrameReader) {
     var connectionConfig: NebulaConnectionConfig = _
-    var readConfig: ReadNebulaConfig = _
+    var readConfig      : ReadNebulaConfig       = _
 
     def nebula(connectionConfig: NebulaConnectionConfig, readConfig: ReadNebulaConfig): NebulaDataFrameReader = {
       SparkValidate.validate("2.4.*")
@@ -108,7 +140,7 @@ package object connector {
      */
     def loadNode(): DataFrame = {
       assert(connectionConfig != null && readConfig != null,
-        "nebula config is not set, please call nebula() before loadVerticesToDF")
+             "nebula config is not set, please call nebula() before loadVerticesToDF")
       val dfReader = reader
         .format(classOf[NebulaDataSource].getName)
         .option(NebulaOptions.TYPE, DataTypeEnum.NODE.toString)
@@ -131,7 +163,7 @@ package object connector {
 
     def loadEdge(): DataFrame = {
       assert(connectionConfig != null && readConfig != null,
-        "nebula config is not set, please call nebula() before loadVerticesToDF")
+             "nebula config is not set, please call nebula() before loadVerticesToDF")
       val dfReader = reader
         .format(classOf[NebulaDataSource].getName)
         .option(NebulaOptions.TYPE, DataTypeEnum.EDGE.toString)
@@ -158,7 +190,7 @@ package object connector {
    */
   implicit class NebulaDataFrameGqlReader(reader: DataFrameReader) {
     var connectionConfig: NebulaConnectionConfig = _
-    var gqlConfig: GqlNebulaConfig = _
+    var gqlConfig       : GqlNebulaConfig        = _
 
     def gql(connectionConfig: NebulaConnectionConfig, gqlConfig: GqlNebulaConfig): NebulaDataFrameGqlReader = {
       SparkValidate.validate("2.4.*")
@@ -174,7 +206,7 @@ package object connector {
      */
     def load(): DataFrame = {
       assert(connectionConfig != null && gqlConfig != null,
-        "nebula gql config is not set, please call gql() before load()")
+             "nebula gql config is not set, please call gql() before load()")
       val dfReader = reader
         .format(classOf[NebulaDataSource].getName)
         .option(NebulaOptions.TYPE, DataTypeEnum.GQL.toString)

@@ -18,7 +18,12 @@ import scala.collection.mutable.ListBuffer
 class GraphProvider(addresses: String,
                     user: String,
                     authOptions: java.util.HashMap[String, Object],
-                    timeout: Int)
+                    timeout: Int,
+                    schema: String,
+                    zonedDatetimeFormat: String,
+                    localDatetimeFormat: String,
+                    zonedTimeFormat: String,
+                    localTimeFormat: String)
   extends AutoCloseable
     with Serializable {
   @transient private[this] lazy val LOG = LoggerFactory.getLogger(this.getClass)
@@ -28,6 +33,40 @@ class GraphProvider(addresses: String,
     .withAuthOptions(authOptions)
     .withRequestTimeoutMills(timeout * 1000)
     .build()
+  if (schema != null) {
+    val res = client.execute("SESSION SET SCHEMA `" + schema + "`")
+    if (!res.isSucceeded) {
+      throw new IllegalArgumentException(s"SESSION SET SCHEMA failed, ${res.getErrorMessage}")
+    }
+  }
+
+  if (zonedDatetimeFormat != null) {
+    val res = client.execute("SESSION SET zoned_datetime_format=\"" + zonedDatetimeFormat + "\"")
+    if (!res.isSucceeded) {
+      throw new IllegalArgumentException(s"SESSION SET zoneddatetime format failed, ${res.getErrorMessage}")
+    }
+  }
+
+  if (localDatetimeFormat != null) {
+    val res = client.execute("SESSION SET local_datetime_format=\"" + localDatetimeFormat + "\"")
+    if (!res.isSucceeded) {
+      throw new IllegalArgumentException(s"SESSION SET localdatetime format failed, ${res.getErrorMessage}")
+    }
+  }
+
+  if (zonedTimeFormat != null) {
+    val res = client.execute("SESSION SET zoned_time_format=\"" + zonedTimeFormat + "\"")
+    if (!res.isSucceeded) {
+      throw new IllegalArgumentException(s"SESSION SET zonedtime format failed, ${res.getErrorMessage}")
+    }
+  }
+
+  if (localTimeFormat != null) {
+    val res = client.execute("SESSION SET local_time_format=\"" + localTimeFormat + "\"")
+    if (!res.isSucceeded) {
+      throw new IllegalArgumentException(s"SESSION SET localtime format failed, ${res.getErrorMessage}")
+    }
+  }
 
   /**
    * close Nebula client
@@ -117,8 +156,8 @@ class GraphProvider(addresses: String,
     val graphType                               = getGraphType(graphName)
 
     val escapedNodeType = NebulaUtils.escapeUtil(nodeType)
-    val descNodeType = s"DESCRIBE NODE TYPE `$escapedNodeType` OF `$graphType`"
-    val result       = client.execute(descNodeType)
+    val descNodeType    = s"DESCRIBE NODE TYPE `$escapedNodeType` OF `$graphType`"
+    val result          = client.execute(descNodeType)
     if (!result.isSucceeded || result.isEmpty) {
       LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $escapedNodeType does not exist in $graphName.")
@@ -129,6 +168,9 @@ class GraphProvider(addresses: String,
     while (result.hasNext) {
       val record = result.next();
       schema += (record.get("property_name").asString() -> record.get("data_type").asString())
+      if (!record.get("primary_key").isNull && record.get("primary_key").asString().equals("Y")) {
+        pkNames.append(record.get("property_name").asString())
+      }
     }
 
     if (pkNames.isEmpty) {
@@ -150,7 +192,7 @@ class GraphProvider(addresses: String,
     val graphType                               = getGraphType(graphName)
 
     val escapedEdgeType = NebulaUtils.escapeUtil(edgeType)
-    val descEdgeType =
+    val descEdgeType    =
       s"call describe_graph_type('$graphType') filter type_name='$escapedEdgeType' return type_pattern next call describe_edge_type('$graphType', '$escapedEdgeType') return *"
 
     val result = client.execute(descEdgeType)
@@ -208,8 +250,8 @@ class GraphProvider(addresses: String,
 
   private def getGraphType(graphName: String): String = {
     val escapedGraphName = NebulaUtils.escapeUtil(graphName)
-    val resultSet = client.execute(s"DESCRIBE GRAPH `$escapedGraphName`")
-    val graphType = if (resultSet.isSucceeded && !resultSet.isEmpty) {
+    val resultSet        = client.execute(s"DESCRIBE GRAPH `$escapedGraphName`")
+    val graphType        = if (resultSet.isSucceeded && !resultSet.isEmpty) {
       resultSet.next().values().get(1).asString
     } else {
       throw new IllegalArgumentException(s"graphName $graphName does not exist.")

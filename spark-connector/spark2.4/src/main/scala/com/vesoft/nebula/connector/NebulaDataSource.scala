@@ -69,7 +69,7 @@ class NebulaDataSource
 
     LOG.info("create writer")
     val parameters = options.asMap()
-    parameters.remove(NebulaOptions.PASSWD)
+    parameters.remove(NebulaOptions.AUTHOPTIONS)
     LOG.info(s"options ${parameters}")
 
     if (DataTypeEnum.NODE == DataTypeEnum.withName(dataType)) {

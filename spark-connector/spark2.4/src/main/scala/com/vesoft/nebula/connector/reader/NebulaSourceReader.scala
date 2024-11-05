@@ -25,7 +25,7 @@ abstract class NebulaSourceReader(nebulaOptions: NebulaOptions) extends DataSour
   override def readSchema(): StructType = {
     if (datasetSchema == null) {
       datasetSchema = NebulaUtils.getSchema(nebulaOptions)
-      LOG.info(s"dataset's schema: $datasetSchema")
+      LOG.info(s"=====dataset's schema: $datasetSchema")
     }
     datasetSchema
   }
