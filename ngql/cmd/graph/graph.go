@@ -45,9 +45,6 @@ func validateFlags() {
 	if port == -1 {
 		log.Fatalf("Error: argument port is missing!")
 	}
-	if len(username) == 0 {
-		log.Fatalf("Error: argument username is empty!")
-	}
 
 	if widthMax < 0 || (widthMax > 0 && widthMax <= 3) {
 		log.Fatalf("Error: argument width_max should be equal to 0 or greater than 3")
