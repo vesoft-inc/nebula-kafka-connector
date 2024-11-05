@@ -314,6 +314,7 @@ var (
 	ERROR_AUTH_CANNOT_DISABLE_SYSTEM_USER                                             ErrorCode = "NH008"
 	ERROR_AUTH_NEED_CHANGE_PASSWORD                                                   ErrorCode = "NH009"
 	ERROR_AUTH_DROP_ROOT_ERROR                                                        ErrorCode = "NH010"
+	ERROR_AUTH_USER_LOGIN_ATTEMPTS                                                    ErrorCode = "NH011"
 	ERROR_AUTH_INVALID_AUTH_INFO                                                      ErrorCode = "NH101"
 	ERROR_AUTH_INVALID_TOKEN                                                          ErrorCode = "NH201"
 	ERROR_AUTH_INIT_ERROR                                                             ErrorCode = "NH301"
@@ -630,8 +631,6 @@ var (
 	ERROR_BACKUP_DROP_NAME_EMPTY                                                      ErrorCode = "NF009"
 	ERROR_BACKUP_DROP_NAME_NOT_EXIST                                                  ErrorCode = "NF010"
 	ERROR_UNKNOWN                                                                     ErrorCode = "NU000"
-
-	ERROR_JOB_PLACEHOLDER_ERROR ErrorCode = "NJ099"
 )
 
 func NewNebulaError(code ErrorCode, format string, args ...interface{}) error {

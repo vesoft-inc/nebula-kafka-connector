@@ -549,6 +549,7 @@
         EMSG(AUTH_INVALID_AUTH_INFO, "Authenticate error: invalid config {}");
         EMSG(AUTH_INVALID_TOKEN, "Authenticate error: invalid token");
         EMSG(AUTH_INIT_ERROR, "AuthenticatorManager init error: `{}`");
+        EMSG(AUTH_USER_LOGIN_ATTEMPTS, "Authenticate error: invalid username or password. you have {} attempts left");
 
         // Authorization
         EMSG(AUTHORIZE_ERROR, "Authorization error: `{}`");

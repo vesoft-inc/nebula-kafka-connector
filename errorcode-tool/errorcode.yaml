@@ -1106,6 +1106,10 @@
   Code: "NH010"
   Message: "Authenticate error: cannot drop system user `root`"
 
+- Name: "AUTH_USER_LOGIN_ATTEMPTS"
+  Code: "NH011"
+  Message: "Authenticate error: invalid username or password. you have {} attempts left"
+
 - Name: "AUTH_INVALID_AUTH_INFO"
   Code: "NH101"
   Message: "Authenticate error: invalid config {}"
