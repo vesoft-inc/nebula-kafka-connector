@@ -112,9 +112,11 @@
 | 42N38 | The option cannot be defined multiple times.                                                                                      | 不允许为同一选项指定多个值。                                             |
 | 42N39 | The option was illegal.                                                                                                           | 选项无效。                                                      |
 | 42N40 | The result in each value expression should contain exactly one column.                                                            | 值查询表达式中的结果只能包含一个列。                                         |
+| 42N41 | The nested vector type property is not allowed.                                                                                   |  不支持指定的嵌套向量类型属性。                                      |
 | 42N42 | The query conjunctions within a composite query expression must be the same.                                                      | 复合查询表达式中的所有连接词必须相同。                                        |
 | 42N43 | The result in the nested query was invalid.                                                                                       | 嵌套查询返回的结果无效。                                               |
 | 42N44 | The syntax was invalid.                                                                                                           | 语法无效。                                                      |
+| 42N45 | Yield clauses cannot be added after graph patterns.                                                                              |  不支持在图模式后跟 Yield 语句。                                                   |
 | G1000 | The specified node cannot be deleted because it is connected to edges.                                                            | 因为存在连接的边，无法删除指定点。                                          |
 | G1001 | Edges still exist.                                                                                                                | 边仍然存在。                                                     |
 | G1002 | The endpoint node is deleted.                                                                                                     | 末端点已删除。                                                    |
@@ -130,25 +132,26 @@
 | ND008 | The property cannot be null.                                                                                                      | 属性不可为 NULL。                                                |
 | NQ001 | The list trim operation was out of range.                                                                                         | 列表修剪超出范围。                                                  |
 | NQ002 | Invalid subtraction between temporal instants.                                                                                    | 时间点间的减法无效。                                                 |
-| NK000 | A key-value store error occurred.                                                                                                 | 键值存储错误。                                                    |
-| NK001 | Batch write to the key-value store failed.                                                                                        | 批量写入键值存储失败。                                                |
-| NK002 | Failed to get the property from the key-value store.                                                                              | 从键值存储获取属性失败。                                               |
-| NK003 | Failed to set the option in the key-value store.                                                                                  | 设置键值存储选项失败。                                                |
-| NK004 | The specified key was not found in the key-value store.                                                                           | 未在键值存储中找到指定键。                                              |
-| NK005 | Commit operation in the key-value store failed.                                                                                   | 提交键值存储失败。                                                  |
-| NK006 | Get operation in the key-value store failed.                                                                                      | 在键值存储执行 Get 操作失败。                                          |
-| NK007 | Put operation in the key-value store failed.                                                                                      | 在键值存储执行 Put 操作失败。                                          |
-| NK008 | Remove operation in the key-value store failed.                                                                                   | 在键值存储执行 Remove 操作失败。                                       |
-| NK009 | Ingest operation in the key-value store failed.                                                                                   | 在键值存储执行 Ingest 操作失败。                                       |
-| NK010 | Compact operation in the key-value store failed.                                                                                  | 在键值存储执行 Compact 操作失败。                                      |
-| NK011 | Flush operation in the key-value store failed.                                                                                    | 在键值存储执行 Flush 操作失败。                                        |
-| NK012 | Checkpoint operation in the key-value store failed.                                                                               | 在键值存储执行 Checkpoint 操作失败。                                   |
-| NK013 | The specified column family was not found in the key-value store.                                                                 | 未在键值存储中找到指定列族。                                             |
-| NK014 | Opening the key-value store failed.                                                                                               | 打开键值存储失败。                                                  |
-| NK016 | Lock operation in the key-value store failed.                                                                                     | 在键值存储中执行 Lock 操作失败。                                        |
-| NK017 | Exporting the table from the key-value store failed.                                                                              | 从键值存储导出表失败。                                                |
-| NK018 | Opening SST file in the key-value store failed.                                                                                   | 打开键值存储中的 SST 文件失败。                                         |
-| NK019 | The prefix in the key-value store was invalid.                                                                                    | 键值存储前缀无效。                                                  |
+| NK000 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                 | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NK001 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NK002 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                   | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NK003 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NK004 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                            |
+| NK005 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                 | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                  |
+| NK006 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                 | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                          |
+| NK007 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NK008 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                  | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NK009 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                   | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                          |
+| NK010 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NK011 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NK012 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                 | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NK013 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                   | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                           |
+| NK014 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                               | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NK015 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                               | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NK016 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                   | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                              |
+| NK017 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NK018 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NK019 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                 |
 | NC000 | A catalog error occurred.                                                                                                         | Catalog 错误。                                                |
 | NC001 | The specified catalog directory was not found.                                                                                    | 未找到指定 Catalog 目录。                                          |
 | NC002 | The specified catalog schema was not found.                                                                                       | 未找到指定 Catalog Schema。                                      |
@@ -179,25 +182,26 @@
 | NC204 | The property was invalid in the catalog.                                                                                          | 指定属性在 Catalog 中无效。                                         |
 | NC205 | The node type was already used in the catalog.                                                                                    | 指定点类型已被使用。                                                 |
 | NC301 | Cancelling the job in the catalog failed.                                                                                         | 取消 Catalog 作业失败。                                           |
-| NC302 | Permission denied for the catalog state.                                                                                          | 访问 Catalog 状态被拒绝。                                          |
-| NC303 | The catalog version was retired.                                                                                                  | Catalog 版本已停用。                                             |
-| NC304 | The DDL operation is executing in the background.                                                                                 | Catalog DDL 操作在后台执行。                                       |
-| NC305 | The DDL operation was illegal in the catalog.                                                                                     | 非法 DDL 操作。                                                 |
-| NC306 | Reorganization in the catalog failed.                                                                                             | 重组失败。                                                      |
-| NC307 | The maximum number of pending DDL operations is exceeded in the catalog.                                                          | 待处理的 DDL 操作超过最大阈值。                                         |
-| NC308 | There was a pending job in the catalog.                                                                                           | Catalog 中存在未完成的作业。                                         |
-| NC309 | The catalog was not ready.                                                                                                        | Catalog 尚未准备就绪。                                            |
-| NC310 | Reorganization in the catalog was interrupted.                                                                                    | 重组中断。                                                      |
-| NN001 | The RPC operation failed.                                                                                                         | RPC 调用失败。                                                  |
-| NN002 | The RPC request was invalid.                                                                                                      | RPC 请求无效。                                                  |
-| NN004 | The RPC retry operation failed.                                                                                                   | RPC 重试失败。                                                  |
-| NN006 | A deserialization error occurred due to an unknown object type.                                                                   | RPC 反序列化错误，未知对象类型。                                         |
-| NN007 | The Storage service was not found.                                                                                                | Storage 服务未找到。                                             |
+| NC302 | The catalog version was retired.                                                                                                  | Catalog 版本已停用。                                          |
+| NC303 | The DDL operation timed out.                                                                                                      | DDL 操作超时。                                          |
+| NC304 | The DDL operation is illegal.                                                                                                     |   非法 DDL 操作。                            |
+| NC305 | Reorganization in the catalog failed.                                                                                             |  重组失败。                                                 |
+| NC306 | The maximum number of pending DDL operations is exceeded in the catalog.                                                          |    待处理的 DDL 操作超过最大阈值。                         |
+| NC307 | There was a pending job in the catalog.                                                                                           |    Catalog 中存在未完成的作业。                                     |
+| NC308 | The catalog was not ready.                                                                                                        |     Catalog 尚未准备就绪。                                        |
+| NC309 | Reorganization in the catalog was interrupted.                                                                                    | 重组中断。                                           |
+| NN001 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NN002 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                    |
+| NN003 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                    |
+| NN004 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                  |
+| NN005 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                  |
+| NN006 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                       | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                           |
+| NN007 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                   |
 | NI000 | The parameter was invalid.                                                                                                        | 无效参数。                                                      |
-| NI001 | The cluster already exists.                                                                                                       | 集群已存在。                                                     |
-| NI002 | The cluster was not found.                                                                                                        | 集群未找到。                                                     |
-| NI003 | The cluster name was invalid.                                                                                                     | 集群名称无效。                                                    |
-| NI004 | The cluster was not empty.                                                                                                        | 集群不为空。                                                     |
+| NI001 | The service group already exists.                                                                                                       | 服务组已存在。                                                     |
+| NI002 | The service group was not found.                                                                                                        | 服务组未找到。                                                     |
+| NI003 | The service group name was invalid.                                                                                                     | 服务组名称无效。                                                    |
+| NI004 | The service group was not empty.                                                                                                        | 服务组不为空。                                                     |
 | NI101 | No service was not added from the host.                                                                                           | 未在主机中找到匹配的服务。                                              |
 | NI102 | The reported service does not match the added service.                                                                            | 报告的服务与添加的服务不匹配。                                            |
 | NI103 | The service already exists on the host.                                                                                           | 主机已存在指定服务。                                                 |
@@ -209,7 +213,7 @@
 | NI109 | Failed to add the service.                                                                                                        | 添加服务失败。                                                    |
 | NI110 | The service was not added.                                                                                                        | 服务未添加。                                                     |
 | NI111 | The service was currently in use.                                                                                                 | 服务在使用中。                                                    |
-| NI112 | The service was not in the cluster.                                                                                               | 服务不在集群中。                                                   |
+| NI112 | The service was not in the service group.                                                                                            | 服务不在服务组中。                                                   |
 | NI113 | There were not enough active services.                                                                                            | 活跃的服务数量不足。                                                 |
 | NI114 | There were not enough services.                                                                                                   | 服务数量不足。                                                    |
 | NI201 | The number of replicas was not adequate according to the max_parts_per_service configuration.                                     | 基于给定的 max_parts_per_service 配置找不到足够的副本数量。                  |
@@ -273,6 +277,7 @@
 | NH008 | The system user cannot be disabled.                                                                                               | 系统用户无法被禁用。                                                 |
 | NH009 | A password change was required.                                                                                                   | 必须更改密码。                                                    |
 | NH010 | The user with the role `root` cannot be dropped.                                                                                  | 带有角色`root`的用户无法被删除。                                        |
+| NH011 | The username or password is invalid.                                                                                              | 用户名或密码无效。                                                  |
 | NH101 | The authentication information was invalid.                                                                                       | 认证配置无效。                                                    |
 | NH201 | The authentication token was invalid.                                                                                             | 认证令牌无效。                                                    |
 | NH301 | An error occurred while initializing AuthenticatorManager.                                                                        | 初始化认证管理器错误。                                                |
@@ -281,8 +286,8 @@
 | NB002 | The object name was invalid.                                                                                                      | 对象名称无效。                                                    |
 | NB003 | The role already exists.                                                                                                          | 角色已存在。                                                     |
 | NB004 | The role does not exist.                                                                                                          | 角色不存在。                                                     |
-| NB005 | The user does not exist in the cluster.                                                                                           | 用户在当前集群不存在。                                                |
-| NB006 | The user already exists in the cluster.                                                                                           | 用户在当前集群已存在。                                                |
+| NB005 | The user does not exist in the service group.                                                                                           | 用户在当前服务组不存在。                                                |
+| NB006 | The user already exists in the service group.                                                                                           | 用户在当前服务组已存在。                                                |
 | NB101 | The privilege was insufficient.                                                                                                   | 权限不足。                                                      |
 | NB102 | The action on the object was invalid.                                                                                             | 对指定对象执行的操作无效。                                              |
 | NB103 | The maximum number of roles for the user was exceeded.                                                                            | 用户的角色数量超过最大限制。                                             |
@@ -300,29 +305,29 @@
 | NV004 | The configuration cannot be set by the specified entity.                                                                          | 配置不能由指定实体设置。                                               |
 | NV005 | The configuration was deprecated.                                                                                                 | 配置已被弃用。                                                    |
 | NV006 | The configuration was immutable.                                                                                                  | 配置是不可变的。                                                   |
-| AN000 | An analytic error occurred.                                                                                                       | An analytic error occurred.                                |
-| AN001 | There was a communication error in analytics.                                                                                     | There was a communication error in analytics.              |
-| AN101 | The partition method used in analytics is invalid.                                                                                | The partition method used in analytics is invalid.         |
-| AN102 | The analytic task failed on a specific node.                                                                                      | The analytic task failed on a specific node.               |
-| AN103 | The analytic log exceeded the maximum size limit.                                                                                 | The analytic log exceeded the maximum size limit.          |
-| AN201 | The analytic worker already exists.                                                                                               | The analytic worker already exists.                        |
-| AN202 | The analytic worker was not found.                                                                                                | The analytic worker was not found.                         |
-| AN203 | There was an error with the analytic reader.                                                                                      | There was an error with the analytic reader.               |
-| AN301 | The specified accumulator was not found.                                                                                          | The specified accumulator was not found.                   |
-| AN302 | The specified accumulator already exists.                                                                                         | The specified accumulator already exists.                  |
-| NM001 | The operation was not supported.                                                                                                  | 操作类型不受支持。                                                  |
-| NM002 | The Meta service was not initialized.                                                                                             | 未初始化 Meta 服务。                                              |
-| NM005 | The Meta service was not found.                                                                                                   | 未找到 Meta 服务。                                               |
-| NM006 | The Meta service ID was incorrect.                                                                                                | Meta 服务 ID 获取失败。                                           |
-| NM007 | Getting key-value prefix failed.                                                                                                  | 获取键值前缀失败。                                                  |
-| NM008 | Putting the service address failed.                                                                                               | 放置服务地址失败。                                                  |
-| NM009 | Listing services failed.                                                                                                          | 列出服务失败。                                                    |
-| NM010 | Cannot find the service.                                                                                                          | 无法找到服务。                                                    |
-| NM011 | Failed to get the Meta client.                                                                                                    | 获取 Meta 客户端失败。                                             |
-| NM012 | The service type is unsupported.                                                                                                  | 服务类型不受支持。                                                  |
-| NM013 | Failed to allocate ID for services.                                                                                               | 分配服务 ID 失败。                                                |
-| NM003 | The response was not set in the metadata.                                                                                         | The response was not set in the metadata.                  |
-| NM004 | Writing key-value data to the metadata failed.                                                                                    | Writing key-value data to the metadata failed.             |
+| AN000 | An analytic error occurred.                                                                                                       | 发生图计算错误。                             |
+| AN001 | There was a communication error in analytics.                                                                                     | 图计算发生通信错误。             |
+| AN101 | The partition method used in analytics is invalid.                                                                                | 图计算使用的分片方法无效。       |
+| AN102 | The analytic task failed on a specific node.                                                                                      | 在指定点上的图计算任务失败。             |
+| AN103 | The analytic log exceeded the maximum size limit.                                                                                 | 图计算日志文件超过最大大小限制。         |
+| AN201 | The analytic worker already exists.                                                                                               | 图计算工作节点已存在。                    |
+| AN202 | The analytic worker was not found.                                                                                                | 未找到图计算工作节点。                       |
+| AN203 | There was an error with the analytic reader.                                                                                      | 图计算阅读器发生错误。             |
+| AN301 | The specified accumulator was not found.                                                                                          | 未找到指定累计器。                 |
+| AN302 | The specified accumulator already exists.                                                                                         | 指定累计器已存在。             |
+| NM001 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                      | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                            |
+| NM002 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NM005 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                          |
+| NM006 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NM007 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NM008 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NM009 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NM010 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NM011 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NM012 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NM013 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NM003 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                      | 发生了内部服务器错误。请联系您的数据库管理员排查错误。               |
+| NM004 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                       | 发生了内部服务器错误。请联系您的数据库管理员排查错误。             |
 | NO001 | The property cannot be null in the storage codec.                                                                                 | 属性在存储编解码器中不能为`NULL`。                                       |
 | NO002 | The property was not set in the storage codec.                                                                                    | 属性在存储编解码器中未设置。                                             |
 | NO003 | The property was not found in the storage codec.                                                                                  | 属性在存储编解码器中未找到。                                             |
@@ -337,28 +342,29 @@
 | NO012 | Index corruption with no terminator in the storage codec.                                                                         | 索引损坏且存储编码中没有终止符。                                           |
 | NO013 | The index properties were illegal as the property does not exist in the storage codec.                                            | 必需的属性在索引中不存在。                                              |
 | NO014 | The property is not reserved in the storage codec.                                                                                | 在存储编码未保留该属性。                                               |
+| NO015 | Failed to write the vector in the storage codec.                                                                                  | 在存储编码写入向量失败。                                                     |
 | NO101 | Getting all partitions failed.                                                                                                    | 获取所有分片失败。                                                  |
 | NO102 | Getting the partition router failed.                                                                                              | 获取分片路由失败。                                                  |
 | NO103 | Getting all leaders failed.                                                                                                       | 获取所有的分片 Leader 失败。                                         |
-| NA001 | The peer was invalid in the Raft operation.                                                                                       | 副本在 Raft 操作中无效。                                            |
-| NA013 | There was a leader conflict in the Raft operation.                                                                                | 在 Raft 操作中有 Leader 冲突。                                     |
-| NA016 | The Raft operation was busy.                                                                                                      | Raft 操作繁忙。                                                 |
-| NA002 | An exception occurred during the Raft RPC.                                                                                        | An exception occurred during the Raft RPC.                 |
-| NA003 | The Raft operation timed out.                                                                                                     | The Raft operation timed out.                              |
-| NA004 | The Raft catch-up operation failed.                                                                                               | The Raft catch-up operation failed.                        |
-| NA005 | The leader was removed in the Raft operation.                                                                                     | The leader was removed in the Raft operation.              |
-| NA006 | Setting the peer in the Raft operation failed.                                                                                    | Setting the peer in the Raft operation failed.             |
-| NA007 | The Raft node has stopped.                                                                                                        | The Raft node has stopped.                                 |
-| NA008 | A higher term request was received in the Raft operation.                                                                         | A higher term request was received in the Raft operation.  |
-| NA009 | A higher term response was received in the Raft operation.                                                                        | A higher term response was received in the Raft operation. |
-| NA010 | The node was bad in the Raft operation.                                                                                           | The node was bad in the Raft operation.                    |
-| NA011 | Voting for the candidate in the Raft operation failed.                                                                            | Voting for the candidate in the Raft operation failed.     |
-| NA012 | A new leader was elected in the Raft operation.                                                                                   | A new leader was elected in the Raft operation.            |
-| NA014 | Transferring the leader in the Raft operation failed.                                                                             | Transferring the leader in the Raft operation failed.      |
-| NA015 | The Raft operation stopped.                                                                                                       | The Raft operation stopped.                                |
-| NA017 | The Raft operation was invalid.                                                                                                   | The Raft operation was invalid.                            |
-| NA018 | The Raft operation failed.                                                                                                        | The Raft operation failed.                                 |
-| NA019 | The Raft snapshot operation failed.                                                                                               | The Raft snapshot operation failed.                        |
+| NA001 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                            |
+| NA013 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                                |
+| NA016 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NA002 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。              |
+| NA003 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NA004 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    |发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NA005 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。         |
+| NA006 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                      | 发生了内部服务器错误。请联系您的数据库管理员排查错误。            |
+| NA007 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     |发生了内部服务器错误。请联系您的数据库管理员排查错误。                              |
+| NA008 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。 |
+| NA009 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。|
+| NA010 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                 |
+| NA011 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。   |
+| NA012 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。            |
+| NA014 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。   |
+| NA015 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。               |
+| NA017 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                 |
+| NA018 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                  |
+| NA019 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
 | NR000 | A runtime error occurred.                                                                                                         | 发生了运行时错误。                                                  |
 | NR001 | An expression error occurred.                                                                                                     | 表达式错误。                                                     |
 | NR002 | The function was undefined.                                                                                                       | 函数未定义。                                                     |
@@ -408,7 +414,7 @@
 | NR209 | Insertion inferred more than one type for the node.                                                                               | 类型推断失败，推断出多个类型。                                            |
 | NR210 | The types of endpoint nodes do not match.                                                                                         | 终点类型不匹配。                                                   |
 | NR211 | The property to be inserted was not found.                                                                                        | 插入失败，未找到指定属性。                                              |
-| NR212 | The node was not part of the current graph context.                                                                               | 点不属于当前工作图。                                                 |
+| NR212 | The element was not in the current graph.                                                                                        | 元素不属于当前工作图。                                                 |
 | NR213 | Multiple attempts to retrieve the node ID from the primary key failed.                                                            | 从主键获取 ID 失败。                                               |
 | NR231 | Invalid type specified in the SET operation.                                                                                      | 在语句`SET`中指定了无效的类型。                                         |
 | NR251 | Invalid type specified in the DELETE operation.                                                                                   | 在语句`DELETE`中指定了无效的类型。                                      |
@@ -430,9 +436,10 @@
 | NS005 | The filter clause must be of boolean type.                                                                                        | 过滤子句必须是布尔类型。                                               |
 | NS006 | The expression type was invalid.                                                                                                  | 表达式的类型无效。                                                  |
 | NS007 | The column names in the linear query do not match.                                                                                | 组合查询语句中的线性查询列名不匹配。                                         |
-| NS008 | Inconsistent variable definition found.                                                                                           | 变量定义不一致。                                                   |
+| NS008 | Inconsistent group variable definition found.                                                                                     | 组变量定义不一致。                                               |
 | NS009 | A group variable was redefined.                                                                                                   | 组变量被重新定义。                                                  |
 | NS010 | Data types are incompatible.                                                                                                      | 数据类型不兼容。                                                   |
+| NS011 | The specified variable was declared for different graphs.                                                                         | 指定的变量在不同的图中被声明。                                             |
 | NS101 | The number of primary key properties for the node does not match.                                                                 | 点的主键属性数目不匹配。                                               |
 | NS102 | The primary key property for the node was not found.                                                                              | 未找到点的主键属性。                                                 |
 | NS103 | The graph pattern quantifier exceeds the lower bound.                                                                             | 图模式量词的上限值应大于 0。                                            |
@@ -460,7 +467,14 @@
 | NS214 | Invalid type for number of paths expression.                                                                                      | 路径数量表达式输出的数据类型无效。                                          |
 | NS215 | Invalid type for number of groups expression.                                                                                     | 组数表达式输出数据类型无效。                                             |
 | NS216 | There was a naming conflict between a column name in the result set of a query and a variable or column name in the parent scope. | 结果集中列名与父级作用域中的变量或列名有命名冲突。                                  |
+| NS217 | All branches of the IF statement must have the same column names and compatible types.                                            | IF 语句的所有分支必须具有相同的列名和兼容的类型。                                |
 | NS218 | Invalid value query expression.                                                                                                   | 无效的值查询表达式。                                                 |
+| NS219 | Unbounded quantifiers in non-restrictive and non-selective path patterns may lead to infinite result sets.                        | 非限制性和非选择性路径模式中的无界量词可能导致无限结果集。                             |
+| NS221 | Repeated edge variable in a path pattern restricted by TRAIL mode will lead to no results.                                        | 在由 TRAIL 模式限制的路径模式中重复的边变量将导致无结果。                             |
+| NS222 | Repeated node variable in a path pattern restricted by ACYCLIC mode will lead to no results.                                      | 在由 ACYCLIC 模式限制的路径模式中重复的点变量将导致无结果。                          |
+| NS223 | Repeated node variable in a path pattern restricted by SIMPLE mode will lead to no results unless the repeated node variables are the first and last in the path pattern. | 在由 SIMPLE 模式限制的路径模式中，除非重复的点变量是路径模式中的第一个和最后一个点，否则将导致无结果。 |
+| NS224 | Repeated edge variable in a graph pattern restricted by 'DIFFERENT EDGES' match mode will lead to no results.                     | 在由“DIFFERENT EDGES”匹配类型限制的图模式中重复的边变量将导致无结果。                         |
+| NS225 | In 'DIFFERENT EDGES' match mode, if the graph pattern contains a selective path pattern, it must not contain any other patterns.  | 在“DIFFERENT EDGES”匹配类型中，如果图模式包含选择性路径模式，则不得包含其他模式。                |
 | NZ001 | Failed to generate the execution plan.                                                                                            | 由于禁用的优化器规则导致执行计划生成失败，请检查配置或查阅文档。                           |
 | NT000 | {} was not supported yet.                                                                                                         | 该操作尚不支持。                                                   |
 | NT001 | The specified index property type was not supported.                                                                              | 该索引属性类型不支持。                                                |
@@ -484,6 +498,7 @@
 | NT105 | Updating the primary key was not supported.                                                                                       | 更新主键不支持。                                                   |
 | NT106 | Setting all labels in a SET statement was not supported.                                                                          | 设置所有属性或设置标签（kSetLabel）尚不支持。                                |
 | NT107 | Updating the multi-edge key was not supported.                                                                                    | 更新多边键不支持。                                                  |
+| NT108 | Updating the vector type property is not supported.                                                                              |  更新向量类型属性不支持。                                               |
 | NT201 | The specified aggregation expression was not supported.                                                                           | 指定的聚合表达式不支持。                                               |
 | NT202 | Nested aggregation expressions were not supported.                                                                                | 嵌套的聚合表达式不支持。                                               |
 | NT203 | Aggregation expressions were not allowed in this context.                                                                         | 在此上下文中不允许使用聚合函数。                                           |
@@ -495,46 +510,51 @@
 | NT402 | The specified collation was not supported.                                                                                        | 指定的校对规则不支持。                                                |
 | NT403 | The charset and collation do not match.                                                                                           | 字符集与校对规则不匹配。                                               |
 | ND000 | System error.ND000                                                                                                                | 系统错误。                                                      |
-| NY001 | Validator not found.                                                                                                              | 未发现校验器。                                                    |
-| NY102 | The specified file was not found.                                                                                                 | 指定的文件未找到。                                                  |
-| NY103 | The file was empty.                                                                                                               | 文件为空。                                                      |
-| NY104 | Read permission for the file was denied.                                                                                          | 读取文件的权限被拒绝。                                                |
-| NY105 | Error in reading the file link.                                                                                                   | 读取文件链接时出错。                                                 |
-| NY106 | Error in reading the file path.                                                                                                   | 读取文件路径时出错。                                                 |
-| NY107 | Error in opening the directory.                                                                                                   | 打开目录时出错。                                                   |
-| NY108 | Error in opening the file.                                                                                                        | 打开文件时出错。                                                   |
-| NY109 | The file type was not supported.                                                                                                  | 文件类型不支持。                                                   |
-| NY110 | Invalid file state.                                                                                                               | 获取文件状态失败。                                                  |
-| NY111 | Failed to create directory.                                                                                                       | 创建目录失败。                                                    |
-| NY112 | Error in reading the service ID file.                                                                                             | 读取服务 ID 文件时出错。                                             |
-| NY113 | Error in parsing the service ID file.                                                                                             | 解析服务 ID 文件时出错。                                             |
-| NY114 | Error in saving the service ID file.                                                                                              | 保存服务 ID 到文件时出错。                                            |
-| NY115 | Failed to remove the directory.                                                                                                   | 删除目录失败。                                                    |
-| NY202 | The configured max memory exceeds the total available memory.                                                                     | 配置的最大内存超过了系统的总内存。                                          |
-| NY203 | Error in background memory check.                                                                                                 | 启动后台内存检查线程失败。                                              |
-| NY204 | Error in retrieving system memory information.                                                                                    | 从`/proc/meminfo`读取系统内存信息失败。                                |
-| NY201 | General memory error.                                                                                                             | General memory error.                                      |
-| NY205 | Invalid size for memory vector.                                                                                                   | Invalid size for memory vector.                            |
-| NY301 | General network error.                                                                                                            | 一般网络错误。                                                    |
-| NY302 | Failed to create a network socket.                                                                                                | 创建网络套接字失败。                                                 |
-| NY303 | Unknown network address.                                                                                                          | 未知网络地址。                                                    |
-| NY304 | Failed to bind the network address.                                                                                               | 绑定网络地址失败。                                                  |
-| NY305 | Failed to listen on the network address.                                                                                          | 监听网络地址失败。                                                  |
-| NY306 | Non-blocking I/O stopped.                                                                                                         | 非阻塞 I/O 已停止。                                               |
-| NY307 | Network connection closed.                                                                                                        | 网络连接被远程主机关闭。                                               |
-| NY308 | Network protocol error.                                                                                                           | 网络协议错误。                                                    |
-| NY309 | Network timeout occurred.                                                                                                         | 网络超时。                                                      |
-| NY310 | Network disconnected.                                                                                                             | 网络断开连接。                                                    |
-| NY311 | Network address not found.                                                                                                        | 找不到网络地址。                                                   |
-| NY312 | Invalid network host.                                                                                                             | 无效的网络主机地址。                                                 |
-| NY313 | TLS connection error.                                                                                                             | TLS 连接错误。                                                  |
-| NY401 | Failed to read metrics data.                                                                                                      | 读取指标失败。                                                    |
-| NY502 | Failed to create a thread.                                                                                                        | 创建线程失败。                                                    |
+| NY000 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                            |
+| NY001 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                    |
+| NY002 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NY101 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NY102 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NY103 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                   |
+| NY104 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NY105 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NY106 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                                     |
+| NY107 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                   |
+| NY108 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                    |
+| NY109 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                   | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NY110 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NY111 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NY112 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NY113 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NY114 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NY115 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NY201 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                              |
+| NY202 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                              |
+| NY203 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                            |
+| NY204 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NY205 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                   |
+| NY301 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NY302 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NY303 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NY304 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NY305 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                          |
+| NY306 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NY307 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                               |
+| NY308 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NY309 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                    | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NY310 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NY311 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                        |
+| NY312 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                         |
+| NY313 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                       |
+| NY401 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NY501 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                      |
+| NY502 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                              |
 | NL001 | License encryption error.                                                                                                         | License 加密错误。                                              |
 | NL101 | General license manager error.                                                                                                    | LM 错误。                                                     |
 | NL201 | License quota exceeded.                                                                                                           | 超出 License 配额。                                             |
 | NL202 | License expired.                                                                                                                  | License 过期。                                                |
 | NL203 | License invalid.                                                                                                                  | 无效 License。                                                |
+| NL301 | Failed to load License Manager response from meta store.                                                                          | 从 Meta Store 加载 License Manager 响应失败。                           |
 | NJ000 | General job error.                                                                                                                | 作业错误。                                                      |
 | NJ001 | Job type unknown.                                                                                                                 | 未知作业类型。                                                    |
 | NJ002 | Job not found.                                                                                                                    | 找不到作业。                                                     |
@@ -560,5 +580,19 @@
 | NF008 | Restoring metadata failed.                                                                                                        | 恢复元数据失败。                                                   |
 | NF009 | Empty backup name to be dropped.                                                                                                  | 要删除的备份名称为空。                                                |
 | NF010 | Backup name does not exist.                                                                                                       | 备份名称不存在。                                                   |
-| NU000 | Unknown error.                                                                                                                    | 未知错误。                                                      |
-| NK015 | The options in the key-value store were invalid. | 键值存储中的选项无效。 |
+| NU000 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                   | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                  |
+| 22N02 | Failed to evaluate the expression.                                                                                                 | 表达式求值失败。                                                   |
+| NW501 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW502 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW503 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW504 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW505 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW506 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW507 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW508 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW509 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW510 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW511 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW512 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW513 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
+| NW514 | An internal server error occurred. Contact your DBA to troubleshoot the error.                                                     | 发生了内部服务器错误。请联系您的数据库管理员排查错误。                     |
