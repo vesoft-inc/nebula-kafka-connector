@@ -1,0 +1,71 @@
+# Copyright (c) 2024 vesoft inc. All rights reserved.
+
+name: release
+
+on:
+  release:
+    types:
+      - published
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  OSS_RELEASE_DIR: 'minio/release-build/nebula-ng-tools'
+
+jobs:
+  package:
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: webiny/action-post-run@3.1.0
+        with:
+          run: find . -mindepth 1 -delete
+      - uses: actions/checkout@v4
+      - uses: vesoft-inc/.github/actions/tagname@master
+        id: tag
+      - uses: vesoft-inc/.github/actions/setup-minio@master
+        with:
+          minio_url: ${{ secrets.MINIO_ENDPOINT }}
+          access_key: ${{ secrets.MINIO_KEY }}
+          secret_key: ${{ secrets.MINIO_SECRET }}
+      - name: Upload golang src to Minio
+        env:
+          TAG: ${{ steps.tagname.outputs.tag }}
+          PROJECT: golang
+        run: |
+          cd ${PROJECT}
+          rm -rf .git .gitignore 
+          tar zcvf nebula-${PROJECT}-${TAG}.tar.gz *
+          mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
+      - name: Upload java src to Minio
+        env:
+          TAG: ${{ steps.tagname.outputs.tag }}
+          PROJECT: java
+        run: |
+          cd ${PROJECT}
+          rm -rf .git .gitignore 
+          tar zcvf nebula-${PROJECT}-${TAG}.tar.gz *
+          mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
+      - name: Upload kafka-connector src to Minio
+        env:
+          TAG: ${{ steps.tagname.outputs.tag }}
+          PROJECT: kafka-connector
+        run: |
+          cd ${PROJECT}
+          rm -rf .git .gitignore 
+          tar zcvf nebula-${PROJECT}-${TAG}.tar.gz *
+          mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
+      - name: Upload spark-connector src to Minio
+        env:
+          TAG: ${{ steps.tagname.outputs.tag }}
+          PROJECT: spark-connector
+        run: |
+          cd ${PROJECT}
+          rm -rf .git .gitignore 
+          tar zcvf nebula-${PROJECT}-${TAG}.tar.gz *
+          mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
