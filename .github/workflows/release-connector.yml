@@ -15,8 +15,8 @@ defaults:
     shell: bash
 
 
-job:
-  deploy-java:
+jobs:
+  deploy-spark-connector:
     runs-on: [self-hosted, linux]
     steps:
       - name: Check out Git repository
