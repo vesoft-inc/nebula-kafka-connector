@@ -150,7 +150,7 @@ func (c *defaultNebulaClusterControl) DeleteCluster(nc *v1alpha1.NebulaCluster) 
 		req := meta.NewDropServiceGroupReq(nc.Name, true)
 		if err := metaClient.DropServiceGroup(req); err != nil {
 			if ne, ok := err.(*nebulaErr.NebulaError); ok {
-				if ne.Code() != nebulaErr.ERROR_META_CLUSTER_NOT_FOUND {
+				if ne.Code() != nebulaErr.ERROR_META_SERVICE_GROUP_NOT_FOUND {
 					klog.Errorf("drop cluster failed: %v", err)
 					return err
 				}
@@ -214,12 +214,12 @@ func (c *defaultNebulaClusterControl) updateNebulaCluster(nc *v1alpha1.NebulaClu
 		req := meta.NewCreateServiceGroupReq(nc.Name, int(nc.Spec.ReplicaFactor), nc.Spec.Owner, nc.Spec.Zones)
 		if err = metaClient.CreateServiceGroup(req); err != nil {
 			if ne, ok := err.(*nebulaErr.NebulaError); ok {
-				if ne.Code() != nebulaErr.ERROR_META_CLUSTER_ALREADY_EXISTS {
+				if ne.Code() != nebulaErr.ERROR_META_SERVICE_GROUP_ALREADY_EXISTS {
 					klog.Errorf("create cluster failed: %v", err)
 					return err
 				}
 			} else {
-				klog.Errorf("create cluster got unkonw error: %v", err)
+				klog.Errorf("create cluster got unknown error: %v", err)
 				return err
 			}
 		}

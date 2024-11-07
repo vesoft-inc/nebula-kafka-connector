@@ -143,18 +143,16 @@ const MetadDefaultConfig = `
 --storage_tls_peer_name_verify=true
 
 # Enable HTTPS
---http_tls_enable=false
-# Enable mTLS
---http_tls_client_verify=false
+--meta_tls_enable=false
 # Certificate for the HTTP service
---http_tls_cert=etc/tls/current/certs/http-server-cert.pem
+--meta_tls_cert=etc/tls/current/certs/http-server-cert.pem
 # Private key for the HTTP service
---http_tls_key=etc/tls/current/private/http-server-key.pem
+--meta_tls_key=etc/tls/current/private/http-server-key.pem
 # Password file for encrypted private key
---http_tls_key_passfile=
+--meta_tls_key_passfile=
 # CA certificate to verify the client certificate
 # Only necessary if mTLS enabled
---http_tls_ca=etc/tls/current/certs/ca/nebula-ca-cert.pem
+--meta_tls_ca=etc/tls/current/certs/ca/nebula-ca-cert.pem
 
 # Interval in seconds to check for cert rotation
 --tls_cert_check_interval=60
