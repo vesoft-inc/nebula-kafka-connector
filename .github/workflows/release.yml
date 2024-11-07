@@ -16,7 +16,7 @@ defaults:
     shell: bash
 
 env:
-  OSS_RELEASE_DIR: 'minio/release-build/nebula-ng-tools'
+  OSS_RELEASE_DIR: "minio/release-build/nebula-ng-tools"
 
 jobs:
   package:
@@ -27,7 +27,7 @@ jobs:
           run: find . -mindepth 1 -delete
       - uses: actions/checkout@v4
       - uses: vesoft-inc/.github/actions/tagname@master
-        id: tag
+        id: tagname
       - uses: vesoft-inc/.github/actions/setup-minio@master
         with:
           minio_url: ${{ secrets.MINIO_ENDPOINT }}
@@ -35,7 +35,7 @@ jobs:
           secret_key: ${{ secrets.MINIO_SECRET }}
       - name: Upload golang src to Minio
         env:
-          TAG: ${{ steps.tagname.outputs.tag }}
+          TAG: ${{ steps.tagname.outputs.tagnum }}
           PROJECT: golang
         run: |
           cd ${PROJECT}
@@ -44,7 +44,7 @@ jobs:
           mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
       - name: Upload java src to Minio
         env:
-          TAG: ${{ steps.tagname.outputs.tag }}
+          TAG: ${{ steps.tagname.outputs.tagnum }}
           PROJECT: java
         run: |
           cd ${PROJECT}
@@ -53,7 +53,7 @@ jobs:
           mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
       - name: Upload kafka-connector src to Minio
         env:
-          TAG: ${{ steps.tagname.outputs.tag }}
+          TAG: ${{ steps.tagname.outputs.tagnum }}
           PROJECT: kafka-connector
         run: |
           cd ${PROJECT}
@@ -62,7 +62,7 @@ jobs:
           mc cp nebula-${PROJECT}-${TAG}.tar.gz ${OSS_RELEASE_DIR}/${PROJECT}/
       - name: Upload spark-connector src to Minio
         env:
-          TAG: ${{ steps.tagname.outputs.tag }}
+          TAG: ${{ steps.tagname.outputs.tagnum }}
           PROJECT: spark-connector
         run: |
           cd ${PROJECT}
@@ -81,7 +81,7 @@ jobs:
         with:
           distribution: "temurin"
           java-version: "8"
-          
+
       - name: Deploy Release to Maven package
         uses: samuelmeuli/action-maven-publish@v1
         with:
@@ -91,4 +91,3 @@ jobs:
           nexus_password: ${{ secrets.OSSRH_TOKEN }}
           directory: java
           maven_goals_phases: "clean deploy -Dmaven.test.skip=true"
-
