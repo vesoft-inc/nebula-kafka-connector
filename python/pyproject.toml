@@ -1,0 +1,30 @@
+[project]
+name = "nebulagraph-python"
+version = "5.0.0"
+description = "NebulaGraph 5.0 Python Client"
+authors = [
+    {name = "NebulaGraph Team", email = "info@vesoft.com"},
+]
+dependencies = [
+    "grpcio>=1.54.0",
+    "protobuf>=4.21.0",
+    "grpcio-tools>=1.54.0",
+    "rich>=13.9.3",
+]
+requires-python = ">=3.9"
+readme = "README.md"
+license = {text = "Apache 2.0"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[tool.pdm]
+distribution = true
+package-dir = "nebulagraph_python"
+
+[tool.ruff]
+exclude = ["nebulagraph_python/proto"]
+
+[tool.ruff.lint]
+select = ["ALL"]
