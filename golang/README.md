@@ -11,7 +11,7 @@ Could build the source code in `package` workspace.
 ```bash
 workspace=/app/myapp
 # get the source code, e.g. nebula-golang-5.0.0.tar.gz
-tar zxvf nebula-golang-5.0.0.tar.gz -o /tmp/golang
+tar zxvf nebula-golang-5.0.0.tar.gz -C /tmp/golang
 # in your project, run go mod edit
 cd ${workspace}
 go mod edit -replace github.com/vesoft-inc/nebula-ng-tools/golang=/tmp/golang
