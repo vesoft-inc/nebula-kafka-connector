@@ -194,6 +194,28 @@ func (c *vectorDecoder) decodeBasiceValue(t types.ColumnType) decodeFlatFn {
 	}
 }
 
+func (c *vectorDecoder) decodeVectorValue() decodeFlatFn {
+	return func(dctx *decodeContext, v *vector.NestedVector, index uint32, columnType typeSchema) (*nebulaValue, error) {
+		vt, ok := columnType.(*columnTypeSchemaVector)
+		if !ok {
+			return nil, errTypeAssertion
+		}
+
+		dim := int(vt.dim)
+		offset := int(index) * dim * 4
+		data := v.VectorData
+		l := &NebulaList{Values: make([]*nebulaValue, 0, dim)}
+		for i := 0; i < dim; i++ {
+			currOff := offset + i*4
+			val := math.Float32frombits(order.Uint32(data[currOff : currOff+4]))
+			l.Values = append(l.Values, &nebulaValue{
+				data: &NebulaFloat{Value: val},
+			})
+		}
+		return &nebulaValue{data: l}, nil
+	}
+}
+
 func (c *vectorDecoder) decodeListValue() decodeFlatFn {
 	return func(dctx *decodeContext, v *vector.NestedVector, index uint32, columnType typeSchema) (*nebulaValue, error) {
 		// offset + size
@@ -1076,6 +1098,7 @@ func init() {
 		types.ColumnTypeDate:          d.decodeBasiceValue(types.ColumnTypeDate),
 		types.ColumnTypeDuration:      d.decodeBasiceValue(types.ColumnTypeDuration),
 		types.ColumnTypeDecimal:       d.decodeDecimalValue(),
+		types.ColumnTypeVector:        d.decodeVectorValue(),
 		types.ColumnTypeAny:           d.decodeAnyValue(),
 	}
 }

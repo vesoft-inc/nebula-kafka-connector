@@ -29,6 +29,7 @@ var columnTypeMap = map[uint8]types.ColumnType{
 	0x11: types.ColumnTypeList,
 	0x12: types.ColumnTypePath,
 	0x13: types.ColumnTypeRecord,
+	0x14: types.ColumnTypeVector,
 	0x15: types.ColumnTypeLocalTime,
 	0x16: types.ColumnTypeDuration,
 	0x17: types.ColumnTypeDate,

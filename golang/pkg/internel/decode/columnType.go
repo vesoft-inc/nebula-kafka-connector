@@ -1,7 +1,11 @@
 package decode
 
 import (
+	"encoding/binary"
+	"fmt"
+
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -16,6 +20,11 @@ type (
 
 	columnTypeSchemaList struct {
 		typ       types.ColumnType
+		subSchema typeSchema
+	}
+	columnTypeSchemaVector struct {
+		typ       types.ColumnType
+		dim       uint32
 		subSchema typeSchema
 	}
 	columnTypeSchemaRecord struct {
@@ -48,6 +57,13 @@ type (
 		labels   []string
 	}
 )
+
+// getType implements typeSchema.
+func (c *columnTypeSchemaVector) getType() types.ColumnType {
+	return c.typ
+}
+
+var _ typeSchema = (*columnTypeSchemaVector)(nil)
 
 func newTypeSchema(r *bytesReader) (typeSchema, error) {
 	b := r.readN(1)
@@ -183,6 +199,21 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 		return &columnTypeSchemaBasic{
 			typ: t,
 		}, nil
+	case types.ColumnTypeVector:
+		dim := binary.LittleEndian.Uint32(r.readN(4))
+		subSchema, err := newTypeSchema(r)
+		if err != nil {
+			return nil, err
+		}
+		if subSchema.getType() != types.ColumnTypeFloat32 {
+			panic(fmt.Sprintf("unexpected child type: %+v", subSchema.getType()))
+		}
+		typ := columnTypeSchemaVector{
+			typ:       t,
+			dim:       dim,
+			subSchema: subSchema,
+		}
+		return &typ, nil
 	default:
 		return &columnTypeSchemaBasic{
 			typ: t,

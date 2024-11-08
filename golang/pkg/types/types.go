@@ -106,5 +106,6 @@ const (
 	ColumnTypeDate
 	ColumnTypeDuration
 	ColumnTypeDecimal
+	ColumnTypeVector
 	ColumnTypeAny ColumnType = 0xFF
 )
