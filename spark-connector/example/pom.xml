@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.vesoft</groupId>
-        <artifactId>spark-connector</artifactId>
+        <artifactId>nebula-spark</artifactId>
         <version>5.0-SNAPSHOT</version>
     </parent>
     <artifactId>example</artifactId>
@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>com.vesoft</groupId>
-            <artifactId>spark-connector_spark2.4</artifactId>
+            <artifactId>nebula-connector_spark2.4</artifactId>
             <version>5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
