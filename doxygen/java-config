@@ -941,7 +941,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = java/client/src/main/java/com/vesoft/nebula/client/graph/data java/client/src/main/java/com/vesoft/nebula/client/graph/exception java/client/src/main/java/com/vesoft/nebula/client/graph/scan java/client/src/main/java/com/vesoft/nebula/client/graph/utils java/client/src/main/java/com/vesoft/nebula/client/graph/ErrorCode.java java/client/src/main/java/com/vesoft/nebula/client/graph/net/NebulaClient.java java/client/src/main/java/com/vesoft/nebula/client/graph/net/NebulaPool.java
+INPUT                  = java/client/src/main/java/com/vesoft/nebula/driver/graph/data java/client/src/main/java/com/vesoft/nebula/driver/graph/exception java/client/src/main/java/com/vesoft/nebula/driver/graph/scan java/client/src/main/java/com/vesoft/nebula/driver/graph/utils java/client/src/main/java/com/vesoft/nebula/driver/graph/ErrorCode.java java/client/src/main/java/com/vesoft/nebula/driver/graph/net/NebulaClient.java java/client/src/main/java/com/vesoft/nebula/driver/graph/net/NebulaPool.java
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
