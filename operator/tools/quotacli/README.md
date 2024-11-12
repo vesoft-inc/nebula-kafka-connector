@@ -24,7 +24,7 @@ Use "quota-cli [command] --help" for more information about a command.
 $ kubectl config current-context 
 kubernetes-admin@kubernetes
 
-$ quotacli --quota-user john --quota-namespace john-ns --cluster-name kubernetes --resource-requests cpu=3,memory=6Gi --resource-limits cpu=4,memory=8Gi
+$ quotacli create --quota-user john --quota-namespace john-ns --cluster-name kubernetes --resource-requests cpu=3,memory=6Gi --resource-limits cpu=4,memory=8Gi
 
 $ ls -lt certs/
 total 8

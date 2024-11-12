@@ -13,6 +13,7 @@ import (
 )
 
 var configPath string
+var opts CreateOptions
 
 func main() {
 	cmd := &cobra.Command{
@@ -27,7 +28,16 @@ func main() {
 			cmd.Help()
 		},
 	}
+
 	cmd.PersistentFlags().StringVarP(&configPath, "config-path", "c", "", "Path to the kubeconfig file to use for CLI requests.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.QuotaUser, "quota-user", "", "Username for basic authentication to the API server.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.QuotaNamespace, "quota-namespace", "", "The namespace for the nebula cluster request.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.ClusterName, "cluster-name", "", "The name of the kubeconfig cluster to use, run cmd 'kubectl config current-context' to confirm.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.UserConfigPath, "user-config-path", "kube", "Path to the saved kubeconfig file to use for the quota user.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.ResourceRequests, "resource-requests", "", "The compute resource requests total for all Pods in the namespace for the quota user, For example, 'cpu=4,memory=8Gi'.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.ResourceLimits, "resource-limits", "", "The compute resource limits total for all Pods in the namespace for the quota user, For example, 'cpu=8,memory=16Gi'.")
+	createUserQuotaCmd.PersistentFlags().StringVar(&opts.CertPath, "cert-path", "certs", "The directory that the certificate signing request (CSR) and private key will be written.")
+
 	cmd.AddCommand(createUserQuotaCmd)
 	cmd.AddCommand(showUserQuotaCmd)
 
@@ -40,12 +50,10 @@ var createUserQuotaCmd = &cobra.Command{
 	Use:   "create",
 	Short: "create user and resource quota for nebula graph",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		opts := &CreateOptions{}
-		opts.AddFlags(cmd.Flags())
 		if err := opts.Validate(); err != nil {
 			return err
 		}
-		return createUserQuota(context.TODO(), opts)
+		return createUserQuota(context.TODO(), &opts)
 	},
 }
 
