@@ -344,14 +344,14 @@ class ErrorCode(Enum):
     TASK_NOT_IN_STOR = "NJ011"
     TASK_REBUILD_INDEX_IS_RUNNING = "NJ012"
     JOB_PLACEHOLDER_ERROR = "NJ099"
-    UNKNOWN_FOR_CLIENT = None
+    UNKNOWN_FOR_CLIENT = "_UNKNOWN_FOR_CLIENT"
 
     @staticmethod
-    def find(code: str) -> "ErrorCode":
-        for error_code in ErrorCode:
-            if error_code.value == code:
-                return error_code
-        return ErrorCode.UNKNOWN_FOR_CLIENT
+    def from_str(code: str) -> "ErrorCode":
+        try:
+            return ErrorCode(code)
+        except ValueError:
+            return ErrorCode.UNKNOWN_FOR_CLIENT
 
     def is_retryable(self) -> bool:
         return self.is_session_error() or self.is_rpc_error() or self.is_raft_error()
@@ -373,3 +373,21 @@ class ErrorCode(Enum):
 
     def is_no_data_error(self) -> bool:
         return self.value.startswith("02")
+
+
+class NebulaGraphRemoteError(Exception):
+    code: ErrorCode
+    message: str
+
+    def __init__(self, code: ErrorCode, message: str):
+        self.code = code
+        self.message = message
+        super().__init__(f"{code.value}: {message}")
+
+
+class NebulaGraphClientError(Exception):
+    pass
+
+
+class ConnectionError(NebulaGraphClientError):
+    pass

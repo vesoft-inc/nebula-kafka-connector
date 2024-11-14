@@ -1,12 +1,15 @@
 from collections.abc import Iterable, Iterator
 from threading import Lock
-from typing import Any, List, Optional, Union
+from typing import TYPE_CHECKING, List, Optional, Union
 
-from .data import ExtraInfo, PlanInfoNode
-from .error_code import ErrorCode
-from .proto.graph_pb2 import ExecuteResponse, QueryStats
-from .result_table import ResultTable
-from .value_wrapper import Row, ValueWrapper
+from nebulagraph_python.data import ExtraInfo, PlanInfoNode
+from nebulagraph_python.error import ErrorCode, NebulaGraphRemoteError
+from nebulagraph_python.proto.graph_pb2 import ExecuteResponse, QueryStats
+from nebulagraph_python.result_table import ResultTable
+from nebulagraph_python.value_wrapper import Row, ValueWrapper
+
+if TYPE_CHECKING:
+    from pandas import DataFrame
 
 
 class Record(Iterable[ValueWrapper]):
@@ -93,10 +96,16 @@ class ResultSet:
         return self.empty
 
     def get_error_code(self) -> ErrorCode:
-        return ErrorCode.find(self.response.status.code.decode("utf-8"))
+        return ErrorCode.from_str(self.response.status.code.decode("utf-8"))
 
     def get_error_message(self) -> str:
         return self.response.status.message.decode("utf-8")
+
+    def raise_on_error(self):
+        if not self.is_succeeded():
+            raise NebulaGraphRemoteError(
+                code=self.get_error_code(), message=self.get_error_message()
+            )
 
     def get_latency(self) -> int:
         return self.response.summary.elapsed_time.total_server_time_us
@@ -118,9 +127,13 @@ class ResultSet:
         return self._index < self.size
 
     def next(self) -> Record:
-        if not self.has_next():
+        row = (
+            self.result_table.next()
+            if self.has_next() and self.result_table is not None
+            else None
+        )
+        if row is None:
             raise StopIteration("no more row record data")
-        row = self.result_table.next()
         with self._index_lock:
             self._index += 1
         return Record(self.column_names, row)
@@ -151,13 +164,15 @@ class ResultSet:
             return self.response.status.message.decode("utf-8")
         return f"ColumnName: {self.column_names}, RowSize: {self.row_size()}, Latency: {self.get_latency()}"
 
-    def as_pandas_df(self) -> Any:
+    def as_pandas_df(self) -> "DataFrame":
         """Convert result set to pandas DataFrame.
 
-        Returns:
+        Returns
+        -------
             pandas.DataFrame: DataFrame containing the query results
 
-        Raises:
+        Raises
+        ------
             ImportError: If pandas is not installed
 
         """
@@ -191,15 +206,16 @@ class ResultSet:
     def as_ascii_table(
         self,
         style: str = "table",
-        width: int = None,
+        width: Optional[int] = None,
         min_width: int = 8,
-        max_width: int = None,
+        max_width: Optional[int] = None,
         padding: int = 1,
         collapse_padding: bool = False,
     ) -> str:
         """Print query results in a formatted table or row-by-row format.
 
         Args:
+        ----
             style: Output style - either "table" (default) or "rows"
             width: Fixed width for all columns. If None, width will be auto-calculated
             min_width: Minimum width of columns when using table style
@@ -208,6 +224,7 @@ class ResultSet:
             collapse_padding: Reduce padding when cell contents are too wide
 
         Examples:
+        --------
             # Print as table (default)
             result.as_ascii_table()
 
@@ -218,6 +235,7 @@ class ResultSet:
             result.as_ascii_table(width=20, max_width=30, padding=2)
 
         Returns:
+        -------
             str: Formatted representation of the results, or error message if query failed
 
         """
@@ -236,11 +254,13 @@ class ResultSet:
 
         if not self.is_succeeded():
             console.print(f"[bold red]Error:[/bold red] {self.get_error_message()}")
-            return console.file.getvalue()
+            console.file.seek(0)
+            return console.file.read()
 
         if self.is_empty():
             console.print("[yellow]Empty result set[/yellow]")
-            return console.file.getvalue()
+            console.file.seek(0)
+            return console.file.read()
 
         # Reset index to start
         self._index = 0
@@ -288,14 +308,15 @@ class ResultSet:
         console.print(f"├── [green]Rows:[/green] {self.row_size()}")
         console.print(f"└── [blue]Latency:[/blue] {self.get_latency()}μs")
 
-        return console.file.getvalue()
+        console.file.seek(0)
+        return console.file.read()
 
     def print(
         self,
         style: str = "table",
-        width: int = None,
+        width: Optional[int] = None,
         min_width: int = 8,
-        max_width: int = None,
+        max_width: Optional[int] = None,
         padding: int = 1,
         collapse_padding: bool = False,
     ):

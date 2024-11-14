@@ -2,8 +2,13 @@ from nebulagraph_python.client import NebulaClient
 
 # Create client
 client = NebulaClient(
-    hosts=["192.168.8.148:9669"], username="root", password="Nebula@123",
+    hosts=["192.168.8.148:9669"],
+    username="root",
+    password="Nebula@123",
 )
+if client._session is None:
+    raise RuntimeError("Failed to create session")
+session = client._session
 
 query = """
 USE movie
@@ -12,24 +17,24 @@ RETURN p as path, e as edge_WithGenre, b as genre_node, a.name as movie_name, 3.
 LIMIT 2
 """
 # Execute query
-result = client.execute(query)
+result = session.execute(query)
 
 # Print results
 result.print()
 
 # Convert to pandas DataFrame
 
-result = client.execute(query)
+result = session.execute(query)
 
 df = result.as_pandas_df()
 df.to_csv("query_result.csv", index=False)
 
 # Use as a CLI tool
 
-client.print_query_result(query)  # or client.pq(query)
+session.print_query_result(query)  # or client.pq(query)
 
 # Get one row
-result = client.execute(query)
+result = session.execute(query)
 row = result.next()
 
 # Get column names
@@ -39,7 +44,7 @@ row.column_names
 cell = row.col_values[0].cast()
 
 # Cast to primitive
-cell_primitive = cell.cast_primitive()
+cell_primitive = row.col_values[0].cast_primitive()
 
 ######
 # special value type example
@@ -56,7 +61,7 @@ RETURN local_datetime("2016-09-20T01:01:01", "%Y-%m-%dT%H:%M:%S") AS localdateti
        "str literal" AS str_literal
 """
 
-client.print_query_result(query)  # or client.pq(query)
+session.print_query_result(query)  # or client.pq(query)
 
 
 ######
@@ -74,7 +79,7 @@ ORDER BY vector_distance(vector<3, float>([1, 2, 3]), v.vec1) LIMIT 3
 RETURN v.id as vid, v.vec1 as vec1
 """
 
-client.pq(query)
+session.pq(query)
 
 
 ######
@@ -88,11 +93,13 @@ os.environ["NG_PYTHON_LOG_LEVEL"] = "DEBUG"
 os.environ["NG_PYTHON_LOG_SINK"] = "stdout"
 
 client = NebulaClient(
-    hosts=["127.0.0.1:9669"], username="root", password="NebulaGraph01",
+    hosts=["192.168.8.148:9669"],
+    username="root",
+    password="Nebula@123",
 )
 
 query = """
 RETURN 1
 """
 
-client.pq(query)
+session.pq(query)

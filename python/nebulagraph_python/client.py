@@ -3,12 +3,16 @@ import logging
 import os
 import sys
 from dataclasses import dataclass
-from typing import List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
 import grpc
 
 from nebulagraph_python.data import HostAddress, SSLParam
-from nebulagraph_python.error_code import ErrorCode
+from nebulagraph_python.error import (
+    ErrorCode,
+    NebulaGraphRemoteError,
+    ConnectionError,
+)
 from nebulagraph_python.proto import common_pb2, graph_pb2, graph_pb2_grpc
 from nebulagraph_python.result_set import ResultSet
 
@@ -48,13 +52,20 @@ class AuthResult:
 class NebulaClientConfig:
     """Configuration for NebulaGraph client"""
 
+    username: str
+    password: str
+    auth_options: Dict[str, Any]
+    connect_timeout_ms: int
+    request_timeout_ms: int
+    ssl_param: Optional[SSLParam]
+
     def __init__(
         self,
         hosts: Union[str, List[str], List[HostAddress]],
         username: str,
         password: str,
         *,  # Force keyword arguments after these
-        auth_options: dict = None,
+        auth_options: Optional[Dict[str, Any]] = None,
         connect_timeout_ms: int = 1000,
         request_timeout_ms: int = 3000,
         ssl_param: Optional[SSLParam] = None,
@@ -87,6 +98,13 @@ class NebulaClientConfig:
 class Session:
     """Represents a session with the NebulaGraph server"""
 
+    session_id: int
+    username: str
+    graph_addr: HostAddress
+    timeout: int
+    _stub: Optional[graph_pb2_grpc.GraphServiceStub]
+    _channel: Optional[grpc.Channel]
+
     def __init__(
         self,
         session_id: int,
@@ -105,12 +123,15 @@ class Session:
         """Execute a nGQL statement
 
         Args:
+        ----
             statement: The nGQL statement to execute
 
         Returns:
+        -------
             ResultSet containing the execution results
 
         Raises:
+        ------
             Exception if execution fails
 
         """
@@ -138,15 +159,16 @@ class Session:
         self,
         query: str,
         style: str = "table",
-        width: int = None,
+        width: Optional[int] = None,
         min_width: int = 8,
-        max_width: int = None,
+        max_width: Optional[int] = None,
         padding: int = 1,
         collapse_padding: bool = False,
     ) -> None:
         """Execute a query and print the results in a formatted way using rich
 
         Args:
+        ----
             query: The nGQL query to execute
             style: Output style - either "table" (default) or "rows"
             width: Fixed width for all columns. If None, width will be auto-calculated
@@ -156,6 +178,7 @@ class Session:
             collapse_padding: Reduce padding when cell contents are too wide
 
         Raises:
+        ------
             Exception if execution fails
 
         """
@@ -193,6 +216,10 @@ class Session:
 class NebulaClient:
     """Client for connecting to NebulaGraph"""
 
+    config: NebulaClientConfig
+    _session: Optional[Session]
+    _round_robin_index: int
+
     def __init__(
         self,
         hosts: Union[str, List[str], List[HostAddress]],
@@ -203,6 +230,7 @@ class NebulaClient:
         """Initialize NebulaGraph client
 
         Args:
+        ----
             hosts: Single host string ("hostname:port"), list of host strings,
                   or list of HostAddress objects
             username: Username for authentication
@@ -232,6 +260,8 @@ class NebulaClient:
         last_error = None
 
         # Try each address until one succeeds
+        host_addr = None
+        channel = None
         for _ in range(len(self.config.addresses)):
             try:
                 host_addr = self._get_next_address()
@@ -271,9 +301,9 @@ class NebulaClient:
                 response = stub.Authenticate(request)
 
                 if response.status.code != b"00000":
-                    error = ErrorCode.find(response.status.code.decode("utf-8"))
-                    raise Exception(
-                        f"Authentication failed: {error} - {response.status.message.decode('utf-8')}",
+                    raise NebulaGraphRemoteError(
+                        code=ErrorCode.from_str(response.status.code.decode("utf-8")),
+                        message=response.status.message.decode("utf-8"),
                     )
 
                 # Create internal session
@@ -291,14 +321,14 @@ class NebulaClient:
 
             except Exception as e:
                 logger.warning(
-                    f"Failed to connect to {host_addr.host}:{host_addr.port}: {e}",
+                    f"Failed to connect to {(host_addr.host, host_addr.port) if host_addr else 'No Available Addr'}: {e}",
                 )
                 last_error = e
                 if channel:
                     channel.close()
 
         # If we get here, all connection attempts failed
-        raise Exception(
+        raise ConnectionError(
             f"Failed to connect to any of the provided hosts. Last error: {last_error}",
         )
 
@@ -306,12 +336,15 @@ class NebulaClient:
         """Execute a nGQL statement
 
         Args:
+        ----
             statement: The nGQL statement to execute
 
         Returns:
+        -------
             ResultSet containing the execution results
 
         Raises:
+        ------
             Exception: If client is not connected or execution fails
 
         """

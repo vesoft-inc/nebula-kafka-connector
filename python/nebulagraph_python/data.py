@@ -2,7 +2,7 @@ import enum
 from dataclasses import dataclass
 from typing import List, Optional
 
-from .proto.graph_pb2 import PlanInfo
+from nebulagraph_python.proto.graph_pb2 import PlanInfo
 
 
 @dataclass

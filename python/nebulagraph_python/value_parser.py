@@ -3,9 +3,11 @@ import decimal
 import struct
 from typing import Any, Dict
 
-from .data_types import (
+from nebulagraph_python.data_types import (
     AnyHeader,
     BasicType,
+    ByteOrder,
+    ColumnType,
     DataType,
     EdgeHeader,
     EdgeType,
@@ -19,10 +21,10 @@ from .data_types import (
     PathType,
     RecordType,
     ResultGraphSchemas,
+    charset,
 )
-from .decode import BytesReader, ColumnType, VectorType, VectorWrapper
-from .decode_utils import (
-    ByteOrder,
+from nebulagraph_python.decode import BytesReader, VectorType, VectorWrapper
+from nebulagraph_python.decode_utils import (
     bytes_to_bool,
     bytes_to_double,
     bytes_to_float,
@@ -32,10 +34,9 @@ from .decode_utils import (
     bytes_to_int64,
     bytes_to_uint8,
     bytes_to_uint16,
-    charset,
 )
-from .proto.vector_pb2 import NestedVector
-from .size_constant import (
+from nebulagraph_python.proto.vector_pb2 import NestedVector
+from nebulagraph_python.size_constant import (
     BOOL_SIZE,
     CHUNK_INDEX_LENGTH_IN_STRING_HEADER,
     CHUNK_INDEX_START_POSITION_IN_STRING_HEADER,
@@ -81,6 +82,7 @@ from .size_constant import (
     ZONED_DATE_TIME_SIZE,
     ZONED_TIME_SIZE,
 )
+
 from .value_wrapper import (
     AnyValue,
     Edge,
@@ -96,13 +98,13 @@ from .value_wrapper import (
 class ValueParser:
     graph_schemas: ResultGraphSchemas
     timezone_offset: int
-    byte_order: str
+    byte_order: ByteOrder
 
     def __init__(
         self,
         graph_schemas: ResultGraphSchemas,
         timezone_offset: int,
-        byte_order: str,
+        byte_order: ByteOrder,
     ):
         self.graph_schemas = graph_schemas
         self.timezone_offset = timezone_offset
@@ -179,9 +181,9 @@ class ValueParser:
             value_data = self._get_sub_bytes(vector_data, INT8_SIZE, row_idx)
             return int.from_bytes(
                 value_data,
-                byteorder="little"
-                if self.byte_order == ByteOrder.LITTLE_ENDIAN
-                else "big",
+                byteorder=(
+                    "little" if self.byte_order == ByteOrder.LITTLE_ENDIAN else "big"
+                ),
                 signed=column_type == ColumnType.INT8,
             )
 
@@ -189,9 +191,9 @@ class ValueParser:
             value_data = self._get_sub_bytes(vector_data, INT16_SIZE, row_idx)
             return int.from_bytes(
                 value_data,
-                byteorder="little"
-                if self.byte_order == ByteOrder.LITTLE_ENDIAN
-                else "big",
+                byteorder=(
+                    "little" if self.byte_order == ByteOrder.LITTLE_ENDIAN else "big"
+                ),
                 signed=column_type == ColumnType.INT16,
             )
 
@@ -199,9 +201,9 @@ class ValueParser:
             value_data = self._get_sub_bytes(vector_data, INT32_SIZE, row_idx)
             return int.from_bytes(
                 value_data,
-                byteorder="little"
-                if self.byte_order == ByteOrder.LITTLE_ENDIAN
-                else "big",
+                byteorder=(
+                    "little" if self.byte_order == ByteOrder.LITTLE_ENDIAN else "big"
+                ),
                 signed=column_type == ColumnType.INT32,
             )
 
@@ -209,9 +211,9 @@ class ValueParser:
             value_data = self._get_sub_bytes(vector_data, INT64_SIZE, row_idx)
             return int.from_bytes(
                 value_data,
-                byteorder="little"
-                if self.byte_order == ByteOrder.LITTLE_ENDIAN
-                else "big",
+                byteorder=(
+                    "little" if self.byte_order == ByteOrder.LITTLE_ENDIAN else "big"
+                ),
                 signed=column_type == ColumnType.INT64,
             )
 
@@ -239,7 +241,7 @@ class ValueParser:
                 STRING_SIZE,
                 row_idx,
             )  # STRING_SIZE
-            return self._string_to_decimal(
+            return self.string_to_decimal(
                 self.bytes_to_string(value_data, vector.vector),
             )
 
@@ -311,10 +313,10 @@ class ValueParser:
             for i in range(list_header.size):
                 element = self._decode_value(
                     vector.vector_wrappers[0],
-                    data_type.value_type,
+                    data_type,
                     list_header.offset + i,
                 )
-                elements.append(ValueWrapper(element, data_type.value_type))
+                elements.append(ValueWrapper(element, data_type.get_type()))
             return elements
 
         if column_type == ColumnType.RECORD:
@@ -322,6 +324,8 @@ class ValueParser:
                 raise ValueError("Expected RecordType for RECORD column type")
 
             special_meta_data = vector.get_special_meta_data()
+            if special_meta_data is None:
+                raise RuntimeError("Special metadata is missing")
             field_types = data_type.get_field_types()
             record = {}
 
@@ -555,7 +559,9 @@ class ValueParser:
             # Process chunks of bytes directly
             for i in range(dimension):
                 start = offset + i * FLOAT32_SIZE
-                values[i] = bytes_to_float(vector_view[start:start + FLOAT32_SIZE], self.byte_order)
+                values[i] = bytes_to_float(
+                    vector_view[start : start + FLOAT32_SIZE], self.byte_order,
+                )
 
             return Vector(values, dimension)
 
@@ -681,7 +687,7 @@ class ValueParser:
         # Skip padding byte at index 3
         microsecond = int.from_bytes(
             data[4:8],
-            byteorder="little" if self.byte_order == ByteOrder.LITTLE_ENDIAN else "big",
+            byteorder=self.byte_order.value,
         )
 
         # Create base time and add timezone offset minutes
@@ -699,7 +705,7 @@ class ValueParser:
         """Convert bytes to local datetime"""
         qword = int.from_bytes(
             data,
-            byteorder="little" if self.byte_order == ByteOrder.LITTLE_ENDIAN else "big",
+            byteorder=self.byte_order.value,
         )
 
         year = qword & 0xFFFF
@@ -760,24 +766,21 @@ class ValueParser:
             micro_sec = int(duration_value % MICRO_SECONDS_OF_SECOND)
 
         return NDuration(
-            is_month_based,
-            year,
-            month,
-            day,
-            hour,
-            minute,
-            second,
-            micro_sec,
+            seconds=second,
+            microseconds=micro_sec,
+            months=month,
         )
 
-    def bytes_to_any(self, value: bytes, vector, row_idx: int) -> "AnyValue":
+    def bytes_to_any(
+        self, value: bytes, vector: VectorWrapper, row_idx: int,
+    ) -> "AnyValue":
         """Convert bytes to AnyValue for flat vector"""
         # Get data type from first vector wrapper
         data_type_vector = vector.get_vector_wrapper(0)
         value_type = ColumnType(
             bytes_to_int8(
                 self._get_sub_bytes(
-                    data_type_vector.vector_data,
+                    data_type_vector.get_vector_data(),
                     VALUE_TYPE_SIZE,
                     row_idx,
                 ),
@@ -796,17 +799,21 @@ class ValueParser:
         if value_type in (ColumnType.STRING, ColumnType.DECIMAL):
             # Handle string and decimal types
             string_vec = vector.get_vector_wrapper(any_header.chunk_index)
+            value_data = self._get_sub_bytes(
+                string_vec.get_vector_data(),
+                STRING_SIZE,
+                row_idx,
+            )
             obj = self.bytes_to_string(
-                string_vec.vector_data,
-                any_header.offset,
-                self.byte_order,
+                string_header=value_data,
+                vector=vector.vector,
             )
 
         if value_type.is_composite():
             # Handle composite types
             sub_vector = vector.get_vector_wrapper(any_header.chunk_index)
-            reader = BytesReader(sub_vector.vector_data[any_header.offset :])
-            obj = self.decode_composite_value(reader, value_type)
+            reader = BytesReader(sub_vector.get_vector_data()[any_header.offset :])
+            obj = self._decode_composite_value(reader, value_type)
 
         return AnyValue(obj, value_type)
 
@@ -821,7 +828,7 @@ class ValueParser:
         elif column_type == ColumnType.DECIMAL:
             obj = self.bytes_to_decimal(reader)
         elif column_type.is_composite():
-            obj = self.decode_composite_value(reader, column_type)
+            obj = self._decode_composite_value(reader, column_type)
         else:
             raise RuntimeError(f"do not support type: {column_type}")
 
@@ -1072,7 +1079,9 @@ class ValueParser:
 
 
 class ValueTypeParser:
-    def __init__(self, byte_order: str):
+    byte_order: ByteOrder
+
+    def __init__(self, byte_order: ByteOrder):
         self.byte_order = byte_order
 
     def get_data_type(self, reader: BytesReader) -> DataType:

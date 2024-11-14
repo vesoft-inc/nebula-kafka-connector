@@ -1,15 +1,14 @@
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
-from .decode_utils import (
-    ByteOrder,
+from nebulagraph_python.data_types import ByteOrder, charset
+from nebulagraph_python.decode_utils import (
     bytes_to_int16,
     bytes_to_int32,
-    charset,
     is_null_bit_map_all_set,
 )
-from .proto.vector_pb2 import NestedVector, VectorBatch
-from .size_constant import (
+from nebulagraph_python.proto.vector_pb2 import NestedVector, VectorBatch
+from nebulagraph_python.size_constant import (
     EDGE_TYPE_ID_SIZE,
     ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE,
     GRAPH_ELEMENT_TYPE_NUM_SIZE,
@@ -20,96 +19,6 @@ from .size_constant import (
     PROPERTY_NUM_SIZE,
     VECTOR_INDEX_SIZE,
 )
-
-
-class ColumnType(Enum):
-    NODE = 0x1
-    EDGE = 0x2
-    NULL = 0x3
-    BOOL = 0x4
-    INT8 = 0x5
-    UINT8 = 0x6
-    INT16 = 0x7
-    UINT16 = 0x8
-    INT32 = 0x9
-    UINT32 = 0xA
-    INT64 = 0xB
-    UINT64 = 0xC
-    FLOAT32 = 0xD
-    FLOAT64 = 0xE
-    STRING = 0x10
-    LIST = 0x11
-    PATH = 0x12
-    RECORD = 0x13
-    EMBEDDINGVECTOR = 0x14
-    LOCALTIME = 0x15
-    DURATION = 0x16
-    DATE = 0x17
-    LOCALDATETIME = 0x18
-    ZONEDTIME = 0x19
-    ZONEDDATETIME = 0x20
-    REFERENCE = 0x21
-    DECIMAL = 0x22
-    ANY = 0xFE
-    INVALID = 0xFF
-
-    def is_basic(self) -> bool:
-        """Check if type is a basic type"""
-        basic_types = {
-            ColumnType.BOOL,
-            ColumnType.INT8,
-            ColumnType.UINT8,
-            ColumnType.INT16,
-            ColumnType.UINT16,
-            ColumnType.INT32,
-            ColumnType.UINT32,
-            ColumnType.INT64,
-            ColumnType.UINT64,
-            ColumnType.FLOAT32,
-            ColumnType.FLOAT64,
-            ColumnType.LOCALTIME,
-            ColumnType.DURATION,
-            ColumnType.DATE,
-            ColumnType.LOCALDATETIME,
-            ColumnType.ZONEDTIME,
-            ColumnType.ZONEDDATETIME,
-        }
-        return self in basic_types
-
-    def is_composite(self) -> bool:
-        """Check if type is a composite type"""
-        composite_types = {
-            ColumnType.NODE,
-            ColumnType.EDGE,
-            ColumnType.LIST,
-            ColumnType.PATH,
-            ColumnType.RECORD,
-            ColumnType.EMBEDDINGVECTOR,
-        }
-        return self in composite_types
-
-    def get_byte_size(self) -> int:
-        """Get byte size for fixed-length types"""
-        size_map = {
-            ColumnType.BOOL: 1,
-            ColumnType.INT8: 1,
-            ColumnType.UINT8: 1,
-            ColumnType.INT16: 2,
-            ColumnType.UINT16: 2,
-            ColumnType.INT32: 4,
-            ColumnType.UINT32: 4,
-            ColumnType.INT64: 8,
-            ColumnType.UINT64: 8,
-            ColumnType.FLOAT32: 4,
-            ColumnType.FLOAT64: 8,
-            ColumnType.DATE: 4,
-            ColumnType.LOCALTIME: 8,
-            ColumnType.LOCALDATETIME: 8,
-            ColumnType.ZONEDTIME: 8,
-            ColumnType.ZONEDDATETIME: 8,
-            ColumnType.DURATION: 8,
-        }
-        return size_map.get(self, 0)  # Return 0 for variable-length types
 
 
 class VectorType(Enum):
@@ -133,7 +42,7 @@ class VectorType(Enum):
 
 
 class PathSpecialMetaData:
-    def __init__(self, vector: NestedVector, byte_order: str):
+    def __init__(self, vector: NestedVector, byte_order: ByteOrder):
         self.graph_id_and_node_types = {}  # graphId -> nodeTypeId -> pairIndex
         self.graph_id_and_edge_types = {}  # graphId -> edgeTypeId -> pairIndex
         self.index_and_nodes = {}  # pairIndex -> PathVectorPair
@@ -307,22 +216,23 @@ class VectorWrapper:
 
         return self.graph_element_type_id_and_prop_vector_index_map
 
-    def get_path_special_meta_data(self) -> PathSpecialMetaData:
+    def get_path_special_meta_data(self) -> Optional[PathSpecialMetaData]:
         """Get path special metadata, matching Java's getPathSpecialMetaData()"""
         if not self.vector or not self.vector.special_meta_data:
             return None
         return PathSpecialMetaData(self.vector, self.byte_order)
 
-    def get_special_meta_data(self) -> bytes:
+    def get_special_meta_data(self) -> Optional[bytes]:
         """Get special metadata bytes, matching Java's getSpecialMetaData()"""
         return self.vector.special_meta_data if self.vector else None
 
 
 class Batch:
-    def __init__(self, batch: VectorBatch, byte_order: str):
+    def __init__(self, batch: VectorBatch, byte_order: ByteOrder):
         """Initialize Batch with VectorBatch and byte order
 
         Args:
+        ----
             batch (VectorBatch): The vector batch
             byte_order (str): Byte order ('little' or 'big')
 
@@ -335,7 +245,8 @@ class Batch:
     def get_vectors_count(self) -> int:
         """Get count of vectors in this Batch
 
-        Returns:
+        Returns
+        -------
             int: Count of vectors
 
         """
@@ -345,9 +256,11 @@ class Batch:
         """Get the VectorWrapper with specific index of the batch
 
         Args:
+        ----
             index (int): Index of vector to get
 
         Returns:
+        -------
             VectorWrapper: Vector wrapper at specified index
 
         """
@@ -356,7 +269,8 @@ class Batch:
     def get_batch_row_size(self) -> int:
         """Get the row size of this batch
 
-        Returns:
+        Returns
+        -------
             int: Row size
 
         """
@@ -370,6 +284,7 @@ class BytesReader:
         """Initialize BytesReader with bytes data
 
         Args:
+        ----
             data (bytes): The bytes data to read from
 
         """
@@ -380,9 +295,11 @@ class BytesReader:
         """Read size bytes from current position and advance position
 
         Args:
+        ----
             size (int): Number of bytes to read
 
         Returns:
+        -------
             bytes: The bytes read
 
         """
@@ -390,13 +307,15 @@ class BytesReader:
         self.index += size
         return data
 
-    def read_sized_string(self, byte_order: str) -> str:
+    def read_sized_string(self, byte_order: ByteOrder) -> str:
         """Read a string prefixed with its 2-byte length
 
         Args:
+        ----
             byte_order (str): Byte order for decoding length
 
         Returns:
+        -------
             str: The decoded string
 
         """
@@ -417,6 +336,7 @@ class PathVectorPair:
         """Initialize PathVectorPair with node/edge vector and adjacency vector
 
         Args:
+        ----
             node_vector (VectorWrapper): Node or Edge Vector
             adj_vector (VectorWrapper): The adjacency Long Vector
 
@@ -427,7 +347,8 @@ class PathVectorPair:
     def get_vector(self) -> "VectorWrapper":
         """Get the node/edge vector
 
-        Returns:
+        Returns
+        -------
             VectorWrapper: The node or edge vector
 
         """
@@ -436,7 +357,8 @@ class PathVectorPair:
     def get_adj_vector(self) -> "VectorWrapper":
         """Get the adjacency vector
 
-        Returns:
+        Returns
+        -------
             VectorWrapper: The adjacency vector
 
         """

@@ -1,13 +1,30 @@
+from collections.abc import Sequence
+from enum import Enum
 from io import BytesIO
-from typing import Dict, List
+from typing import Dict, List, Optional
 
-from .decode import ColumnType
-from .decode_utils import charset
-from .proto.vector_pb2 import EdgeType, NodeType, PropertyGraphSchema
+from nebulagraph_python.proto.vector_pb2 import (
+    EdgeType as ProtoEdgeType,
+)
+from nebulagraph_python.proto.vector_pb2 import (
+    NodeType as ProtoNodeType,
+)
+from nebulagraph_python.proto.vector_pb2 import (
+    PropertyGraphSchema,
+)
+
+
+class ByteOrder(str, Enum):
+    LITTLE_ENDIAN = "little"
+    BIG_ENDIAN = "big"
+
+
+# Define charset constant to match Java
+charset = "utf-8"
 
 
 class NodeSchema:
-    def __init__(self, node_type: NodeType):
+    def __init__(self, node_type: ProtoNodeType):
         self.node_type_id = node_type.node_type_id
         self.node_type_name = node_type.node_type_name.decode(charset)
         self.node_labels = []
@@ -25,7 +42,7 @@ class NodeSchema:
 
 
 class EdgeSchema:
-    def __init__(self, edge_type: EdgeType):
+    def __init__(self, edge_type: ProtoEdgeType):
         self.edge_type_id = edge_type.edge_type_id
         self.edge_type_name = edge_type.edge_type_name.decode(charset)
         self.edge_labels = []
@@ -43,20 +60,27 @@ class EdgeSchema:
 
 
 class ResultGraphSchemas:
-    def __init__(self, graph_schemas: List[PropertyGraphSchema] = None):
+    graph_schemas: Dict[int, "GraphSchema"]
+
+    def __init__(self, graph_schemas: Optional[Sequence[PropertyGraphSchema]] = None):
         self.graph_schemas: Dict[int, GraphSchema] = {}
         if graph_schemas:
             for schema in graph_schemas:
                 self.graph_schemas[schema.graph_id] = GraphSchema(schema)
 
     def get_graph_schema(self, graph_id: int) -> "GraphSchema":
-        return self.graph_schemas.get(graph_id)
+        return self.graph_schemas[graph_id]
 
     def get_graph_schema_map(self) -> Dict[int, "GraphSchema"]:
         return self.graph_schemas
 
 
 class GraphSchema:
+    graph_id: int
+    graph_name: str
+    node_schemas: Dict[int, "NodeSchema"]
+    edge_schemas: Dict[int, "EdgeSchema"]
+
     def __init__(self, graph_schema: PropertyGraphSchema):
         self.graph_id = graph_schema.graph_id
         self.graph_name = graph_schema.graph_name.decode(charset)
@@ -75,17 +99,17 @@ class GraphSchema:
         return self.graph_name
 
     def get_node_schema(self, node_type_id: int) -> "NodeSchema":
-        return self.node_schemas.get(node_type_id)
+        return self.node_schemas[node_type_id]
 
     def get_edge_schema(self, edge_type_id: int) -> "EdgeSchema":
-        return self.edge_schemas.get(edge_type_id)
+        return self.edge_schemas[edge_type_id]
 
 
 class ListHeader:
-    def __init__(self, data: bytes, byte_order: str):
+    def __init__(self, data: bytes, byte_order: ByteOrder):
         buffer = BytesIO(data)
-        self.offset = int.from_bytes(buffer.read(4), byte_order)  # uint32
-        self.size = int.from_bytes(buffer.read(4), byte_order)  # uint32
+        self.offset = int.from_bytes(buffer.read(4), byte_order.value)  # uint32
+        self.size = int.from_bytes(buffer.read(4), byte_order.value)  # uint32
 
     def get_offset(self) -> int:
         return self.offset
@@ -95,11 +119,11 @@ class ListHeader:
 
 
 class NodeHeader:
-    def __init__(self, data: bytes, byte_order: str):
+    def __init__(self, data: bytes, byte_order: ByteOrder):
         buffer = BytesIO(data)
-        self.node_id = int.from_bytes(buffer.read(8), byte_order)  # int64
+        self.node_id = int.from_bytes(buffer.read(8), byte_order.value)  # int64
         self.node_type_id = self.node_id >> 48  # first 16 bytes
-        self.graph_id = int.from_bytes(buffer.read(4), byte_order)  # int32
+        self.graph_id = int.from_bytes(buffer.read(4), byte_order.value)  # int32
 
     def get_node_id(self) -> int:
         return self.node_id
@@ -112,13 +136,13 @@ class NodeHeader:
 
 
 class EdgeHeader:
-    def __init__(self, data: bytes, byte_order: str):
+    def __init__(self, data: bytes, byte_order: ByteOrder):
         buffer = BytesIO(data)
-        self.src_id = int.from_bytes(buffer.read(8), byte_order)  # int64
-        self.dst_id = int.from_bytes(buffer.read(8), byte_order)  # int64
-        self.rank = int.from_bytes(buffer.read(8), byte_order)  # int64
-        self.graph_id = int.from_bytes(buffer.read(4), byte_order)  # int32
-        self.edge_type_id = int.from_bytes(buffer.read(4), byte_order)  # int32
+        self.src_id = int.from_bytes(buffer.read(8), byte_order.value)  # int64
+        self.dst_id = int.from_bytes(buffer.read(8), byte_order.value)  # int64
+        self.rank = int.from_bytes(buffer.read(8), byte_order.value)  # int64
+        self.graph_id = int.from_bytes(buffer.read(4), byte_order.value)  # int32
+        self.edge_type_id = int.from_bytes(buffer.read(4), byte_order.value)  # int32
 
     def get_edge_type_id(self) -> int:
         return self.edge_type_id
@@ -146,17 +170,19 @@ class PathHeader:
     - tailOffset: 4 bytes
     """
 
-    def __init__(self, data: bytes, byte_order: str):
+    def __init__(self, data: bytes, byte_order: ByteOrder):
         buffer = BytesIO(data)
-        self.size = int.from_bytes(buffer.read(4), byte_order) & 0xFFFFFFFF  # uint32
+        self.size = (
+            int.from_bytes(buffer.read(4), byte_order.value) & 0xFFFFFFFF
+        )  # uint32
         self.head_node_index = (
-            int.from_bytes(buffer.read(2), byte_order) & 0xFFFF
+            int.from_bytes(buffer.read(2), byte_order.value) & 0xFFFF
         )  # uint16
         self.tail_node_index = (
-            int.from_bytes(buffer.read(2), byte_order) & 0xFFFF
+            int.from_bytes(buffer.read(2), byte_order.value) & 0xFFFF
         )  # uint16
-        self.head_offset = int.from_bytes(buffer.read(4), byte_order)  # uint32
-        self.tail_offset = int.from_bytes(buffer.read(4), byte_order)  # uint32
+        self.head_offset = int.from_bytes(buffer.read(4), byte_order.value)  # uint32
+        self.tail_offset = int.from_bytes(buffer.read(4), byte_order.value)  # uint32
 
     def get_head_node_index(self) -> int:
         return self.head_node_index
@@ -221,8 +247,98 @@ class PathAdjHeader:
         return self._offset_of_next_ele
 
 
+class ColumnType(Enum):
+    NODE = 0x1
+    EDGE = 0x2
+    NULL = 0x3
+    BOOL = 0x4
+    INT8 = 0x5
+    UINT8 = 0x6
+    INT16 = 0x7
+    UINT16 = 0x8
+    INT32 = 0x9
+    UINT32 = 0xA
+    INT64 = 0xB
+    UINT64 = 0xC
+    FLOAT32 = 0xD
+    FLOAT64 = 0xE
+    STRING = 0x10
+    LIST = 0x11
+    PATH = 0x12
+    RECORD = 0x13
+    EMBEDDINGVECTOR = 0x14
+    LOCALTIME = 0x15
+    DURATION = 0x16
+    DATE = 0x17
+    LOCALDATETIME = 0x18
+    ZONEDTIME = 0x19
+    ZONEDDATETIME = 0x20
+    REFERENCE = 0x21
+    DECIMAL = 0x22
+    ANY = 0xFE
+    INVALID = 0xFF
+
+    def is_basic(self) -> bool:
+        """Check if type is a basic type"""
+        basic_types = {
+            ColumnType.BOOL,
+            ColumnType.INT8,
+            ColumnType.UINT8,
+            ColumnType.INT16,
+            ColumnType.UINT16,
+            ColumnType.INT32,
+            ColumnType.UINT32,
+            ColumnType.INT64,
+            ColumnType.UINT64,
+            ColumnType.FLOAT32,
+            ColumnType.FLOAT64,
+            ColumnType.LOCALTIME,
+            ColumnType.DURATION,
+            ColumnType.DATE,
+            ColumnType.LOCALDATETIME,
+            ColumnType.ZONEDTIME,
+            ColumnType.ZONEDDATETIME,
+        }
+        return self in basic_types
+
+    def is_composite(self) -> bool:
+        """Check if type is a composite type"""
+        composite_types = {
+            ColumnType.NODE,
+            ColumnType.EDGE,
+            ColumnType.LIST,
+            ColumnType.PATH,
+            ColumnType.RECORD,
+            ColumnType.EMBEDDINGVECTOR,
+        }
+        return self in composite_types
+
+    def get_byte_size(self) -> int:
+        """Get byte size for fixed-length types"""
+        size_map = {
+            ColumnType.BOOL: 1,
+            ColumnType.INT8: 1,
+            ColumnType.UINT8: 1,
+            ColumnType.INT16: 2,
+            ColumnType.UINT16: 2,
+            ColumnType.INT32: 4,
+            ColumnType.UINT32: 4,
+            ColumnType.INT64: 8,
+            ColumnType.UINT64: 8,
+            ColumnType.FLOAT32: 4,
+            ColumnType.FLOAT64: 8,
+            ColumnType.DATE: 4,
+            ColumnType.LOCALTIME: 8,
+            ColumnType.LOCALDATETIME: 8,
+            ColumnType.ZONEDTIME: 8,
+            ColumnType.ZONEDDATETIME: 8,
+            ColumnType.DURATION: 8,
+        }
+        return size_map.get(self, 0)  # Return 0 for variable-length types
+
+
 class AnyHeader:
-    def __init__(self, data: bytes, column_type: ColumnType, byte_order: str):
+    def __init__(self, data: bytes, column_type: ColumnType, byte_order: ByteOrder):
         self.chunk_index = 0
         self.offset = 0
 
@@ -250,9 +366,9 @@ class AnyHeader:
         ]:
             buffer = BytesIO(data)
             # chunk_index is uint32, add 1 to match Java implementation
-            self.chunk_index = int.from_bytes(buffer.read(4), byte_order) + 1
+            self.chunk_index = int.from_bytes(buffer.read(4), byte_order.value) + 1
             # offset is uint32
-            self.offset = int.from_bytes(buffer.read(4), byte_order)
+            self.offset = int.from_bytes(buffer.read(4), byte_order.value)
 
     def get_chunk_index(self) -> int:
         return self.chunk_index

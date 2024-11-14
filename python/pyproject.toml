@@ -21,7 +21,11 @@ build-backend = "pdm.backend"
 
 [tool.pdm]
 distribution = true
-package-dir = "nebulagraph_python"
+build.package-dir = "nebulagraph_python"
+[tool.pdm.dev-dependencies]
+dev = [
+    "pandas>=2.2.3",
+]
 
 [tool.ruff]
 exclude = ["nebulagraph_python/proto"]

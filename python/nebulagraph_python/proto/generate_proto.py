@@ -36,6 +36,7 @@ def generate_proto_files():
             f"--proto_path={proto_dir}",
             f"--python_out={proto_dir}",
             f"--grpc_python_out={proto_dir}",
+            f"--pyi_out={proto_dir}",
             "--experimental_allow_proto3_optional",  # Add this flag
             str(proto_path),
         ]

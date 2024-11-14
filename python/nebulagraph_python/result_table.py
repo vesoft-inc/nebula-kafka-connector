@@ -4,12 +4,11 @@
 
 from typing import List
 
-from .data_types import ResultGraphSchemas
-from .decode import Batch, BytesReader
-from .decode_utils import ByteOrder
-from .proto.vector_pb2 import VectorResultTable
-from .value_parser import ValueParser, ValueTypeParser
-from .value_wrapper import Row
+from nebulagraph_python.data_types import ByteOrder, ResultGraphSchemas
+from nebulagraph_python.decode import Batch, BytesReader
+from nebulagraph_python.proto.vector_pb2 import VectorResultTable
+from nebulagraph_python.value_parser import ValueParser, ValueTypeParser
+from nebulagraph_python.value_wrapper import Row
 
 
 class ResultTable:
@@ -54,7 +53,8 @@ class ResultTable:
     def get_column_names(self) -> List[str]:
         """Get the column names of the response
 
-        Returns:
+        Returns
+        -------
             List[str]: list of column names
 
         """
@@ -63,22 +63,29 @@ class ResultTable:
     def get_total_num_records(self) -> int:
         """Get the total data records size of the response
 
-        Returns:
+        Returns
+        -------
             int: total number of records
 
         """
+        if self.result_table is None:
+            raise RuntimeError("no result table data")
         return self.result_table.meta.num_records
 
     def _get_row_by_index(self, index: int) -> Row:
         """Parse row record from batch
 
         Args:
+        ----
             index: the position of each vector in current batch
 
         Returns:
+        -------
             Row: row record
 
         """
+        if self.current_batch is None:
+            raise RuntimeError("no more batch data")
         row = Row()
         for i in range(self.current_batch.get_vectors_count()):
             value = self.parser.decode_value_wrapper(
@@ -92,16 +99,19 @@ class ResultTable:
     def next(self) -> Row:
         """Get the next row data
 
-        Returns:
+        Returns
+        -------
             Row: next row record
 
-        Raises:
+        Raises
+        ------
             RuntimeError: if no more batch data
 
         """
+        if self.result_table is None:
+            raise RuntimeError("no result table data")
         if self.current_batch is None:
             raise RuntimeError("no more batch data")
-
         # each VectorMetaData has the same numRecords value,
         # just use the first one to get the numRecord for this batch
         current_batch_row_size = 0

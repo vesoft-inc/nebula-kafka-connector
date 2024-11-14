@@ -3,9 +3,8 @@ from datetime import date, datetime, time
 from decimal import Decimal
 from typing import Any, Dict, List, Optional
 
-from .data_types import ResultGraphSchemas
-from .decode import ColumnType
-from .size_constant import EDGE_TYPE_ID_SIZE
+from nebulagraph_python.data_types import ColumnType, ResultGraphSchemas
+from nebulagraph_python.size_constant import EDGE_TYPE_ID_SIZE
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +66,8 @@ class Node(BaseDataObject):
     def get_graph(self) -> str:
         """Get graph
 
-        Returns:
+        Returns
+        -------
             str: graph name
 
         """
@@ -76,7 +76,8 @@ class Node(BaseDataObject):
     def get_type(self) -> str:
         """Get node type name
 
-        Returns:
+        Returns
+        -------
             str: node type name
 
         """
@@ -85,7 +86,8 @@ class Node(BaseDataObject):
     def get_node_type_id(self) -> int:
         """Get node type id
 
-        Returns:
+        Returns
+        -------
             int: node type id
 
         """
@@ -94,7 +96,8 @@ class Node(BaseDataObject):
     def get_labels(self) -> List[str]:
         """Get node label list
 
-        Returns:
+        Returns
+        -------
             List[str]: list of labels
 
         """
@@ -103,7 +106,8 @@ class Node(BaseDataObject):
     def get_id(self) -> int:
         """Get vid
 
-        Returns:
+        Returns
+        -------
             int: node id
 
         """
@@ -112,7 +116,8 @@ class Node(BaseDataObject):
     def get_column_names(self) -> List[str]:
         """Get property names from the node
 
-        Returns:
+        Returns
+        -------
             List[str]: the list of property names
 
         """
@@ -121,7 +126,8 @@ class Node(BaseDataObject):
     def get_values(self) -> List["ValueWrapper"]:
         """Get all property values
 
-        Returns:
+        Returns
+        -------
             List[ValueWrapper]: the List of property values
 
         """
@@ -133,7 +139,8 @@ class Node(BaseDataObject):
     def get_properties(self) -> Dict[str, "ValueWrapper"]:
         """Get all properties for node
 
-        Returns:
+        Returns
+        -------
             Dict[str, ValueWrapper]: property name -> property value
 
         """
@@ -142,7 +149,8 @@ class Node(BaseDataObject):
     def cast_primitive(self) -> Any:
         """Convert node to a dictionary format with id, type, labels and properties
 
-        Returns:
+        Returns
+        -------
             dict: A dictionary containing node information in format:
                 {
                     'id': node_id,
@@ -235,7 +243,8 @@ class Edge(BaseDataObject):
     def get_graph(self) -> str:
         """Get graph
 
-        Returns:
+        Returns
+        -------
             str: graph name
 
         """
@@ -244,7 +253,8 @@ class Edge(BaseDataObject):
     def get_type(self) -> str:
         """Get edge type name
 
-        Returns:
+        Returns
+        -------
             str: edge type name
 
         """
@@ -257,7 +267,8 @@ class Edge(BaseDataObject):
     def is_directed(self) -> bool:
         """If the edge is directed
 
-        Returns:
+        Returns
+        -------
             bool: true if edge is directed
 
         """
@@ -266,7 +277,8 @@ class Edge(BaseDataObject):
     def get_labels(self) -> List[str]:
         """Get edge labels
 
-        Returns:
+        Returns
+        -------
             List[str]: list of edge labels
 
         """
@@ -275,7 +287,8 @@ class Edge(BaseDataObject):
     def get_src_id(self) -> int:
         """Get the src id
 
-        Returns:
+        Returns
+        -------
             int: source id
 
         """
@@ -284,7 +297,8 @@ class Edge(BaseDataObject):
     def get_dst_id(self) -> int:
         """Get the dst id from the edge
 
-        Returns:
+        Returns
+        -------
             int: destination id
 
         """
@@ -293,7 +307,8 @@ class Edge(BaseDataObject):
     def get_rank(self) -> int:
         """Get rank from the edge
 
-        Returns:
+        Returns
+        -------
             int: rank
 
         """
@@ -302,7 +317,8 @@ class Edge(BaseDataObject):
     def get_column_names(self) -> List[str]:
         """Get all property name
 
-        Returns:
+        Returns
+        -------
             List[str]: the List of property names
 
         """
@@ -311,7 +327,8 @@ class Edge(BaseDataObject):
     def get_property_values(self) -> List["ValueWrapper"]:
         """Get all property values
 
-        Returns:
+        Returns
+        -------
             List[ValueWrapper]: the List of property values
 
         """
@@ -323,7 +340,8 @@ class Edge(BaseDataObject):
     def get_properties(self) -> Dict[str, "ValueWrapper"]:
         """Get property names and values from the edge
 
-        Returns:
+        Returns
+        -------
             Dict[str, ValueWrapper]: property name -> property value
 
         """
@@ -332,7 +350,8 @@ class Edge(BaseDataObject):
     def cast_primitive(self) -> Any:
         """Convert edge to a dictionary format with source id, destination id, rank, type, labels and properties
 
-        Returns:
+        Returns
+        -------
             dict: A dictionary containing edge information in format:
                 {
                     'src_id': source_id,
@@ -414,32 +433,35 @@ class Path:
             else:
                 self.edges.append(value.as_edge())
 
-    def nodes(self) -> list[Node]:
+    def get_nodes(self) -> list[Node]:
         """Create a list over the nodes in this path, nodes will appear in the same order as they appear
         in the path.
 
-        Returns:
+        Returns
+        -------
             List[Node]: a List of all nodes in this path
 
         """
         return self.nodes
 
-    def edges(self) -> list[Edge]:
+    def get_edges(self) -> list[Edge]:
         """Create a list over the edges in this path. The edges will appear
         in the same order as they appear in the path.
 
-        Returns:
+        Returns
+        -------
             List[Edge]: a List of all edges in this path
 
         """
         return self.edges
 
-    def values(self) -> list["ValueWrapper"]:
+    def get_values(self) -> list["ValueWrapper"]:
         """Create a list over the nodes and edges in this path. The value will appear
         in the same order as they appear in the path. The first value will be Node type, then the
         next one will be Edge type, and next one will be Node type.
 
-        Returns:
+        Returns
+        -------
             List[ValueWrapper]: a List of all values in this path
 
         """
@@ -459,6 +481,7 @@ class Path:
         """Convert path to a dictionary format with nodes and edges.
 
         Args:
+        ----
             fields: List of fields to include in the dictionary. Valid fields are:
                    - nodes: List of node dictionaries
                    - edges: List of edge dictionaries
@@ -473,6 +496,7 @@ class Path:
             (289483299716333572@Genre:Genre{id:101,name:Staged Documentary})
 
         Returns:
+        -------
             Dict containing the requested path information. Only fields specified in the
             fields parameter will be included.
 
@@ -504,7 +528,7 @@ class Path:
 
     def __str__(self):
         if not self.values:
-            return None
+            return "()"
 
         prefix_node = self.nodes[0]
         prefix_node_prop_strs = []
@@ -595,6 +619,7 @@ class NRecord:
         """Returns true if this record contains a mapping for the specified key. The key cannot be null.
 
         Args:
+        ----
             key: key whose presence in this record is to be checked
         Returns:
             bool: true if this record contains a mapping for the specified key
@@ -610,6 +635,7 @@ class NRecord:
         """Get the Value of specified key in this record
 
         Args:
+        ----
             key: key whose corresponding value in this record will be returned
         Returns:
             The ValueWrapper of the specified key
@@ -622,7 +648,8 @@ class NRecord:
     def is_empty(self) -> bool:
         """Returns true if this record has no values
 
-        Returns:
+        Returns
+        -------
             bool: true if this record contains no key-value mappings
 
         """
@@ -631,7 +658,8 @@ class NRecord:
     def size(self) -> int:
         """Get the number of key-value mappings in this record.
 
-        Returns:
+        Returns
+        -------
             int: the number of key-value mappings in this record
 
         """
@@ -640,7 +668,8 @@ class NRecord:
     def get_values_map(self) -> Dict[str, "ValueWrapper"]:
         """Get the Map object for this record
 
-        Returns:
+        Returns
+        -------
             Dict: Map for this record
 
         """
@@ -649,7 +678,8 @@ class NRecord:
     def cast_primitive(self) -> Dict[str, Any]:
         """Convert record(Map or Dict actually) to a dictionary format with property name -> primitive value
 
-        Returns:
+        Returns
+        -------
             Dict: A dictionary containing property name -> primitive value
 
         """
@@ -698,9 +728,6 @@ class NDuration:
         self.minute = minutes
         self.second = secs
         self.microsec = microseconds
-
-    def is_month_based(self) -> bool:
-        return self.is_month_based
 
     def get_year(self) -> int:
         return self.year
@@ -817,10 +844,12 @@ class Vector:
         """Initialize a Vector with values and dimension.
 
         Args:
+        ----
             values: List of float values representing the vector components
             dimension: The dimension of the vector (must match length of values)
 
         Raises:
+        ------
             ValueError: If length of values doesn't match the specified dimension
 
         """
@@ -848,7 +877,7 @@ class Vector:
             raise IndexError(f"Index out of bounds: {index}")
         return self.values[index]
 
-    def __eq__(self, other: "Vector") -> bool:
+    def __eq__(self, other) -> bool:
         """Compare two vectors for equality."""
         if not isinstance(other, Vector):
             logger.warning(f"Expected Vector, got {type(other)}")
@@ -878,7 +907,8 @@ class ValueWrapper:
     def is_null(self) -> bool:
         """If the value is null
 
-        Returns:
+        Returns
+        -------
             bool: true if value is null
 
         """
@@ -887,7 +917,8 @@ class ValueWrapper:
     def is_bool(self) -> bool:
         """Check if the Value is Boolean type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_BOOL
 
         """
@@ -896,7 +927,8 @@ class ValueWrapper:
     def is_long(self) -> bool:
         """Check if the Value is Long type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_UINT64 or COLUMN_TYPE_INT64
 
         """
@@ -905,7 +937,8 @@ class ValueWrapper:
     def is_int(self) -> bool:
         """Check if the Value is Int type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_UINT8 or COLUMN_TYPE_INT8 or COLUMN_TYPE_UINT16
                 or COLUMN_TYPE_INT16 or COLUMN_TYPE_UINT32 or COLUMN_TYPE_INT32
 
@@ -922,7 +955,8 @@ class ValueWrapper:
     def is_float(self) -> bool:
         """Check if the Value is Float type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_FLOAT32
 
         """
@@ -931,7 +965,8 @@ class ValueWrapper:
     def is_double(self) -> bool:
         """Check if the Value is Double type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_FLOAT64
 
         """
@@ -940,7 +975,8 @@ class ValueWrapper:
     def is_string(self) -> bool:
         """Check if the Value is String type.
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_STRING
 
         """
@@ -949,7 +985,8 @@ class ValueWrapper:
     def is_list(self) -> bool:
         """Check if the Value is List type.
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_LIST
 
         """
@@ -958,7 +995,8 @@ class ValueWrapper:
     def is_node(self) -> bool:
         """Check if the Value is Node type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_NODE
 
         """
@@ -967,7 +1005,8 @@ class ValueWrapper:
     def is_edge(self) -> bool:
         """Check if the Value is Edge type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_EDGE
 
         """
@@ -976,7 +1015,8 @@ class ValueWrapper:
     def is_local_time(self) -> bool:
         """Check if the Value is Local Time type.
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_LOCALTIME
 
         """
@@ -985,7 +1025,8 @@ class ValueWrapper:
     def is_zoned_time(self) -> bool:
         """Check if the Value is Zoned Time type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_ZONEDTIME
 
         """
@@ -994,7 +1035,8 @@ class ValueWrapper:
     def is_local_datetime(self) -> bool:
         """Check if the Value is Local Datetime type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_LOCALDATETIME
 
         """
@@ -1003,7 +1045,8 @@ class ValueWrapper:
     def is_zoned_datetime(self) -> bool:
         """Check if the Value is Zoned Datetime type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_ZONEDDATETIME
 
         """
@@ -1012,7 +1055,8 @@ class ValueWrapper:
     def is_date(self) -> bool:
         """Check if the Value is Date type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_DATE
 
         """
@@ -1021,7 +1065,8 @@ class ValueWrapper:
     def is_record(self) -> bool:
         """Check if the Value is Record type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_RECORD
 
         """
@@ -1030,7 +1075,8 @@ class ValueWrapper:
     def is_duration(self) -> bool:
         """Check if the Value is Duration type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_DURATION
 
         """
@@ -1039,7 +1085,8 @@ class ValueWrapper:
     def is_path(self) -> bool:
         """Check if the Value is Path type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_PATH
 
         """
@@ -1048,7 +1095,8 @@ class ValueWrapper:
     def is_decimal(self) -> bool:
         """Check if the Value is Decimal type
 
-        Returns:
+        Returns
+        -------
             bool: true if Value's type is COLUMN_TYPE_DECIMAL
 
         """
@@ -1256,13 +1304,14 @@ class ValueWrapper:
 
 
 class Row:
-    def __init__(self, values: List[ValueWrapper] = None):
+    def __init__(self, values: Optional[List[ValueWrapper]] = None):
         self.values = values if values is not None else []
 
     def add_value(self, value: ValueWrapper):
         """Append one value into row.
 
         Args:
+        ----
             value (ValueWrapper): one value of the row
 
         """
@@ -1271,7 +1320,8 @@ class Row:
     def get_values(self) -> list[ValueWrapper]:
         """Get the values of this row.
 
-        Returns:
+        Returns
+        -------
             List[ValueWrapper]: list of values in this row
 
         """

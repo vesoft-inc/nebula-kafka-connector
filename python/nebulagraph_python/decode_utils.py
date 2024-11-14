@@ -1,15 +1,9 @@
 import struct
 
-from .proto.vector_pb2 import NestedVector
-from .size_constant import ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE
+from data_types import ByteOrder, charset
 
-# Define charset constant to match Java
-charset = "utf-8"
-
-
-class ByteOrder:
-    LITTLE_ENDIAN = "little"
-    BIG_ENDIAN = "big"
+from nebulagraph_python.proto.vector_pb2 import NestedVector
+from nebulagraph_python.size_constant import ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE
 
 
 def bytes_to_int8(data: bytes) -> int:
@@ -28,7 +22,7 @@ def bytes_to_int16(data: bytes, byte_order: ByteOrder) -> int:
     """Match Java's DecodeUtils.bytesToInt16"""
     # Java: ByteBuffer buffer = ByteBuffer.wrap(data.toByteArray());
     # return buffer.order(order).getShort();
-    return int.from_bytes(data, byteorder=byte_order, signed=True)
+    return int.from_bytes(data, byteorder=byte_order.value, signed=True)
 
 
 def bytes_to_uint16(data: bytes, byte_order: ByteOrder) -> int:
@@ -41,20 +35,20 @@ def bytes_to_int32(data: bytes, byte_order: ByteOrder) -> int:
     """Match Java's DecodeUtils.bytesToInt32"""
     # Java: ByteBuffer buffer = ByteBuffer.wrap(data.toByteArray());
     # return buffer.order(order).getInt();
-    return int.from_bytes(data, byteorder=byte_order, signed=True)
+    return int.from_bytes(data, byteorder=byte_order.value, signed=True)
 
 
 def bytes_to_uint32(data: bytes, byte_order: ByteOrder) -> int:
     """Match Java's DecodeUtils.bytesToUInt32"""
     # Java: return Integer.toUnsignedLong(bytesToInt32(data, order));
-    return int.from_bytes(data, byteorder=byte_order, signed=False)
+    return int.from_bytes(data, byteorder=byte_order.value, signed=False)
 
 
 def bytes_to_int64(data: bytes, byte_order: ByteOrder) -> int:
     """Match Java's DecodeUtils.bytesToInt64"""
     # Java: ByteBuffer buffer = ByteBuffer.wrap(data.toByteArray());
     # return buffer.order(order).getLong();
-    return int.from_bytes(data, byteorder=byte_order, signed=True)
+    return int.from_bytes(data, byteorder=byte_order.value, signed=True)
 
 
 def bytes_to_float(data: bytes, byte_order: ByteOrder) -> float:
