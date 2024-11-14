@@ -4,7 +4,7 @@
 
 This repository is the NebulaGraph Connector for Apache Spark.
 
-## Building for Spark2.4
+## Building for Spark2.4 (Optional)
 
 1. Package NebulaGraph Spark Connector.
 
@@ -15,8 +15,9 @@ This repository is the NebulaGraph Connector for Apache Spark.
     ```
    These commands will generate the corresponding targets:
    ```agsl
-     spark-connector/spark2.4/target/spark-connector_spark2.4-5.0.0.jar
+     spark-connector/spark2.4/target/nebula-connector_spark2.4-5.0.0.jar
    ```
+   
 ## Integration with Apache Spark Applications
 
 * Import nebula spark connector with maven
@@ -24,7 +25,7 @@ This repository is the NebulaGraph Connector for Apache Spark.
   ```agsl
   <dependency>
      <groupId>com.vesoft</groupId>
-     <artifactId>spark-connector_spark2.4</artifactId>
+     <artifactId>nebula-connector_spark2.4</artifactId>
      <version>5.0.0</version>
   </dependency>
   ```
@@ -48,6 +49,25 @@ This repository is the NebulaGraph Connector for Apache Spark.
       .build()
     df.write.nebula(nebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()
   ```
+  * Write DataFrame into NebulaGraph as Edges:
+  ```agsl
+    val df = spark.read.json("spark-connector/example/src/main/resources/edge")
+    df.show()
+
+    val nebulaWriteEdgeConfig: WriteNebulaEdgeConfig = WriteNebulaEdgeConfig
+      .builder()
+      .withGraphName("nba")
+      .withEdge("edge_type_follow")
+      .withSrcPkFields(List("src", "name1"))
+      .withDstPkFields(List("dst", "name2"))
+      .withSrcPksAsProperty(false)
+      .withDstPksAsProperty(false)
+      .withWriteMode(WriteMode.INSERTIGNORE)
+      .withBatchSize(10)
+      .build()
+    df.write.nebula(getNebulaConnectionConfig, nebulaWriteEdgeConfig).writeEdges()
+  ```
+
 * Read DataFrame from NebulaGraph Node type:
 ```agsl
     val nebulaConnectionConfig = NebulaConnectionConfig
@@ -62,11 +82,31 @@ This repository is the NebulaGraph Connector for Apache Spark.
       .withTypeName("node_type_player")
       .withReturnCols(List("name"))
       .withBatchSize(10)
-      .withPartitionNum(1)
+      .withPartitionNum(10)
       .build()
     val df = spark.read.nebula(nebulaConnectionConfig, nebulaNodeReadConfig).loadNode()
     df.show()
-```
+  ```
+
+* Read DataFrame from NebulaGraph Edge type:
+  ```agsl
+    val nebulaConnectionConfig = NebulaConnectionConfig
+      .builder()
+      .withGraphAddress("192.168.8.6:3820")
+      .withUser("root")
+      .withPasswd("Nebula123")
+      .build()
+    val nebulaReadEdgeConfig: ReadNebulaConfig = ReadNebulaConfig
+      .builder()
+      .withGraphName("nba")
+      .withTypeName("edge_type_follow")
+      .withReturnCols(List("likeness"))
+      .withBatchSize(1000)
+      .withPartitionNum(10)
+      .build()
+    val df = spark.read.nebula(getNebulaConnectionConfig, nebulaReadEdgeConfig).loadEdge()
+    df.show()
+  ```
 
 for complete example, see https://github.com/vesoft-inc/nebula-ng-tools/tree/master/spark-connector/example/src/main/scala/com/vesoft/nebula/example
 

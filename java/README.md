@@ -9,7 +9,7 @@ NebulaGraph Java SDK is a Java client for developers to connect their projects t
 ```agsl
 ./mvnw clean package -Dmaven.test.skip=true
 ```
-the sdk jar will be generated in java/client/target/client-5.0.0.jar
+the sdk jar will be generated in java/client/target/driver-5.0.0.jar
 
 ## Example to use Java SDK
 There are two ways to use Java SDK: get a NebulaClient from NebulaPool or get a NebulaClient by yourself.
