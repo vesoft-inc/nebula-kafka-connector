@@ -4,23 +4,23 @@ import (
 	"math"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/vector"
+	internal_error "github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/vector"
-	internal_error "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 var (
-	errTypeAssertion       = internal_error.ErrInternel("type assertion failed")
-	errOutOfRange          = internal_error.ErrInternel("index out of range")
-	errInvalidColumnType   = internal_error.ErrInternel("invalid type")
-	errInvalidVectorType   = internal_error.ErrInternel("invalid vector type")
-	errNoZeroString        = internal_error.ErrInternel("no zero found in string")
-	errElementTypeNotFount = internal_error.ErrInternel("element type not found")
-	errGraphNotFound       = internal_error.ErrInternel("graph not found")
-	errPropNotFound        = internal_error.ErrInternel("prop not found")
-	errBatchNotEqual       = internal_error.ErrInternel("batch not equal")
-	errColumnTypeIsNil     = internal_error.ErrInternel("column type is nil")
+	errTypeAssertion       = internal_error.ErrInternal("type assertion failed")
+	errOutOfRange          = internal_error.ErrInternal("index out of range")
+	errInvalidColumnType   = internal_error.ErrInternal("invalid type")
+	errInvalidVectorType   = internal_error.ErrInternal("invalid vector type")
+	errNoZeroString        = internal_error.ErrInternal("no zero found in string")
+	errElementTypeNotFount = internal_error.ErrInternal("element type not found")
+	errGraphNotFound       = internal_error.ErrInternal("graph not found")
+	errPropNotFound        = internal_error.ErrInternal("prop not found")
+	errBatchNotEqual       = internal_error.ErrInternal("batch not equal")
+	errColumnTypeIsNil     = internal_error.ErrInternal("column type is nil")
 )
 
 const (
@@ -181,7 +181,7 @@ func (c *vectorDecoder) decodeDecimalValue() decodeFlatFn {
 	}
 }
 
-func (c *vectorDecoder) decodeBasiceValue(t types.ColumnType) decodeFlatFn {
+func (c *vectorDecoder) decodeBasicValue(t types.ColumnType) decodeFlatFn {
 	return func(dctx *decodeContext, v *vector.NestedVector, index uint32, columnType typeSchema) (*nebulaValue, error) {
 		bs, err := c.getCommonBytes(v, t, index)
 		offset := dctx.timezoneOffset
@@ -251,7 +251,7 @@ func (c *vectorDecoder) decodeRecordValue() decodeFlatFn {
 			return nil, errTypeAssertion
 		}
 		propSchemas := schema.propSchemas
-		nameIndexs := make([]string, 0, len(propSchemas))
+		nameIndexes := make([]string, 0, len(propSchemas))
 		for i := 0; i < len(propSchemas); i++ {
 			sizeBytes := r.readN(2)
 			if r.error() != nil {
@@ -262,13 +262,13 @@ func (c *vectorDecoder) decodeRecordValue() decodeFlatFn {
 			if r.error() != nil {
 				return nil, r.error()
 			}
-			nameIndexs = append(nameIndexs, string(propNameBytes))
+			nameIndexes = append(nameIndexes, string(propNameBytes))
 		}
 		record := &NebulaRecord{
 			Values: make(map[string]*nebulaValue),
 		}
 		for i := 0; i < len(propSchemas); i++ {
-			n := nameIndexs[i]
+			n := nameIndexes[i]
 			s, ok := propSchemas[n]
 			if !ok {
 				return nil, errPropNotFound
@@ -298,7 +298,7 @@ func (c *vectorDecoder) decodeNodeValue() decodeFlatFn {
 		if !ok {
 			return nil, errTypeAssertion
 		}
-		allNodeProps := nodeSchema.graphElemenetProps
+		allNodeProps := nodeSchema.graphElementProps
 		if err := decodePropVectorIndex(allNodeProps, v.SpecialMetaData, true); err != nil {
 			return nil, err
 		}
@@ -351,7 +351,7 @@ func (c *vectorDecoder) decodeEdgeValue() decodeFlatFn {
 		if !ok {
 			return nil, errTypeAssertion
 		}
-		allGraphElementProps := schema.graphElemenetProps
+		allGraphElementProps := schema.graphElementProps
 		if err := decodePropVectorIndex(allGraphElementProps, v.SpecialMetaData, false); err != nil {
 			return nil, err
 		}
@@ -707,7 +707,7 @@ func decodeBasicValue(bs []byte, typ types.ColumnType, offset int64) valuer {
 		hour := bytesToInt8(bs[:1])
 		minute := bytesToInt8(bs[1:2])
 		second := bytesToInt8(bs[2:3])
-		// pedding
+		// padding
 		microsecond := bytesToInt32(bs[4:8])
 		return &NebulaLocalTime{
 			Hour:     hour,
@@ -719,7 +719,7 @@ func decodeBasicValue(bs []byte, typ types.ColumnType, offset int64) valuer {
 		hour := bytesToInt8(bs[:1])
 		minute := bytesToInt8(bs[1:2])
 		second := bytesToInt8(bs[2:3])
-		// pedding
+		// padding
 		microsecond := bytesToInt32(bs[4:8])
 		n := time.Now()
 		var h int
@@ -1073,17 +1073,17 @@ func init() {
 	d := defaultDecoder.(*vectorDecoder)
 	d.decodeFlatFns = make(map[types.ColumnType]decodeFlatFn)
 	d.decodeFlatFns = map[types.ColumnType]decodeFlatFn{
-		types.ColumnTypeBool:          d.decodeBasiceValue(types.ColumnTypeBool),
-		types.ColumnTypeInt8:          d.decodeBasiceValue(types.ColumnTypeInt8),
-		types.ColumnTypeInt16:         d.decodeBasiceValue(types.ColumnTypeInt16),
-		types.ColumnTypeInt32:         d.decodeBasiceValue(types.ColumnTypeInt32),
-		types.ColumnTypeInt64:         d.decodeBasiceValue(types.ColumnTypeInt64),
-		types.ColumnTypeUint8:         d.decodeBasiceValue(types.ColumnTypeUint8),
-		types.ColumnTypeUint16:        d.decodeBasiceValue(types.ColumnTypeUint16),
-		types.ColumnTypeUint32:        d.decodeBasiceValue(types.ColumnTypeUint32),
-		types.ColumnTypeUint64:        d.decodeBasiceValue(types.ColumnTypeUint64),
-		types.ColumnTypeFloat32:       d.decodeBasiceValue(types.ColumnTypeFloat32),
-		types.ColumnTypeFloat64:       d.decodeBasiceValue(types.ColumnTypeFloat64),
+		types.ColumnTypeBool:          d.decodeBasicValue(types.ColumnTypeBool),
+		types.ColumnTypeInt8:          d.decodeBasicValue(types.ColumnTypeInt8),
+		types.ColumnTypeInt16:         d.decodeBasicValue(types.ColumnTypeInt16),
+		types.ColumnTypeInt32:         d.decodeBasicValue(types.ColumnTypeInt32),
+		types.ColumnTypeInt64:         d.decodeBasicValue(types.ColumnTypeInt64),
+		types.ColumnTypeUint8:         d.decodeBasicValue(types.ColumnTypeUint8),
+		types.ColumnTypeUint16:        d.decodeBasicValue(types.ColumnTypeUint16),
+		types.ColumnTypeUint32:        d.decodeBasicValue(types.ColumnTypeUint32),
+		types.ColumnTypeUint64:        d.decodeBasicValue(types.ColumnTypeUint64),
+		types.ColumnTypeFloat32:       d.decodeBasicValue(types.ColumnTypeFloat32),
+		types.ColumnTypeFloat64:       d.decodeBasicValue(types.ColumnTypeFloat64),
 		types.ColumnTypeString:        d.decodeStringValue(),
 		types.ColumnTypeNode:          d.decodeNodeValue(),
 		types.ColumnTypeEdge:          d.decodeEdgeValue(),
@@ -1091,12 +1091,12 @@ func init() {
 		types.ColumnTypeUnknown:       d.decodeNullValue(),
 		types.ColumnTypeList:          d.decodeListValue(),
 		types.ColumnTypeRecord:        d.decodeRecordValue(),
-		types.ColumnTypeLocalTime:     d.decodeBasiceValue(types.ColumnTypeLocalTime),
-		types.ColumnTypeLocalDatetime: d.decodeBasiceValue(types.ColumnTypeLocalDatetime),
-		types.ColumnTypeZonedTime:     d.decodeBasiceValue(types.ColumnTypeZonedTime),
-		types.ColumnTypeZonedDatetime: d.decodeBasiceValue(types.ColumnTypeZonedDatetime),
-		types.ColumnTypeDate:          d.decodeBasiceValue(types.ColumnTypeDate),
-		types.ColumnTypeDuration:      d.decodeBasiceValue(types.ColumnTypeDuration),
+		types.ColumnTypeLocalTime:     d.decodeBasicValue(types.ColumnTypeLocalTime),
+		types.ColumnTypeLocalDatetime: d.decodeBasicValue(types.ColumnTypeLocalDatetime),
+		types.ColumnTypeZonedTime:     d.decodeBasicValue(types.ColumnTypeZonedTime),
+		types.ColumnTypeZonedDatetime: d.decodeBasicValue(types.ColumnTypeZonedDatetime),
+		types.ColumnTypeDate:          d.decodeBasicValue(types.ColumnTypeDate),
+		types.ColumnTypeDuration:      d.decodeBasicValue(types.ColumnTypeDuration),
 		types.ColumnTypeDecimal:       d.decodeDecimalValue(),
 		types.ColumnTypeVector:        d.decodeVectorValue(),
 		types.ColumnTypeAny:           d.decodeAnyValue(),

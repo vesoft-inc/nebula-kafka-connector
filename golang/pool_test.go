@@ -323,7 +323,7 @@ func TestPoolMaxWait(t *testing.T) {
 	_, _ = p.GetClient()
 	_, err = p.GetClient()
 	assert.True(t, err != nil)
-	assert.Equal(t, "[99009]: Internel error, cannot get the valid connection", err.Error())
+	assert.Equal(t, "[99009]: Internal error, cannot get the valid connection", err.Error())
 }
 
 func TestPoolMaxLifeTime(t *testing.T) {

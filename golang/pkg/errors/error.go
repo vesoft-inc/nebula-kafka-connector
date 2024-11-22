@@ -31,7 +31,8 @@ var (
 	ERROR_WAIT_POOL_TIMEOUT    ErrorCode = "99006"
 	ERROR_ILLEGAL              ErrorCode = "99007"
 	ERROR_TYPE                 ErrorCode = "99008"
-	ERROR_CLIENT_INTERNEL      ErrorCode = "99009"
+	ERROR_CLIENT_INTERNEL      ErrorCode = "99009" // TODO should be removed
+	ERROR_CLIENT_INTERNAL      ErrorCode = "99009"
 	ERROR_TLS_ERROR            ErrorCode = "99010"
 	ERROR_UNKNOWN_COLUMN_TYPE  ErrorCode = "99011"
 

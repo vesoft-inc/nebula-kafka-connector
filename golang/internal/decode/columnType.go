@@ -4,7 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
@@ -33,8 +33,8 @@ type (
 	}
 
 	columnTypeSchemaElement struct {
-		typ                types.ColumnType
-		graphElemenetProps graphElementProps
+		typ               types.ColumnType
+		graphElementProps graphElementProps
 	}
 
 	columnTypeSchemaPath struct {
@@ -48,7 +48,7 @@ type (
 	graphSchema  struct {
 		name        string
 		id          int32
-		nodesSchmea map[int32]*elementSchema
+		nodesSchema map[int32]*elementSchema
 		edgesSchema map[int32]*elementSchema
 	}
 	elementSchema struct {
@@ -123,8 +123,8 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			return nil, err
 		}
 		typ := columnTypeSchemaElement{
-			typ:                t,
-			graphElemenetProps: pp,
+			typ:               t,
+			graphElementProps: pp,
 		}
 		return &typ, nil
 	case types.ColumnTypeEdge:
@@ -133,8 +133,8 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			return nil, err
 		}
 		typ := columnTypeSchemaElement{
-			typ:                t,
-			graphElemenetProps: pp,
+			typ:               t,
+			graphElementProps: pp,
 		}
 		return &typ, nil
 	case types.ColumnTypePath:
@@ -142,12 +142,12 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 		typ := columnTypeSchemaPath{
 			typ: t,
 			nodeSchema: &columnTypeSchemaElement{
-				typ:                types.ColumnTypeNode,
-				graphElemenetProps: make(graphElementProps),
+				typ:               types.ColumnTypeNode,
+				graphElementProps: make(graphElementProps),
 			},
 			edgeSchema: &columnTypeSchemaElement{
-				typ:                types.ColumnTypeEdge,
-				graphElemenetProps: make(graphElementProps),
+				typ:               types.ColumnTypeEdge,
+				graphElementProps: make(graphElementProps),
 			},
 		}
 		elementNumBytes := r.readN(4)
@@ -162,10 +162,10 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			}
 			if elementSchema.getType() == types.ColumnTypeNode {
 				s := elementSchema.(*columnTypeSchemaElement)
-				for graphId, types := range s.graphElemenetProps {
-					graph, ok := typ.nodeSchema.graphElemenetProps[graphId]
+				for graphId, types := range s.graphElementProps {
+					graph, ok := typ.nodeSchema.graphElementProps[graphId]
 					if !ok {
-						typ.nodeSchema.graphElemenetProps[graphId] = types
+						typ.nodeSchema.graphElementProps[graphId] = types
 					} else {
 						for k, v := range types {
 							graph[k] = v
@@ -174,10 +174,10 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 				}
 			} else if elementSchema.getType() == types.ColumnTypeEdge {
 				s := elementSchema.(*columnTypeSchemaElement)
-				for graphId, types := range s.graphElemenetProps {
-					graph, ok := typ.edgeSchema.graphElemenetProps[graphId]
+				for graphId, types := range s.graphElementProps {
+					graph, ok := typ.edgeSchema.graphElementProps[graphId]
 					if !ok {
-						typ.edgeSchema.graphElemenetProps[graphId] = types
+						typ.edgeSchema.graphElementProps[graphId] = types
 					} else {
 						for k, v := range types {
 							graph[k] = v
@@ -238,7 +238,7 @@ func (s *columnTypeSchemaElement) getType() types.ColumnType {
 }
 
 func (s *columnTypeSchemaElement) getElementProps() graphElementProps {
-	return s.graphElemenetProps
+	return s.graphElementProps
 }
 
 func (s *columnTypeSchemaPath) getType() types.ColumnType {

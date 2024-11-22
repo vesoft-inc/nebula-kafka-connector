@@ -9,7 +9,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -219,7 +219,7 @@ func (dp *driverPool) getClient(timeout context.Context) (types.Client, error) {
 		case <-timeout.Done():
 			close(req)
 			delete(dp.requestConnChan, index)
-			return nil, internal_error.ErrInternel("cannot get the valid connection")
+			return nil, internal_error.ErrInternal("cannot get the valid connection")
 		case conn := <-req:
 			dc = conn.(*driverConn)
 		}
@@ -238,7 +238,7 @@ func (dp *driverPool) GetClient() (types.Client, error) {
 	defer cancel()
 	for {
 		if timeout.Err() != nil {
-			return nil, internal_error.ErrInternel("cannot get the valid connection, err:" + lastErr.Error())
+			return nil, internal_error.ErrInternal("cannot get the valid connection, err:" + lastErr.Error())
 		}
 		dc, err := dp.getClient(timeout)
 		if err != nil {
@@ -258,13 +258,13 @@ func (dp *driverPool) GetClient() (types.Client, error) {
 
 func (dp *driverPool) PutClient(c types.Client) error {
 	if c == nil {
-		return internal_error.ErrInternel("connection is nil")
+		return internal_error.ErrInternal("connection is nil")
 	}
 
 	dc, ok := c.(*driverConn)
 	if !ok {
 		// never happen from nebula client
-		return internal_error.ErrInternel("invalid client type")
+		return internal_error.ErrInternal("invalid client type")
 	}
 
 	dp.mu.Lock()
@@ -283,7 +283,7 @@ func (dp *driverPool) putNewConn(dc types.Client) {
 func (dp *driverPool) putConnLocked(client types.Client) error {
 	dc, ok := client.(*driverConn)
 	if !ok {
-		return internal_error.ErrInternel("invalid client type")
+		return internal_error.ErrInternal("invalid client type")
 	}
 	// if client is closed by user, remove from pool,
 	// and then raise an error.

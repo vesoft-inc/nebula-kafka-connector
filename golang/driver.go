@@ -6,12 +6,12 @@ import (
 	"math/rand"
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
 type (
-	// an internel interface to get the connection
+	// an internal interface to get the connection
 	connector interface {
 		connect(host *hostAddress, cfg *connConfig) (types.Client, error)
 	}
@@ -49,7 +49,7 @@ const (
 	defaultMaxIdleConns   = 5
 	defaultMaxLieTime     = 30 * time.Minute
 	defaultRequestTimeout = 1 * time.Minute
-	defaultConnetTimeout  = 3 * time.Second
+	defaultConnectTimeout  = 3 * time.Second
 	defaultTicker         = 5 * time.Second
 	defaultMaxWait        = 1 * time.Minute
 )
@@ -105,11 +105,11 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 		o(pool)
 	}
 	var (
-		successed = 0
+		succeeded = 0
 		dc        types.Client
 	)
 	for _, h := range pool.hostAddresses {
-		if !pool.strictlyServerHealthy && successed > 0 {
+		if !pool.strictlyServerHealthy && succeeded > 0 {
 			break
 		}
 		address := fmt.Sprintf("%s:%d", h.host, h.port)
@@ -119,11 +119,11 @@ func NewNebulaPool(addresses, username, password string, opts ...poolOptionsFn) 
 				break
 			}
 		} else {
-			successed++
+			succeeded++
 			pool.putNewConn(dc)
 		}
 	}
-	if successed == 0 || (pool.strictlyServerHealthy && successed != len(pool.hostAddresses)) {
+	if succeeded == 0 || (pool.strictlyServerHealthy && succeeded != len(pool.hostAddresses)) {
 		return nil, err
 	}
 
@@ -138,7 +138,7 @@ func newConnConfig(username, password string) *connConfig {
 		username:       username,
 		password:       password,
 		requestTimeout: defaultRequestTimeout,
-		connectTimeout: defaultConnetTimeout,
+		connectTimeout: defaultConnectTimeout,
 	}
 }
 
@@ -219,7 +219,7 @@ func (dc *driverConn) replaceFromPool() error {
 	newConn, ok := conn.(*driverConn)
 	if !ok {
 		// not reachable
-		return internal_error.ErrInternel("invalid connection type")
+		return internal_error.ErrInternal("invalid connection type")
 	}
 	dc.conn = newConn.conn
 	dc.currentHost = newConn.currentHost

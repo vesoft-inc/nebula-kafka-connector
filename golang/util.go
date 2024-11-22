@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 )
 
 func parseHostPort(address string) (string, int, error) {

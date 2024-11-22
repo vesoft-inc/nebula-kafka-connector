@@ -4,8 +4,8 @@ import (
 	"io"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/vector"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/vector"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 
@@ -218,7 +218,7 @@ func (rt *ResultTable) constructGraphsSchema() graphsSchema {
 		gs := graphSchema{
 			name:        string(g.GraphName),
 			id:          g.GraphId,
-			nodesSchmea: make(map[int32]*elementSchema),
+			nodesSchema: make(map[int32]*elementSchema),
 			edgesSchema: make(map[int32]*elementSchema),
 		}
 		for _, n := range g.NodeType {
@@ -226,7 +226,7 @@ func (rt *ResultTable) constructGraphsSchema() graphsSchema {
 			for _, l := range n.Label {
 				lables = append(lables, string(l))
 			}
-			gs.nodesSchmea[n.NodeTypeId] = &elementSchema{
+			gs.nodesSchema[n.NodeTypeId] = &elementSchema{
 				typeName: string(n.NodeTypeName),
 				typeId:   n.NodeTypeId,
 				labels:   lables,

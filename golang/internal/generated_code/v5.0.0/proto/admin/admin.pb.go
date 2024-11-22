@@ -11,7 +11,7 @@
 package admin
 
 import (
-	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
+	common "github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/common"
 	protoreflect "google.golang.org/protobuf/reflect/protoreflect"
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	reflect "reflect"

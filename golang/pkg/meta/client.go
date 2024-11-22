@@ -10,12 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto"
+	admin "github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/admin"
+	common "github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/common"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/grpcutil"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 	nebulaErr "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
-	admin "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/admin"
-	common "github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/grpcutil"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
 )

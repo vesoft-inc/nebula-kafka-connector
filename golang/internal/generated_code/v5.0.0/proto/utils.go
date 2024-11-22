@@ -3,7 +3,7 @@ package proto
 import (
 	"time"
 
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/common"
 )
 
 func ConvertZonedTime(zdt *common.ZonedDatetime) *time.Time {

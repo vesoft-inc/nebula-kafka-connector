@@ -97,7 +97,7 @@ func getSchemaName(gsm graphsSchema, graphId int32, elementTypeId int32, isNode 
 	}
 	var elementsSchema map[int32]*elementSchema
 	if isNode {
-		elementsSchema = gs.nodesSchmea
+		elementsSchema = gs.nodesSchema
 	} else {
 		elementsSchema = gs.edgesSchema
 	}

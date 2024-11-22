@@ -8,9 +8,9 @@ import (
 
 func getServiceConfig(c *config.Config, serviceGroup string, serviceType string, host string) (map[string]string, error) {
 	configs := make(map[string]string)
-	var customzieConfig map[string]any
+	var customizeConfig map[string]any
 	if serviceType == "metad" {
-		customzieConfig = c.Spec.Metad.Config
+		customizeConfig = c.Spec.Metad.Config
 	} else {
 		var svcgrp *config.ServiceGroupSpec
 		for _, sg := range c.Spec.ServiceGroups {
@@ -24,14 +24,14 @@ func getServiceConfig(c *config.Config, serviceGroup string, serviceType string,
 		}
 		switch serviceType {
 		case "graphd":
-			customzieConfig = svcgrp.Graphd.Config
+			customizeConfig = svcgrp.Graphd.Config
 		case "storaged":
-			customzieConfig = svcgrp.Storaged.Config
+			customizeConfig = svcgrp.Storaged.Config
 		default:
 			return nil, fmt.Errorf("invalid service type %s", serviceType)
 		}
 	}
-	for k, v := range customzieConfig {
+	for k, v := range customizeConfig {
 		configs[k] = fmt.Sprintf("%v", v)
 	}
 	configs["local_ip"] = host

@@ -51,17 +51,17 @@ func ErrWaitPoolTimeout() error {
 }
 
 func ErrIllegal(msg string) error {
-	return errors.NewNebulaError(errors.ERROR_ILLEGAL, "illegal, %s", msg)
+	return errors.NewNebulaError(errors.ERROR_ILLEGAL, "Illegal, %s", msg)
 }
 
 func ErrType(msg string) error {
 	return errors.NewNebulaError(errors.ERROR_TYPE, "Type error, %s", msg)
 }
 
-// client internel error
+// client internal error
 // user should not see this error
-func ErrInternel(msg string) error {
-	return errors.NewNebulaError(errors.ERROR_CLIENT_INTERNEL, "Internel error, %s", msg)
+func ErrInternal(msg string) error {
+	return errors.NewNebulaError(errors.ERROR_CLIENT_INTERNAL, "Internal error, %s", msg)
 }
 
 func ErrServerResponse(code string, msg string) error {

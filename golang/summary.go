@@ -1,7 +1,7 @@
 package nebula_ng
 
 import (
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/graph"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 )
 

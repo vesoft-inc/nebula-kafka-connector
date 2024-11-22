@@ -9,13 +9,13 @@ import (
 	"sync"
 	"time"
 
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/decode"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/common"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/graph"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/grpcutil"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/decode"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/common"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/generated_code/v5.0.0/proto/graph"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/grpcutil"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/internel/internal_error"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/version"
 	"google.golang.org/grpc"
@@ -192,7 +192,7 @@ func (cn *connection) Close() error {
 	if cn.IsClosed() {
 		return nil
 	}
-	// logout via statment, ignore the logout error
+	// logout via statement, ignore the logout error
 	in := &graph.ExecuteRequest{
 		SessionId: cn.sessionId,
 		Stmt:      []byte("SESSION CLOSE"),
