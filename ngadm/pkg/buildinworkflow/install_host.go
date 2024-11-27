@@ -1,6 +1,7 @@
 package buildinworkflow
 
 import (
+	"fmt"
 	"path"
 
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
@@ -80,6 +81,14 @@ func InstallHost(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec,
 						Host:        agent.Host,
 						ExtractPath: installPath,
 						PkgPath:     dstPath,
+					},
+				},
+				{
+					Type: "shell",
+					Params: &tasks.ShellParams{
+						Host:    agent.Host,
+						Command: fmt.Sprintf("mkdir -p %s && cd %s && echo %s > %s",
+							INSTALL_PATH_DIR, INSTALL_PATH_DIR, installPath, INSTALL_PATH_FILE),
 					},
 				},
 			},

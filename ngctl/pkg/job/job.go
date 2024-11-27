@@ -136,11 +136,12 @@ func (j *ngadmJobType) DownCluster(c *config.Config, drain bool) error {
 	_ = j.ServiceOperation(c, hosts, "metad", "stop")
 
 	job := newJob("down", c)
-	wf, err := newUnintallWorkflow(c, hosts, drain)
-	if err != nil {
-		return err
+	args := map[string]any{
+		"drain":        drain,
+		"uninstallAll": false,
+		"selectedHost": hosts,
 	}
-	if err := job.RunWorkflow(wf); err != nil {
+	if err := job.Run("uninstall-host", args, c.JobSpec); err != nil {
 		return err
 	}
 	return nil
@@ -212,75 +213,13 @@ func (j *ngadmJobType) UninstallHost(c *config.Config, host string, drain bool) 
 	_ = j.ServiceOperation(c, []string{host}, "graphd", "stop")
 	_ = j.ServiceOperation(c, []string{host}, "storaged", "stop")
 	job := newJob("uninstall-host", c)
-	wf, err := newUnintallWorkflow(c, []string{host}, drain)
-	if err != nil {
-		return err
+	args := map[string]any{
+		"drain":        drain,
+		"uninstallAll": false,
+		"selectedHost": []string{host},
 	}
-	if err := job.RunWorkflow(wf); err != nil {
+	if err := job.Run("uninstall-host", args, c.JobSpec); err != nil {
 		return err
 	}
 	return nil
-}
-
-func newUnintallWorkflow(c *config.Config, hosts []string, drain bool) (*types.WorkflowSpec, error) {
-	workflow := &types.WorkflowSpec{}
-	connectTasks := &types.TaskSpec{
-		Type:     "parallel",
-		SubTasks: make([]*types.TaskSpec, 0),
-	}
-	uinstallTasks := &types.TaskSpec{
-		Type:     "parallel",
-		SubTasks: make([]*types.TaskSpec, 0),
-	}
-	deleteTasks := &types.TaskSpec{
-		Type:     "parallel",
-		SubTasks: make([]*types.TaskSpec, 0),
-	}
-	for _, h := range hosts {
-		inst, err := c.GetInstanceFromHost(h)
-		if err != nil {
-			return nil, err
-		}
-		addr := fmt.Sprintf("%s:%d", inst.Host, inst.AgentPort)
-
-		connectTasks.SubTasks = append(connectTasks.SubTasks, &types.TaskSpec{
-			Type: "connect",
-			Params: &tasks.ConnectParams{
-				Host: addr,
-			},
-		})
-		var uninstallCmd string
-		if drain {
-			// if drain, we need to ignore the error of uninstall
-			uninstallCmd = fmt.Sprintf("echo Y | %s || echo 1", filepath.Join(c.JobSpec.InstallPath, "scripts", "nebula.uninstall"))
-		} else {
-			uninstallCmd = fmt.Sprintf("echo Y | " + filepath.Join(c.JobSpec.InstallPath, "scripts", "nebula.uninstall"))
-		}
-		uinstallTasks.SubTasks = append(uinstallTasks.SubTasks, &types.TaskSpec{
-			Type: "shell",
-			Params: &tasks.ShellParams{
-				Host:    addr,
-				Command: uninstallCmd,
-			},
-		})
-		if drain {
-			if c.JobSpec.InstallPath == "" {
-				return nil, common.NgctlError("install path is empty", "")
-			}
-			deleteCmd := fmt.Sprintf("rm -rf " + c.JobSpec.InstallPath)
-			deleteTasks.SubTasks = append(deleteTasks.SubTasks, &types.TaskSpec{
-				Type: "shell",
-				Params: &tasks.ShellParams{
-					Host:    addr,
-					Command: deleteCmd,
-				},
-			})
-		}
-	}
-	if drain {
-		workflow.Tasks = []*types.TaskSpec{connectTasks, uinstallTasks, deleteTasks}
-	} else {
-		workflow.Tasks = []*types.TaskSpec{connectTasks, uinstallTasks}
-	}
-	return workflow, nil
 }

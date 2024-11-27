@@ -106,6 +106,14 @@ func InstallMetad(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, er
 						PkgPath:     dstPath,
 					},
 				},
+				{
+					Type: "shell",
+					Params: &tasks.ShellParams{
+						Host: agent.Host,
+						Command: fmt.Sprintf("mkdir -p %s && cd %s && echo %s > %s",
+							INSTALL_PATH_DIR, INSTALL_PATH_DIR, installPath, INSTALL_PATH_FILE),
+					},
+				},
 			},
 		})
 	}

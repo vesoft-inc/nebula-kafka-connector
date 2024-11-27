@@ -28,7 +28,7 @@ var uninstallHostCmd = &cobra.Command{
 		if err := job.NgadmJob.UninstallHost(c, instance.Host, hostFlags.drain); err != nil {
 			return err
 		}
-		fmt.Fprintf(common.MetaOutput, "Install NebulaGraph on host successfully.\n")
+		fmt.Fprintf(common.MetaOutput, "Uninstall NebulaGraph on host successfully.\n")
 		return nil
 	},
 }

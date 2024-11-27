@@ -8,6 +8,11 @@ import (
 
 type WorkflowConverter func(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error)
 
+const (
+	INSTALL_PATH_FILE = "install_path"
+	INSTALL_PATH_DIR  = "~/.nebulagraph"
+)
+
 // buildin workflow converter map, don't need lock,just read
 var BuildInWorkflowConverterMap = map[string]WorkflowConverter{
 	"install":        Install,
