@@ -47,10 +47,41 @@ func validateServiceGroup(c *Config) error {
 	return nil
 }
 
+func validateBlankConfigItem(c *Config) error {
+	if c.Spec == nil {
+		return nil
+	}
+	if c.Spec.Metad.Config != nil {
+		for k, v := range c.Spec.Metad.Config {
+			if v == nil || v == "" {
+				return fmt.Errorf("metad config item %s is empty", k)
+			}
+		}
+	}
+	for _, sg := range c.Spec.ServiceGroups {
+		if sg.Graphd.Config != nil {
+			for k, v := range sg.Graphd.Config {
+				if v == nil || v == "" {
+					return fmt.Errorf("graphd config item %s is empty", k)
+				}
+			}
+		}
+		if sg.Storaged.Config != nil {
+			for k, v := range sg.Storaged.Config {
+				if v == nil || v == "" {
+					return fmt.Errorf("storaged config item %s is empty", k)
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func init() {
 	validateRules = map[string]validateRule{
-		"path": validatePath,
-		"tls":  validateTLS,
-		"sg":   validateServiceGroup,
+		"path":  validatePath,
+		"tls":   validateTLS,
+		"sg":    validateServiceGroup,
+		"blank": validateBlankConfigItem,
 	}
 }
