@@ -24,15 +24,29 @@ type Job interface {
 	UninstallHost(*config.Config, string, bool) error
 }
 
-type ngadmJobType struct{}
+type Option func(job *runner.Job)
+
+type ngadmJobType struct {
+	opts []Option
+}
 
 var NgadmJob Job = &ngadmJobType{}
 
 const defaultMetadUser = "root"
 const defaultMetadPassword = "nebula"
 
-func newJob(name string, c *config.Config) *runner.Job {
+func NewNgadmJob(opts ...Option) Job {
+	return &ngadmJobType{
+		opts: opts,
+	}
+}
+
+func newJob(name string, c *config.Config, opts ...Option) *runner.Job {
 	job := runner.NewJob(name)
+	for _, opt := range opts {
+		opt(job)
+	}
+
 	executor.SetCertConfig(executor.CertConfig{
 		CAFile:  c.JobSpec.CAFile,
 		CrtFile: c.JobSpec.CertFile,
@@ -42,7 +56,7 @@ func newJob(name string, c *config.Config) *runner.Job {
 }
 
 func (j *ngadmJobType) UpCluster(c *config.Config, metaPassword string) error {
-	job := newJob("up", c)
+	job := newJob("up", c, j.opts...)
 	args := map[string]any{
 		"username":     defaultMetadUser,
 		"password":     defaultMetadPassword,
@@ -63,7 +77,7 @@ func (j *ngadmJobType) ServiceOperation(c *config.Config, hosts []string, servic
 	}
 	cmd := exec.Command(filepath.Join(c.InstallPath, "scripts/nebula.service"), operation, serviceType)
 	log.Printf("exec cmd: %v, on %+v", cmd, hosts)
-	job := newJob(fmt.Sprintf("%s_service", operation), c)
+	job := newJob(fmt.Sprintf("%s_service", operation), c, j.opts...)
 
 	workflow := &types.WorkflowSpec{}
 	connectTasks := &types.TaskSpec{
@@ -135,7 +149,7 @@ func (j *ngadmJobType) DownCluster(c *config.Config, drain bool) error {
 	_ = j.ServiceOperation(c, hosts, "storaged", "stop")
 	_ = j.ServiceOperation(c, hosts, "metad", "stop")
 
-	job := newJob("down", c)
+	job := newJob("down", c, j.opts...)
 	args := map[string]any{
 		"drain":        drain,
 		"uninstallAll": false,
@@ -151,7 +165,7 @@ func (j *ngadmJobType) UpdateConfig(c *config.Config, serviceGroup string, hosts
 	if !isValidServiceType(serviceType) {
 		return common.NgctlError("invalid service type", "")
 	}
-	job := newJob("update_config", c)
+	job := newJob("update_config", c, j.opts...)
 	workflow := &types.WorkflowSpec{}
 	connectTasks := &types.TaskSpec{
 		Type:     "parallel",
@@ -194,7 +208,7 @@ func (j *ngadmJobType) UpdateConfig(c *config.Config, serviceGroup string, hosts
 }
 
 func (j *ngadmJobType) InstallHost(c *config.Config, host string) error {
-	job := newJob("install-host", c)
+	job := newJob("install-host", c, j.opts...)
 	args := map[string]any{
 		"drain":        false,
 		"installAll":   false,
@@ -212,7 +226,7 @@ func (j *ngadmJobType) UninstallHost(c *config.Config, host string, drain bool) 
 	// 3. if drain, delete all data in install path
 	_ = j.ServiceOperation(c, []string{host}, "graphd", "stop")
 	_ = j.ServiceOperation(c, []string{host}, "storaged", "stop")
-	job := newJob("uninstall-host", c)
+	job := newJob("uninstall-host", c, j.opts...)
 	args := map[string]any{
 		"drain":        drain,
 		"uninstallAll": false,
