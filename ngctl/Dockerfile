@@ -1,8 +1,8 @@
 # Node: should build in nebula-ng-tools folder
 # e.g.
 # cd nebula-ng-tools
-# docker build -t reg.vesoft-inc.com/vesoft-ng/ngctl:nightly -f console/Dockerfile  --target ngctl .
-FROM golang:1.22.4-alpine as builder
+# docker build -t reg.vesoft-inc.com/vesoft-ng/ngctl:nightly -f ngctl/Dockerfile  --target ngctl .
+FROM golang:1.22.4-alpine AS builder
 
 COPY ngctl /usr/src
 COPY golang /usr/golang
@@ -14,7 +14,7 @@ COPY agent /usr/agent
 RUN sed -i 's/https/http/' /etc/apk/repositories
 RUN cd /usr/src && apk add --no-cache git make && make
 
-FROM alpine as ngctl
+FROM alpine AS ngctl
 
 COPY --from=builder /usr/src/ngctl /usr/local/bin/ngctl
 
