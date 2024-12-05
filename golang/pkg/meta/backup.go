@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/admin"
-	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/common"
 )
 
 type (
@@ -73,11 +72,6 @@ type (
 	RestoreResp struct {
 		*HeaderResponse
 		PartServiceMap map[int64][]int64
-	}
-
-	ShowMetaResp struct {
-		*HeaderResponse
-		Services []*ServiceInfo
 	}
 )
 
@@ -220,45 +214,6 @@ func (c *metaClient) Restore(req *RestoreReq) (*RestoreResp, error) {
 	return &RestoreResp{
 		HeaderResponse: header,
 		PartServiceMap: partServiceMap,
-	}, nil
-}
-
-func (c *metaClient) ShowMeta() (*ShowMetaResp, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
-	defer cancel()
-	in := &admin.ShowMetaRequest{
-		Header: &admin.RequestHeader{Token: c.token},
-	}
-	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.ShowMetaInfo(ctx, in)
-	})
-	if err != nil {
-		return nil, err
-	}
-	if err = responseIsErr(resp); err != nil {
-		return nil, err
-	}
-	response, ok := resp.(*admin.ShowMetaResponse)
-	if !ok {
-		return nil, fmt.Errorf("invalid response")
-	}
-	header, err := getResponseHeader(response)
-	if err != nil {
-		return nil, fmt.Errorf("get response header failed: %w", err)
-	}
-
-	services := make([]*ServiceInfo, 0, len(response.Info.Peers))
-	for _, host := range response.Info.Peers {
-		services = append(services, &ServiceInfo{
-			Host: string(host.GetHost()),
-			Port: host.GetPort(),
-			Type: ServiceType(common.ServiceType_META),
-		})
-	}
-
-	return &ShowMetaResp{
-		HeaderResponse: header,
-		Services:       services,
 	}, nil
 }
 

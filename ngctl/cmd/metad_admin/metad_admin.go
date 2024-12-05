@@ -8,6 +8,7 @@ import (
 type metadFlagsType struct {
 	host       string
 	configFile string
+	output     string
 }
 
 var metadFlags metadFlagsType
@@ -34,4 +35,5 @@ func init() {
 	MetadCmd.AddCommand(startMetadCmd)
 	MetadCmd.AddCommand(stopMetadCmd)
 	MetadCmd.AddCommand(configMetadCmd)
+	MetadCmd.AddCommand(showMetadCmd)
 }

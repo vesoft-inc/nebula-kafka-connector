@@ -30,6 +30,7 @@ type (
 		//if leader change, error is not nil, and return leader info in LoginResponse
 		Login() (*LoginResponse, error)
 		Logout() error
+		ShowMeta() (*ShowMetaResp, error)
 		UserClient
 		ServiceGroupClient
 		BackupRestoreClient
@@ -38,6 +39,13 @@ type (
 	LoginResponse struct {
 		Token  []byte `json:"token"`
 		Leader string `json:"leader"`
+	}
+
+	ShowMetaResp struct {
+		ClusterId  int64
+		GitInfoSha string
+		Peers      []string // host:port,host:port
+		Agents     []string // host:port,host:port
 	}
 
 	UserClient interface {
@@ -68,7 +76,6 @@ type (
 		CreateBackup(req *CreateBackupReq) (*CreateBackupResp, error)
 		DropBackup(req *DropBackupReq) (*DropBackupResp, error)
 		Restore(req *RestoreReq) (*RestoreResp, error)
-		ShowMeta() (*ShowMetaResp, error)
 	}
 
 	metaClient struct {
@@ -357,4 +364,43 @@ func (c *metaClient) Logout() error {
 		return err
 	}
 	return nil
+}
+
+func (c *metaClient) ShowMeta() (*ShowMetaResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.connectTimeout)
+	defer cancel()
+	in := &admin.ShowMetaRequest{
+		Header: &admin.RequestHeader{Token: c.token},
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.ShowMetaInfo(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err = responseIsErr(resp); err != nil {
+		return nil, err
+	}
+	r, ok := resp.(*admin.ShowMetaResponse)
+	if !ok {
+		return nil, fmt.Errorf("invalid response")
+	}
+	if r.Info == nil {
+		return nil, fmt.Errorf("invalid response")
+	}
+	peers := make([]string, 0, len(r.Info.GetPeers()))
+	for _, peer := range r.Info.GetPeers() {
+		peers = append(peers, fmt.Sprintf("%s:%d", peer.GetHost(), peer.GetPort()))
+	}
+	agents := make([]string, 0, len(r.Info.GetAgents()))
+	for _, agent := range r.Info.GetAgents() {
+		agents = append(agents, fmt.Sprintf("%s:%d", agent.GetHost(), agent.GetPort()))
+	}
+
+	return &ShowMetaResp{
+		ClusterId:  r.Info.GetMetaClusterId(),
+		GitInfoSha: string(r.Info.GetGitInfoSha()),
+		Peers:      peers,
+		Agents:     agents,
+	}, nil
 }
