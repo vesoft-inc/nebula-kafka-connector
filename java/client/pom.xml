@@ -274,6 +274,7 @@
                     <excludes>
                         <exclude>common.proto</exclude>
                         <exclude>graph.proto</exclude>
+                        <exclude>vector.proto</exclude>
                     </excludes>
                 </configuration>
                 <executions>
