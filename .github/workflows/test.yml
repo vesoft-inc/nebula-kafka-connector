@@ -51,11 +51,7 @@ jobs:
         uses: webiny/action-post-run@3.1.0
         with:
           run: find . -mindepth 1 -delete
-      - name: Stop docker compose
-        uses: webiny/action-post-run@3.1.0
-        with:
-          run: docker compose down
-          working-directory: docker-compose
+   
       - uses: actions/checkout@v4
       - name: Set up JDK 1.8
         uses: actions/setup-java@v4
@@ -72,14 +68,6 @@ jobs:
       - name: Link maven config file
         run: |
           ln -s /github/home/.m2/ /root/.m2
-      - name: install docker
-        uses: papodaca/install-docker-action@main
-      - name: install NebulaGraph 5.0
-        run: |
-          docker compose up -d
-          sleep 30
-          docker compose ps
-        working-directory: docker-compose
       - name: Build with Maven
         run: |
           mvn -B package -Dmaven.test.skip=true

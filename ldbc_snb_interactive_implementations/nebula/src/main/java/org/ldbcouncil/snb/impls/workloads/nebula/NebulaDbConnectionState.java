@@ -30,7 +30,8 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
     // enable the log print for query statement, query type, query execution latency, query response time
     final boolean enableQueryInfoLog;
 
-    private final int graphServerSize;
+    private final int     graphServerSize;
+    private       boolean testOnBorrow = false;
 
     public String getGraphName() {
         return graphName;
@@ -68,7 +69,9 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
         } else {
             maxSessionWaitTime = Integer.MAX_VALUE;
         }
-
+        if (properties.containsKey("pingWhenBorrowClientFromPool")) {
+            testOnBorrow = Boolean.parseBoolean(properties.get("pingWhenBorrowClientFromPool"));
+        }
         graphName = properties.get("graphName");
         graphAddresses = endpointURI.split(",");
         graphServerSize = graphAddresses.length;
@@ -82,6 +85,7 @@ public class NebulaDbConnectionState<TDbQueryStore extends QueryStore> extends B
                         .withBlockWhenExhausted(true)
                         .withMaxWaitMills(maxSessionWaitTime)
                         .withHealthCheckTimeMills(-1)
+                        .withTestOnBorrow(testOnBorrow)
                         .build();
                 pools.add(new NewNebulaPool(pool, addr));
             }
