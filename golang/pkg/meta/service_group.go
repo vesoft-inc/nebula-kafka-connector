@@ -112,6 +112,7 @@ const (
 	ServiceTypeStoraged
 	ServiceTypeGraphd
 	ServiceTypeMetad
+	ServiceTypeAnalyticd
 	ServiceTypeSearch
 )
 

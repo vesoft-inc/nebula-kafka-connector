@@ -55,6 +55,8 @@ func getServiceType(typ string) (meta.ServiceType, error) {
 		return meta.ServiceTypeGraphd, nil
 	case "storaged":
 		return meta.ServiceTypeStoraged, nil
+	case "analyticd":
+		return meta.ServiceTypeAnalyticd, nil
 	default:
 		return meta.ServiceTypeGraphd, common.NgctlError("Invalid service type, "+typ, "")
 	}

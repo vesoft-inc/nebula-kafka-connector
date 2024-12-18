@@ -37,10 +37,15 @@ var showServiceCmd = &cobra.Command{
 		for _, s := range resp.Services {
 			row := make([]string, 0)
 			row = append(row, fmt.Sprintf("%d", s.Id))
-			if s.Type == meta.ServiceTypeGraphd {
-				row = append(row, "graphd")
-			} else {
-				row = append(row, "storaged")
+			switch s.Type {
+				case meta.ServiceTypeGraphd:
+					row = append(row, "graphd")
+				case meta.ServiceTypeStoraged:
+					row = append(row, "storaged")
+				case meta.ServiceTypeAnalyticd:
+					row = append(row, "analyticd")
+				default:
+					row = append(row, "unknown")
 			}
 			row = append(row, s.Host)
 			row = append(row, fmt.Sprintf("%d", s.Port))
