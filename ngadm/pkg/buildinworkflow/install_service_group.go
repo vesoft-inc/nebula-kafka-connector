@@ -10,7 +10,23 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
-func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
+func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {
+	workflow := &types.WorkflowSpec{
+		Type:     "serial",
+		Rollback: spec.Rollback,
+		Tasks:    []*types.TaskSpec{},
+	}
+	installTask, err := BuildInstallServiceGroupTask(args, spec)
+	if err != nil {
+		return nil, err
+	}
+	if installTask != nil {
+		workflow.Tasks = append(workflow.Tasks, installTask)
+	}
+	return workflow, nil
+}
+
+func BuildInstallServiceGroupTask(args map[string]any, spec *types.JobSpec) (*types.TaskSpec, error) {
 	if args == nil {
 		args = map[string]any{}
 	}
@@ -37,9 +53,16 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 	if !ok {
 		force = false
 	}
+	metadHosts := GetMetadAllNeedHosts(spec)
 	needHosts := GetServiceGroupNeedHosts(spec)
 	for _, agent := range needHosts {
-		if agent.SSHConfig == nil {
+		installPath := utils.GetUserCluster(spec.InstallPath, agent.InstallPath)
+		isSameMetaHost := true
+		if _, ok := metadHosts[agent.Host]; !ok {
+			isSameMetaHost = false
+		}
+		// if the host is the same as the meta host, we default think use the meta package, we only need to connect
+		if isSameMetaHost {
 			connectTasks = append(connectTasks, &types.TaskSpec{
 				Type: "serial",
 				SubTasks: []*types.TaskSpec{
@@ -47,15 +70,13 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 						Type: "connect",
 						Params: &tasks.ConnectParams{
 							Host: agent.Host,
+							// SSHConfig: agent.SSHConfig,
 						},
 					},
 				},
 			})
 			continue
 		}
-
-		// TODO: check if the host already has nebula installed
-		installPath := utils.GetUserCluster(spec.InstallPath, agent.InstallPath)
 		//1. connect
 		connectTasks = append(connectTasks, &types.TaskSpec{
 			Type: "serial",
@@ -63,8 +84,7 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 				{
 					Type: "connect",
 					Params: &tasks.ConnectParams{
-						Host:      agent.Host,
-						SSHConfig: agent.SSHConfig,
+						Host: agent.Host,
 					},
 				},
 				{
@@ -77,7 +97,7 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 				},
 			},
 		})
-		//2.upload
+		//2.upload, if the package is already uploaded, it will be skipped
 		dstPath := path.Join(utils.GetUserDownloadPath(spec.InstallPath, agent.InstallPath), path.Base(metaServiceGroup.PackagePath))
 		uploadTasks = append(uploadTasks, &types.TaskSpec{
 			Type: "serial",
@@ -131,17 +151,6 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 							Path:      installPath,
 						},
 					},
-					//{
-					//	Type: "save-agent-config",
-					//	Params: &tasks.SaveAgentParams{
-					//		Component: "metad",
-					//		Config: map[string]any{
-					//			"installPath": installPath,
-					//			"host":        utils.GetHostIP(agent.Host),
-					//			"port":        utils.GetConfigPort(metaServiceGroup.Config),
-					//		},
-					//	},
-					//},
 				},
 			})
 		}
@@ -228,10 +237,10 @@ func InstallServiceGroup(args map[string]any, spec *types.JobSpec) (*types.TaskS
 
 func GetServiceGroupNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	allNeedHosts := make(map[string]*types.Agent, 0)
-	for _, host := range spec.Spec.Metad.Hosts {
-		agentCopy := host.Agent
-		allNeedHosts[host.Agent.Host] = &agentCopy
-	}
+	// for _, host := range spec.Spec.Metad.Hosts {
+	// 	agentCopy := host.Agent
+	// 	allNeedHosts[host.Agent.Host] = &agentCopy
+	// }
 	for _, cluster := range spec.Spec.Metad.ServiceGroups {
 		for _, host := range cluster.Graphd.Hosts {
 			agentCopy := host.Agent

@@ -15,16 +15,18 @@ const (
 
 // buildin workflow converter map, don't need lock,just read
 var BuildInWorkflowConverterMap = map[string]WorkflowConverter{
-	"install":        Install,
-	"verify":         Verify,
-	"operation":      Operation,
-	"uninstall":      Uninstall,
-	"status":         Status,
-	"config":         Config,
-	"install-agent":  InstallAgent,
-	"install-host":   InstallHost,
-	"uninstall-host": UninstallHost,
-	"upload-file":    UploadFile,
+	"install":                 Install,
+	"verify":                  Verify,
+	"operation":               Operation,
+	"uninstall":               Uninstall,
+	"status":                  Status,
+	"config":                  Config,
+	"install-agent":           InstallAgent,
+	"install-host":            InstallHost,
+	"uninstall-host":          UninstallHost,
+	"upload-file":             UploadFile,
+	"install-service-group":   InstallServiceGroup,
+	"uninstall-service-group": UninstallServiceGroup,
 }
 
 func GetBuildinWorkflow(cmd string, args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {

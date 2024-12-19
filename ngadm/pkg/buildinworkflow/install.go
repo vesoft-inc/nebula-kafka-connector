@@ -26,7 +26,7 @@ func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, err
 		workflow.Tasks = append(workflow.Tasks, installTask)
 	}
 
-	installTask, err = InstallServiceGroup(args, spec)
+	installTask, err = BuildInstallServiceGroupTask(args, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -211,16 +211,6 @@ func GetMetadAllNeedHosts(spec *types.JobSpec) map[string]*types.Agent {
 	for _, host := range spec.Spec.Metad.Hosts {
 		agentCopy := host.Agent
 		allNeedHosts[host.Agent.Host] = &agentCopy
-	}
-	for _, cluster := range spec.Spec.Metad.ServiceGroups {
-		for _, host := range cluster.Graphd.Hosts {
-			agentCopy := host.Agent
-			allNeedHosts[host.Agent.Host] = &agentCopy
-		}
-		for _, host := range cluster.Storaged.Hosts {
-			agentCopy := host.Agent
-			allNeedHosts[host.Agent.Host] = &agentCopy
-		}
 	}
 	return allNeedHosts
 }

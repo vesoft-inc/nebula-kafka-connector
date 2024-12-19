@@ -22,6 +22,8 @@ type Job interface {
 	UpdateConfig(c *config.Config, serviceGroup string, hosts []string, serviceType string) error
 	InstallHost(*config.Config, string) error
 	UninstallHost(*config.Config, string, bool) error
+	InstallServiceGroup(*config.Config, string, string, bool) error
+	UninstallServiceGroup(*config.Config, string, string) error
 }
 
 type Option func(job *runner.Job)
@@ -233,6 +235,31 @@ func (j *ngadmJobType) UninstallHost(c *config.Config, host string, drain bool) 
 		"selectedHost": []string{host},
 	}
 	if err := job.Run("uninstall-host", args, c.JobSpec); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (j *ngadmJobType) InstallServiceGroup(c *config.Config, username string, metaPassword string, force bool) error {
+	job := newJob("install-service-group", c, j.opts...)
+	args := map[string]any{
+		"username":     username,
+		"metaPassword": metaPassword,
+		"force":        false,
+	}
+	if err := job.Run("install-service-group", args, c.JobSpec); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (j *ngadmJobType) UninstallServiceGroup(c *config.Config, username string, metaPassword string) error {
+	job := newJob("uninstall-service-group", c, j.opts...)
+	args := map[string]any{
+		"username":     username,
+		"metaPassword": metaPassword,
+	}
+	if err := job.Run("uninstall-service-group", args, c.JobSpec); err != nil {
 		return err
 	}
 	return nil
