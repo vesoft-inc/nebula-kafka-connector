@@ -6,6 +6,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
@@ -44,7 +45,20 @@ ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if userFlags.password != "" {
+		if userFlags.authInfo == "" {
+			var err error
+			if userFlags.password == "" {
+				pw := promptui.Prompt{
+					Label:       "Password",
+					AllowEdit:   true,
+					Mask:        rune(' '),
+					HideEntered: true,
+				}
+				userFlags.password, err = pw.Run()
+				if err != nil {
+					return err
+				}
+			}
 			m := make(map[string]string)
 			m["password"] = userFlags.password
 			m["encry_type"] = userFlags.passwordEncryptType
@@ -103,7 +117,20 @@ ngctl user alter --user [username] --password [password]
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		if userFlags.password != "" {
+		if userFlags.authInfo == "" {
+			var err error
+			if userFlags.password == "" {
+				pw := promptui.Prompt{
+					Label:       "Password",
+					AllowEdit:   true,
+					Mask:        rune(' '),
+					HideEntered: true,
+				}
+				userFlags.password, err = pw.Run()
+				if err != nil {
+					return err
+				}
+			}
 			m := make(map[string]string)
 			m["password"] = userFlags.password
 			m["encry_type"] = userFlags.passwordEncryptType
@@ -250,7 +277,7 @@ func init() {
 	createUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	createUserCmd.MarkFlagRequired("user")
 	createUserCmd.MarkFlagsRequiredTogether("auth-type", "auth-info")
-	createUserCmd.MarkFlagsMutuallyExclusive("auth-type", "password")
+	createUserCmd.MarkFlagsMutuallyExclusive("auth-info", "password")
 
 	dropUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	dropUserCmd.MarkFlagRequired("user")
@@ -260,8 +287,8 @@ func init() {
 	alterUserCmd.Flags().StringVarP(&userFlags.passwordEncryptType, "encrypt-type", "e", "sha256", "User password encrypt type, options: sha256, sha512, sm3")
 	alterUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	alterUserCmd.MarkFlagRequired("user")
+	alterUserCmd.MarkFlagsRequiredTogether("auth-type", "auth-info")
 	alterUserCmd.MarkFlagsMutuallyExclusive("password", "auth-info")
-	alterUserCmd.MarkFlagsOneRequired("password", "auth-info")
 
 	showUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "Users, e.g. 'aa,bb'")
 	showUserCmd.Flags().StringVarP(&userFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
