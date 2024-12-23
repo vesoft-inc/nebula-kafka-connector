@@ -12,11 +12,12 @@ import (
 )
 
 type userFlagsType struct {
-	user     string
-	password string
-	authType string
-	authInfo string
-	output   string
+	user                string
+	password            string
+	passwordEncryptType string
+	authType            string
+	authInfo            string
+	output              string
 }
 
 var userFlags = userFlagsType{}
@@ -46,6 +47,7 @@ ngctl user create --user [username] --auth-type [authType] --auth-info [authInfo
 		if userFlags.password != "" {
 			m := make(map[string]string)
 			m["password"] = userFlags.password
+			m["encry_type"] = userFlags.passwordEncryptType
 			bs, err := json.Marshal(m)
 			if err != nil {
 				return err
@@ -104,6 +106,7 @@ ngctl user alter --user [username] --password [password]
 		if userFlags.password != "" {
 			m := make(map[string]string)
 			m["password"] = userFlags.password
+			m["encry_type"] = userFlags.passwordEncryptType
 			bs, err := json.Marshal(m)
 			if err != nil {
 				return err
@@ -242,6 +245,7 @@ func init() {
 
 	createUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	createUserCmd.Flags().StringVarP(&userFlags.password, "password", "p", "", "User password")
+	createUserCmd.Flags().StringVarP(&userFlags.passwordEncryptType, "encrypt-type", "e", "sha256", "User password encrypt type, options: sha256, sha512, sm3")
 	createUserCmd.Flags().StringVar(&userFlags.authType, "auth-type", "", "User auth type")
 	createUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	createUserCmd.MarkFlagRequired("user")
@@ -253,6 +257,7 @@ func init() {
 
 	alterUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "User name")
 	alterUserCmd.Flags().StringVarP(&userFlags.password, "password", "p", "", "User password")
+	alterUserCmd.Flags().StringVarP(&userFlags.passwordEncryptType, "encrypt-type", "e", "sha256", "User password encrypt type, options: sha256, sha512, sm3")
 	alterUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	alterUserCmd.MarkFlagRequired("user")
 	alterUserCmd.MarkFlagsMutuallyExclusive("password", "auth-info")

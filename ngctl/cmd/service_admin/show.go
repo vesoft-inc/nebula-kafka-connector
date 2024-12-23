@@ -38,14 +38,14 @@ var showServiceCmd = &cobra.Command{
 			row := make([]string, 0)
 			row = append(row, fmt.Sprintf("%d", s.Id))
 			switch s.Type {
-				case meta.ServiceTypeGraphd:
-					row = append(row, "graphd")
-				case meta.ServiceTypeStoraged:
-					row = append(row, "storaged")
-				case meta.ServiceTypeAnalyticd:
-					row = append(row, "analyticd")
-				default:
-					row = append(row, "unknown")
+			case meta.ServiceTypeGraphd:
+				row = append(row, "graphd")
+			case meta.ServiceTypeStoraged:
+				row = append(row, "storaged")
+			case meta.ServiceTypeAnalyticd:
+				row = append(row, "analyticd")
+			default:
+				row = append(row, "unknown")
 			}
 			row = append(row, s.Host)
 			row = append(row, fmt.Sprintf("%d", s.Port))
