@@ -287,7 +287,6 @@ func init() {
 	alterUserCmd.Flags().StringVarP(&userFlags.passwordEncryptType, "encrypt-type", "e", "sha256", "User password encrypt type, options: sha256, sha512, sm3")
 	alterUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	alterUserCmd.MarkFlagRequired("user")
-	alterUserCmd.MarkFlagsRequiredTogether("auth-type", "auth-info")
 	alterUserCmd.MarkFlagsMutuallyExclusive("password", "auth-info")
 
 	showUserCmd.Flags().StringVarP(&userFlags.user, "user", "u", "", "Users, e.g. 'aa,bb'")
