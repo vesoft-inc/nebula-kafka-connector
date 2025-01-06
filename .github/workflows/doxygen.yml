@@ -1,7 +1,7 @@
 name: Generate API reference via Doxygen and push to GitHub Pages
 env:
   # Specify the doc version to which the API reference belongs
-  doc_version: 5.0_base
+  doc_version: master
   ENSITE_PASSWORD: ${{ secrets.ENSITE_PASSWORD }}
   ZHSITE_PASSWORD: ${{ secrets.ZHSITE_PASSWORD }}
 on:
@@ -86,6 +86,7 @@ jobs:
         port: 404
         script: |
           tar -zxf /var/www/ent-docs/${{ env.doc_version}}/api_doc.tar.gz -C /var/www/ent-docs/${{ env.doc_version}}/
+          tar -zxf /var/www/ent-docs/${{ env.doc_version}}/api_doc.tar.gz -C /var/www/cloud/master/
 
     - name: transfer api reference to yueshu server
       uses: appleboy/scp-action@v0.1.7
