@@ -1064,6 +1064,22 @@ func decodeAnyCompositeValue(dctx *decodeContext, r *bytesReader, typ types.Colu
 		return &nebulaValue{
 			data: p,
 		}, nil
+	case types.ColumnTypeVector:
+		sizeBytes := r.readN(2)
+		if r.error() != nil {
+			return nil, r.error()
+		}
+		size := int(bytesToInt16(sizeBytes))
+		l := &NebulaList{Values: make([]*nebulaValue, 0, size)}
+		for i := 0; i < size; i++ {
+			fval := math.Float32frombits(order.Uint32(r.readN(4)))
+			l.Values = append(l.Values, &nebulaValue{
+				data: &NebulaFloat{Value: fval},
+			})
+		}
+		return &nebulaValue{
+			data: l,
+		}, nil
 	default:
 		return nil, errors.Wrap(errInvalidColumnType, "")
 	}
