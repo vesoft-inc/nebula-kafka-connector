@@ -11,22 +11,35 @@ This repository is the NebulaGraph Connector for Apache Spark.
     ```bash
     $ git clone https://github.com/vesoft-inc/nebula-ng-tools.git
     $ cd spark-connector
-    $ ./mvnw clean package -Dmaven.test.skip=true -Dgpg.skip -Dmaven.javadoc.skip=true 
     ```
+
+   package spark-connector for spark2.4
+    ```bash
+    $ ./mvnw clean package -Dmaven.test.skip=true -Dgpg.skip -Dmaven.javadoc.skip=true  -pl spark2.4 -am -Pscala-2.11
+    ```
+   
+    package spark-connector for spark3
+    ```bash
+    $ ./mvnw clean package -Dmaven.test.skip=true -Dgpg.skip -Dmaven.javadoc.skip=true  -pl spark3 -am -Pscala-2.12
+    ```
+
    These commands will generate the corresponding targets:
    ```agsl
-     spark-connector/spark2.4/target/nebula-connector_spark2.4-5.0.0.jar
+     spark-connector/spark2.4/target/nebula-connector_spark2.4-5.0-SNAPSHOT.jar
+   ```
+   ```agsl
+     spark-connector/spark3/target/nebula-connector_spark3-5.0-SNAPSHOT.jar
    ```
    
 ## Integration with Apache Spark Applications
 
-* Import nebula spark connector with maven
-  In your pom.xml, add:
+* Import nebula spark connector for spark2.4 with maven
+  In your pom.xml,(change the artifactId to nebula-connector_spark3 for spark3) add:
   ```agsl
   <dependency>
      <groupId>com.vesoft</groupId>
      <artifactId>nebula-connector_spark2.4</artifactId>
-     <version>5.0.0</version>
+     <version>5.0-SNAOSHOT</version>
   </dependency>
   ```
 * Write DataFrame into NebulaGraph as Nodes:

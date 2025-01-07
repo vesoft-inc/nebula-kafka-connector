@@ -43,7 +43,7 @@ There are two ways to use Java SDK: get a NebulaClient from NebulaPool or get a 
 ```agsl
         NebulaClient client = null;
         try {
-            client = NebulaClient.builder(host, user, passwd)
+            client = NebulaClient.builder(address, user, passwd)
                     .withAuthOptions(Collections.emptyMap())
                     .withConnectTimeoutMills(1000)
                     .withRequestTimeoutMills(3000)
