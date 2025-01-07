@@ -159,7 +159,7 @@ class GraphProvider(addresses: String,
     val descNodeType    = s"DESCRIBE NODE TYPE `$escapedNodeType` OF `$graphType`"
     val result          = client.execute(descNodeType)
     if (!result.isSucceeded || result.isEmpty) {
-      LOG.error(s"get 'describe' of $nodeType failed for ${result.getErrorMessage}")
+      LOG.error(s"get schema of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $escapedNodeType does not exist in $graphName.")
     }
 
@@ -197,7 +197,7 @@ class GraphProvider(addresses: String,
 
     val result = client.execute(descEdgeType)
     if (!result.isSucceeded || result.isEmpty) {
-      LOG.error(s"get 'describe' of $edgeType failed for ${result.getErrorMessage}")
+      LOG.error(s"get schema of $edgeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"edge type $edgeType does not exist in $graphName.")
     }
 

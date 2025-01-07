@@ -16,9 +16,16 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spark2.4.version>2.4.4</spark2.4.version>
+        <scala.binary.version>2.11</scala.binary.version>
+        <scalatest.version>3.2.3</scalatest.version>
     </properties>
 
     <dependencies>
+        <dependency>
+            <groupId>com.vesoft</groupId>
+            <artifactId>nebula-spark-common_${scala.binary.version}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.spark</groupId>
             <artifactId>spark-core_2.11</artifactId>
@@ -37,29 +44,13 @@
             <version>${spark2.4.version}</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.apache.spark</groupId>
-            <artifactId>spark-graphx_2.11</artifactId>
-            <version>${spark2.4.version}</version>
-            <scope>provided</scope>
-        </dependency>
 
-        <dependency>
-            <groupId>com.vesoft</groupId>
-            <artifactId>nebula-spark-common_${scala.binary.version}</artifactId>
-            <version>${project.version}</version>
-        </dependency>
         <!-- scalatest -->
         <dependency>
             <groupId>org.scalatest</groupId>
             <artifactId>scalatest-funsuite_2.11</artifactId>
             <version>3.2.3</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-pool2</artifactId>
-            <version>2.2</version>
         </dependency>
     </dependencies>
 
@@ -111,27 +102,6 @@
                 <configuration>
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
-                </configuration>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.5.3</version>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>single</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <configuration>
-                    <descriptorRefs>
-                        <descriptorRef>jar-with-dependencies</descriptorRef>
-                    </descriptorRefs>
-                    <finalName>${project.artifactId}-${project.version}-jar-with-dependencies</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
                 </configuration>
             </plugin>
 

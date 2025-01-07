@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 vesoft inc. All rights reserved.
+/* Copyright (c) 2022 vesoft inc. All rights reserved.
  *
  * This source code is licensed under Apache 2.0 License.
  */
@@ -8,9 +8,13 @@ package com.vesoft.nebula.connector.reader
 import com.vesoft.nebula.spark.common.{NebulaOptions}
 import com.vesoft.nebula.spark.common.reader.NebulaGqlReader
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sources.v2.reader.InputPartitionReader
+import org.apache.spark.sql.connector.read.PartitionReader
 
-class NebulaGqlPartitionReader extends InputPartitionReader[InternalRow] with NebulaGqlReader{
+/**
+  * create reader by ngql
+  */
+class NebulaGqlPartitionReader extends PartitionReader[InternalRow] with NebulaGqlReader {
+
   def this(nebulaOptions: NebulaOptions) {
     this()
     init(nebulaOptions)
@@ -23,4 +27,3 @@ class NebulaGqlPartitionReader extends InputPartitionReader[InternalRow] with Ne
   override def close(): Unit = closeGraphProvider()
 
 }
-

@@ -6,6 +6,7 @@
 package com.vesoft.nebula.connector.reader
 
 import com.vesoft.nebula.spark.common.NebulaOptions
+import com.vesoft.nebula.spark.common.reader.NebulaGqlReader
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.sources.v2.reader.{InputPartition, InputPartitionReader}
 import org.apache.spark.sql.types.StructType

@@ -1,9 +1,8 @@
-
 package com.vesoft.nebula
 
 import com.vesoft.nebula.spark.common.utils.SparkValidate
 import com.vesoft.nebula.spark.common.{DataTypeEnum, GqlNebulaConfig, NebulaConnectionConfig, NebulaOptions, OperaType, ReadNebulaConfig, WriteNebulaConfig, WriteNebulaEdgeConfig, WriteNebulaNodeConfig}
-import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Row, SaveMode}
+import org.apache.spark.sql.{DataFrame, DataFrameReader, DataFrameWriter, Encoder, Encoders, Row, SaveMode}
 
 package object connector {
 
@@ -12,25 +11,25 @@ package object connector {
    */
   implicit class NebulaDataFrameWriter(writer: DataFrameWriter[Row]) {
 
-    private var connectionConfig : NebulaConnectionConfig = _
-    private var writeNebulaConfig: WriteNebulaConfig      = _
+    var connectionConfig : NebulaConnectionConfig = _
+    var writeNebulaConfig: WriteNebulaConfig      = _
 
     /**
      * config nebula connection
      *
      * @param connectionConfig  connection parameters
-     * @param writeNebulaConfig write parameters for node or edge
+     * @param writeNebulaConfig write parameters for vertex or edge
      */
     def nebula(connectionConfig: NebulaConnectionConfig,
                writeNebulaConfig: WriteNebulaConfig): NebulaDataFrameWriter = {
-      SparkValidate.validate("2.4.*")
+      SparkValidate.validate("3.*.*")
       this.connectionConfig = connectionConfig
       this.writeNebulaConfig = writeNebulaConfig
       this
     }
 
     /**
-     * write dataframe into nebula node type
+     * write dataframe into nebula vertex
      */
     def writeVertices(): Unit = {
       assert(connectionConfig != null && writeNebulaConfig != null,
@@ -119,23 +118,26 @@ package object connector {
     }
   }
 
+
+
+
   /**
    * spark reader for nebula graph
    */
   implicit class NebulaDataFrameReader(reader: DataFrameReader) {
     var connectionConfig: NebulaConnectionConfig = _
-    var readConfig      : ReadNebulaConfig       = _
+    var readConfig: ReadNebulaConfig             = _
 
-    def nebula(connectionConfig: NebulaConnectionConfig, readConfig: ReadNebulaConfig): NebulaDataFrameReader = {
-      SparkValidate.validate("2.4.*")
+    def nebula(connectionConfig: NebulaConnectionConfig,
+               readConfig: ReadNebulaConfig): NebulaDataFrameReader = {
+      SparkValidate.validate("3.*.*")
       this.connectionConfig = connectionConfig
       this.readConfig = readConfig
       this
     }
 
     /**
-     * Reading nodes from NebulaGraph
-     *
+     * Reading nodes from Nebula Graph
      * @return DataFrame
      */
     def loadNode(): DataFrame = {
@@ -160,15 +162,14 @@ package object connector {
       dfReader.load()
     }
 
-
     /**
      * Reading edges from Nebula Graph
-     *
      * @return DataFrame
      */
     def loadEdge(): DataFrame = {
       assert(connectionConfig != null && readConfig != null,
-             "nebula config is not set, please call nebula() before loadEdge")
+             "nebula config is not set, please call nebula() before loadEdgesToDF")
+
       val dfReader = reader
         .format(classOf[NebulaDataSource].getName)
         .option(NebulaOptions.TYPE, DataTypeEnum.EDGE.toString)
@@ -198,7 +199,7 @@ package object connector {
     var gqlConfig       : GqlNebulaConfig        = _
 
     def gql(connectionConfig: NebulaConnectionConfig, gqlConfig: GqlNebulaConfig): NebulaDataFrameGqlReader = {
-      SparkValidate.validate("2.4.*")
+      SparkValidate.validate("3.*.*")
       this.connectionConfig = connectionConfig
       this.gqlConfig = gqlConfig
       this
@@ -226,5 +227,6 @@ package object connector {
       dfReader.load()
     }
   }
+
 
 }

@@ -135,6 +135,9 @@ object NebulaExecutor {
                                                                   propValueTypeClassName.length)
 
     val fieldName = schema.fields(index).name
+    if (!fieldTypeMap.contains(fieldName)) {
+      throw new RuntimeException(s"NebulaGraph does not contain the property ${fieldName}")
+    }
     fieldTypeMap(fieldName) match {
       case "STRING" =>
         NebulaUtils.escapeUtil(propValue.toString).mkString("\"", "", "\"")

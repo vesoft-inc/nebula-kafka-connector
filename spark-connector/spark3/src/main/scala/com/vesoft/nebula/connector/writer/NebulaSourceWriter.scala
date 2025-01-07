@@ -1,24 +1,23 @@
+/* Copyright (c) 2020 vesoft inc. All rights reserved.
+ *
+ * This source code is licensed under Apache 2.0 License.
+ */
 
 package com.vesoft.nebula.connector.writer
 
 import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
-import com.vesoft.nebula.spark.common.nebula.{GraphProvider, NodeDesc}
 import org.apache.spark.TaskContext
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sources.v2.writer.{DataSourceWriter, DataWriter, DataWriterFactory, WriterCommitMessage}
+import org.apache.spark.sql.connector.write.{BatchWrite, DataWriter, DataWriterFactory, PhysicalWriteInfo, WriterCommitMessage}
 import org.apache.spark.sql.types.StructType
 import org.slf4j.LoggerFactory
 
-import scala.collection.mutable.ListBuffer
-
 /**
- * creating and initializing the actual Nebula node writer at executor side
- */
+  * creating and initializing the actual Nebula vertex writer at executor side
+  */
 class NebulaNodeWriterFactory(nebulaOptions: NebulaOptions, schema: StructType)
-  extends DataWriterFactory[InternalRow] {
-  override def createDataWriter(partitionId: Int,
-                                taskId: Long,
-                                epochId: Long): DataWriter[InternalRow] = {
+    extends DataWriterFactory {
+  override def createWriter(partitionId: Int, taskId: Long): DataWriter[InternalRow] = {
     // check if the dataFrame's schema matches NebulaGraph's schema
     NebulaUtils.checkNodeSchemaMatchWithDataFrame(nebulaOptions, schema)
     new NebulaNodeWriter(nebulaOptions, schema)
@@ -26,16 +25,14 @@ class NebulaNodeWriterFactory(nebulaOptions: NebulaOptions, schema: StructType)
 }
 
 /**
- * creating and initializing the actual Nebula edge writer at executor side
- */
+  * creating and initializing the actual Nebula edge writer at executor side
+  */
 class NebulaEdgeWriterFactory(nebulaOptions: NebulaOptions,
                               srcIndices: List[Int],
                               dstIndices: List[Int],
                               schema: StructType)
-  extends DataWriterFactory[InternalRow] {
-  override def createDataWriter(partitionId: Int,
-                                taskId: Long,
-                                epochId: Long): DataWriter[InternalRow] = {
+    extends DataWriterFactory {
+  override def createWriter(partitionId: Int, taskId: Long): DataWriter[InternalRow] = {
     // check if the dataFrame's schema matches NebulaGraph's schema
     NebulaUtils.checkEdgeSchemaMatchWithDataFrame(nebulaOptions, schema)
     new NebulaEdgeWriter(nebulaOptions, srcIndices, dstIndices, schema)
@@ -43,42 +40,14 @@ class NebulaEdgeWriterFactory(nebulaOptions: NebulaOptions,
 }
 
 /**
- * nebula node writer to create factory
- */
+  * nebula vertex writer to create factory
+  */
 class NebulaDataSourceNodeWriter(nebulaOptions: NebulaOptions,
                                  schema: StructType)
-  extends DataSourceWriter {
+    extends BatchWrite {
   private val LOG = LoggerFactory.getLogger(this.getClass)
 
-  override def createWriterFactory(): DataWriterFactory[InternalRow] = {
-    // check if the dataFrame's schema matches NebulaGraph's schema
-    val graphProvider      = new GraphProvider(
-      nebulaOptions.graphAddress,
-      nebulaOptions.user,
-      nebulaOptions.authOptions,
-      nebulaOptions.timeout,
-      nebulaOptions.schema,
-      nebulaOptions.zonedDatetimeFormat,
-      nebulaOptions.localDatetimeFormat,
-      nebulaOptions.zonedTimeFormat,
-      nebulaOptions.zonedTimeFormat)
-    var nodeDesc: NodeDesc = null
-    try {
-      nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
-    } finally {
-      graphProvider.close()
-    }
-    // check primary key name exists in dataframe's schema
-    val dataFrameFields = new ListBuffer[String]
-    schema.fields.toList.foreach(field => dataFrameFields.append(field.name))
-    nodeDesc.nodePkNames.foreach(pk => {
-      assert(dataFrameFields.contains(pk), s"the dataframe does not contain the node primary key property ${pk}")
-
-    })
-    for (field <- dataFrameFields) {
-      assert(nodeDesc.properties.keySet.contains(field),
-             s"the dataframe field $field does not match NebulaGraph node ${nebulaOptions.label} properties.")
-    }
+  override def createBatchWriterFactory(info: PhysicalWriteInfo): DataWriterFactory = {
     new NebulaNodeWriterFactory(nebulaOptions, schema)
   }
 
@@ -100,16 +69,16 @@ class NebulaDataSourceNodeWriter(nebulaOptions: NebulaOptions,
 }
 
 /**
- * nebula edge writer to create factory
- */
+  * nebula edge writer to create factory
+  */
 class NebulaDataSourceEdgeWriter(nebulaOptions: NebulaOptions,
                                  srcIndices: List[Int],
                                  dstIndices: List[Int],
                                  schema: StructType)
-  extends DataSourceWriter {
+    extends BatchWrite {
   private val LOG = LoggerFactory.getLogger(this.getClass)
 
-  override def createWriterFactory(): DataWriterFactory[InternalRow] = {
+  override def createBatchWriterFactory(info: PhysicalWriteInfo): DataWriterFactory = {
     new NebulaEdgeWriterFactory(nebulaOptions, srcIndices, dstIndices, schema)
   }
 

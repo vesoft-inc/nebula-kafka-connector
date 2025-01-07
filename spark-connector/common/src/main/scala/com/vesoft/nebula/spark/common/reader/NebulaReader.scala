@@ -9,7 +9,7 @@ import com.vesoft.nebula.driver.graph.data._
 import com.vesoft.nebula.driver.graph.data.ValueWrapper
 import com.vesoft.nebula.driver.graph.scan.{ScanEdgeResult, ScanEdgeResultIterator, ScanNodeResult, ScanNodeResultIterator, TableRow}
 import com.vesoft.nebula.spark.common.NebulaUtils.NebulaValueGetter
-import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils}
+import com.vesoft.nebula.spark.common.{NebulaOptions, NebulaUtils, PartitionUtils}
 import com.vesoft.nebula.spark.common.nebula.GraphProvider
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.catalyst.expressions.SpecificInternalRow
@@ -37,7 +37,7 @@ trait NebulaReader {
   /**
    * init the reader: init metaProvider, storageClient
    */
-  def init(index: Int, nebulaOptions: NebulaOptions, schema: StructType): Int = {
+  def init(index: Int, nebulaOptions: NebulaOptions, schema: StructType): Unit = {
     this.schema = schema
     this.nebulaOptions = nebulaOptions
 
@@ -54,7 +54,10 @@ trait NebulaReader {
 
     // allocate scanPart to this partition
     val totalPart = graphProvider.getAllParts.size()
-    totalPart
+    // index starts with 1
+    val scanParts = PartitionUtils.getScanParts(index, totalPart, nebulaOptions.partitionNums)
+    LOG.info(s"partition index: ${index}, scanParts: ${scanParts.toString}")
+    scanPartIterator = scanParts.iterator
   }
 
   /**

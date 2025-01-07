@@ -107,6 +107,8 @@ This repository is the NebulaGraph Connector for Apache Spark.
     val df = spark.read.nebula(getNebulaConnectionConfig, nebulaReadEdgeConfig).loadEdge()
     df.show()
   ```
+  
+
 
 for complete example, see https://github.com/vesoft-inc/nebula-ng-tools/tree/master/spark-connector/example/src/main/scala/com/vesoft/nebula/example
 

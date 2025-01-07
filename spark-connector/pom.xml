@@ -12,6 +12,8 @@
         <module>spark2.4</module>
         <module>common</module>
         <module>example</module>
+        <module>spark3</module>
+        <module>assembly</module>
     </modules>
 
     <properties>
@@ -19,9 +21,8 @@
         <maven.compiler.target>8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spark.version>2.4.4</spark.version>
-        <scala.binary.version>2.11</scala.binary.version>
-        <scala.version>2.11.12</scala.version>
         <scalatest.version>3.2.3</scalatest.version>
+        <artId>nebula-connector_spark2.4</artId>
     </properties>
 
     <!-- More Project Information -->
@@ -117,9 +118,6 @@
         </profile>
         <profile>
             <id>scala-2.11</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <properties>
                 <scala.binary.version>2.11</scala.binary.version>
                 <scala.version>2.11.12</scala.version>
@@ -130,6 +128,20 @@
             <properties>
                 <scala.binary.version>2.12</scala.binary.version>
                 <scala.version>2.12.10</scala.version>
+            </properties>
+        </profile>
+        <profile>
+            <id>spark2.4</id>
+            <properties>
+                <spark.version>2.4.4</spark.version>
+                <artId>nebula-connector_spark2.4</artId>
+            </properties>
+        </profile>
+        <profile>
+            <id>spark3</id>
+            <properties>
+                <spark.version>3.0.0</spark.version>
+                <artId>nebula-connector_spark3</artId>
             </properties>
         </profile>
     </profiles>

@@ -2,7 +2,7 @@
 package com.vesoft.nebula.spark.common
 
 import com.vesoft.nebula.driver.graph.data.ResultSet
-import com.vesoft.nebula.spark.common.nebula.GraphProvider
+import com.vesoft.nebula.spark.common.nebula.{EdgeDesc, GraphProvider, NodeDesc}
 import org.apache.spark.sql.catalyst.InternalRow
 import org.apache.spark.sql.types._
 import org.apache.spark.unsafe.types.UTF8String
@@ -119,10 +119,10 @@ object NebulaUtils {
       } else {
         val edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
         edgeDesc.srcNodePkNames.foreach(srcPk => {
-          fields.append(DataTypes.createStructField(srcPk, DataTypes.StringType, false))
+          fields.append(DataTypes.createStructField(s"src_$srcPk", DataTypes.StringType, false))
         })
         edgeDesc.dstNodePkNames.foreach(dstPk => {
-          fields.append(DataTypes.createStructField(dstPk, DataTypes.StringType, false))
+          fields.append(DataTypes.createStructField(s"dst_$dstPk", DataTypes.StringType, false))
         })
         // if returnCols is null, read all the property of node type/edge type
         if (returnCols == null) {
@@ -132,7 +132,7 @@ object NebulaUtils {
         for (propName <- returnCols) {
           // if edge property has the same name with src/dst node's pk name, rename it with suffix $
           val finalPropName =
-            if (edgeDesc.srcNodePkNames.contains(propName) || edgeDesc.dstNodePkNames.contains(propName)) {
+            if (edgeDesc.srcNodePkNames.contains(s"src_$propName") || edgeDesc.dstNodePkNames.contains(s"dst_$propName")) {
               propName + "$"
             } else {
               propName
@@ -187,5 +187,78 @@ object NebulaUtils {
       fields.append(StructField(column, StringType, true))
     }
     StructType(fields)
+  }
+
+
+  /**
+   * check if the fields in DataFrame match with property of NebulaGraph Edge
+   *
+   * @param nebulaOptions configs for NebulaGraph
+   * @param schema        schema of DataFrame
+   * @throws RuntimeException when the DataFrame's field name does not exist in NebulaGraph
+   */
+  def checkEdgeSchemaMatchWithDataFrame(nebulaOptions: NebulaOptions, schema: StructType): Unit = {
+    val graphProvider      = new GraphProvider(
+      nebulaOptions.graphAddress,
+      nebulaOptions.user,
+      nebulaOptions.authOptions,
+      nebulaOptions.timeout,
+      nebulaOptions.schema,
+      nebulaOptions.zonedDatetimeFormat,
+      nebulaOptions.localDatetimeFormat,
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.zonedTimeFormat)
+    var edgeDesc: EdgeDesc = null
+    try {
+      edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
+    } finally {
+      graphProvider.close()
+    }
+    val dataFrameFields = new ListBuffer[String]
+    schema.fields.toList.foreach(field => {
+      if ((!nebulaOptions.srcPkFields.contains(field.name) || nebulaOptions.srcPksAsProp)
+        && (!nebulaOptions.dstPkFields.contains(field.name) || nebulaOptions.dstPksAsProp)) {
+        dataFrameFields.append(field.name)
+      }
+    })
+    for (field <- dataFrameFields) {
+      assert(edgeDesc.properties.keySet.contains(field),
+             s"the dataframe field $field does not match the properties of ${nebulaOptions.label}.")
+    }
+  }
+
+
+  /**
+   * check if the fields in DataFrame match with property of NebulaGraph Node
+   *
+   * @param nebulaOptions configs for NebulaGraph
+   * @param schema        schema of DataFrame
+   * @throws RuntimeException when the DataFrame's field name does not exist in NebulaGraph
+   */
+  def checkNodeSchemaMatchWithDataFrame(nebulaOptions: NebulaOptions, schema: StructType): Unit = {
+    val graphProvider      = new GraphProvider(
+      nebulaOptions.graphAddress,
+      nebulaOptions.user,
+      nebulaOptions.authOptions,
+      nebulaOptions.timeout,
+      nebulaOptions.schema,
+      nebulaOptions.zonedDatetimeFormat,
+      nebulaOptions.localDatetimeFormat,
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.zonedTimeFormat)
+    var nodeDesc: NodeDesc = null
+    try {
+      nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
+    } finally {
+      graphProvider.close()
+    }
+    val dataFrameFields = new ListBuffer[String]
+    schema.fields.toList.foreach(field => {
+      dataFrameFields.append(field.name)
+    })
+    for (field <- dataFrameFields) {
+      assert(nodeDesc.properties.keySet.contains(field),
+             s"the dataframe field $field does not match the properties of ${nebulaOptions.label}.")
+    }
   }
 }

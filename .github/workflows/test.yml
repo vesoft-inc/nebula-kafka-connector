@@ -96,12 +96,10 @@ jobs:
           ln -s /github/home/.m2/ /root/.m2
       - name: Build with Maven
         run: |
-          cd java
-          mvn clean install -Dmaven.test.skip=true -Dgpg.skip
-          cd ../ldbc_snb_interactive_implementations
           mvn -B package -Pnebula -Dmaven.test.skip=true
+        working-directory: ldbc_snb_interactive_implementations
 
-  connectors:
+  spark-connector:
     runs-on: [ self-hosted, nebula-fast ]
     container:
       image: vesoft/nebula-dev:ubuntu2004
@@ -124,9 +122,34 @@ jobs:
           ln -s /github/home/.m2/ /root/.m2
       - name: Build with Maven
         run: |
-          cd java
-          mvn clean install -Dmaven.test.skip=true -Dgpg.skip
-          cd ../spark-connector
-          mvn -B package -Dmaven.test.skip=true
-          cd ../kafka-connector
-          mvn -B package -Dmaven.test.skip=true
+          mvn -B package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl spark2.4 -am -Pscala-2.11 
+          mvn -B package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true -pl spark3 -am -Pscala-2.12 
+        working-directory: spark-connector
+
+  kafka-connector:
+    runs-on: [ self-hosted, nebula-fast ]
+    container:
+      image: vesoft/nebula-dev:ubuntu2004
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "8"
+      - name: Set up Maven
+        uses: stCarolas/setup-maven@v5
+        with:
+          maven-version: 3.8.2
+      - uses: s4u/maven-settings-action@v3.0.0
+        with:
+          mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
+      - name: Link maven config file
+        run: |
+          ln -s /github/home/.m2/ /root/.m2
+      - name: Build with Maven
+        run: |
+          mvn -B package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
+        working-directory: kafka-connector
+
+

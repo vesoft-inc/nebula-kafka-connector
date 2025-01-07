@@ -6,7 +6,6 @@ import org.apache.commons.lang.StringUtils
 import org.apache.spark.sql.catalyst.util.CaseInsensitiveMap
 
 import java.util.Properties
-import scala.collection.mutable
 
 class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) extends Serializable {
 

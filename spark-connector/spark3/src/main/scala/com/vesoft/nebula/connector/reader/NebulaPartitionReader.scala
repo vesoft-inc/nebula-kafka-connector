@@ -1,4 +1,4 @@
-/* Copyright (c) 2024 vesoft inc. All rights reserved.
+/* Copyright (c) 2020 vesoft inc. All rights reserved.
  *
  * This source code is licensed under Apache 2.0 License.
  */
@@ -8,14 +8,14 @@ package com.vesoft.nebula.connector.reader
 import com.vesoft.nebula.spark.common.{NebulaOptions, PartitionUtils}
 import com.vesoft.nebula.spark.common.reader.NebulaReader
 import org.apache.spark.sql.catalyst.InternalRow
-import org.apache.spark.sql.sources.v2.reader.InputPartitionReader
+import org.apache.spark.sql.connector.read.PartitionReader
 import org.apache.spark.sql.types.StructType
 import org.slf4j.{Logger, LoggerFactory}
 
 /**
   * Read nebula data for each spark partition
   */
-abstract class NebulaPartitionReader extends InputPartitionReader[InternalRow] with NebulaReader {
+abstract class NebulaPartitionReader extends PartitionReader[InternalRow] with NebulaReader {
 
   /**
     * @param index identifier for spark partition

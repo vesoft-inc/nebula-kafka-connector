@@ -69,6 +69,7 @@ class NebulaDataSource
 
     LOG.info("create writer")
     val parameters = options.asMap()
+    parameters.remove(NebulaOptions.PASSWD)
     parameters.remove(NebulaOptions.AUTHOPTIONS)
     LOG.info(s"options ${parameters}")
 
@@ -77,7 +78,7 @@ class NebulaDataSource
     } else {
       val srcPkFields     = nebulaOptions.srcPkFields
       val dstPkFields     = nebulaOptions.dstPkFields
-      val edgeFieldsIndex = {
+      val edgePkFieldsIndex = {
         val srcPkIndices = srcPkFields.flatMap { srcPkField =>
           schema.fields.indices.find(i => schema.fields(i).name == srcPkField)
         }
@@ -94,8 +95,8 @@ class NebulaDataSource
 
       Optional.of(
         new NebulaDataSourceEdgeWriter(nebulaOptions,
-                                       edgeFieldsIndex._1.toList,
-                                       edgeFieldsIndex._2.toList,
+                                       edgePkFieldsIndex._1,
+                                       edgePkFieldsIndex._2,
                                        schema))
     }
   }
