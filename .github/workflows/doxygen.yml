@@ -2,6 +2,12 @@ name: Generate API reference via Doxygen and push to GitHub Pages
 env:
   # Specify the doc version to which the API reference belongs
   doc_version: master
+
+  # Specify the SDK version
+  java_version: 5.0.0
+  python_version: 0.1.0-alpha
+
+  # specify the password for the nebula and yueshu servers
   ENSITE_PASSWORD: ${{ secrets.ENSITE_PASSWORD }}
   ZHSITE_PASSWORD: ${{ secrets.ZHSITE_PASSWORD }}
 on:
@@ -31,17 +37,17 @@ jobs:
     # Generate Java API reference 
     - name: Generate Documentation for Java
       run: |
-        echo "PROJECT_NUMBER=$BRANCH_NAME" >> doxygen/java-config
-        mkdir -p $BRANCH_NAME/api_reference/java
-        echo "OUTPUT_DIRECTORY=$BRANCH_NAME/api_reference/java" >> doxygen/java-config
+        echo "PROJECT_NUMBER=${{ env.java_version }}" >> doxygen/java-config
+        mkdir -p $BRANCH_NAME/java/${{ env.java_version }}
+        echo "OUTPUT_DIRECTORY=$BRANCH_NAME/java/${{ env.java_version }}" >> doxygen/java-config
         doxygen doxygen/java-config
     
     # Generate Python API reference
 #    - name: Generate Documentation for Python
 #      run: |
-#        echo "PROJECT_NUMBER=$BRANCH_NAME" >> doxygen/python-config
-#        mkdir -p $BRANCH_NAME/api_reference/python
-#        echo "OUTPUT_DIRECTORY=$BRANCH_NAME/api_reference/python" >> doxygen/python-config
+#        echo "PROJECT_NUMBER=${{ env.python_version }}" >> doxygen/python-config
+#        mkdir -p $BRANCH_NAME/python/${{ env.python_version }}
+#        echo "OUTPUT_DIRECTORY=$BRANCH_NAME/python/${{ env.python_version }}" >> doxygen/python-config
 #        doxygen doxygen/python-config   
 
     # Generate C++ API reference
