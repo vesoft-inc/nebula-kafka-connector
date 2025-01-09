@@ -9,6 +9,7 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
 import com.vesoft.nebula.driver.graph.data.Edge;
+import com.vesoft.nebula.driver.graph.data.EmbeddingVector;
 import com.vesoft.nebula.driver.graph.data.NRecord;
 import com.vesoft.nebula.driver.graph.data.Node;
 import com.vesoft.nebula.driver.graph.data.Path;
@@ -23,7 +24,9 @@ import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Vector;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -483,6 +486,25 @@ public class NebulaClientDecodeTest {
             Assert.assertTrue(values.get(0).asRecord().getValue("b").asBoolean());
             Assert.assertEquals("str literal",
                                 values.get(0).asRecord().getValue("c").asString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testConstVectorVectorResult() {
+        System.out.println("<==== testConstVectorVectorResult ====>");
+        try {
+            String             gql    = "LET r=VECTOR<3,FLOAT32>([1.0,2.0,3.0]) return r as r1";
+            ResultSet          res    = client.execute(gql);
+            List<ValueWrapper> values = res.next().values();
+            Assert.assertEquals(1, values.size());
+            Assert.assertEquals(3, values.get(0).asVector().size());
+            List<Float> expectList = Arrays.asList(1.0f, 2.0f, 3.0f);
+            Assert.assertTrue(expectList.stream().allMatch(values.get(0)
+                                                                   .asVector()
+                                                                   .getValues()::contains));
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail(e.getMessage());
@@ -1049,6 +1071,36 @@ public class NebulaClientDecodeTest {
 
 
     @Test
+    public void testDecodeEmbeddingVectorResult() {
+        System.out.println("<==== testDecodeEmbeddingVectorResult ====>");
+        try {
+            ResultSet res = client.execute(
+                    "CREATE GRAPH TYPE IF NOT EXISTS sdk_vector_test_type AS {"
+                            + "node type p(LABEL p{id INT32 PRIMARY KEY, vec VECTOR<3,FLOAT32>})}");
+            Assert.assertTrue(res.isSucceeded());
+            res = client.execute(
+                    "CREATE GRAPH IF NOT EXISTS sdk_vector_test sdk_vector_test_type");
+            Assert.assertTrue(res.isSucceeded());
+            res = client.execute("USE sdk_vector_test INSERT OR IGNORE "
+                                         + "(@p{id:1,vec:VECTOR<3,FLOAT32>([1.0,2.0,3.0])})");
+            Assert.assertTrue(res.isSucceeded());
+            String gql = "USE sdk_vector_test MATCH(v) RETURN v.vec";
+            res = client.execute(gql);
+            List<ValueWrapper> values = res.next().values();
+            Assert.assertEquals(1, values.size());
+            Assert.assertEquals(3, values.get(0).asVector().size());
+            List<Float> expectList = Arrays.asList(1.0f, 2.0f, 3.0f);
+            Assert.assertTrue(expectList.stream().allMatch(values.get(0)
+                                                                   .asVector()
+                                                                   .getValues()::contains));
+        } catch (Exception e) {
+            e.printStackTrace();
+            Assert.fail(e.getMessage());
+        }
+    }
+
+
+    @Test
     public void testDecodeAnyResult() {
         System.out.println("<==== testDecodeAnyResult ====>");
         try {
@@ -1093,6 +1145,9 @@ public class NebulaClientDecodeTest {
             Assert.assertTrue(res.isSucceeded());
 
             res = client.execute("SESSION SET value $n=List[\"a\",\"b\",\"中文\"]");
+            Assert.assertTrue(res.isSucceeded());
+
+            res = client.execute("SESSION SET value $o=VECTOR<3,FLOAT>([1.0,2.0,3.0])");
             Assert.assertTrue(res.isSucceeded());
 
 
@@ -1175,7 +1230,9 @@ public class NebulaClientDecodeTest {
                         NRecord record = value.asRecord();
                         Assert.assertEquals(6, record.size());
                         Assert.assertEquals(1, record.getValue("a").asInt());
-                        Assert.assertEquals(1.0, record.getValue("b").asDouble(), 0.001);
+                        Assert.assertEquals("1.0", record.getValue("b")
+                                .asDecimal()
+                                .toPlainString());
                         Assert.assertFalse(record.getValue("c").asBoolean());
                         Assert.assertEquals("test", record.getValue("d").asString());
                         Assert.assertEquals(LocalDate.of(2024, 1, 1),
@@ -1192,6 +1249,13 @@ public class NebulaClientDecodeTest {
                                 new ValueWrapper("b", ColumnType.COLUMN_TYPE_STRING)));
                         Assert.assertTrue(listValues.contains(
                                 new ValueWrapper("中文", ColumnType.COLUMN_TYPE_STRING)));
+                        break;
+                    case "o":
+                        EmbeddingVector vector = value.asVector();
+                        Assert.assertEquals(3, vector.size());
+                        List<Float> expectList = Arrays.asList(1.0f, 2.0f, 3.0f);
+                        Assert.assertTrue(expectList.stream()
+                                                  .allMatch(vector.getValues()::contains));
                         break;
                     default:
                         System.out.println("not defined.");

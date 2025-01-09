@@ -95,4 +95,9 @@ public class SizeConstant {
     // size for any
     public static final int ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE = 2;
 
+    // dim size for embeddingVector
+    public static final int EMBEDDING_VECTOR_DIM_SIZE = 4;
+    public static final int ELEMENT_NUMBER_SIZE_FOR_VECTOR_VALUE = 2;
+    public static final int EMBEDDING_VECTOR_FLOAT_VALUE_SIZE = 4;
+
 }

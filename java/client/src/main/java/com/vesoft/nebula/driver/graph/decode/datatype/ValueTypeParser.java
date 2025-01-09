@@ -5,7 +5,9 @@
 
 package com.vesoft.nebula.driver.graph.decode.datatype;
 
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_FLOAT32;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EDGE_TYPE_ID_SIZE;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EMBEDDING_VECTOR_DIM_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ELEMENT_TYPE_NUM_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.NODE_TYPE_ID_SIZE;
@@ -96,6 +98,14 @@ public class ValueTypeParser {
                     fieldTypes.put(fieldName, decodeValueType(reader));
                 }
                 return new RecordType(fieldTypes);
+            case COLUMN_TYPE_EMBEDDINGVECTOR:
+                int dim = DecodeUtils.bytesToInt32(reader.read(EMBEDDING_VECTOR_DIM_SIZE),
+                                                   byteOrder);
+                DataType vecElementType = decodeValueType(reader);
+                if (vecElementType.getType() != COLUMN_TYPE_FLOAT32) {
+                    throw new RuntimeException("unexpected child type:" + vecElementType.getType());
+                }
+                return new EmbeddingVectorType(dim, vecElementType);
             default:
                 throw new RuntimeException("unsupported type:" + type);
         }

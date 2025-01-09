@@ -26,7 +26,7 @@ public enum ColumnType {
     COLUMN_TYPE_LIST(0x11),
     COLUMN_TYPE_PATH(0x12),
     COLUMN_TYPE_RECORD(0x13),
-    COLUMN_TYPE_ENBEDDINGVECTOR(0x14),
+    COLUMN_TYPE_EMBEDDINGVECTOR(0x14),
     COLUMN_TYPE_LOCALTIME(0x15),
     COLUMN_TYPE_DURATION(0x16),
     COLUMN_TYPE_DATE(0x17),
@@ -86,6 +86,7 @@ public enum ColumnType {
         switch (type) {
             case COLUMN_TYPE_LIST:
             case COLUMN_TYPE_RECORD:
+            case COLUMN_TYPE_EMBEDDINGVECTOR:
             case COLUMN_TYPE_NODE:
             case COLUMN_TYPE_EDGE:
             case COLUMN_TYPE_PATH:

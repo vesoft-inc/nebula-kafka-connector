@@ -5,6 +5,7 @@ import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_DATE;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_DECIMAL;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_DURATION;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_EDGE;
+import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_EMBEDDINGVECTOR;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_FLOAT32;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_FLOAT64;
 import static com.vesoft.nebula.driver.graph.decode.ColumnType.COLUMN_TYPE_INT16;
@@ -577,8 +578,10 @@ public class ValueWrapper {
      * @return {@link Vector}
      * @throws InvalidValueException if the value type is not Vector
      */
-    public Vector asVector() throws InvalidValueException {
-        // TODO parse value to Vector
+    public EmbeddingVector asVector() throws InvalidValueException {
+        if (type == COLUMN_TYPE_EMBEDDINGVECTOR) {
+            return (EmbeddingVector) value;
+        }
         throw new InvalidValueException(
                 "cannot get field `vector` because value's type is " + getDataType());
     }

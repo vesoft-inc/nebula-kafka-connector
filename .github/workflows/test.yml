@@ -88,9 +88,6 @@ jobs:
         uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
-      - uses: s4u/maven-settings-action@v3.0.0
-        with:
-          mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
       - name: Link maven config file
         run: |
           ln -s /github/home/.m2/ /root/.m2
@@ -114,9 +111,6 @@ jobs:
         uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
-      - uses: s4u/maven-settings-action@v3.0.0
-        with:
-          mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
       - name: Link maven config file
         run: |
           ln -s /github/home/.m2/ /root/.m2
@@ -141,9 +135,6 @@ jobs:
         uses: stCarolas/setup-maven@v5
         with:
           maven-version: 3.8.2
-      - uses: s4u/maven-settings-action@v3.0.0
-        with:
-          mirrors: '[{"id": "nexus", "name": "nexus-maven-proxy", "mirrorOf": "*", "url": "${{ vars.MAVEN_MIRRORS }}"}]'
       - name: Link maven config file
         run: |
           ln -s /github/home/.m2/ /root/.m2

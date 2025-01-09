@@ -28,6 +28,8 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.DOUBLE_S
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.DURATION_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EDGE_TYPE_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ELEMENT_NUMBER_SIZE_FOR_VECTOR_VALUE;
+import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.EMBEDDING_VECTOR_FLOAT_VALUE_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.FLOAT_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.GRAPH_ID_SIZE;
 import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.INT16_SIZE;
@@ -57,6 +59,7 @@ import static com.vesoft.nebula.driver.graph.decode.struct.SizeConstant.ZONED_TI
 
 import com.google.protobuf.ByteString;
 import com.vesoft.nebula.driver.graph.data.Edge;
+import com.vesoft.nebula.driver.graph.data.EmbeddingVector;
 import com.vesoft.nebula.driver.graph.data.NDuration;
 import com.vesoft.nebula.driver.graph.data.NRecord;
 import com.vesoft.nebula.driver.graph.data.Node;
@@ -65,6 +68,7 @@ import com.vesoft.nebula.driver.graph.data.ValueWrapper;
 import com.vesoft.nebula.driver.graph.decode.datatype.BasicType;
 import com.vesoft.nebula.driver.graph.decode.datatype.DataType;
 import com.vesoft.nebula.driver.graph.decode.datatype.EdgeType;
+import com.vesoft.nebula.driver.graph.decode.datatype.EmbeddingVectorType;
 import com.vesoft.nebula.driver.graph.decode.datatype.ListType;
 import com.vesoft.nebula.driver.graph.decode.datatype.NodeType;
 import com.vesoft.nebula.driver.graph.decode.datatype.PathType;
@@ -362,12 +366,12 @@ public class ValueParser {
                                                                      .getType()));
                 }
                 Edge edgeValue = new Edge(edgeHeader.getGraphId(),
-                                             edgeHeader.getEdgeTypeId(),
-                                             edgeHeader.getRank(),
-                                             edgeHeader.getSrcId(),
-                                             edgeHeader.getDstId(),
-                                             edgeProps,
-                                             graphSchemas);
+                                          edgeHeader.getEdgeTypeId(),
+                                          edgeHeader.getRank(),
+                                          edgeHeader.getSrcId(),
+                                          edgeHeader.getDstId(),
+                                          edgeProps,
+                                          graphSchemas);
                 return edgeValue;
 
             case COLUMN_TYPE_PATH:
@@ -382,9 +386,9 @@ public class ValueParser {
                 // decode the special meta data into:
                 PathSpecialMetaData pathSpecialMetaData = vector.getPathSpecialMetaData();
                 // graphId -> (NodeTypeId -> vecIndex),  graphId -> (EdgeTypeId -> vecIndex)
-                Map<Integer,Map<Integer, Integer>> nodeTypes =
+                Map<Integer, Map<Integer, Integer>> nodeTypes =
                         pathSpecialMetaData.getGraphIdAndNodeTypes();
-                Map<Integer,Map<Integer, Integer>> edgeTypes =
+                Map<Integer, Map<Integer, Integer>> edgeTypes =
                         pathSpecialMetaData.getGraphIdAndEdgeTypes();
 
                 // construct map: uint16 pair index-> (node vector, adj vector)
@@ -453,6 +457,12 @@ public class ValueParser {
                                         ANY_HEADER_SIZE,
                                         rowIndex);
                 return bytesToAny(valueData, vector, rowIndex);
+            case COLUMN_TYPE_EMBEDDINGVECTOR:
+                EmbeddingVectorType vectorType = (EmbeddingVectorType) type;
+                int dim = vectorType.getDim();
+                valueData = getSubBytes(vectorData, dim * EMBEDDING_VECTOR_FLOAT_VALUE_SIZE,
+                                        rowIndex);
+                return bytesToEmbeddingVector(new BytesReader(valueData), dim);
             default:
                 throw new RuntimeException("do not support type: " + type);
         }
@@ -660,6 +670,20 @@ public class ValueParser {
         return new NDuration(isMonthBased, year, month, day, hour, minute, second, microSec);
     }
 
+
+    /**
+     * decode binary to EmbeddingVector
+     *
+     * @param reader BytesReader
+     * @return EmbeddingVector
+     */
+    private EmbeddingVector bytesToEmbeddingVector(BytesReader reader, int dim) {
+        List<Float> vector = new ArrayList<>(dim);
+        for (int i = 0; i < dim; i++) {
+            vector.add(bytesToFloat(reader.read(FLOAT_SIZE), byteOrder));
+        }
+        return new EmbeddingVector(dim, vector);
+    }
 
     /**
      * decode binary to Any Object
@@ -933,6 +957,10 @@ public class ValueParser {
                     eleValues.add(new ValueWrapper(element, elementType));
                 }
                 return new Path(eleValues);
+            case COLUMN_TYPE_EMBEDDINGVECTOR:
+                int vectorEleNum = bytesToInt16(reader.read(ELEMENT_NUMBER_SIZE_FOR_VECTOR_VALUE),
+                                                byteOrder);
+                return bytesToEmbeddingVector(reader, vectorEleNum);
             default:
                 throw new RuntimeException("do not support type:" + type);
         }
