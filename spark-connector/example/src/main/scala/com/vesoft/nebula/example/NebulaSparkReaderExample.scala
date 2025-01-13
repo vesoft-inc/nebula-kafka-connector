@@ -5,7 +5,7 @@
 
 package com.vesoft.nebula.example
 
-import com.vesoft.nebula.connector.{NebulaDataFrameGqlReader, NebulaDataFrameReader}
+import com.vesoft.nebula.spark.connector.{NebulaDataFrameGqlReader, NebulaDataFrameReader}
 import com.vesoft.nebula.spark.common.{GqlNebulaConfig, NebulaConnectionConfig, ReadNebulaConfig}
 import org.apache.spark.sql.SparkSession
 
