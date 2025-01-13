@@ -2,7 +2,6 @@ package decode
 
 import (
 	"encoding/binary"
-	"fmt"
 
 	"github.com/vesoft-inc/nebula-ng-tools/golang/internal/internal_error"
 
@@ -206,7 +205,7 @@ func newTypeSchema(r *bytesReader) (typeSchema, error) {
 			return nil, err
 		}
 		if subSchema.getType() != types.ColumnTypeFloat32 {
-			panic(fmt.Sprintf("unexpected child type: %+v", subSchema.getType()))
+			return nil, errInvalidColumnType
 		}
 		typ := columnTypeSchemaVector{
 			typ:       t,
