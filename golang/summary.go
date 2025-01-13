@@ -45,6 +45,10 @@ func (s *summary) QueryStats() types.QueryStats {
 	return &queryStats{s.summary.GetQueryStats()}
 }
 
+func (s *summary) Log() string {
+	return string(s.summary.LogStream)
+}
+
 func (p *planInfo) Id() string {
 	return string(p.planInfo.Id)
 }

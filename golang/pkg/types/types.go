@@ -36,6 +36,7 @@ type (
 		ExplainType() string
 		PlanInfo() PlanInfo
 		QueryStats() QueryStats
+		Log() string
 	}
 	PlanInfo interface {
 		Id() string

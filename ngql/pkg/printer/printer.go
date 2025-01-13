@@ -64,6 +64,10 @@ func (p *defaultPrinter) PrintResult(w io.Writer, res nebula.Result) {
 		s += "\n"
 		s += p.getQueryStatsString(res)
 	}
+	if (p.getLog(res)) != "" {
+		s += "\n"
+		s += "Log:\n" + p.getLog(res)
+	}
 	fmt.Fprintln(w, s)
 }
 
@@ -159,6 +163,10 @@ func (p *defaultPrinter) getQueryStatsString(res nebula.Result) string {
 		s += fmt.Sprintf("Affected edges: %d\n", stats.NumAffectedEdges())
 	}
 	return s
+}
+
+func (p *defaultPrinter) getLog(res nebula.Result) string {
+	return res.Summary().Log()
 }
 
 func (p *defaultPrinter) getResultVerticalString(res nebula.Result) string {
