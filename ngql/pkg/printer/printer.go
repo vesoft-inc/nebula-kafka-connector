@@ -68,6 +68,10 @@ func (p *defaultPrinter) PrintResult(w io.Writer, res nebula.Result) {
 		s += "\n"
 		s += "Log:\n" + p.getLog(res)
 	}
+	if (p.getCursor(res)) != "" {
+		s += "\n"
+		s += "Cursor: " + p.getCursor(res)
+	}
 	fmt.Fprintln(w, s)
 }
 
@@ -167,6 +171,10 @@ func (p *defaultPrinter) getQueryStatsString(res nebula.Result) string {
 
 func (p *defaultPrinter) getLog(res nebula.Result) string {
 	return res.Summary().Log()
+}
+
+func (p *defaultPrinter) getCursor(res nebula.Result) string {
+	return string(res.Cursor())
 }
 
 func (p *defaultPrinter) getResultVerticalString(res nebula.Result) string {
