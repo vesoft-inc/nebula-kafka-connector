@@ -32,7 +32,7 @@ class EdgeWriter(nebulaOptions: NebulaOptions,
     for (i <- dfSrcPkFieldsIndex.indices) {
       val srcIdValue = NebulaExecutor.extraPrimaryKey(row, schema, dfSrcPkFieldsIndex(i), edgeDesc.srcNodePkDataTypeMap(edgeDesc.srcNodePkNames(i)))
       if (srcIdValue == null) {
-        LOG.warn(s">>>> record has null value at index ${dfSrcPkFieldsIndex(i)} for primary key, ignore it. record:$row")
+        LOG.error(s">>>> record has null value at index ${dfSrcPkFieldsIndex(i)} for primary key, ignore it. record:$row")
         return
       }
       srcIds.put(edgeDesc.srcNodePkNames(i), srcIdValue)
@@ -42,7 +42,7 @@ class EdgeWriter(nebulaOptions: NebulaOptions,
     for (i <- dfDstPkFieldsIndex.indices) {
       val dstIdValue = NebulaExecutor.extraPrimaryKey(row, schema, dfDstPkFieldsIndex(i), edgeDesc.dstNodePkDataTypeMap(edgeDesc.dstNodePkNames(i)))
       if (dstIdValue == null) {
-        LOG.warn(s">>>> record has null value at index ${dfDstPkFieldsIndex(i)} for primary key, ignore it. record:$row")
+        LOG.error(s">>>> record has null value at index ${dfDstPkFieldsIndex(i)} for primary key, ignore it. record:$row")
         return
       }
       dstIds.put(edgeDesc.dstNodePkNames(i), dstIdValue)

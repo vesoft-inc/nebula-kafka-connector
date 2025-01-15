@@ -12,7 +12,7 @@ case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkNames: List
   /** *
    * construct the table header
    */
-  def tableHeaders: String = propNames.mkString(",")
+  def tableHeaders: String = propNames.map(p=>s"`$p`").mkString(",")
 
   /**
    * construct the table value
@@ -22,12 +22,10 @@ case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkNames: List
   }).mkString(",")
 
 
-  def propNamesStr = propNames.mkString(",")
-
   /**
    * construct the property mapping statement for insert
    */
-  def propNamesWithTableStr = propNames.map(prop => s"`$prop`:CAST(r.$prop AS ${fieldTypeMap(prop)})").mkString(",")
+  def propNamesWithTableStr = propNames.map(prop => s"`$prop`:CAST(r.`$prop` AS ${fieldTypeMap(prop)})").mkString(",")
 
   /**
    * construct the match filter statement for node
@@ -35,7 +33,7 @@ case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkNames: List
   def getPkFieldMathStatement(prefix: String): String = {
     val srcPkMappings = new ListBuffer[String]
     for (pkName <- pkNames) {
-      srcPkMappings.append(s"$prefix.`${pkName}`=CAST(r.${pkName} AS ${fieldTypeMap(pkName)})")
+      srcPkMappings.append(s"$prefix.`${pkName}`=CAST(r.`${pkName}` AS ${fieldTypeMap(pkName)})")
     }
     srcPkMappings.mkString(" AND ")
   }
@@ -47,7 +45,7 @@ case class NebulaNodes(nodeType: String, values: List[NebulaNode], pkNames: List
     val propNameMappings = new ListBuffer[String]
     for (name <- propNames) {
       if (!pkNames.contains(name)) {
-        propNameMappings.append(s"$prefix.`${name}`=CAST(r.${name} AS ${fieldTypeMap(name)})")
+        propNameMappings.append(s"$prefix.`${name}`=CAST(r.`${name}` AS ${fieldTypeMap(name)})")
       }
     }
     propNameMappings.mkString(",")
@@ -79,7 +77,7 @@ case class NebulaEdges(edgeType: String,
   def tableHeaders: String = {
     val propNamesWithoutPks = propNames.filterNot(p => dfSrcFields.contains(p) || dfDstFields.contains(p))
     val pksAndPropNames     = dfSrcFields ++ dfDstFields ++ propNamesWithoutPks
-    pksAndPropNames.distinct.mkString(",")
+    pksAndPropNames.distinct.map(p =>s"`$p`").mkString(",")
   }
 
   def getEdgesStr = {
@@ -117,13 +115,13 @@ case class NebulaEdges(edgeType: String,
     val propNamesWithoutPks = propNames.filterNot(p => dfSrcFields.contains(p) || dfDstFields.contains(p))
       .filterNot(p => srcPkNames.contains(p) || dstPkNames.contains(p))
     val pksAndPropNames     = dfSrcFields ++ dfDstFields ++ propNamesWithoutPks
-    pksAndPropNames.distinct.map(n => s"r.$n as $n").mkString(",")
+    pksAndPropNames.distinct.map(n => s"r.`$n` as _$n").mkString(",")
   }
 
   def getSrcPkStr(prefix: String): String = {
     val srcPkMappings = new ListBuffer[String]
     for (i <- srcPkNames.indices) {
-      srcPkMappings.append(s"$prefix.`${srcPkNames(i)}`=CAST(${dfSrcFields(i)} AS ${srcPkDataTypeMap(srcPkNames(i))})")
+      srcPkMappings.append(s"$prefix.`${srcPkNames(i)}`=CAST(_${dfSrcFields(i)} AS ${srcPkDataTypeMap(srcPkNames(i))})")
     }
     srcPkMappings.mkString(" AND ")
   }
@@ -131,17 +129,17 @@ case class NebulaEdges(edgeType: String,
   def getDstPkStr(prefix: String): String = {
     val dstPkMappings = new ListBuffer[String]
     for (i <- dstPkNames.indices) {
-      dstPkMappings.append(s"$prefix.`${dstPkNames(i)}`=CAST(${dfDstFields(i)} AS ${dstPkDataTypeMap(dstPkNames(i))})")
+      dstPkMappings.append(s"$prefix.`${dstPkNames(i)}`=CAST(_${dfDstFields(i)} AS ${dstPkDataTypeMap(dstPkNames(i))})")
     }
     dstPkMappings.mkString(" AND ")
   }
 
 
-  def propNamesWithTableStr: String = propNames.map(prop => s"`$prop`:CAST($prop AS ${fieldTypeMap(prop)})").mkString(",")
+  def propNamesWithTableStr: String = propNames.map(prop => s"`$prop`:CAST(_$prop AS ${fieldTypeMap(prop)})").mkString(",")
 
   /**
    * construct the setting property mapping for update
    */
-  def getUpdatePropNamesWithTableStr: String = propNames.map(prop => s"e.`$prop`=CAST($prop AS ${fieldTypeMap(prop)})").mkString(",")
+  def getUpdatePropNamesWithTableStr: String = propNames.map(prop => s"e.`$prop`=CAST(_$prop AS ${fieldTypeMap(prop)})").mkString(",")
 
 }

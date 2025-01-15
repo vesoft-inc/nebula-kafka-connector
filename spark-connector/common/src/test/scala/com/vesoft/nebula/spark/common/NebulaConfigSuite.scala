@@ -117,7 +117,7 @@ class NebulaConfigSuite extends AnyFunSuite with BeforeAndAfterAll {
       .withGraphName("test")
       .withTypeName("person")
       .build()
-    assert(readNebulaConfig.getPartitionNum == 100)
+    assert(readNebulaConfig.getPartitionNum == 10)
     assert(readNebulaConfig.getBatchSize == 2000)
     assert(readNebulaConfig.getReturnCols == null)
   }

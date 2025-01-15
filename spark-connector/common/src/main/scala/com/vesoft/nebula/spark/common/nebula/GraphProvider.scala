@@ -140,6 +140,7 @@ class GraphProvider(addresses: String,
     while (resultSet.hasNext) {
       partitions.add(resultSet.next().get("partition_id").asInt())
     }
+    partitions.remove(0)
     partitions
   }
 

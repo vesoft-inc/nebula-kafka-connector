@@ -17,7 +17,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll{
 
   val graphAddr = "192.168.8.6:3820"
   val user = "root"
-  val passwd = "nebula"
+  val passwd = "Nebula123"
 
   override def beforeAll():Unit = {
     val graphMock = new NebulaGraphMock
@@ -151,7 +151,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll{
       .builder()
       .withGraphName("spark_read")
       .withTypeName("edge_follow")
-      .withReturnCols(List("col1", "col2"))
+      .withReturnCols(List("ecol1", "ecol2"))
       .withBatchSize(1)
       .withPartitionNum(10)
       .build()

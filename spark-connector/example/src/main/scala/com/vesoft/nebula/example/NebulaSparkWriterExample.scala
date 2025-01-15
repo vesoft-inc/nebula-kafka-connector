@@ -4,7 +4,6 @@ package com.vesoft.nebula.example
 import breeze.numerics.log
 import com.sun.org.slf4j.internal.LoggerFactory
 import com.vesoft.nebula.spark.connector.NebulaDataFrameWriter
-import com.vesoft.nebula.driver.graph.data.ResultSet
 import com.vesoft.nebula.driver.graph.net.NebulaClient
 import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, WriteMode, WriteNebulaEdgeConfig, WriteNebulaNodeConfig}
 import org.apache.spark.sql.SparkSession

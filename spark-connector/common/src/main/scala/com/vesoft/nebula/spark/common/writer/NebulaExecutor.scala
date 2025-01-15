@@ -164,7 +164,7 @@ object NebulaExecutor {
    */
   def toInsertSentence(graphName: String, nodes: NebulaNodes, mode: String): String = {
     s"""
-       |TABLE t {${nodes.propNamesStr}} =
+       |TABLE t {${nodes.tableHeaders}} =
        |${nodes.getNodesStr}
        |USE `$graphName`
        |FOR r IN t
@@ -241,7 +241,7 @@ object NebulaExecutor {
   def toDeleteSentence(graphName: String, nodeType: String, nodes: NebulaNodes, deleteMode: String): String = {
     if (nodes.pkNames.size == 1) {
       val nodePks = nodes.values.map(node => node.values(nodes.pkNames.head)).mkString(",")
-      s"USE `$graphName` MATCH(a@$nodeType where a.${nodes.pkNames.head} in [$nodePks]) DETACH DELETE a "
+      s"USE `$graphName` MATCH(a@`$nodeType` where a.`${nodes.pkNames.head}` in [$nodePks]) DETACH DELETE a "
     } else {
       s"""
          |TABLE t {${nodes.tableHeaders}} =

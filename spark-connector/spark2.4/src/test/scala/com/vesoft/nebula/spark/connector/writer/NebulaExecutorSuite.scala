@@ -110,11 +110,11 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       NebulaExecutor.toInsertSentence(graphName, nebulaNodes, "")
     var expectStatement =
       s"""
-         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |INSERT  (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+         |INSERT  (@`$nodeType`{`col_string`:CAST(r.`col_string` AS STRING),`col_fixed_string`:CAST(r.`col_fixed_string` AS STRING),`col_bool`:CAST(r.`col_bool` AS BOOL),`col_int`:CAST(r.`col_int` AS INT32),`col_int64`:CAST(r.`col_int64` AS INT64),`col_double`:CAST(r.`col_double` AS DOUBLE),`col_date`:CAST(r.`col_date` AS DATE)})
          |""".stripMargin
     assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
 
@@ -123,11 +123,11 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       NebulaExecutor.toInsertSentence(graphName, nebulaNodes, "OR REPLACE")
     expectStatement =
       s"""
-         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |INSERT OR REPLACE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+         |INSERT OR REPLACE (@`$nodeType`{`col_string`:CAST(r.`col_string` AS STRING),`col_fixed_string`:CAST(r.`col_fixed_string` AS STRING),`col_bool`:CAST(r.`col_bool` AS BOOL),`col_int`:CAST(r.`col_int` AS INT32),`col_int64`:CAST(r.`col_int64` AS INT64),`col_double`:CAST(r.`col_double` AS DOUBLE),`col_date`:CAST(r.`col_date` AS DATE)})
          |""".stripMargin
     assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
 
@@ -136,11 +136,11 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       NebulaExecutor.toInsertSentence(graphName, nebulaNodes, "OR IGNORE")
     expectStatement =
       s"""
-         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |INSERT OR IGNORE (@`$nodeType`{`col_string`:CAST(r.col_string AS STRING),`col_fixed_string`:CAST(r.col_fixed_string AS STRING),`col_bool`:CAST(r.col_bool AS BOOL),`col_int`:CAST(r.col_int AS INT32),`col_int64`:CAST(r.col_int64 AS INT64),`col_double`:CAST(r.col_double AS DOUBLE),`col_date`:CAST(r.col_date AS DATE)})
+         |INSERT OR IGNORE (@`$nodeType`{`col_string`:CAST(r.`col_string` AS STRING),`col_fixed_string`:CAST(r.`col_fixed_string` AS STRING),`col_bool`:CAST(r.`col_bool` AS BOOL),`col_int`:CAST(r.`col_int` AS INT32),`col_int64`:CAST(r.`col_int64` AS INT64),`col_double`:CAST(r.`col_double` AS DOUBLE),`col_date`:CAST(r.`col_date` AS DATE)})
          |""".stripMargin
     assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
 
@@ -179,16 +179,16 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
 
     val exptStatement =
       s"""
-         |TABLE t {id1,id2,col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`id1`,`id2`,`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"vid1\",\"vid2\",\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"vid2\",\"vid1\",\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |RETURN r.id1 as id1,r.id2 as id2,r.col_string as col_string,r.col_fixed_string as col_fixed_string,r.col_bool as col_bool,r.col_int as col_int,r.col_int64 as col_int64,r.col_double as col_double, r.col_date as col_date
+         |RETURN r.`id1` as _id1,r.`id2` as _id2,r.`col_string` as _col_string,r.`col_fixed_string` as _col_fixed_string,r.`col_bool` as _col_bool,r.`col_int` as _col_int,r.`col_int64` as _col_int64,r.`col_double` as _col_double, r.`col_date` as _col_date
          |NEXT
          |USE `$graphName`
-         |OPTIONAL MATCH (src_node@`person`) WHERE src_node.`id`=CAST(id1 AS STRING)
-         |OPTIONAL MATCH (dst_node@`person`) WHERE dst_node.`id`=CAST(id2 AS STRING)
-         |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(col_string AS STRING),`col_fixed_string`:CAST(col_fixed_string AS STRING),`col_bool`:CAST(col_bool AS BOOL),`col_int`:CAST(col_int AS INT32),`col_int64`:CAST(col_int64 AS INT64),`col_double`:CAST(col_double AS DOUBLE),`col_date`:CAST(col_date AS DATE)}]->(dst_node)
+         |OPTIONAL MATCH (src_node@`person`) WHERE src_node.`id`=CAST(_id1 AS STRING)
+         |OPTIONAL MATCH (dst_node@`person`) WHERE dst_node.`id`=CAST(_id2 AS STRING)
+         |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(_col_string AS STRING),`col_fixed_string`:CAST(_col_fixed_string AS STRING),`col_bool`:CAST(_col_bool AS BOOL),`col_int`:CAST(_col_int AS INT32),`col_int64`:CAST(_col_int64 AS INT64),`col_double`:CAST(_col_double AS DOUBLE),`col_date`:CAST(_col_date AS DATE)}]->(dst_node)
          |""".stripMargin
 
     assert(exptStatement.toCharArray.sorted.mkString("").trim.equals(edgeStatement.toCharArray.sorted.mkString("").trim))
@@ -237,16 +237,16 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
 
     val exptStatement =
       s"""
-         |TABLE t {dfId1,dfId2,dfId3,dfId4,col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`dfId1`,`dfId2`,`dfId3`,`dfId4`,`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"id_1\",\"id_2\",\"id_3\",\"id_4\",\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"id_3\",\"id_4\",\"id_1\",\"id_2\",\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |RETURN r.dfId1 as dfId1,r.dfId2 as dfId2,r.dfId3 as dfId3,r.dfId4 as dfId4,r.col_string as col_string,r.col_fixed_string as col_fixed_string,r.col_bool as col_bool,r.col_int as col_int,r.col_int64 as col_int64,r.col_double as col_double, r.col_date as col_date
+         |RETURN r.`dfId1` as _dfId1,r.`dfId2` as _dfId2,r.`dfId3` as _dfId3,r.`dfId4` as _dfId4,r.`col_string` as _col_string,r.`col_fixed_string` as _col_fixed_string,r.`col_bool` as _col_bool,r.`col_int` as _col_int,r.`col_int64` as _col_int64,r.`col_double` as _col_double, r.`col_date` as _col_date
          |NEXT
          |USE `$graphName`
-         |OPTIONAL MATCH (src_node@`person`) WHERE src_node.`id1`=CAST(dfId1 AS STRING) AND src_node.`id2`=CAST(dfId2 AS STRING)
-         |OPTIONAL MATCH (dst_node@`person`) WHERE dst_node.`id1`=CAST(dfId3 AS STRING) AND dst_node.`id2`=CAST(dfId4 AS STRING)
-         |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(col_string AS STRING),`col_fixed_string`:CAST(col_fixed_string AS STRING),`col_bool`:CAST(col_bool AS BOOL),`col_int`:CAST(col_int AS INT32),`col_int64`:CAST(col_int64 AS INT64),`col_double`:CAST(col_double AS DOUBLE),`col_date`:CAST(col_date AS DATE)}]->(dst_node)
+         |OPTIONAL MATCH (src_node@`person`) WHERE src_node.`id1`=CAST(_dfId1 AS STRING) AND src_node.`id2`=CAST(_dfId2 AS STRING)
+         |OPTIONAL MATCH (dst_node@`person`) WHERE dst_node.`id1`=CAST(_dfId3 AS STRING) AND dst_node.`id2`=CAST(_dfId4 AS STRING)
+         |INSERT  (src_node)-[e@`friend`{`col_string`:CAST(_col_string AS STRING),`col_fixed_string`:CAST(_col_fixed_string AS STRING),`col_bool`:CAST(_col_bool AS BOOL),`col_int`:CAST(_col_int AS INT32),`col_int64`:CAST(_col_int64 AS INT64),`col_double`:CAST(_col_double AS DOUBLE),`col_date`:CAST(_col_date AS DATE)}]->(dst_node)
          |""".stripMargin
 
     assert(exptStatement.toCharArray.sorted.mkString("").trim.equals(edgeStatement.toCharArray.sorted.mkString("").trim))
@@ -285,7 +285,7 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
       NebulaExecutor.toDeleteSentence(graphName, nodeType, nebulaNodes, "DETACH DELETE")
 
     val expectStatement =
-      s"""USE `$graphName` MATCH (a@$nodeType where a.col_string in [\"Bob\",\"Tom\"]) DETACH DELETE a""".stripMargin
+      s"""USE `$graphName` MATCH (a@`$nodeType` where a.`col_string` in [\"Bob\",\"Tom\"]) DETACH DELETE a""".stripMargin
 
     expectStatement.toCharArray.sorted.mkString("")
     assert(expectStatement.toCharArray.sorted.mkString("").equals(nodeStatement.toCharArray.sorted.mkString("")))
@@ -326,11 +326,11 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
 
     val expectStatement =
       s"""
-         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"Tom\",\"Tom\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Bob\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |MATCH(v_node@`person`) WHERE v_node.`col_string`=CAST(r.col_string AS STRING) AND v_node.`col_fixed_string`=CAST(r.col_fixed_string AS STRING)
+         |MATCH(v_node@`person`) WHERE v_node.`col_string`=CAST(r.`col_string` AS STRING) AND v_node.`col_fixed_string`=CAST(r.`col_fixed_string` AS STRING)
          |DETACH DELETE v_node
          |""".stripMargin
 
@@ -371,15 +371,15 @@ class NebulaExecutorSuite extends AnyFunSuite with BeforeAndAfterAll {
 
     val expectStatement =
       s"""
-         |TABLE t {col_string,col_fixed_string,col_bool,col_int,col_int64,col_double,col_date} =
+         |TABLE t {`col_string`,`col_fixed_string`,`col_bool`,`col_int`,`col_int64`,`col_double`,`col_date`} =
          |(\"Tom\",\"Bob\",true,10,100,1.0,date(\"2021-11-12\")),(\"Bob\",\"Tom\",false,20,200,2.0,date(\"2021-05-01\"))
          |USE `$graphName`
          |FOR r IN t
-         |RETURN r.col_string as col_string,r.col_fixed_string as col_fixed_string,r.col_bool as col_bool,r.col_int as col_int,r.col_int64 as col_int64,r.col_double as col_double, r.col_date as col_date
+         |RETURN r.`col_string` as _col_string,r.`col_fixed_string` as _col_fixed_string,r.`col_bool` as _col_bool,r.`col_int` as _col_int,r.`col_int64` as _col_int64,r.`col_double` as _col_double, r.`col_date` as _col_date
          |NEXT
          |USE `$graphName`
-         |MATCH (nebula_src_node@`person`) WHERE nebula_src_node.`id`=CAST(col_string AS STRING)
-         |MATCH (nebula_dst_node@`person`) WHERE nebula_dst_node.`id`=CAST(col_fixed_string AS STRING)
+         |MATCH (nebula_src_node@`person`) WHERE nebula_src_node.`id`=CAST(_col_string AS STRING)
+         |MATCH (nebula_dst_node@`person`) WHERE nebula_dst_node.`id`=CAST(_col_fixed_string AS STRING)
          |MATCH (nebula_src_node)-[e@`friend`]->(nebula_dst_node)
          |DELETE e
          |""".stripMargin

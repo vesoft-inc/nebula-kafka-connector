@@ -12,7 +12,7 @@ import org.apache.spark.sql.types.StructType
 
 import scala.collection.mutable.ListBuffer
 
-class NodeWriter(nebulaOptions: NebulaOptions, schema: StructType) extends NebulaWriter(nebulaOptions){
+class NodeWriter(nebulaOptions: NebulaOptions, schema: StructType) extends NebulaWriter(nebulaOptions) {
 
   private val nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)
 
@@ -22,13 +22,13 @@ class NodeWriter(nebulaOptions: NebulaOptions, schema: StructType) extends Nebul
   /** buffer to save batch vertices */
   protected val nodes: ListBuffer[NebulaNode] = new ListBuffer()
 
-  def writeRow(row:InternalRow): Unit = {
+  def writeRow(row: InternalRow): Unit = {
     // check the node primary key value's validation, the pkName must exist in row,
     // it's already checked in NebulaDataSourceNodeWriter.createWriterFactory
     val pkIndicesInSparkRow: Map[String, Int] = schema.fields.toList.map(field => field.name).zip(schema.fields.indices).toMap
     pkIndicesInSparkRow.foreach((pkIndex) => {
-      if (row.isNullAt(pkIndex._2)) {
-        LOG.warn(s">>>> record has null value at index ${pkIndex._2} for primary key ${pkIndex._1}, ignore it. record:$row")
+      if (row.isNullAt(pkIndex._2) && pkNames.contains(pkIndex._1)) {
+        LOG.error(s">>>> record has null value at index ${pkIndex._2} for primary key ${pkIndex._1}, ignore it. record:$row")
         return
       }
     })

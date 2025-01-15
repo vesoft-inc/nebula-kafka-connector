@@ -12,22 +12,24 @@ import scala.collection.JavaConverters.asScalaBufferConverter
 
 class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   var graphProvider: GraphProvider = null
+  val graphName = "spark_connector_nba"
 
   override def beforeAll(): Unit = {
     val address = "192.168.8.6:3820"
     val authOptions = new util.HashMap[String, Object]()
-    authOptions.put("password", "nebula")
+    authOptions.put("password", "Nebula123")
     graphProvider = new GraphProvider(address, "root", authOptions,
                                       3000,
                                       "/default_schema",
                                       "%Y-%m-%dT%H:%M:%S %z",
-                                      "%H:%M:%S",
+                                      "%Y-%m-%dT%H:%M:%S",
                                       "%H:%M:%S %z",
                                       "%H:%M:%S")
 
-    val createSchema = "CREATE GRAPH TYPE graph_type_nba AS {" +
-      "(node_type_player LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
-      "(node_type_player)-[edge_type_follow LABEL follow {followness INT, likeness FLOAT64}]->(node_type_player)}"
+    val createSchema = "CREATE GRAPH TYPE IF NOT EXISTS spark_connector_nba_type AS {" +
+      "NODE TYPE node_type_player (LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +
+      "EDGE TYPE edge_type_follow (node_type_player)-[LABEL follow {followness INT, likeness FLOAT64}]->(node_type_player)}"
+    val createGraph = "CREATE GRAPH IF NOT EXISTS spark_connector_nba TYPED spark_connector_nba_type"
     val resp = graphProvider.submit(createSchema)
     if (!resp.isSucceeded) {
       System.out.println("create graph type failed, " + resp.getErrorMessage)
@@ -41,7 +43,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
 
 
   test("getNodeDesc") {
-    val nodeDesc = graphProvider.getNodeDesc("nba", "node_type_player")
+    val nodeDesc = graphProvider.getNodeDesc(graphName, "node_type_player")
     assert(nodeDesc.nodeTypeName.equals("node_type_player"))
     assert(nodeDesc.properties.size == 5)
     assert(nodeDesc.properties.keySet.contains("id"))
@@ -52,7 +54,7 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   }
 
   test("getEdgeDesc") {
-    val edgeDesc = graphProvider.getEdgeDesc("nba", "edge_type_follow")
+    val edgeDesc = graphProvider.getEdgeDesc(graphName, "edge_type_follow")
     assert(edgeDesc.edgeTypeName.equals("edge_type_follow"))
     assert(edgeDesc.srcNodeTypeName.equals("node_type_player"))
     assert(edgeDesc.dstNodeTypeName.equals("node_type_player"))
