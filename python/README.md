@@ -30,10 +30,7 @@ client = NebulaClient(
 )
 
 query = """
-    USE movie
-    MATCH p=(a:Movie{name:"Unpromised Land"})-[e:WithGenre]->(b:Genre) 
-    RETURN p as path, e as edge_WithGenre, b as genre_node, a.name as movie_name, 3.14 as float_val, true as bool_val
-    LIMIT 2
+    RETURN 1 AS a, 2 AS b
 """
 # Execute query
 result = client.execute(query)
@@ -42,60 +39,49 @@ result = client.execute(query)
 2. Then we could inspect the result ourselves.
 
 ```python
-# Get one row
-result = client.execute(query)
-row = result.next()
+# Print the result in table style
+result.print()
+```
+```
+╔═══╤═══╗
+║   │   ║
+║ a │ b ║
+║   │   ║
+╟───┼───╢
+║   │   ║
+║ 1 │ 2 ║
+║   │   ║
+╚═══╧═══╝
 
-# Get column names
-row.column_names
+Summary
+├── Rows: 1
+└── Latency: 1450μs
+```
+
+```python
+# Get one row
+row = result.one()
 
 # Get one value
-cell = row.col_values[0].cast()
+cell = row["a"].cast_primitive()
 
-# see a cell and its methods
-cell
-
-# see all methods of a cell
-dir(cell)
+# Print its value
+print(cell, type(cell))
+```
+```
+1 <class 'int'>
 ```
 
-3. We could actually get primitive values from a cell with `cast_primitive()` method.
+
+3. We could actually get primitive values from the result set.
 
 ```python
-cell_primitive = cell.cast_primitive()
-
-cell_primitive
+print(result.as_primitive_by_column())
+print(list(result.as_primitive_by_row()))
 ```
-
-And it looks like this:
-
-```python
-{'nodes': [{'id': 289226172909223937,
-   'type': 'Movie',
-   'labels': ['Movie'],
-   'properties': {'name': 'Unpromised Land', 'id': 91}},
-  {'id': 289483299716333572,
-   'type': 'Genre',
-   'labels': ['Genre'],
-   'properties': {'name': 'Staged Documentary', 'id': 101}}],
- 'edges': [{'src_id': 289226172909223937,
-   'dst_id': 289483299716333572,
-   'rank': 0,
-   'type': 'WithGenre',
-   'labels': ['WithGenre'],
-   'properties': {},
-   'direction': 'OUTGOING'}],
- 'length': 2,
- 'start_node': {'id': 289226172909223937,
-  'type': 'Movie',
-  'labels': ['Movie'],
-  'properties': {'name': 'Unpromised Land', 'id': 91}},
- 'end_node': {'id': 289483299716333572,
-  'type': 'Genre',
-  'labels': ['Genre'],
-  'properties': {'name': 'Staged Documentary', 'id': 101}},
- 'string_representation': '(289226172909223937@Movie:Movie{name:Unpromised Land,id:91})-[0@WithGenre:WithGenre{}]->(289483299716333572@Genre:Genre{name:Staged Documentary,id:101})'}
-
+```
+{'a': [1], 'b': [2]}
+[{'a': 1, 'b': 2}]
 ```
 
 4. If needed we could also get a pandas dataframe from the result.
@@ -112,35 +98,17 @@ Then we could get a pandas dataframe like this:
 result = client.execute(query)
 df = result.as_pandas_df()
 ```
-
-5. Also you could print the result directly.
-
-```python
-client.print_query_result(query) # or client.pq(query)
+```
+   a  b
+0  1  2
 ```
 
-Result:
+## Console Tools
 
-```
-╔════════════════════════════════════════════════╤════════════════════════════════════════════════╤═════════════════════════════════════════════════╤═════════════════╤═══════════╤══════════╗
-║                                                │                                                │                                                 │                 │           │          ║
-║ path                                           │ edge_WithGenre                                 │ genre_node                                      │ movie_name      │ float_val │ bool_val ║
-║                                                │                                                │                                                 │                 │           │          ║
-╟────────────────────────────────────────────────┼────────────────────────────────────────────────┼─────────────────────────────────────────────────┼─────────────────┼───────────┼──────────╢
-║                                                │                                                │                                                 │                 │           │          ║
-║ (289226172909223937@Movie:Movie{name:Unpromis… │ (289226172909223937)-[0@WithGenre:['WithGenre… │ (289556378584875011@Genre:['Genre']{name:Soci,… │ Unpromised Land │ 3.14      │ True     ║
-║ Land,id:91})-[0@WithGenre:WithGenre{}]->(2895… │                                                │                                                 │                 │           │          ║
-║                                                │                                                │                                                 │                 │           │          ║
-║                                                │                                                │                                                 │                 │           │          ║
-║ (289226172909223937@Movie:Movie{name:Unpromis… │ (289226172909223937)-[0@WithGenre:['WithGenre… │ (289483299716333572@Genre:['Genre']{name:Staged │ Unpromised Land │ 3.14      │ True     ║
-║ Land,id:91})-[0@WithGenre:WithGenre{}]->(2894… │                                                │ Documentary,id:101})                            │                 │           │          ║
-║ Documentary,                                   │                                                │                                                 │                 │           │          ║
-║                                                │                                                │                                                 │                 │           │          ║
-╚════════════════════════════════════════════════╧════════════════════════════════════════════════╧═════════════════════════════════════════════════╧═════════════════╧═══════════╧══════════╝
+Run `ngcli --help` to get the help message. An example to connect to NebulaGraph is as follows:
 
-Summary
-├── Rows: 2
-└── Latency: 3422μs
+```bash
+ngcli -h 127.0.0.1:9669 -u root -p NebulaGraph01
 ```
 
 ## Dev and Debug

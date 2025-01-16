@@ -1,7 +1,6 @@
 import struct
 
-from data_types import ByteOrder, charset
-
+from nebulagraph_python.data_types import ByteOrder, charset
 from nebulagraph_python.proto.vector_pb2 import NestedVector
 from nebulagraph_python.size_constant import ELEMENT_NUMBER_SIZE_FOR_ANY_VALUE
 

@@ -1,5 +1,5 @@
-import common_pb2 as _common_pb2
-import vector_pb2 as _vector_pb2
+from . import nebula_common_pb2 as _nebula_common_pb2
+from . import vector_pb2 as _vector_pb2
 from google.protobuf.internal import containers as _containers
 from google.protobuf import descriptor as _descriptor
 from google.protobuf import message as _message
@@ -8,7 +8,7 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class QueryStats(_message.Message):
-    __slots__ = ("num_affected_nodes", "num_affected_edges")
+    __slots__ = ["num_affected_nodes", "num_affected_edges"]
     NUM_AFFECTED_NODES_FIELD_NUMBER: _ClassVar[int]
     NUM_AFFECTED_EDGES_FIELD_NUMBER: _ClassVar[int]
     num_affected_nodes: int
@@ -16,7 +16,7 @@ class QueryStats(_message.Message):
     def __init__(self, num_affected_nodes: _Optional[int] = ..., num_affected_edges: _Optional[int] = ...) -> None: ...
 
 class PlanInfo(_message.Message):
-    __slots__ = ("id", "name", "details", "columns", "time_ms", "rows", "memory_kib", "blocked_ms", "queued_ms", "consume_ms", "produce_ms", "finish_ms", "batches", "concurrency", "other_stats_json", "children")
+    __slots__ = ["id", "name", "details", "columns", "time_ms", "rows", "memory_kib", "blocked_ms", "queued_ms", "consume_ms", "produce_ms", "finish_ms", "batches", "concurrency", "other_stats_json", "children"]
     ID_FIELD_NUMBER: _ClassVar[int]
     NAME_FIELD_NUMBER: _ClassVar[int]
     DETAILS_FIELD_NUMBER: _ClassVar[int]
@@ -52,7 +52,7 @@ class PlanInfo(_message.Message):
     def __init__(self, id: _Optional[bytes] = ..., name: _Optional[bytes] = ..., details: _Optional[bytes] = ..., columns: _Optional[_Iterable[bytes]] = ..., time_ms: _Optional[float] = ..., rows: _Optional[int] = ..., memory_kib: _Optional[float] = ..., blocked_ms: _Optional[float] = ..., queued_ms: _Optional[float] = ..., consume_ms: _Optional[float] = ..., produce_ms: _Optional[float] = ..., finish_ms: _Optional[float] = ..., batches: _Optional[int] = ..., concurrency: _Optional[int] = ..., other_stats_json: _Optional[bytes] = ..., children: _Optional[_Iterable[_Union[PlanInfo, _Mapping]]] = ...) -> None: ...
 
 class ElapsedTime(_message.Message):
-    __slots__ = ("total_server_time_us", "build_time_us", "optimize_time_us", "serialize_time_us")
+    __slots__ = ["total_server_time_us", "build_time_us", "optimize_time_us", "serialize_time_us"]
     TOTAL_SERVER_TIME_US_FIELD_NUMBER: _ClassVar[int]
     BUILD_TIME_US_FIELD_NUMBER: _ClassVar[int]
     OPTIMIZE_TIME_US_FIELD_NUMBER: _ClassVar[int]
@@ -64,7 +64,7 @@ class ElapsedTime(_message.Message):
     def __init__(self, total_server_time_us: _Optional[int] = ..., build_time_us: _Optional[int] = ..., optimize_time_us: _Optional[int] = ..., serialize_time_us: _Optional[int] = ...) -> None: ...
 
 class Summary(_message.Message):
-    __slots__ = ("elapsed_time", "explain_type", "plan_info", "query_stats", "log_stream")
+    __slots__ = ["elapsed_time", "explain_type", "plan_info", "query_stats", "log_stream"]
     ELAPSED_TIME_FIELD_NUMBER: _ClassVar[int]
     EXPLAIN_TYPE_FIELD_NUMBER: _ClassVar[int]
     PLAN_INFO_FIELD_NUMBER: _ClassVar[int]
@@ -78,7 +78,7 @@ class Summary(_message.Message):
     def __init__(self, elapsed_time: _Optional[_Union[ElapsedTime, _Mapping]] = ..., explain_type: _Optional[bytes] = ..., plan_info: _Optional[_Union[PlanInfo, _Mapping]] = ..., query_stats: _Optional[_Union[QueryStats, _Mapping]] = ..., log_stream: _Optional[bytes] = ...) -> None: ...
 
 class ExecuteRequest(_message.Message):
-    __slots__ = ("session_id", "stmt")
+    __slots__ = ["session_id", "stmt"]
     SESSION_ID_FIELD_NUMBER: _ClassVar[int]
     STMT_FIELD_NUMBER: _ClassVar[int]
     session_id: int
@@ -86,31 +86,31 @@ class ExecuteRequest(_message.Message):
     def __init__(self, session_id: _Optional[int] = ..., stmt: _Optional[bytes] = ...) -> None: ...
 
 class ExecuteResponse(_message.Message):
-    __slots__ = ("status", "result", "summary", "cursor")
+    __slots__ = ["status", "result", "summary", "cursor"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     RESULT_FIELD_NUMBER: _ClassVar[int]
     SUMMARY_FIELD_NUMBER: _ClassVar[int]
     CURSOR_FIELD_NUMBER: _ClassVar[int]
-    status: _common_pb2.Status
+    status: _nebula_common_pb2.Status
     result: _vector_pb2.VectorResultTable
     summary: Summary
     cursor: bytes
-    def __init__(self, status: _Optional[_Union[_common_pb2.Status, _Mapping]] = ..., result: _Optional[_Union[_vector_pb2.VectorResultTable, _Mapping]] = ..., summary: _Optional[_Union[Summary, _Mapping]] = ..., cursor: _Optional[bytes] = ...) -> None: ...
+    def __init__(self, status: _Optional[_Union[_nebula_common_pb2.Status, _Mapping]] = ..., result: _Optional[_Union[_vector_pb2.VectorResultTable, _Mapping]] = ..., summary: _Optional[_Union[Summary, _Mapping]] = ..., cursor: _Optional[bytes] = ...) -> None: ...
 
 class AuthRequest(_message.Message):
-    __slots__ = ("username", "auth_info", "client_info")
+    __slots__ = ["username", "auth_info", "client_info"]
     USERNAME_FIELD_NUMBER: _ClassVar[int]
     AUTH_INFO_FIELD_NUMBER: _ClassVar[int]
     CLIENT_INFO_FIELD_NUMBER: _ClassVar[int]
     username: bytes
     auth_info: bytes
-    client_info: _common_pb2.ClientInfo
-    def __init__(self, username: _Optional[bytes] = ..., auth_info: _Optional[bytes] = ..., client_info: _Optional[_Union[_common_pb2.ClientInfo, _Mapping]] = ...) -> None: ...
+    client_info: _nebula_common_pb2.ClientInfo
+    def __init__(self, username: _Optional[bytes] = ..., auth_info: _Optional[bytes] = ..., client_info: _Optional[_Union[_nebula_common_pb2.ClientInfo, _Mapping]] = ...) -> None: ...
 
 class AuthResponse(_message.Message):
-    __slots__ = ("status", "session_id")
+    __slots__ = ["status", "session_id"]
     STATUS_FIELD_NUMBER: _ClassVar[int]
     SESSION_ID_FIELD_NUMBER: _ClassVar[int]
-    status: _common_pb2.Status
+    status: _nebula_common_pb2.Status
     session_id: int
-    def __init__(self, status: _Optional[_Union[_common_pb2.Status, _Mapping]] = ..., session_id: _Optional[int] = ...) -> None: ...
+    def __init__(self, status: _Optional[_Union[_nebula_common_pb2.Status, _Mapping]] = ..., session_id: _Optional[int] = ...) -> None: ...

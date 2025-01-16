@@ -1,4 +1,8 @@
 from enum import Enum
+from typing import TYPE_CHECKING, Optional
+
+if TYPE_CHECKING:
+    from src.nebulagraph_python.result_set import ResultSet
 
 
 class ErrorCode(Enum):
@@ -353,35 +357,24 @@ class ErrorCode(Enum):
         except ValueError:
             return ErrorCode.UNKNOWN_FOR_CLIENT
 
-    def is_retryable(self) -> bool:
-        return self.is_session_error() or self.is_rpc_error() or self.is_raft_error()
-
     def is_semantic_error(self) -> bool:
         return self.value.startswith("NS")
 
     def is_syntax_error(self) -> bool:
         return self.value.startswith("42")
 
-    def is_session_error(self) -> bool:
-        return self.value.startswith("NE")
-
-    def is_rpc_error(self) -> bool:
-        return self.value.startswith("NN")
-
-    def is_raft_error(self) -> bool:
-        return self.value.startswith("NA")
-
-    def is_no_data_error(self) -> bool:
-        return self.value.startswith("02")
-
 
 class NebulaGraphRemoteError(Exception):
     code: ErrorCode
     message: str
+    result: Optional["ResultSet"]
 
-    def __init__(self, code: ErrorCode, message: str):
+    def __init__(
+        self, code: ErrorCode, message: str, result: Optional["ResultSet"] = None
+    ):
         self.code = code
         self.message = message
+        self.result = result
         super().__init__(f"{code.value}: {message}")
 
 
@@ -389,5 +382,25 @@ class NebulaGraphClientError(Exception):
     pass
 
 
-class ConnectionError(NebulaGraphClientError):
+class InternalError(NebulaGraphClientError):
+    """General internal error that cannot be recovered due to unexpected inputs or bugs"""
+
+    pass
+
+
+class ConnectingError(NebulaGraphClientError):
+    """Error raised when connecting to the server"""
+
+    pass
+
+
+class AuthenticatingError(NebulaGraphClientError):
+    """Error raised when authenticating failed"""
+
+    pass
+
+
+class ExecutingError(NebulaGraphClientError):
+    """Error raised when executing a statement failed"""
+
     pass

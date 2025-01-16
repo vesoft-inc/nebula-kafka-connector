@@ -1,12 +1,57 @@
 import logging
+from abc import ABC, abstractmethod
 from datetime import date, datetime, time
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from enum import Enum
+
+# Forward references for type hints
+from typing import TYPE_CHECKING, Any, Dict, List, Optional, Set, Type, Union
+
+from typing_extensions import TypedDict
 
 from nebulagraph_python.data_types import ColumnType, ResultGraphSchemas
 from nebulagraph_python.size_constant import EDGE_TYPE_ID_SIZE
 
+if TYPE_CHECKING:
+    from nebulagraph_python.value_wrapper import ValueWrapper
+
+
 logger = logging.getLogger(__name__)
+
+
+class NodePrimitive(TypedDict):
+    id: int
+    type: str
+    labels: List[str]
+    properties: Dict[str, Any]
+
+
+class EdgePrimitive(TypedDict):
+    src_id: int
+    dst_id: int
+    rank: int
+    type: str
+    labels: List[str]
+    properties: Dict[str, Any]
+    direction: str
+
+
+class PathPrimitive(TypedDict, total=False):
+    nodes: List[NodePrimitive]
+    edges: List[EdgePrimitive]
+    length: int
+    start_node: NodePrimitive
+    end_node: NodePrimitive
+    string_representation: str
+
+
+class PathPrimitiveField(str, Enum):
+    NODES = "nodes"
+    EDGES = "edges"
+    LENGTH = "length"
+    START_NODE = "start_node"
+    END_NODE = "end_node"
+    STRING_REPRESENTATION = "string_representation"
 
 
 class BaseDataObject:
@@ -21,23 +66,13 @@ class BaseDataObject:
         return self
 
 
-class AnyValue:
-    """The value for any type and its actual data type."""
-
-    def __init__(self, value: Any, type: ColumnType):
-        # the value for any type
-        self.value = value
-        # the actual data type for any type
-        self.type = type
-
-    def get_type(self) -> ColumnType:
-        return self.type
-
-    def get_value(self) -> Any:
-        return self.value
+class CompositeDataObject(BaseDataObject, ABC):
+    @abstractmethod
+    def cast_primitive(self) -> Any:
+        pass
 
 
-class Node(BaseDataObject):
+class Node(CompositeDataObject):
     def __init__(
         self,
         graph_id: int,
@@ -146,12 +181,12 @@ class Node(BaseDataObject):
         """
         return self.properties
 
-    def cast_primitive(self) -> Any:
+    def cast_primitive(self) -> NodePrimitive:
         """Convert node to a dictionary format with id, type, labels and properties
 
         Returns
         -------
-            dict: A dictionary containing node information in format:
+            NodePrimitive: A typed dictionary containing node information in format:
                 {
                     'id': node_id,
                     'type': node_type,
@@ -162,7 +197,7 @@ class Node(BaseDataObject):
         """
         properties = {}
         for prop_name, prop_value in self.properties.items():
-            properties[prop_name] = prop_value.cast()
+            properties[prop_name] = prop_value.cast_primitive()
 
         return {
             "id": self.node_id,
@@ -186,12 +221,12 @@ class Node(BaseDataObject):
     def __str__(self):
         props = self.get_properties()
         prop_strs = []
-        for prop_name in props.keys():
+        for prop_name in props:
             prop_strs.append(f"{prop_name}:{props[prop_name].cast()}")
         return f"({self.get_id()}@{self.get_type()}:{self.get_labels()}{{{','.join(prop_strs)}}})"
 
 
-class Edge(BaseDataObject):
+class Edge(CompositeDataObject):
     def __init__(
         self,
         graph_id: int,
@@ -347,12 +382,12 @@ class Edge(BaseDataObject):
         """
         return self.properties
 
-    def cast_primitive(self) -> Any:
+    def cast_primitive(self) -> EdgePrimitive:
         """Convert edge to a dictionary format with source id, destination id, rank, type, labels and properties
 
         Returns
         -------
-            dict: A dictionary containing edge information in format:
+            EdgePrimitive: A typed dictionary containing edge information in format:
                 {
                     'src_id': source_id,
                     'dst_id': destination_id,
@@ -366,7 +401,7 @@ class Edge(BaseDataObject):
         """
         properties = {}
         for prop_name, prop_value in self.properties.items():
-            properties[prop_name] = prop_value.cast()
+            properties[prop_name] = prop_value.cast_primitive()
 
         return {
             "src_id": self.src_id,
@@ -421,7 +456,7 @@ class Edge(BaseDataObject):
         return f"({self.get_src_id()})~[{self.get_rank()}@{self.get_type()}:{self.get_labels()}{{{','.join(prop_strs)}}}]~({self.get_dst_id()})"
 
 
-class Path:
+class Path(CompositeDataObject):
     def __init__(self, values: list["ValueWrapper"]):
         self.values = values
         self.nodes: list[Node] = []
@@ -469,26 +504,13 @@ class Path:
 
     def cast_primitive(
         self,
-        fields: list[str] = [
-            "nodes",
-            "edges",
-            "length",
-            "start_node",
-            "end_node",
-            "string_representation",
-        ],
-    ) -> Dict[str, Any]:
+        fields: Optional[Set[PathPrimitiveField]] = None,
+    ) -> PathPrimitive:
         """Convert path to a dictionary format with nodes and edges.
 
         Args:
         ----
-            fields: List of fields to include in the dictionary. Valid fields are:
-                   - nodes: List of node dictionaries
-                   - edges: List of edge dictionaries
-                   - length: Number of nodes in the path
-                   - start_node: First node in the path
-                   - end_node: Last node in the path
-                   - string_representation: String representation of the path
+            fields: List of fields to include in the dictionary.
 
         Example path string representation:
             (289226172909223937@Movie:Movie{id:91,name:Unpromised Land})-
@@ -501,19 +523,23 @@ class Path:
             fields parameter will be included.
 
         """
-        result = {}
-        if "nodes" in fields:
-            result["nodes"] = [node.cast_primitive() for node in self.nodes]
-        if "edges" in fields:
-            result["edges"] = [edge.cast_primitive() for edge in self.edges]
-        if "length" in fields:
-            result["length"] = len(self.nodes)
-        if "start_node" in fields:
-            result["start_node"] = self.nodes[0].cast_primitive()
-        if "end_node" in fields:
-            result["end_node"] = self.nodes[-1].cast_primitive()
-        if "string_representation" in fields:
-            result["string_representation"] = str(self)
+        fields = fields or set(PathPrimitiveField)
+        mapping = {
+            PathPrimitiveField.NODES: lambda: [
+                node.cast_primitive() for node in self.nodes
+            ],
+            PathPrimitiveField.EDGES: lambda: [
+                edge.cast_primitive() for edge in self.edges
+            ],
+            PathPrimitiveField.LENGTH: lambda: len(self.nodes),
+            PathPrimitiveField.START_NODE: lambda: self.nodes[0].cast_primitive(),
+            PathPrimitiveField.END_NODE: lambda: self.nodes[-1].cast_primitive(),
+            PathPrimitiveField.STRING_REPRESENTATION: lambda: str(self),
+        }
+        result: PathPrimitive = {}
+        for field in fields:
+            result[field.value] = mapping[field]()
+
         return result
 
     def __eq__(self, other):
@@ -608,10 +634,10 @@ class Path:
         return "".join(edge_strs)
 
 
-class NRecord:
+class NRecord(CompositeDataObject):
     def __init__(self, properties: Dict[str, "ValueWrapper"]):
         self.type = ColumnType.RECORD
-        self.map: Dict[str, ValueWrapper] = {}
+        self.map: Dict[str, "ValueWrapper"] = {}
         if properties:
             self.map.update(properties)
 
@@ -683,15 +709,7 @@ class NRecord:
             Dict: A dictionary containing property name -> primitive value
 
         """
-
-        # if value is a list, convert it to a list of primitive values
-        # else call cast_primitive on value
-        def cast_value(value):
-            if isinstance(value, list):
-                return [v.cast_primitive() for v in value]
-            return value.cast_primitive()
-
-        return {key: cast_value(value) for key, value in self.map.items()}
+        return {key: value.cast_primitive() for key, value in self.map.items()}
 
     def __str__(self):
         return str(self.cast_primitive())
@@ -707,7 +725,7 @@ class NRecord:
         return hash(frozenset(self.map.items()))
 
 
-class NDuration:
+class NDuration(BaseDataObject):
     def __init__(self, seconds: int, microseconds: int, months: int):
         self.is_month_based = months != 0
 
@@ -837,7 +855,7 @@ class NDuration:
         )
 
 
-class Vector:
+class NVector(CompositeDataObject):
     """Represents a fixed-dimension vector of float values."""
 
     def __init__(self, values: List[float], dimension: int):
@@ -879,8 +897,8 @@ class Vector:
 
     def __eq__(self, other) -> bool:
         """Compare two vectors for equality."""
-        if not isinstance(other, Vector):
-            logger.warning(f"Expected Vector, got {type(other)}")
+        if not isinstance(other, NVector):
+            logger.warning("Expected Vector, got %s", type(other))
             return False
         return self.dimension == other.dimension and all(
             abs(a - b) < 1e-7 for a, b in zip(self.values, other.values)
@@ -899,430 +917,61 @@ class Vector:
         return self.values
 
 
-class ValueWrapper:
-    def __init__(self, value: Any, data_type: ColumnType):
-        self.value = value
-        self.data_type = data_type
-
-    def is_null(self) -> bool:
-        """If the value is null
-
-        Returns
-        -------
-            bool: true if value is null
-
-        """
-        return self.value is None
-
-    def is_bool(self) -> bool:
-        """Check if the Value is Boolean type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_BOOL
-
-        """
-        return self.data_type == ColumnType.BOOL
-
-    def is_long(self) -> bool:
-        """Check if the Value is Long type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_UINT64 or COLUMN_TYPE_INT64
-
-        """
-        return self.data_type in [ColumnType.UINT64, ColumnType.INT64]
-
-    def is_int(self) -> bool:
-        """Check if the Value is Int type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_UINT8 or COLUMN_TYPE_INT8 or COLUMN_TYPE_UINT16
-                or COLUMN_TYPE_INT16 or COLUMN_TYPE_UINT32 or COLUMN_TYPE_INT32
-
-        """
-        return self.data_type in [
-            ColumnType.UINT8,
-            ColumnType.INT8,
-            ColumnType.UINT16,
-            ColumnType.INT16,
-            ColumnType.UINT32,
-            ColumnType.INT32,
-        ]
-
-    def is_float(self) -> bool:
-        """Check if the Value is Float type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_FLOAT32
-
-        """
-        return self.data_type == ColumnType.FLOAT32
-
-    def is_double(self) -> bool:
-        """Check if the Value is Double type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_FLOAT64
-
-        """
-        return self.data_type == ColumnType.FLOAT64
-
-    def is_string(self) -> bool:
-        """Check if the Value is String type.
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_STRING
-
-        """
-        return self.data_type == ColumnType.STRING
-
-    def is_list(self) -> bool:
-        """Check if the Value is List type.
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_LIST
-
-        """
-        return self.data_type == ColumnType.LIST
-
-    def is_node(self) -> bool:
-        """Check if the Value is Node type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_NODE
-
-        """
-        return self.data_type == ColumnType.NODE
-
-    def is_edge(self) -> bool:
-        """Check if the Value is Edge type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_EDGE
-
-        """
-        return self.data_type == ColumnType.EDGE
-
-    def is_local_time(self) -> bool:
-        """Check if the Value is Local Time type.
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_LOCALTIME
-
-        """
-        return self.data_type == ColumnType.LOCALTIME
-
-    def is_zoned_time(self) -> bool:
-        """Check if the Value is Zoned Time type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_ZONEDTIME
-
-        """
-        return self.data_type == ColumnType.ZONEDTIME
-
-    def is_local_datetime(self) -> bool:
-        """Check if the Value is Local Datetime type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_LOCALDATETIME
-
-        """
-        return self.data_type == ColumnType.LOCALDATETIME
-
-    def is_zoned_datetime(self) -> bool:
-        """Check if the Value is Zoned Datetime type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_ZONEDDATETIME
-
-        """
-        return self.data_type == ColumnType.ZONEDDATETIME
-
-    def is_date(self) -> bool:
-        """Check if the Value is Date type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_DATE
-
-        """
-        return self.data_type == ColumnType.DATE
-
-    def is_record(self) -> bool:
-        """Check if the Value is Record type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_RECORD
-
-        """
-        return self.data_type == ColumnType.RECORD
-
-    def is_duration(self) -> bool:
-        """Check if the Value is Duration type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_DURATION
-
-        """
-        return self.data_type == ColumnType.DURATION
-
-    def is_path(self) -> bool:
-        """Check if the Value is Path type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_PATH
-
-        """
-        return self.data_type == ColumnType.PATH
-
-    def is_decimal(self) -> bool:
-        """Check if the Value is Decimal type
-
-        Returns
-        -------
-            bool: true if Value's type is COLUMN_TYPE_DECIMAL
-
-        """
-        return self.data_type == ColumnType.DECIMAL
-
-    def as_bool(self) -> bool:
-        return bool(self.value)
-
-    def as_int(self) -> int:
-        return int(self.value)
-
-    def as_long(self) -> int:
-        return int(self.value)
-
-    def as_string(self) -> str:
-        return str(self.value)
-
-    def as_float(self) -> float:
-        return float(self.value)
-
-    def as_double(self) -> float:
-        return float(self.value)
-
-    def as_list(self) -> list["ValueWrapper"]:
-        if self.data_type == ColumnType.LIST:
-            return [item.cast() for item in self.value]
-        raise ValueError(
-            f"cannot get field `list` because value's type is {self.data_type}",
-        )
-
-    def as_node(self) -> Node:
-        if self.data_type == ColumnType.NODE:
-            return self.value
-        raise ValueError(
-            f"cannot get field `node` because value's type is {self.data_type}",
-        )
-
-    def as_edge(self) -> Edge:
-        if self.data_type == ColumnType.EDGE:
-            return self.value
-        raise ValueError(
-            f"cannot get field `edge` because value's type is {self.data_type}",
-        )
-
-    def as_local_time(self) -> time:
-        if self.data_type == ColumnType.LOCALTIME:
-            return self.value
-        raise ValueError(
-            f"cannot get field `localtime` because value's type is {self.data_type}",
-        )
-
-    def as_zoned_time(self) -> time:
-        if self.data_type == ColumnType.ZONEDTIME:
-            return self.value
-        raise ValueError(
-            f"cannot get field `zonedtime` because value's type is {self.data_type}",
-        )
-
-    def as_date(self) -> date:
-        if self.data_type == ColumnType.DATE:
-            return self.value
-        raise ValueError(
-            f"cannot get field `date` because value's type is {self.data_type}",
-        )
-
-    def as_local_datetime(self) -> datetime:
-        if self.data_type == ColumnType.LOCALDATETIME:
-            return self.value
-        raise ValueError(
-            f"cannot get field `localdatetime` because value's type is {self.data_type}",
-        )
-
-    def as_zoned_datetime(self) -> datetime:
-        if self.data_type == ColumnType.ZONEDDATETIME:
-            return self.value
-        raise ValueError(
-            f"cannot get field `zoneddatetime` because value's type is {self.data_type}",
-        )
-
-    def as_duration(self) -> NDuration:
-        if self.data_type == ColumnType.DURATION:
-            return self.value
-        raise ValueError(
-            f"cannot get field `duration` because value's type is {self.data_type}",
-        )
-
-    def as_record(self) -> "NRecord":
-        if self.data_type == ColumnType.RECORD:
-            return self.value
-        raise ValueError(
-            f"cannot get field `record` because value's type is {self.data_type}",
-        )
-
-    def as_path(self) -> "Path":
-        if self.data_type == ColumnType.PATH:
-            return self.value
-        raise ValueError(
-            f"cannot get field `path` because value's type is {self.data_type}",
-        )
-
-    def as_decimal(self) -> Decimal:
-        if self.data_type == ColumnType.DECIMAL:
-            return self.value
-        raise ValueError(
-            f"cannot get field `decimal` because value's type is {self.data_type}",
-        )
-
-    def as_embedding_vector(self) -> "Vector":
-        if self.data_type == ColumnType.EMBEDDINGVECTOR:
-            return self.value
-        raise ValueError(
-            f"cannot get field `embedding_vector` because value's type is {self.data_type}",
-        )
-
-    def cast(self) -> Any:
-        """Convert the wrapped value to its most appropriate Python type"""
-        if self.is_null():
-            return None
-
-        type_mapping = {
-            "BOOL": self.as_bool,
-            "INT8": self.as_int,
-            "INT16": self.as_int,
-            "INT32": self.as_int,
-            "INT64": self.as_int,
-            "UINT8": self.as_int,
-            "UINT16": self.as_int,
-            "UINT32": self.as_int,
-            "UINT64": self.as_int,
-            "FLOAT32": self.as_float,
-            "FLOAT64": self.as_double,
-            "STRING": self.as_string,
-            "DATE": self.as_date,
-            "LIST": self.as_list,
-            "NODE": self.as_node,
-            "EDGE": self.as_edge,
-            "PATH": self.as_path,
-            "RECORD": self.as_record,
-            "DECIMAL": self.as_decimal,
-            "LOCALTIME": self.as_local_time,
-            "DURATION": self.as_duration,
-            "LOCALDATETIME": self.as_local_datetime,
-            "ZONEDTIME": self.as_zoned_time,
-            "ZONEDDATETIME": self.as_zoned_datetime,
-            "EMBEDDINGVECTOR": self.as_embedding_vector,
-        }
-        converter = type_mapping.get(self.data_type.name)
-        return converter() if converter else self.value
-
-    def cast_primitive(self) -> Any:
-        """Convert the wrapped value to primitive Python types recursively.
-
-        For basic types, uses cast()
-        For composite types (Path, Node, Edge), calls cast_primitive()
-        For containers (Map, List, Record), recursively calls cast_primitive() on elements
-        """
-        if self.is_null():
-            return None
-
-        # Handle basic types with regular cast
-        if self.data_type.name in {
-            "BOOL",
-            "INT8",
-            "INT16",
-            "INT32",
-            "INT64",
-            "UINT8",
-            "UINT16",
-            "UINT32",
-            "UINT64",
-            "FLOAT32",
-            "FLOAT64",
-            "STRING",
-            "DATE",
-            "DECIMAL",
-            "LOCALTIME",
-            "DURATION",
-            "LOCALDATETIME",
-            "ZONEDTIME",
-            "ZONEDDATETIME",
-            "EMBEDDINGVECTOR",
-        }:
-            return self.cast()
-
-        # Handle composite types
-        if self.data_type == ColumnType.PATH:
-            return self.value.cast_primitive()
-        if self.data_type == ColumnType.NODE:
-            return self.value.cast_primitive()
-        if self.data_type == ColumnType.EDGE:
-            return self.value.cast_primitive()
-
-        # Handle containers recursively
-        if self.data_type == ColumnType.LIST:
-            return [v.cast_primitive() for v in self.value]
-        if self.data_type == ColumnType.RECORD:
-            return [v.cast_primitive() for v in self.value]
-
-        return self.value
-
-    def __eq__(self, other):
-        if not isinstance(other, ValueWrapper):
-            return False
-        return self.value == other.value and self.data_type == other.data_type
-
-
-class Row:
-    def __init__(self, values: Optional[List[ValueWrapper]] = None):
-        self.values = values if values is not None else []
-
-    def add_value(self, value: ValueWrapper):
-        """Append one value into row.
-
-        Args:
-        ----
-            value (ValueWrapper): one value of the row
-
-        """
-        self.values.append(value)
-
-    def get_values(self) -> list[ValueWrapper]:
-        """Get the values of this row.
-
-        Returns
-        -------
-            List[ValueWrapper]: list of values in this row
-
-        """
-        return self.values
+BasicTargetType = Union[
+    None,
+    bool,
+    int,
+    float,
+    str,
+    list,
+    time,
+    date,
+    datetime,
+    Decimal,
+    NDuration,
+]
+
+CompositeTargetType = Union[
+    Path,
+    Node,
+    Edge,
+    NRecord,
+    NVector,
+]
+TargetType = Union[BasicTargetType, CompositeTargetType]
+TargetPrimitiveType = Union[
+    BasicTargetType,
+    PathPrimitive,
+    EdgePrimitive,
+    NodePrimitive,
+    Dict[str, Any],
+    List[float],
+]
+ColumnToPy: Dict[ColumnType, Type[TargetType]] = {
+    ColumnType.NULL: type(None),
+    ColumnType.BOOL: bool,
+    ColumnType.INT8: int,
+    ColumnType.INT16: int,
+    ColumnType.INT32: int,
+    ColumnType.INT64: int,
+    ColumnType.UINT8: int,
+    ColumnType.UINT16: int,
+    ColumnType.UINT32: int,
+    ColumnType.UINT64: int,
+    ColumnType.FLOAT32: float,
+    ColumnType.FLOAT64: float,
+    ColumnType.STRING: str,
+    ColumnType.DATE: date,
+    ColumnType.LOCALTIME: time,
+    ColumnType.ZONEDTIME: time,
+    ColumnType.LOCALDATETIME: datetime,
+    ColumnType.ZONEDDATETIME: datetime,
+    ColumnType.DECIMAL: Decimal,
+    ColumnType.LIST: list,
+    ColumnType.DURATION: NDuration,
+    ColumnType.PATH: Path,
+    ColumnType.NODE: Node,
+    ColumnType.EDGE: Edge,
+    ColumnType.RECORD: NRecord,
+    ColumnType.EMBEDDINGVECTOR: NVector,
+}

@@ -463,9 +463,13 @@ class EmbeddingVectorType(DataType):
     hold a data type object for each element.
     """
 
-    def __init__(self, dimension: int):
+    dimension: int
+    value_type: ColumnType
+
+    def __init__(self, dimension: int, value_type: ColumnType):
         super().__init__(ColumnType.EMBEDDINGVECTOR)
         self.dimension = dimension
+        self.value_type = value_type
 
     def get_dimension(self) -> int:
         return self.dimension

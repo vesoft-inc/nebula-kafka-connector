@@ -32,11 +32,22 @@ from nebulagraph_python.decode_utils import (
     bytes_to_int16,
     bytes_to_int32,
     bytes_to_int64,
+    bytes_to_sized_string,
     bytes_to_uint8,
     bytes_to_uint16,
 )
+from nebulagraph_python.error import InternalError
 from nebulagraph_python.proto.vector_pb2 import NestedVector
+from nebulagraph_python.py_data_types import (
+    Edge,
+    NDuration,
+    Node,
+    NRecord,
+    NVector,
+    Path,
+)
 from nebulagraph_python.size_constant import (
+    ANY_HEADER_SIZE,
     BOOL_SIZE,
     CHUNK_INDEX_LENGTH_IN_STRING_HEADER,
     CHUNK_INDEX_START_POSITION_IN_STRING_HEADER,
@@ -59,8 +70,6 @@ from nebulagraph_python.size_constant import (
     INT64_SIZE,
     LIST_HEADER_SIZE,
     LOCAL_TIME_SIZE,
-    MICRO_SECONDS_OF_DAY,
-    MICRO_SECONDS_OF_HOUR,
     MICRO_SECONDS_OF_MINUTE,
     MICRO_SECONDS_OF_SECOND,
     MONTH_SIZE,
@@ -82,17 +91,23 @@ from nebulagraph_python.size_constant import (
     ZONED_DATE_TIME_SIZE,
     ZONED_TIME_SIZE,
 )
+from nebulagraph_python.value_wrapper import ValueWrapper
 
-from .value_wrapper import (
-    AnyValue,
-    Edge,
-    NDuration,
-    Node,
-    NRecord,
-    Path,
-    ValueWrapper,
-    Vector,
-)
+
+class AnyValue:
+    """The value for any type and its actual data type."""
+
+    def __init__(self, value: Any, type: ColumnType):
+        # the value for any type
+        self.value = value
+        # the actual data type for any type
+        self.type = type
+
+    def get_type(self) -> ColumnType:
+        return self.type
+
+    def get_value(self) -> Any:
+        return self.value
 
 
 class ValueParser:
@@ -132,7 +147,7 @@ class ValueParser:
     ) -> Any:
         """Main decode method matching Java's decodeValue"""
         # Check if value at index is null
-        if not vector.is_null_all_set() and vector.get_null_bit_map().decode(charset):
+        if not vector.is_null_all_set() and vector.get_null_bit_map():
             byte_idx = row_idx // 8
             bit_idx = row_idx % 8
             k_one_bitmasks = [
@@ -308,15 +323,19 @@ class ValueParser:
                 row_idx,
             )  # LIST_HEADER_SIZE
             list_header = ListHeader(value_data, self.byte_order)
+            if isinstance(data_type, ListType):
+                value_type = data_type.get_value_type()
+            else:
+                raise InternalError("Expected ListType for LIST column type")
 
             elements = []
             for i in range(list_header.size):
                 element = self._decode_value(
                     vector.vector_wrappers[0],
-                    data_type,
+                    value_type,
                     list_header.offset + i,
                 )
-                elements.append(ValueWrapper(element, data_type.get_type()))
+                elements.append(ValueWrapper(element, value_type.get_type()))
             return elements
 
         if column_type == ColumnType.RECORD:
@@ -560,13 +579,14 @@ class ValueParser:
             for i in range(dimension):
                 start = offset + i * FLOAT32_SIZE
                 values[i] = bytes_to_float(
-                    vector_view[start : start + FLOAT32_SIZE], self.byte_order,
+                    vector_view[start : start + FLOAT32_SIZE],
+                    self.byte_order,
                 )
 
-            return Vector(values, dimension)
+            return NVector(values, dimension)
 
         if column_type == ColumnType.ANY:
-            value_data = self._get_sub_bytes(vector_data, 8, row_idx)  # ANY_HEADER_SIZE
+            value_data = self._get_sub_bytes(vector_data, ANY_HEADER_SIZE, row_idx)
             return self.bytes_to_any(value_data, vector, row_idx)
 
         raise ValueError(f"Unsupported type for flat vector: {column_type}")
@@ -747,19 +767,12 @@ class ValueParser:
         duration_value = qword >> 1
 
         # Initialize all fields
-        year = month = day = hour = minute = second = micro_sec = 0
-
+        month, second, micro_sec = 0, 0, 0
         if is_month_based:
             # For month-based duration
-            year = int(duration_value // 12)
             month = int(duration_value % 12)
         else:
             # For time-based duration
-            day = int(duration_value // MICRO_SECONDS_OF_DAY)
-            hour = int((duration_value % MICRO_SECONDS_OF_DAY) // MICRO_SECONDS_OF_HOUR)
-            minute = int(
-                (duration_value % MICRO_SECONDS_OF_HOUR) // MICRO_SECONDS_OF_MINUTE,
-            )
             second = int(
                 (duration_value % MICRO_SECONDS_OF_MINUTE) // MICRO_SECONDS_OF_SECOND,
             )
@@ -772,7 +785,10 @@ class ValueParser:
         )
 
     def bytes_to_any(
-        self, value: bytes, vector: VectorWrapper, row_idx: int,
+        self,
+        value: bytes,
+        vector: VectorWrapper,
+        row_idx: int,
     ) -> "AnyValue":
         """Convert bytes to AnyValue for flat vector"""
         # Get data type from first vector wrapper
@@ -799,14 +815,10 @@ class ValueParser:
         if value_type in (ColumnType.STRING, ColumnType.DECIMAL):
             # Handle string and decimal types
             string_vec = vector.get_vector_wrapper(any_header.chunk_index)
-            value_data = self._get_sub_bytes(
-                string_vec.get_vector_data(),
-                STRING_SIZE,
-                row_idx,
-            )
-            obj = self.bytes_to_string(
-                string_header=value_data,
-                vector=vector.vector,
+            obj = bytes_to_sized_string(
+                data=string_vec.get_vector_data(),
+                start_pos=any_header.offset,
+                byte_order=self.byte_order,
             )
 
         if value_type.is_composite():
@@ -1073,7 +1085,7 @@ class ValueParser:
                 value_bytes = reader.read(FLOAT32_SIZE)
                 values[i] = bytes_to_float(value_bytes, self.byte_order)
 
-            return Vector(values=values, dimension=dimension)
+            return NVector(values=values, dimension=dimension)
 
         raise RuntimeError(f"do not support type: {column_type}")
 
@@ -1167,7 +1179,8 @@ class ValueTypeParser:
                 reader.read(VECTOR_DIMENSION_SIZE),
                 self.byte_order,
             )
-            return EmbeddingVectorType(dimension)
+            value_type = ColumnType(bytes_to_uint8(reader.read(VALUE_TYPE_SIZE)))
+            return EmbeddingVectorType(dimension, value_type)
 
         raise RuntimeError(f"unsupported type: {column_type}")
 

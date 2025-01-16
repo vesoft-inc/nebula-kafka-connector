@@ -8,7 +8,7 @@ from typing import ClassVar as _ClassVar, Iterable as _Iterable, Mapping as _Map
 DESCRIPTOR: _descriptor.FileDescriptor
 
 class ServiceType(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-    __slots__ = ()
+    __slots__ = []
     UNKNOWN: _ClassVar[ServiceType]
     STORAGE: _ClassVar[ServiceType]
     GRAPH: _ClassVar[ServiceType]
@@ -27,7 +27,7 @@ SUPPORTED_VERSIONS_FIELD_NUMBER: _ClassVar[int]
 supported_versions: _descriptor.FieldDescriptor
 
 class Duration(_message.Message):
-    __slots__ = ("is_month_based", "year", "month", "day", "hour", "minute", "sec", "microsec")
+    __slots__ = ["is_month_based", "year", "month", "day", "hour", "minute", "sec", "microsec"]
     IS_MONTH_BASED_FIELD_NUMBER: _ClassVar[int]
     YEAR_FIELD_NUMBER: _ClassVar[int]
     MONTH_FIELD_NUMBER: _ClassVar[int]
@@ -47,7 +47,7 @@ class Duration(_message.Message):
     def __init__(self, is_month_based: bool = ..., year: _Optional[int] = ..., month: _Optional[int] = ..., day: _Optional[int] = ..., hour: _Optional[int] = ..., minute: _Optional[int] = ..., sec: _Optional[int] = ..., microsec: _Optional[int] = ...) -> None: ...
 
 class Date(_message.Message):
-    __slots__ = ("year", "month", "day")
+    __slots__ = ["year", "month", "day"]
     YEAR_FIELD_NUMBER: _ClassVar[int]
     MONTH_FIELD_NUMBER: _ClassVar[int]
     DAY_FIELD_NUMBER: _ClassVar[int]
@@ -57,7 +57,7 @@ class Date(_message.Message):
     def __init__(self, year: _Optional[int] = ..., month: _Optional[int] = ..., day: _Optional[int] = ...) -> None: ...
 
 class LocalTime(_message.Message):
-    __slots__ = ("hour", "minute", "sec", "microsec")
+    __slots__ = ["hour", "minute", "sec", "microsec"]
     HOUR_FIELD_NUMBER: _ClassVar[int]
     MINUTE_FIELD_NUMBER: _ClassVar[int]
     SEC_FIELD_NUMBER: _ClassVar[int]
@@ -69,7 +69,7 @@ class LocalTime(_message.Message):
     def __init__(self, hour: _Optional[int] = ..., minute: _Optional[int] = ..., sec: _Optional[int] = ..., microsec: _Optional[int] = ...) -> None: ...
 
 class ZonedTime(_message.Message):
-    __slots__ = ("hour", "minute", "sec", "microsec", "offset")
+    __slots__ = ["hour", "minute", "sec", "microsec", "offset"]
     HOUR_FIELD_NUMBER: _ClassVar[int]
     MINUTE_FIELD_NUMBER: _ClassVar[int]
     SEC_FIELD_NUMBER: _ClassVar[int]
@@ -83,7 +83,7 @@ class ZonedTime(_message.Message):
     def __init__(self, hour: _Optional[int] = ..., minute: _Optional[int] = ..., sec: _Optional[int] = ..., microsec: _Optional[int] = ..., offset: _Optional[int] = ...) -> None: ...
 
 class LocalDatetime(_message.Message):
-    __slots__ = ("year", "month", "day", "hour", "minute", "sec", "microsec")
+    __slots__ = ["year", "month", "day", "hour", "minute", "sec", "microsec"]
     YEAR_FIELD_NUMBER: _ClassVar[int]
     MONTH_FIELD_NUMBER: _ClassVar[int]
     DAY_FIELD_NUMBER: _ClassVar[int]
@@ -101,7 +101,7 @@ class LocalDatetime(_message.Message):
     def __init__(self, year: _Optional[int] = ..., month: _Optional[int] = ..., day: _Optional[int] = ..., hour: _Optional[int] = ..., minute: _Optional[int] = ..., sec: _Optional[int] = ..., microsec: _Optional[int] = ...) -> None: ...
 
 class ZonedDatetime(_message.Message):
-    __slots__ = ("year", "month", "day", "hour", "minute", "sec", "microsec", "offset")
+    __slots__ = ["year", "month", "day", "hour", "minute", "sec", "microsec", "offset"]
     YEAR_FIELD_NUMBER: _ClassVar[int]
     MONTH_FIELD_NUMBER: _ClassVar[int]
     DAY_FIELD_NUMBER: _ClassVar[int]
@@ -121,21 +121,21 @@ class ZonedDatetime(_message.Message):
     def __init__(self, year: _Optional[int] = ..., month: _Optional[int] = ..., day: _Optional[int] = ..., hour: _Optional[int] = ..., minute: _Optional[int] = ..., sec: _Optional[int] = ..., microsec: _Optional[int] = ..., offset: _Optional[int] = ...) -> None: ...
 
 class List(_message.Message):
-    __slots__ = ("values",)
+    __slots__ = ["values"]
     VALUES_FIELD_NUMBER: _ClassVar[int]
     values: _containers.RepeatedCompositeFieldContainer[Value]
     def __init__(self, values: _Optional[_Iterable[_Union[Value, _Mapping]]] = ...) -> None: ...
 
 class Vector(_message.Message):
-    __slots__ = ("values",)
+    __slots__ = ["values"]
     VALUES_FIELD_NUMBER: _ClassVar[int]
     values: _containers.RepeatedScalarFieldContainer[float]
     def __init__(self, values: _Optional[_Iterable[float]] = ...) -> None: ...
 
 class Record(_message.Message):
-    __slots__ = ("values",)
+    __slots__ = ["values"]
     class ValuesEntry(_message.Message):
-        __slots__ = ("key", "value")
+        __slots__ = ["key", "value"]
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
@@ -146,9 +146,9 @@ class Record(_message.Message):
     def __init__(self, values: _Optional[_Mapping[str, Value]] = ...) -> None: ...
 
 class Node(_message.Message):
-    __slots__ = ("node_id", "graph", "type", "labels", "properties")
+    __slots__ = ["node_id", "graph", "type", "labels", "properties"]
     class PropertiesEntry(_message.Message):
-        __slots__ = ("key", "value")
+        __slots__ = ["key", "value"]
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
@@ -167,15 +167,15 @@ class Node(_message.Message):
     def __init__(self, node_id: _Optional[int] = ..., graph: _Optional[str] = ..., type: _Optional[str] = ..., labels: _Optional[_Iterable[str]] = ..., properties: _Optional[_Mapping[str, Value]] = ...) -> None: ...
 
 class Edge(_message.Message):
-    __slots__ = ("src_id", "dst_id", "direction", "graph", "type", "labels", "rank", "properties")
+    __slots__ = ["src_id", "dst_id", "direction", "graph", "type", "labels", "rank", "properties"]
     class Direction(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = ()
+        __slots__ = []
         DIRECTED: _ClassVar[Edge.Direction]
         UNDIRECTED: _ClassVar[Edge.Direction]
     DIRECTED: Edge.Direction
     UNDIRECTED: Edge.Direction
     class PropertiesEntry(_message.Message):
-        __slots__ = ("key", "value")
+        __slots__ = ["key", "value"]
         KEY_FIELD_NUMBER: _ClassVar[int]
         VALUE_FIELD_NUMBER: _ClassVar[int]
         key: str
@@ -200,19 +200,19 @@ class Edge(_message.Message):
     def __init__(self, src_id: _Optional[int] = ..., dst_id: _Optional[int] = ..., direction: _Optional[_Union[Edge.Direction, str]] = ..., graph: _Optional[str] = ..., type: _Optional[str] = ..., labels: _Optional[_Iterable[str]] = ..., rank: _Optional[int] = ..., properties: _Optional[_Mapping[str, Value]] = ...) -> None: ...
 
 class Decimal(_message.Message):
-    __slots__ = ("sval",)
+    __slots__ = ["sval"]
     SVAL_FIELD_NUMBER: _ClassVar[int]
     sval: str
     def __init__(self, sval: _Optional[str] = ...) -> None: ...
 
 class Path(_message.Message):
-    __slots__ = ("values",)
+    __slots__ = ["values"]
     VALUES_FIELD_NUMBER: _ClassVar[int]
     values: _containers.RepeatedCompositeFieldContainer[Value]
     def __init__(self, values: _Optional[_Iterable[_Union[Value, _Mapping]]] = ...) -> None: ...
 
 class Ref(_message.Message):
-    __slots__ = ("code", "offset")
+    __slots__ = ["code", "offset"]
     CODE_FIELD_NUMBER: _ClassVar[int]
     OFFSET_FIELD_NUMBER: _ClassVar[int]
     code: int
@@ -220,9 +220,9 @@ class Ref(_message.Message):
     def __init__(self, code: _Optional[int] = ..., offset: _Optional[int] = ...) -> None: ...
 
 class Value(_message.Message):
-    __slots__ = ("bool_value", "int8_value", "uint8_value", "int16_value", "uint16_value", "int32_value", "uint32_value", "int64_value", "uint64_value", "float_value", "double_value", "string_value", "list_value", "record_value", "node_value", "edge_value", "path_value", "duration_value", "local_time_value", "zoned_time_value", "date_value", "local_datetime_value", "zoned_datetime_value", "ref_value", "decimal_value", "vector_value")
+    __slots__ = ["bool_value", "int8_value", "uint8_value", "int16_value", "uint16_value", "int32_value", "uint32_value", "int64_value", "uint64_value", "float_value", "double_value", "string_value", "list_value", "record_value", "node_value", "edge_value", "path_value", "duration_value", "local_time_value", "zoned_time_value", "date_value", "local_datetime_value", "zoned_datetime_value", "ref_value", "decimal_value", "vector_value"]
     class Type(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = ()
+        __slots__ = []
         kNull: _ClassVar[Value.Type]
         kBool: _ClassVar[Value.Type]
         kInt8: _ClassVar[Value.Type]
@@ -332,7 +332,7 @@ class Value(_message.Message):
     def __init__(self, bool_value: bool = ..., int8_value: _Optional[int] = ..., uint8_value: _Optional[int] = ..., int16_value: _Optional[int] = ..., uint16_value: _Optional[int] = ..., int32_value: _Optional[int] = ..., uint32_value: _Optional[int] = ..., int64_value: _Optional[int] = ..., uint64_value: _Optional[int] = ..., float_value: _Optional[float] = ..., double_value: _Optional[float] = ..., string_value: _Optional[bytes] = ..., list_value: _Optional[_Union[List, _Mapping]] = ..., record_value: _Optional[_Union[Record, _Mapping]] = ..., node_value: _Optional[_Union[Node, _Mapping]] = ..., edge_value: _Optional[_Union[Edge, _Mapping]] = ..., path_value: _Optional[_Union[Path, _Mapping]] = ..., duration_value: _Optional[_Union[Duration, _Mapping]] = ..., local_time_value: _Optional[_Union[LocalTime, _Mapping]] = ..., zoned_time_value: _Optional[_Union[ZonedTime, _Mapping]] = ..., date_value: _Optional[_Union[Date, _Mapping]] = ..., local_datetime_value: _Optional[_Union[LocalDatetime, _Mapping]] = ..., zoned_datetime_value: _Optional[_Union[ZonedDatetime, _Mapping]] = ..., ref_value: _Optional[_Union[Ref, _Mapping]] = ..., decimal_value: _Optional[_Union[Decimal, _Mapping]] = ..., vector_value: _Optional[_Union[Vector, _Mapping]] = ...) -> None: ...
 
 class HostAddress(_message.Message):
-    __slots__ = ("host", "port")
+    __slots__ = ["host", "port"]
     HOST_FIELD_NUMBER: _ClassVar[int]
     PORT_FIELD_NUMBER: _ClassVar[int]
     host: bytes
@@ -340,7 +340,7 @@ class HostAddress(_message.Message):
     def __init__(self, host: _Optional[bytes] = ..., port: _Optional[int] = ...) -> None: ...
 
 class Status(_message.Message):
-    __slots__ = ("code", "message")
+    __slots__ = ["code", "message"]
     CODE_FIELD_NUMBER: _ClassVar[int]
     MESSAGE_FIELD_NUMBER: _ClassVar[int]
     code: bytes
@@ -348,7 +348,7 @@ class Status(_message.Message):
     def __init__(self, code: _Optional[bytes] = ..., message: _Optional[bytes] = ...) -> None: ...
 
 class DirInfo(_message.Message):
-    __slots__ = ("install_path", "data_paths")
+    __slots__ = ["install_path", "data_paths"]
     INSTALL_PATH_FIELD_NUMBER: _ClassVar[int]
     DATA_PATHS_FIELD_NUMBER: _ClassVar[int]
     install_path: bytes
@@ -356,9 +356,9 @@ class DirInfo(_message.Message):
     def __init__(self, install_path: _Optional[bytes] = ..., data_paths: _Optional[_Iterable[bytes]] = ...) -> None: ...
 
 class ClientInfo(_message.Message):
-    __slots__ = ("lang", "protocol_version", "version")
+    __slots__ = ["lang", "protocol_version", "version"]
     class Language(int, metaclass=_enum_type_wrapper.EnumTypeWrapper):
-        __slots__ = ()
+        __slots__ = []
         UNKNOWN: _ClassVar[ClientInfo.Language]
         CPP: _ClassVar[ClientInfo.Language]
         GO: _ClassVar[ClientInfo.Language]
