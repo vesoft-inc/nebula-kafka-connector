@@ -5,7 +5,7 @@ env:
 
   # Specify the SDK version
   java_version: 5.0.0
-  python_version: 0.1.0-alpha
+  python_version: 5.0.0a1
 
   # specify the password for the nebula and yueshu servers
   ENSITE_PASSWORD: ${{ secrets.ENSITE_PASSWORD }}
@@ -43,12 +43,12 @@ jobs:
         doxygen doxygen/java-config
     
     # Generate Python API reference
-#    - name: Generate Documentation for Python
-#      run: |
-#        echo "PROJECT_NUMBER=${{ env.python_version }}" >> doxygen/python-config
-#        mkdir -p $BRANCH_NAME/python/${{ env.python_version }}
-#        echo "OUTPUT_DIRECTORY=$BRANCH_NAME/python/${{ env.python_version }}" >> doxygen/python-config
-#        doxygen doxygen/python-config   
+    - name: Generate Documentation for Python
+      run: |
+        echo "PROJECT_NUMBER=${{ env.python_version }}" >> doxygen/python-config
+        mkdir -p $BRANCH_NAME/python/${{ env.python_version }}
+        echo "OUTPUT_DIRECTORY=$BRANCH_NAME/python/${{ env.python_version }}" >> doxygen/python-config
+        doxygen doxygen/python-config   
 
     # Generate C++ API reference
 #    - name: Generate Documentation for CPP

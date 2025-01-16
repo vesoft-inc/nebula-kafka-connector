@@ -941,7 +941,7 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = nebula3/gclient/ nebula3/mclient nebula3/sclient
+INPUT                  = python/src/nebulagraph_python/client/__init__.py python/src/nebulagraph_python/client/base_executor.py python/src/nebulagraph_python/client/client.py python/src/nebulagraph_python/client/pool.py python/src/nebulagraph_python/__init__.py python/src/nebulagraph_python/data.py python/src/nebulagraph_python/data_types.py python/src/nebulagraph_python/error.py python/src/nebulagraph_python/py_data_types.py python/src/nebulagraph_python/result_set.py python/src/nebulagraph_python/result_table.py python/src/nebulagraph_python/value_wrapper.py
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
