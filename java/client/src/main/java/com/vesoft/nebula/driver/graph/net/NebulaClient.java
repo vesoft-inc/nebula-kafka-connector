@@ -525,7 +525,9 @@ public class NebulaClient implements Serializable {
     private List<String> getNodeProperties(String graphName, String nodeType)
             throws IOErrorException {
         String    graphType    = getGraphType(graphName);
-        String    descNodeType = String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType);
+        String    descNodeType = String.format("DESCRIBE NODE TYPE `%s` OF `%s`",
+                                               nodeType,
+                                               graphType);
         ResultSet resultSet    = execute(descNodeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             logger.error(String.format("get description of %s failed for %s", nodeType,
