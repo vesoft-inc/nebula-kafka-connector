@@ -5,7 +5,6 @@
 
 package com.vesoft.nebula.spark.common.reader
 
-import com.vesoft.nebula.driver.graph.data._
 import com.vesoft.nebula.driver.graph.data.ValueWrapper
 import com.vesoft.nebula.driver.graph.scan.{ScanEdgeResult, ScanEdgeResultIterator, ScanNodeResult, ScanNodeResultIterator, TableRow}
 import com.vesoft.nebula.spark.common.NebulaUtils.NebulaValueGetter
@@ -16,9 +15,9 @@ import org.apache.spark.sql.catalyst.expressions.SpecificInternalRow
 import org.apache.spark.sql.types.StructType
 import org.slf4j.{Logger, LoggerFactory}
 
+import java.time.format.DateTimeFormatter
 import scala.collection.JavaConverters._
 import scala.collection.mutable
-import scala.collection.mutable.ListBuffer
 
 trait NebulaReader {
   private val LOG: Logger = LoggerFactory.getLogger(this.getClass)
@@ -33,6 +32,11 @@ trait NebulaReader {
 
   private var nodeResponseIterator: ScanNodeResultIterator = _
   private var edgeResponseIterator: ScanEdgeResultIterator = _
+
+  private val datetimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+  private val zonedDatetimeFormatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+  private val timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
+  private val zonedTimeFormatter = DateTimeFormatter.ISO_OFFSET_TIME
 
   /**
    * init the reader: init metaProvider, storageClient
@@ -82,16 +86,16 @@ trait NebulaReader {
         getters(i).apply(value.asDate(), mutableRow, i)
       }
       if (value.isLocalTime) {
-        getters(i).apply(value.asLocalTime(), mutableRow, i)
+        getters(i).apply(value.asLocalTime().format(timeFormatter), mutableRow, i)
       }
       if (value.isZonedTime) {
-        getters(i).apply(value.asZonedTime(), mutableRow, i)
+        getters(i).apply(value.asZonedTime().format(zonedTimeFormatter), mutableRow, i)
       }
       if (value.isLocalDateTime) {
-        getters(i).apply(value.asLocalDateTime(), mutableRow, i)
+        getters(i).apply(value.asLocalDateTime().format(datetimeFormatter), mutableRow, i)
       }
       if (value.isZonedDateTime) {
-        getters(i).apply(value.asZonedDateTime(), mutableRow, i)
+        getters(i).apply(value.asZonedDateTime().format(zonedDatetimeFormatter), mutableRow, i)
       }
       if (value.isInt) {
         getters(i).apply(value.asInt(), mutableRow, i)
