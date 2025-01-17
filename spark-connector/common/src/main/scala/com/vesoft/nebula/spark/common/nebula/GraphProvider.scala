@@ -192,22 +192,24 @@ class GraphProvider(addresses: String,
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
     val graphType                               = getGraphType(graphName)
 
-    val escapedEdgeType = NebulaUtils.escapeUtil(edgeType)
-    val descEdgeType    =
-      s"call describe_graph_type('$graphType') filter type_name='$escapedEdgeType' return type_pattern next call describe_edge_type('$graphType', '$escapedEdgeType') return *"
+    val escapedEdgeType     = NebulaUtils.escapeUtil(edgeType)
+    val descEdgeTypePattern =
+      s"call describe_graph_type('$graphType') filter type_name='$escapedEdgeType' return type_pattern"
 
-    val result = client.execute(descEdgeType)
+    var result = client.execute(descEdgeTypePattern)
     if (!result.isSucceeded || result.isEmpty) {
-      LOG.error(s"get schema of $edgeType failed for ${result.getErrorMessage}")
+      LOG.error(s"get edge type pattern of $edgeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"edge type $edgeType does not exist in $graphName.")
     }
+    val edgeTypePattern: String = result.next().get("type_pattern").asString()
 
-    var edgeTypePattern: String = null
+    result = client.execute(s"call describe_edge_type('$graphType', '$escapedEdgeType') return *")
+    if (!result.isSucceeded) {
+      LOG.error(s"desc edge type $edgeType failed for ${result.getErrorMessage}")
+      throw new IllegalArgumentException(s"desc edge type $edgeType failed: ${result.getErrorMessage}")
+    }
     while (result.hasNext) {
       val record = result.next()
-      if (edgeTypePattern == null) {
-        edgeTypePattern = record.get("type_pattern").asString()
-      }
       schema += (record.get("property_name").asString() -> record.get("data_type").asString())
     }
 
