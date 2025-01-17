@@ -52,7 +52,7 @@ services:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9559
       - --data_path=/data/meta
-      - --local_ip=metad1
+      - --local_ip=metad2
     volumes:
       - ./data/metad2:/data/meta
       - ./logs/metad2:/usr/local/nebula/logs
