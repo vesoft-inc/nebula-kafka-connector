@@ -47,7 +47,6 @@ package object connector {
         .option(NebulaOptions.EXECUTION_RETRY, connectionConfig.getExecRetry)
         .option(NebulaOptions.EXECUTION_RETRY_INTERVAL, connectionConfig.getExecRetryIntervalMs)
         .option(NebulaOptions.GRAPH_NAME, writeConfig.getGraphName)
-
         .option(NebulaOptions.LABEL, writeConfig.getNodeType)
         .option(NebulaOptions.BATCH_SIZE, writeConfig.getBatchSize)
         .option(NebulaOptions.WRITE_MODE, writeConfig.getWriteMode)
@@ -158,6 +157,9 @@ package object connector {
         .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
+      if(readConfig.getSchema!= null){
+        dfReader.option(NebulaOptions.SCHEMA, readConfig.getSchema)
+      }
 
       dfReader.load()
     }

@@ -63,6 +63,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   require(parameters.isDefinedAt(GRAPH_ADDRESS),
           s"option $GRAPH_ADDRESS is required and can not be blank")
   var graphAddress      = parameters(GRAPH_ADDRESS)
+  val schema = parameters.getOrElse[String](SCHEMA, null)
   var graphName: String = _
   var label    : String = _
   if (!dataType.equalsIgnoreCase(DataTypeEnum.GQL.toString)) {
@@ -84,7 +85,6 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   var dstPksAsProp       : Boolean         = _
   var writeMode          : WriteMode.Value = _
   var disableWriteLog    : Boolean         = _
-  var schema             : String          = _
   var zonedDatetimeFormat: String          = _
   var localDatetimeFormat: String          = _
   var zonedTimeFormat    : String          = _
@@ -98,7 +98,6 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
     writeMode =
       WriteMode.withName(parameters.getOrElse(WRITE_MODE, DEFAULT_WRITE_MODE).toString.toLowerCase)
     disableWriteLog = parameters.getOrElse(DISABLE_WRITE_LOG, false).toString.toBoolean
-    schema = parameters.getOrElse[String](SCHEMA, null)
     zonedDatetimeFormat = parameters.getOrElse[String](ZONED_DATETIME_FORMAT, null)
     localDatetimeFormat = parameters.getOrElse[String](LOCAL_DATETIME_FORMAT, null)
     zonedTimeFormat = parameters.getOrElse[String](ZONED_TIME_FORMAT, null)

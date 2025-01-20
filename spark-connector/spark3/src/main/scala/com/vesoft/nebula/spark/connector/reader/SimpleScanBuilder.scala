@@ -58,7 +58,7 @@ class SimpleScan(nebulaOptions: NebulaOptions)
         datasetSchema = NebulaUtils.getSchemaForGql(nebulaOptions)
       }
 
-      LOG.info(s"=====dataset's schema: $datasetSchema")
+      LOG.info(s"dataset's schema: $datasetSchema")
     }
     datasetSchema
   }

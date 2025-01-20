@@ -39,7 +39,7 @@ This repository is the NebulaGraph Connector for Apache Spark.
   <dependency>
      <groupId>com.vesoft</groupId>
      <artifactId>nebula-connector_spark2.4</artifactId>
-     <version>5.0-SNAOSHOT</version>
+     <version>5.0-SNAPSHOT</version>
   </dependency>
   ```
 * Write DataFrame into NebulaGraph as Nodes:

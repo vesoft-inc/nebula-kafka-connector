@@ -38,6 +38,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll{
       .build()
     val readConfig = ReadNebulaConfig
       .builder()
+      .withSchema("/default_schema")
       .withGraphName("spark_read")
       .withTypeName("node_player")
       .withReturnCols(List())

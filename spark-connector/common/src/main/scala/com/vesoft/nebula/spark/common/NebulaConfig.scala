@@ -158,15 +158,15 @@ class WriteNebulaConfig(graphName: String,
   extends Serializable {
   def getGraphName: String = graphName
 
-  def getSchema: String =  schema
+  def getSchema: String = schema
 
-  def getZonedDateTimeFormat: String =  zonedDateTimeFormat
+  def getZonedDateTimeFormat: String = zonedDateTimeFormat
 
   def getLocalDateTimeFormat: String = localDateTimeFormat
 
-  def getZonedTimeFormat: String =  zonedTimeFormat
+  def getZonedTimeFormat: String = zonedTimeFormat
 
-  def getLocalTimeFormat: String =  localTimeFormat
+  def getLocalTimeFormat: String = localTimeFormat
 
   def getBatchSize: Int = batchSize
 
@@ -610,7 +610,14 @@ object WriteNebulaEdgeConfig {
 }
 
 
-class ReadNebulaConfig(graphName: String, typeName: String, returnCols: ListBuffer[String], partitionNum: Int, batchSize: Int) extends Serializable {
+class ReadNebulaConfig(schema: String,
+                       graphName: String,
+                       typeName: String,
+                       returnCols: ListBuffer[String],
+                       partitionNum: Int,
+                       batchSize: Int) extends Serializable {
+  def getSchema: String = schema
+
   def getGraphName: String = graphName
 
   def getTypeName: String = typeName
@@ -641,11 +648,20 @@ object ReadNebulaConfig {
   }
 
   class ReadConfigBuilder {
+    private var schema      : String             = null
     private var graphName   : String             = _
     private var typeName    : String             = _
     private var returnCols  : ListBuffer[String] = _
     private var partitionNum: Int                = 10
     private var batchSize   : Int                = 2000
+
+    /**
+     * config the schema path for reading
+     */
+    def withSchema(schema: String): ReadConfigBuilder = {
+      this.schema = schema
+      this
+    }
 
     /**
      * config the graph name for reading
@@ -700,7 +716,7 @@ object ReadNebulaConfig {
      */
     def build(): ReadNebulaConfig = {
       check()
-      new ReadNebulaConfig(graphName, typeName, returnCols, partitionNum, batchSize)
+      new ReadNebulaConfig(schema, graphName, typeName, returnCols, partitionNum, batchSize)
     }
 
     /**
@@ -715,7 +731,9 @@ object ReadNebulaConfig {
   }
 }
 
-class GqlNebulaConfig(gql: String) extends Serializable {
+class GqlNebulaConfig(schema: String, gql: String) extends Serializable {
+  def getSchema: String = schema
+
   def getGql: String = gql
 }
 
@@ -730,7 +748,13 @@ object GqlNebulaConfig {
   }
 
   class GqlConfigBuilder {
-    private var gql: String = _
+    private var schema: String = null
+    private var gql   : String = _
+
+    def withSchema(schema: String): GqlConfigBuilder = {
+      this.schema = schema
+      this
+    }
 
     def withGql(gql: String): GqlConfigBuilder = {
       this.gql = gql;
@@ -743,7 +767,7 @@ object GqlNebulaConfig {
      */
     def build(): GqlNebulaConfig = {
       check()
-      new GqlNebulaConfig(gql)
+      new GqlNebulaConfig(schema, gql)
     }
 
     private def check(): Unit = {
