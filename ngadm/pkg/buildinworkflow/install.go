@@ -9,7 +9,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/utils"
 )
 
-const defaultMetadResetTimeout = 10
+const defaultMetadResetTimeout = 20
 const defaultMetadUser = "root"
 
 func Install(args map[string]any, spec *types.JobSpec) (*types.WorkflowSpec, error) {
