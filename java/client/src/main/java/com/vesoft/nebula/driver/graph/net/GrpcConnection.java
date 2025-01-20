@@ -103,6 +103,7 @@ public class GrpcConnection extends Connection {
                     .authenticate(authReq);
             String code = resp.getStatus().getCode().toString(charset);
             if (!ErrorCode.SUCCESSFUL_COMPLETION.code.equals(code)) {
+                close();
                 throw new AuthFailedException(resp.getStatus().getMessage().toString(charset));
             }
             return new AuthResult(resp.getSessionId());
