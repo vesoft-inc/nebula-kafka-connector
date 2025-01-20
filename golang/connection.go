@@ -61,8 +61,8 @@ func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (types.Clie
 	if err := cn.open(host.host, host.port, cfg.connectTimeout, tlsCfg); err != nil {
 		return nil, err
 	}
-
 	if err := cn.authenticate(ctx, cfg.username, cfg.password); err != nil {
+		_ = cn.clientConn.Close()
 		return nil, err
 	}
 	cn.timeout = cfg.requestTimeout
