@@ -99,11 +99,12 @@ func (cn *connection) authenticate(ctx context.Context, username, password strin
 	}
 	resp, err := cn.graphClient.Authenticate(ctx, &in)
 	if err != nil {
-		_ = cn.Close()
+		_ = cn.closeConn()
 		return grpcutil.GetGrpcError(fmt.Sprintf("%s:%d", cn.host, cn.port), err)
 	}
 	respErr := resp.GetStatus()
 	if string(respErr.GetCode()) != string(errors.ERROR_SUCCESSFUL_COMPLETION) {
+		_ = cn.closeConn()
 		return internal_error.ErrServerResponse(string(respErr.GetCode()), string(respErr.GetMessage()))
 	}
 	cn.sessionId = resp.GetSessionId()
@@ -185,10 +186,13 @@ func (cn *connection) PingContext(ctx context.Context) error {
 	return nil
 }
 
+func (cn *connection) closeConn() error {
+	return cn.clientConn.Close()
+}
+
 func (cn *connection) Close() error {
 	cn.mu.Lock()
 	defer cn.mu.Unlock()
-
 	if cn.IsClosed() {
 		return nil
 	}
@@ -200,11 +204,8 @@ func (cn *connection) Close() error {
 	ctx, cancel := context.WithTimeout(context.Background(), cn.timeout)
 	defer cancel()
 	_, err := cn.graphClient.Execute(ctx, in)
+	_ = cn.closeConn()
 	if err != nil {
-		return err
-	}
-
-	if err := cn.clientConn.Close(); err != nil {
 		return err
 	}
 	return nil

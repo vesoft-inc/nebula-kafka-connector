@@ -333,25 +333,5 @@ func (nv *EmptyValue) AsDecimal() (Decimal, error) {
 }
 
 func (s *String) String() string {
-	inputbytes := []byte(*s)
-	// Create a byte slice to store the output, but don't specify the length!!!
-	outputBytes := []byte{}
-	// Initialize the index to track the current position
-	idx := 0
-	for _, ch := range inputbytes {
-		if ch == '\r' {
-			// Carriage return: move to the beginning of the line by setting idx to 0
-			idx = 0
-		} else {
-			// If the index is out of range, append the character to the output
-			if idx >= len(outputBytes) {
-				outputBytes = append(outputBytes, ch)
-			} else {
-				// Otherwise, overwrite the character at the index
-				outputBytes[idx] = ch
-			}
-			idx++
-		}
-	}
-	return fmt.Sprintf(`%s`, string(outputBytes))
+	return fmt.Sprintf(`%s`, *s)
 }

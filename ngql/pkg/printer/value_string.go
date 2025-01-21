@@ -34,7 +34,7 @@ func newValueStringer(format string) valueStringer {
 // used for record value
 // if the value is string and contain special character, should quote it
 func (s *defaultStringer) strQuoteSpecial(str string) string {
-	subStr := []string{"\"", "\a", "\b", "\f", "\n", "\r", "\t", "\v", " "}
+	subStr := []string{"\"", "\a", "\b", "\f", "\n", "\r", "\t", "\v", " ", "\\"}
 	for _, c := range subStr {
 		if strings.Contains(str, c) {
 			return strconv.Quote(str)
@@ -85,7 +85,10 @@ func (s *defaultStringer) String(v nebula.Value) string {
 	switch v.GetType() {
 	case nebula.ValueTypeString:
 		d, _ := v.AsString()
-		return d.String()
+		rr := s.strQuoteSpecial(d.String())
+		rr = strings.Trim(rr, `"`)
+		return strings.ReplaceAll(rr, "\\\\", "\\")
+
 	case nebula.ValueTypeList, nebula.ValueTypeRecord, nebula.ValueTypeNode, nebula.ValueTypeEdge, nebula.ValueTypePath:
 		return s.complexString(v, false, s.String)
 	default:
