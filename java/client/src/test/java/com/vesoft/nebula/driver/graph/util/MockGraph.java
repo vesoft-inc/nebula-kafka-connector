@@ -1,5 +1,6 @@
 package com.vesoft.nebula.driver.graph.util;
 
+import com.vesoft.nebula.driver.graph.ServerConstant;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
 import org.slf4j.Logger;
@@ -8,13 +9,14 @@ import org.slf4j.LoggerFactory;
 public class MockGraph {
     private static final Logger log = LoggerFactory.getLogger(MockGraph.class);
 
-    static String address = "127.0.0.1:9669";
-    static String user    = "root";
-    static String passwd  = "NebulaGraph01";
+    static String address = ServerConstant.address;
+    static String user    = ServerConstant.user;
+    static String passwd  = ServerConstant.passwd;
 
     public static void mockGraphData() {
+        NebulaClient client = null;
         try {
-            NebulaClient client = NebulaClient.builder(address, user, passwd).build();
+            client = NebulaClient.builder(address, user, passwd).build();
             String createGraphType = "CREATE GRAPH TYPE IF NOT EXISTS graph_type_nba AS {"
                     + "NODE node_type_player (LABEL player "
                     + "{id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE}),"
@@ -67,6 +69,69 @@ public class MockGraph {
         } catch (Exception e) {
             log.error("mock graph failed", e);
             System.exit(1);
+        } finally {
+            if (client != null) {
+                client.close();
+            }
+        }
+    }
+
+    public static void mockSpecialGraphType() {
+        NebulaClient client = null;
+        try {
+            client = NebulaClient.builder(address, user, passwd).build();
+            String createGraphType = "CREATE GRAPH TYPE IF NOT EXISTS `中文_graph\\\"_type` AS {"
+                    + "NODE `user` (LABEL `user` "
+                    + "{id INT PRIMARY KEY, `type` STRING, `姓名` STRING, `age\\t` INT32}),"
+                    + "EDGE `edge` (`user`)-[LABEL `edge` "
+                    + "{followness INT, likeness FLOAT64, `type\\r` STRING}]->(`user`)"
+                    + "}";
+
+            ResultSet resultSet = client.execute(createGraphType);
+            if (!resultSet.isSucceeded()) {
+                log.error("create graph type `中文_graph\"_type` failed:{}",
+                          resultSet.getErrorMessage());
+                System.exit(1);
+            }
+
+            String createGraph = "CREATE GRAPH IF NOT EXISTS `图` TYPED `中文_graph\"_type`";
+            resultSet = client.execute(createGraph);
+            if (!resultSet.isSucceeded()) {
+                log.error("create graph `图` failed:{}", resultSet.getErrorMessage());
+                System.exit(1);
+            }
+
+            String insertNode = "USE `图` INSERT OR REPLACE "
+                    + "(@`user`{id:1, `type`:\"点\", `姓名`: \"Tom\", `age\\t`: 18}),"
+                    + "(@`user`{id:2, `type`:\"node\", `姓名`: \"Bob\", `age\\t`: 19})";
+            resultSet = client.execute(insertNode);
+            if (!resultSet.isSucceeded()) {
+                log.error("insert node failed for `user`:{}",
+                          resultSet.getErrorMessage());
+                System.exit(1);
+            }
+
+            String insertEdge = "table t{id1,id2,followness,likeness,ty} = \n"
+                    + "(1,2,90,66.8,\"a\"),(2,1,100,93.35,\"b\")\n"
+                    + "USE `图`\n"
+                    + "for r IN t\n"
+                    + "MATCH(src@`user`) where src.id=r.id1\n"
+                    + "MATCH(dst@`user`) where dst.id=r.id2\n"
+                    + "INSERT OR REPLACE (src)-[@`edge`"
+                    + "{followness:r.followness,likeness:r.likeness,`type\\r`:r.ty}]->(dst)";
+            resultSet = client.execute(insertEdge);
+            if (!resultSet.isSucceeded()) {
+                log.error("insert edge failed for `edge`:{}",
+                          resultSet.getErrorMessage());
+                System.exit(1);
+            }
+        } catch (Exception e) {
+            log.error("mock graph failed", e);
+            System.exit(1);
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
     }
 }

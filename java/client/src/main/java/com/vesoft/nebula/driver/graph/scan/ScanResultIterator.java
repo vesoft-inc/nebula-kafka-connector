@@ -4,6 +4,7 @@ import com.vesoft.nebula.driver.graph.data.ExtraInfo;
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
+import com.vesoft.nebula.driver.graph.utils.GqlUtil;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
@@ -18,20 +19,20 @@ import org.slf4j.LoggerFactory;
 public class ScanResultIterator implements Serializable {
     private static final Logger logger = LoggerFactory.getLogger(ScanResultIterator.class);
 
-    String serversAddress;
-    String userName;
+    String              serversAddress;
+    String              userName;
     Map<String, Object> authOptions;
-    long requestTimeout;
+    long                requestTimeout;
 
     protected boolean hasNext = true;
 
     protected final Map<Integer, String> partCursor = new HashMap<>();
 
-    protected final String graphName;
-    protected final String labelName;
-    protected List<String> propNames;
-    protected int batchSize;
-    protected final ExecutorService threadPool;
+    protected final String                                   graphName;
+    protected final String                                   labelName;
+    protected       List<String>                             propNames;
+    protected       int                                      batchSize;
+    protected final ExecutorService                          threadPool;
     protected final ConcurrentHashMap<Integer, NebulaClient> partClient = new ConcurrentHashMap<>();
 
     protected ScanResultIterator(String graphName,
@@ -78,12 +79,12 @@ public class ScanResultIterator implements Serializable {
     }
 
     protected String getPropertyListString() {
-        StringBuilder properties = new StringBuilder();
-        String propertyListPrefix = "list[";
+        StringBuilder properties         = new StringBuilder();
+        String        propertyListPrefix = "list[";
         properties.append(propertyListPrefix);
         for (String column : propNames) {
             properties.append("\"");
-            properties.append(column);
+            properties.append(GqlUtil.escape(column));
             properties.append("\"");
             properties.append(",");
         }
@@ -98,10 +99,16 @@ public class ScanResultIterator implements Serializable {
     protected ResultSet scan(String scanTemplate, Map.Entry<Integer, String> partCur)
             throws Exception {
         // construct the scan producer
-        String producer = String.format(scanTemplate, graphName, graphName, labelName,
-                getPropertyListString(), partCur.getKey(), partCur.getValue(), batchSize);
+        String producer = String.format(scanTemplate,
+                                        GqlUtil.escape(graphName),
+                                        GqlUtil.escape(graphName),
+                                        GqlUtil.escape(labelName),
+                                        getPropertyListString(),
+                                        partCur.getKey(),
+                                        partCur.getValue(),
+                                        batchSize);
         NebulaClient client = partClient.get(partCur.getKey());
-        return  client.execute(producer);
+        return client.execute(producer);
     }
 
     protected String getCursor(ResultSet resultSet) {
@@ -113,7 +120,7 @@ public class ScanResultIterator implements Serializable {
     }
 
     protected void close() {
-        for (NebulaClient client: partClient.values()) {
+        for (NebulaClient client : partClient.values()) {
             client.close();
         }
     }

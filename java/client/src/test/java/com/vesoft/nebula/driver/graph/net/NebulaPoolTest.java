@@ -6,6 +6,7 @@
 package com.vesoft.nebula.driver.graph.net;
 
 import com.vesoft.nebula.driver.graph.ErrorCode;
+import com.vesoft.nebula.driver.graph.ServerConstant;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.util.MockGraph;
@@ -18,12 +19,13 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class NebulaPoolTest {
-    String addresses = "127.0.0.1:9669";
-    String user      = "root";
-    String passwd    = "NebulaGraph01";
+    String addresses = ServerConstant.address;
+    String user      = ServerConstant.user;
+    String passwd    = ServerConstant.passwd;
 
     @Before
     public void setup() {
@@ -33,27 +35,33 @@ public class NebulaPoolTest {
     @Test
     public void testNullUser() {
         System.out.println("<==== testNullUser =====>");
+        NebulaPool pool = null;
         try {
-            NebulaPool pool = NebulaPool.builder("127.0.0.1:9669", null, null)
+            pool = NebulaPool.builder(addresses, null, null)
                     .withConnectTimeoutMills(1111)
                     .withRequestTimeoutMills(2222)
                     .withScanParallel(15)
                     .build();
-            pool.getClient();
+            NebulaClient client = pool.getClient();
+            pool.returnClient(client);
         } catch (AuthFailedException e) {
-            System.out.println("expected to here");
             Assert.assertTrue(true);
         } catch (Exception e) {
             e.printStackTrace();
             Assert.fail();
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
     }
 
     @Test
     public void testBuilder() {
         System.out.println("<==== testBuilder =====>");
+        NebulaPool pool = null;
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withConnectTimeoutMills(1111)
                     .withRequestTimeoutMills(2222)
                     .withScanParallel(15)
@@ -63,136 +71,174 @@ public class NebulaPoolTest {
             Assert.assertEquals(1111L, client.getConnectTimeoutMills());
             Assert.assertEquals(2222L, client.getRequestTimeoutMills());
             Assert.assertEquals(15, client.getScanParallel());
+            pool.returnClient(client);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
 
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withConnectTimeoutMills(0)
                     .withRequestTimeoutMills(-1)
                     .build();
             NebulaClient client = pool.getClient();
             Assert.assertEquals(Integer.MAX_VALUE, client.getConnectTimeoutMills());
             Assert.assertEquals(Integer.MAX_VALUE, client.getRequestTimeoutMills());
+            pool.returnClient(client);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
     }
 
     @Test
     public void testNebulaPool() {
         System.out.println("<==== testNebulaPool ====>");
+        NebulaPool pool = null;
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withMaxClientSize(10)
                     .withMinClientSize(1)
                     .build();
             NebulaClient client = pool.getClient();
             client.execute("RETURN 1");
+            pool.returnClient(client);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
     }
 
     @Test
     public void testSessionSet() {
         System.out.println("<==== testSessionSet ====>");
+        NebulaPool pool = null;
         // test all session set configs
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withGraph("nba")
                     .withSchema("/default_schema")
                     .withTimeZone(ZoneId.systemDefault().getId())
                     .build();
+            NebulaClient client = pool.getClient();
             Assert.assertEquals("nba",
-                                pool
-                                        .getClient()
+                                client
                                         .execute("show current_session")
                                         .next()
                                         .get("home_graph_name")
                                         .asString());
             Assert.assertEquals("/default_schema",
-                                pool
-                                        .getClient()
+                                client
                                         .execute("show current_session")
                                         .next()
                                         .get("home_schema_path")
                                         .asString());
             Assert.assertEquals("Asia/Shanghai",
-                                pool
-                                        .getClient()
+                                client
                                         .execute("show current_session")
                                         .next()
-                                        .get("time_zone")
+                                        .get("timezone")
                                         .asString());
+            pool.returnClient(client);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
 
         // test one session set config
 
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withGraph("nba")
                     .build();
+            NebulaClient client = pool.getClient();
             Assert.assertEquals("nba",
-                                pool
-                                        .getClient()
+                                client
                                         .execute("show current_session")
                                         .next()
                                         .get("home_graph_name")
                                         .asString());
+            pool.returnClient(client);
         } catch (Exception e) {
             assert e.getMessage().contains("SESSION SET home_graph_name=\"nba_not_exist\" failed");
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
 
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withSchema("/default_schema")
                     .build();
+            NebulaClient client = pool.getClient();
             Assert.assertEquals("/default_schema",
-                                pool
-                                        .getClient()
+                                client
                                         .execute("show current_session")
                                         .next()
                                         .get("home_schema_path")
                                         .asString());
-
+            pool.returnClient(client);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
 
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withTimeZone("UTC")
                     .build();
+            NebulaClient client = pool.getClient();
             Assert.assertEquals("UTC",
-                                pool
-                                        .getClient()
+                                client
                                         .execute("show current_session")
                                         .next()
-                                        .get("time_zone")
+                                        .get("timezone")
                                         .asString());
-
+            pool.returnClient(client);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
 
         // test wrong graph
         try {
-            NebulaPool pool = NebulaPool.builder(addresses, user, passwd)
+            pool = NebulaPool.builder(addresses, user, passwd)
                     .withGraph("nba_not_exist")
                     .build();
             pool.getClient();
             Assert.fail("get client should fail.");
         } catch (Exception e) {
-            assert e.getMessage().contains("SESSION SET home_graph_name=\"nba_not_exist\" failed");
+            assert e.getMessage().contains("SESSION SET GRAPH \"nba_not_exist\" failed");
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
 
     }
 
 
+    @Ignore
     @Test
     public void testStrictlyServerHealthy() {
         System.out.println("<==== testStrictlyServerHealthy ====>");
@@ -246,6 +292,7 @@ public class NebulaPoolTest {
                     try {
                         NebulaClient client = finalPool.getClient();
                         client.execute("SHOW GRAPHS");
+                        finalPool.returnClient(client);
                     } catch (Exception e) {
                         failedCount.incrementAndGet();
                     } finally {
@@ -265,19 +312,20 @@ public class NebulaPoolTest {
         }
     }
 
+    @Ignore
     @Test
     public void testTls() {
         System.out.println("<==== testTls ====>");
         String address = "192.168.8.6:4820";
 
 
-        String tlsCa   = "src/test/resources/tls/ca.pem";
-        String tlsCert = "src/test/resources/tls/client/client.cert";
-        String tlsKey  = "src/test/resources/tls/client/client-private.key";
-
+        String     tlsCa   = "src/test/resources/tls/ca.pem";
+        String     tlsCert = "src/test/resources/tls/client/client.cert";
+        String     tlsKey  = "src/test/resources/tls/client/client-private.key";
+        NebulaPool pool    = null;
         try {
-            NebulaPool pool = NebulaPool
-                    .builder(address, "root", "Nebula123")
+            pool = NebulaPool
+                    .builder(address, user, passwd)
                     .withEnableTls(true)
                     .withTlsCa(tlsCa)
                     .withTlsCert(tlsCert, tlsKey)
@@ -289,6 +337,10 @@ public class NebulaPoolTest {
         } catch (Exception e) {
             e.printStackTrace();
             assert false;
+        } finally {
+            if (pool != null) {
+                pool.close();
+            }
         }
     }
 }

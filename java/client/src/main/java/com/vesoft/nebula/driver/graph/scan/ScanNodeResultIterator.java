@@ -15,7 +15,7 @@ public class ScanNodeResultIterator extends ScanResultIterator {
     private static final Logger logger = LoggerFactory.getLogger(ScanNodeResultIterator.class);
 
     private static final String SCAN_NODE_TEMPLATE =
-        "USE %s CALL cursor_node_scan(\"%s\",\"%s\",%s,%d,\"%s\", %d) return *";
+        "USE `%s` CALL cursor_node_scan(\"%s\",\"%s\",%s,%d,\"%s\", %d) return *";
 
     public ScanNodeResultIterator(String graphName,
                                   String label,

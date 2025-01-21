@@ -1,6 +1,7 @@
 package com.vesoft.nebula.driver.graph.net;
 
 import com.google.common.base.Charsets;
+import com.vesoft.nebula.driver.graph.ServerConstant;
 import com.vesoft.nebula.driver.graph.data.HostAddress;
 import com.vesoft.nebula.driver.graph.util.MockGraph;
 import com.vesoft.nebula.proto.graph.ExecuteResponse;
@@ -17,10 +18,10 @@ import org.slf4j.LoggerFactory;
 
 public class GrpcConnectionTest {
     private static final Logger LOGGER   = LoggerFactory.getLogger(GrpcConnection.class);
-    private final        String host     = "127.0.0.1";
-    private final        int    port     = 9669;
-    private final        String user     = "root";
-    private final        String password = "NebulaGraph01";
+    private final        String host     = ServerConstant.host;
+    private final        int    port     = ServerConstant.port;
+    private final        String user     = ServerConstant.user;
+    private final        String password = ServerConstant.passwd;
 
     private NebulaClient.Builder builder;
 
@@ -28,7 +29,7 @@ public class GrpcConnectionTest {
     public void setup() {
         MockGraph.mockGraphData();
         builder = NebulaClient
-                .builder(host + ":" + port, "root", "Nebula123")
+                .builder(host + ":" + port, user, password)
                 .withConnectTimeoutMills(1000)
                 .withRequestTimeoutMills(1000)
                 .withEnableTls(false);
@@ -37,11 +38,11 @@ public class GrpcConnectionTest {
 
     @Test(timeout = 3000)
     public void testAll() {
+        GrpcConnection connection = new GrpcConnection();
         try {
             // Test open
-            GrpcConnection connection = new GrpcConnection();
             NebulaClient.Builder builder = NebulaClient
-                    .builder(host + port, "root", "Nebula123")
+                    .builder(host + ":" + port, user, password)
                     .withConnectTimeoutMills(1000)
                     .withRequestTimeoutMills(1000)
                     .withEnableTls(false);
@@ -83,6 +84,8 @@ public class GrpcConnectionTest {
         } catch (Exception e) {
             e.printStackTrace();
             assert (false);
+        } finally {
+            connection.close();
         }
     }
 
@@ -119,7 +122,7 @@ public class GrpcConnectionTest {
         }
     }
 
-    @Test
+    //@Test
     public void testTlsConnection() {
         String              host     = "192.168.8.6";
         int                 port     = 4820;

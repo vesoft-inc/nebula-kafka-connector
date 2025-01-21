@@ -15,7 +15,7 @@ public class ScanEdgeResultIterator extends ScanResultIterator {
     private static final Logger logger = LoggerFactory.getLogger(ScanNodeResultIterator.class);
 
     private static final String SCAN_EDGE_TEMPLATE =
-        "USE %s CALL cursor_edge_scan(\"%s\",\"%s\",%s,%d,\"%s\", %d) return *";
+        "USE `%s` CALL cursor_edge_scan(\"%s\",\"%s\",%s,%d,\"%s\", %d) return *";
 
     public ScanEdgeResultIterator(String graphName,
                                   String label,

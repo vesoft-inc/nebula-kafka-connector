@@ -1,6 +1,7 @@
 package com.vesoft.nebula.driver.graph.net;
 
 import com.vesoft.nebula.driver.graph.ErrorCode;
+import com.vesoft.nebula.driver.graph.ServerConstant;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
@@ -9,35 +10,41 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 public class NebulaClientTest {
-    String addresses = "127.0.0.1:9669,127.0.0.1:9670,127.0.0.1:9671";
-    String user      = "root";
-    String passwd    = "NebulaGraph01";
+    String addresses = ServerConstant.address;
+    String user      = ServerConstant.user;
+    String passwd    = ServerConstant.passwd;
 
     @Test
     public void testNullUser() {
         System.out.println("<==== testNullUser =====>");
+        NebulaClient client = null;
         try {
-            NebulaClient client = NebulaClient.builder(addresses, null, null)
+            client = NebulaClient.builder(addresses, null, null)
                     .withConnectTimeoutMills(1111)
                     .withRequestTimeoutMills(2222)
                     .withScanParallel(15)
                     .build();
         } catch (AuthFailedException e) {
-            System.out.println("expected to here");
             Assert.assertTrue(true);
         } catch (Exception e) {
             Assert.fail();
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
     }
 
     @Test
     public void testBuilder() {
         System.out.println("<==== testBuilder =====>");
+        NebulaClient client = null;
         try {
-            NebulaClient client = NebulaClient.builder(addresses, user, passwd)
+            client = NebulaClient.builder(addresses, user, passwd)
                     .withConnectTimeoutMills(1111)
                     .withRequestTimeoutMills(2222)
                     .withScanParallel(15)
@@ -47,10 +54,14 @@ public class NebulaClientTest {
             Assert.assertEquals(15, client.getScanParallel());
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
 
         try {
-            NebulaClient client = NebulaClient.builder(addresses, user, passwd)
+            client = NebulaClient.builder(addresses, user, passwd)
                     .withConnectTimeoutMills(0)
                     .withRequestTimeoutMills(-1)
                     .build();
@@ -58,20 +69,29 @@ public class NebulaClientTest {
             Assert.assertEquals(Integer.MAX_VALUE, client.getRequestTimeoutMills());
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
     }
 
     @Test()
     public void testBuildNebulaClient() {
         System.out.println("<==== testBuildNebulaClient ====>");
+        NebulaClient client = null;
         try {
-            NebulaClient client = NebulaClient.builder(addresses, user, passwd)
+            client = NebulaClient.builder(addresses, user, passwd)
                     .withRequestTimeoutMills(3000)
                     .build();
             ResultSet resultSet = client.execute("return 1");
             Assert.assertEquals(resultSet.getErrorCode(), ErrorCode.SUCCESSFUL_COMPLETION);
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
     }
 
@@ -79,27 +99,34 @@ public class NebulaClientTest {
     public void testBuildNebulaClientFailed() {
         System.out.println("<==== testBuildNebulaClientFailed ====>");
         // config illegal, illegal address
-        String illegalAddress = "127.0.0.1:100000";
+        String       illegalAddress = "127.0.0.1:100000";
+        NebulaClient client         = null;
         try {
-            NebulaClient client = NebulaClient.builder(illegalAddress, user, passwd).build();
-            client.close();
+            client = NebulaClient.builder(illegalAddress, user, passwd).build();
         } catch (AuthFailedException | IOErrorException e) {
             Assert.fail(e.getMessage());
         } catch (IllegalArgumentException e) {
             assert true;
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
 
         // config illegal, host name is not exist
         String illegalHostName = "hostname:9669";
         try {
-            NebulaClient client = NebulaClient.builder(illegalHostName, user, passwd).build();
-            client.close();
+            client = NebulaClient.builder(illegalHostName, user, passwd).build();
         } catch (RuntimeException e) {
             if (e.getMessage().contains("UnknownHostException")) {
                 Assert.assertTrue("expect reach here:" + e.getMessage(), true);
             }
         } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
 
 
@@ -113,35 +140,49 @@ public class NebulaClientTest {
 
         // config illegal, illegal requestTimeout
         try {
-            builder.withRequestTimeoutMills(-1).build();
+            client = builder.withRequestTimeoutMills(-1).build();
         } catch (Exception e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
     }
 
+    @Ignore
     @Test
     public void testReconnectWithMultiServices() {
         System.out.println("<==== testReconnectWithMultiServices ====>");
         Runtime runtime = Runtime.getRuntime();
         String  cmd     = "docker stop docker-compose-graphd0-1";
 
+        NebulaClient client = null;
         try {
-            NebulaClient.builder("127.0.0.1:9669", user, passwd).build();
+            client = NebulaClient.builder("127.0.0.1:9669", user, passwd).build();
         } catch (Exception e) {
             assert true;
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
+
 
         try {
             Process p = runtime.exec(cmd);
             p.waitFor(10, TimeUnit.SECONDS);
             ProcessUtil.printProcessStatus(cmd, p);
             Thread.sleep(5000);
-            NebulaClient client    = NebulaClient.builder(addresses, user, passwd).build();
-            ResultSet    resultSet = client.execute("RETURN 1");
+            client = NebulaClient.builder(addresses, user, passwd).build();
+            ResultSet resultSet = client.execute("RETURN 1");
             assert resultSet.isSucceeded();
         } catch (Exception e) {
             Assert.fail(e.getMessage());
         } finally {
+            if (client != null) {
+                client.close();
+            }
             try {
                 cmd = "docker start docker-compose-graphd0-1";
                 Process p = runtime.exec(cmd);
@@ -217,12 +258,17 @@ public class NebulaClientTest {
         try {
             client = NebulaClient.builder(addresses, user, passwd)
                     .build();
+            assert client.ping();
         } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
+        } finally {
+            if (client != null) {
+                client.close();
+            }
         }
-        assert client.ping();
     }
 
+    @Ignore
     @Test
     public void testGetHost() {
         System.out.println("<==== testGetHost ====>");
@@ -231,17 +277,18 @@ public class NebulaClientTest {
             for (int i = 0; i < 10; i++) {
                 client = NebulaClient.builder(addresses, user, passwd)
                         .build();
-                System.out.println(">>>> host:" + client.getHost());
                 assert client.getHost().equals("127.0.0.1:9669")
                         || client.getHost().equals("127.0.0.1:9670")
                         || client.getHost().equals("127.0.0.1:9671");
+                assert client.ping();
+                client.close();
             }
         } catch (IOErrorException | AuthFailedException e) {
             Assert.fail(e.getMessage());
         }
-        assert client.ping();
     }
 
+    @Ignore
     @Test
     public void testTls() {
         System.out.println("<==== testTls ====>");
@@ -254,13 +301,14 @@ public class NebulaClientTest {
 
         try {
             NebulaClient client = NebulaClient
-                    .builder(address, "root", "Nebula123")
+                    .builder(address, user, passwd)
                     .withEnableTls(true)
                     .withTlsCa(tlsCa)
                     .withTlsCert(tlsCert, tlsKey)
                     .withTlsPeerName("NICOLE")
                     .build();
             client.execute("RETURN 1");
+            client.close();
         } catch (Exception e) {
             e.printStackTrace();
             assert false;

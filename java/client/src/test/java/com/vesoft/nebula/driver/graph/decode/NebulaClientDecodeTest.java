@@ -8,6 +8,7 @@ package com.vesoft.nebula.driver.graph.decode;
 import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 
+import com.vesoft.nebula.driver.graph.ServerConstant;
 import com.vesoft.nebula.driver.graph.data.Edge;
 import com.vesoft.nebula.driver.graph.data.EmbeddingVector;
 import com.vesoft.nebula.driver.graph.data.NRecord;
@@ -33,9 +34,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 public class NebulaClientDecodeTest {
-    String addresses = "127.0.0.1:9669";
-    String user      = "root";
-    String passwd    = "NebulaGraph01";
+    String addresses = ServerConstant.address;
+    String user      = ServerConstant.user;
+    String passwd    = ServerConstant.passwd;
 
     NebulaClient client = null;
 
@@ -57,7 +58,6 @@ public class NebulaClientDecodeTest {
                             + "node person(label person{id int32 primary key, high int32}),"
                             + "edge friend(person)-[label friend{degree int32}]->(person)}";
             ResultSet res = client.execute(createGraphType);
-            System.out.println("create schema:" + res.getErrorMessage());
             assert res.isSucceeded();
             String createGraph = "create graph if not exists decode TYPED decode_type";
             res = client.execute(createGraph);
@@ -72,7 +72,6 @@ public class NebulaClientDecodeTest {
                     + "p_ZonedDT:zoned_datetime(\"2024-12-12T10:00:00+0800\"),"
                     + "p_list:[\"a\",\"b\"]}) ";
             res = client.execute(insertNode1);
-            System.out.println("insert node: " + res.getErrorMessage());
             assert res.isSucceeded();
 
             String insertNode2 = "use decode insert or ignore (@person{id:2,high:20}) ";
@@ -177,13 +176,15 @@ public class NebulaClientDecodeTest {
             BigDecimal decimal = res.next().values().get(0).asDecimal();
             Assert.assertEquals("-9223372036854775808", decimal.toPlainString());
 
-            res = client.execute("return 1M / 0.0 as t next return cast(t as decimal)");
+            res = client.execute("return 1.7976931348623159e+308D as t "
+                                         + "next return cast(t as decimal)");
             ResultSet finalPosInfRes = res;
             Exception exception = assertThrows(RuntimeException.class, () ->
                     finalPosInfRes.next().values().get(0).asDecimal());
             assertTrue(exception.getMessage().contains("+Inf"));
 
-            res = client.execute("return 1M / -0.0 as t next return cast(t as decimal)");
+            res = client.execute("return -1.7976931348623159e+308D  as t "
+                                         + "next return cast(t as decimal)");
             ResultSet finalNegInfRes = res;
             exception = assertThrows(RuntimeException.class, () ->
                     finalNegInfRes.next().values().get(0).asDecimal());
@@ -751,13 +752,13 @@ public class NebulaClientDecodeTest {
             BigDecimal decimal = res.next().values().get(0).asDecimal();
             Assert.assertEquals("-9223372036854775808", decimal.toPlainString());
 
-            res = client.execute("let a=1M/0.0 return cast(a as decimal)");
+            res = client.execute("let a=1.7976931348623159e+308D return cast(a as decimal)");
             ResultSet finalPosInfRes = res;
             Exception exception = assertThrows(RuntimeException.class, () ->
                     finalPosInfRes.next().values().get(0).asDecimal());
             assertTrue(exception.getMessage().contains("+Inf"));
 
-            res = client.execute("let a=-1M/0.0  return cast(a as decimal)");
+            res = client.execute("let a=-1.7976931348623159e+308D return cast(a as decimal)");
             ResultSet finalNegInfRes = res;
             exception = assertThrows(RuntimeException.class, () ->
                     finalNegInfRes.next().values().get(0).asDecimal());

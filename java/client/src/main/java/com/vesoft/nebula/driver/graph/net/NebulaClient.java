@@ -17,6 +17,7 @@ import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.scan.ScanEdgeResultIterator;
 import com.vesoft.nebula.driver.graph.scan.ScanNodeResultIterator;
 import com.vesoft.nebula.driver.graph.utils.AddressUtil;
+import com.vesoft.nebula.driver.graph.utils.GqlUtil;
 import com.vesoft.nebula.driver.graph.utils.TlsUtil;
 import io.grpc.netty.shaded.io.grpc.netty.GrpcSslContexts;
 import io.grpc.netty.shaded.io.netty.handler.ssl.SslContext;
@@ -511,6 +512,9 @@ public class NebulaClient implements Serializable {
         while (resultSet.hasNext()) {
             partitions.add(resultSet.next().get("partition_id").asInt());
         }
+        if (partitions.contains(0)) {
+            partitions.remove(Integer.valueOf(0));
+        }
         return partitions;
     }
 
@@ -524,11 +528,11 @@ public class NebulaClient implements Serializable {
      */
     private List<String> getNodeProperties(String graphName, String nodeType)
             throws IOErrorException {
-        String    graphType    = getGraphType(graphName);
-        String    descNodeType = String.format("DESCRIBE NODE TYPE `%s` OF `%s`",
-                                               nodeType,
-                                               graphType);
-        ResultSet resultSet    = execute(descNodeType);
+        String graphType = getGraphType(graphName);
+        String descNodeType = String.format("DESCRIBE NODE TYPE `%s` OF `%s`",
+                                            GqlUtil.escape(nodeType),
+                                            GqlUtil.escape(graphType));
+        ResultSet resultSet = execute(descNodeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             logger.error(String.format("get description of %s failed for %s", nodeType,
                                        resultSet.getErrorMessage()));
@@ -572,12 +576,11 @@ public class NebulaClient implements Serializable {
      */
     private List<String> getEdgeProperties(String graphName, String edgeType)
             throws IOErrorException {
-
         String graphType = getGraphType(graphName);
 
         String descEdgeType = String.format(
                 "CALL describe_graph_type(\"%s\") FILTER type_name=\"%s\" return properties",
-                graphType, edgeType);
+                GqlUtil.escape(graphType), GqlUtil.escape(edgeType));
         ResultSet resultSet = execute(descEdgeType);
         if (!resultSet.isSucceeded() || resultSet.isEmpty()) {
             logger.error(String.format("get description of %s failed for %s", edgeType,
@@ -593,14 +596,14 @@ public class NebulaClient implements Serializable {
 
     /**
      * get the graph's graph type
-     * TODO add `` for graph type and graph name
      *
      * @param graphName NebulaGraph name
      * @return String
      */
     private String getGraphType(String graphName) throws IOErrorException {
-        ResultSet resultSet = execute(String.format("DESCRIBE GRAPH %s", graphName));
-        String    graphType;
+        ResultSet resultSet = execute(String.format("DESCRIBE GRAPH `%s`",
+                                                    GqlUtil.escape(graphName)));
+        String graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
             graphType = resultSet.next().values().get(1).asString();
         } else {
@@ -618,7 +621,7 @@ public class NebulaClient implements Serializable {
         // ms timeout for rpc request, the value must be larger than 0, smaller than 100000001000L
         protected       long                requestTimeoutMills = DEFAULT_REQUEST_TIMEOUT_MS;
         protected       int                 scanParallel        = DEFAULT_SCAN_PARALLEL;
-        protected        boolean             enableTls           = DEFAULT_ENABLE_TLS;
+        protected       boolean             enableTls           = DEFAULT_ENABLE_TLS;
         protected       String              tlsCa;
         protected       String              tlsCert;
         protected       String              tlsKey;
