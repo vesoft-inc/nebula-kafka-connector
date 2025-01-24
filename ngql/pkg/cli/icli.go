@@ -1,105 +1,55 @@
 package cli
 
 import (
+	"errors"
+	"fmt"
 	"io"
-	"log"
-	"os"
 )
+
+// ErrPromptAborted is the error for prompt aborted. i.e. ctrl+d.
+var ErrPromptAborted = errors.New("prompt aborted")
 
 // interactive
 type iCli struct {
-	status
-	terminal Terminal
+	editor Editor
+	user   string
 }
 
-func NewiCli(historyFile, user string, enableGoPrompt bool) Cli {
-	var t Terminal
-	if enableGoPrompt {
-		t = NewGoPromptTerminal()
-	} else {
-		t = NewLinerTerminal()
-	}
-
-	f, err := os.OpenFile(historyFile, os.O_RDONLY|os.O_CREATE, 0666)
-	if err != nil {
-		log.Panicf("Open or create history file %s failed, %s", historyFile, err.Error())
-	}
-	defer f.Close()
-	t.ReadHistory(f)
+func NewiCli(historyFile, user string) Cli {
+	t := NewBubblineEditor(historyFile)
 
 	return &iCli{
-		status: status{
-			historyFile:          historyFile,
-			user:                 user,
-			promptLen:            -1,
-			promptColor:          -1,
-			playingData:          false,
-			line:                 "",
-			joinedByTripleQuotes: false,
-			joinedByBackSlash:    false,
-		},
-		terminal: t,
+		editor: t,
+		user:   user,
 	}
+}
+
+func (l *iCli) ReadInput() (string, bool, error) {
+	input, err := l.editor.ReadInput(l.GetPrompt())
+	if err != nil {
+		if err == ErrPromptAborted {
+			return "", false, nil
+		} else if err == io.EOF {
+			return "", true, nil
+		}
+		return "", false, err
+	}
+
+	if len(input) > 0 {
+		l.editor.AddHistory(input)
+	}
+	return input, false, nil
+}
+
+func (l *iCli) GetPrompt() string {
+	return fmt.Sprintf("(%s@nebula)> ", l.user)
 }
 
 func (l *iCli) Output() bool {
 	return true
 }
 
-func (l *iCli) ReadLine() (string, bool, error) {
-	for {
-		input, err := l.terminal.Prompt(l.status.nebulaPrompt())
-		if err == nil {
-			l.status.checkJoined(input)
-			if l.status.joinedByTripleQuotes || l.status.joinedByBackSlash {
-				continue
-			}
-			if len(l.status.line) > 0 {
-				l.terminal.AppendHistory(l.status.line)
-			}
-			return l.status.line, false, nil
-		} else if err == ErrPromptAborted {
-			l.status.joinedByTripleQuotes = false
-			l.status.joinedByBackSlash = false
-			return "", false, nil
-		} else if err == io.EOF {
-			return "", true, nil
-		} else {
-			return "", false, err
-		}
-	}
-}
-
-func (l *iCli) Interactive() bool {
-	return true
-}
-
-func (l *iCli) SetRespError(msg string) {
-	l.status.respErr = msg
-}
-
-func (l *iCli) GetRespError() string {
-	return l.status.respErr
-}
-
-func (l *iCli) PlayingData(b bool) {
-	l.playingData = b
-}
-
-func (l iCli) IsPlayingData() bool {
-	return l.playingData
-}
-
 func (l *iCli) Close() {
-	defer l.terminal.Close()
-	f, err := os.OpenFile(l.status.historyFile, os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0666)
-	if err != nil {
-		log.Panicf("Open or create history file %s failed, %s", l.status.historyFile, err.Error())
-	}
-	defer f.Close()
-	l.terminal.WriteHistory(f)
-}
-
-func (l *iCli) GetPrompt() string {
-	return l.status.nebulaPrompt()
+	defer l.editor.Close()
+	l.editor.SaveHistory()
 }

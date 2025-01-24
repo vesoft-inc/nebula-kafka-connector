@@ -651,6 +651,10 @@ func (e *NebulaError) Code() ErrorCode {
 	return e.errorCode
 }
 
+func (e *NebulaError) ErrorClass() string {
+	return string(e.errorCode[:2])
+}
+
 func (e *NebulaError) Format(s fmt.State, verb rune) {
 	f := e.err.(formater)
 	f.Format(s, verb)

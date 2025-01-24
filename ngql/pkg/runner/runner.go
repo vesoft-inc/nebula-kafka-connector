@@ -6,10 +6,13 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 	"syscall"
 	"time"
 
+	"github.com/mattn/go-runewidth"
 	nebula "github.com/vesoft-inc/nebula-ng-tools/golang"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/errors"
 	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/types"
@@ -17,10 +20,12 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngql/pkg/printer"
 )
 
-const default_pager = true
-const default_pagerLimit = 200
-const default_pagerCommand = "less"
-const maxRetryTimes = 1
+const (
+	default_pager        = true
+	default_pagerLimit   = 200
+	default_pagerCommand = "less"
+	maxRetryTimes        = 1
+)
 
 type (
 	Runner struct {
@@ -47,9 +52,8 @@ type (
 		user           string
 		password       string
 		historyDir     string
-		enableGoPrompt bool
 		timeoutSec     int
-		failFast       bool //if true, stop loop for error
+		failFast       bool // if true, stop loop for error
 		widthMax       int
 		signalChan     <-chan os.Signal
 		pager          bool
@@ -102,7 +106,15 @@ func NewRunner(opts ...runnerOptionsFn) (*Runner, error) {
 	var c cli.Cli
 	if r.option.interactive {
 		historyFile := filepath.Join(r.option.historyDir, ".nebula_history")
-		c = cli.NewiCli(historyFile, r.option.user, r.option.enableGoPrompt)
+		// Create history file if not exists with proper permissions
+		if _, err := os.Stat(historyFile); os.IsNotExist(err) {
+			file, err := os.Create(historyFile)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create history file: %w", err)
+			}
+			file.Close()
+		}
+		c = cli.NewiCli(historyFile, r.option.user)
 	} else {
 		c = cli.NewnCli(r.option.fileReader, r.option.enableOutput, r.option.user)
 	}
@@ -132,12 +144,6 @@ func WithHistoryDir(dir string) runnerOptionsFn {
 func WithReadCloser(r io.ReadCloser) runnerOptionsFn {
 	return func(o *runnerOption) {
 		o.fileReader = r
-	}
-}
-
-func WithGoPrompt(enable bool) runnerOptionsFn {
-	return func(o *runnerOption) {
-		o.enableGoPrompt = enable
 	}
 }
 
@@ -177,6 +183,7 @@ func WithFailFast(failFast bool) runnerOptionsFn {
 		o.failFast = failFast
 	}
 }
+
 func WithSignalChan(signalChan <-chan os.Signal) runnerOptionsFn {
 	return func(o *runnerOption) {
 		o.signalChan = signalChan
@@ -198,11 +205,10 @@ func (r *Runner) bye() {
 }
 
 // Loop the request util fatal or timeout
-// We treat one line as one query
-// Add line break yourself as `SHOW \<CR>HOSTS`
+// Add input break yourself as `SHOW \<CR>HOSTS`
 func (r *Runner) loop() error {
 	for {
-		line, exit, err := r.cli.ReadLine()
+		input, exit, err := r.cli.ReadInput()
 		if err != nil {
 			return err
 		}
@@ -210,14 +216,14 @@ func (r *Runner) loop() error {
 			r.printBoth("\n")
 			return nil
 		}
-		if len(line) == 0 { // 1). The line input is empty, or 2). user presses ctrlC so the input is truncated
+		if len(input) == 0 { // 1). The input is empty, or 2). user presses ctrlC so the input is truncated
 			continue
 		}
-		line = strings.TrimSpace(line)
+		input = strings.TrimSpace(input)
 		// record in file
-		r.printFile(fmt.Sprintf("%s%s\n", r.cli.GetPrompt(), line))
+		r.printFile(fmt.Sprintf("%s%s\n", r.cli.GetPrompt(), input))
 		r.running = true
-		exit, err = r.execute(line)
+		exit, err = r.execute(input)
 		r.running = false
 		if err != nil {
 			if r.option.failFast {
@@ -235,6 +241,10 @@ func (r *Runner) loop() error {
 				}
 			}
 			r.printBoth(fmt.Sprintf("Error: %s\n", err.Error()))
+			// "42" means SYNTAX_ERROR_OR_ACCESS_RULE_VIOLATION error class
+			if ok && ne.ErrorClass() == "42" {
+				r.highlightSyntaxError(input, err.Error())
+			}
 			continue
 		}
 		if exit { // :exit
@@ -244,8 +254,8 @@ func (r *Runner) loop() error {
 }
 
 // execute one line
-func (r *Runner) execute(line string) (exit bool, err error) {
-	cmd, err := getCommand(r, line)
+func (r *Runner) execute(input string) (exit bool, err error) {
+	cmd, err := getCommand(r, input)
 	if err != nil {
 		return false, err
 	}
@@ -260,12 +270,12 @@ func (r *Runner) execute(line string) (exit bool, err error) {
 		}
 	}
 	// execute nebula statement
-	isVertical := strings.HasSuffix(line, "\\G")
+	isVertical := strings.HasSuffix(input, "\\G")
 	if isVertical {
-		line = strings.TrimSuffix(line, "\\G")
+		input = strings.TrimSuffix(input, "\\G")
 	}
 	start := time.Now()
-	resp, err := r.executeGQLWithRetry(line, 0, maxRetryTimes)
+	resp, err := r.executeGQLWithRetry(input, 0, maxRetryTimes)
 	if err != nil {
 		if r.option.failFast {
 			return true, err
@@ -354,11 +364,11 @@ func (r *Runner) executeGQLWithRetry(stmt string, retryTimes, retryLimit int) (t
 		return nil, err
 	}
 	switch ne.Code() {
-	//retry for session not found
+	// retry for session not found
 	case errors.ERROR_SESSION_NOT_FOUND:
 		fallthrough
 
-	//retry for connection error
+	// retry for connection error
 	case errors.ERROR_CONN_IS_BROKEN, errors.ERROR_CONN_IS_CLOSED:
 		if err := r.reopenNebulaClient(); err != nil {
 			return nil, err
@@ -500,7 +510,6 @@ func (r *Runner) killQuery() error {
 		return err
 	}
 	return nil
-
 }
 
 func (o *combinOutput) Write(p []byte) (n int, err error) {
@@ -509,4 +518,112 @@ func (o *combinOutput) Write(p []byte) (n int, err error) {
 		o.runner.file.Write(p)
 	}
 	return
+}
+
+// calculate the display width for error marker
+func getRuneDisplayWidth(r rune) int {
+	// Handle tab character
+	if r == '\t' {
+		return 8
+	}
+	// Handle control characters
+	if r == '\r' || r == '\n' || r == '\b' || r == '\f' || r == '\v' {
+		return 0
+	}
+	return runewidth.RuneWidth(r)
+}
+
+func (r *Runner) highlightSyntaxError(input string, errMsg string) {
+	// Check if error message contains position information
+	idx := strings.LastIndex(errMsg, "at [L")
+	if idx == -1 {
+		return
+	}
+
+	// Extract position information [L4:1-L5:3]
+	loc := regexp.MustCompile(`L(\d+):(\d+)-L(\d+):(\d+)\]$`).FindStringSubmatch(errMsg)
+	if len(loc) != 5 {
+		return
+	}
+
+	// Parse position information
+	startLineNum, _ := strconv.Atoi(loc[1])
+	startColNum, _ := strconv.Atoi(loc[2])
+	endLineNum, _ := strconv.Atoi(loc[3])
+	endColNum, _ := strconv.Atoi(loc[4])
+
+	// Split input into lines, handling different line endings (\n, \r\n, \r)
+	input = strings.ReplaceAll(input, "\r\n", "\n")
+	input = strings.ReplaceAll(input, "\r", "\n")
+	lines := strings.Split(input, "\n")
+
+	// Validate line numbers
+	if startLineNum <= 0 || startLineNum > len(lines) || endLineNum <= 0 || endLineNum > len(lines) {
+		return
+	}
+
+	r.printBoth("\n") // Add a blank line before error display
+
+	// Print error lines with markers
+	for lineNum := startLineNum; lineNum <= endLineNum; lineNum++ {
+		line := lines[lineNum-1]
+		runes := []rune(line)
+		marker := &strings.Builder{}
+
+		// Print line number and separator
+		r.printBoth(fmt.Sprintf("%4d | %s\n", lineNum, line))
+		r.printBoth("     | ")
+
+		if lineNum == startLineNum && lineNum == endLineNum {
+			// Single line case
+			// Add spaces before the error marker
+			for i := 0; i < startColNum-1; i++ {
+				marker.WriteRune(' ')
+			}
+			// Calculate total width of characters in error range
+			totalWidth := 0
+			for i := startColNum - 1; i < endColNum && i < len(runes); i++ {
+				totalWidth += getRuneDisplayWidth(runes[i])
+			}
+			// Add markers according to total width
+			for i := 0; i < totalWidth; i++ {
+				marker.WriteRune('^')
+			}
+		} else if lineNum == startLineNum {
+			// Start line case
+			for i := 0; i < startColNum-1; i++ {
+				marker.WriteRune(' ')
+			}
+			// Calculate total width from start to end of line
+			totalWidth := 0
+			for i := startColNum - 1; i < len(runes); i++ {
+				totalWidth += getRuneDisplayWidth(runes[i])
+			}
+			for i := 0; i < totalWidth; i++ {
+				marker.WriteRune('^')
+			}
+		} else if lineNum == endLineNum {
+			// End line case
+			totalWidth := 0
+			for i := 0; i < endColNum && i < len(runes); i++ {
+				totalWidth += getRuneDisplayWidth(runes[i])
+			}
+			for i := 0; i < totalWidth; i++ {
+				marker.WriteRune('^')
+			}
+		} else {
+			// Middle lines case
+			totalWidth := 0
+			for _, r := range runes {
+				totalWidth += getRuneDisplayWidth(r)
+			}
+			for i := 0; i < totalWidth; i++ {
+				marker.WriteRune('^')
+			}
+		}
+
+		r.printBoth(fmt.Sprintf("%s\n", marker.String()))
+	}
+
+	r.printBoth("\n")
 }

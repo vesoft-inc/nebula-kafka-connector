@@ -1,100 +1,62 @@
 package cli
 
 import (
-	"bufio"
 	"fmt"
 	"io"
+	"strings"
 )
 
 // non-interactive
 type nCli struct {
-	status
-	buf    *bufio.Reader
-	io     io.ReadCloser
+	reader BatchReader
 	output bool
+	user   string
 }
 
 func NewnCli(i io.ReadCloser, output bool, user string) Cli {
 	return &nCli{
-		status: status{
-			user:                 user,
-			respErr:              "",
-			playingData:          false,
-			promptLen:            -1,
-			promptColor:          -1,
-			line:                 "",
-			joinedByTripleQuotes: false,
-			joinedByBackSlash:    false,
-		},
-		io:     i,
-		buf:    bufio.NewReader(i),
+		reader: NewBatchReader(i),
 		output: output,
+		user:   user,
 	}
 }
 
-func readln(r *bufio.Reader) (string, error) {
-	var (
-		isPartial bool  = true
-		err       error = nil
-		line, ln  []byte
-	)
-	for isPartial && err == nil {
-		line, isPartial, err = r.ReadLine()
-		ln = append(ln, line...)
+func (l *nCli) ReadInput() (string, bool, error) {
+	result, isEOF, _, err := l.reader.ReadInput()
+	if err != nil {
+		return "", false, err
 	}
-	return string(ln), err
+
+	if l.output && result != "" {
+		// Print prompt and input only when there is actual content
+		l.printPromptAndInput(result)
+	}
+
+	return result, isEOF, nil
+}
+
+func (l *nCli) GetPrompt() string {
+	return fmt.Sprintf("(%s@nebula)> ", l.user)
 }
 
 func (l *nCli) Output() bool {
 	return l.output
 }
 
-func (l *nCli) ReadLine() (string, bool, error) {
-	for {
-		input, err := readln(l.buf)
-		if err == nil {
-			if l.output {
-				fmt.Print(l.status.nebulaPrompt())
-				// not record input to historyFile now
-				fmt.Println(input)
-			}
-			l.status.checkJoined(input)
-			if l.status.joinedByTripleQuotes || l.status.joinedByBackSlash {
-				continue
-			}
-			return l.status.line, false, nil
-		} else if err == io.EOF {
-			return "", true, nil
-		} else {
-			return "", false, err
-		}
-	}
-}
-
-func (l *nCli) Interactive() bool {
-	return false
-}
-
-func (l *nCli) SetRespError(msg string) {
-	l.status.respErr = msg
-}
-
-func (l *nCli) GetRespError() string {
-	return l.status.respErr
-}
-
-func (l *nCli) PlayingData(b bool) {
-	l.playingData = b
-}
-
-func (l nCli) IsPlayingData() bool {
-	return l.playingData
-}
-
 func (l *nCli) Close() {
-	l.io.Close()
+	l.reader.Close()
 }
 
-func (l *nCli) GetPrompt() string {
-	return l.status.nebulaPrompt()
+func (l *nCli) printPromptAndInput(input string) {
+	prompt := l.GetPrompt()
+	// If the input contains multiple lines, add the prompt to each line
+	lines := strings.Split(input, "\n")
+	for i, line := range lines {
+		if i == 0 {
+			fmt.Print(prompt)
+		} else {
+			fmt.Print("-> ")
+		}
+		fmt.Println(line)
+	}
 }

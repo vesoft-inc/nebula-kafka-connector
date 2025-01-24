@@ -34,7 +34,6 @@ var (
 	key            string
 	peerNameVerify bool
 	peerName       string
-	goPrompt       bool
 )
 
 type ParameterMap map[string]interface{}
@@ -100,13 +99,13 @@ func handleGraphCmd() error {
 	}
 	c := make(chan os.Signal)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
 	runner, err := runner.NewRunner(
 		runner.WithInteractive(interactive),
 		runner.WithNebula(address, username, password),
 		runner.WithTimeoutSec(timeout),
 		runner.WithHistoryDir(historyHome),
 		runner.WithReadCloser(rc),
-		runner.WithGoPrompt(goPrompt),
 		runner.WithOutput(output),
 		runner.WithWidthMax(widthMax),
 		runner.WithSignalChan(c),
