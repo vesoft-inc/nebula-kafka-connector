@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+var keywordMap map[string]struct{}
+
 // all keywords
 var keywords = []string{
 	"NODE",
@@ -285,24 +287,30 @@ func NewCompleter(line string, pos int) (head string, completions []string, tail
 		return
 	}
 	lastWord := strings.ToUpper(words[len(words)-1])
-	h := strings.LastIndex(line[:pos], " ")
-	head = line[:h+1]
-	tail = line[pos:]
-	if line[pos-1] == ' ' { // find sub cmd
+	if line[pos-1] == ' ' {
+		head = line
+		tail = ""
 		if subs, ok := subCmds[lastWord]; ok {
 			completions = append(completions, subs...)
 		}
 	} else {
-		for _, k := range keywords {
+		n := len(line)
+		h := len(lastWord)
+		head = line[:n-h]
+		tail = lastWord
+		for k := range keywordMap {
 			if strings.HasPrefix(k, lastWord) {
 				completions = append(completions, k)
 			}
 		}
 	}
 
-	if len(completions) == 1 {
-		completions[0] += " "
-	}
-
 	return
+}
+
+func init() {
+	keywordMap = make(map[string]struct{})
+	for _, k := range keywords {
+		keywordMap[k] = struct{}{}
+	}
 }

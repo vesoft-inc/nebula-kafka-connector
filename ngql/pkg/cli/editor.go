@@ -159,8 +159,10 @@ func (t *BubblineEditor) Close() {
 
 func (t *BubblineEditor) getCompletions(entireInput [][]rune, line, col int) (string, editline.Completions) {
 	text := string(entireInput[line])
-	_, completions, _ := completer.NewCompleter(text, col)
-	return "", editline.SimpleWordsCompletion(completions, "completion", col, 0, len(text))
+	head, completions, tail := completer.NewCompleter(text, col)
+	b := len(head)
+	e := len(tail)
+	return "", editline.SimpleWordsCompletion(completions, "completion", col, b, b+e)
 }
 
 // checkInputComplete checks if the input is complete
