@@ -219,7 +219,6 @@ func (r *Runner) loop() error {
 		if len(input) == 0 { // 1). The input is empty, or 2). user presses ctrlC so the input is truncated
 			continue
 		}
-		input = strings.TrimSpace(input)
 		// record in file
 		r.printFile(fmt.Sprintf("%s%s\n", r.cli.GetPrompt(), input))
 		r.running = true
@@ -255,7 +254,8 @@ func (r *Runner) loop() error {
 
 // execute one line
 func (r *Runner) execute(input string) (exit bool, err error) {
-	cmd, err := getCommand(r, input)
+	trimmedInput := strings.TrimSpace(input)
+	cmd, err := getCommand(r, trimmedInput)
 	if err != nil {
 		return false, err
 	}
@@ -270,12 +270,12 @@ func (r *Runner) execute(input string) (exit bool, err error) {
 		}
 	}
 	// execute nebula statement
-	isVertical := strings.HasSuffix(input, "\\G")
+	isVertical := strings.HasSuffix(trimmedInput, "\\G")
 	if isVertical {
-		input = strings.TrimSuffix(input, "\\G")
+		trimmedInput = strings.TrimSuffix(trimmedInput, "\\G")
 	}
 	start := time.Now()
-	resp, err := r.executeGQLWithRetry(input, 0, maxRetryTimes)
+	resp, err := r.executeGQLWithRetry(trimmedInput, 0, maxRetryTimes)
 	if err != nil {
 		if r.option.failFast {
 			return true, err

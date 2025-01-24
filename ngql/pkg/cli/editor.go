@@ -87,6 +87,10 @@ func (t *BubblineEditor) ReadInput(p string) (string, error) {
 
 		// Process first line: remove triple quotes from start, keep the rest
 		lines[0] = firstLine[3:]
+		startLineIndex := 0
+		if lines[0] == "" {
+			startLineIndex = 1
+		}
 
 		// Find and process last line with matching triple quotes
 		for i := len(lines) - 1; i >= 0; i-- {
@@ -94,8 +98,12 @@ func (t *BubblineEditor) ReadInput(p string) (string, error) {
 			if strings.HasSuffix(trimmedLine, quoteType) {
 				// Remove triple quotes from end, keep the rest
 				lines[i] = trimmedLine[:len(trimmedLine)-3]
+				endLineIndex := i + 1
+				if lines[i] == "" {
+					endLineIndex = i
+				}
 				// Keep only lines between start and end quotes (inclusive)
-				lines = lines[:i+1]
+				lines = lines[startLineIndex:endLineIndex]
 				break
 			}
 		}
