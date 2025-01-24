@@ -28,8 +28,8 @@ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2
 github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
 github.com/jedib0t/go-pretty/v6 v6.0.5 h1:oOo0/jSb3NEYKT6l1hhFXoX2UZnkanMuCE2DVT1mqnE=
 github.com/jedib0t/go-pretty/v6 v6.0.5/go.mod h1:MTr6FgcfNdnN5wPVBzJ6mhJeDyiF0yBvS2TMXEV/XSU=
-github.com/jievince/bubbline v0.2.0 h1:DOPMu9xTT/XM/5z46ia0tgswcRVWZe0mV7IAOhvbDmg=
-github.com/jievince/bubbline v0.2.0/go.mod h1:/ZvyNPgP3rU3f8si2F3ctWh0hNWa/5iNoEc7VfIgIhA=
+github.com/jievince/bubbline v0.3.0 h1:CJFAfgIoey09RE0W7Fh31Gg2jn3nsJVYVVpOpGhPuKw=
+github.com/jievince/bubbline v0.3.0/go.mod h1:/ZvyNPgP3rU3f8si2F3ctWh0hNWa/5iNoEc7VfIgIhA=
 github.com/knz/catwalk v0.1.4 h1:GgCxHbPp+nzyZBJcNL/CJd1aba4ACoeuI1lnsshAPkY=
 github.com/knz/catwalk v0.1.4/go.mod h1:Q+Yj4ny4AXgrOOyWyDGY/HJzmbGH8MFnsUqvCAiUT5s=
 github.com/knz/lipgloss-convert v0.1.0 h1:qUPUt6r8mqvi9DIV3nBPu3kEmFyHrZtXzv0BlPBPLNQ=
