@@ -138,18 +138,16 @@ class _Connection:
                         ),
                     )
 
+                self._stub = graph_pb2_grpc.GraphServiceStub(self._channel)
+
             except Exception as e:
                 logger.warning(
                     f"Failed to connect to {(host_addr.host, host_addr.port) if host_addr else 'No Available Addr'}: {e}",
                 )
                 last_error = e
-                if self._channel:
-                    self._channel.close()
-                    self._channel = None
-                self._stub = None
-
-            self._stub = graph_pb2_grpc.GraphServiceStub(self._channel)
-            return
+                self.close()
+            else:
+                return
 
         # If we get here, all connection attempts failed
         raise ConnectingError(
@@ -199,7 +197,7 @@ class _Connection:
         auth_options: Dict[str, Any],
         session_config: SessionConfig,
     ) -> "_Session":
-        """Authenticate with NebulaGraph and return session ID"""
+        """Authenticate with NebulaGraph and return session ID. May raise Exception when authentication failed."""
         if not self._stub:
             raise InternalError("Connection not established")
 

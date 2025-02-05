@@ -51,12 +51,16 @@ class NebulaClient(NebulaBaseExecutor):
         self._conn = _Connection(
             conn_config or ConnectionConfig.from_defults(hosts, ssl_param)
         )
-        self._session = self._conn.authenticate(
-            username=username,
-            password=password,
-            session_config=session_config or SessionConfig(),
-            auth_options=auth_options or {},
-        )
+        try:
+            self._session = self._conn.authenticate(
+                username=username,
+                password=password,
+                session_config=session_config or SessionConfig(),
+                auth_options=auth_options or {},
+            )
+        except Exception as e:
+            self._conn.close()
+            raise e
 
     def execute(self, statement: str, *, timeout: Optional[float] = None) -> ResultSet:
         return self._session.execute(statement, timeout=timeout)

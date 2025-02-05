@@ -404,3 +404,9 @@ class ExecutingError(NebulaGraphClientError):
     """Error raised when executing a statement failed"""
 
     pass
+
+
+class PoolError(NebulaGraphClientError):
+    """Error raised when pool is not healthy"""
+
+    pass
