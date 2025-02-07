@@ -107,6 +107,7 @@ func NewNebulaGraph() *GraphPool {
 				return nil, err
 			}
 			if err := conn.Ping(); err != nil {
+				_ = conn.Close()
 				return nil, fmt.Errorf("Failed to ping: %s", err.Error())
 			}
 			return conn, nil
