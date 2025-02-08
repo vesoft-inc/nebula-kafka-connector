@@ -3,7 +3,7 @@
 :param messageId: 206158431836
  */
 USE $graphName
-MATCH (m:Message WHERE m.id = $messageId)-[:REPLY_OF]->{0,10}(p:Post)<-[:CONTAINER_OF]-(f:Forum)-[:HAS_MODERATOR]->(moderator:Person)
+MATCH TRAIL (m:Message WHERE m.id = $messageId)-[:REPLY_OF]->*(p:Post)<-[:CONTAINER_OF]-(f:Forum)-[:HAS_MODERATOR]->(moderator:Person)
 RETURN
   f.id AS forumId,
   f.title AS forumTitle,
