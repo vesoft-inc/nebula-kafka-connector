@@ -47,3 +47,5 @@ require (
 )
 
 replace github.com/vesoft-inc/nebula-ng-tools/golang => ../golang
+
+replace github.com/charmbracelet/bubbletea => github.com/cockroachdb/bubbletea v0.23.1-bracketed-paste2

@@ -244,6 +244,7 @@ func (r *Runner) loop() error {
 			if ok && ne.ErrorClass() == "42" {
 				r.highlightSyntaxError(input, err.Error())
 			}
+			r.printBoth("\n")
 			continue
 		}
 		if exit { // :exit
@@ -624,6 +625,4 @@ func (r *Runner) highlightSyntaxError(input string, errMsg string) {
 
 		r.printBoth(fmt.Sprintf("%s\n", marker.String()))
 	}
-
-	r.printBoth("\n")
 }
