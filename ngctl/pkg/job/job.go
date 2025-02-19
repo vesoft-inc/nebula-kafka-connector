@@ -11,7 +11,7 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/runner"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/tasks"
 	"github.com/vesoft-inc/nebula-ng-tools/ngadm/pkg/types"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd/common"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/common"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/config"
 )
 

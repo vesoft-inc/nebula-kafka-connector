@@ -1,6 +1,6 @@
-//*
 // Copyright (c) 2024 vesoft inc. All rights reserved.
-//
+
+//*
 // This is the protocol file that defines the data exchanging contract
 // between the client SDKs and the server of NebulaGraph
 
@@ -50,16 +50,16 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AnalyticService_Run_FullMethodName           = "/nebula.proto.analytic.AnalyticService/Run"
-	AnalyticService_Init_FullMethodName          = "/nebula.proto.analytic.AnalyticService/Init"
-	AnalyticService_PrepareWorker_FullMethodName = "/nebula.proto.analytic.AnalyticService/PrepareWorker"
-	AnalyticService_LoadGraph_FullMethodName     = "/nebula.proto.analytic.AnalyticService/LoadGraph"
-	AnalyticService_CreateAccum_FullMethodName   = "/nebula.proto.analytic.AnalyticService/CreateAccum"
-	AnalyticService_RunEdgeTask_FullMethodName   = "/nebula.proto.analytic.AnalyticService/RunEdgeTask"
-	AnalyticService_RunNodeTask_FullMethodName   = "/nebula.proto.analytic.AnalyticService/RunNodeTask"
-	AnalyticService_RunSinkTask_FullMethodName   = "/nebula.proto.analytic.AnalyticService/RunSinkTask"
-	AnalyticService_DropWorker_FullMethodName    = "/nebula.proto.analytic.AnalyticService/DropWorker"
-	AnalyticService_Barrier_FullMethodName       = "/nebula.proto.analytic.AnalyticService/Barrier"
+	AnalyticService_Run_FullMethodName            = "/nebula.proto.analytic.AnalyticService/Run"
+	AnalyticService_Init_FullMethodName           = "/nebula.proto.analytic.AnalyticService/Init"
+	AnalyticService_PrepareWorker_FullMethodName  = "/nebula.proto.analytic.AnalyticService/PrepareWorker"
+	AnalyticService_LoadGraph_FullMethodName      = "/nebula.proto.analytic.AnalyticService/LoadGraph"
+	AnalyticService_DropGraph_FullMethodName      = "/nebula.proto.analytic.AnalyticService/DropGraph"
+	AnalyticService_CreateResource_FullMethodName = "/nebula.proto.analytic.AnalyticService/CreateResource"
+	AnalyticService_RunEdgeTask_FullMethodName    = "/nebula.proto.analytic.AnalyticService/RunEdgeTask"
+	AnalyticService_RunNodeTask_FullMethodName    = "/nebula.proto.analytic.AnalyticService/RunNodeTask"
+	AnalyticService_DropWorker_FullMethodName     = "/nebula.proto.analytic.AnalyticService/DropWorker"
+	AnalyticService_Barrier_FullMethodName        = "/nebula.proto.analytic.AnalyticService/Barrier"
 )
 
 // AnalyticServiceClient is the client API for AnalyticService service.
@@ -70,10 +70,10 @@ type AnalyticServiceClient interface {
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	PrepareWorker(ctx context.Context, in *PrepareWorkerRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	LoadGraph(ctx context.Context, in *LoadGraphRequest, opts ...grpc.CallOption) (*LoadGraphResponse, error)
-	CreateAccum(ctx context.Context, in *CreateAccumRequest, opts ...grpc.CallOption) (*TaskResponse, error)
+	DropGraph(ctx context.Context, in *DropGraphRequest, opts ...grpc.CallOption) (*TaskResponse, error)
+	CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	RunEdgeTask(ctx context.Context, in *EdgeTaskRequest, opts ...grpc.CallOption) (*EngineTaskResponse, error)
 	RunNodeTask(ctx context.Context, in *NodeTaskRequest, opts ...grpc.CallOption) (*EngineTaskResponse, error)
-	RunSinkTask(ctx context.Context, in *SinkTaskRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	DropWorker(ctx context.Context, in *DropWorkerRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	Barrier(ctx context.Context, in *BarrierRequest, opts ...grpc.CallOption) (*BarrierResponse, error)
 }
@@ -122,9 +122,18 @@ func (c *analyticServiceClient) LoadGraph(ctx context.Context, in *LoadGraphRequ
 	return out, nil
 }
 
-func (c *analyticServiceClient) CreateAccum(ctx context.Context, in *CreateAccumRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
+func (c *analyticServiceClient) DropGraph(ctx context.Context, in *DropGraphRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
 	out := new(TaskResponse)
-	err := c.cc.Invoke(ctx, AnalyticService_CreateAccum_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, AnalyticService_DropGraph_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *analyticServiceClient) CreateResource(ctx context.Context, in *CreateResourceRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
+	out := new(TaskResponse)
+	err := c.cc.Invoke(ctx, AnalyticService_CreateResource_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,15 +152,6 @@ func (c *analyticServiceClient) RunEdgeTask(ctx context.Context, in *EdgeTaskReq
 func (c *analyticServiceClient) RunNodeTask(ctx context.Context, in *NodeTaskRequest, opts ...grpc.CallOption) (*EngineTaskResponse, error) {
 	out := new(EngineTaskResponse)
 	err := c.cc.Invoke(ctx, AnalyticService_RunNodeTask_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *analyticServiceClient) RunSinkTask(ctx context.Context, in *SinkTaskRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
-	out := new(TaskResponse)
-	err := c.cc.Invoke(ctx, AnalyticService_RunSinkTask_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -184,10 +184,10 @@ type AnalyticServiceServer interface {
 	Init(context.Context, *InitRequest) (*TaskResponse, error)
 	PrepareWorker(context.Context, *PrepareWorkerRequest) (*TaskResponse, error)
 	LoadGraph(context.Context, *LoadGraphRequest) (*LoadGraphResponse, error)
-	CreateAccum(context.Context, *CreateAccumRequest) (*TaskResponse, error)
+	DropGraph(context.Context, *DropGraphRequest) (*TaskResponse, error)
+	CreateResource(context.Context, *CreateResourceRequest) (*TaskResponse, error)
 	RunEdgeTask(context.Context, *EdgeTaskRequest) (*EngineTaskResponse, error)
 	RunNodeTask(context.Context, *NodeTaskRequest) (*EngineTaskResponse, error)
-	RunSinkTask(context.Context, *SinkTaskRequest) (*TaskResponse, error)
 	DropWorker(context.Context, *DropWorkerRequest) (*TaskResponse, error)
 	Barrier(context.Context, *BarrierRequest) (*BarrierResponse, error)
 	mustEmbedUnimplementedAnalyticServiceServer()
@@ -209,17 +209,17 @@ func (UnimplementedAnalyticServiceServer) PrepareWorker(context.Context, *Prepar
 func (UnimplementedAnalyticServiceServer) LoadGraph(context.Context, *LoadGraphRequest) (*LoadGraphResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method LoadGraph not implemented")
 }
-func (UnimplementedAnalyticServiceServer) CreateAccum(context.Context, *CreateAccumRequest) (*TaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateAccum not implemented")
+func (UnimplementedAnalyticServiceServer) DropGraph(context.Context, *DropGraphRequest) (*TaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropGraph not implemented")
+}
+func (UnimplementedAnalyticServiceServer) CreateResource(context.Context, *CreateResourceRequest) (*TaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateResource not implemented")
 }
 func (UnimplementedAnalyticServiceServer) RunEdgeTask(context.Context, *EdgeTaskRequest) (*EngineTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunEdgeTask not implemented")
 }
 func (UnimplementedAnalyticServiceServer) RunNodeTask(context.Context, *NodeTaskRequest) (*EngineTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RunNodeTask not implemented")
-}
-func (UnimplementedAnalyticServiceServer) RunSinkTask(context.Context, *SinkTaskRequest) (*TaskResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RunSinkTask not implemented")
 }
 func (UnimplementedAnalyticServiceServer) DropWorker(context.Context, *DropWorkerRequest) (*TaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DropWorker not implemented")
@@ -312,20 +312,38 @@ func _AnalyticService_LoadGraph_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
-func _AnalyticService_CreateAccum_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateAccumRequest)
+func _AnalyticService_DropGraph_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropGraphRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(AnalyticServiceServer).CreateAccum(ctx, in)
+		return srv.(AnalyticServiceServer).DropGraph(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: AnalyticService_CreateAccum_FullMethodName,
+		FullMethod: AnalyticService_DropGraph_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AnalyticServiceServer).CreateAccum(ctx, req.(*CreateAccumRequest))
+		return srv.(AnalyticServiceServer).DropGraph(ctx, req.(*DropGraphRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AnalyticService_CreateResource_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateResourceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AnalyticServiceServer).CreateResource(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AnalyticService_CreateResource_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AnalyticServiceServer).CreateResource(ctx, req.(*CreateResourceRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -362,24 +380,6 @@ func _AnalyticService_RunNodeTask_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AnalyticServiceServer).RunNodeTask(ctx, req.(*NodeTaskRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _AnalyticService_RunSinkTask_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SinkTaskRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AnalyticServiceServer).RunSinkTask(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AnalyticService_RunSinkTask_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AnalyticServiceServer).RunSinkTask(ctx, req.(*SinkTaskRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -444,8 +444,12 @@ var AnalyticService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _AnalyticService_LoadGraph_Handler,
 		},
 		{
-			MethodName: "CreateAccum",
-			Handler:    _AnalyticService_CreateAccum_Handler,
+			MethodName: "DropGraph",
+			Handler:    _AnalyticService_DropGraph_Handler,
+		},
+		{
+			MethodName: "CreateResource",
+			Handler:    _AnalyticService_CreateResource_Handler,
 		},
 		{
 			MethodName: "RunEdgeTask",
@@ -454,10 +458,6 @@ var AnalyticService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "RunNodeTask",
 			Handler:    _AnalyticService_RunNodeTask_Handler,
-		},
-		{
-			MethodName: "RunSinkTask",
-			Handler:    _AnalyticService_RunSinkTask_Handler,
 		},
 		{
 			MethodName: "DropWorker",

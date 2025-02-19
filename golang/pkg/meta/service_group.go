@@ -23,17 +23,18 @@ type (
 
 	AddHostReq struct {
 		host             string
-		serviceGroupname string
+		serviceGroupName string
 		agentPort        uint32
+		zoneName         string
 	}
 
 	DropHostReq struct {
 		host             string
-		serviceGroupname string
+		serviceGroupName string
 	}
 
 	ListHostsReq struct {
-		serviceGroupname string
+		serviceGroupName string
 	}
 
 	HostInfo struct {
@@ -49,14 +50,14 @@ type (
 		host             string
 		port             uint32
 		serviceType      ServiceType
-		serviceGroupname string
+		serviceGroupName string
 	}
 
 	DropServiceReq struct {
 		host             string
 		port             uint32
 		serviceType      ServiceType
-		serviceGroupname string
+		serviceGroupName string
 	}
 
 	ServiceType int8
@@ -93,17 +94,49 @@ type (
 	}
 
 	InitServiceGroupReq struct {
-		serviceGroupname string
+		serviceGroupName string
 	}
 
 	DropServiceGroupReq struct {
-		serviceGroupname string
+		serviceGroupName string
 		force            bool
 	}
 
 	ServiceGroupServiceInfo struct {
 		ServiceGroupId int64
 		Services       []*ServiceInfo
+	}
+	AddZoneReq struct {
+		zoneName         string
+		serviceGroupName string
+		replicas         int
+		priority         int
+	}
+
+	DropZoneReq struct {
+		zoneName         string
+		serviceGroupName string
+	}
+
+	RenameZoneReq struct {
+		zoneName         string
+		newZoneName      string
+		serviceGroupName string
+	}
+
+	ZoneInfo struct {
+		Name     string   `json:"name"`
+		Replicas int      `json:"replicas"`
+		Priority int      `json:"priority"`
+		Hosts    []string `json:"hosts"`
+	}
+
+	ListZonesReq struct {
+		serviceGroupName string
+	}
+
+	ListZonesResp struct {
+		Zones []*ZoneInfo `json:"zones"`
 	}
 )
 
@@ -116,10 +149,10 @@ const (
 	ServiceTypeSearch
 )
 
-func NewCreateServiceGroupReq(serviceGroupName string, replic int, owner string, zones []string) *CreateServiceGroupReq {
+func NewCreateServiceGroupReq(serviceGroupName string, replica int, owner string, zones []string) *CreateServiceGroupReq {
 	return &CreateServiceGroupReq{
 		serviceGroupName: serviceGroupName,
-		replica:          replic,
+		replica:          replica,
 		zones:            zones,
 		owner:            owner,
 	}
@@ -132,24 +165,33 @@ func NewAlterServiceGroupReq(serviceGroupName string, owner string) *AlterServic
 	}
 }
 
-func NewAddHostReq(host string, serviceGroupName string, agentPort uint32) *AddHostReq {
+func NewAddHostReq(host string, serviceGroupName string, agentPort uint32, opts ...string) *AddHostReq {
+	if len(opts) == 1 {
+		return &AddHostReq{
+			host:             host,
+			serviceGroupName: serviceGroupName,
+			agentPort:        9669,
+			zoneName:         opts[0],
+		}
+	}
 	return &AddHostReq{
 		host:             host,
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
 		agentPort:        agentPort,
+		zoneName:         "",
 	}
 }
 
 func NewDropHostReq(host string, serviceGroupName string) *DropHostReq {
 	return &DropHostReq{
 		host:             host,
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
 	}
 }
 
 func NewShowHostsReq(serviceGroupName string) *ListHostsReq {
 	return &ListHostsReq{
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
 	}
 }
 
@@ -158,7 +200,7 @@ func NewAddServiceReq(host string, port uint32, serviceType ServiceType, service
 		host:             host,
 		port:             port,
 		serviceType:      serviceType,
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
 	}
 }
 
@@ -170,7 +212,7 @@ func NewListServiceGroupsReq(serviceGroupName string) *ListServiceGroupsReq {
 
 func NewInitServiceGroupReq(serviceGroupName string) *InitServiceGroupReq {
 	return &InitServiceGroupReq{
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
 	}
 }
 
@@ -185,7 +227,37 @@ func NewDropServiceReq(host string, port uint32, serviceType ServiceType, servic
 		host:             host,
 		port:             port,
 		serviceType:      serviceType,
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
+	}
+}
+
+func NewAddZoneReq(serviceGroupName string, zoneName string, replicas int, priority int) *AddZoneReq {
+	return &AddZoneReq{
+		zoneName:         zoneName,
+		serviceGroupName: serviceGroupName,
+		replicas:         replicas,
+		priority:         priority,
+	}
+}
+
+func NewDropZoneReq(serviceGroupName string, zoneName string) *DropZoneReq {
+	return &DropZoneReq{
+		zoneName:         zoneName,
+		serviceGroupName: serviceGroupName,
+	}
+}
+
+func NewRenameZoneReq(serviceGroupName string, zoneName string, newZoneName string) *RenameZoneReq {
+	return &RenameZoneReq{
+		zoneName:         zoneName,
+		newZoneName:      newZoneName,
+		serviceGroupName: serviceGroupName,
+	}
+}
+
+func NewListZonesReq(serviceGroupName string) *ListZonesReq {
+	return &ListZonesReq{
+		serviceGroupName: serviceGroupName,
 	}
 }
 
@@ -218,8 +290,13 @@ func (c *metaClient) AddHost(req *AddHostReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
 	in := &admin.AddHostRequest{
-		Header:   &admin.RequestHeader{Token: c.token},
-		HostInfo: &admin.HostInfo{HostName: []byte(req.host), ServiceGroup: []byte(req.serviceGroupname), AgentPort: req.agentPort},
+		Header: &admin.RequestHeader{Token: c.token},
+		HostInfo: &admin.HostInfo{
+			HostName:     []byte(req.host),
+			ServiceGroup: []byte(req.serviceGroupName),
+			AgentPort:    req.agentPort,
+			ZoneName:     []byte(req.zoneName),
+		},
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AddHost(ctx, in)
@@ -236,7 +313,7 @@ func (c *metaClient) DropHost(req *DropHostReq) error {
 	in := &admin.RemoveHostRequest{
 		Header:       &admin.RequestHeader{Token: c.token},
 		HostName:     []byte(req.host),
-		ServiceGroup: []byte(req.serviceGroupname),
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropHost(ctx, in)
@@ -252,7 +329,7 @@ func (c *metaClient) ListHosts(req *ListHostsReq) (*ListHostsResp, error) {
 	defer cancel()
 	in := &admin.ListHostsRequest{
 		Header:       &admin.RequestHeader{Token: c.token},
-		ServiceGroup: []byte(req.serviceGroupname),
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.ListHosts(ctx, in)
@@ -288,7 +365,7 @@ func (c *metaClient) AddService(req *AddServiceReq) error {
 		Host:         []byte(req.host),
 		Port:         req.port,
 		Type:         common.ServiceType(req.serviceType),
-		ServiceGroup: []byte(req.serviceGroupname),
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AddService(ctx, in)
@@ -358,7 +435,7 @@ func (c *metaClient) InitServiceGroup(req *InitServiceGroupReq) error {
 	defer cancel()
 	in := &admin.InitStorageRequest{
 		Header:       &admin.RequestHeader{Token: c.token},
-		ServiceGroup: []byte(req.serviceGroupname),
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.InitStorage(ctx, in)
@@ -416,7 +493,7 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 		Name:         []byte(req.host),
 		Port:         req.port,
 		Type:         common.ServiceType(req.serviceType),
-		ServiceGroup: []byte(req.serviceGroupname),
+		ServiceGroup: []byte(req.serviceGroupName),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.DropService(ctx, in)
@@ -429,7 +506,7 @@ func (c *metaClient) DropService(req *DropServiceReq) error {
 
 func NewDropServiceGroupReq(serviceGroupName string, force bool) *DropServiceGroupReq {
 	return &DropServiceGroupReq{
-		serviceGroupname: serviceGroupName,
+		serviceGroupName: serviceGroupName,
 		force:            force,
 	}
 }
@@ -439,7 +516,7 @@ func (c *metaClient) DropServiceGroup(req *DropServiceGroupReq) error {
 	defer cancel()
 	in := &admin.DropServiceGroupRequest{
 		Header:       &admin.RequestHeader{Token: c.token},
-		ServiceGroup: []byte(req.serviceGroupname),
+		ServiceGroup: []byte(req.serviceGroupName),
 		Force:        req.force,
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
@@ -449,4 +526,101 @@ func (c *metaClient) DropServiceGroup(req *DropServiceGroupReq) error {
 		return err
 	}
 	return responseIsErr(resp)
+}
+
+func (c *metaClient) AddZone(req *AddZoneReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.AddZoneRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
+		ZoneDesc: &admin.ZoneDesc{
+			ZoneName:    []byte(req.zoneName),
+			NumReplicas: uint32(req.replicas),
+			Priority:    uint32(req.priority),
+		},
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.AddZone(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return responseIsErr(resp)
+}
+
+func (c *metaClient) DropZone(req *DropZoneReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.DropZoneRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
+		ZoneName:     []byte(req.zoneName),
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.DropZone(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return responseIsErr(resp)
+}
+
+func (c *metaClient) RenameZone(req *RenameZoneReq) error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.RenameZoneRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
+		ZoneName:     []byte(req.zoneName),
+		NewZoneName:  []byte(req.newZoneName),
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.RenameZone(ctx, in)
+	})
+	if err != nil {
+		return err
+	}
+	return responseIsErr(resp)
+}
+
+func (c *metaClient) ListZones(req *ListZonesReq) (*ListZonesResp, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
+	defer cancel()
+	in := &admin.ListZonesRequest{
+		Header:       &admin.RequestHeader{Token: c.token},
+		ServiceGroup: []byte(req.serviceGroupName),
+	}
+	resp, err := c.execute(func() (responseHeader, error) {
+		return c.client.ListZones(ctx, in)
+	})
+	if err != nil {
+		return nil, err
+	}
+	if err := responseIsErr(resp); err != nil {
+		return nil, err
+	}
+	response, ok := resp.(*admin.ListZonesResponse)
+	if !ok {
+		return nil, fmt.Errorf("invalid response")
+	}
+	zones := make([]*ZoneInfo, 0)
+	for _, z := range response.Zones {
+		if z.ZoneDesc == nil {
+			continue
+		}
+		zone := &ZoneInfo{
+			Name:     string(z.ZoneDesc.ZoneName),
+			Replicas: int(z.ZoneDesc.NumReplicas),
+			Priority: int(z.ZoneDesc.Priority),
+			Hosts:    make([]string, 0),
+		}
+		for _, h := range z.HostNames {
+			zone.Hosts = append(zone.Hosts, string(h))
+		}
+		zones = append(zones, zone)
+	}
+	return &ListZonesResp{
+		Zones: zones,
+	}, nil
 }

@@ -23,29 +23,34 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AdminService_SetMetaAgent_FullMethodName       = "/nebula.proto.admin.AdminService/SetMetaAgent"
-	AdminService_ShowMetaInfo_FullMethodName       = "/nebula.proto.admin.AdminService/ShowMetaInfo"
-	AdminService_AddHost_FullMethodName            = "/nebula.proto.admin.AdminService/AddHost"
-	AdminService_DropHost_FullMethodName           = "/nebula.proto.admin.AdminService/DropHost"
-	AdminService_ListHosts_FullMethodName          = "/nebula.proto.admin.AdminService/ListHosts"
-	AdminService_AddService_FullMethodName         = "/nebula.proto.admin.AdminService/AddService"
-	AdminService_DropService_FullMethodName        = "/nebula.proto.admin.AdminService/DropService"
-	AdminService_ShowService_FullMethodName        = "/nebula.proto.admin.AdminService/ShowService"
-	AdminService_CreateServiceGroup_FullMethodName = "/nebula.proto.admin.AdminService/CreateServiceGroup"
-	AdminService_ShowServiceGroup_FullMethodName   = "/nebula.proto.admin.AdminService/ShowServiceGroup"
-	AdminService_AlterServiceGroup_FullMethodName  = "/nebula.proto.admin.AdminService/AlterServiceGroup"
-	AdminService_InitStorage_FullMethodName        = "/nebula.proto.admin.AdminService/InitStorage"
-	AdminService_DropServiceGroup_FullMethodName   = "/nebula.proto.admin.AdminService/DropServiceGroup"
-	AdminService_CreateBackup_FullMethodName       = "/nebula.proto.admin.AdminService/CreateBackup"
-	AdminService_Restore_FullMethodName            = "/nebula.proto.admin.AdminService/Restore"
-	AdminService_DropBackup_FullMethodName         = "/nebula.proto.admin.AdminService/DropBackup"
-	AdminService_CreateUser_FullMethodName         = "/nebula.proto.admin.AdminService/CreateUser"
-	AdminService_DropUser_FullMethodName           = "/nebula.proto.admin.AdminService/DropUser"
-	AdminService_AlterUser_FullMethodName          = "/nebula.proto.admin.AdminService/AlterUser"
-	AdminService_ListUser_FullMethodName           = "/nebula.proto.admin.AdminService/ListUser"
-	AdminService_Login_FullMethodName              = "/nebula.proto.admin.AdminService/Login"
-	AdminService_Logout_FullMethodName             = "/nebula.proto.admin.AdminService/Logout"
-	AdminService_ChangePassword_FullMethodName     = "/nebula.proto.admin.AdminService/ChangePassword"
+	AdminService_SetMetaAgent_FullMethodName          = "/nebula.proto.admin.AdminService/SetMetaAgent"
+	AdminService_ShowMetaInfo_FullMethodName          = "/nebula.proto.admin.AdminService/ShowMetaInfo"
+	AdminService_AddHost_FullMethodName               = "/nebula.proto.admin.AdminService/AddHost"
+	AdminService_DropHost_FullMethodName              = "/nebula.proto.admin.AdminService/DropHost"
+	AdminService_ListHosts_FullMethodName             = "/nebula.proto.admin.AdminService/ListHosts"
+	AdminService_AddService_FullMethodName            = "/nebula.proto.admin.AdminService/AddService"
+	AdminService_DropService_FullMethodName           = "/nebula.proto.admin.AdminService/DropService"
+	AdminService_ShowService_FullMethodName           = "/nebula.proto.admin.AdminService/ShowService"
+	AdminService_AddZone_FullMethodName               = "/nebula.proto.admin.AdminService/AddZone"
+	AdminService_DropZone_FullMethodName              = "/nebula.proto.admin.AdminService/DropZone"
+	AdminService_RenameZone_FullMethodName            = "/nebula.proto.admin.AdminService/RenameZone"
+	AdminService_ListZones_FullMethodName             = "/nebula.proto.admin.AdminService/ListZones"
+	AdminService_SetServiceGroupPolicy_FullMethodName = "/nebula.proto.admin.AdminService/SetServiceGroupPolicy"
+	AdminService_CreateServiceGroup_FullMethodName    = "/nebula.proto.admin.AdminService/CreateServiceGroup"
+	AdminService_ShowServiceGroup_FullMethodName      = "/nebula.proto.admin.AdminService/ShowServiceGroup"
+	AdminService_AlterServiceGroup_FullMethodName     = "/nebula.proto.admin.AdminService/AlterServiceGroup"
+	AdminService_InitStorage_FullMethodName           = "/nebula.proto.admin.AdminService/InitStorage"
+	AdminService_DropServiceGroup_FullMethodName      = "/nebula.proto.admin.AdminService/DropServiceGroup"
+	AdminService_CreateBackup_FullMethodName          = "/nebula.proto.admin.AdminService/CreateBackup"
+	AdminService_Restore_FullMethodName               = "/nebula.proto.admin.AdminService/Restore"
+	AdminService_DropBackup_FullMethodName            = "/nebula.proto.admin.AdminService/DropBackup"
+	AdminService_CreateUser_FullMethodName            = "/nebula.proto.admin.AdminService/CreateUser"
+	AdminService_DropUser_FullMethodName              = "/nebula.proto.admin.AdminService/DropUser"
+	AdminService_AlterUser_FullMethodName             = "/nebula.proto.admin.AdminService/AlterUser"
+	AdminService_ListUser_FullMethodName              = "/nebula.proto.admin.AdminService/ListUser"
+	AdminService_Login_FullMethodName                 = "/nebula.proto.admin.AdminService/Login"
+	AdminService_Logout_FullMethodName                = "/nebula.proto.admin.AdminService/Logout"
+	AdminService_ChangePassword_FullMethodName        = "/nebula.proto.admin.AdminService/ChangePassword"
 )
 
 // AdminServiceClient is the client API for AdminService service.
@@ -60,6 +65,11 @@ type AdminServiceClient interface {
 	AddService(ctx context.Context, in *AddServiceRequest, opts ...grpc.CallOption) (*AddServiceResponse, error)
 	DropService(ctx context.Context, in *DropServiceRequest, opts ...grpc.CallOption) (*DropServiceResponse, error)
 	ShowService(ctx context.Context, in *ShowServiceRequest, opts ...grpc.CallOption) (*ShowServiceResponse, error)
+	AddZone(ctx context.Context, in *AddZoneRequest, opts ...grpc.CallOption) (*AddZoneResponse, error)
+	DropZone(ctx context.Context, in *DropZoneRequest, opts ...grpc.CallOption) (*DropZoneResponse, error)
+	RenameZone(ctx context.Context, in *RenameZoneRequest, opts ...grpc.CallOption) (*RenameZoneResponse, error)
+	ListZones(ctx context.Context, in *ListZonesRequest, opts ...grpc.CallOption) (*ListZonesResponse, error)
+	SetServiceGroupPolicy(ctx context.Context, in *SetServiceGroupPolicyRequest, opts ...grpc.CallOption) (*SetServiceGroupPolicyResponse, error)
 	CreateServiceGroup(ctx context.Context, in *CreateServiceGroupRequest, opts ...grpc.CallOption) (*CreateServiceGroupResponse, error)
 	ShowServiceGroup(ctx context.Context, in *ShowServiceGroupRequest, opts ...grpc.CallOption) (*ShowServiceGroupResponse, error)
 	AlterServiceGroup(ctx context.Context, in *AlterServiceGroupRequest, opts ...grpc.CallOption) (*AlterServiceGroupResponse, error)
@@ -154,6 +164,51 @@ func (c *adminServiceClient) DropService(ctx context.Context, in *DropServiceReq
 func (c *adminServiceClient) ShowService(ctx context.Context, in *ShowServiceRequest, opts ...grpc.CallOption) (*ShowServiceResponse, error) {
 	out := new(ShowServiceResponse)
 	err := c.cc.Invoke(ctx, AdminService_ShowService_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) AddZone(ctx context.Context, in *AddZoneRequest, opts ...grpc.CallOption) (*AddZoneResponse, error) {
+	out := new(AddZoneResponse)
+	err := c.cc.Invoke(ctx, AdminService_AddZone_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) DropZone(ctx context.Context, in *DropZoneRequest, opts ...grpc.CallOption) (*DropZoneResponse, error) {
+	out := new(DropZoneResponse)
+	err := c.cc.Invoke(ctx, AdminService_DropZone_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) RenameZone(ctx context.Context, in *RenameZoneRequest, opts ...grpc.CallOption) (*RenameZoneResponse, error) {
+	out := new(RenameZoneResponse)
+	err := c.cc.Invoke(ctx, AdminService_RenameZone_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) ListZones(ctx context.Context, in *ListZonesRequest, opts ...grpc.CallOption) (*ListZonesResponse, error) {
+	out := new(ListZonesResponse)
+	err := c.cc.Invoke(ctx, AdminService_ListZones_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *adminServiceClient) SetServiceGroupPolicy(ctx context.Context, in *SetServiceGroupPolicyRequest, opts ...grpc.CallOption) (*SetServiceGroupPolicyResponse, error) {
+	out := new(SetServiceGroupPolicyResponse)
+	err := c.cc.Invoke(ctx, AdminService_SetServiceGroupPolicy_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -307,6 +362,11 @@ type AdminServiceServer interface {
 	AddService(context.Context, *AddServiceRequest) (*AddServiceResponse, error)
 	DropService(context.Context, *DropServiceRequest) (*DropServiceResponse, error)
 	ShowService(context.Context, *ShowServiceRequest) (*ShowServiceResponse, error)
+	AddZone(context.Context, *AddZoneRequest) (*AddZoneResponse, error)
+	DropZone(context.Context, *DropZoneRequest) (*DropZoneResponse, error)
+	RenameZone(context.Context, *RenameZoneRequest) (*RenameZoneResponse, error)
+	ListZones(context.Context, *ListZonesRequest) (*ListZonesResponse, error)
+	SetServiceGroupPolicy(context.Context, *SetServiceGroupPolicyRequest) (*SetServiceGroupPolicyResponse, error)
 	CreateServiceGroup(context.Context, *CreateServiceGroupRequest) (*CreateServiceGroupResponse, error)
 	ShowServiceGroup(context.Context, *ShowServiceGroupRequest) (*ShowServiceGroupResponse, error)
 	AlterServiceGroup(context.Context, *AlterServiceGroupRequest) (*AlterServiceGroupResponse, error)
@@ -355,6 +415,21 @@ func (UnimplementedAdminServiceServer) DropService(context.Context, *DropService
 }
 func (UnimplementedAdminServiceServer) ShowService(context.Context, *ShowServiceRequest) (*ShowServiceResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ShowService not implemented")
+}
+func (UnimplementedAdminServiceServer) AddZone(context.Context, *AddZoneRequest) (*AddZoneResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddZone not implemented")
+}
+func (UnimplementedAdminServiceServer) DropZone(context.Context, *DropZoneRequest) (*DropZoneResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DropZone not implemented")
+}
+func (UnimplementedAdminServiceServer) RenameZone(context.Context, *RenameZoneRequest) (*RenameZoneResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenameZone not implemented")
+}
+func (UnimplementedAdminServiceServer) ListZones(context.Context, *ListZonesRequest) (*ListZonesResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ListZones not implemented")
+}
+func (UnimplementedAdminServiceServer) SetServiceGroupPolicy(context.Context, *SetServiceGroupPolicyRequest) (*SetServiceGroupPolicyResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SetServiceGroupPolicy not implemented")
 }
 func (UnimplementedAdminServiceServer) CreateServiceGroup(context.Context, *CreateServiceGroupRequest) (*CreateServiceGroupResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateServiceGroup not implemented")
@@ -554,6 +629,96 @@ func _AdminService_ShowService_Handler(srv interface{}, ctx context.Context, dec
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(AdminServiceServer).ShowService(ctx, req.(*ShowServiceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_AddZone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddZoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).AddZone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_AddZone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).AddZone(ctx, req.(*AddZoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_DropZone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DropZoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).DropZone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_DropZone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).DropZone(ctx, req.(*DropZoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_RenameZone_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RenameZoneRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).RenameZone(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_RenameZone_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).RenameZone(ctx, req.(*RenameZoneRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_ListZones_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ListZonesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).ListZones(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_ListZones_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).ListZones(ctx, req.(*ListZonesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _AdminService_SetServiceGroupPolicy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SetServiceGroupPolicyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(AdminServiceServer).SetServiceGroupPolicy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: AdminService_SetServiceGroupPolicy_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(AdminServiceServer).SetServiceGroupPolicy(ctx, req.(*SetServiceGroupPolicyRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -866,6 +1031,26 @@ var AdminService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ShowService",
 			Handler:    _AdminService_ShowService_Handler,
+		},
+		{
+			MethodName: "AddZone",
+			Handler:    _AdminService_AddZone_Handler,
+		},
+		{
+			MethodName: "DropZone",
+			Handler:    _AdminService_DropZone_Handler,
+		},
+		{
+			MethodName: "RenameZone",
+			Handler:    _AdminService_RenameZone_Handler,
+		},
+		{
+			MethodName: "ListZones",
+			Handler:    _AdminService_ListZones_Handler,
+		},
+		{
+			MethodName: "SetServiceGroupPolicy",
+			Handler:    _AdminService_SetServiceGroupPolicy_Handler,
 		},
 		{
 			MethodName: "CreateServiceGroup",

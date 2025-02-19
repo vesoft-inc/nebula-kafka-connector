@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd"
 )
 
 func main() {

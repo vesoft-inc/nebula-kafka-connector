@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/spf13/cobra/doc"
-	"github.com/vesoft-inc/nebula-ng-tools/ngctl/cmd"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd"
 )
 
 func main() {

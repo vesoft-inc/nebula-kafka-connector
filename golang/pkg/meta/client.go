@@ -70,6 +70,11 @@ type (
 		AddService(req *AddServiceReq) error
 		DropService(req *DropServiceReq) error
 		ListServices(req *ListServicesReq) (*ListServicesResp, error)
+
+		AddZone(req *AddZoneReq) error
+		DropZone(req *DropZoneReq) error
+		ListZones(req *ListZonesReq) (*ListZonesResp, error)
+		RenameZone(req *RenameZoneReq) error
 	}
 
 	BackupRestoreClient interface {
@@ -303,16 +308,7 @@ func (c *metaClient) execute(fn func() (responseHeader, error)) (responseHeader,
 	if err != nil {
 		return nil, grpcutil.GetGrpcError(c.address, err)
 	}
-	header := resp.GetHeader()
-	if internal_error.ErrorFromBytes(header.GetStatus().GetCode()) == nebulaErr.ERROR_SUCCESSFUL_COMPLETION {
-		return resp, nil
-	} else {
-		return nil, nebulaErr.NewNebulaError(
-			nebulaErr.ErrorCode(string(header.GetStatus().GetCode())),
-			"%s",
-			string(header.GetStatus().GetMessage()),
-		)
-	}
+	return resp, nil
 }
 
 func getResponseHeader(respHeader responseHeader) (*HeaderResponse, error) {

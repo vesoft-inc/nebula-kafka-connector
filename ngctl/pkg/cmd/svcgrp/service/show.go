@@ -1,0 +1,72 @@
+package service
+
+import (
+	"fmt"
+	"sort"
+
+	"github.com/spf13/cobra"
+	"github.com/vesoft-inc/nebula-ng-tools/golang/pkg/meta"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/common"
+)
+
+var ShowServiceCmd = &cobra.Command{
+	Use:   "show-service",
+	Short: "Show services in a svcgrp",
+	Long:  "Show services in a svcgrp",
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		return common.MetaClientInit()
+	},
+	PostRunE: func(cmd *cobra.Command, args []string) error {
+		common.MetaClientClose()
+		return nil
+	},
+	RunE: func(cmd *cobra.Command, args []string) error {
+		svcgrp, err := common.GetResourceName(args)
+		if err != nil {
+			return err
+		}
+		req := meta.NewListServicesReq(svcgrp)
+
+		resp, err := common.MetaClient.ListServices(req)
+		if err != nil {
+			return common.NgctlError("Show service failed", err.Error())
+		}
+
+		header := []string{"Id", "Type", "Host", "Port"}
+		data := make([][]string, 0)
+		for _, s := range resp.Services {
+			row := make([]string, 0)
+			row = append(row, fmt.Sprintf("%d", s.Id))
+			switch s.Type {
+			case meta.ServiceTypeGraphd:
+				row = append(row, "graphd")
+			case meta.ServiceTypeStoraged:
+				row = append(row, "storaged")
+			case meta.ServiceTypeAnalyticd:
+				row = append(row, "analyticd")
+			default:
+				row = append(row, "unknown")
+			}
+			row = append(row, s.Host)
+			row = append(row, fmt.Sprintf("%d", s.Port))
+			data = append(data, row)
+		}
+
+		// order by service id
+		sort.Slice(data, func(i, j int) bool {
+			return data[i][0] < data[j][0]
+		})
+		r, err := common.Format(header, data, common.OutputFormatType(serviceFlags.output))
+		if err != nil {
+			return common.NgctlError("Show service failed", err.Error())
+		}
+
+		fmt.Fprintln(common.MetaOutput, r)
+		return nil
+	},
+}
+
+func init() {
+	ShowServiceCmd.Flags().StringVarP(&serviceFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
+	ShowServiceCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp show-service <svcgrp-name> [flags]"))
+}
