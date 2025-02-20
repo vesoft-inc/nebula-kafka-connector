@@ -11,7 +11,7 @@ import (
 )
 
 var ShowCmd = &cobra.Command{
-	Use:   "show-zone",
+	Use:   "show-zone <svcgrp-name>",
 	Short: "Show zone",
 	Long:  "Show zone",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -54,6 +54,5 @@ var ShowCmd = &cobra.Command{
 }
 
 func init() {
-	ShowCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp show-zone <svcgrp-name> [flags]"))
 	ShowCmd.Flags().StringVarP(&output, "output", "o", "table", "output format. Allowed values: table, json")
 }

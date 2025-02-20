@@ -10,7 +10,7 @@ import (
 )
 
 var StopServiceCmd = &cobra.Command{
-	Use:   "stop-service",
+	Use:   "stop-service <svcgrp-name>",
 	Short: "Stop service",
 	Long:  "Stop service",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -53,6 +53,5 @@ func init() {
 	StopServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
 	StopServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "host")
 	StopServiceCmd.Flags().StringVarP(&serviceFlags.configFile, "config", "f", "", "config file for ngctl")
-	StopServiceCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp stop-service <svcgrp-name> [flags]"))
 
 }

@@ -9,7 +9,7 @@ import (
 )
 
 var RemoveCmd = &cobra.Command{
-	Use:   "remove-zone",
+	Use:   "remove-zone <svcgrp-name>",
 	Short: "Remove zone",
 	Long:  "Remove zone",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -35,6 +35,5 @@ var RemoveCmd = &cobra.Command{
 
 func init() {
 	RemoveCmd.Flags().StringVarP(&zoneName, "name", "n", "", "zone name")
-	RemoveCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp remove-zone <svcgrp-name> [flags]"))
 	RenameCmd.MarkFlagRequired("name")
 }

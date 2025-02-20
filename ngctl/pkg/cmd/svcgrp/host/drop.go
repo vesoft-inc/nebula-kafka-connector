@@ -9,7 +9,7 @@ import (
 )
 
 var RemoveHostCmd = &cobra.Command{
-	Use:   "remove-host",
+	Use:   "remove-host <svcgrp-name>",
 	Short: "Remove a host from a svcgrp",
 	Long:  "Remove a host from a svcgrp",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -37,7 +37,6 @@ var RemoveHostCmd = &cobra.Command{
 
 func init() {
 	// drop host
-	RemoveHostCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp remove-host <svcgrp_name> [flags]"))
 	RemoveHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be dropped from a svcgrp")
 	RemoveHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 6688, "port of the agent on the host")
 }

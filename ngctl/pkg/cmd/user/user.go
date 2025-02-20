@@ -32,10 +32,10 @@ var UserCmd = &cobra.Command{
 }
 
 var createUserCmd = &cobra.Command{
-	Use:   "create",
+	Use:   "create <user-name>",
 	Short: "Create user in meta server",
-	Long: `ngctl user create <username> --password [password] or 
-ngctl user create <username> --auth-type [authType] --auth-info [authInfo]`,
+	Long: `ngctl user create <user-name> --password [password] or 
+ngctl user create <user-name> --auth-type [authType] --auth-info [authInfo]`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -87,7 +87,7 @@ ngctl user create <username> --auth-type [authType] --auth-info [authInfo]`,
 }
 
 var dropUserCmd = &cobra.Command{
-	Use:   "drop",
+	Use:   "drop <user-name>",
 	Short: "Drop user in meta server",
 	Long:  "ngctl user drop <user-name>",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -113,7 +113,7 @@ var dropUserCmd = &cobra.Command{
 }
 
 var alterUserCmd = &cobra.Command{
-	Use:   "alter",
+	Use:   "alter <user-name>",
 	Short: "Alter user in meta server",
 	Long: `ngctl user alter <user-name> --auth-info [authInfo] or
 ngctl user alter <user-name> --password [password]
@@ -171,7 +171,7 @@ ngctl user alter <user-name> --password [password]
 }
 
 var showUserCmd = &cobra.Command{
-	Use:   "show",
+	Use:   "show [user-name]",
 	Short: "show user in meta server",
 	Long:  "ngctl user show [user-name]",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -237,7 +237,7 @@ var showUserCmd = &cobra.Command{
 }
 
 var disableUserCmd = &cobra.Command{
-	Use:   "disable",
+	Use:   "disable <user-name>",
 	Short: "disable user in meta server",
 	Long:  "ngctl user disable <user-name>",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -264,9 +264,9 @@ var disableUserCmd = &cobra.Command{
 }
 
 var enableUserCmd = &cobra.Command{
-	Use:   "enable",
+	Use:   "enable <user-name>",
 	Short: "enable user in meta server",
-	Long:  "ngctl user enable --user aa",
+	Long:  "ngctl user enable <user-name>",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -304,19 +304,12 @@ func init() {
 	createUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	createUserCmd.MarkFlagsRequiredTogether("auth-type", "auth-info")
 	createUserCmd.MarkFlagsMutuallyExclusive("auth-info", "password")
-	createUserCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl user create <user-name> [flags]"))
-
-	dropUserCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl user drop <user-name>"))
-	enableUserCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl user enable <user-name>"))
-	disableUserCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl user disable <user-name>"))
 
 	alterUserCmd.Flags().StringVarP(&userFlags.password, "password", "p", "", "User password")
 	alterUserCmd.Flags().StringVarP(&userFlags.passwordEncryptType, "encrypt-type", "e", "sha256", "User password encrypt type, options: sha256, sha512, sm3")
 	alterUserCmd.Flags().StringVar(&userFlags.authInfo, "auth-info", "", "User auth info")
 	alterUserCmd.MarkFlagsMutuallyExclusive("password", "auth-info")
-	alterUserCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl user alter <user-name> [flags]"))
 
 	showUserCmd.Flags().StringVarP(&userFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
-	showUserCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl user show [user-name] [flags]"))
 
 }

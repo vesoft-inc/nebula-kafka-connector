@@ -9,7 +9,7 @@ import (
 )
 
 var DropServiceCmd = &cobra.Command{
-	Use:   "drop-service",
+	Use:   "drop-service <svcgrp-name>",
 	Short: "Drop a service from a svcgrp",
 	Long:  "Drop a service from a svcgrp",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -47,5 +47,4 @@ func init() {
 	DropServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
 	DropServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "service host")
 	DropServiceCmd.Flags().Int32VarP(&serviceFlags.port, "port", "P", -1, "service port")
-	DropServiceCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp drop-service <svcgrp-name> [flags]"))
 }

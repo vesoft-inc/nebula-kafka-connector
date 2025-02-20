@@ -9,7 +9,7 @@ import (
 )
 
 var RenameCmd = &cobra.Command{
-	Use:   "rename-zone",
+	Use:   "rename-zone <svcgrp-name>",
 	Short: "Rename zone",
 	Long:  "Rename zone",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -38,5 +38,4 @@ func init() {
 	RenameCmd.Flags().StringVarP(&zoneName, "name", "n", "", "zone name")
 	RenameCmd.Flags().StringVarP(&newZoneName, "new-name", "E", "", "new zone name")
 	RenameCmd.MarkFlagRequired("name")
-	RenameCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp rename-zone <svcgrp-name> [flags]"))
 }

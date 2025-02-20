@@ -9,7 +9,7 @@ import (
 )
 
 var AddCmd = &cobra.Command{
-	Use:   "add-zone",
+	Use:   "add-zone <svcgrp-name>",
 	Short: "Add zone",
 	Long:  "Add zone",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -39,5 +39,4 @@ func init() {
 	AddCmd.Flags().IntVarP(&replicas, "replicas", "r", 0, "zone replicas")
 	AddCmd.Flags().IntVarP(&priority, "priority", "p", 0, "zone priority")
 	AddCmd.MarkFlagRequired("name")
-	AddCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp add-zone <svcgrp-name> [flags]"))
 }

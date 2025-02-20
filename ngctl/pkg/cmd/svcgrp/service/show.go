@@ -10,7 +10,7 @@ import (
 )
 
 var ShowServiceCmd = &cobra.Command{
-	Use:   "show-service",
+	Use:   "show-service <svcgrp-name>",
 	Short: "Show services in a svcgrp",
 	Long:  "Show services in a svcgrp",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -68,5 +68,4 @@ var ShowServiceCmd = &cobra.Command{
 
 func init() {
 	ShowServiceCmd.Flags().StringVarP(&serviceFlags.output, "output", "o", "table", "output format. Allowed values: table, json")
-	ShowServiceCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp show-service <svcgrp-name> [flags]"))
 }

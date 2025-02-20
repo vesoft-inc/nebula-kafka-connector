@@ -9,7 +9,7 @@ import (
 )
 
 var AddServiceCmd = &cobra.Command{
-	Use:   "add-service",
+	Use:   "add-service <svcgrp-name>",
 	Short: "Add a service into a service group",
 	Long:  "Add a service info a service group",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -45,5 +45,4 @@ func init() {
 	AddServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
 	AddServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "service host")
 	AddServiceCmd.Flags().Int32VarP(&serviceFlags.port, "port", "P", -1, "service port")
-	AddServiceCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp add-service <svcgrp-name> [flags]"))
 }

@@ -24,7 +24,7 @@ var (
 )
 
 var CreateCmd = &cobra.Command{
-	Use:   "create",
+	Use:   "create <svcgrp-name>",
 	Short: "Create a service group in the metad",
 	Long:  "Create a service group and register in the metad. The service group will be empty after creation. Users need to add hosts and services into a newly created svcgrp",
 
@@ -82,7 +82,7 @@ var InitCmd = &cobra.Command{
 }
 
 var DropCmd = &cobra.Command{
-	Use:   "drop",
+	Use:   "drop <svcgrp-name>",
 	Short: "Drop a service group from the metad",
 	Long:  "Drop a service group from the metad",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -108,7 +108,7 @@ var DropCmd = &cobra.Command{
 }
 
 var AlterCmd = &cobra.Command{
-	Use:   "alter",
+	Use:   "alter <svcgrp-name>",
 	Short: "Alter the owner of a svcgrp.",
 	Long:  `A service group has an owner registered in the metad. Users can alter it.`,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -138,7 +138,7 @@ var AlterCmd = &cobra.Command{
 }
 
 var ShowCmd = &cobra.Command{
-	Use:   "show",
+	Use:   "show [svcgrp-name]",
 	Short: "Show details of a service group",
 	Long:  "Show details of a service group",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -186,19 +186,13 @@ var ShowCmd = &cobra.Command{
 }
 
 func init() {
-	CreateCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp create <svcgrp name> [flags]"))
 	CreateCmd.Flags().IntVarP(&replicas, "replica-factor", "r", 3, "replica number, default: 3")
 	CreateCmd.Flags().StringVarP(&owner, "owner", "o", "", "svcgrp owner")
 
-	DropCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp drop <svcgrp name> [flags]"))
 	DropCmd.Flags().BoolVarP(&force, "force", "f", false, "force drop svcgrp")
 
-	AlterCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp alter <svcgrp name> [flags]"))
 	AlterCmd.Flags().StringVarP(&owner, "owner", "o", "", "svcgrp owner")
 
-	InitCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp init <svcgrp name> [flags]"))
-
-	ShowCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp show [svcgrp name] [flags]"))
 	ShowCmd.Flags().StringVarP(&output, "output", "o", "table", "output format. Allowed values: table, json")
 
 }

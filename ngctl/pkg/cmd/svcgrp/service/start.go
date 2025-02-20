@@ -10,7 +10,7 @@ import (
 )
 
 var StartServiceCmd = &cobra.Command{
-	Use:   "start-service",
+	Use:   "start-service <svcgrp-name>",
 	Short: "Start service",
 	Long:  "Start service",
 	RunE: func(cmd *cobra.Command, args []string) error {
@@ -46,5 +46,4 @@ func init() {
 	StartServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
 	StartServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "host")
 	StartServiceCmd.Flags().StringVarP(&serviceFlags.configFile, "config", "f", "", "config file for ngctl")
-	StartServiceCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp start-service <svcgrp-name> [flags]"))
 }

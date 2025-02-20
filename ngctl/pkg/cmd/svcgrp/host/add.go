@@ -9,7 +9,7 @@ import (
 )
 
 var AddHostCmd = &cobra.Command{
-	Use:   "add-host",
+	Use:   "add-host <svcgrp-name>",
 	Short: "Add a host into a svcgrp",
 	Long:  "Add a host into a svcgrp. A host is identified by its IP address. The port of the deployed agent is also needed",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -37,7 +37,6 @@ var AddHostCmd = &cobra.Command{
 
 func init() {
 	// add host
-	AddHostCmd.SetUsageTemplate(common.GetUsageTemplate("ngctl svcgrp add-host <svcgrp_name> [flags]"))
 	AddHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be added to a svcgrp")
 	AddHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 6688, "agent port")
 }
