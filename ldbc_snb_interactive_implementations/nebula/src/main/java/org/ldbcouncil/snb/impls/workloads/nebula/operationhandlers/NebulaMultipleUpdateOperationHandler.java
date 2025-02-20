@@ -31,7 +31,7 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
             String graphName = state.getGraphName();
             long startTime = System.currentTimeMillis();
             for (String queryString : queryStrings) {
-                queryString = queryString.replace("$graphName", graphName);
+                queryString = queryString.replace("$graphName", graphName).replace("''", "null");
                 state.logQuery(operation.getClass().getSimpleName(), queryString);
                 ResultSet resultSet = client.execute(queryString);
                 if(state.isEnableQueryInfoLog()){
