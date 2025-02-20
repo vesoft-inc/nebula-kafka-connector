@@ -18,6 +18,12 @@ ngctl svcgrp rename-zone <svcgrp-name> [flags]
   -E, --new-name string   new zone name
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl svcgrp](ngctl_svcgrp.md)	 - Run commands managing a service group

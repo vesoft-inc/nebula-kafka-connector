@@ -21,6 +21,12 @@ ngctl user alter <user-name> [flags]
   -p, --password string       User password
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl user](ngctl_user.md)	 - Process user management command

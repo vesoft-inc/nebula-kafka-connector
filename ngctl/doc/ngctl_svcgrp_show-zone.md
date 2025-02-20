@@ -17,6 +17,12 @@ ngctl svcgrp show-zone <svcgrp-name> [flags]
   -o, --output string   output format. Allowed values: table, json (default "table")
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl svcgrp](ngctl_svcgrp.md)	 - Run commands managing a service group

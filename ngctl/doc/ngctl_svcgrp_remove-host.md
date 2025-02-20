@@ -18,6 +18,12 @@ ngctl svcgrp remove-host <svcgrp-name> [flags]
   -H, --host string         the host to be dropped from a svcgrp
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl svcgrp](ngctl_svcgrp.md)	 - Run commands managing a service group

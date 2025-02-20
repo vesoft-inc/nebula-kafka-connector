@@ -16,6 +16,12 @@ ngctl user disable <user-name> [flags]
   -h, --help   help for disable
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl user](ngctl_user.md)	 - Process user management command

@@ -16,6 +16,12 @@ ngctl auth logout [flags]
   -h, --help   help for logout
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl auth](ngctl_auth.md)	 - Process auth management command

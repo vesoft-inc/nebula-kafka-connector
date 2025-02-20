@@ -18,6 +18,12 @@ ngctl metad stop [flags]
   -H, --host string     host
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl metad](ngctl_metad.md)	 - Run commands managing a metad

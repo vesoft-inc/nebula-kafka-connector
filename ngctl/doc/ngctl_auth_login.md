@@ -26,6 +26,12 @@ ngctl auth login [flags]
   -u, --user string        user name (default "root")
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl auth](ngctl_auth.md)	 - Process auth management command

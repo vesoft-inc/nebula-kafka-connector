@@ -16,6 +16,12 @@ ngctl auth [flags]
   -h, --help   help for auth
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl](ngctl.md)	 - Execute ngctl commands in cli mode

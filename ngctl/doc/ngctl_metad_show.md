@@ -17,6 +17,12 @@ ngctl metad show [flags]
   -o, --output string   output format. Allowed values: table, json (default "table")
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl metad](ngctl_metad.md)	 - Run commands managing a metad

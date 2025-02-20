@@ -3,11 +3,13 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/auth"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/common"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/down"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/metad"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/svcgrp"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/up"
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/user"
+	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/version"
 )
 
 var RootCmd = &cobra.Command{
@@ -29,5 +31,6 @@ func init() {
 	RootCmd.AddCommand(metad.MetadCmd)
 	RootCmd.AddCommand(up.UpCmd)
 	RootCmd.AddCommand(down.DownCmd)
-
+	RootCmd.AddCommand(version.VersionCmd)
+	RootCmd.PersistentFlags().StringVarP(&common.CachePath, "tokenFile", "", "", "token file path")
 }

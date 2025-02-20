@@ -18,6 +18,12 @@ ngctl up [flags]
   -p, --password string   default metad password after install
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl](ngctl.md)	 - Execute ngctl commands in cli mode

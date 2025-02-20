@@ -17,6 +17,12 @@ ngctl svcgrp remove-zone <svcgrp-name> [flags]
   -n, --name string   zone name
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl svcgrp](ngctl_svcgrp.md)	 - Run commands managing a service group

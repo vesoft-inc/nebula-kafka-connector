@@ -12,6 +12,12 @@ A service group may contain multiple graphd and storaged services. Users could r
   -h, --help   help for svcgrp
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl](ngctl.md)	 - Execute ngctl commands in cli mode

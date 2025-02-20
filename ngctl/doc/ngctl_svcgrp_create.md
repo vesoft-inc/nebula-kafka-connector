@@ -18,6 +18,12 @@ ngctl svcgrp create <svcgrp-name> [flags]
   -r, --replica-factor int   replica number, default: 3 (default 3)
 ```
 
+### Options inherited from parent commands
+
+```
+      --tokenFile string   token file path
+```
+
 ### SEE ALSO
 
 * [ngctl svcgrp](ngctl_svcgrp.md)	 - Run commands managing a service group
