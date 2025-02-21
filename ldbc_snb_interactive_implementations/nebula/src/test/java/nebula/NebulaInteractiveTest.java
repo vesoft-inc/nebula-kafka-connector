@@ -67,7 +67,6 @@ public class NebulaInteractiveTest extends InteractiveTest {
     @Test
     public void testDateToLong(){
 
-        // TODO NODE 属性中的Date 解析有问题 查看下valueParser
         NebulaConverter converter = new NebulaConverter();
         Date date = new Date(492480000000L);
 

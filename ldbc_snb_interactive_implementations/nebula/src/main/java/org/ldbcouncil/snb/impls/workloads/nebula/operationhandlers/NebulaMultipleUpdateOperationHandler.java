@@ -31,16 +31,22 @@ public abstract class NebulaMultipleUpdateOperationHandler<TOperation extends Op
             String graphName = state.getGraphName();
             long startTime = System.currentTimeMillis();
             for (String queryString : queryStrings) {
-                queryString = queryString.replace("$graphName", graphName).replace("''", "null");
+                queryString = queryString
+                        .replace("$graphName", graphName)
+                        .replace(": '',", ": null,")
+                        .replace(":'',", ": null,")
+                        .replace(": ''}",": null}")
+                        .replace(":''}",": null}");
                 state.logQuery(operation.getClass().getSimpleName(), queryString);
                 ResultSet resultSet = client.execute(queryString);
                 if(state.isEnableQueryInfoLog()){
                     LOGGER.info(String.format("====> sub_update_query=%s, latency=%dus", queryString, resultSet.getLatency()));
                 }
                 if (!resultSet.isSucceeded()) {
-                    LOGGER.error("execute {} failed, {}, session id:{}",
+                    LOGGER.error("execute {} failed, {}, gql:{}, session id:{}",
                             operation.getClass().getSimpleName(),
                             resultSet.getErrorMessage(),
+                                 queryString,
                                  client.getSessionId());
                 }
             }

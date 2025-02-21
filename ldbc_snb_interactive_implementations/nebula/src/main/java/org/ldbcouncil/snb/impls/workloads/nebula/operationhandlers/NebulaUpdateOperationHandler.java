@@ -47,9 +47,10 @@ public abstract class NebulaUpdateOperationHandler<TOperation extends Operation<
             final ResultSet resultSet = client.execute(query);
             long endTime = System.currentTimeMillis();
             if (!resultSet.isSucceeded()) {
-                LOGGER.error("execute {} failed, {}, session id:{}",
+                LOGGER.error("execute {} failed, {}, gql:{}, session id:{}",
                         operation.getClass().getSimpleName(),
                         resultSet.getErrorMessage(),
+                             query,
                              client.getSessionId());
             }
             if (state.isEnableQueryInfoLog()) {
