@@ -12,7 +12,6 @@ import (
 )
 
 type userFlagsType struct {
-	user                string
 	password            string
 	passwordEncryptType string
 	authType            string
@@ -44,8 +43,7 @@ ngctl user create <user-name> --auth-type [authType] --auth-info [authInfo]`,
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-		userFlags.user, err = cmd.Flags().GetString("user")
+		user, err := common.GetResourceName(args)
 		if err != nil {
 			return err
 		}
@@ -74,7 +72,7 @@ ngctl user create <user-name> --auth-type [authType] --auth-info [authInfo]`,
 			userFlags.authInfo = string(bs)
 		}
 		req := meta.NewCreateUserReq(
-			userFlags.user,
+			user,
 			userFlags.authType,
 			userFlags.authInfo,
 		)
@@ -98,12 +96,11 @@ var dropUserCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-		userFlags.user, err = common.GetResourceName(args)
+		user, err := common.GetResourceName(args)
 		if err != nil {
 			return err
 		}
-		req := meta.NewDropUserReq(userFlags.user)
+		req := meta.NewDropUserReq(user)
 		if err := common.MetaClient.DropUser(req); err != nil {
 			return err
 		}
@@ -126,8 +123,7 @@ ngctl user alter <user-name> --password [password]
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-		userFlags.user, err = common.GetResourceName(args)
+		user, err := common.GetResourceName(args)
 		if err != nil {
 			return err
 		}
@@ -157,7 +153,7 @@ ngctl user alter <user-name> --password [password]
 			userFlags.authInfo = string(bs)
 		}
 		req := meta.NewAlterUserReq(
-			userFlags.user,
+			user,
 			userFlags.authInfo,
 			true, //always active for alter user
 		)
@@ -182,13 +178,10 @@ var showUserCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
 		var l []string
-		userFlags.user, err = common.GetResourceName(args)
-		if err != nil {
-			userFlags.user = ""
-		} else {
-			l = append(l, userFlags.user)
+		user, err := common.GetResourceName(args)
+		if err == nil {
+			l = append(l, user)
 		}
 
 		req := meta.NewListUsersReq(l)
@@ -248,12 +241,11 @@ var disableUserCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-		userFlags.user, err = common.GetResourceName(args)
+		user, err := common.GetResourceName(args)
 		if err != nil {
 			return err
 		}
-		req := meta.NewAlterUserReq(userFlags.user, "", false)
+		req := meta.NewAlterUserReq(user, "", false)
 		if err := common.MetaClient.AlterUser(req); err != nil {
 			return err
 		}
@@ -275,12 +267,11 @@ var enableUserCmd = &cobra.Command{
 		return nil
 	},
 	RunE: func(cmd *cobra.Command, args []string) error {
-		var err error
-		userFlags.user, err = common.GetResourceName(args)
+		user, err := common.GetResourceName(args)
 		if err != nil {
 			return err
 		}
-		req := meta.NewAlterUserReq(userFlags.user, "", true)
+		req := meta.NewAlterUserReq(user, "", true)
 		if err := common.MetaClient.AlterUser(req); err != nil {
 			return err
 		}
