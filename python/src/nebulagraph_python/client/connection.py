@@ -48,8 +48,8 @@ class ConnectionConfig:
         cls,
         hosts: Union[str, List[str], List[HostAddress]],
         ssl_param: Union[SSLParam, Literal[True], None] = None,
-        connect_timeout: Optional[float] = None,
-        request_timeout: Optional[float] = None,
+        connect_timeout: Optional[float] = constants.DEFAULT_CONNECT_TIMEOUT,
+        request_timeout: Optional[float] = constants.DEFAULT_REQUEST_TIMEOUT,
     ):
         if ssl_param is True:
             ssl_param = SSLParam()
