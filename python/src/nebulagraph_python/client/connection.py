@@ -225,7 +225,7 @@ class _Connection:
 
         if response.status.code != b"00000":
             raise NebulaGraphRemoteError(
-                code=ErrorCode.from_str(response.status.code.decode("utf-8")),
+                code=ErrorCode(response.status.code.decode("utf-8")),
                 message=response.status.message.decode("utf-8"),
             )
         return _Session(self, int(response.session_id), session_config)

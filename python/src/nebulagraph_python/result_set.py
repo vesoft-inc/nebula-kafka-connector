@@ -131,7 +131,7 @@ class ResultSet:
                 error_code = ErrorCode(self.status_code)
             except ValueError:
                 logger.error("Unknown error code: %s", self.status_code)
-                error_code = ErrorCode.UNKNOWN_FOR_CLIENT
+                error_code = ErrorCode.UNKNOWN
             raise NebulaGraphRemoteError(
                 code=error_code,
                 message=self.status_message,
