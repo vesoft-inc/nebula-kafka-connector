@@ -50,7 +50,6 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	AnalyticService_Run_FullMethodName            = "/nebula.proto.analytic.AnalyticService/Run"
 	AnalyticService_Init_FullMethodName           = "/nebula.proto.analytic.AnalyticService/Init"
 	AnalyticService_PrepareWorker_FullMethodName  = "/nebula.proto.analytic.AnalyticService/PrepareWorker"
 	AnalyticService_LoadGraph_FullMethodName      = "/nebula.proto.analytic.AnalyticService/LoadGraph"
@@ -66,7 +65,6 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AnalyticServiceClient interface {
-	Run(ctx context.Context, in *AnalyticRequest, opts ...grpc.CallOption) (*AnalyticResponse, error)
 	Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	PrepareWorker(ctx context.Context, in *PrepareWorkerRequest, opts ...grpc.CallOption) (*TaskResponse, error)
 	LoadGraph(ctx context.Context, in *LoadGraphRequest, opts ...grpc.CallOption) (*LoadGraphResponse, error)
@@ -84,15 +82,6 @@ type analyticServiceClient struct {
 
 func NewAnalyticServiceClient(cc grpc.ClientConnInterface) AnalyticServiceClient {
 	return &analyticServiceClient{cc}
-}
-
-func (c *analyticServiceClient) Run(ctx context.Context, in *AnalyticRequest, opts ...grpc.CallOption) (*AnalyticResponse, error) {
-	out := new(AnalyticResponse)
-	err := c.cc.Invoke(ctx, AnalyticService_Run_FullMethodName, in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
 }
 
 func (c *analyticServiceClient) Init(ctx context.Context, in *InitRequest, opts ...grpc.CallOption) (*TaskResponse, error) {
@@ -180,7 +169,6 @@ func (c *analyticServiceClient) Barrier(ctx context.Context, in *BarrierRequest,
 // All implementations must embed UnimplementedAnalyticServiceServer
 // for forward compatibility
 type AnalyticServiceServer interface {
-	Run(context.Context, *AnalyticRequest) (*AnalyticResponse, error)
 	Init(context.Context, *InitRequest) (*TaskResponse, error)
 	PrepareWorker(context.Context, *PrepareWorkerRequest) (*TaskResponse, error)
 	LoadGraph(context.Context, *LoadGraphRequest) (*LoadGraphResponse, error)
@@ -197,9 +185,6 @@ type AnalyticServiceServer interface {
 type UnimplementedAnalyticServiceServer struct {
 }
 
-func (UnimplementedAnalyticServiceServer) Run(context.Context, *AnalyticRequest) (*AnalyticResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Run not implemented")
-}
 func (UnimplementedAnalyticServiceServer) Init(context.Context, *InitRequest) (*TaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Init not implemented")
 }
@@ -238,24 +223,6 @@ type UnsafeAnalyticServiceServer interface {
 
 func RegisterAnalyticServiceServer(s grpc.ServiceRegistrar, srv AnalyticServiceServer) {
 	s.RegisterService(&AnalyticService_ServiceDesc, srv)
-}
-
-func _AnalyticService_Run_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AnalyticRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(AnalyticServiceServer).Run(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: AnalyticService_Run_FullMethodName,
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AnalyticServiceServer).Run(ctx, req.(*AnalyticRequest))
-	}
-	return interceptor(ctx, in, info, handler)
 }
 
 func _AnalyticService_Init_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -427,10 +394,6 @@ var AnalyticService_ServiceDesc = grpc.ServiceDesc{
 	ServiceName: "nebula.proto.analytic.AnalyticService",
 	HandlerType: (*AnalyticServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
-		{
-			MethodName: "Run",
-			Handler:    _AnalyticService_Run_Handler,
-		},
 		{
 			MethodName: "Init",
 			Handler:    _AnalyticService_Init_Handler,

@@ -29,6 +29,7 @@ type (
 	}
 
 	Summary interface {
+		ParseTimeUs() int64
 		BuildTimeUs() int64
 		OptimizeTimeUs() int64
 		SerializeTimeUs() int64

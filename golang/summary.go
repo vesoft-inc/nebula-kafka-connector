@@ -17,6 +17,10 @@ type (
 	}
 )
 
+func (s *summary) ParseTimeUs() int64 {
+	return s.summary.ElapsedTime.ParseTimeUs
+}
+
 func (s *summary) BuildTimeUs() int64 {
 	return s.summary.ElapsedTime.BuildTimeUs
 }

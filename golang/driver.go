@@ -49,7 +49,7 @@ const (
 	defaultMaxIdleConns   = 5
 	defaultMaxLieTime     = 30 * time.Minute
 	defaultRequestTimeout = 1 * time.Minute
-	defaultConnectTimeout  = 3 * time.Second
+	defaultConnectTimeout = 3 * time.Second
 	defaultTicker         = 5 * time.Second
 	defaultMaxWait        = 1 * time.Minute
 )
