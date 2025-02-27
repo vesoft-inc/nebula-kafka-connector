@@ -7,12 +7,12 @@ MATCH (p:Person WHERE p.id = $personId )<-[:HAS_CREATOR]-(message:Message)
 LET messageId=message.id, messageCreationDate=message.creationDate
 ORDER BY messageCreationDate DESC, messageId ASC
 LIMIT 10
-MATCH TRAIL (message:Message)-[:REPLY_OF]->*(post:Post)-[:HAS_CREATOR]->(person:Person)
+MATCH (message:Message)-[:REPLY_OF]->{0,10}(post:Post)-[:HAS_CREATOR]->(person:Person)
 ORDER BY messageCreationDate DESC, messageId ASC
 RETURN
   messageId,
   COALESCE(message.content, message.imageFile) AS messageContent,
-  messageCreationDate,
+  cast(messageCreationDate as local datetime),
   post.id AS postId,
   person.id AS personId,
   person.firstName AS personFirstName,

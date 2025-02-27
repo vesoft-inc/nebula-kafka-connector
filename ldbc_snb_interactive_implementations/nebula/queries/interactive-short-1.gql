@@ -12,4 +12,4 @@ RETURN
     n.browserUsed AS browserUsed,
     p.id AS cityId,
     n.gender AS gender,
-    n.creationDate AS creationDate
+    cast(n.creationDate as local datetime) AS creationDate

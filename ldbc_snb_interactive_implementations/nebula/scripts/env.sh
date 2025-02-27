@@ -1,23 +1,3 @@
 #!/bin/bash
+LDBC_HOME=/home/harris.chu/data-sets-surf-repository/social_network-sf0.1-CsvBasic-LongDateFormatter
 
-set -eu
-# Directory of this script
-SCRIPT_DIR=$(dirname $(readlink -f "$0"))
-# Directory of this project
-PROJECT_DIR=$(dirname ${SCRIPT_DIR})
-# target data
-DATA_DIR=${PROJECT_DIR}/data
-#LDBC home
-LDBC_HOME=${DATA_DIR}/ldbc_snb_datagen
-
-LDBC_SNB_DATAGEN_VERSION=${LDBC_SNB_DATAGEN_VERSION:-v0.3.3}
-HADOOP_VERSION=${HADOOP_VERSION:-3.2.1}
-JAVA_HOME=${JAVA_HOME:-/data/java-1.8.0/jre}
-HADOOP_HOME=${HADOOP_HOME:-${DATA_DIR}/hadoop-${HADOOP_VERSION}}
-HADOOP_CLIENT_OPTS=${HADOOP_CLIENT_OPTS:-"-Xmx8G"}
-
-SCALE_FACTOR=${SCALE_FACTOR:-0.1}
-
-NEBULA_ADDRESS=${NEBULA_ADDRESS:-127.0.0.1:3713}
-GRAPH_NAME=${GRAPH_NAME:-sf01}
-NEBULA_IMPORTER_VERSION=${NEBULA_IMPORTER_VERSION:-v5.0.0}

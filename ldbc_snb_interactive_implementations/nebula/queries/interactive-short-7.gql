@@ -9,7 +9,7 @@ MATCH (m:Message WHERE m.id = $messageId)<-[:REPLY_OF]-(c:Comment)-[:HAS_CREATOR
     ORDER BY c.creationDate DESC, p.id
     RETURN c.id AS commentId,
         c.content AS commentContent,
-        c.creationDate AS commentCreationDate,
+        cast(c.creationDate as local datetime) AS commentCreationDate,
         p.id AS replyAuthorId,
         p.firstName AS replyAuthorFirstName,
         p.lastName AS replyAuthorLastName,

@@ -13,7 +13,7 @@ PROJECT_DIR=$(dirname ${SCRIPT_DIR})
 
 source ${SCRIPT_DIR}/env.sh
 
-cd ${LDBC_HOME}/test_data/social_network/dynamic
+cd ${LDBC_HOME}/dynamic
 
 # 933|si
 # 933|en

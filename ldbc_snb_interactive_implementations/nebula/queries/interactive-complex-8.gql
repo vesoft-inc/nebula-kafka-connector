@@ -12,6 +12,6 @@ RETURN
   person.id AS personId,
   person.firstName AS personFirstName,
   person.lastName AS personLastName,
-  comment.creationDate AS commentCreationDate,
+  cast(comment.creationDate as local datetime) AS commentCreationDate,
   comment.id AS commentId,
   comment.content AS commentContent

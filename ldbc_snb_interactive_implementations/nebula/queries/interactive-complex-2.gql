@@ -15,4 +15,4 @@ RETURN
     friend.lastName AS personLastName,
     message.id AS postOrCommentId,
     COALESCE(message.content, message.imageFile) AS messageContent,
-    message.creationDate AS postOrCommentCreationDate
+    cast(message.creationDate as local datetime) AS postOrCommentCreationDate

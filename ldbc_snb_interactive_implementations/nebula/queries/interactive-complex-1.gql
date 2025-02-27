@@ -39,7 +39,7 @@ RETURN
   friend.lastName AS friendLastName,
   distance AS distanceFromPerson,
   friend.birthday AS friendBirthday,
-  friend.creationDate AS friendCreationDate,
+  cast(friend.creationDate as local datetime) AS friendCreationDate,
   friend.gender AS friendGender,
   friend.browserUsed AS friendBrowserUsed,
   friend.locationIP AS friendLocationIp,

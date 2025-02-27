@@ -5,7 +5,7 @@
 CONFIGS optimizer_rules = "enhanced_column_pruner=on"
 USE $graphName
 MATCH (person:Person {id: $personId})<-[:HAS_CREATOR]-(message:Message)<-[likes:LIKES]-(liker:Person)
-  LET likeTime=likes.creationDate
+  LET likeTime=cast(likes.creationDate as local datetime)
   ORDER BY likeTime DESC, message.id ASC
   RETURN head(collect(message)) AS latestLikeMsg, head(collect(likeTime)) AS likeCreationDate, liker, person GROUP BY liker, person
 NEXT USE $graphName
@@ -16,8 +16,9 @@ LIMIT 20
 RETURN
   liker.id AS personId,
   liker.firstName AS personFirstName,
-  liker.lastName AS personLastName,likeCreationDate,
+  liker.lastName AS personLastName,
+  cast(likeCreationDate as local datetime),
   latestLikeMsg.id AS messageId,
   COALESCE(latestLikeMsg.content, latestLikeMsg.imageFile) AS messageContent,
-  latestLikeMsg.creationDate AS minutesLatency,
+  cast(latestLikeMsg.creationDate as local datetime) AS minutesLatency,
   NOT EXISTS ((person:Person{id: $personId})<-[:KNOWS]->(liker:Person))  AS isNew

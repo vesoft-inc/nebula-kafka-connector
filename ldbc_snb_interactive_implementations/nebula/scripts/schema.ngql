@@ -1,0 +1,42 @@
+'''
+CREATE GRAPH TYPE IF NOT EXISTS ldbc_type AS {
+                NODE City (LABELS City&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Country (LABELS Country&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Continent (LABELS Continent&Place {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE University (LABELS University&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Company (LABELS Company&Organisation {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE Person (LABEL Person {id INT64 PRIMARY KEY, firstName STRING, lastName STRING, gender STRING, birthday DATE, creationDate zoned DATETIME, locationIP STRING, browserUsed STRING, email STRING, speaks STRING }),
+                NODE Forum (LABEL Forum {id INT64 PRIMARY KEY, title STRING, creationDate zoned DATETIME}),
+                NODE Post (LABELS Post&Message {id INT64 PRIMARY KEY, imageFile STRING, creationDate zoned DATETIME, locationIP STRING, browserUsed STRING, language STRING, content STRING, `length` INT32}),
+                NODE Comment (LABELS Comment&Message {id INT64 PRIMARY KEY, creationDate zoned DATETIME, locationIP STRING, browserUsed STRING, content STRING, `length` INT32}),
+                NODE Tag (LABEL Tag {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                NODE TagClass (LABEL TagClass {id INT64 PRIMARY KEY, name STRING, url STRING}),
+                EDGE CITY_IS_PART_OF_COUNTRY (City)-[:IS_PART_OF]->(Country),
+                EDGE COUNTRY_IS_PART_OF_CONTINENT (Country)-[:IS_PART_OF]->(Continent),
+                EDGE UNIVERSITY_IS_LOCATED_IN_CITY (University)-[:IS_LOCATED_IN]->(City),
+                EDGE COMPANY_IS_LOCATED_IN_COUNTRY (Company)-[:IS_LOCATED_IN]->(Country),
+                EDGE PERSON_IS_LOCATED_IN_CITY (Person)-[:IS_LOCATED_IN]->(City),
+                EDGE PERSON_STUDY_AT_UNIVERSITY (Person)-[:STUDY_AT{classYear INT32}]->(University),
+                EDGE PERSON_WORK_AT_COMPANY (Person)-[:WORK_AT{workFrom INT32}]->(Company),
+                EDGE PERSON_LIKES_POST (Person)-[:LIKES{creationDate zoned DATETIME}]->(Post),
+                EDGE PERSON_LIKES_COMMENT (Person)-[:LIKES{creationDate zoned DATETIME}]->(Comment),
+                EDGE PERSON_HAS_INTEREST_TAG (Person)-[:HAS_INTEREST]->(Tag),
+                EDGE PERSON_KNOWS_PERSON (Person)-[:KNOWS{creationDate zoned DATETIME}]->(Person),
+                EDGE POST_IS_LOCATED_IN_COUNTRY (Post)-[:IS_LOCATED_IN]->(Country),
+                EDGE POST_HAS_CREATOR_PERSON (Post)-[:HAS_CREATOR]->(Person),
+                EDGE POST_HAS_TAG_TAG (Post)-[:HAS_TAG]->(Tag),
+                EDGE COMMENT_IS_LOCATED_IN_COUNTRY (Comment)-[:IS_LOCATED_IN]->(Country),
+                EDGE COMMENT_HAS_CREATOR_PERSON (Comment)-[:HAS_CREATOR]->(Person),
+                EDGE COMMENT_HAS_TAG_TAG (Comment)-[:HAS_TAG]->(Tag),
+                EDGE COMMENT_REPLY_OF_POST (Comment)-[:REPLY_OF]->(Post),
+                EDGE COMMENT_REPLY_OF_COMMENT (Comment)-[:REPLY_OF]->(Comment),
+                EDGE FORUM_CONTAINER_OF_POST (Forum)-[:CONTAINER_OF]->(Post),
+                EDGE FORUM_HAS_MEMBER_PERSON (Forum)-[:HAS_MEMBER{joinDate zoned DATETIME}]->(Person),
+                EDGE FORUM_HAS_MODERATOR_PERSON (Forum)-[:HAS_MODERATOR]->(Person),
+                EDGE FORUM_HAS_TAG_TAG (Forum)-[:HAS_TAG]->(Tag),
+                EDGE TAG_HAS_TYPE_TAGCLASS (Tag)-[:HAS_TYPE]->(TagClass),
+                EDGE TAGCLASS_IS_SUBCLASS_OF_TAGCLASS (TagClass)-[:IS_SUBCLASS_OF]->(TagClass)
+        }
+'''
+CREATE GRAPH sf10 TYPED ldbc_type
+CREATE GRAPH sf1000 TYPED ldbc_type

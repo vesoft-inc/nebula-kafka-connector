@@ -5,5 +5,5 @@
 USE $graphName
 MATCH (m:Message WHERE m.id = $messageId)
 RETURN
-   m.creationDate as messageCreationDate,
+   cast(m.creationDate as local datetime) as messageCreationDate,
    COALESCE(m.content,m.imageFile) AS messageContent
