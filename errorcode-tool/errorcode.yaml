@@ -30,6 +30,10 @@
   Code: "01G11"
   Message: "Null value eliminated in set function: {}"
 
+- Name: "CATALOG_PROCEDURE_NOT_FOUND"
+  Code: "01G12"
+  Message: "Procedure not found: `{}`"
+
 - Name: "NO_DATA"
   Code: "02000"
   Message: "No data"
@@ -310,6 +314,10 @@
   Code: "42015"
   Message: "Number of edge type key labels exceeds supported maximum"
 
+- Name: "INVALID_ANN_SYNTAX"
+  Code: "42016"
+  Message: "Invalid syntax for ANN search: {}"
+
 - Name: "EMPTY_STATEMENT"
   Code: "42N01"
   Message: "Empty statement"
@@ -466,6 +474,50 @@
   Code: "42N45"
   Message: "Invalid syntax, yield clause after graph pattern is not supported now."
 
+- Name: "INVALID_SYNTAX_RETURN_OR_FINISH_CAN_ONLY_BE_LAST_STATEMENT"
+  Code: "42N46"
+  Message: "Invalid syntax, RETURN/FINISH statement can only be used as the last statement in a linear statement"
+
+- Name: "INVALID_SYNTAX_LINEAR_QUERY_SHOULD_ENDS_WITH_RETURN_OR_FINISH"
+  Code: "42N47"
+  Message: "Invalid syntax, linear query should ends with RETURN or FINISH statement"
+
+- Name: "INVALID_SYNTAX_DDL_MIXD_WITH_NON_DDL"
+  Code: "42N48"
+  Message: "Invalid syntax, cannot mix DDL statements with non-DDL statements in the same linear statement"
+
+- Name: "INVALID_SYNTAX_FOCUSED_MIXED_WITH_AMBIENT"
+  Code: "42N49"
+  Message: "Invalid syntax, cannot mix 'use graph' and non-'use graph' statements connected by 'next'."
+
+- Name: "INVALID_SYNTAX_NEXT_CONNECTED_DDL_STATEMENT"
+  Code: "42N50"
+  Message: "Invalid syntax, DDL statement cannot be connected by 'next'."
+
+- Name: "INVALID_SYNTAX_ACCUM_MATCH_CLAUSE_ERROR"
+  Code: "42N51"
+  Message: "Invalid syntax, `{}` statement is not supported in the ForNode/ForPath clause."
+
+- Name: "INVALID_SYNTAX_ASSIGN_GLOBAL_ACCUM_ERROR"
+  Code: "42N52"
+  Message: "Invalid syntax, `{}` assignment to the global accum variable is not allowed in the ForNode/ForPath clause."
+
+- Name: "INVALID_SYNTAX_ASSIGN_NODE_ACCUM_ERROR"
+  Code: "42N53"
+  Message: "Invalid syntax, `{}` assignment to the node accum variable is not allowed in the ForPath clause."
+
+- Name: "INVALID_SYNTAX_INVALID_NODE_VAR_REFERENCE"
+  Code: "42N54"
+  Message: "Invalid syntax, invalid node variable reference: `{}`"
+
+- Name: "INVALID_SYNTAX_SET_PROPERTY"
+  Code: "42N55"
+  Message: "Invalid syntax, set property `{}` is not supported in the ForNode/ForPath clause"
+
+- Name: "INVALID_SYNTAX_ACCUMULATOR_NOT_DEFINED"
+  Code: "42N56"
+  Message: "Invalid syntax, {} accum `{}` not defined"
+
 - Name: "DEPENDENT_OBJECT_ERROR"
   Code: "G1000"
   Message: "Dependent object error, node {} can not be deleted, {} edge connected"
@@ -517,6 +569,18 @@
 - Name: "PROPERTY_NOT_NULLABLE"
   Code: "ND008"
   Message: "Property `{}` of type `{}` is not nullable"
+
+- Name: "PART_NOT_FOUND_IN_ROUTER"
+  Code: "ND009"
+  Message: "Partition `{}` not found in router"
+
+- Name: "SYSTEM_PART_NOT_FOUND"
+  Code: "ND010"
+  Message: "System part not found"
+
+- Name: "SYSTEM_PART_NOT_OWNER"
+  Code: "ND011"
+  Message: "Not the owner of system part"
 
 - Name: "TRIM_LIST_OUT_OF_RANGE"
   Code: "NQ001"
@@ -662,6 +726,10 @@
   Code: "NC013"
   Message: "`{}` already has a ttl property `{}`"
 
+- Name: "CATALOG_FUNCTION_NOT_FOUND"
+  Code: "NC014"
+  Message: "Function not found: {}"
+
 - Name: "CATALOG_SCHEMA_ALREADY_EXISTS"
   Code: "NC101"
   Message: "Catalog schema already exists: `{}`"
@@ -701,6 +769,22 @@
 - Name: "CATALOG_PLUGIN_ALREADY_EXIST"
   Code: "NC110"
   Message: "Plugin already exist: `{}`"
+
+- Name: "CATALOG_NODE_VECTOR_INDEX_ALREADY_EXISTS"
+  Code: "NC111"
+  Message: "Node vector index already exists: {}"
+
+- Name: "CATALOG_EDGE_VECTOR_INDEX_ALREADY_EXISTS"
+  Code: "NC112"
+  Message: "Edge vector index already exists: {}"
+
+- Name: "CATALOG_PROCEDURE_ALREADY_EXISTS"
+  Code: "NC113"
+  Message: "Procedure already exist: {}"
+
+- Name: "CATALOG_FUNCTION_ALREADY_EXISTS"
+  Code: "NC114"
+  Message: "Function already exist: {}"
 
 - Name: "CATALOG_GRAPH_TYPE_MISMATCH"
   Code: "NC201"
@@ -757,6 +841,10 @@
 - Name: "CATALOG_REORG_INTERRUPT"
   Code: "NC309"
   Message: "Reorg interrupt"
+
+- Name: "CATALOG_DDL_INTERRUPT"
+  Code: "NC310"
+  Message: "DDL is interrupted because of meta exit"
 
 - Name: "RPC_FAILED"
   Code: "NN001"
@@ -862,6 +950,14 @@
   Code: "NI114"
   Message: "Meta insufficient service"
 
+- Name: "META_HOST_NAME_INVALID"
+  Code: "NI115"
+  Message: "host name is invalid"
+
+- Name: "META_ADD_HOST_WITHOUT_ZONE"
+  Code: "NI116"
+  Message: "add host without zone name"
+
 - Name: "META_PART_CONFIG_INVALID"
   Code: "NI201"
   Message: "Can't find proper replica number under given parts per service config"
@@ -893,6 +989,10 @@
 - Name: "META_NO_PART"
   Code: "NI208"
   Message: "There is no part, may be need init"
+
+- Name: "META_PART_NOT_EXIST"
+  Code: "NI209"
+  Message: "Meta Part {} not exist"
 
 - Name: "STORAGE_EXECUTOR_PARAMETER_INVALID"
   Code: "NI301"
@@ -937,6 +1037,78 @@
 - Name: "CONFIGURATION_ILLEGAL_FORMAT"
   Code: "NI409"
   Message: "Configuration illegal format: {}"
+
+- Name: "ARG_ILLEGAL_FILE_FORMAT"
+  Code: "NI501"
+  Message: "Illegal file format configuration: {}"
+
+- Name: "META_DEFAULT_ZONE_ALREADY_EXIST"
+  Code: "NI601"
+  Message: "Default zone already exists: {}"
+
+- Name: "META_ZONE_ALREADY_EXIST"
+  Code: "NI602"
+  Message: "Zone already exists: {}"
+
+- Name: "META_ZONE_REPLICAS_EXCEED_MAX_REPLICAS"
+  Code: "NI603"
+  Message: "zone replicas {} exceed max replicas {}"
+
+- Name: "META_ZONE_REPLICAS_NOT_MATCH_MAX_REPLICAS"
+  Code: "NI604"
+  Message: "zone replicas {} not match max replicas {}"
+
+- Name: "META_ZONE_NAME_INVALID"
+  Code: "NI605"
+  Message: "zone name is invalid"
+
+- Name: "META_ZONE_REPLICAS_INVALID"
+  Code: "NI606"
+  Message: "zone replicas is invalid: {}"
+
+- Name: "META_ZONE_PRIORITY_INVALID"
+  Code: "NI607"
+  Message: "zone priority(0-255) is invalid: {}"
+
+- Name: "META_ZONE_NOT_EXIST"
+  Code: "NI608"
+  Message: "zone {} not exist"
+
+- Name: "META_DROP_ZONE_WITH_HOSTS"
+  Code: "NI609"
+  Message: "drop zone {} with hosts"
+
+- Name: "META_DROP_INSIDE_ZONE"
+  Code: "NI610"
+  Message: "unable to delete the zone {} inside the system"
+
+- Name: "META_ZONE_NOT_ENOUGH_LOCATION"
+  Code: "NI611"
+  Message: "zone {} has no enough services({}) to hold replica({})"
+
+- Name: "META_OPERATOR_STATUS_INVALID"
+  Code: "NI701"
+  Message: "Meta operator status invalid {}, not [STARTED]"
+
+- Name: "META_ADD_OPERATOR_FAILED"
+  Code: "NI702"
+  Message: "Meta add operator failed with reason {}"
+
+- Name: "META_STEP_CHECK_FAILED"
+  Code: "NI703"
+  Message: "Meta operator's step check failed with reason {}"
+
+- Name: "META_OPERATOR_LIMITED"
+  Code: "NI704"
+  Message: "Meta target operator {} Limit reached"
+
+- Name: "META_OPERATOR_ALREADY_RUNNING"
+  Code: "NI705"
+  Message: "Meta target operator {} already running"
+
+- Name: "META_STEP_TIMEOUT"
+  Code: "NI706"
+  Message: "Meta step timeout"
 
 - Name: "GRAPH_COMPUTE_ERROR"
   Code: "NG000"
@@ -1014,6 +1186,10 @@
   Code: "NP106"
   Message: "Unknown yield column `{}` for procedure `{}`"
 
+- Name: "PROCEDURE_RETURN_TYPE_MISMATCH"
+  Code: "NP107"
+  Message: "Procedure return type mismatch want {} but got {}"
+
 - Name: "UDF_ERROR"
   Code: "NP201"
   Message: "UDF error: {}"
@@ -1066,6 +1242,26 @@
   Code: "NP312"
   Message: "Invalid register `{}` for module: `{}`"
 
+- Name: "CONNECTOR_ERROR"
+  Code: "NP401"
+  Message: "Connector error: {}"
+
+- Name: "CONNECTOR_PLUGIN_NOT_FOUND"
+  Code: "NP402"
+  Message: "Connector: Plugin not found: {}"
+
+- Name: "CONNECTOR_PLUGIN_UNSUPPORTED_OUTPUT_TYPE"
+  Code: "NP403"
+  Message: "Connector: Unsupported output type: {}"
+
+- Name: "CONNECTOR_CSV_ERROR"
+  Code: "NP404"
+  Message: "CSV Connector error: {}"
+
+- Name: "CONNECTOR_PARQUET_ERROR"
+  Code: "NP405"
+  Message: "Parquet Connector error: {}"
+
 - Name: "AUTH_INVALID_PASSWORD"
   Code: "NH001"
   Message: "The password must be at least 8 characters long and should include at least one digit, one lowercase letter, and one uppercase letter"
@@ -1088,7 +1284,7 @@
 
 - Name: "AUTH_INVALID_USERNAME"
   Code: "NH006"
-  Message: "The username should be between 4 and 32 characters in length and can only include letters, numbers, and underscores"
+  Message: "The username should be less than 256 characters in length and can only include letters, numbers, underscores, hyphens, dots and the @ symbol"
 
 - Name: "AUTH_INVALID_USERNAME_OR_PASSWORD"
   Code: "NH007"
@@ -1121,6 +1317,14 @@
 - Name: "AUTH_INIT_ERROR"
   Code: "NH301"
   Message: "AuthenticatorManager init error: `{}`"
+
+- Name: "AUTH_PLUGIN_INTERNAL_ERROR"
+  Code: "NH401"
+  Message: "Authenticate plugin error: {}"
+
+- Name: "AUTH_RETURN_CAS_URL"
+  Code: "NH402"
+  Message: "Authenticate error: CAS url is {}"
 
 - Name: "AUTHORIZE_ERROR"
   Code: "NB000"
@@ -1232,7 +1436,7 @@
 
 - Name: "ANALYTIC_TASK_ERROR"
   Code: "AN102"
-  Message: "Analytic error, task on {} failed, error:{}"
+  Message: "Analytic error, task on {} failed, error: {}"
 
 - Name: "ANALYTIC_LOG_EXCEED_LIMIT"
   Code: "AN103"
@@ -1250,13 +1454,45 @@
   Code: "AN203"
   Message: "Analytic reader error: {}"
 
+- Name: "ANALYTIC_TASK_NOT_FOUND"
+  Code: "AN204"
+  Message: "Analytic error, Task {} not found"
+
 - Name: "ANALYTIC_ACCUMULATOR_NOT_FOUND"
   Code: "AN301"
-  Message: "Analytic error, accum {} not found"
+  Message: "Analytic error, accum `{}` not found"
 
 - Name: "ANALYTIC_ACCUMULATOR_EXIST"
   Code: "AN302"
-  Message: "Analytic error, accum {} already exist"
+  Message: "Analytic error, accum `{}` already exist"
+
+- Name: "ANALYTIC_INVALID_ACCUMULATOR_TYPE"
+  Code: "AN303"
+  Message: "Analytic error, invalid accum type"
+
+- Name: "ANALYTIC_TABLE_NOT_FOUND"
+  Code: "AN401"
+  Message: "Analytic error, table `{}` not found"
+
+- Name: "ANALYTIC_TABLE_EXIST"
+  Code: "AN402"
+  Message: "Analytic error, table `{}` already exist"
+
+- Name: "ANALYTIC_ACTIVE_SET_NOT_FOUND"
+  Code: "AN501"
+  Message: "Analytic error, active set `{}` not found"
+
+- Name: "ANALYTIC_ACTIVE_SET_EXIST"
+  Code: "AN502"
+  Message: "Analytic error, active set `{}` already exist"
+
+- Name: "ANALYTIC_SHUFFLE_SEND_FAILED"
+  Code: "AN601"
+  Message: "Shuffle `{}` encountered an error in Analytic {} and failed to send message."
+
+- Name: "SHUFFLE_NOT_FOUND"
+  Code: "AN602"
+  Message: "Shuffle `{}` not found"
 
 - Name: "META_NOT_SUPPORTED"
   Code: "NM001"
@@ -1562,6 +1798,10 @@
   Code: "NR024"
   Message: "Invalid decimal type: {}"
 
+- Name: "INVALID_ELEMENT_ID"
+  Code: "NR025"
+  Message: "Invalid element id for type {}: `{}`"
+
 - Name: "DDL_FAILED"
   Code: "NR100"
   Message: "DDL failed: {}"
@@ -1577,6 +1817,10 @@
 - Name: "INVALID_SCHEMA_PATH"
   Code: "NR103"
   Message: "Invalid schema path, it should be a canonical path"
+
+- Name: "INVALID_PLUGIN_TYPE"
+  Code: "NR104"
+  Message: "Invalid plugin type, expect: `{}`, got: `{}`"
 
 - Name: "PROPERTY_TYPE_CONSTRAINT_VIOLATION"
   Code: "NR111"
@@ -1606,6 +1850,10 @@
   Code: "NR124"
   Message: "Failed to build memory graph: {}"
 
+- Name: "MEMORY_GRAPH_INVALID_DATA_SOURC_FUNC"
+  Code: "NR125"
+  Message: "Invalid graph data source `{}`"
+
 - Name: "CREATE_PLUGIN_FAILED"
   Code: "NR131"
   Message: "Create plugin failed: `{}`"
@@ -1613,6 +1861,14 @@
 - Name: "DROP_PLUGIN_FAILED"
   Code: "NR132"
   Message: "Drop plugin failed: `{}`"
+
+- Name: "CREATE_FUNCTION_FAILED"
+  Code: "NR141"
+  Message: "Create function failed: `{}`"
+
+- Name: "DROP_FUNCTION_FAILED"
+  Code: "NR142"
+  Message: "Drop function failed: `{}`"
 
 - Name: "GET_NODE_ID_FAILED"
   Code: "NR201"
@@ -1666,6 +1922,10 @@
   Code: "NR213"
   Message: "Get id from primary keys failed in part {}"
 
+- Name: "ANN_INDEX_MEMORY_QUOTA_EXCEEDED"
+  Code: "NR214"
+  Message: "ANN index is out of memory quota when inserting data to vector index `{}`, current usage: {}KB, quota: {}KB"
+
 - Name: "SET_INVALID_TYPE"
   Code: "NR231"
   Message: "The type of element {} updated in the set statement must be Node or Edge"
@@ -1713,6 +1973,14 @@
 - Name: "SESSION_IS_BUSY"
   Code: "NR406"
   Message: "Session is busy, running query id: {}"
+
+- Name: "ANALYTIC_QUERY_RUNNING_ON_GRAPH"
+  Code: "NR501"
+  Message: "Analytic query is not supported to be run in Graph service"
+
+- Name: "INTERPRETER_ERROR"
+  Code: "NR502"
+  Message: "Interpreter error: {}"
 
 - Name: "VECTOR_DIMENSION_MISSMATCHED"
   Code: "NW501"
@@ -1768,6 +2036,26 @@
 
 - Name: "ANN_INDEX_MANAGER_REMOVE_FAILED"
   Code: "NW514"
+  Message: "Internal Server Error"
+
+- Name: "ANN_INDEX_RECONSTRUCT_FAILED"
+  Code: "NW515"
+  Message: "Internal Server Error"
+
+- Name: "ANN_WAL_WRITE_FAILED"
+  Code: "NW516"
+  Message: "Internal Server Error"
+
+- Name: "ANN_WAL_READ_FAILED"
+  Code: "NW517"
+  Message: "Internal Server Error"
+
+- Name: "ANN_WAL_FLUSH_FAILED"
+  Code: "NW518"
+  Message: "Internal Server Error"
+
+- Name: "ANN_WAL_FSYNC_FAILED"
+  Code: "NW519"
   Message: "Internal Server Error"
 
 - Name: "SEMANTIC_ERROR"
@@ -1958,6 +2246,38 @@
   Code: "NS225"
   Message: "In 'different edges' match mode, if the graph pattern contains a selective path pattern, it must not contain any other patterns."
 
+- Name: "SEMANTIC_VECTOR_DIM_MISMATCH"
+  Code: "NS226"
+  Message: "Vecotr dimension mismatch {} vs {}"
+
+- Name: "SEMANTIC_ILLEGAL_VECTOR_DISTANCE_FUNC_ARGS"
+  Code: "NS227"
+  Message: "Illegal vector distance function args, expect property reference and vector literal as input but got {} and {}"
+
+- Name: "INVALID_LABEL_EXPR"
+  Code: "NS228"
+  Message: "{} label `{}` not found in {}"
+
+- Name: "INVALID_TYPE_EXPR"
+  Code: "NS229"
+  Message: "{} type `{}` not found in {}"
+
+- Name: "INVALID_PROPERTY_EXPR"
+  Code: "NS230"
+  Message: "property `{}` not found in {}"
+
+- Name: "DUPLICATE_DEFINE_ACCUMULATOR"
+  Code: "NS231"
+  Message: "Semantic error, duplicate defined {} accum: `{}`"
+
+- Name: "INVALID_ACCUMULATOR_OPERATION"
+  Code: "NS232"
+  Message: "{} operation of `{}({})` cannot accept `{}({})` as input"
+
+- Name: "INVALID_ACCUMULATOR_DEFINITION"
+  Code: "NS233"
+  Message: "Invalid accumulator definition: {}"
+
 - Name: "PLAN_GENERATE_FAILED"
   Code: "NZ001"
   Message: "Execution plan generation failed due to disabled optimizer rules. Check configs or consult documentation"
@@ -2022,6 +2342,10 @@
   Code: "NT014"
   Message: "Unsupported multiple edge key of `{}` in edge type `{}`"
 
+- Name: "UNSUPPORTED_RESERVED_PROPERTY_NAME"
+  Code: "NT015"
+  Message: "Property name `{}` of `{}` is reserved"
+
 - Name: "UNSUPPORTED_INSERT_EDGE_STATEMENT"
   Code: "NT101"
   Message: "InsertEdge Statement doesn't support pattern like `{}`"
@@ -2030,7 +2354,7 @@
   Code: "NT102"
   Message: "InsertNode Statement doesn't support pattern like `{}`"
 
-- Name: "UNSUPPORTED_DATE_MODIFY_STATEMENT"
+- Name: "UNSUPPORTED_DATA_MODIFY_STATEMENT"
   Code: "NT103"
   Message: "Adding any statement after data modify statement is not supported."
 
@@ -2049,10 +2373,6 @@
 - Name: "UNSUPPORTED_UPDATE_MULTIEDGE_KEY"
   Code: "NT107"
   Message: "Updating the multiedge key is not supported, edge type: `{}`, property name: `{}`"
-
-- Name: "UNSUPPORTED_UPDATE_VECTOR_PROPERTY"
-  Code: "NT108"
-  Message: "Updating the vector type property is not supported, element type: `{}`, property name: `{}`"
 
 - Name: "UNSUPPORTED_AGGREGATION_EXPRESSION"
   Code: "NT201"
@@ -2081,6 +2401,10 @@
 - Name: "UNSUPPORTED_PATH_FACTOR"
   Code: "NT301"
   Message: "Not supported path factor: {}"
+
+- Name: "UNSUPPORTED_ACCUM_MATCH_PATH_PATTERN"
+  Code: "NT302"
+  Message: "Accum Match only support zero-hop or one-hop path pattern: {}"
 
 - Name: "UNSUPPORTED_CHARSET"
   Code: "NT401"
@@ -2134,7 +2458,7 @@
   Code: "NY107"
   Message: "Internal Server Error"
 
-- Name: "FILE_OPEN_FILE"
+- Name: "FILE_OPEN_FAILED"
   Code: "NY108"
   Message: "Internal Server Error"
 
@@ -2164,6 +2488,14 @@
 
 - Name: "FILE_REMOVE_DIR_FAILED"
   Code: "NY115"
+  Message: "Internal Server Error"
+
+- Name: "FILE_REMOVE_FAILED"
+  Code: "NY116"
+  Message: "Internal Server Error"
+
+- Name: "FILE_CLOSE_FAILED"
+  Code: "NY117"
   Message: "Internal Server Error"
 
 - Name: "MEMORY_ERROR"
@@ -2250,6 +2582,10 @@
   Code: "NY502"
   Message: "Internal Server Error"
 
+- Name: "SYS_GRAPH_ERROR"
+  Code: "NY601"
+  Message: "Internal Server Error"
+
 - Name: "LICENSE_ENCRYPTION_ERROR"
   Code: "NL001"
   Message: "License encryption error: {}"
@@ -2284,15 +2620,15 @@
 
 - Name: "JOB_NOT_FOUND"
   Code: "NJ002"
-  Message: "Can't find job: `{}`"
+  Message: "Can't find [Job {}]"
 
 - Name: "JOB_TASK_NOT_FOUND"
   Code: "NJ003"
-  Message: "Can't find task {} of job {}"
+  Message: "Can't find [Job {}, Task {}]"
 
 - Name: "JOB_IS_NOT_RUNNING"
   Code: "NJ004"
-  Message: "Job is not running: `{}`"
+  Message: "[Job {}] is not running"
 
 - Name: "JOB_DESCRIPTION_INVALID"
   Code: "NJ005"
@@ -2300,7 +2636,7 @@
 
 - Name: "JOB_ALREADY_STOPPED"
   Code: "NJ006"
-  Message: "Job has already stopped: `{}`"
+  Message: "[Job {}] has already stopped"
 
 - Name: "JOB_MANAGER_NOT_RUNNING"
   Code: "NJ007"
@@ -2308,23 +2644,27 @@
 
 - Name: "JOB_TASK_NOT_ACTIVE"
   Code: "NJ008"
-  Message: "Task {} of job {} is not active"
+  Message: "[Job {}, Task {}] is not active"
+
+- Name: "JOB_NO_STATS_FOR_GRAPH"
+  Code: "NJ009"
+  Message: "No stats for graph {}, please submit stats job first"
 
 - Name: "TASK_NOT_FOUND_IN_STORAGE"
   Code: "NJ011"
-  Message: "Task {} of job {} is not found in storage"
+  Message: "[Job {}, Task {}] is not found in storage"
 
 - Name: "TASK_STOPPED"
   Code: "NJ012"
-  Message: "Task {} of job {} is stopped"
+  Message: "[Job {}, Task {}] is stopped"
 
 - Name: "TASK_STILL_RUNNING"
   Code: "NJ013"
-  Message: "Task {} of job {} is still queuing or running"
+  Message: "[Job {}, Task {}] is still queuing or running"
 
 - Name: "TASK_REPORT_FAILED"
   Code: "NJ014"
-  Message: "Task {} of job {} reports to meta failed: `{}`"
+  Message: "[Job {}, Task {}] reports to meta failed: `{}`"
 
 - Name: "BACKUP_ERROR"
   Code: "NF000"
