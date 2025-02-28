@@ -15,6 +15,8 @@ public class ExtraInfo {
 
     private long totalServerTimeUs;
 
+    private long parseTimeUs;
+
     private long buildTimeUs;
 
     private long optimizeTimeUs;
@@ -44,6 +46,10 @@ public class ExtraInfo {
         this.totalServerTimeUs = totalServerTimeUs;
     }
 
+    public void setParseTimeUs(long parseTimeUs) {
+        this.parseTimeUs = parseTimeUs;
+    }
+
     public void setBuildTimeUs(long buildTimeUs) {
         this.buildTimeUs = buildTimeUs;
     }
@@ -71,6 +77,11 @@ public class ExtraInfo {
     public long getTotalServerTimeUs() {
         return totalServerTimeUs;
     }
+
+    public long getParseTimeUs() {
+        return parseTimeUs;
+    }
+
 
     public long getBuildTimeUs() {
         return buildTimeUs;

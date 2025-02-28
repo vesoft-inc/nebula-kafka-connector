@@ -71,6 +71,7 @@ message ElapsedTime {
     int64 build_time_us        = 2;
     int64 optimize_time_us     = 3;
     int64 serialize_time_us    = 4;
+    int64 parse_time_us        = 5;
 }
 
 message Summary {
@@ -91,6 +92,7 @@ message ExecuteResponse {
     nebula.proto.vector.VectorResultTable    result  = 2;
     Summary                                  summary = 3;
     bytes                                    cursor  = 4;
+    optional bytes                           log     = 5;
 }
 
 message AuthRequest {

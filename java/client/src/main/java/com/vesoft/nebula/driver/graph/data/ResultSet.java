@@ -264,6 +264,7 @@ public class ResultSet {
         extraInfo.setAffectedNodes(queryStats.getNumAffectedNodes());
         extraInfo.setAffectedEdges(queryStats.getNumAffectedEdges());
         extraInfo.setCursor(response.getCursor().toString(charset));
+        extraInfo.setParseTimeUs(response.getSummary().getElapsedTime().getParseTimeUs());
         extraInfo.setBuildTimeUs(response.getSummary().getElapsedTime().getBuildTimeUs());
         extraInfo.setOptimizeTimeUs(response.getSummary().getElapsedTime().getOptimizeTimeUs());
         extraInfo.setSerializeTimeUs(response.getSummary().getElapsedTime().getSerializeTimeUs());
