@@ -1,4 +1,4 @@
-## ngctl svcgrp drop-service
+## ngctl svcgrp remove-service
 
 Drop a service from a svcgrp
 
@@ -7,13 +7,13 @@ Drop a service from a svcgrp
 Drop a service from a svcgrp
 
 ```
-ngctl svcgrp drop-service <svcgrp-name> [flags]
+ngctl svcgrp remove-service <svcgrp-name> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help          help for drop-service
+  -h, --help          help for remove-service
   -H, --host string   service host
   -P, --port int32    service port (default -1)
   -t, --type string   service type

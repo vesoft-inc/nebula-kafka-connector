@@ -129,7 +129,7 @@ func (d *CreateServiceGroup) addHost(added map[string]struct{}, client meta.Clie
 	if _, ok := added[host]; ok {
 		return nil
 	}
-	req := meta.NewAddHostReq(host, serviceGroup, uint32(agentPort))
+	req := meta.NewAddHostReq(host, serviceGroup, uint32(agentPort), "")
 	if err := client.AddHost(req); err != nil {
 		return err
 	}

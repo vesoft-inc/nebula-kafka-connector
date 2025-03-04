@@ -36,7 +36,7 @@ var AddCmd = &cobra.Command{
 
 func init() {
 	AddCmd.Flags().StringVarP(&zoneName, "name", "n", "", "zone name")
-	AddCmd.Flags().IntVarP(&replicas, "replicas", "r", 0, "zone replicas")
+	AddCmd.Flags().IntVarP(&replicas, "replica-factor", "r", 1, "zone replica number, default: 1")
 	AddCmd.Flags().IntVarP(&priority, "priority", "p", 0, "zone priority")
 	AddCmd.MarkFlagRequired("name")
 }

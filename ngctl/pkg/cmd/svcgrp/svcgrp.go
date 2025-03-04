@@ -37,7 +37,7 @@ func init() {
 
 	serviceCmds := []*cobra.Command{
 		service.AddServiceCmd,
-		service.DropServiceCmd,
+		service.RemoveServiceCmd,
 		service.ShowServiceCmd,
 		service.StartServiceCmd,
 		service.StopServiceCmd,
@@ -48,7 +48,7 @@ func init() {
 		zone.AddCmd,
 		zone.RemoveCmd,
 		zone.ShowCmd,
-		zone.RenameCmd,
+		zone.AlterCmd,
 	}
 
 	cmds := make([]*cobra.Command, 0)

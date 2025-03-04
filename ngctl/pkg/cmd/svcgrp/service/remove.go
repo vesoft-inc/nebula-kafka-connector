@@ -8,8 +8,8 @@ import (
 	"github.com/vesoft-inc/nebula-ng-tools/ngctl/pkg/cmd/common"
 )
 
-var DropServiceCmd = &cobra.Command{
-	Use:   "drop-service <svcgrp-name>",
+var RemoveServiceCmd = &cobra.Command{
+	Use:   "remove-service <svcgrp-name>",
 	Short: "Drop a service from a svcgrp",
 	Long:  "Drop a service from a svcgrp",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
@@ -44,7 +44,7 @@ var DropServiceCmd = &cobra.Command{
 }
 
 func init() {
-	DropServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
-	DropServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "service host")
-	DropServiceCmd.Flags().Int32VarP(&serviceFlags.port, "port", "P", -1, "service port")
+	RemoveServiceCmd.Flags().StringVarP(&serviceFlags.serviceType, "type", "t", "", "service type")
+	RemoveServiceCmd.Flags().StringVarP(&serviceFlags.host, "host", "H", "", "service host")
+	RemoveServiceCmd.Flags().Int32VarP(&serviceFlags.port, "port", "P", -1, "service port")
 }

@@ -1,20 +1,22 @@
-## ngctl svcgrp show-zone
+## ngctl svcgrp alter-zone
 
-Show zone
+Alter zone
 
 ### Synopsis
 
-Show zone
+Alter zone
 
 ```
-ngctl svcgrp show-zone <svcgrp-name> [flags]
+ngctl svcgrp alter-zone <svcgrp-name> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for show-zone
-  -o, --output string   output format. Allowed values: table, json (default "table")
+  -h, --help               help for alter-zone
+  -n, --name string        zone name
+  -E, --new-name string    new zone name
+  -P, --new-priority int   new zone priority (default -1)
 ```
 
 ### Options inherited from parent commands

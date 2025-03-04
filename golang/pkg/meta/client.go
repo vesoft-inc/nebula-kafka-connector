@@ -74,13 +74,13 @@ type (
 		AddZone(req *AddZoneReq) error
 		DropZone(req *DropZoneReq) error
 		ListZones(req *ListZonesReq) (*ListZonesResp, error)
-		RenameZone(req *RenameZoneReq) error
+		AlterZone(req *AlterZoneReq) error
 	}
 
 	BackupRestoreClient interface {
 		CreateBackup(req *CreateBackupReq) (*CreateBackupResp, error)
-		DropBackup(req *DropBackupReq) (*DropBackupResp, error)
-		Restore(req *RestoreReq) (*RestoreResp, error)
+		DropBackups(req *DropBackupReq) error
+		Restore(req *RestoreReq) error
 	}
 
 	metaClient struct {

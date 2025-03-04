@@ -1,19 +1,19 @@
-## ngctl svcgrp show-zone
+## ngctl svcgrp show-zones
 
-Show zone
+Show zones
 
 ### Synopsis
 
-Show zone
+Show zones
 
 ```
-ngctl svcgrp show-zone <svcgrp-name> [flags]
+ngctl svcgrp show-zones <svcgrp-name> [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help            help for show-zone
+  -h, --help            help for show-zones
   -o, --output string   output format. Allowed values: table, json (default "table")
 ```
 

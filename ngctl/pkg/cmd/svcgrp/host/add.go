@@ -25,7 +25,7 @@ var AddHostCmd = &cobra.Command{
 			return err
 		}
 
-		req := meta.NewAddHostReq(hostFlags.host, svcgrpName, hostFlags.agentPort)
+		req := meta.NewAddHostReq(hostFlags.host, svcgrpName, hostFlags.agentPort, hostFlags.zoneName)
 		if err := common.MetaClient.AddHost(req); err != nil {
 			return common.NgctlError("Add host failed", err.Error())
 		}
@@ -38,5 +38,6 @@ var AddHostCmd = &cobra.Command{
 func init() {
 	// add host
 	AddHostCmd.Flags().StringVarP(&hostFlags.host, "host", "H", "", "the host to be added to a svcgrp")
-	AddHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent_port", "a", 6688, "agent port")
+	AddHostCmd.Flags().StringVarP(&hostFlags.zoneName, "zone-name", "z", "", "zone name")
+	AddHostCmd.Flags().Uint32VarP(&hostFlags.agentPort, "agent-port", "a", 6688, "agent port")
 }

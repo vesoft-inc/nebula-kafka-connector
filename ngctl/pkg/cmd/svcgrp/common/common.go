@@ -16,11 +16,13 @@ import (
 // show
 // reset
 var (
-	svcgrpName string
-	replicas   int
-	force      bool
-	owner      string
-	output     string
+	svcgrpName  string
+	replicas    int
+	force       bool
+	owner       string
+	output      string
+	retry       bool
+	routePolicy string
 )
 
 var CreateCmd = &cobra.Command{
@@ -124,11 +126,25 @@ var AlterCmd = &cobra.Command{
 			return err
 		}
 
-		if owner == "" {
-			return common.NgctlError("Owner is invalid", "")
+		if owner == "" && routePolicy == "" {
+			return common.NgctlError("Owner or route policy is empty", "")
 		}
-		// do not need to specify zones
-		req := meta.NewAlterServiceGroupReq(svcgrpName, owner)
+		getReq := meta.NewListServiceGroupsReq(svcgrpName)
+		getResp, err := common.MetaClient.ListServiceGroups(getReq)
+		if err != nil {
+			return common.NgctlError("Alter svcgrp failed", err.Error())
+		}
+		if len(getResp.ServiceGroups) == 0 {
+			return common.NgctlError("Service group not found", "")
+		}
+		r := getResp.ServiceGroups[0]
+		var req *meta.AlterServiceGroupReq
+
+		if owner != "" {
+			req = meta.NewAlterServiceGroupReq(r.Name, owner, r.RoutePolicy, r.Retry)
+		} else {
+			req = meta.NewAlterServiceGroupReq(r.Name, "", routePolicy, retry)
+		}
 		if err := common.MetaClient.AlterServiceGroup(req); err != nil {
 			return common.NgctlError("Alter svcgrp failed", err.Error())
 		}
@@ -160,7 +176,7 @@ var ShowCmd = &cobra.Command{
 			return common.NgctlError("Show svcgrp failed", err.Error())
 		}
 
-		header := []string{"Id", "Name", "Replica", "Owner"}
+		header := []string{"Id", "Name", "Replica Factor", "Owner", "Route Policy", "Retry"}
 		data := make([][]string, 0)
 		for _, s := range resp.ServiceGroups {
 			row := make([]string, 0)
@@ -168,6 +184,8 @@ var ShowCmd = &cobra.Command{
 			row = append(row, fmt.Sprintf("%s", s.Name))
 			row = append(row, fmt.Sprintf("%d", s.ReplicaRefactor))
 			row = append(row, fmt.Sprintf("%s", s.Owner))
+			row = append(row, fmt.Sprintf("%s", s.RoutePolicy))
+			row = append(row, fmt.Sprintf("%t", s.Retry))
 			data = append(data, row)
 		}
 
@@ -192,6 +210,10 @@ func init() {
 	DropCmd.Flags().BoolVarP(&force, "force", "f", false, "force drop svcgrp")
 
 	AlterCmd.Flags().StringVarP(&owner, "owner", "o", "", "svcgrp owner")
+	AlterCmd.Flags().BoolVarP(&retry, "retry", "r", false, "")
+	AlterCmd.Flags().StringVarP(&routePolicy, "route-policy", "p", "", "route policy")
+	AlterCmd.MarkFlagsRequiredTogether("route-policy", "retry")
+	AlterCmd.MarkFlagsMutuallyExclusive("owner", "route-policy")
 
 	ShowCmd.Flags().StringVarP(&output, "output", "o", "table", "output format. Allowed values: table, json")
 

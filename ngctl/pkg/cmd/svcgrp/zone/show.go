@@ -11,9 +11,9 @@ import (
 )
 
 var ShowCmd = &cobra.Command{
-	Use:   "show-zone <svcgrp-name>",
-	Short: "Show zone",
-	Long:  "Show zone",
+	Use:   "show-zones <svcgrp-name>",
+	Short: "Show zones",
+	Long:  "Show zones",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},
@@ -31,7 +31,7 @@ var ShowCmd = &cobra.Command{
 		if err != nil {
 			return common.NgctlError("list zones failed", err.Error())
 		}
-		header := []string{"zone name", "replicas", "priority", "hosts"}
+		header := []string{"Name", "Replica Factor", "Priority", "Hosts"}
 		data := make([][]string, 0)
 		for _, z := range zones.Zones {
 			row := make([]string, 0)

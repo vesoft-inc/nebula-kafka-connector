@@ -35,5 +35,5 @@ var RemoveCmd = &cobra.Command{
 
 func init() {
 	RemoveCmd.Flags().StringVarP(&zoneName, "name", "n", "", "zone name")
-	RenameCmd.MarkFlagRequired("name")
+	RemoveCmd.MarkFlagRequired("name")
 }

@@ -3,6 +3,7 @@ package meta
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	admin "github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/admin"
 	common "github.com/vesoft-inc/nebula-ng-tools/golang/internal/generated_code/v5.0.0/proto/common"
@@ -19,6 +20,8 @@ type (
 	AlterServiceGroupReq struct {
 		serviceGroupName string
 		owner            string
+		routePolicy      string
+		retry            bool
 	}
 
 	AddHostReq struct {
@@ -68,6 +71,8 @@ type (
 		ReplicaRefactor uint32   `json:"replica_refactor"`
 		Zones           []string `json:"zones"`
 		Owner           string   `json:"owner"`
+		RoutePolicy     string   `json:"route_policy"`
+		Retry           bool     `json:"retry"`
 	}
 
 	ListServiceGroupsReq struct {
@@ -118,9 +123,10 @@ type (
 		serviceGroupName string
 	}
 
-	RenameZoneReq struct {
+	AlterZoneReq struct {
 		zoneName         string
 		newZoneName      string
+		newPriority      int
 		serviceGroupName string
 	}
 
@@ -158,27 +164,21 @@ func NewCreateServiceGroupReq(serviceGroupName string, replica int, owner string
 	}
 }
 
-func NewAlterServiceGroupReq(serviceGroupName string, owner string) *AlterServiceGroupReq {
+func NewAlterServiceGroupReq(serviceGroupName string, owner string, routePolicy string, retry bool) *AlterServiceGroupReq {
 	return &AlterServiceGroupReq{
 		serviceGroupName: serviceGroupName,
 		owner:            owner,
+		routePolicy:      routePolicy,
+		retry:            retry,
 	}
 }
 
-func NewAddHostReq(host string, serviceGroupName string, agentPort uint32, opts ...string) *AddHostReq {
-	if len(opts) == 1 {
-		return &AddHostReq{
-			host:             host,
-			serviceGroupName: serviceGroupName,
-			agentPort:        9669,
-			zoneName:         opts[0],
-		}
-	}
+func NewAddHostReq(host string, serviceGroupName string, agentPort uint32, zoneName string) *AddHostReq {
 	return &AddHostReq{
 		host:             host,
 		serviceGroupName: serviceGroupName,
 		agentPort:        agentPort,
-		zoneName:         "",
+		zoneName:         zoneName,
 	}
 }
 
@@ -247,10 +247,11 @@ func NewDropZoneReq(serviceGroupName string, zoneName string) *DropZoneReq {
 	}
 }
 
-func NewRenameZoneReq(serviceGroupName string, zoneName string, newZoneName string) *RenameZoneReq {
-	return &RenameZoneReq{
+func NewAlterZoneReq(serviceGroupName string, zoneName string, newZoneName string, newPriority int) *AlterZoneReq {
+	return &AlterZoneReq{
 		zoneName:         zoneName,
 		newZoneName:      newZoneName,
+		newPriority:      newPriority,
 		serviceGroupName: serviceGroupName,
 	}
 }
@@ -416,11 +417,54 @@ func (c *metaClient) ListServices(req *ListServicesReq) (*ListServicesResp, erro
 func (c *metaClient) AlterServiceGroup(req *AlterServiceGroupReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
-	in := &admin.AlterServiceGroupRequest{
-		Header:       &admin.RequestHeader{Token: c.token},
-		ServiceGroup: []byte(req.serviceGroupName),
-		Owner:        []byte(req.owner),
+	if req.owner == "" && req.routePolicy == "" {
+		return fmt.Errorf("owner or routePolicy is required")
 	}
+	var in *admin.AlterServiceGroupRequest
+	if req.owner != "" {
+		data := &admin.AlterServiceGroupRequest_Owner{
+			Owner: []byte(req.owner),
+		}
+		in = &admin.AlterServiceGroupRequest{
+			Header:       &admin.RequestHeader{Token: c.token},
+			ServiceGroup: []byte(req.serviceGroupName),
+			Data:         data,
+		}
+	} else {
+		var data *admin.AlterServiceGroupRequest_RoutePolicy
+		switch strings.ToUpper(req.routePolicy) {
+		case "LEADER_FIRST":
+			data = &admin.AlterServiceGroupRequest_RoutePolicy{
+				RoutePolicy: &common.RoutePolicyInfo{
+					RoutePolicy: common.RoutePolicy_LEADER_FIRST,
+					Retry:       req.retry,
+				},
+			}
+
+		case "ZONE_AFFINITY":
+			data = &admin.AlterServiceGroupRequest_RoutePolicy{
+				RoutePolicy: &common.RoutePolicyInfo{
+					RoutePolicy: common.RoutePolicy_ZONE_AFFINITY,
+					Retry:       req.retry,
+				},
+			}
+		case "ZONE_STRICT":
+			data = &admin.AlterServiceGroupRequest_RoutePolicy{
+				RoutePolicy: &common.RoutePolicyInfo{
+					RoutePolicy: common.RoutePolicy_ZONE_STRICT,
+					Retry:       req.retry,
+				},
+			}
+		default:
+			return fmt.Errorf("invalid routePolicy, valid routePolicy is LEADER_FIRST, ZONE_AFFINITY, ZONE_STRICT")
+		}
+		in = &admin.AlterServiceGroupRequest{
+			Header:       &admin.RequestHeader{Token: c.token},
+			ServiceGroup: []byte(req.serviceGroupName),
+			Data:         data,
+		}
+	}
+
 	resp, err := c.execute(func() (responseHeader, error) {
 		return c.client.AlterServiceGroup(ctx, in)
 	})
@@ -474,6 +518,8 @@ func (c *metaClient) ListServiceGroups(req *ListServiceGroupsReq) (*ListServiceG
 			ReplicaRefactor: c.Desc.ReplicaFactor,
 			Zones:           make([]string, 0),
 			Owner:           string(c.Desc.Owner),
+			RoutePolicy:     common.RoutePolicy_name[int32(c.Desc.RoutePolicy.RoutePolicy)],
+			Retry:           c.Desc.RoutePolicy.Retry,
 		}
 		for _, z := range c.Desc.Zones {
 			serviceGroup.Zones = append(serviceGroup.Zones, string(z))
@@ -566,17 +612,18 @@ func (c *metaClient) DropZone(req *DropZoneReq) error {
 	return responseIsErr(resp)
 }
 
-func (c *metaClient) RenameZone(req *RenameZoneReq) error {
+func (c *metaClient) AlterZone(req *AlterZoneReq) error {
 	ctx, cancel := context.WithTimeout(context.Background(), c.requestTimeout)
 	defer cancel()
-	in := &admin.RenameZoneRequest{
+	in := &admin.AlterZoneRequest{
 		Header:       &admin.RequestHeader{Token: c.token},
 		ServiceGroup: []byte(req.serviceGroupName),
 		ZoneName:     []byte(req.zoneName),
 		NewZoneName:  []byte(req.newZoneName),
+		NewPriority:  uint32(req.newPriority),
 	}
 	resp, err := c.execute(func() (responseHeader, error) {
-		return c.client.RenameZone(ctx, in)
+		return c.client.AlterZone(ctx, in)
 	})
 	if err != nil {
 		return err

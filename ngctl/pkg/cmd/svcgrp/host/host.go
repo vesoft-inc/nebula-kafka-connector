@@ -9,6 +9,7 @@ type hostFlagsType struct {
 	agentPort  uint32
 	configFile string
 	output     string
+	zoneName   string
 	drain      bool
 }
 
