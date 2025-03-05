@@ -2,7 +2,7 @@
 /*
 :param messageId: 206158432794
  */
-CONFIGS optimizer_rules = "enhanced_column_pruner=on"
+/*+ SET_VAR(optimizer_rules = "enhanced_column_pruner=on") */
 USE $graphName
 MATCH (m:Message WHERE m.id = $messageId)<-[:REPLY_OF]-(c:Comment)-[:HAS_CREATOR]->(p:Person)
     OPTIONAL MATCH (m:Message WHERE m.id = $messageId)-[:HAS_CREATOR]->(a:Person)<-[r:KNOWS]->(p:Person)
