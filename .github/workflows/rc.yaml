@@ -31,7 +31,7 @@ jobs:
           go-version-file: go.work
           cache: false
       - name: setup java 
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'adopt'
           java-version: '8'
@@ -68,9 +68,9 @@ jobs:
     runs-on: self-hosted
     steps:
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v1
+        uses: docker/setup-buildx-action@v3
       - uses: docker/login-action@v3
         with:
           registry: ${{ secrets.HARBOR_REGISTRY }}
@@ -79,7 +79,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build and push Docker images - ngctl
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
           tags: reg.vesoft-inc.com/vesoft-ng/ngctl:nightly
@@ -88,7 +88,7 @@ jobs:
           file: ./ngctl/Dockerfile
           target: ngctl
       - name: Build and push Docker images - ngql
-        uses: docker/build-push-action@v3
+        uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
           tags: reg.vesoft-inc.com/vesoft-ng/ngql:nightly

@@ -45,11 +45,11 @@ jobs:
           cp ../ngadm/build/ngadm build/
           cp -r ../ngadm/examples/ build/
         working-directory: agent
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           path: ./ngadm/build/*
           name: ngadm-linux-${{ matrix.os[1] }}
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           path: ./agent/build/*
           name: ngadm-agent-linux-${{ matrix.os[1] }}

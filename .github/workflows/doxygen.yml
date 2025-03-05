@@ -84,7 +84,7 @@ jobs:
         target: /var/www/ent-docs/${{ env.doc_version }}/
         
     - name: uncompress api reference in nebula server
-      uses: appleboy/ssh-action@v1.0.3
+      uses: appleboy/ssh-action@v1.2.1
       with:
         host: 20.163.77.63
         username: azureuser
@@ -105,7 +105,7 @@ jobs:
         target: /var/www/ent-docs/${{ env.doc_version }}/      
 
     - name: uncompress api reference in yueshu server
-      uses: appleboy/ssh-action@v1.0.3
+      uses: appleboy/ssh-action@v1.2.1
       with:
         host: 121.40.218.31
         username: root
