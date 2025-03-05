@@ -1,6 +1,7 @@
 import json
 import logging
 from abc import abstractmethod
+from datetime import date
 from typing import Any, Callable, Dict, Optional, Type, Union
 
 from jinja2 import Template
@@ -33,6 +34,7 @@ def unwrap_value(v: Union[TargetType, TargetPrimitiveType]) -> str:
         dict: from_dict,
         type(None): lambda x: "NULL",
         NVector: from_vector,
+        date: lambda x: f'date("{x.strftime("%Y-%m-%d")}")',
     }
     try:
         return mapping[type(v)](v)

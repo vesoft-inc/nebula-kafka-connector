@@ -12,6 +12,7 @@ from nebulagraph_python.proto.vector_pb2 import (
 from nebulagraph_python.proto.vector_pb2 import (
     PropertyGraphSchema,
 )
+from functools import cache
 
 
 class ByteOrder(str, Enum):
@@ -420,29 +421,46 @@ class RecordType(DataType):
 class PathType(DataType):
     def __init__(self, data_types: List[DataType]):
         super().__init__(ColumnType.PATH)
-        self.data_types = data_types
-        self.node_types = []
-        self.edge_types = []
+        self.data_types: List[DataType] = data_types
+        self.node_types: List[NodeType] = []
+        self.edge_types: List[EdgeType] = []
 
         for data_type in data_types:
-            if data_type.get_type() == ColumnType.NODE:
+            if isinstance(data_type, NodeType):
                 self.node_types.append(data_type)
-            if data_type.get_type() == ColumnType.EDGE:
+            elif isinstance(data_type, EdgeType):
                 self.edge_types.append(data_type)
+            else:
+                raise ValueError(f"Unsupported data type: {data_type}")
 
+    @cache
     def get_data_types(self) -> List[DataType]:
         return self.data_types
 
+    @cache
     def get_node_types(self) -> Dict[int, Dict[int, Dict[str, DataType]]]:
-        node_types_map = {}
+        node_types_map: Dict[int, Dict[int, Dict[str, DataType]]] = {}
         for node_type in self.node_types:
-            node_types_map.update(node_type.get_node_types())
+            for graph_id, type_dict in node_type.get_node_types().items():
+                if graph_id not in node_types_map:
+                    node_types_map[graph_id] = {}
+                for type_id, props in type_dict.items():
+                    node_types_map.setdefault(graph_id, {}).setdefault(
+                        type_id, {}
+                    ).update(props)
         return node_types_map
 
+    @cache
     def get_edge_types(self) -> Dict[int, Dict[int, Dict[str, DataType]]]:
-        edge_types_map = {}
+        edge_types_map: Dict[int, Dict[int, Dict[str, DataType]]] = {}
         for edge_type in self.edge_types:
-            edge_types_map.update(edge_type.get_edge_types())
+            for graph_id, type_dict in edge_type.get_edge_types().items():
+                if graph_id not in edge_types_map:
+                    edge_types_map[graph_id] = {}
+                for type_id, props in type_dict.items():
+                    edge_types_map.setdefault(graph_id, {}).setdefault(
+                        type_id, {}
+                    ).update(props)
         return edge_types_map
 
 
