@@ -10,6 +10,7 @@ services:
       - --port=9559
       - --data_path=/data/meta
       - --local_ip=metad0
+      - --containerized=true
     # healthcheck:
     #   test: ["CMD", "curl", "-sf", "http://${NAME}:19559/status"]
     #   interval: 30s
@@ -28,6 +29,11 @@ services:
     restart: on-failure
     cap_add:
       - SYS_PTRACE
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: 1G
 
   metad1:
     <<: *metad
@@ -39,6 +45,7 @@ services:
       - --port=9559
       - --data_path=/data/meta
       - --local_ip=metad1
+      - --containerized=true
     volumes:
       - ./data/metad1:/data/meta
       - ./logs/metad1:/usr/local/nebula/logs
@@ -53,6 +60,7 @@ services:
       - --port=9559
       - --data_path=/data/meta
       - --local_ip=metad2
+      - --containerized=true
     volumes:
       - ./data/metad2:/data/meta
       - ./logs/metad2:/usr/local/nebula/logs
@@ -67,6 +75,8 @@ services:
       - --port=9779
       - --data_path=/data/storage
       - --local_ip=storaged0
+      - --containerized=true
+      - --dynamic_memory_reserved_gib=0
     depends_on:
       - metad0
       - metad1
@@ -88,6 +98,11 @@ services:
     restart: on-failure
     cap_add:
       - SYS_PTRACE
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
 
   storaged1:
     <<: *storaged
@@ -99,6 +114,8 @@ services:
       - --port=9779
       - --data_path=/data/storage
       - --local_ip=storaged1
+      - --containerized=true
+      - --dynamic_memory_reserved_gib=0
     volumes:
       - ./data/storaged1:/data/storage
       - ./logs/storaged1:/usr/local/nebula/logs
@@ -113,6 +130,8 @@ services:
       - --port=9779
       - --data_path=/data/storage
       - --local_ip=storaged2
+      - --containerized=true
+      - --dynamic_memory_reserved_gib=0
     volumes:
       - ./data/storaged2:/data/storage
       - ./logs/storaged2:/usr/local/nebula/logs
@@ -126,6 +145,8 @@ services:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9669
       - --local_ip=graphd0
+      - --containerized=true
+      - --dynamic_memory_reserved_gib=0
     depends_on:
       - storaged0
       - storaged1
@@ -147,6 +168,11 @@ services:
     restart: on-failure
     cap_add:
       - SYS_PTRACE
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: 4G
 
   graphd1:
     <<: *graphd
@@ -157,6 +183,8 @@ services:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9669
       - --local_ip=graphd1
+      - --containerized=true
+      - --dynamic_memory_reserved_gib=0
     ports:
       - "9670:9669"
       - 19669
@@ -173,6 +201,8 @@ services:
       - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
       - --port=9669
       - --local_ip=graphd2
+      - --containerized=true
+      - --dynamic_memory_reserved_gib=0
     ports:
       - "9671:9669"
       - 19669
@@ -187,24 +217,23 @@ services:
       - sh
       - -c
       - |
-        sleep 5;
-        for i in `seq 1 3`;do
-          ngctl passwd -H metad0 -P 9559 -u root -c nebula -p NebulaGraph01
+        for i in `seq 1 20`;do
+          ngctl auth passwd -H metad0 -P 9559 -u root -c nebula -p NebulaGraph01 > /dev/null 2>&1
           if [[ $$? == 0 ]];then
             break;
           fi;
           sleep 1;
           echo "retry to connect metad0";
         done ;
-        ngctl login -H metad0 -P 9559 -u root  -p NebulaGraph01
-        ngctl svcgrp create --svcgrp my_cluster1 --replica-factor 3
+        ngctl auth login -H metad0 -P 9559 -u root  -p NebulaGraph01
+        ngctl svcgrp create my_cluster1 --replica-factor 3
         for i in `seq 0 2`;do
-          ngctl host add -H graphd$${i} --svcgrp my_cluster1
-          ngctl host add -H storaged$${i} --svcgrp my_cluster1
-          ngctl service add --type graphd -H graphd$${i} --port 9669 --svcgrp my_cluster1
-          ngctl service add --type storaged -H storaged$${i} --port 9779 --svcgrp my_cluster1
+          ngctl svcgrp add-host my_cluster1 -H graphd$${i} 
+          ngctl svcgrp add-host my_cluster1 -H storaged$${i} 
+          ngctl svcgrp add-service my_cluster1 --type graphd -H graphd$${i} --port 9669
+          ngctl svcgrp add-service my_cluster1 --type storaged -H storaged$${i} --port 9779
         done;
-        ngctl svcgrp init --svcgrp my_cluster1
+        ngctl svcgrp init my_cluster1
         tail -f /dev/null;
 
     depends_on:
