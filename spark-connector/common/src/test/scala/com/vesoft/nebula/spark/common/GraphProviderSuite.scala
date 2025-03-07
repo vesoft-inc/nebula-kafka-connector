@@ -15,16 +15,21 @@ class GraphProviderSuite extends AnyFunSuite with BeforeAndAfterAll {
   val graphName = "spark_connector_nba"
 
   override def beforeAll(): Unit = {
-    val address = "192.168.8.6:3820"
+    val address = TestServerInfo.host
     val authOptions = new util.HashMap[String, Object]()
-    authOptions.put("password", "Nebula123")
-    graphProvider = new GraphProvider(address, "root", authOptions,
+    authOptions.put("password", TestServerInfo.passwd)
+    graphProvider = new GraphProvider(address, TestServerInfo.user, authOptions,
                                       3000,
                                       "/default_schema",
                                       "%Y-%m-%dT%H:%M:%S %z",
                                       "%Y-%m-%dT%H:%M:%S",
                                       "%H:%M:%S %z",
-                                      "%H:%M:%S")
+                                      "%H:%M:%S",
+                                      false,
+                                      null,
+                                      null,
+                                      null,
+                                      null)
 
     val createSchema = "CREATE GRAPH TYPE IF NOT EXISTS spark_connector_nba_type AS {" +
       "NODE TYPE node_type_player (LABEL player {id INT PRIMARY KEY, name STRING, score FLOAT, gender bool, rate DOUBLE})," +

@@ -36,7 +36,13 @@ trait NebulaGqlReader {
       nebulaOptions.zonedDatetimeFormat,
       nebulaOptions.localDatetimeFormat,
       nebulaOptions.zonedTimeFormat,
-      nebulaOptions.zonedTimeFormat)
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.enableTls,
+      nebulaOptions.tlsCa,
+      nebulaOptions.tlsCert,
+      nebulaOptions.tlsKey,
+      nebulaOptions.tlsPeerName
+      )
     this.resultSet = graphProvider.submit(nebulaOptions.gql)
     schema = new StructType()
     for (name <- resultSet.getColumnNames.asScala) {

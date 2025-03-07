@@ -59,6 +59,13 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
     DataTypeEnum.validDataType(dataType),
     s"Option '$TYPE' is illegal, it should be '${DataTypeEnum.NODE}' or '${DataTypeEnum.EDGE}' or `${DataTypeEnum.GQL}`")
 
+  /** tls parameters */
+  val enableTls: Boolean = parameters.getOrElse(ENABLE_TLS, false).toString.toBoolean
+  var tlsCa              = if (enableTls) parameters.getOrElse(TLS_CA, null) else null
+  val tlsCert            = if (enableTls) parameters.getOrElse(NebulaOptions.TLS_CERT, null) else null
+  val tlsKey             = if (enableTls) parameters.getOrElse(NebulaOptions.TLS_KEY, null) else null
+  val tlsPeerName        = if (enableTls) parameters.getOrElse(NebulaOptions.TLS_PEERNAME, null) else null
+
   /** nebula common parameters */
   require(parameters.isDefinedAt(GRAPH_ADDRESS),
           s"option $GRAPH_ADDRESS is required and can not be blank")
@@ -143,6 +150,12 @@ object NebulaOptions {
   val USER_NAME               : String = "user"
   val PASSWD                  : String = "passwd"
   val AUTHOPTIONS             : String = "auth_options"
+  val ENABLE_TLS              : String = "enable_tls"
+  val TLS_CA                  : String = "tlsCa"
+  val TLS_CERT                : String = "tlsCert"
+  val TLS_KEY                 : String = "tlsKey"
+  val TLS_PEERNAME            : String = "tlsPeerName"
+
 
   val OPERATE_TYPE: String = "operate_type"
 

@@ -23,7 +23,12 @@ class GraphProvider(addresses: String,
                     zonedDatetimeFormat: String,
                     localDatetimeFormat: String,
                     zonedTimeFormat: String,
-                    localTimeFormat: String)
+                    localTimeFormat: String,
+                    enableTls: Boolean,
+                    tlsCa: String,
+                    tlsCert: String,
+                    tlsKey: String,
+                    tlsPeerName: String)
   extends AutoCloseable
     with Serializable {
   @transient private[this] lazy val LOG = LoggerFactory.getLogger(this.getClass)
@@ -32,6 +37,10 @@ class GraphProvider(addresses: String,
     .builder(addresses, user)
     .withAuthOptions(authOptions)
     .withRequestTimeoutMills(timeout * 1000)
+    .withEnableTls(enableTls)
+    .withTlsCa(tlsCa)
+    .withTlsCert(tlsCert, tlsKey)
+    .withTlsPeerName(tlsPeerName)
     .build()
   if (schema != null) {
     val res = client.execute("SESSION SET SCHEMA `" + schema + "`")
@@ -124,8 +133,8 @@ class GraphProvider(addresses: String,
    * get all part list for NebulaGraph
    */
   def getAllParts: List[Integer] = {
-    val showPartitions: String    = "CALL show_partitions() RETURN *"
-    var resultSet     : ResultSet = null
+    val showPartitions: String = "CALL show_partitions() RETURN *"
+    var resultSet: ResultSet = null
     try resultSet = client.execute(showPartitions)
     catch {
       case e: Exception =>
@@ -154,11 +163,11 @@ class GraphProvider(addresses: String,
    */
   def getNodeDesc(graphName: String, nodeType: String): NodeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val graphType                               = getGraphType(graphName)
+    val graphType = getGraphType(graphName)
 
     val escapedNodeType = NebulaUtils.escapeUtil(nodeType)
-    val descNodeType    = s"DESCRIBE NODE TYPE `$escapedNodeType` OF `$graphType`"
-    val result          = client.execute(descNodeType)
+    val descNodeType = s"DESCRIBE NODE TYPE `$escapedNodeType` OF `$graphType`"
+    val result = client.execute(descNodeType)
     if (!result.isSucceeded || result.isEmpty) {
       LOG.error(s"get schema of $nodeType failed for ${result.getErrorMessage}")
       throw new IllegalArgumentException(s"node type $escapedNodeType does not exist in $graphName.")
@@ -190,9 +199,9 @@ class GraphProvider(addresses: String,
    */
   def getEdgeDesc(graphName: String, edgeType: String): EdgeDesc = {
     val schema: mutable.HashMap[String, String] = new mutable.HashMap[String, String]()
-    val graphType                               = getGraphType(graphName)
+    val graphType = getGraphType(graphName)
 
-    val escapedEdgeType     = NebulaUtils.escapeUtil(edgeType)
+    val escapedEdgeType = NebulaUtils.escapeUtil(edgeType)
     val descEdgeTypePattern =
       s"call describe_graph_type('$graphType') filter type_name='$escapedEdgeType' return type_pattern"
 
@@ -213,12 +222,12 @@ class GraphProvider(addresses: String,
       schema += (record.get("property_name").asString() -> record.get("data_type").asString())
     }
 
-    var srcNodeType: String       = null
-    var dstNodeType: String       = null
+    var srcNodeType: String = null
+    var dstNodeType: String = null
     // regularly match two types of edge:()-[]->() or ()~[]~() to get the srcNodeType and dstNodeType.
-    val edgeDirectionPattern      = """\((.*?)\)-\[.*?\]->\((.*?)\)"""
-    val edgeUnDirectionPattern    = """\((.*?)\)~\[.*?\]~\((.*?)\)"""
-    val regexWithEdgeDirection    = edgeDirectionPattern.r
+    val edgeDirectionPattern = """\((.*?)\)-\[.*?\]->\((.*?)\)"""
+    val edgeUnDirectionPattern = """\((.*?)\)~\[.*?\]~\((.*?)\)"""
+    val regexWithEdgeDirection = edgeDirectionPattern.r
     val regexWithoutEdgeDirection = edgeUnDirectionPattern.r
     if (edgeTypePattern.matches(edgeDirectionPattern)) {
       edgeTypePattern match {
@@ -236,25 +245,25 @@ class GraphProvider(addresses: String,
       throw new RuntimeException("can not parse the edge type pattern.")
     }
 
-    val srcNodeDesc       = getNodeDesc(graphName, srcNodeType)
-    val dstNodeDesc       = getNodeDesc(graphName, dstNodeType)
+    val srcNodeDesc = getNodeDesc(graphName, srcNodeType)
+    val dstNodeDesc = getNodeDesc(graphName, dstNodeType)
     val srcNodePkDataType = srcNodeDesc.properties.filterKeys(srcNodeDesc.nodePkNames.contains)
     val dstNodeIdDataType = dstNodeDesc.properties.filterKeys(dstNodeDesc.nodePkNames.contains)
 
     EdgeDesc(edgeType,
-             srcNodeType,
-             srcNodeDesc.nodePkNames,
-             srcNodePkDataType,
-             dstNodeType,
-             dstNodeDesc.nodePkNames,
-             dstNodeIdDataType,
-             schema.toMap)
+      srcNodeType,
+      srcNodeDesc.nodePkNames,
+      srcNodePkDataType,
+      dstNodeType,
+      dstNodeDesc.nodePkNames,
+      dstNodeIdDataType,
+      schema.toMap)
   }
 
   private def getGraphType(graphName: String): String = {
     val escapedGraphName = NebulaUtils.escapeUtil(graphName)
-    val resultSet        = client.execute(s"DESCRIBE GRAPH `$escapedGraphName`")
-    val graphType        = if (resultSet.isSucceeded && !resultSet.isEmpty) {
+    val resultSet = client.execute(s"DESCRIBE GRAPH `$escapedGraphName`")
+    val graphType = if (resultSet.isSucceeded && !resultSet.isEmpty) {
       resultSet.next().values().get(1).asString
     } else {
       throw new IllegalArgumentException(s"graphName $graphName does not exist.")

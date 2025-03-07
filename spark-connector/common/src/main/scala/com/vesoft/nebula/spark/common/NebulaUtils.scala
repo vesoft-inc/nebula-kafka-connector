@@ -94,7 +94,13 @@ object NebulaUtils {
                                           nebulaOptions.zonedDatetimeFormat,
                                           nebulaOptions.localDatetimeFormat,
                                           nebulaOptions.zonedTimeFormat,
-                                          nebulaOptions.zonedTimeFormat)
+                                          nebulaOptions.zonedTimeFormat,
+                                          nebulaOptions.enableTls,
+                                          nebulaOptions.tlsCa,
+                                          nebulaOptions.tlsCert,
+                                          nebulaOptions.tlsKey,
+                                          nebulaOptions.tlsPeerName
+                                          )
     val isNodeType    = DataTypeEnum.NODE.toString.equalsIgnoreCase(nebulaOptions.dataType)
 
     val fields: ListBuffer[StructField] = new ListBuffer[StructField]
@@ -176,7 +182,13 @@ object NebulaUtils {
                                               nebulaOptions.zonedDatetimeFormat,
                                               nebulaOptions.localDatetimeFormat,
                                               nebulaOptions.zonedTimeFormat,
-                                              nebulaOptions.zonedTimeFormat)
+                                              nebulaOptions.zonedTimeFormat,
+                                              nebulaOptions.enableTls,
+                                              nebulaOptions.tlsCa,
+                                              nebulaOptions.tlsCert,
+                                              nebulaOptions.tlsKey,
+                                              nebulaOptions.tlsPeerName
+                                              )
     var result: ResultSet = null
     try {
       result = graphProvider.submit(newGql)
@@ -207,7 +219,12 @@ object NebulaUtils {
       nebulaOptions.zonedDatetimeFormat,
       nebulaOptions.localDatetimeFormat,
       nebulaOptions.zonedTimeFormat,
-      nebulaOptions.zonedTimeFormat)
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.enableTls,
+      nebulaOptions.tlsCa,
+      nebulaOptions.tlsCert,
+      nebulaOptions.tlsKey,
+      nebulaOptions.tlsPeerName)
     var edgeDesc: EdgeDesc = null
     try {
       edgeDesc = graphProvider.getEdgeDesc(nebulaOptions.graphName, nebulaOptions.label)
@@ -245,7 +262,12 @@ object NebulaUtils {
       nebulaOptions.zonedDatetimeFormat,
       nebulaOptions.localDatetimeFormat,
       nebulaOptions.zonedTimeFormat,
-      nebulaOptions.zonedTimeFormat)
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.enableTls,
+      nebulaOptions.tlsCa,
+      nebulaOptions.tlsCert,
+      nebulaOptions.tlsKey,
+      nebulaOptions.tlsPeerName)
     var nodeDesc: NodeDesc = null
     try {
       nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)

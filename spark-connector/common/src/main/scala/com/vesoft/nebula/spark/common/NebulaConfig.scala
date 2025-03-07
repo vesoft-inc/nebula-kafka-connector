@@ -14,7 +14,12 @@ class NebulaConnectionConfig(graphAddress: String,
                              authOptions: Map[String, Any],
                              timeout: Int,
                              executeRetry: Int,
-                             executeRetryIntervalMs: Int)
+                             executeRetryIntervalMs: Int,
+                             enableTls: Boolean,
+                             tlsCaPath: String,
+                             tlsCertPath: String,
+                             tlsKeyPath: String,
+                             tlsPeerName: String)
   extends Serializable {
   def getGraphAddress = graphAddress
 
@@ -38,19 +43,34 @@ class NebulaConnectionConfig(graphAddress: String,
 
   def getExecRetryIntervalMs = executeRetryIntervalMs
 
+  def getEnableTls: Boolean = enableTls
+
+  def getTlsCaPath: String = tlsCaPath
+
+  def getTlsCertPath: String = tlsCertPath
+
+  def getTlsKeyPath: String = tlsKeyPath
+
+  def getTlsPeerName: String = tlsPeerName
+
 }
 
 object NebulaConnectionConfig {
   class ConfigBuilder {
     private val LOG = LoggerFactory.getLogger(this.getClass)
 
-    protected var graphAddress          : String = _
-    protected var user                  : String = _
-    protected var passwd                : String = _
-    protected var authOptions                    = new mutable.HashMap[String, Any]
-    protected var timeout               : Int    = 5
-    protected var executeRetry          : Int    = 3
-    protected var executeRetryIntervalMs: Int    = 0
+    protected var graphAddress          : String  = _
+    protected var user                  : String  = _
+    protected var passwd                : String  = _
+    protected var authOptions                     = new mutable.HashMap[String, Any]
+    protected var timeout               : Int     = 5
+    protected var executeRetry          : Int     = 3
+    protected var executeRetryIntervalMs: Int     = 0
+    protected var enableTls             : Boolean = false
+    protected var tlsCaPath             : String  = ""
+    protected var tlsCertPath           : String  = ""
+    protected var tlsKeyPath            : String  = ""
+    protected var tlsPeerName           : String  = ""
 
     /**
      * set nebula graph server address, multi addresses is split by English comma
@@ -111,6 +131,46 @@ object NebulaConnectionConfig {
     }
 
     /**
+     * enable the tls
+     * */
+    def withEnableTls(): ConfigBuilder = {
+      this.enableTls = true
+      this
+    }
+
+    /**
+     * set the path of tls ca
+     */
+    def withTlsCaPath(tlsCaPath: String): ConfigBuilder = {
+      this.tlsCaPath = tlsCaPath;
+      this
+    }
+
+    /**
+     * set the path of client private key
+     */
+    def withTlsKeyPath(tlsKeyPath: String): ConfigBuilder = {
+      this.tlsKeyPath = tlsKeyPath
+      this
+    }
+
+    /**
+     * set the path of tls cert
+     */
+    def withTlsCertPath(tlsCertPath: String): ConfigBuilder = {
+      this.tlsCertPath = tlsCertPath
+      this
+    }
+
+    /**
+     * set the peerName for Common Name or Subject Alternative Name in Server's Ca
+     */
+    def withTlsPeerName(peerName: String): ConfigBuilder = {
+      this.tlsPeerName = peerName
+      this
+    }
+
+    /**
      * check if the connection config is valid
      */
     def check(): Unit = {
@@ -120,6 +180,8 @@ object NebulaConnectionConfig {
              "password and authOptions cannot be blank at the same time.")
       assert(timeout > 0, "timeout must be larger than 0.")
       assert(executeRetry >= 0, "retry must be equal or larger than 0.")
+      assert(!enableTls || (!tlsCaPath.equals("") && !tlsPeerName.equals("")),
+             "tlsCaPath and tlsPeerName cannot be blank when enableTls")
     }
 
     /**
@@ -133,7 +195,12 @@ object NebulaConnectionConfig {
                                  authOptions.toMap,
                                  timeout,
                                  executeRetry,
-                                 executeRetryIntervalMs)
+                                 executeRetryIntervalMs,
+                                 enableTls,
+                                 tlsCaPath,
+                                 tlsCertPath,
+                                 tlsKeyPath,
+                                 tlsPeerName)
     }
   }
 

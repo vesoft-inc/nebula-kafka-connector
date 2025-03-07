@@ -51,6 +51,11 @@ package object connector {
         .option(NebulaOptions.BATCH_SIZE, writeConfig.getBatchSize)
         .option(NebulaOptions.WRITE_MODE, writeConfig.getWriteMode)
         .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
+        .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
+        .option(NebulaOptions.TLS_CA, connectionConfig.getTlsCaPath)
+        .option(NebulaOptions.TLS_CERT, connectionConfig.getTlsCertPath)
+        .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
+        .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
 
       if (writeConfig.getSchema != null) {
         dfWriter.option(NebulaOptions.SCHEMA, writeConfig.getSchema)
@@ -98,6 +103,12 @@ package object connector {
         .option(NebulaOptions.DST_PK_AS_PROP, writeConfig.getDstAsProp)
         .option(NebulaOptions.WRITE_MODE, writeConfig.getWriteMode)
         .option(NebulaOptions.DISABLE_WRITE_LOG, writeConfig.isDisableWriteLog)
+        .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
+        .option(NebulaOptions.TLS_CA, connectionConfig.getTlsCaPath)
+        .option(NebulaOptions.TLS_CERT, connectionConfig.getTlsCertPath)
+        .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
+        .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
+
       if (writeConfig.getSchema != null) {
         dfWriter.option(NebulaOptions.SCHEMA, writeConfig.getSchema)
       }
@@ -157,6 +168,12 @@ package object connector {
         .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
+        .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
+        .option(NebulaOptions.TLS_CA, connectionConfig.getTlsCaPath)
+        .option(NebulaOptions.TLS_CERT, connectionConfig.getTlsCertPath)
+        .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
+        .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
+
       if(readConfig.getSchema!= null){
         dfReader.option(NebulaOptions.SCHEMA, readConfig.getSchema)
       }
@@ -187,6 +204,11 @@ package object connector {
         .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
+        .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
+        .option(NebulaOptions.TLS_CA, connectionConfig.getTlsCaPath)
+        .option(NebulaOptions.TLS_CERT, connectionConfig.getTlsCertPath)
+        .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
+        .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
 
       dfReader.load()
     }

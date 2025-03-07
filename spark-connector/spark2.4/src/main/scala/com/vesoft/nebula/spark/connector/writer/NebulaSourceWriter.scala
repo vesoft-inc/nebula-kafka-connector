@@ -61,7 +61,13 @@ class NebulaDataSourceNodeWriter(nebulaOptions: NebulaOptions,
       nebulaOptions.zonedDatetimeFormat,
       nebulaOptions.localDatetimeFormat,
       nebulaOptions.zonedTimeFormat,
-      nebulaOptions.zonedTimeFormat)
+      nebulaOptions.zonedTimeFormat,
+      nebulaOptions.enableTls,
+      nebulaOptions.tlsCa,
+      nebulaOptions.tlsCert,
+      nebulaOptions.tlsKey,
+      nebulaOptions.tlsPeerName
+      )
     var nodeDesc: NodeDesc = null
     try {
       nodeDesc = graphProvider.getNodeDesc(nebulaOptions.graphName, nebulaOptions.label)

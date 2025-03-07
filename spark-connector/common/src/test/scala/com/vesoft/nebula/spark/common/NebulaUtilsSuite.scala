@@ -8,9 +8,9 @@ import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
 
 class NebulaUtilsSuite extends AnyFunSuite with BeforeAndAfterAll {
-  val host   = "192.168.8.6:3820"
-  val user   = "root"
-  val passwd = "Nebula123"
+  val host   = TestServerInfo.host
+  val user   = TestServerInfo.user
+  val passwd = TestServerInfo.passwd
 
   val graphName = "spark_connector_nba"
 

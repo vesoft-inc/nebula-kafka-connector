@@ -5,9 +5,9 @@
 
 package com.vesoft.nebula.spark.connector.reader
 
+import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, ReadNebulaConfig}
 import com.vesoft.nebula.spark.connector.{NebulaDataFrameReader, TestServerInfo}
 import com.vesoft.nebula.spark.connector.mock.NebulaGraphMock
-import com.vesoft.nebula.spark.common.{NebulaConnectionConfig, ReadNebulaConfig}
 import org.apache.spark.sql.SparkSession
 import org.scalatest.BeforeAndAfterAll
 import org.scalatest.funsuite.AnyFunSuite
@@ -39,7 +39,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll {
     val readConfig = ReadNebulaConfig
       .builder()
       .withSchema("/default_schema")
-      .withGraphName("spark_read")
+      .withGraphName("spark3_read")
       .withTypeName("node_player")
       .withReturnCols(List())
       .withBatchSize(1)
@@ -61,7 +61,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll {
       .build()
     val readConfig = ReadNebulaConfig
       .builder()
-      .withGraphName("spark_read")
+      .withGraphName("spark3_read")
       .withTypeName("node_player")
       .withReturnCols(null)
       .withBatchSize(1)
@@ -83,7 +83,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll {
       .build()
     val readConfig = ReadNebulaConfig
       .builder()
-      .withGraphName("spark_read")
+      .withGraphName("spark3_read")
       .withTypeName("node_player")
       .withReturnCols(List("col1", "col2", "col3", "col4"))
       .withBatchSize(1)
@@ -106,7 +106,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll {
       .build()
     val readConfig = ReadNebulaConfig
       .builder()
-      .withGraphName("spark_read")
+      .withGraphName("spark3_read")
       .withTypeName("edge_follow")
       .withReturnCols(List())
       .withBatchSize(1)
@@ -128,7 +128,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll {
       .build()
     val readConfig = ReadNebulaConfig
       .builder()
-      .withGraphName("spark_read")
+      .withGraphName("spark3_read")
       .withTypeName("edge_follow")
       .withReturnCols(null)
       .withBatchSize(1)
@@ -150,7 +150,7 @@ class ReadSuite extends AnyFunSuite with BeforeAndAfterAll {
       .build()
     val readConfig = ReadNebulaConfig
       .builder()
-      .withGraphName("spark_read")
+      .withGraphName("spark3_read")
       .withTypeName("edge_follow")
       .withReturnCols(List("ecol1", "ecol2"))
       .withBatchSize(1)

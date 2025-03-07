@@ -19,7 +19,7 @@ class NebulaGraphMock {
 
   def mockReadGraph(): Unit = {
     try {
-      val createGraphType = "CREATE GRAPH TYPE IF NOT EXISTS spark_read_type AS {" +
+      val createGraphType = "CREATE GRAPH TYPE IF NOT EXISTS spark3_read_type AS {" +
         "NODE TYPE node_player (LABEL player {col1 INT PRIMARY KEY, col2 STRING, col3 FLOAT, col4 bool, col5 DOUBLE, col6 INT64, col7 local time, col8 local datetime, col9 zoned time})," +
         "EDGE TYPE edge_follow (node_player)-[LABEL follow {ecol1 INT, ecol2 FLOAT64, ecol3 STRING, ecol4 DOUBLE}]->(node_player)}"
 
@@ -31,7 +31,7 @@ class NebulaGraphMock {
       Thread.sleep(3000)
 
 
-      val createGraph = "CREATE GRAPH IF NOT EXISTS spark_read spark_read_type"
+      val createGraph = "CREATE GRAPH IF NOT EXISTS spark3_read spark3_read_type"
       result = client.execute(createGraph)
       if (!result.isSucceeded) {
         LOG.error("create graph spark_read failed: $result.getErrorMessage")
