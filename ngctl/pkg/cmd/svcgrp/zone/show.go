@@ -11,9 +11,9 @@ import (
 )
 
 var ShowCmd = &cobra.Command{
-	Use:   "show-zones <svcgrp-name>",
-	Short: "Show zones",
-	Long:  "Show zones",
+	Use:   "show-zone <svcgrp-name>",
+	Short: "Show zone",
+	Long:  "Show zone",
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		return common.MetaClientInit()
 	},

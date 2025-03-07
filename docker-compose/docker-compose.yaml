@@ -5,12 +5,21 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9559
-      - --data_path=/data/meta
-      - --local_ip=metad0
-      - --containerized=true
+      LOCAL_IP: metad0
+    entrypoint: ""
+    command: 
+      - sh
+      - -c
+      - |
+        ./bin/nebula-metad \
+        --flagfile=/usr/local/nebula/etc/nebula-metad.conf \
+        --daemonize=false \
+        --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559 \
+        --port=9559 \
+        --data_path=/data/meta \
+        --local_ip=$${LOCAL_IP} \
+        --containerized=true \
+        --license_manager_url=license.vesoft-inc.com:9119
     # healthcheck:
     #   test: ["CMD", "curl", "-sf", "http://${NAME}:19559/status"]
     #   interval: 30s
@@ -40,12 +49,7 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9559
-      - --data_path=/data/meta
-      - --local_ip=metad1
-      - --containerized=true
+      LOCAL_IP: metad1
     volumes:
       - ./data/metad1:/data/meta
       - ./logs/metad1:/usr/local/nebula/logs
@@ -55,12 +59,8 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9559
-      - --data_path=/data/meta
-      - --local_ip=metad2
-      - --containerized=true
+      LOCAL_IP: metad2
+
     volumes:
       - ./data/metad2:/data/meta
       - ./logs/metad2:/usr/local/nebula/logs
@@ -70,13 +70,21 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
+      LOCAL_IP: storaged0
+    entrypoint: ""
     command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9779
-      - --data_path=/data/storage
-      - --local_ip=storaged0
-      - --containerized=true
-      - --dynamic_memory_reserved_gib=0
+      - sh
+      - -c
+      - |
+       ./bin/nebula-storaged \
+        --flagfile=/usr/local/nebula/etc/nebula-storaged.conf \
+        --daemonize=false \
+        --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559 \
+        --port=9779 \
+        --data_path=/data/storage \
+        --local_ip=$${LOCAL_IP} \
+        --containerized=true \
+        --dynamic_memory_reserved_gib=0
     depends_on:
       - metad0
       - metad1
@@ -109,13 +117,7 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9779
-      - --data_path=/data/storage
-      - --local_ip=storaged1
-      - --containerized=true
-      - --dynamic_memory_reserved_gib=0
+      LOCAL_IP: storaged1
     volumes:
       - ./data/storaged1:/data/storage
       - ./logs/storaged1:/usr/local/nebula/logs
@@ -125,13 +127,7 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9779
-      - --data_path=/data/storage
-      - --local_ip=storaged2
-      - --containerized=true
-      - --dynamic_memory_reserved_gib=0
+      LOCAL_IP: storaged2
     volumes:
       - ./data/storaged2:/data/storage
       - ./logs/storaged2:/usr/local/nebula/logs
@@ -141,12 +137,20 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
+      LOCAL_IP: graphd0
+    entrypoint: ""
     command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9669
-      - --local_ip=graphd0
-      - --containerized=true
-      - --dynamic_memory_reserved_gib=0
+      - sh
+      - -c
+      - |
+        ./bin/nebula-graphd \
+        --flagfile=/usr/local/nebula/etc/nebula-graphd.conf \
+        --daemonize=false \
+        --containerized=true \
+        --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559 \
+        --port=9669 \
+        --local_ip=$${LOCAL_IP} \
+        --dynamic_memory_reserved_gib=0
     depends_on:
       - storaged0
       - storaged1
@@ -179,12 +183,7 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9669
-      - --local_ip=graphd1
-      - --containerized=true
-      - --dynamic_memory_reserved_gib=0
+      LOCAL_IP: graphd1
     ports:
       - "9670:9669"
       - 19669
@@ -197,12 +196,7 @@ services:
     environment:
       USER: root
       TZ:   "${TZ}"
-    command:
-      - --meta_server_addrs=metad0:9559,metad1:9559,metad2:9559
-      - --port=9669
-      - --local_ip=graphd2
-      - --containerized=true
-      - --dynamic_memory_reserved_gib=0
+      LOCAL_IP: graphd2
     ports:
       - "9671:9669"
       - 19669
@@ -225,6 +219,7 @@ services:
           sleep 1;
           echo "retry to connect metad0";
         done ;
+        sleep 1
         ngctl auth login -H metad0 -P 9559 -u root  -p NebulaGraph01
         ngctl svcgrp create my_cluster1 --replica-factor 3
         for i in `seq 0 2`;do
