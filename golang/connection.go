@@ -61,7 +61,7 @@ func (c *graphConnector) connect(host *hostAddress, cfg *connConfig) (types.Clie
 	if err := cn.open(host.host, host.port, cfg.connectTimeout, tlsCfg); err != nil {
 		return nil, err
 	}
-	if err := cn.authenticate(ctx, cfg.username, cfg.password); err != nil {
+	if err := cn.authenticate(ctx, cfg.username, cfg.password, cfg.authInfo); err != nil {
 		_ = cn.clientConn.Close()
 		return nil, err
 	}
@@ -79,10 +79,12 @@ func (cn *connection) open(host string, port int, timeout time.Duration, tlsCfg 
 	return nil
 }
 
-func (cn *connection) authenticate(ctx context.Context, username, password string) error {
-	// TODO just simple auth with password
-	authInfo := make(map[string]string)
-	authInfo["password"] = password
+func (cn *connection) authenticate(ctx context.Context, username, password string, authInfo map[string]string) error {
+	if authInfo == nil {
+		authInfo = make(map[string]string)
+		authInfo["password"] = password
+	}
+
 	bs, err := json.Marshal(authInfo)
 	if err != nil {
 		return err

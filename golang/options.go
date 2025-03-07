@@ -191,3 +191,17 @@ func WithPoolTLS(enable bool, ca, cert, key string, peerNameVerify bool, peerNam
 		pool.connCfg.peerName = peerName
 	}
 }
+
+// WithClientAuthInfo sets the authInfo for the client connection
+func WithClientAuthInfo(authInfo map[string]string) clientOptionsFn {
+	return func(ops *driverConn) {
+		ops.cfg.authInfo = authInfo
+	}
+}
+
+// WithPoolAuthInfo sets the authInfo for the pool connection
+func WithPoolAuthInfo(authInfo map[string]string) poolOptionsFn {
+	return func(ops *driverPool) {
+		ops.connCfg.authInfo = authInfo
+	}
+}

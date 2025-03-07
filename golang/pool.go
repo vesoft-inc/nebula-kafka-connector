@@ -82,6 +82,7 @@ func (dp *driverPool) openNewConn(address string) (types.Client, error) {
 		WithClientRequestTimeout(dp.connCfg.requestTimeout),
 		WithClientLogger(dp.log),
 		withClientConnector(dp.connector),
+		WithClientAuthInfo(dp.connCfg.authInfo),
 	)
 	if err != nil {
 		return nil, err

@@ -28,6 +28,7 @@ type (
 		ca             string
 		peerName       string
 		peerNameVerify bool
+		authInfo       map[string]string
 	}
 	// driverConn is a client wrapper
 	driverConn struct {
