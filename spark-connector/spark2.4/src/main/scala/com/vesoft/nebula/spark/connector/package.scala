@@ -163,7 +163,6 @@ package object connector {
         .option(NebulaOptions.AUTHOPTIONS, connectionConfig.getAuthOptions)
         .option(NebulaOptions.GRAPH_NAME, readConfig.getGraphName)
         .option(NebulaOptions.LABEL, readConfig.getTypeName)
-        .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
         .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
@@ -172,6 +171,9 @@ package object connector {
         .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
         .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
 
+      if (readConfig.getReturnCols != null) {
+        dfReader.option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
+      }
       if (readConfig.getSchema != null) {
         dfReader.option(NebulaOptions.SCHEMA, readConfig.getSchema)
       }
@@ -199,7 +201,6 @@ package object connector {
         .option(NebulaOptions.AUTHOPTIONS, connectionConfig.getAuthOptions)
         .option(NebulaOptions.GRAPH_NAME, readConfig.getGraphName)
         .option(NebulaOptions.LABEL, readConfig.getTypeName)
-        .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
         .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
@@ -208,6 +209,9 @@ package object connector {
         .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
         .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
 
+      if (readConfig.getReturnCols != null) {
+        dfReader.option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
+      }
       if (readConfig.getSchema != null) {
         dfReader.option(NebulaOptions.SCHEMA, readConfig.getSchema)
       }

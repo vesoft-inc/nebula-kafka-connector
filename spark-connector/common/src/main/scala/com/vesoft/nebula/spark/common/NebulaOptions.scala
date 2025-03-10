@@ -116,7 +116,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   val returnCols         = parameters.getOrElse(RETURN_COLS, null)
 
   def getReturnCols: List[String] = {
-    if (returnCols.equals("$null")) {
+    if (returnCols == null) {
       null
     } else if (returnCols.isEmpty) {
       List()

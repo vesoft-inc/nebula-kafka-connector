@@ -129,14 +129,12 @@ package object connector {
   }
 
 
-
-
   /**
    * spark reader for nebula graph
    */
   implicit class NebulaDataFrameReader(reader: DataFrameReader) {
     var connectionConfig: NebulaConnectionConfig = _
-    var readConfig: ReadNebulaConfig             = _
+    var readConfig      : ReadNebulaConfig       = _
 
     def nebula(connectionConfig: NebulaConnectionConfig,
                readConfig: ReadNebulaConfig): NebulaDataFrameReader = {
@@ -148,6 +146,7 @@ package object connector {
 
     /**
      * Reading nodes from Nebula Graph
+     *
      * @return DataFrame
      */
     def loadNode(): DataFrame = {
@@ -165,7 +164,6 @@ package object connector {
         .option(NebulaOptions.AUTHOPTIONS, connectionConfig.getAuthOptions)
         .option(NebulaOptions.GRAPH_NAME, readConfig.getGraphName)
         .option(NebulaOptions.LABEL, readConfig.getTypeName)
-        .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
         .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
@@ -174,7 +172,10 @@ package object connector {
         .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
         .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
 
-      if(readConfig.getSchema!= null){
+      if (readConfig.getReturnCols != null) {
+        dfReader.option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
+      }
+      if (readConfig.getSchema != null) {
         dfReader.option(NebulaOptions.SCHEMA, readConfig.getSchema)
       }
 
@@ -183,6 +184,7 @@ package object connector {
 
     /**
      * Reading edges from Nebula Graph
+     *
      * @return DataFrame
      */
     def loadEdge(): DataFrame = {
@@ -201,7 +203,6 @@ package object connector {
         .option(NebulaOptions.AUTHOPTIONS, connectionConfig.getAuthOptions)
         .option(NebulaOptions.GRAPH_NAME, readConfig.getGraphName)
         .option(NebulaOptions.LABEL, readConfig.getTypeName)
-        .option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
         .option(NebulaOptions.BATCH_SIZE, readConfig.getBatchSize)
         .option(NebulaOptions.PARTITION_NUMBER, readConfig.getPartitionNum)
         .option(NebulaOptions.ENABLE_TLS, connectionConfig.getEnableTls)
@@ -209,7 +210,12 @@ package object connector {
         .option(NebulaOptions.TLS_CERT, connectionConfig.getTlsCertPath)
         .option(NebulaOptions.TLS_KEY, connectionConfig.getTlsKeyPath)
         .option(NebulaOptions.TLS_PEERNAME, connectionConfig.getTlsPeerName)
-
+      if (readConfig.getReturnCols != null) {
+        dfReader.option(NebulaOptions.RETURN_COLS, readConfig.getReturnColsString)
+      }
+      if (readConfig.getSchema != null) {
+        dfReader.option(NebulaOptions.SCHEMA, readConfig.getSchema)
+      }
       dfReader.load()
     }
   }
@@ -248,6 +254,9 @@ package object connector {
         .option(NebulaOptions.USER_NAME, connectionConfig.getUser)
         .option(NebulaOptions.AUTHOPTIONS, connectionConfig.getAuthOptions)
         .option(NebulaOptions.GQL, gqlConfig.getGql)
+      if (gqlConfig.getSchema != null) {
+        dfReader.option(NebulaOptions.SCHEMA, gqlConfig.getSchema)
+      }
       dfReader.load()
     }
   }

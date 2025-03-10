@@ -691,12 +691,7 @@ class ReadNebulaConfig(schema: String,
 
   def getReturnCols: ListBuffer[String] = returnCols
 
-  def getReturnColsString: String = {
-    if (returnCols == null) {
-      return "$null"
-    }
-    returnCols.mkString(",")
-  }
+  def getReturnColsString: String = returnCols.mkString(",")
 
   def getPartitionNum: Int = partitionNum
 
