@@ -31,7 +31,10 @@ package object connector {
     /**
      * write dataframe into nebula vertex
      */
-    def writeVertices(): Unit = {
+    @Deprecated
+    def writeVertices(): Unit = writeNodes()
+
+    def writeNodes(): Unit = {
       assert(connectionConfig != null && writeNebulaConfig != null,
              "nebula config is not set, please call nebula() before writeVertices")
       val writeConfig = writeNebulaConfig.asInstanceOf[WriteNebulaNodeConfig]

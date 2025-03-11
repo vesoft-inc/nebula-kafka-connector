@@ -49,7 +49,9 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   val user                  : String                            = parameters.getOrElse(USER_NAME, DEFAULT_USER_NAME)
   val authOptions           : java.util.HashMap[String, Object] = {
     val authJsonString = parameters.getOrElse(AUTHOPTIONS, "")
-    JSON.parseObject(authJsonString, classOf[java.util.HashMap[String, Object]])
+    val authInfo       = JSON.parseObject(authJsonString, classOf[java.util.HashMap[String, Object]])
+    if (parameters.isDefinedAt(PASSWD)) authInfo.put("password", parameters(PASSWD))
+    authInfo
   }
   val rateLimit             : Long                              = parameters.getOrElse(RATE_LIMIT, DEFAULT_RATE_LIMIT).toString.toLong
 
@@ -70,7 +72,7 @@ class NebulaOptions(@transient val parameters: CaseInsensitiveMap[String]) exten
   require(parameters.isDefinedAt(GRAPH_ADDRESS),
           s"option $GRAPH_ADDRESS is required and can not be blank")
   var graphAddress      = parameters(GRAPH_ADDRESS)
-  val schema = parameters.getOrElse[String](SCHEMA, null)
+  val schema            = parameters.getOrElse[String](SCHEMA, null)
   var graphName: String = _
   var label    : String = _
   if (!dataType.equalsIgnoreCase(DataTypeEnum.GQL.toString)) {
