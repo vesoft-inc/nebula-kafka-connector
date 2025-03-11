@@ -88,7 +88,7 @@ object NebulaSparkWriterExample {
       .withWriteMode(WriteMode.INSERTIGNORE)
       .withBatchSize(10)
       .build()
-    df.write.nebula(getNebulaConnectionConfig, nebulaWriteNodeConfig).writeVertices()
+    df.write.nebula(getNebulaConnectionConfig, nebulaWriteNodeConfig).writeNodes()
   }
 
   /**
