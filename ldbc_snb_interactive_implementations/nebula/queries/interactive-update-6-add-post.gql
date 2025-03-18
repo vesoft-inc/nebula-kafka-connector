@@ -1,9 +1,0 @@
-USE $graphName
-INSERT OR IGNORE (@Post{id: $postId,
-              creationDate: local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S"),
-              locationIP: $locationIP,
-              browserUsed: $browserUsed,
-              language: $language,
-              content: $content,
-              imageFile: $imageFile,
-              `length`: $length})

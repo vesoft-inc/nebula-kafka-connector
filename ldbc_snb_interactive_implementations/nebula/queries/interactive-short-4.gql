@@ -1,9 +1,0 @@
-// IS4. Content of a message
-/*
-:param messageId: 206158431836
- */
-USE $graphName
-MATCH (m:Message WHERE m.id = $messageId)
-RETURN
-   cast(m.creationDate as local datetime) as messageCreationDate,
-   COALESCE(m.content,m.imageFile) AS messageContent

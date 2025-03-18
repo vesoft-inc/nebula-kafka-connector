@@ -1,2 +1,0 @@
-USE $graphName
-INSERT OR IGNORE (@Forum{id:$forumId, title: $forumTitle, creationDate: local_datetime($creationDate, "%Y-%m-%dT%H:%M:%S")})

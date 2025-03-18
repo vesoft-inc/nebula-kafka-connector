@@ -1,3 +1,0 @@
-USE $graphName
-MATCH (a@Forum{id: $forumId}),(b@Person{id:$personId})
-INSERT OR IGNORE (a)-[@FORUM_HAS_MEMBER_PERSON{joinDate: local_datetime($joinDate, "%Y-%m-%dT%H:%M:%S")}]->(b)

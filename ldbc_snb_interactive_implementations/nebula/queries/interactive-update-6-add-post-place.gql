@@ -1,3 +1,0 @@
-USE $graphName
-MATCH (a@Post{id: $postId}),(b@Country{id: $countryId})
-INSERT OR IGNORE (a)-[@POST_IS_LOCATED_IN_COUNTRY{}]->(b)

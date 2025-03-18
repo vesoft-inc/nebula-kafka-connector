@@ -1,3 +1,0 @@
-USE $graphName
-MATCH (a@Comment{id: $commentId}),(b@Post{id: $replyToPostId})
-INSERT OR IGNORE (a)-[@COMMENT_REPLY_OF_POST{}]->(b)

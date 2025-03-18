@@ -1,9 +1,0 @@
-{"src":12,"dst":13,"followness":34, "likeness": 1.0, "name1": "Tom", "name2": "Bob"}
-{"src":12,"dst":14,"followness":33, "likeness": 2.0, "name1": "Tom", "name2": "Jane"}
-{"src":12,"dst":15,"followness":32, "likeness": 3.0, "name1": "Tom", "name2": "Jena"}
-{"src":12,"dst":16,"followness":31, "likeness": 4.0, "name1": "Tom", "name2": "Nic"}
-{"src":12,"dst":17,"followness":30, "likeness": 5.0, "name1": "Tom", "name2": "Mei"}
-{"src":12,"dst":18,"followness":29, "likeness": 6.0, "name1": "Tom", "name2": "HH"}
-{"src":12,"dst":19,"followness":28, "likeness": 7.0, "name1": "Tom", "name2": "Tyler"}
-{"src":12,"dst":20,"followness":27, "likeness": 8.0, "name1": "Tom", "name2": "Ber"}
-{"src":13,"dst":21,"followness":26, "likeness": 9.0, "name1": "Bob", "name2": "Mercy"}

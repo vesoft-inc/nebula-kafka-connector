@@ -1,5 +1,0 @@
-## Append samples of your project ##
-resources:
-- apps_v2alpha1_nebulametad.yaml
-- apps_v2alpha1_nebulacluster.yaml
-#+kubebuilder:scaffold:manifestskustomizesamples
