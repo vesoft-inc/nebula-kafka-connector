@@ -23,10 +23,10 @@ import java.util.regex.Pattern;
  * NebulaGraph graph client provider, responsible for sending request with graphd server.
  */
 public class NebulaGraphProvider implements Serializable {
-    private final String host;
-    private final String user;
+    private final String              host;
+    private final String              user;
     private final Map<String, Object> authOptions;
-    private NebulaClient client = null;
+    private       NebulaClient        client = null;
 
     public NebulaGraphProvider(NebulaSinkConnectConfig config) {
         this.host = config.graphServers;
@@ -92,9 +92,9 @@ public class NebulaGraphProvider implements Serializable {
      */
     public NebulaNodeSchema getNodeSchema(String graphName, String nodeType)
             throws IOErrorException, NoValidSessionException {
-        NebulaNodeSchema nodeSchema = new NebulaNodeSchema();
-        Map<String, String> schema = new HashMap<>();
-        String graphType = getGraphType(graphName);
+        NebulaNodeSchema    nodeSchema = new NebulaNodeSchema();
+        Map<String, String> schema     = new HashMap<>();
+        String              graphType  = getGraphType(graphName);
 
         ResultSet result = client.execute(
                 String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType));
@@ -103,7 +103,7 @@ public class NebulaGraphProvider implements Serializable {
                     "node type " + nodeType + " does not exist in " + graphName);
         }
 
-        String pk = null;
+        String pk         = null;
         String pkDataType = null;
         while (result.hasNext()) {
             ResultSet.Record record = result.next();
@@ -134,7 +134,7 @@ public class NebulaGraphProvider implements Serializable {
 
         String descEdgeType = String.format(
                 "CALL describe_graph_type('%s') filter type_name='%s' return type_pattern "
-                        + "next CALL describe_edge_type('%s','%s') return *",
+                        + "next OPTIONAL CALL describe_edge_type('%s','%s') return *",
                 graphType, edgeType, graphType, edgeType);
 
         ResultSet result = client.execute(descEdgeType);
@@ -149,17 +149,20 @@ public class NebulaGraphProvider implements Serializable {
             if (edgeTypePattern == null) {
                 edgeTypePattern = record.get("type_pattern").asString();
             }
-            schema.put(record.get("property_name").asString(), record.get("data_type").asString());
+            if (!record.get("property_name").isNull()) {
+                schema.put(record.get("property_name").asString(),
+                        record.get("data_type").asString());
+            }
         }
 
         // get the src node type and dst node type according to edge pattern
-        String srcNodeType = null;
-        String dstNodeType = null;
-        String edgeDirectionPattern = "\\((.*?)\\)-\\[.*?\\]->\\((.*?)\\)";
-        String edgeUnDirectionPattern = "\\((.*?)\\)~\\[.*?\\]~\\((.*?)\\)";
-        Pattern patternWithEdgeDirection = Pattern.compile(edgeDirectionPattern);
+        String  srcNodeType                 = null;
+        String  dstNodeType                 = null;
+        String  edgeDirectionPattern        = "\\((.*?)\\)-\\[.*?\\]->\\((.*?)\\)";
+        String  edgeUnDirectionPattern      = "\\((.*?)\\)~\\[.*?\\]~\\((.*?)\\)";
+        Pattern patternWithEdgeDirection    = Pattern.compile(edgeDirectionPattern);
         Pattern patternWithoutEdgeDirection = Pattern.compile(edgeUnDirectionPattern);
-        Matcher matcherWithEdgeDirection = patternWithEdgeDirection.matcher(edgeTypePattern);
+        Matcher matcherWithEdgeDirection    = patternWithEdgeDirection.matcher(edgeTypePattern);
         Matcher matcherWithoutEdgeDirection = patternWithoutEdgeDirection.matcher(edgeTypePattern);
         if (matcherWithEdgeDirection.matches()) {
             srcNodeType = matcherWithEdgeDirection.group(1);
@@ -195,7 +198,7 @@ public class NebulaGraphProvider implements Serializable {
      */
     private String getGraphType(String graphName) throws IOErrorException {
         ResultSet resultSet = client.execute("DESCRIBE GRAPH " + graphName);
-        String graphType;
+        String    graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
             graphType = resultSet.next().values().get(1).asString();
         } else {
