@@ -1,0 +1,2 @@
+CREATE GRAPH TYPE test_type AS {NODE TYPE person(LABEL person{id STRING PRIMARY KEY, name string, age int64})}
+CREATE GRAPH test TYPED test_type
