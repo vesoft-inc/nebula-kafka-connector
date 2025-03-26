@@ -13,6 +13,7 @@ import com.vesoft.nebula.driver.graph.net.NebulaClient;
 import com.vesoft.nebula.driver.graph.scan.ScanEdgeResultIterator;
 import com.vesoft.nebula.driver.graph.scan.ScanNodeResultIterator;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,7 +42,7 @@ public class NebulaGraphProvider implements Serializable {
             throw new RuntimeException("auth failed, please check your user and passwd");
         } catch (IOErrorException e) {
             throw new RuntimeException("connect to NebulaGraph server failed, please check "
-                    + "the connectivity between client and server.", e);
+                                               + "the connectivity between client and server.", e);
         }
     }
 
@@ -58,7 +59,7 @@ public class NebulaGraphProvider implements Serializable {
             throw new RuntimeException("auth failed, please check your user and passwd");
         } catch (IOErrorException e) {
             throw new RuntimeException("connect to NebulaGraph server failed, please check "
-                    + "the connectivity between client and server.", e);
+                                               + "the connectivity between client and server.", e);
         }
     }
 
@@ -103,19 +104,16 @@ public class NebulaGraphProvider implements Serializable {
                     "node type " + nodeType + " does not exist in " + graphName);
         }
 
-        String pk         = null;
-        String pkDataType = null;
+        List<String> pks = new ArrayList<>();
         while (result.hasNext()) {
             ResultSet.Record record = result.next();
             schema.put(record.get("property_name").asString(), record.get("data_type").asString());
             if ("Y".equals(record.get("primary_key").asString())) {
-                pk = record.get("property_name").asString();
-                pkDataType = record.get("data_type").asString();
+                pks.add(record.get("property_name").asString());
             }
         }
         nodeSchema.setNodeTypeName(nodeType);
-        nodeSchema.setNodePkName(pk);
-        nodeSchema.setNodePkType(pkDataType);
+        nodeSchema.setPkNames(pks);
         nodeSchema.setNodeProperties(schema);
         return nodeSchema;
     }
@@ -151,7 +149,7 @@ public class NebulaGraphProvider implements Serializable {
             }
             if (!record.get("property_name").isNull()) {
                 schema.put(record.get("property_name").asString(),
-                        record.get("data_type").asString());
+                           record.get("data_type").asString());
             }
         }
 
@@ -174,17 +172,18 @@ public class NebulaGraphProvider implements Serializable {
             throw new RuntimeException("Cannot parse the edge type pattern.");
         }
 
-        NebulaNodeSchema srcNodeSchema = getNodeSchema(graphName, srcNodeType);
-        NebulaNodeSchema dstNodeSchema = getNodeSchema(graphName, dstNodeType);
-
         NebulaEdgeSchema edgeSchema = new NebulaEdgeSchema();
         edgeSchema.setEdgeTypeName(edgeType);
         edgeSchema.setSourceNodeTypeName(srcNodeType);
-        edgeSchema.setSourceNodePkName(srcNodeSchema.getNodePkName());
-        edgeSchema.setSourceNodePkType(srcNodeSchema.getNodePkType());
         edgeSchema.setTargetNodeTypeName(dstNodeType);
-        edgeSchema.setTargetNodePkName(dstNodeSchema.getNodePkName());
-        edgeSchema.setTargetNodePkType(dstNodeSchema.getNodePkType());
+        NebulaNodeSchema srcNodeSchema = getNodeSchema(graphName, srcNodeType);
+        NebulaNodeSchema dstNodeSchema = getNodeSchema(graphName, dstNodeType);
+        for (String pk : srcNodeSchema.getPkNames()) {
+            edgeSchema.getSourcePkNameAndType().put(pk, srcNodeSchema.getNodeProperties().get(pk));
+        }
+        for (String pk : dstNodeSchema.getPkNames()) {
+            edgeSchema.getTargetPkNameAndType().put(pk, dstNodeSchema.getNodeProperties().get(pk));
+        }
         edgeSchema.setProperties(schema);
         return edgeSchema;
     }

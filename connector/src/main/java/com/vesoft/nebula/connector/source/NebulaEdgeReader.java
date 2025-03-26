@@ -65,8 +65,13 @@ public class NebulaEdgeReader extends NebulaReader {
             throw new RuntimeException(e);
         }
         Map<String, String> props = schema.getProperties();
-        props.put(schema.getSourceNodePkName(), schema.getSourceNodePkType());
-        props.put(schema.getTargetNodePkName(), schema.getTargetNodePkType());
+
+        for (String pk : schema.getSourcePkNameAndType().keySet()) {
+            props.put("src_" + pk, schema.getSourcePkNameAndType().get(pk));
+        }
+        for (String pk : schema.getTargetPkNameAndType().keySet()) {
+            props.put("dst_" + pk, schema.getTargetPkNameAndType().get(pk));
+        }
         edgeSchema = props;
         return edgeSchema;
     }

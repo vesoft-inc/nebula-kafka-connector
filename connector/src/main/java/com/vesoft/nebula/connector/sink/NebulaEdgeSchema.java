@@ -1,19 +1,19 @@
 
 package com.vesoft.nebula.connector.sink;
 
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NebulaEdgeSchema {
-    private String edgeTypeName;
-    private String sourceNodeTypeName;
-    private String sourceNodePkName;
-    private String sourceNodePkType;
-    private String targetNodePkName;
-    private String targetNodeTypeName;
-    private String targetNodePkType;
+    private String       edgeTypeName;
+    private String       sourceNodeTypeName;
+    private Map<String, String> sourcePkNameAndType = new HashMap<>();
+    private String       targetNodeTypeName;
+    private Map<String, String> targetPkNameAndType = new HashMap<>();
 
     // map of property name and property data type
-    private Map<String,String> properties;
+    private Map<String, String> properties = new HashMap<>();
 
     public String getEdgeTypeName() {
         return edgeTypeName;
@@ -31,21 +31,6 @@ public class NebulaEdgeSchema {
         this.sourceNodeTypeName = sourceNodeTypeName;
     }
 
-    public String getSourceNodePkName() {
-        return sourceNodePkName;
-    }
-
-    public void setSourceNodePkName(String sourceNodePkName) {
-        this.sourceNodePkName = sourceNodePkName;
-    }
-
-    public String getSourceNodePkType() {
-        return sourceNodePkType;
-    }
-
-    public void setSourceNodePkType(String sourceNodePkType) {
-        this.sourceNodePkType = sourceNodePkType;
-    }
 
     public String getTargetNodeTypeName() {
         return targetNodeTypeName;
@@ -55,21 +40,6 @@ public class NebulaEdgeSchema {
         this.targetNodeTypeName = targetNodeTypeName;
     }
 
-    public String getTargetNodePkName() {
-        return targetNodePkName;
-    }
-
-    public void setTargetNodePkName(String targetNodePkName) {
-        this.targetNodePkName = targetNodePkName;
-    }
-
-    public String getTargetNodePkType() {
-        return targetNodePkType;
-    }
-
-    public void setTargetNodePkType(String targetNodePkType) {
-        this.targetNodePkType = targetNodePkType;
-    }
 
     public Map<String, String> getProperties() {
         return properties;
@@ -79,17 +49,19 @@ public class NebulaEdgeSchema {
         this.properties = properties;
     }
 
-    @Override
-    public String toString() {
-        return "NebulaEdgeSchema{"
-                + "edgeTypeName='" + edgeTypeName + '\''
-                + ", sourceNodeTypeName='" + sourceNodeTypeName + '\''
-                + ", sourceNodePkName='" + sourceNodePkName + '\''
-                + ", sourceNodePkType='" + sourceNodePkType + '\''
-                + ", targetNodeTypeName='" + targetNodeTypeName + '\''
-                + ", targetNodePkType='" + targetNodePkName + '\''
-                + ", targetNodePkType='" + targetNodePkType + '\''
-                + ", properties=" + properties
-                + '}';
+    public Map<String, String> getSourcePkNameAndType() {
+        return sourcePkNameAndType;
+    }
+
+    public void setSourcePkNameAndType(Map<String, String> sourcePkNameAndType) {
+        this.sourcePkNameAndType = sourcePkNameAndType;
+    }
+
+    public Map<String, String> getTargetPkNameAndType() {
+        return targetPkNameAndType;
+    }
+
+    public void setTargetPkNameAndType(Map<String, String> targetPkNameAndType) {
+        this.targetPkNameAndType = targetPkNameAndType;
     }
 }

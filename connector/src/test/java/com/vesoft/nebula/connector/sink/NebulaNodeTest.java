@@ -33,8 +33,7 @@ public class NebulaNodeTest {
         schema.put("weight", "INT32");
         schema.put("gender", "STRING");
         nodeSchema.setNodeTypeName("player");
-        nodeSchema.setNodePkName("id");
-        nodeSchema.setNodePkType("STRING");
+        nodeSchema.setPkNames(Arrays.asList("id"));
         nodeSchema.setNodeProperties(schema);
     }
 
@@ -130,8 +129,8 @@ public class NebulaNodeTest {
                 + "(\"1\",\"Tom\",18,100,\"male\") \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (v@player) WHERE v.id=r.id \n"
-                + "SET v.name=r.name,v.age=r.age,v.weight=r.weight,v.gender=r.gender";
+                + "OPTIONAL MATCH (n_v@player) WHERE n_v.id=r.id \n"
+                + "SET n_v.name=r.name,n_v.age=r.age,n_v.weight=r.weight,n_v.gender=r.gender";
         String expectChars = expectStatement.chars()
                 .sorted()
                 .collect(StringBuilder::new,
@@ -158,8 +157,8 @@ public class NebulaNodeTest {
                 + "(\"1\",\"Tom\",18,100,\"male\") \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (v@player) WHERE v.id=r.id \n"
-                + "DELETE v";
+                + "OPTIONAL MATCH (n_v@player) WHERE n_v.id=r.id \n"
+                + "DELETE n_v";
         String expectChars = expectStatement.chars()
                 .sorted()
                 .collect(StringBuilder::new,
@@ -187,8 +186,8 @@ public class NebulaNodeTest {
                 + "(\"1\",\"Tom\",18,100,\"male\") \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (v@player) WHERE v.id=r.id \n"
-                + "DETACH DELETE v";
+                + "OPTIONAL MATCH (n_v@player) WHERE n_v.id=r.id \n"
+                + "DETACH DELETE n_v";
         String expectChars = expectStatement.chars()
                 .sorted()
                 .collect(StringBuilder::new,

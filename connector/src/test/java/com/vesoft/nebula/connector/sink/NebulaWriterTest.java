@@ -1,18 +1,19 @@
 package com.vesoft.nebula.connector.sink;
 
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PK;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PK;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEYS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PKS;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.anyString;
 
@@ -50,7 +51,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(NebulaWriter.class)
 public class NebulaWriterTest {
-    private Map<String, Object> props = new HashMap<>();
+    private Map<String, Object>     props = new HashMap<>();
     private NebulaSinkConnectConfig config;
     @Mock
     NebulaGraphProvider mockProvider;
@@ -61,16 +62,17 @@ public class NebulaWriterTest {
     public void setUp() throws Exception {
         props.put(CONNECT_GRAPH_ADDRESS, "127.0.0.1:9669");
         props.put(CONNECT_GRAPH_NAME, "nba");
+        props.put(CONNECT_GRAPH_PASSWD, "nebula");
         props.put(CONNECT_GRAPH_DATA_TYPE, "BOTH");
         // node config
         props.put(CONNECT_GRAPH_NODE_TYPE_NAME, "person");
         props.put(CONNECT_GRAPH_EDGE_TYPE_NAME, "friend");
-        props.put(CONNECT_PRIMARY_KEY, "id");
+        props.put(CONNECT_PRIMARY_KEYS, "id");
         props.put(CONNECT_NEBULA_NODE_PROPERTIES, Arrays.asList("Name", "Age"));
         props.put(CONNECT_KAFKA_NODE_PROPERTIES, Arrays.asList("name", "age"));
         // edge config
-        props.put(CONNECT_SRC_PK, "src");
-        props.put(CONNECT_DST_PK, "dst");
+        props.put(CONNECT_SRC_PKS, "src");
+        props.put(CONNECT_DST_PKS, "dst");
         props.put(CONNECT_NEBULA_EDGE_PROPERTIES, Arrays.asList("Degree", "Type"));
         props.put(CONNECT_KAFKA_EDGE_PROPERTIES, Arrays.asList("degree", "type"));
 
@@ -91,7 +93,9 @@ public class NebulaWriterTest {
         ExecuteResponse response = ExecuteResponse
                 .newBuilder()
                 .setStatus(Status.newBuilder()
-                        .setCode(ByteString.copyFrom("00000", Charsets.UTF_8)).build()).build();
+                                   .setCode(ByteString.copyFrom("00000", Charsets.UTF_8))
+                                   .build())
+                .build();
         ResultSet result = new ResultSet(response);
         try {
             PowerMockito.when(mockProvider.execute(anyString())).thenReturn(result);
@@ -136,8 +140,8 @@ public class NebulaWriterTest {
             Method getEdgeMethod = writer.getClass().getDeclaredMethod("getEdge", Map.class);
             getEdgeMethod.setAccessible(true);
             NebulaEdge edge = (NebulaEdge) getEdgeMethod.invoke(writer, properties);
-            assertEquals("1", edge.getSrcPk());
-            assertEquals("2", edge.getDstPk());
+            assertEquals("1", edge.getSrcPks().get("src"));
+            assertEquals("2", edge.getDstPks().get("dst"));
             assert (edge.getProperties().containsKey("Degree"));
             assert (edge.getProperties().containsKey("Type"));
             assert (edge.getProperties().containsValue(10));
@@ -160,7 +164,7 @@ public class NebulaWriterTest {
         properties1.put("age", "10");
         properties1.put("weight", "12");
         List<NebulaNode> nodes = new ArrayList<>();
-        NebulaNode node1 = new NebulaNode(properties1);
+        NebulaNode       node1 = new NebulaNode(properties1);
         nodes.add(node1);
         Map<String, String> properties2 = new HashMap<>();
         properties2.put("name", "\"B\"");
@@ -177,14 +181,18 @@ public class NebulaWriterTest {
             String expect =
                     "USE `nba` INSERT NODE `person` ({`name`:\"A\",`age`:\"10\",`weight`:\"12\"}),"
                             + "({`name`:\"B\",`age`:\"20\",`weight`:\"22\"})";
-            String statementStr = statement.chars().sorted().collect(StringBuilder::new,
-                    StringBuilder::appendCodePoint, StringBuilder::append).toString();
+            String statementStr = statement
+                    .chars()
+                    .sorted()
+                    .collect(StringBuilder::new,
+                             StringBuilder::appendCodePoint, StringBuilder::append)
+                    .toString();
             String expectStr = expect
                     .chars()
                     .sorted()
                     .collect(StringBuilder::new,
-                            StringBuilder::appendCodePoint,
-                            StringBuilder::append)
+                             StringBuilder::appendCodePoint,
+                             StringBuilder::append)
                     .toString();
             assertEquals(statementStr, expectStr);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
@@ -195,16 +203,25 @@ public class NebulaWriterTest {
 
     @Test
     public void testGetEdgeStatement() {
-        List<NebulaEdge> edges = new ArrayList<>();
         Map<String, String> properties1 = new HashMap<>();
         properties1.put("degree", "1");
         properties1.put("type", "\"friend\"");
-        NebulaEdge edge1 = new NebulaEdge("1", "2", properties1);
+        Map<String, String> srcPks = new HashMap<>();
+        srcPks.put("1", "STRING");
+        Map<String, String> dstPks = new HashMap<>();
+        dstPks.put("2", "STRING");
+        NebulaEdge       edge1 = new NebulaEdge(srcPks, dstPks, properties1);
+        List<NebulaEdge> edges = new ArrayList<>();
         edges.add(edge1);
+
+        Map<String, String> srcPks2 = new HashMap<>();
+        srcPks2.put("2", "STRING");
+        Map<String, String> dstPks2 = new HashMap<>();
+        dstPks2.put("1", "STRING");
         Map<String, String> properties2 = new HashMap<>();
         properties2.put("degree", "2");
         properties2.put("type", "\"friend\"");
-        NebulaEdge edge2 = new NebulaEdge("2", "3", properties2);
+        NebulaEdge edge2 = new NebulaEdge(srcPks2, dstPks2, properties2);
         edges.add(edge2);
 
         try {
@@ -216,14 +233,17 @@ public class NebulaWriterTest {
             String expect = "USE `nba` INSERT EDGE `friend` "
                     + "({`srcId`:1})-[{`degree`:\"1\",`type`:\"friend\"}]->({`dstId`:2}),"
                     + "({`srcId`:2})-[{`degree`:\"2\",`type`:\"friend\"}]->({`dstId`:3})";
-            String statementStr = statement.chars().sorted().collect(StringBuilder::new,
-                    StringBuilder::appendCodePoint, StringBuilder::append).toString();
+            String statementStr = statement.chars()
+                    .sorted()
+                    .collect(StringBuilder::new,
+                             StringBuilder::appendCodePoint,
+                             StringBuilder::append).toString();
             String expectStr = expect
                     .chars()
                     .sorted()
                     .collect(StringBuilder::new,
-                            StringBuilder::appendCodePoint,
-                            StringBuilder::append)
+                             StringBuilder::appendCodePoint,
+                             StringBuilder::append)
                     .toString();
             assertEquals(statementStr, expectStr);
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
@@ -263,9 +283,12 @@ public class NebulaWriterTest {
                 .put("degree", 50)
                 .put("type", "friend");
 
-        SinkRecord sinkRecord1 = new SinkRecord("test", 0, null, null, SCHEMA, struct1, 2);
-        SinkRecord sinkRecord2 = new SinkRecord("test", 0, null, null, SCHEMA, struct2, 2);
-        SinkRecord nullSinkRecord = new SinkRecord("test", 0, null, null, SCHEMA, null, 3);
+        SinkRecord sinkRecord1 = new SinkRecord("test", 0,
+                                                null, null, SCHEMA, struct1, 2);
+        SinkRecord sinkRecord2 = new SinkRecord("test", 0,
+                                                null, null, SCHEMA, struct2, 2);
+        SinkRecord nullSinkRecord = new SinkRecord("test", 0,
+                                                   null, null, SCHEMA, null, 3);
         List<SinkRecord> records = new ArrayList<>();
         records.add(sinkRecord1);
         records.add(sinkRecord2);

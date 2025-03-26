@@ -10,23 +10,27 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NebulaEdges {
+    private static final String SRC_NODE_ALIAS = "n_src";
+    private static final String DST_NODE_ALIAS = "n_dst";
+    private static final String EDGE_ALIAS     = "n_e";
+
     private NebulaEdgeSchema edgeSchema;
-    private String           kafkaSrcField;
-    private String           kafkaDstField;
+    private List<String>     kafkaSrcFields;
+    private List<String>     kafkaDstFields;
     private List<String>     kafkaEdgePropertyNames;
     private List<String>     nebulaEdgePropertyNames;
     private List<NebulaEdge> edges;
     private List<String>     propertyNames = new ArrayList<>();
 
     public NebulaEdges(NebulaEdgeSchema edgeSchema,
-                       String kafkaSrcField,
-                       String kafkaDstField,
+                       List<String> kafkaSrcFields,
+                       List<String> kafkaDstFields,
                        List<String> kafkaEdgePropertyNames,
                        List<String> nebulaEdgePropertyNames,
                        List<NebulaEdge> edges) {
         this.edgeSchema = edgeSchema;
-        this.kafkaSrcField = kafkaSrcField;
-        this.kafkaDstField = kafkaDstField;
+        this.kafkaSrcFields = kafkaSrcFields;
+        this.kafkaDstFields = kafkaDstFields;
         this.kafkaEdgePropertyNames = kafkaEdgePropertyNames;
         this.nebulaEdgePropertyNames = nebulaEdgePropertyNames;
         this.edges = edges;
@@ -59,23 +63,25 @@ public class NebulaEdges {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (src_node@%s) WHERE src_node.%s=r.%s "
-                + "OPTIONAL MATCH (dst_node@%s) WHERE dst_node.%s=r.%s \n"
-                + "%s (src_node)-[@%s{%s}]->(dst_node)";
+                + "OPTIONAL MATCH (%s@%s) WHERE %s "
+                + "OPTIONAL MATCH (%s@%s) WHERE %s \n"
+                + "%s (%s)-[@%s{%s}]->(%s)";
 
         return String.format(format,
                              getTableHeaders(),
                              getTableValues(),
                              graphName,
+                             SRC_NODE_ALIAS,
                              edgeSchema.getSourceNodeTypeName(),
-                             edgeSchema.getSourceNodePkName(),
-                             kafkaSrcField,
+                             getSrcPkFilter(),
+                             DST_NODE_ALIAS,
                              edgeSchema.getTargetNodeTypeName(),
-                             edgeSchema.getTargetNodePkName(),
-                             kafkaDstField,
+                             getDstPkFilter(),
                              insertModeString,
+                             SRC_NODE_ALIAS,
                              edgeSchema.getEdgeTypeName(),
-                             getProperties());
+                             getProperties(),
+                             DST_NODE_ALIAS);
     }
 
 
@@ -84,20 +90,21 @@ public class NebulaEdges {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (src_node@%s)-[e@%s]->(dst_node@%s) "
-                + "WHERE src_node.%s=r.%s AND dst_node.%s=r.%s \n"
+                + "OPTIONAL MATCH (%s@%s)-[%s@%s]->(%s@%s) "
+                + "WHERE %s AND %s \n"
                 + "SET %s";
         return String.format(format,
                              getTableHeaders(),
                              getTableValues(),
                              graphName,
+                             SRC_NODE_ALIAS,
                              edgeSchema.getSourceNodeTypeName(),
+                             EDGE_ALIAS,
                              edgeSchema.getEdgeTypeName(),
+                             DST_NODE_ALIAS,
                              edgeSchema.getTargetNodeTypeName(),
-                             edgeSchema.getSourceNodePkName(),
-                             kafkaSrcField,
-                             edgeSchema.getTargetNodePkName(),
-                             kafkaDstField,
+                             getSrcPkFilter(),
+                             getDstPkFilter(),
                              getUpdateProperties());
     }
 
@@ -106,32 +113,33 @@ public class NebulaEdges {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (src_node@%s)-[e@%s]->(dst_node@%s) "
-                + "WHERE src_node.%s=r.%s AND dst_node.%s=r.%s \n"
-                + "DELETE e";
+                + "OPTIONAL MATCH (%s@%s)-[%s@%s]->(%s@%s) "
+                + "WHERE %s AND %s \n"
+                + "DELETE %s";
         return String.format(format,
                              getTableHeaders(),
                              getTableValues(),
                              graphName,
+                             SRC_NODE_ALIAS,
                              edgeSchema.getSourceNodeTypeName(),
+                             EDGE_ALIAS,
                              edgeSchema.getEdgeTypeName(),
+                             DST_NODE_ALIAS,
                              edgeSchema.getTargetNodeTypeName(),
-                             edgeSchema.getSourceNodePkName(),
-                             kafkaSrcField,
-                             edgeSchema.getTargetNodePkName(),
-                             kafkaDstField);
+                             getSrcPkFilter(),
+                             getDstPkFilter(),
+                             EDGE_ALIAS);
     }
 
     private String getTableHeaders() {
         List<String> headerNames = new ArrayList<>();
-        headerNames.add(kafkaSrcField);
-        headerNames.add(kafkaDstField);
-        for (String kafkaFieldName : kafkaEdgePropertyNames) {
-            if (kafkaFieldName.equals(kafkaSrcField) || kafkaFieldName.equals(kafkaDstField)) {
-                continue;
-            }
-            headerNames.add(kafkaFieldName);
+        for (String pk : edgeSchema.getSourcePkNameAndType().keySet()) {
+            headerNames.add("src_" + pk);
         }
+        for (String pk : edgeSchema.getTargetPkNameAndType().keySet()) {
+            headerNames.add("dst_" + pk);
+        }
+        headerNames.addAll(kafkaEdgePropertyNames);
         return String.join(",", headerNames);
     }
 
@@ -139,19 +147,16 @@ public class NebulaEdges {
         List<String> tableRows = new ArrayList<>();
         for (NebulaEdge edge : edges) {
             List<String> rowValues = new ArrayList<>();
-            rowValues.add(edge.getSrcPk());
-            rowValues.add(edge.getDstPk());
-            for (String propName : nebulaEdgePropertyNames) {
-                int index = nebulaEdgePropertyNames.indexOf(propName);
-                if (kafkaEdgePropertyNames.get(index).equals(kafkaSrcField)
-                        || kafkaEdgePropertyNames.get(index).equals(kafkaDstField)) {
-                    continue;
-                }
-                rowValues.add(edge.getProperties().get(propName).toString());
+            for (String pk : edgeSchema.getSourcePkNameAndType().keySet()) {
+                rowValues.add(edge.getSrcPks().get(pk));
             }
-            StringBuilder rowValueString = new StringBuilder();
-            rowValueString.append("(").append(String.join(",", rowValues)).append(")");
-            tableRows.add(rowValueString.toString());
+            for (String pk : edgeSchema.getTargetPkNameAndType().keySet()) {
+                rowValues.add(edge.getDstPks().get(pk));
+            }
+            for (String propName : nebulaEdgePropertyNames) {
+                rowValues.add(edge.getProperties().get(propName));
+            }
+            tableRows.add("(" + String.join(",", rowValues) + ")");
         }
         return String.join(",", tableRows);
     }
@@ -175,7 +180,8 @@ public class NebulaEdges {
         StringBuilder propertyString = new StringBuilder();
         for (int index = 0; index < nebulaEdgePropertyNames.size(); index++) {
             propertyString
-                    .append("e.")
+                    .append(EDGE_ALIAS)
+                    .append(".")
                     .append(nebulaEdgePropertyNames.get(index))
                     .append("=r.")
                     .append(kafkaEdgePropertyNames.get(index))
@@ -187,5 +193,34 @@ public class NebulaEdges {
         return propertyString.toString();
     }
 
+    private String getSrcPkFilter() {
+        StringBuilder pkFilterString = new StringBuilder();
+        for (String srcPk : edgeSchema.getSourcePkNameAndType().keySet()) {
+            if (pkFilterString.length() > 0) {
+                pkFilterString.append(" AND ");
+            }
+            pkFilterString.append(SRC_NODE_ALIAS)
+                    .append(".")
+                    .append(srcPk)
+                    .append("=r.src_")
+                    .append(srcPk);
+        }
+        return pkFilterString.toString();
+    }
 
+
+    private String getDstPkFilter() {
+        StringBuilder pkFilterString = new StringBuilder();
+        for (String dstPk : edgeSchema.getTargetPkNameAndType().keySet()) {
+            if (pkFilterString.length() > 0) {
+                pkFilterString.append(" AND ");
+            }
+            pkFilterString.append(DST_NODE_ALIAS)
+                    .append(".")
+                    .append(dstPk)
+                    .append("=r.dst_")
+                    .append(dstPk);
+        }
+        return pkFilterString.toString();
+    }
 }

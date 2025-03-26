@@ -4,6 +4,9 @@ package com.vesoft.nebula.connector.util;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_DST_PKS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_PRIMARY_KEYS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_SRC_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_MODE;
@@ -19,7 +22,9 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT
 
 import com.alibaba.fastjson.JSON;
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ConfigUtils {
@@ -42,7 +47,7 @@ public class ConfigUtils {
 
     public static int retryTimes(Map<?, ?> connectorProps) {
         if (connectorProps.containsKey(CONNECT_SINK_RETRY_TIMES)) {
-            return (Integer) connectorProps.get(CONNECT_SINK_RETRY_TIMES);
+            return Integer.parseInt(connectorProps.get(CONNECT_SINK_RETRY_TIMES).toString());
         } else {
             return DEFAULT_CONNECT_RETRY_TIMES;
         }
@@ -50,7 +55,8 @@ public class ConfigUtils {
 
     public static long intervalTimeMill(Map<?, ?> connectorProps) {
         if (connectorProps.containsKey(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY)) {
-            return (Long) connectorProps.get(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY);
+            return Long.parseLong(connectorProps.get(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY)
+                                        .toString());
         } else {
             return DEFAULT_INTERVAL_BETWEEN_RETRY;
         }
@@ -87,7 +93,7 @@ public class ConfigUtils {
 
     public static int connectTimeout(Map<?, ?> connectorProps) {
         if (connectorProps.containsKey(CONNECT_CONNECT_TIMEOUT)) {
-            return (Integer) connectorProps.get(CONNECT_CONNECT_TIMEOUT);
+            return Integer.parseInt(connectorProps.get(CONNECT_CONNECT_TIMEOUT).toString());
         } else {
             return DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
         }
@@ -95,7 +101,7 @@ public class ConfigUtils {
 
     public static int requestTimeout(Map<?, ?> connectorProps) {
         if (connectorProps.containsKey(CONNECT_REQUEST_TIMEOUT)) {
-            return (Integer) connectorProps.get(CONNECT_REQUEST_TIMEOUT);
+            return Integer.parseInt(connectorProps.get(CONNECT_REQUEST_TIMEOUT).toString());
         } else {
             return DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
         }
@@ -103,7 +109,7 @@ public class ConfigUtils {
 
     public static int sinkPartition(Map<?, ?> connectorProps) {
         if (connectorProps.containsKey(CONNECT_SINK_PARTITION)) {
-            return (Integer) connectorProps.get(CONNECT_SINK_PARTITION);
+            return Integer.parseInt(connectorProps.get(CONNECT_SINK_PARTITION).toString());
         } else {
             return DEFAULT_CONNECT_SINK_PARTITION;
         }
@@ -111,7 +117,7 @@ public class ConfigUtils {
 
     public static int batchSize(Map<?, ?> connectorProps) {
         if (connectorProps.containsKey(CONNECT_BATCH_SIZE)) {
-            return (Integer) connectorProps.get(CONNECT_BATCH_SIZE);
+            return Integer.parseInt(connectorProps.get(CONNECT_BATCH_SIZE).toString());
         } else {
             return DEFAULT_BATCH_SIZE;
         }

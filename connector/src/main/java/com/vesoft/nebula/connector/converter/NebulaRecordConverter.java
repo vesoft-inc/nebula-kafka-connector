@@ -180,7 +180,6 @@ public class NebulaRecordConverter {
      * because NebulaGraph property does not support Map type.
      */
     private static String convertMap(Object value, Schema schema) {
-        Map<String, Object> nebulaMap = new HashMap<>();
         StringBuilder sb = new StringBuilder();
         for (Map.Entry<String, Object> entry : ((Map<String, Object>) value).entrySet()) {
             sb.append(entry.getKey());

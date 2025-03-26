@@ -11,16 +11,20 @@ public class NebulaConnectConfigName {
     public static final String CONNECT_GRAPH_DATA_TYPE        = CONNECT_PREFIX + "data.type";
     public static final String CONNECT_GRAPH_NODE_TYPE_NAME   = CONNECT_PREFIX + "node.typeName";
     public static final String CONNECT_GRAPH_EDGE_TYPE_NAME   = CONNECT_PREFIX + "edge.typeName";
-    public static final String CONNECT_PRIMARY_KEY            = CONNECT_PREFIX + "node.primaryKey";
-    public static final String CONNECT_SRC_PK                 = CONNECT_PREFIX + "edge.srcPk";
-    public static final String CONNECT_DST_PK                 = CONNECT_PREFIX + "edge.dstPk";
+    public static final String CONNECT_PRIMARY_KEYS           = CONNECT_PREFIX + "node.primaryKeys";
+    public static final String CONNECT_KAFKA_PRIMARY_KEYS     = "kafka.node.primaryKeys";
+    public static final String CONNECT_SRC_PKS                = CONNECT_PREFIX + "edge.srcPks";
+    public static final String CONNECT_KAFKA_SRC_PKS          = "kafka.edge.srcPks";
+    public static final String CONNECT_DST_PKS                = CONNECT_PREFIX + "edge.dstPks";
+    public static final String CONNECT_KAFKA_DST_PKS          = "kafka.edge.dstPks";
     public static final String CONNECT_KAFKA_NODE_PROPERTIES  = "kafka.node.property.names";
     public static final String CONNECT_NEBULA_NODE_PROPERTIES = CONNECT_PREFIX
             + "node.property.names";
     public static final String CONNECT_KAFKA_EDGE_PROPERTIES  = "kafka.edge.property.names";
     public static final String CONNECT_NEBULA_EDGE_PROPERTIES = CONNECT_PREFIX
             + "edge.property.names";
-    public static final String CONNECT_CONNECT_TIMEOUT = CONNECT_PREFIX + "connect.timeout";
+    public static final String CONNECT_KAFKA_NULL_VALUE = "kafka.null.value";
+    public static final String CONNECT_CONNECT_TIMEOUT        = CONNECT_PREFIX + "connect.timeout";
     public static final String CONNECT_REQUEST_TIMEOUT        = CONNECT_PREFIX + "request.timeout";
     public static final String CONNECT_SINK_RETRY_TIMES       = CONNECT_PREFIX + "sink.retry.times";
 
@@ -31,7 +35,6 @@ public class NebulaConnectConfigName {
     public static final String CONNECT_SINK_PARTITION    = CONNECT_PREFIX + "sink.partitions";
     public static final String CONNECT_SINK_MODE         = CONNECT_PREFIX + "sink.mode";
     public static final String CONNECT_BATCH_SIZE        = CONNECT_PREFIX + "batchSize";
-    public static final String CONNECT_SINK_TOPIC_NAME   = "topic";
 
     // ######## source connect config
     public static final String CONNECT_SOURCE_NODE_TYPES   = "connect.source.nodeTypes";
@@ -55,7 +58,7 @@ public class NebulaConnectConfigName {
     public static final int     DEFAULT_CONNECT_SINK_PARTITION                = 10;
     public static final int     DEFAULT_BATCH_SIZE                            = 2000;
     public static final int     DEFAULT_CONNECT_RETRY_TIMES                   = 1;
-    public static final int     DEFAULT_INTERVAL_BETWEEN_RETRY                = 0;
+    public static final long    DEFAULT_INTERVAL_BETWEEN_RETRY                = 0;
 
 
     // ########## NebulaGraph Sink statement template

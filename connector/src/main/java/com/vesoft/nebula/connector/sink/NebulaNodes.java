@@ -10,7 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class NebulaNodes {
-    private NebulaNodeSchema nodeSchema;
+    private static final String NODE_ALIAS = "n_v";
+    private NebulaNodeSchema    nodeSchema;
     private List<NebulaNode> nodes;
 
     private List<String> propertyNames = new ArrayList<>();
@@ -67,15 +68,15 @@ public class NebulaNodes {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (v@%s) WHERE v.%s=r.%s \n"
+                + "OPTIONAL MATCH (%s@%s) WHERE %s \n"
                 + "SET %s";
         return String.format(format,
                              getTableHeaders(),
                              getTableValues(),
                              graphName,
+                             NODE_ALIAS,
                              nodeSchema.getNodeTypeName(),
-                             nodeSchema.getNodePkName(),
-                             nodeSchema.getNodePkName(),
+                             getPkFilters(),
                              getUpdateProperties());
     }
 
@@ -100,16 +101,17 @@ public class NebulaNodes {
                 + "%s \n"
                 + "USE %s \n"
                 + "FOR r IN t \n"
-                + "OPTIONAL MATCH (v@%s) WHERE v.%s=r.%s \n"
-                + "%s v";
+                + "OPTIONAL MATCH (%s@%s) WHERE %s \n"
+                + "%s %s";
         return String.format(format,
                              getTableHeaders(),
                              getTableValues(),
                              graphName,
+                             NODE_ALIAS,
                              nodeSchema.getNodeTypeName(),
-                             nodeSchema.getNodePkName(),
-                             nodeSchema.getNodePkName(),
-                             deleteModeString);
+                             getPkFilters(),
+                             deleteModeString,
+                             NODE_ALIAS);
     }
 
     private String getTableHeaders() {
@@ -122,7 +124,7 @@ public class NebulaNodes {
             List<String>  rowValues      = new ArrayList<>();
             StringBuilder rowValueString = new StringBuilder();
             for (String propName : propertyNames) {
-                rowValues.add(node.getProperties().get(propName).toString());
+                rowValues.add(node.getProperties().get(propName));
             }
             rowValueString.append("(").append(String.join(",", rowValues)).append(")");
             tableRows.add(rowValueString.toString());
@@ -132,8 +134,8 @@ public class NebulaNodes {
 
     private String getProperties() {
         StringBuilder propertyString = new StringBuilder();
-        for (String proertyName : propertyNames) {
-            propertyString.append(proertyName).append(":r.").append(proertyName).append(",");
+        for (String propertyName : propertyNames) {
+            propertyString.append(propertyName).append(":r.").append(propertyName).append(",");
         }
         if (propertyString.length() > 0) {
             propertyString.deleteCharAt(propertyString.length() - 1);
@@ -144,11 +146,12 @@ public class NebulaNodes {
     private String getUpdateProperties() {
         StringBuilder propertyString = new StringBuilder();
         for (String propertyName : propertyNames) {
-            if (propertyName.equals(nodeSchema.getNodePkName())) {
+            if (nodeSchema.getPkNames().contains(propertyName)) {
                 continue;
             }
             propertyString
-                    .append("v.")
+                    .append(NODE_ALIAS)
+                    .append(".")
                     .append(propertyName)
                     .append("=r.")
                     .append(propertyName)
@@ -158,5 +161,22 @@ public class NebulaNodes {
             propertyString.deleteCharAt(propertyString.length() - 1);
         }
         return propertyString.toString();
+    }
+
+    private String getPkFilters() {
+        StringBuilder pkFilterString = new StringBuilder();
+        for (String pk : nodeSchema.getPkNames()) {
+            pkFilterString
+                    .append(NODE_ALIAS)
+                    .append(".")
+                    .append(pk)
+                    .append("=r.")
+                    .append(pk)
+                    .append(",");
+        }
+        if (pkFilterString.length() > 0) {
+            pkFilterString.deleteCharAt(pkFilterString.length() - 1);
+        }
+        return pkFilterString.toString();
     }
 }
