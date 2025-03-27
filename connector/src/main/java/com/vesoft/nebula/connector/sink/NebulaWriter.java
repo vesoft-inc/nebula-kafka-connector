@@ -1,8 +1,6 @@
 
 package com.vesoft.nebula.connector.sink;
 
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.BATCH_INSERT_EDGE_TEMPLATE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.BATCH_INSERT_NODE_TEMPLATE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEYS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PKS;
@@ -27,7 +25,6 @@ import java.util.Map;
 import org.apache.kafka.connect.sink.SinkRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import javax.crypto.spec.PSource;
 
 /**
  * a writer to batch write the records into NebulaGraph
@@ -89,12 +86,13 @@ public class NebulaWriter {
                 } else {
                     throw new IllegalArgumentException(
                             "source node type " + nebulaEdgeSchema.getSourceNodeTypeName()
-                                    + " of " + nebulaEdgeSchema.getEdgeTypeName() +
-                                    " has multiple primary keys, please config " + CONNECT_SRC_PKS);
+                                    + " of " + nebulaEdgeSchema.getEdgeTypeName()
+                                    + " has multiple primary keys, please config "
+                                    + CONNECT_SRC_PKS);
                 }
             } else {
                 if (!nebulaEdgeSchema.getSourcePkNameAndType()
-                        .keySet().containsAll(config.srcKeys)){
+                        .keySet().containsAll(config.srcKeys)) {
                     throw new IllegalArgumentException(
                             "source node type " + nebulaEdgeSchema.getSourceNodeTypeName()
                                     + " of " + nebulaEdgeSchema.getEdgeTypeName()
@@ -106,14 +104,15 @@ public class NebulaWriter {
                     config.dstKeys.addAll(nebulaEdgeSchema.getTargetPkNameAndType().keySet());
                 } else {
                     throw new IllegalArgumentException(
-                            "target node type " + nebulaEdgeSchema.getTargetNodeTypeName() +
-                                    " of " + nebulaEdgeSchema.getEdgeTypeName() +
-                                    " has multiple primary keys, please config " + CONNECT_DST_PKS);
+                            "target node type " + nebulaEdgeSchema.getTargetNodeTypeName()
+                                    + " of " + nebulaEdgeSchema.getEdgeTypeName()
+                                    + " has multiple primary keys, please config "
+                                    + CONNECT_DST_PKS);
                 }
             } else {
                 if (!nebulaEdgeSchema.getTargetPkNameAndType()
                         .keySet()
-                        .containsAll(config.dstKeys)){
+                        .containsAll(config.dstKeys)) {
                     throw new IllegalArgumentException(
                             "target node type " + nebulaEdgeSchema.getTargetNodeTypeName()
                                     + " of " + nebulaEdgeSchema.getEdgeTypeName()
@@ -306,9 +305,6 @@ public class NebulaWriter {
         List<String> srcPkFields = config.kafkaSrcKeys;
         List<String> dstPkFields = config.kafkaDstKeys;
 
-        List<String> nebulaSrcPkNames = config.srcKeys;
-        List<String> nebulaDstPkNames = config.dstKeys;
-
         for (String srcPk : srcPkFields) {
             if (kafkaRecordProperties.get(srcPk) == null) {
                 log.error(">>>>> record {} has null value for source node primary key", srcPk);
@@ -337,6 +333,8 @@ public class NebulaWriter {
             edgeProperties.put(propName, value);
         }
 
+        List<String> nebulaSrcPkNames = config.srcKeys;
+        List<String> nebulaDstPkNames = config.dstKeys;
         Map<String, String> srcPkAndValue = new HashMap<>();
         for (int i = 0; i < nebulaSrcPkNames.size(); i++) {
             String srcValue = NebulaUtils

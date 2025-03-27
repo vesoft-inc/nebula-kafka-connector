@@ -31,5 +31,5 @@ jobs:
           gpg_passphrase: ""
           nexus_username: ${{ secrets.OSSRH_USERNAME }}
           nexus_password: ${{ secrets.OSSRH_TOKEN }}
-          maven_goals_phases: "clean deploy -Dmaven.javadoc.skip=true"
+          maven_goals_phases: "clean deploy -Dmaven.javadoc.skip=true -Dmaven.javadoc.skip=true"
 
