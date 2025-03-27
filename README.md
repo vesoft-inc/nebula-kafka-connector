@@ -83,7 +83,7 @@ execute the gql statement to create a graph with movie schema.
 ```agsl
 git clone https://github.com/vesoft-inc/nebula-ng-tools.git
 cd nebula-ng-tools/kafka-connector/connector
-mvn clean package -Dmaven.test.skip=true
+mvn clean package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
 ```
 
 after the command finished, there will be `kafka-connect-nebula-5.0-SNAPSHOT.jar` in
