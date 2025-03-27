@@ -1,15 +1,17 @@
 
 package com.vesoft.nebula.connector.sink;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class NebulaNodeSchema {
-    private String nodeTypeName;
-    private String nodePkName;
-    private String nodePkType;
+    private String       nodeTypeName;
+    private List<String> pkNames = new ArrayList<>();
 
     // map of property name and property data type
-    private Map<String, String> nodeProperties;
+    private Map<String, String> nodeProperties = new HashMap<>();
 
     public String getNodeTypeName() {
         return nodeTypeName;
@@ -19,20 +21,13 @@ public class NebulaNodeSchema {
         this.nodeTypeName = nodeTypeName;
     }
 
-    public String getNodePkName() {
-        return nodePkName;
+
+    public List<String> getPkNames() {
+        return pkNames;
     }
 
-    public void setNodePkName(String nodePkName) {
-        this.nodePkName = nodePkName;
-    }
-
-    public String getNodePkType() {
-        return nodePkType;
-    }
-
-    public void setNodePkType(String nodePkType) {
-        this.nodePkType = nodePkType;
+    public void setPkNames(List<String> pkNames) {
+        this.pkNames = pkNames;
     }
 
     public Map<String, String> getNodeProperties() {
@@ -46,9 +41,8 @@ public class NebulaNodeSchema {
     @Override
     public String toString() {
         return "NebulaNodeSchema{"
-                + "nodeTypeName='" + nodeTypeName
-                + ", nodePkName='" + nodePkName
-                + ", nodePkType='" + nodePkType
+                + "nodeTypeName='" + nodeTypeName + '\''
+                + ", pkNames=" + pkNames
                 + ", nodeProperties=" + nodeProperties
                 + '}';
     }

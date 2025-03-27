@@ -8,7 +8,7 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEYS;
 
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
@@ -47,7 +47,7 @@ public class NebulaGraphProviderTest {
         props.put(CONNECT_GRAPH_DATA_TYPE, graphType);
         props.put(CONNECT_GRAPH_NODE_TYPE_NAME, nodeType);
         props.put(CONNECT_GRAPH_EDGE_TYPE_NAME, edgeType);
-        props.put(CONNECT_PRIMARY_KEY, primaryKey);
+        props.put(CONNECT_PRIMARY_KEYS, primaryKey);
         NebulaSinkConnectConfig config = new NebulaSinkConnectConfig(props);
         provider = new NebulaGraphProvider(config);
         mockGraphSchema();
@@ -58,8 +58,8 @@ public class NebulaGraphProviderTest {
         try {
             NebulaNodeSchema schema = provider.getNodeSchema(graphName, nodeType);
             assert (schema.getNodeTypeName().equalsIgnoreCase(nodeType));
-            assert (schema.getNodePkName().equals("id"));
-            assert (schema.getNodePkType().equalsIgnoreCase("INT64"));
+            assert (schema.getPkNames().contains("id"));
+            assert (schema.getNodeProperties().get("id").equalsIgnoreCase("INT64"));
             assert (schema.getNodeProperties().size() == 5);
         } catch (IOErrorException | NoValidSessionException e) {
             e.printStackTrace();
@@ -75,10 +75,10 @@ public class NebulaGraphProviderTest {
             assert (schema.getEdgeTypeName().equalsIgnoreCase(edgeType));
             assert (schema.getSourceNodeTypeName().equalsIgnoreCase(nodeType));
             assert (schema.getTargetNodeTypeName().equalsIgnoreCase(nodeType));
-            assert (schema.getSourceNodePkName().equals("id"));
-            assert (schema.getTargetNodePkName().equals("id"));
-            assert (schema.getSourceNodePkType().equalsIgnoreCase("INT64"));
-            assert (schema.getTargetNodePkType().equalsIgnoreCase("INT64"));
+            assert (schema.getSourcePkNameAndType().containsKey("id"));
+            assert (schema.getTargetPkNameAndType().containsKey("id"));
+            assert (schema.getSourcePkNameAndType().get("id").equalsIgnoreCase("INT64"));
+            assert (schema.getTargetPkNameAndType().get("id").equalsIgnoreCase("INT64"));
             assert (schema.getProperties().size() == 2);
         } catch (Exception e) {
             e.printStackTrace();

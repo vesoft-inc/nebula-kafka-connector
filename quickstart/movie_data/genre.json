@@ -1,0 +1,423 @@
+{"genre_id":11,"name_y":"Space Opera"}
+{"genre_id":18,"name_y":"Drama"}
+{"genre_id":18,"name_y":"dramatisch"}
+{"genre_id":28,"name_y":"Action"}
+{"genre_id":34,"name_y":"Anime"}
+{"genre_id":34,"name_y":"Anime Film"}
+{"genre_id":34,"name_y":"Japanese Animation"}
+{"genre_id":34,"name_y":"Japanese Animation Film"}
+{"genre_id":37,"name_y":"Western"}
+{"genre_id":85,"name_y":"Comic"}
+{"genre_id":85,"name_y":"Graphic Novel"}
+{"genre_id":130,"name_y":"Melodrama"}
+{"genre_id":218,"name_y":"Cyberpunk"}
+{"genre_id":329,"name_y":"Backflash"}
+{"genre_id":329,"name_y":"Flashback"}
+{"genre_id":329,"name_y":"Rückblende"}
+{"genre_id":354,"name_y":"Experimental Film"}
+{"genre_id":354,"name_y":"Experimentalfilm"}
+{"genre_id":541,"name_y":"Anti Hero"}
+{"genre_id":644,"name_y":"Film Noir"}
+{"genre_id":707,"name_y":"Tragedy"}
+{"genre_id":1033,"name_y":"Dream Sequence"}
+{"genre_id":1033,"name_y":"Traumsequenz"}
+{"genre_id":1037,"name_y":"Realism"}
+{"genre_id":1110,"name_y":"Classic"}
+{"genre_id":1119,"name_y":"Episode Film"}
+{"genre_id":1505,"name_y":"Famous Score"}
+{"genre_id":3167,"name_y":"Film Produced For TV"}
+{"genre_id":3167,"name_y":"Television Film"}
+{"genre_id":3167,"name_y":"TV Film"}
+{"genre_id":10215,"name_y":"Emotionen > Spannend"}
+{"genre_id":10215,"name_y":"spannend"}
+{"genre_id":10215,"name_y":"Spannung"}
+{"genre_id":10215,"name_y":"Suspenseful"}
+{"genre_id":10215,"name_y":"Tense"}
+{"genre_id":10215,"name_y":"Thrilling"}
+{"genre_id":10216,"name_y":"Funny"}
+{"genre_id":10224,"name_y":"Downbeat"}
+{"genre_id":10224,"name_y":"Miserable"}
+{"genre_id":10224,"name_y":"Misery"}
+{"genre_id":10224,"name_y":"Sad"}
+{"genre_id":44,"name_y":"Social Drama"}
+{"genre_id":106,"name_y":"Political Thriller"}
+{"genre_id":49,"name_y":"Cult Favorite"}
+{"genre_id":49,"name_y":"Cult Movie"}
+{"genre_id":124,"name_y":"Slapstick"}
+{"genre_id":124,"name_y":"Slapstick Comedy Film"}
+{"genre_id":124,"name_y":"Splatstick"}
+{"genre_id":124,"name_y":"Splatstick Comedy Film"}
+{"genre_id":303,"name_y":"Independent Film"}
+{"genre_id":10228,"name_y":"Goofy"}
+{"genre_id":10228,"name_y":"Offbeat"}
+{"genre_id":10228,"name_y":"Quirky"}
+{"genre_id":12,"name_y":"Adventure"}
+{"genre_id":13,"name_y":"Fairy Tale Film"}
+{"genre_id":13,"name_y":"Fairy-Tale Film"}
+{"genre_id":939,"name_y":"Costume Film"}
+{"genre_id":939,"name_y":"Period Costume Drama"}
+{"genre_id":17,"name_y":"Familienfilm"}
+{"genre_id":17,"name_y":"Family Film"}
+{"genre_id":50,"name_y":"Hollywood Film"}
+{"genre_id":104,"name_y":"Blockbuster"}
+{"genre_id":151,"name_y":"High Fantasy"}
+{"genre_id":1108,"name_y":"Popcorn Movie"}
+{"genre_id":1109,"name_y":"Mainstream"}
+{"genre_id":3148,"name_y":"Milestone"}
+{"genre_id":10214,"name_y":"Exciting"}
+{"genre_id":10281,"name_y":"Academy Award Winner"}
+{"genre_id":878,"name_y":"Sci-Fi"}
+{"genre_id":878,"name_y":"Science Fiction"}
+{"genre_id":878,"name_y":"Science-Fiction"}
+{"genre_id":878,"name_y":"SciFi"}
+{"genre_id":10217,"name_y":"Feel-good"}
+{"genre_id":10217,"name_y":"Good-humoured"}
+{"genre_id":10217,"name_y":"Uplifting"}
+{"genre_id":10282,"name_y":"Nominated for Academy Award"}
+{"genre_id":18385,"name_y":"Action Comedy"}
+{"genre_id":19,"name_y":"Romantic Drama"}
+{"genre_id":71,"name_y":"Family Drama"}
+{"genre_id":219,"name_y":"Psychodrama"}
+{"genre_id":865,"name_y":"Chick Flick"}
+{"genre_id":10219,"name_y":"Romantic"}
+{"genre_id":10221,"name_y":"Berührend"}
+{"genre_id":10221,"name_y":"Emotional"}
+{"genre_id":10221,"name_y":"Heartfelt"}
+{"genre_id":10221,"name_y":"Sentimental"}
+{"genre_id":10221,"name_y":"Touching"}
+{"genre_id":14,"name_y":"Fantasy"}
+{"genre_id":35,"name_y":"Comedy"}
+{"genre_id":35,"name_y":"Funny"}
+{"genre_id":35,"name_y":"Komödie"}
+{"genre_id":145,"name_y":"Pirate Film"}
+{"genre_id":3160,"name_y":"Franchise Film"}
+{"genre_id":54,"name_y":"Destiny"}
+{"genre_id":81,"name_y":"Kung-Fu"}
+{"genre_id":81,"name_y":"Martial Arts"}
+{"genre_id":81,"name_y":"Martial-Arts"}
+{"genre_id":134,"name_y":"Justice Drama"}
+{"genre_id":141,"name_y":"Psychological Thriller"}
+{"genre_id":193,"name_y":"Samurai Film"}
+{"genre_id":252,"name_y":"Yakuza Film"}
+{"genre_id":684,"name_y":"Non-linear Timeline"}
+{"genre_id":874,"name_y":"Violence"}
+{"genre_id":1123,"name_y":"Hommage"}
+{"genre_id":10225,"name_y":"Bleak"}
+{"genre_id":10225,"name_y":"Dark"}
+{"genre_id":10225,"name_y":"düster"}
+{"genre_id":10225,"name_y":"Gloomy"}
+{"genre_id":10225,"name_y":"Gritty"}
+{"genre_id":10225,"name_y":"Hard-hitting"}
+{"genre_id":10225,"name_y":"Rough"}
+{"genre_id":14926,"name_y":"Girls with Guns"}
+{"genre_id":92,"name_y":"Political Drama"}
+{"genre_id":302,"name_y":"Art film"}
+{"genre_id":302,"name_y":"Art House Film"}
+{"genre_id":22,"name_y":"Musical"}
+{"genre_id":22,"name_y":"Musicals"}
+{"genre_id":33,"name_y":"Romance Film"}
+{"genre_id":873,"name_y":"Sexually Explicit"}
+{"genre_id":1195,"name_y":"Hand Camera"}
+{"genre_id":3110,"name_y":"Sex Film"}
+{"genre_id":10220,"name_y":"Erotic"}
+{"genre_id":10220,"name_y":"Raunchy"}
+{"genre_id":10220,"name_y":"Sexy"}
+{"genre_id":32,"name_y":"Anti-War Film"}
+{"genre_id":138,"name_y":"Military Film"}
+{"genre_id":209,"name_y":"Real Events"}
+{"genre_id":209,"name_y":"Real Life"}
+{"genre_id":209,"name_y":"True Story"}
+{"genre_id":209,"name_y":"wahre Geschichte"}
+{"genre_id":6033,"name_y":"Literary Fiction"}
+{"genre_id":6033,"name_y":"Literature"}
+{"genre_id":10222,"name_y":"Intellectually Stimulating"}
+{"genre_id":10222,"name_y":"Smart"}
+{"genre_id":10223,"name_y":"Ernst"}
+{"genre_id":10223,"name_y":"Serious"}
+{"genre_id":10227,"name_y":"Disquieting"}
+{"genre_id":10227,"name_y":"Disturbing"}
+{"genre_id":10227,"name_y":"Unsettling"}
+{"genre_id":10227,"name_y":"Verstörend"}
+{"genre_id":16,"name_y":"Animation"}
+{"genre_id":114,"name_y":"Satire"}
+{"genre_id":864,"name_y":"Boy Movie"}
+{"genre_id":864,"name_y":"Dude Film"}
+{"genre_id":864,"name_y":"Guy Movie"}
+{"genre_id":13544,"name_y":"Sitcom"}
+{"genre_id":1580,"name_y":"Mexican Cinema"}
+{"genre_id":3164,"name_y":"Debut Film"}
+{"genre_id":3164,"name_y":"Debutfilm"}
+{"genre_id":3164,"name_y":"Debütfilm"}
+{"genre_id":196,"name_y":"Cartoon"}
+{"genre_id":196,"name_y":"Cel Animation"}
+{"genre_id":196,"name_y":"Classical Animation"}
+{"genre_id":196,"name_y":"Hand-Drawn Animation"}
+{"genre_id":196,"name_y":"Traditional Animation"}
+{"genre_id":7931,"name_y":"TV Show"}
+{"genre_id":1282,"name_y":"Match Cut"}
+{"genre_id":2979,"name_y":"Hard Science Fiction"}
+{"genre_id":2979,"name_y":"Hard SF"}
+{"genre_id":2979,"name_y":"Scientific Science Fiction"}
+{"genre_id":43,"name_y":"Utopia & Dystopia"}
+{"genre_id":51,"name_y":"Time Travel"}
+{"genre_id":52,"name_y":"Apocalypse & Post-Apocalypse"}
+{"genre_id":53,"name_y":"Thriller"}
+{"genre_id":2579,"name_y":"Sad Ending"}
+{"genre_id":2579,"name_y":"Tragic Ending"}
+{"genre_id":2579,"name_y":"Unhappy End"}
+{"genre_id":10464,"name_y":"Remake"}
+{"genre_id":73,"name_y":"Queer Film"}
+{"genre_id":301,"name_y":"Black And White Film"}
+{"genre_id":3163,"name_y":"Auteur movie"}
+{"genre_id":1164,"name_y":"Cinemascope"}
+{"genre_id":807,"name_y":"First-Person Narrator"}
+{"genre_id":1086,"name_y":"neo-noir"}
+{"genre_id":31,"name_y":"War Film"}
+{"genre_id":2926,"name_y":"Wǔxiá"}
+{"genre_id":2926,"name_y":"Wuxia Film"}
+{"genre_id":84,"name_y":"Myth"}
+{"genre_id":89,"name_y":"Treasure Hunting"}
+{"genre_id":122,"name_y":"Tragic Comedy Film"}
+{"genre_id":122,"name_y":"Tragicomedy"}
+{"genre_id":101,"name_y":"Arranged Documentary"}
+{"genre_id":101,"name_y":"Staged Documentary"}
+{"genre_id":204,"name_y":"Social Study"}
+{"genre_id":69,"name_y":"Coming Of Age"}
+{"genre_id":69,"name_y":"Drama > Coming of Age"}
+{"genre_id":129,"name_y":"Coming Out"}
+{"genre_id":7141,"name_y":"Spanish Cinema"}
+{"genre_id":14354,"name_y":"Couples film"}
+{"genre_id":15588,"name_y":"Cannes Winner"}
+{"genre_id":87,"name_y":"Low Budget Film"}
+{"genre_id":250,"name_y":"Caper Movie"}
+{"genre_id":250,"name_y":"Caper-Movie"}
+{"genre_id":1125,"name_y":"Criminal Comedy Film"}
+{"genre_id":10218,"name_y":"Chilled"}
+{"genre_id":10218,"name_y":"Entspannt"}
+{"genre_id":10218,"name_y":"Laidback"}
+{"genre_id":10218,"name_y":"Relaxed"}
+{"genre_id":10218,"name_y":"Understated"}
+{"genre_id":249,"name_y":"Mafia Film"}
+{"genre_id":251,"name_y":"Police Film"}
+{"genre_id":1080,"name_y":"US-American Cinema"}
+{"genre_id":2738,"name_y":"Gangster Film"}
+{"genre_id":20,"name_y":"Dogma 95"}
+{"genre_id":353,"name_y":"Art Movie"}
+{"genre_id":159,"name_y":"Aliens"}
+{"genre_id":159,"name_y":"Extraterrestrial Monsters"}
+{"genre_id":245,"name_y":"Multiple Roles"}
+{"genre_id":10226,"name_y":"Creepy"}
+{"genre_id":10226,"name_y":"Scary"}
+{"genre_id":10226,"name_y":"Spine-chilling"}
+{"genre_id":10226,"name_y":"unheimlich"}
+{"genre_id":56,"name_y":"Black Comedy"}
+{"genre_id":56,"name_y":"Dark Comedy"}
+{"genre_id":56,"name_y":"Dark Comedy Film"}
+{"genre_id":56,"name_y":"Schwarze Komödie"}
+{"genre_id":126,"name_y":"Romantic Comedy"}
+{"genre_id":1167,"name_y":"35-mm"}
+{"genre_id":202,"name_y":"Political Documentary"}
+{"genre_id":1122,"name_y":"Kurzfilm"}
+{"genre_id":1122,"name_y":"Short"}
+{"genre_id":1122,"name_y":"Short Film"}
+{"genre_id":1122,"name_y":"Short Subject"}
+{"genre_id":1122,"name_y":"Shorty"}
+{"genre_id":17580,"name_y":"Berlinale Winner"}
+{"genre_id":99,"name_y":"Documentary"}
+{"genre_id":99,"name_y":"Documentation"}
+{"genre_id":210,"name_y":"Biography"}
+{"genre_id":14453,"name_y":"Concert film"}
+{"genre_id":158,"name_y":"Monster Film"}
+{"genre_id":818,"name_y":"Novel"}
+{"genre_id":3165,"name_y":"Black And White Film"}
+{"genre_id":14726,"name_y":"Mono"}
+{"genre_id":1178,"name_y":"Actors Playing Themselves"}
+{"genre_id":227,"name_y":"Nouvelle Vague"}
+{"genre_id":82,"name_y":"Eastern"}
+{"genre_id":154,"name_y":"Contemporary Fantasy"}
+{"genre_id":154,"name_y":"Modern-Day Fantasy"}
+{"genre_id":154,"name_y":"Urban Fantasy"}
+{"genre_id":1049,"name_y":"Super Hero"}
+{"genre_id":1163,"name_y":"Widescreen"}
+{"genre_id":2891,"name_y":"Action Super Hero"}
+{"genre_id":2891,"name_y":"Super Hero"}
+{"genre_id":25,"name_y":"Danish Cinema"}
+{"genre_id":206,"name_y":"Event Documentary"}
+{"genre_id":1116,"name_y":"Silent Film"}
+{"genre_id":866,"name_y":"Teen Film"}
+{"genre_id":2896,"name_y":"Flop"}
+{"genre_id":76,"name_y":"Conspiracy Thriller"}
+{"genre_id":4866,"name_y":"Dolby Surround"}
+{"genre_id":80,"name_y":"Crime"}
+{"genre_id":10067,"name_y":"Inflection"}
+{"genre_id":10067,"name_y":"Inflexion"}
+{"genre_id":10067,"name_y":"Surprise"}
+{"genre_id":10067,"name_y":"Surprising Twist"}
+{"genre_id":10067,"name_y":"Turning Point"}
+{"genre_id":867,"name_y":"Adult"}
+{"genre_id":871,"name_y":"Explicit Language"}
+{"genre_id":8530,"name_y":"Computer Generated Imagery"}
+{"genre_id":1096,"name_y":"School of Berlin"}
+{"genre_id":36,"name_y":"Historical Film"}
+{"genre_id":36,"name_y":"Historie"}
+{"genre_id":36,"name_y":"History"}
+{"genre_id":79,"name_y":"Mysterie"}
+{"genre_id":79,"name_y":"mysteriös"}
+{"genre_id":79,"name_y":"Mystery Thriller"}
+{"genre_id":144,"name_y":"Detective Film"}
+{"genre_id":1040,"name_y":"Surrealism"}
+{"genre_id":1051,"name_y":"Lonely Hero"}
+{"genre_id":1058,"name_y":"Color Grading"}
+{"genre_id":1176,"name_y":"Macro View"}
+{"genre_id":10213,"name_y":"Emotions"}
+{"genre_id":10213,"name_y":"Gefühle"}
+{"genre_id":1115,"name_y":"Road Movie"}
+{"genre_id":1112,"name_y":"Pretty Hard Stuff"}
+{"genre_id":2889,"name_y":"Fugitive Drama"}
+{"genre_id":2889,"name_y":"Refugee Drama"}
+{"genre_id":3135,"name_y":"Novella"}
+{"genre_id":39,"name_y":"Slasher Film"}
+{"genre_id":157,"name_y":"Gore Film"}
+{"genre_id":157,"name_y":"Splatter Film"}
+{"genre_id":157,"name_y":"Splatter Film / Gore Film"}
+{"genre_id":14710,"name_y":"Torture Porn"}
+{"genre_id":10066,"name_y":"Twist in the End"}
+{"genre_id":127,"name_y":"Marital Tragedy"}
+{"genre_id":524,"name_y":"New German Film"}
+{"genre_id":3137,"name_y":"Narrative"}
+{"genre_id":1823,"name_y":"Neue Sachlichkeit"}
+{"genre_id":1823,"name_y":"New Objectivity"}
+{"genre_id":10947,"name_y":"One Day"}
+{"genre_id":133,"name_y":"Family Saga"}
+{"genre_id":1038,"name_y":"Expressionism"}
+{"genre_id":1089,"name_y":"Caligarism"}
+{"genre_id":1085,"name_y":"New Hollywood"}
+{"genre_id":1149,"name_y":"Method Acting"}
+{"genre_id":7286,"name_y":"Jidaigeki"}
+{"genre_id":8741,"name_y":"children's book"}
+{"genre_id":5702,"name_y":"Film im Film"}
+{"genre_id":5702,"name_y":"Film in Film"}
+{"genre_id":5702,"name_y":"Film-im-Film"}
+{"genre_id":142,"name_y":"Erotic Thriller"}
+{"genre_id":1479,"name_y":"Erotic Comedy Film"}
+{"genre_id":1479,"name_y":"Raunchy comedy"}
+{"genre_id":1076,"name_y":"Jump Cutting"}
+{"genre_id":869,"name_y":"Children's Film"}
+{"genre_id":1073,"name_y":"Voice Over"}
+{"genre_id":1113,"name_y":"Special Interest"}
+{"genre_id":1137,"name_y":"Happy End"}
+{"genre_id":1137,"name_y":"Happy Ending"}
+{"genre_id":1137,"name_y":"Versöhnliches Ende"}
+{"genre_id":1204,"name_y":"Worm's Eye View"}
+{"genre_id":1246,"name_y":"Digital Video"}
+{"genre_id":1249,"name_y":"Student Graduation Film"}
+{"genre_id":1024,"name_y":"Theater Play"}
+{"genre_id":1024,"name_y":"Theatre Play"}
+{"genre_id":1134,"name_y":"Conflict"}
+{"genre_id":1147,"name_y":"Antagonist"}
+{"genre_id":2890,"name_y":"Biographical Film"}
+{"genre_id":2890,"name_y":"Biographical picture"}
+{"genre_id":2890,"name_y":"Biopic"}
+{"genre_id":2890,"name_y":"Film Biographie"}
+{"genre_id":241,"name_y":"Caper-Movie"}
+{"genre_id":241,"name_y":"Heist"}
+{"genre_id":241,"name_y":"Heist Film"}
+{"genre_id":241,"name_y":"Stick-up"}
+{"genre_id":228,"name_y":"French Cinema"}
+{"genre_id":1071,"name_y":"Stop Motion"}
+{"genre_id":10597,"name_y":"Open Ending"}
+{"genre_id":1101,"name_y":"Italian New Realism"}
+{"genre_id":190,"name_y":"Classical Western"}
+{"genre_id":191,"name_y":"Italo-Western"}
+{"genre_id":191,"name_y":"Spaghetti Western"}
+{"genre_id":1088,"name_y":"Italian Cinema"}
+{"genre_id":1045,"name_y":"Movie Stars"}
+{"genre_id":115,"name_y":"Satire On Media"}
+{"genre_id":1048,"name_y":"Femme Fatale"}
+{"genre_id":1133,"name_y":"Climax"}
+{"genre_id":1150,"name_y":"Arch of Suspense"}
+{"genre_id":1150,"name_y":"Growing Suspense"}
+{"genre_id":1150,"name_y":"Suspense"}
+{"genre_id":169,"name_y":"Teen Horror Film"}
+{"genre_id":1168,"name_y":"16-mm"}
+{"genre_id":135,"name_y":"Courtroom Drama"}
+{"genre_id":135,"name_y":"Forensic"}
+{"genre_id":656,"name_y":"Nameless Character"}
+{"genre_id":756,"name_y":"Wide-Angle Lens"}
+{"genre_id":1500,"name_y":"Real Time"}
+{"genre_id":1152,"name_y":"Developing"}
+{"genre_id":14452,"name_y":"Musical"}
+{"genre_id":1597,"name_y":"Macho"}
+{"genre_id":1104,"name_y":"Poetic Realism"}
+{"genre_id":1042,"name_y":"Lolita"}
+{"genre_id":3919,"name_y":"weapons"}
+{"genre_id":4840,"name_y":"long shot"}
+{"genre_id":4844,"name_y":"very close shot"}
+{"genre_id":1140,"name_y":"Frame Story"}
+{"genre_id":7402,"name_y":"Magic Realism"}
+{"genre_id":18305,"name_y":"Shaky camera"}
+{"genre_id":18305,"name_y":"Shaky-cam"}
+{"genre_id":9031,"name_y":"Idealist"}
+{"genre_id":10107,"name_y":"Sport"}
+{"genre_id":10107,"name_y":"Sport Film"}
+{"genre_id":10107,"name_y":"Sports Film"}
+{"genre_id":2370,"name_y":"Heimatfilm"}
+{"genre_id":2370,"name_y":"Regional film"}
+{"genre_id":1055,"name_y":"Character Actor"}
+{"genre_id":1135,"name_y":"Key Scene"}
+{"genre_id":166,"name_y":"Obsession"}
+{"genre_id":27,"name_y":"Horror"}
+{"genre_id":3115,"name_y":"Fake Documentary"}
+{"genre_id":3115,"name_y":"Mockumentary"}
+{"genre_id":197,"name_y":"Stop Motion"}
+{"genre_id":6515,"name_y":"Claymation"}
+{"genre_id":2731,"name_y":"Buddy Film"}
+{"genre_id":2731,"name_y":"Buddy Movie"}
+{"genre_id":14999,"name_y":"Parodie"}
+{"genre_id":14999,"name_y":"Parody"}
+{"genre_id":6723,"name_y":"New Russian Film"}
+{"genre_id":86,"name_y":"Animalhorror"}
+{"genre_id":103,"name_y":"Natural Disaster"}
+{"genre_id":1047,"name_y":"Guest Appearance"}
+{"genre_id":1124,"name_y":"Anarchic Comedy Film"}
+{"genre_id":2713,"name_y":"Comedy Of Mistaken Identity"}
+{"genre_id":57,"name_y":"Retro Science Fiction"}
+{"genre_id":57,"name_y":"Retro SF"}
+{"genre_id":1107,"name_y":"New Soviet Film"}
+{"genre_id":1146,"name_y":"Protagonist"}
+{"genre_id":4870,"name_y":"Score"}
+{"genre_id":11083,"name_y":"Hollywood Star"}
+{"genre_id":14666,"name_y":"Child Star"}
+{"genre_id":7424,"name_y":"Non-fiction"}
+{"genre_id":149,"name_y":"Monumental Film"}
+{"genre_id":3084,"name_y":"Bible Film"}
+{"genre_id":3128,"name_y":"Legend"}
+{"genre_id":121,"name_y":"Daffy Comedy"}
+{"genre_id":121,"name_y":"Madcap Comedy"}
+{"genre_id":121,"name_y":"Screwball Comedy Film"}
+{"genre_id":2744,"name_y":"Motor-Bike Film"}
+{"genre_id":2744,"name_y":"Motor-Cycle Film"}
+{"genre_id":2744,"name_y":"Motorbike Film"}
+{"genre_id":2744,"name_y":"Motorcycle Film"}
+{"genre_id":163,"name_y":"Vampiremovie"}
+{"genre_id":163,"name_y":"Vampirfilm"}
+{"genre_id":1050,"name_y":"Vamp"}
+{"genre_id":116,"name_y":"Satire On War"}
+{"genre_id":1078,"name_y":"Associative Cutting"}
+{"genre_id":1087,"name_y":"Russian Cinema"}
+{"genre_id":3162,"name_y":"Propaganda Film"}
+{"genre_id":3138,"name_y":"Short Story"}
+{"genre_id":136,"name_y":"Espionage"}
+{"genre_id":136,"name_y":"Secret Agent"}
+{"genre_id":136,"name_y":"Secret Service"}
+{"genre_id":136,"name_y":"Spy"}
+{"genre_id":4288,"name_y":"Animated Sequences"}
+{"genre_id":4288,"name_y":"Animated Title Sequence"}
+{"genre_id":1103,"name_y":"Surrealistic Film"}
+{"genre_id":2895,"name_y":"Fairy Tale"}
+{"genre_id":13547,"name_y":"Machismo"}
+{"genre_id":863,"name_y":"B-Movie"}
+{"genre_id":4220,"name_y":"Cinema Novo"}
+{"genre_id":3918,"name_y":"injuries"}
+{"genre_id":152,"name_y":"Sword And Sorcery"}
+{"genre_id":1165,"name_y":"Television"}

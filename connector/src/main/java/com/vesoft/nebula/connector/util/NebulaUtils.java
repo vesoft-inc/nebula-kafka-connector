@@ -4,15 +4,69 @@ package com.vesoft.nebula.connector.util;
 import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class NebulaUtils {
 
     public static String extractPropertyValue(Map<String, String> schema,
                                               String propName,
-                                              String value) {
-        switch (schema.get(propName)) {
-            case "STRING":
-                return mkString(value, "\"", "", "\"");
+                                              String value,
+                                              String nullValue) {
+        return extractValue(schema.get(propName), value, nullValue);
+    }
+
+    public static String extractValue(String dataType, String value, String nullValue) {
+        if (value == null || value.equals(nullValue)) {
+            return null;
+        }
+        if (dataType.equals("STRING")) {
+            return mkString(StringEscapeUtil.escapeValue(value), "\"", "", "\"");
+        }
+        if (value.isEmpty()) {
+            return null;
+        }
+        // process the list type
+        if (dataType.startsWith("LIST")) {
+            if (dataType.startsWith("LIST<STRING")) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("LIST[");
+                String  trimmedInput = value.replaceAll("^\\[|\\]$", "");
+                Pattern pattern      = Pattern.compile("(['\"])((?:\\\\\\1|.)*?)\\1|([^,]+)");
+                Matcher matcher      = pattern.matcher(trimmedInput);
+
+                while (matcher.find()) {
+                    if (matcher.group(1) != null) {
+                        String ele = matcher.group(2)
+                                .replace("\\" + matcher.group(1), matcher.group(1));
+                        sb.append("\"")
+                                .append(StringEscapeUtil.escapeValue(ele))
+                                .append("\"").append(",");
+                    } else {
+                        sb.append("\"")
+                                .append(StringEscapeUtil.escapeValue(matcher.group(3)))
+                                .append("\"").append(",");
+                    }
+                }
+
+                if (sb.length() > 5) {
+                    sb.deleteCharAt(sb.length() - 1);
+                }
+                sb.append("]");
+                return sb.toString();
+            } else {
+                return "LIST" + value;
+            }
+        }
+
+        // process the vector type
+        if (dataType.startsWith("VECTOR<")) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(dataType).append("(").append(value).append(")");
+            return sb.toString();
+        }
+        // process other data type
+        switch (dataType) {
             case "DATE":
                 return "date(\"" + value + "\")";
             case "LOCAL DATETIME":
@@ -30,24 +84,12 @@ public class NebulaUtils {
             default:
                 return value;
         }
-    }
-
-    public static String extractIdValue(String dataType, String value) {
-        switch (dataType) {
-            case "STRING":
-                return mkString(value, "\"", "", "\"");
-            case "INT64":
-                return value;
-            default:
-                throw new RuntimeException("data type " + dataType + " of edge source/target id "
-                        + "is not supported.");
-        }
 
     }
 
     public static String mkString(String value, String start, String sep, String end) {
         StringBuilder builder = new StringBuilder();
-        boolean first = true;
+        boolean       first   = true;
         builder.append(start);
         for (char c : value.toCharArray()) {
             if (first) {

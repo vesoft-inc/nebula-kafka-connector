@@ -1,43 +1,35 @@
 
 package com.vesoft.nebula.connector.sink;
 
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.EDGE_VALUES_TEMPLATE;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.PROPERTY_TEMPLATE;
-
-import com.vesoft.nebula.connector.exceptions.DataFormatException;
-import com.vesoft.nebula.connector.util.NebulaUtils;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 public class NebulaEdge {
-    private String srcPk;
-    private String dstPk;
+    private Map<String, String> srcPks;
+    private Map<String, String> dstPks;
 
     private Map<String, String> properties;
 
-    public NebulaEdge(String srcPk, String dstPk,
+    public NebulaEdge(Map<String, String> srcPks, Map<String, String> dstPks,
                       Map<String, String> properties) {
-        this.srcPk = srcPk;
-        this.dstPk = dstPk;
+        this.srcPks = srcPks;
+        this.dstPks = dstPks;
         this.properties = properties;
     }
 
-
-    public String getSrcPk() {
-        return srcPk;
+    public Map<String, String> getSrcPks() {
+        return srcPks;
     }
 
-    public void setSrcPk(String srcPk) {
-        this.srcPk = srcPk;
+    public void setSrcPks(Map<String, String> srcPks) {
+        this.srcPks = srcPks;
     }
 
-    public String getDstPk() {
-        return dstPk;
+    public Map<String, String> getDstPks() {
+        return dstPks;
     }
 
-    public void setDstPk(String dstPk) {
-        this.dstPk = dstPk;
+    public void setDstPks(Map<String, String> dstPks) {
+        this.dstPks = dstPks;
     }
 
     public Map<String, String> getProperties() {
@@ -52,8 +44,8 @@ public class NebulaEdge {
     @Override
     public String toString() {
         return "NebulaEdge{"
-                + "srcPk='" + srcPk + '\''
-                + ", dstPk='" + dstPk + '\''
+                + "srcPks=" + srcPks
+                + ", dstPks=" + dstPks
                 + ", properties=" + properties
                 + '}';
     }

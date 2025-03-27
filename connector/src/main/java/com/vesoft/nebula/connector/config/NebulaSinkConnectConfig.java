@@ -4,7 +4,7 @@ package com.vesoft.nebula.connector.config;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PK;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
@@ -12,17 +12,21 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_DST_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NODE_PROPERTIES;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NULL_VALUE;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_PRIMARY_KEYS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_SRC_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEY;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEYS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_MODE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PK;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
@@ -72,13 +76,17 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
     public final NebulaConnectDataTypeEnum dataType;
     public final String                    graphNodeType;
     public final String                    graphEdgeType;
-    public final String                    primaryKey;
-    public final String                    srcKey;
-    public final String                    dstKey;
+    public final List<String>              kafkaPrimaryKeys;
+    public final List<String>              primaryKeys;
+    public final List<String>              kafkaSrcKeys;
+    public final List<String>              srcKeys;
+    public final List<String>              kafkaDstKeys;
+    public final List<String>              dstKeys;
     public       List<String>              kafkaNodePropertyNames  = new ArrayList<>();
     public       List<String>              nebulaNodePropertyNames = new ArrayList<>();
     public       List<String>              kafkaEdgePropertyNames  = new ArrayList<>();
     public       List<String>              nebulaEdgePropertyNames = new ArrayList<>();
+    public final String                    nullValue;
     public final int                       connectTimeout;
     public final int                       requestTimeout;
     public final int                       retryTimes;
@@ -106,13 +114,17 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         dataType = NebulaConnectDataTypeEnum.getDataType(getString(CONNECT_GRAPH_DATA_TYPE));
         graphNodeType = getString(CONNECT_GRAPH_NODE_TYPE_NAME);
         graphEdgeType = getString(CONNECT_GRAPH_EDGE_TYPE_NAME);
-        primaryKey = getString(CONNECT_PRIMARY_KEY);
-        srcKey = getString(CONNECT_SRC_PK);
-        dstKey = getString(CONNECT_DST_PK);
+        primaryKeys = getList(CONNECT_PRIMARY_KEYS);
+        kafkaPrimaryKeys = getList(CONNECT_KAFKA_SRC_PKS);
+        srcKeys = getList(CONNECT_SRC_PKS);
+        dstKeys = getList(CONNECT_DST_PKS);
+        kafkaSrcKeys = getList(CONNECT_KAFKA_SRC_PKS);
+        kafkaDstKeys = getList(CONNECT_KAFKA_DST_PKS);
         kafkaNodePropertyNames = getList(CONNECT_KAFKA_NODE_PROPERTIES);
         kafkaEdgePropertyNames = getList(CONNECT_KAFKA_EDGE_PROPERTIES);
         nebulaNodePropertyNames = getList(CONNECT_NEBULA_NODE_PROPERTIES);
         nebulaEdgePropertyNames = getList(CONNECT_NEBULA_EDGE_PROPERTIES);
+        nullValue = getString(CONNECT_KAFKA_NULL_VALUE);
         connectTimeout = ConfigUtils.connectTimeout(props);
         requestTimeout = ConfigUtils.requestTimeout(props);
         retryTimes = ConfigUtils.retryTimes(props);
@@ -166,28 +178,43 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         "Name of the edge type")
                 .define(CONNECT_SINK_MODE,
                         ConfigDef.Type.STRING,
-                        DEFAULT_INSERT_MODE,
+                        DEFAULT_INSERT_MODE.toString(),
                         EnumValidator.in(
                                 Arrays.stream(InsertMode.values())
                                         .map(InsertMode::toString).toArray()),
                         ConfigDef.Importance.HIGH,
                         "sink mode, available mode is: INSERT, UPDATE, DELETE, default is "
                                 + DEFAULT_INSERT_MODE)
-                .define(CONNECT_PRIMARY_KEY,
-                        ConfigDef.Type.STRING,
-                        null,
+                .define(CONNECT_PRIMARY_KEYS,
+                        ConfigDef.Type.LIST,
+                        Arrays.asList(),
                         ConfigDef.Importance.HIGH,
-                        "primaryKey field for kafka data")
-                .define(CONNECT_SRC_PK,
-                        ConfigDef.Type.STRING,
-                        null,
+                        "primaryKey fields for nebula node type")
+                .define(CONNECT_KAFKA_PRIMARY_KEYS,
+                        ConfigDef.Type.LIST,
+                        Arrays.asList(),
                         ConfigDef.Importance.HIGH,
-                        "src key field for kafka data")
-                .define(CONNECT_DST_PK,
-                        ConfigDef.Type.STRING,
-                        null,
+                        "primaryKey fields name for kafka data")
+                .define(CONNECT_SRC_PKS,
+                        ConfigDef.Type.LIST,
+                        Arrays.asList(),
                         ConfigDef.Importance.HIGH,
-                        "dst key field for kafka data")
+                        "src key prop names for edge in nebula")
+                .define(CONNECT_DST_PKS,
+                        ConfigDef.Type.LIST,
+                        Arrays.asList(),
+                        ConfigDef.Importance.HIGH,
+                        "dst key prop names for edge in nebula")
+                .define(CONNECT_KAFKA_SRC_PKS,
+                        ConfigDef.Type.LIST,
+                        Arrays.asList(),
+                        ConfigDef.Importance.HIGH,
+                        "src key fields for kafka data")
+                .define(CONNECT_KAFKA_DST_PKS,
+                        ConfigDef.Type.LIST,
+                        Arrays.asList(),
+                        ConfigDef.Importance.HIGH,
+                        "dst key fields for kafka data")
                 .define(CONNECT_KAFKA_NODE_PROPERTIES,
                         ConfigDef.Type.LIST,
                         null,
@@ -208,6 +235,11 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         null,
                         ConfigDef.Importance.HIGH,
                         "property name list for node type in Nebula")
+                .define(CONNECT_KAFKA_NULL_VALUE,
+                        ConfigDef.Type.STRING,
+                        "\\N",
+                        ConfigDef.Importance.HIGH,
+                        "treat the value as null")
                 .define(CONNECT_CONNECT_TIMEOUT,
                         ConfigDef.Type.INT,
                         DEFAULT_CONNECTOR_CONNECT_TIMEOUT,
@@ -230,7 +262,7 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         "retry times for failed insert query, default is "
                                 + DEFAULT_SINK_RETRY_TIMES)
                 .define(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY,
-                        ConfigDef.Type.INT,
+                        ConfigDef.Type.LONG,
                         DEFAULT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY,
                         ConfigDef.Importance.LOW,
                         "interval time between each retry execution, default is "

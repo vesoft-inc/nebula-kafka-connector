@@ -1,2 +1,15 @@
-CREATE GRAPH TYPE test_type AS {NODE TYPE person(LABEL person{id STRING PRIMARY KEY, name string, age int64})}
-CREATE GRAPH test TYPED test_type
+"""
+CREATE GRAPH TYPE IF NOT EXISTS `movie_type` AS {
+   NODE TYPE `Actor` (LABEL `Person`{`id` INT64 NOT NULL, `name` STRING DEFAULT NULL, `birthDate` DATE DEFAULT NULL, PRIMARY KEY (`id`)}),
+   NODE TYPE `Director` (LABEL `Person`{`id` INT64 NOT NULL, `name` STRING DEFAULT NULL, `birthDate` DATE DEFAULT NULL, PRIMARY KEY (`id`)}),
+   NODE TYPE `User` (LABEL `Person`{`id` INT64 NOT NULL, PRIMARY KEY (`id`)}),
+   NODE TYPE `Movie` (LABEL `Movie`{`id` INT64 NOT NULL, `name` STRING DEFAULT NULL, PRIMARY KEY (`id`)}),
+   NODE TYPE `Genre` (LABEL `Genre`{`id` INT64 NOT NULL, `name` STRING DEFAULT NULL, PRIMARY KEY (`id`)}),
+   EDGE TYPE `Act` (`Actor`)-[LABEL `Act`{}]->(`Movie`),
+   EDGE TYPE `Direct` (`Director`)-[LABEL `Direct`{}]->(`Movie`),
+   EDGE TYPE `Watch` (`User`)-[LABEL `Watch`{`rate` FLOAT DEFAULT NULL}]->(`Movie`),
+   EDGE TYPE `WithGenre` (`Movie`)-[LABEL `WithGenre`{}]->(`Genre`)
+   }
+"""
+CREATE GRAPH IF NOT EXISTS `movie` TYPED movie_type
+
