@@ -1,8 +1,11 @@
 
 package com.vesoft.nebula.connector.config;
 
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DISABLE_VERIFY_CERT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ENABLE_TLS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
@@ -20,6 +23,9 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_EDGE_TYPES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_NODE_TYPES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_TOPIC_PREFIX;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_CA_PATH;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_CERT_PATH;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_KEY_PATH;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
@@ -39,23 +45,28 @@ import org.apache.kafka.common.config.ConfigException;
 
 public class NebulaSourceConnectConfig extends AbstractConfig implements Serializable {
 
-    public final String connectorName;
-    public final String graphServers;
-    public final String user;
-    public final Map<String, Object> authOptions;
-    public final String graphName;
+    public final String                    connectorName;
+    public final String                    graphServers;
+    public final String                    user;
+    public final Map<String, Object>       authOptions;
+    public final Boolean                   enableTls;
+    public final Boolean                   disableVerifyCert;
+    public final String                    caPath;
+    public final String                    certPath;
+    public final String                    keyPath;
+    public final String                    graphName;
     public final NebulaConnectDataTypeEnum dataType;
-    public final List<String> graphNodeTypes = new ArrayList<>();
-    public final List<String> graphEdgeTypes = new ArrayList<>();
-    public List<String> nebulaNodePropertyNames = new ArrayList<>();
-    public List<String> nebulaEdgePropertyNames = new ArrayList<>();
-    public final int requestTimeout;
-    public final int retryTimes;
-    public final int intervalTimeMill;
+    public final List<String>              graphNodeTypes          = new ArrayList<>();
+    public final List<String>              graphEdgeTypes          = new ArrayList<>();
+    public       List<String>              nebulaNodePropertyNames = new ArrayList<>();
+    public       List<String>              nebulaEdgePropertyNames = new ArrayList<>();
+    public final int                       requestTimeout;
+    public final int                       retryTimes;
+    public final int                       intervalTimeMill;
 
     public final int batchSize;
 
-    public final int maxTask;
+    public final int    maxTask;
     public final String topicPrefix;
 
     public NebulaSourceConnectConfig(Map<?, ?> props) {
@@ -68,6 +79,11 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
         if (passwd != null && !passwd.isEmpty()) {
             authOptions.put("password", passwd);
         }
+        enableTls = getBoolean(CONNECT_ENABLE_TLS);
+        disableVerifyCert = getBoolean(CONNECT_DISABLE_VERIFY_CERT);
+        caPath = getString(CONNECT_TLS_CA_PATH);
+        certPath = getString(CONNECT_TLS_CERT_PATH);
+        keyPath = getString(CONNECT_TLS_KEY_PATH);
         graphName = getString(CONNECT_GRAPH_NAME);
         dataType = NebulaConnectDataTypeEnum.getDataType(getString(CONNECT_GRAPH_DATA_TYPE));
         Collections.addAll(graphNodeTypes, getString(CONNECT_SOURCE_NODE_TYPES).split(","));
@@ -100,6 +116,36 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
                         new ConfigDef.NonEmptyString(),
                         ConfigDef.Importance.HIGH,
                         "NebulaGraph passwd")
+                .define(CONNECT_AUTH_OPTIONS,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph authOptions")
+                .define(CONNECT_ENABLE_TLS,
+                        ConfigDef.Type.BOOLEAN,
+                        false,
+                        ConfigDef.Importance.LOW,
+                        "enable tls")
+                .define(CONNECT_DISABLE_VERIFY_CERT,
+                        ConfigDef.Type.BOOLEAN,
+                        false,
+                        ConfigDef.Importance.LOW,
+                        "disable the verification for server cert")
+                .define(CONNECT_TLS_CA_PATH,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.LOW,
+                        "path of ca certification")
+                .define(CONNECT_TLS_CERT_PATH,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.LOW,
+                        "path of client cert certification")
+                .define(CONNECT_TLS_KEY_PATH,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.LOW,
+                        "path of client cert key")
                 .define(CONNECT_GRAPH_DATA_TYPE,
                         ConfigDef.Type.STRING,
                         NebulaSourceConnectConfig.EnumValidator
@@ -146,7 +192,7 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
 
     private static class EnumValidator implements ConfigDef.Validator {
         private final List<String> canonicalValues;
-        private final Set<String> validValues;
+        private final Set<String>  validValues;
 
         private EnumValidator(List<String> canonicalValues, Set<String> validValues) {
             this.canonicalValues = canonicalValues;
@@ -155,7 +201,7 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
 
         public static <E> NebulaSourceConnectConfig.EnumValidator in(E[] enumerators) {
             final List<String> canonicalValues = new ArrayList<>(enumerators.length);
-            final Set<String> validValues = new HashSet<>(enumerators.length * 2);
+            final Set<String>  validValues     = new HashSet<>(enumerators.length * 2);
             for (E e : enumerators) {
                 canonicalValues.add(e.toString().toLowerCase());
                 validValues.add(e.toString().toUpperCase());

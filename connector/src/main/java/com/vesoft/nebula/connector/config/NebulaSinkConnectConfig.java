@@ -4,7 +4,9 @@ package com.vesoft.nebula.connector.config;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DISABLE_VERIFY_CERT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PKS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ENABLE_TLS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
@@ -27,6 +29,9 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SRC_PKS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_CA_PATH;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_CERT_PATH;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_KEY_PATH;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
@@ -72,6 +77,11 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
     public final String                    graphServers;
     public final String                    user;
     public final Map<String, Object>       authOptions;
+    public final Boolean                   enableTls;
+    public final Boolean                   disableVerifyCert;
+    public final String                    caPath;
+    public final String                    certPath;
+    public final String                    keyPath;
     public final String                    graphName;
     public final NebulaConnectDataTypeEnum dataType;
     public final String                    graphNodeType;
@@ -110,6 +120,11 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         if (passwd != null && !passwd.isEmpty()) {
             authOptions.put("password", passwd);
         }
+        enableTls = getBoolean(CONNECT_ENABLE_TLS);
+        disableVerifyCert = getBoolean(CONNECT_DISABLE_VERIFY_CERT);
+        caPath = getString(CONNECT_TLS_CA_PATH);
+        certPath = getString(CONNECT_TLS_CERT_PATH);
+        keyPath = getString(CONNECT_TLS_KEY_PATH);
         graphName = getString(CONNECT_GRAPH_NAME);
         dataType = NebulaConnectDataTypeEnum.getDataType(getString(CONNECT_GRAPH_DATA_TYPE));
         graphNodeType = getString(CONNECT_GRAPH_NODE_TYPE_NAME);
@@ -155,6 +170,31 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         null,
                         ConfigDef.Importance.LOW,
                         "NebulaGraph authOptions")
+                .define(CONNECT_ENABLE_TLS,
+                        ConfigDef.Type.BOOLEAN,
+                        false,
+                        ConfigDef.Importance.LOW,
+                        "enable tls")
+                .define(CONNECT_DISABLE_VERIFY_CERT,
+                        ConfigDef.Type.BOOLEAN,
+                        false,
+                        ConfigDef.Importance.LOW,
+                        "disable the verification for server cert")
+                .define(CONNECT_TLS_CA_PATH,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.LOW,
+                        "path of ca certification")
+                .define(CONNECT_TLS_CERT_PATH,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.LOW,
+                        "path of client cert certification")
+                .define(CONNECT_TLS_KEY_PATH,
+                        ConfigDef.Type.STRING,
+                        "",
+                        ConfigDef.Importance.LOW,
+                        "path of client cert key")
                 .define(CONNECT_GRAPH_NAME,
                         ConfigDef.Type.STRING,
                         ConfigDef.Importance.HIGH,

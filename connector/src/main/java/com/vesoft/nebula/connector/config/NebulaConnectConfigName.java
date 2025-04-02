@@ -7,6 +7,13 @@ public class NebulaConnectConfigName {
     public static final String CONNECT_GRAPH_USER             = CONNECT_PREFIX + "user";
     public static final String CONNECT_GRAPH_PASSWD           = CONNECT_PREFIX + "passwd";
     public static final String CONNECT_AUTH_OPTIONS           = CONNECT_PREFIX + "authOptions";
+
+    public static final String CONNECT_ENABLE_TLS = CONNECT_PREFIX + "enable.tls";
+    public static final String CONNECT_DISABLE_VERIFY_CERT = CONNECT_PREFIX + "disable.verify.cert";
+    public static final String CONNECT_TLS_CA_PATH = CONNECT_PREFIX + "tls.ca.path";
+    public static final String CONNECT_TLS_CERT_PATH = CONNECT_PREFIX + "tls.cert.path";
+    public static final String CONNECT_TLS_KEY_PATH = CONNECT_PREFIX + "tls.key.path";
+
     public static final String CONNECT_GRAPH_NAME             = CONNECT_PREFIX + "graph.name";
     public static final String CONNECT_GRAPH_DATA_TYPE        = CONNECT_PREFIX + "data.type";
     public static final String CONNECT_GRAPH_NODE_TYPE_NAME   = CONNECT_PREFIX + "node.typeName";
