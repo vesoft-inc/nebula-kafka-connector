@@ -37,6 +37,10 @@ public class NebulaGraphProvider implements Serializable {
             client = NebulaClient.builder(host, user)
                     .withAuthOptions(authOptions)
                     .withRequestTimeoutMills(config.requestTimeout)
+                    .withEnableTls(config.enableTls)
+                    .withDisableVerifyServerCert(config.disableVerifyCert)
+                    .withTlsCa(config.caPath)
+                    .withTlsCert(config.certPath, config.keyPath)
                     .build();
         } catch (AuthFailedException e) {
             throw new RuntimeException("auth failed, please check your user and passwd");
@@ -54,6 +58,10 @@ public class NebulaGraphProvider implements Serializable {
             client = NebulaClient.builder(host, user)
                     .withAuthOptions(authOptions)
                     .withRequestTimeoutMills(config.requestTimeout)
+                    .withEnableTls(config.enableTls)
+                    .withDisableVerifyServerCert(config.disableVerifyCert)
+                    .withTlsCa(config.caPath)
+                    .withTlsCert(config.certPath, config.keyPath)
                     .build();
         } catch (AuthFailedException e) {
             throw new RuntimeException("auth failed, please check your user and passwd");
