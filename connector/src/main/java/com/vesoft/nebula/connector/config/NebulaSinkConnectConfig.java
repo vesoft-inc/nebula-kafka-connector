@@ -4,6 +4,7 @@ package com.vesoft.nebula.connector.config;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_AUTH_OPTIONS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_CONNECT_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DATE_FORMAT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DISABLE_VERIFY_CERT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DST_PKS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ENABLE_TLS;
@@ -20,10 +21,13 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_NULL_VALUE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_PRIMARY_KEYS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_KAFKA_SRC_PKS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_LOCAL_DATETIME_FORMAT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_LOCAL_TIME_FORMAT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_EDGE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEYS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_REQUEST_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SCHEMA;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_MODE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_PARTITION;
@@ -32,6 +36,8 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_CA_PATH;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_CERT_PATH;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_TLS_KEY_PATH;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ZONE_DATETIME_FORMAT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ZONE_TIME_FORMAT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_BATCH_SIZE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_CONNECT_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.DEFAULT_CONNECTOR_REQUEST_TIMEOUT;
@@ -77,6 +83,12 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
     public final String                    graphServers;
     public final String                    user;
     public final Map<String, Object>       authOptions;
+    public final String                    schema;
+    public final String                    dateFormat;
+    public final String                    localDatetimeFormat;
+    public final String                    zonedDatetimeFormat;
+    public final String                    localTimeFormat;
+    public final String                    zonedTimeFormat;
     public final Boolean                   enableTls;
     public final Boolean                   disableVerifyCert;
     public final String                    caPath;
@@ -120,6 +132,12 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
         if (passwd != null && !passwd.isEmpty()) {
             authOptions.put("password", passwd);
         }
+        schema = getString(CONNECT_SCHEMA);
+        dateFormat = getString(CONNECT_DATE_FORMAT);
+        localDatetimeFormat = getString(CONNECT_LOCAL_DATETIME_FORMAT);
+        localTimeFormat = getString(CONNECT_LOCAL_TIME_FORMAT);
+        zonedDatetimeFormat = getString(CONNECT_ZONE_DATETIME_FORMAT);
+        zonedTimeFormat = getString(CONNECT_ZONE_TIME_FORMAT);
         enableTls = getBoolean(CONNECT_ENABLE_TLS);
         disableVerifyCert = getBoolean(CONNECT_DISABLE_VERIFY_CERT);
         caPath = getString(CONNECT_TLS_CA_PATH);
@@ -170,6 +188,36 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         null,
                         ConfigDef.Importance.LOW,
                         "NebulaGraph authOptions")
+                .define(CONNECT_SCHEMA,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph home schema path")
+                .define(CONNECT_DATE_FORMAT,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph date format")
+                .define(CONNECT_LOCAL_DATETIME_FORMAT,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph local datetime format")
+                .define(CONNECT_ZONE_DATETIME_FORMAT,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph zoned datetime format")
+                .define(CONNECT_LOCAL_TIME_FORMAT,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph local time format")
+                .define(CONNECT_ZONE_TIME_FORMAT,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph zoned time format")
                 .define(CONNECT_ENABLE_TLS,
                         ConfigDef.Type.BOOLEAN,
                         false,

@@ -42,6 +42,13 @@ public class NebulaGraphProvider implements Serializable {
                     .withTlsCa(config.caPath)
                     .withTlsCert(config.certPath, config.keyPath)
                     .build();
+            initClient(client,
+                       config.schema,
+                       config.dateFormat,
+                       config.localDatetimeFormat,
+                       config.zonedDatetimeFormat,
+                       config.localTimeFormat,
+                       config.zonedTimeFormat);
         } catch (AuthFailedException e) {
             throw new RuntimeException("auth failed, please check your user and passwd");
         } catch (IOErrorException e) {
@@ -63,11 +70,80 @@ public class NebulaGraphProvider implements Serializable {
                     .withTlsCa(config.caPath)
                     .withTlsCert(config.certPath, config.keyPath)
                     .build();
+            initClient(client,
+                       config.schema,
+                       null,
+                       null,
+                       null,
+                       null,
+                       null);
         } catch (AuthFailedException e) {
             throw new RuntimeException("auth failed, please check your user and passwd");
         } catch (IOErrorException e) {
             throw new RuntimeException("connect to NebulaGraph server failed, please check "
                                                + "the connectivity between client and server.", e);
+        }
+    }
+
+    private void initClient(NebulaClient client,
+                            String schema,
+                            String dateFormat,
+                            String localDatetimeFormat,
+                            String zonedDatetimeFormat,
+                            String localTimeFormat,
+                            String zonedTimeFormat) {
+        ResultSet res;
+        try {
+            if (schema != null && !schema.isEmpty()) {
+                String gql = String.format("SESSION SET home_schema_path=\"%s\"", schema);
+                res = client.execute(gql);
+                if (!res.isSucceeded()) {
+                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
+                }
+            }
+            if (dateFormat != null && !dateFormat.isEmpty()) {
+                String gql = String.format("SESSION SET date_format=\"%s\"", dateFormat);
+                res = client.execute(gql);
+                if (!res.isSucceeded()) {
+                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
+                }
+            }
+
+            if (localDatetimeFormat != null && !localDatetimeFormat.isEmpty()) {
+                String gql = String.format("SESSION SET local_datetime_format=\"%s\"",
+                                           localDatetimeFormat);
+                res = client.execute(gql);
+                if (!res.isSucceeded()) {
+                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
+                }
+            }
+
+            if (zonedDatetimeFormat != null && !zonedDatetimeFormat.isEmpty()) {
+                String gql = String.format("SESSION SET zoned_datetime_format=\"%s\"",
+                                           zonedDatetimeFormat);
+                res = client.execute(gql);
+                if (!res.isSucceeded()) {
+                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
+                }
+            }
+
+            if (zonedTimeFormat != null && !zonedTimeFormat.isEmpty()) {
+                String gql = String.format("SESSION SET zoned_time_format=\"%s\"", zonedTimeFormat);
+                res = client.execute(gql);
+                if (!res.isSucceeded()) {
+                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
+                }
+            }
+
+            if (localTimeFormat != null && !localTimeFormat.isEmpty()) {
+                String gql = String.format("SESSION SET local_time_format=\"%s\"", localTimeFormat);
+                res = client.execute(gql);
+                if (!res.isSucceeded()) {
+                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
+                }
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("set configs error for session", e);
         }
     }
 

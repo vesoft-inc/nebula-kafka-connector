@@ -2,17 +2,26 @@
 package com.vesoft.nebula.connector.config;
 
 public class NebulaConnectConfigName {
-    public static final String CONNECT_PREFIX                 = "nebula.";
-    public static final String CONNECT_GRAPH_ADDRESS          = CONNECT_PREFIX + "graph.servers";
-    public static final String CONNECT_GRAPH_USER             = CONNECT_PREFIX + "user";
-    public static final String CONNECT_GRAPH_PASSWD           = CONNECT_PREFIX + "passwd";
-    public static final String CONNECT_AUTH_OPTIONS           = CONNECT_PREFIX + "authOptions";
+    public static final String CONNECT_PREFIX        = "nebula.";
+    public static final String CONNECT_GRAPH_ADDRESS = CONNECT_PREFIX + "graph.servers";
+    public static final String CONNECT_GRAPH_USER    = CONNECT_PREFIX + "user";
+    public static final String CONNECT_GRAPH_PASSWD  = CONNECT_PREFIX + "passwd";
+    public static final String CONNECT_AUTH_OPTIONS  = CONNECT_PREFIX + "authOptions";
 
-    public static final String CONNECT_ENABLE_TLS = CONNECT_PREFIX + "enable.tls";
+    public static final String CONNECT_SCHEMA                = CONNECT_PREFIX + "schema";
+    public static final String CONNECT_DATE_FORMAT           = CONNECT_PREFIX + "date.format";
+    public static final String CONNECT_LOCAL_DATETIME_FORMAT =
+            CONNECT_PREFIX + "localDatetime.format";
+    public static final String CONNECT_ZONE_DATETIME_FORMAT  =
+            CONNECT_PREFIX + "zonedDatetime.format";
+    public static final String CONNECT_LOCAL_TIME_FORMAT     = CONNECT_PREFIX + "localTime.format";
+    public static final String CONNECT_ZONE_TIME_FORMAT      = CONNECT_PREFIX + "zonedTime.format";
+
+    public static final String CONNECT_ENABLE_TLS          = CONNECT_PREFIX + "enable.tls";
     public static final String CONNECT_DISABLE_VERIFY_CERT = CONNECT_PREFIX + "disable.verify.cert";
-    public static final String CONNECT_TLS_CA_PATH = CONNECT_PREFIX + "tls.ca.path";
-    public static final String CONNECT_TLS_CERT_PATH = CONNECT_PREFIX + "tls.cert.path";
-    public static final String CONNECT_TLS_KEY_PATH = CONNECT_PREFIX + "tls.key.path";
+    public static final String CONNECT_TLS_CA_PATH         = CONNECT_PREFIX + "tls.ca.path";
+    public static final String CONNECT_TLS_CERT_PATH       = CONNECT_PREFIX + "tls.cert.path";
+    public static final String CONNECT_TLS_KEY_PATH        = CONNECT_PREFIX + "tls.key.path";
 
     public static final String CONNECT_GRAPH_NAME             = CONNECT_PREFIX + "graph.name";
     public static final String CONNECT_GRAPH_DATA_TYPE        = CONNECT_PREFIX + "data.type";
@@ -30,7 +39,7 @@ public class NebulaConnectConfigName {
     public static final String CONNECT_KAFKA_EDGE_PROPERTIES  = "kafka.edge.property.names";
     public static final String CONNECT_NEBULA_EDGE_PROPERTIES = CONNECT_PREFIX
             + "edge.property.names";
-    public static final String CONNECT_KAFKA_NULL_VALUE = "kafka.null.value";
+    public static final String CONNECT_KAFKA_NULL_VALUE       = "kafka.null.value";
     public static final String CONNECT_CONNECT_TIMEOUT        = CONNECT_PREFIX + "connect.timeout";
     public static final String CONNECT_REQUEST_TIMEOUT        = CONNECT_PREFIX + "request.timeout";
     public static final String CONNECT_SINK_RETRY_TIMES       = CONNECT_PREFIX + "sink.retry.times";
