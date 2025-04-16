@@ -1,6 +1,7 @@
 
 package com.vesoft.nebula.connector.connection;
 
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_DATE_FORMAT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_ADDRESS;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_DATA_TYPE;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_EDGE_TYPE_NAME;
@@ -8,7 +9,12 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_NODE_TYPE_NAME;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_PASSWD;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_GRAPH_USER;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_LOCAL_DATETIME_FORMAT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_LOCAL_TIME_FORMAT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_PRIMARY_KEYS;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SCHEMA;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ZONE_DATETIME_FORMAT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_ZONE_TIME_FORMAT;
 
 import com.vesoft.nebula.connector.config.NebulaSinkConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
@@ -28,12 +34,19 @@ public class NebulaGraphProviderTest {
 
     String host       = "192.168.8.6:3820";
     String user       = "root";
-    String passwd     = "Nebula123";
+    String passwd     = "NebulaGraph01";
     String graphName  = "nba";
     String graphType  = "NODE";
     String nodeType   = "node_type_player";
     String primaryKey = "id";
     String edgeType   = "edge_type_follow";
+
+    String schema              = "/default_schema";
+    String dateFormat          = "%Y-%m-%d";
+    String localDatetimeFormat = "%Y-%m-%dT%H:%M:%S";
+    String zonedDatetimeFormat = "%Y-%m-%dT%H:%M:%S %z";
+    String localTimeFormat     = "%H:%M:%S";
+    String zonedTimeFormat     = "%H:%M:%S %z";
 
     NebulaGraphProvider provider;
 
@@ -48,6 +61,12 @@ public class NebulaGraphProviderTest {
         props.put(CONNECT_GRAPH_NODE_TYPE_NAME, nodeType);
         props.put(CONNECT_GRAPH_EDGE_TYPE_NAME, edgeType);
         props.put(CONNECT_PRIMARY_KEYS, primaryKey);
+        props.put(CONNECT_SCHEMA, schema);
+        props.put(CONNECT_DATE_FORMAT, dateFormat);
+        props.put(CONNECT_LOCAL_DATETIME_FORMAT, localDatetimeFormat);
+        props.put(CONNECT_ZONE_DATETIME_FORMAT, zonedDatetimeFormat);
+        props.put(CONNECT_ZONE_TIME_FORMAT, zonedTimeFormat);
+        props.put(CONNECT_LOCAL_TIME_FORMAT, localTimeFormat);
         NebulaSinkConnectConfig config = new NebulaSinkConnectConfig(props);
         provider = new NebulaGraphProvider(config);
         mockGraphSchema();

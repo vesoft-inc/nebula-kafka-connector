@@ -18,6 +18,7 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_NODE_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_REQUEST_TIMEOUT;
+import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SCHEMA;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_EDGE_TYPES;
@@ -49,6 +50,7 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
     public final String                    graphServers;
     public final String                    user;
     public final Map<String, Object>       authOptions;
+    public final String                    schema;
     public final Boolean                   enableTls;
     public final Boolean                   disableVerifyCert;
     public final String                    caPath;
@@ -79,6 +81,7 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
         if (passwd != null && !passwd.isEmpty()) {
             authOptions.put("password", passwd);
         }
+        schema = getString(CONNECT_SCHEMA);
         enableTls = getBoolean(CONNECT_ENABLE_TLS);
         disableVerifyCert = getBoolean(CONNECT_DISABLE_VERIFY_CERT);
         caPath = getString(CONNECT_TLS_CA_PATH);
@@ -121,6 +124,11 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
                         null,
                         ConfigDef.Importance.LOW,
                         "NebulaGraph authOptions")
+                .define(CONNECT_SCHEMA,
+                        ConfigDef.Type.STRING,
+                        null,
+                        ConfigDef.Importance.LOW,
+                        "NebulaGraph home schema path")
                 .define(CONNECT_ENABLE_TLS,
                         ConfigDef.Type.BOOLEAN,
                         false,
