@@ -25,12 +25,29 @@ jobs:
         with:
           maven-version: 3.8.2
 
-      - name: Deploy nebula-connector_spark2.4  to SNAPSHOT
-        uses: samuelmeuli/action-maven-publish@v1
-        with:
-          gpg_private_key: ${{ secrets.JAVA_GPG_PRIVATE_KEY }}
-          gpg_passphrase: ""
-          nexus_username: ${{ secrets.OSSRH_USERNAME }}
-          nexus_password: ${{ secrets.OSSRH_TOKEN }}
-          maven_goals_phases: "clean deploy -Dmaven.test.skip=true"
+      - name: Build with Maven
+        run: |
+          mvn -B package -Dmaven.javadoc.skip=true -Dmaven.test.skip=true
 
+      - name: setup minio
+        uses: vesoft-inc/.github/actions/setup-minio@master
+        with:
+          minio_url: ${{ secrets.MINIO_ENDPOINT }}
+          access_key: ${{ secrets.MINIO_KEY }}
+          secret_key: ${{ secrets.MINIO_SECRET }}
+
+      - name: Get the version
+        id: get_version
+        run: |
+          tag=$(echo ${{ github.ref }} | rev | cut -d/ -f1 | rev)
+          tagnum=$(echo $tag | sed 's/^v//')
+          echo "tag=$tag" >> $GITHUB_OUTPUT
+          echo "tagnum=$tagnum" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - name: Copy kafka connector to release on MinIO
+        run: |
+          cd target
+          tar czf ./nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz kafka-connect-nebula-${{ steps.get_version.outputs.tagnum }}.jar
+          mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
+        working-directory: connector
