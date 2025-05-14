@@ -37,8 +37,8 @@ jobs:
 
       - name: Copy kafka connector to release on MinIO
         run: |
-          cd target
-          tar czf ./nebula-graph-kafkaconnector-5.0-SNAPSHOT.tgz kafka-connect-nebula-5.0-SNAPSHOT.jar
+          mv target/ nebula-graph-kafkaconnector/
+          tar czf ./nebula-graph-kafkaconnector-5.0-SNAPSHOT.tgz nebula-graph-kafkaconnector/kafka-connect-nebula-5.0-SNAPSHOT.jar
           mc cp nebula-graph-kafkaconnector-5.0-SNAPSHOT.tgz minio/nightly-build/nebula-ng-kafka-connector/5.0-SNAPSHOT/
         working-directory: connector
 
