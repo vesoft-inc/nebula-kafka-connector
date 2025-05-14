@@ -122,9 +122,7 @@ public class NebulaWriter {
         }
     }
 
-    public void write(final Collection<SinkRecord> records) throws IOErrorException,
-                                                                   NoValidSessionException,
-                                                                   InterruptedException {
+    public void write(final Collection<SinkRecord> records) throws Exception {
         for (SinkRecord record : records) {
             if (record.value() == null) {
                 log.warn(String.format("Getting empty record skip the insert topic[%s] offset[%s]",
@@ -155,7 +153,7 @@ public class NebulaWriter {
     /**
      * commit to execute the nodes and edges when their size beyond the sinkBatchSize
      */
-    public void commit() throws IOErrorException, NoValidSessionException, InterruptedException {
+    public void commit() throws Exception {
         int batchSize = config.sinkBatchSize;
         // write nodes
         if (nodes.size() >= batchSize) {
@@ -182,8 +180,7 @@ public class NebulaWriter {
     }
 
 
-    private void batchWriteNode(List<NebulaNode> nodes)
-            throws IOErrorException, NoValidSessionException, InterruptedException {
+    private void batchWriteNode(List<NebulaNode> nodes) throws Exception {
         if (nodes.isEmpty()) {
             return;
         }
@@ -203,8 +200,7 @@ public class NebulaWriter {
     }
 
 
-    private void batchWriteEdge(List<NebulaEdge> edges)
-            throws IOErrorException, NoValidSessionException, InterruptedException {
+    private void batchWriteEdge(List<NebulaEdge> edges) throws Exception {
         if (edges.isEmpty()) {
             return;
         }
@@ -229,8 +225,7 @@ public class NebulaWriter {
      * @param batch     batch size of nodes or edges for param statement
      * @return {@link ResultSet}
      */
-    private ResultSet execute(String statement, String type, int batch)
-            throws IOErrorException, NoValidSessionException, InterruptedException {
+    private ResultSet execute(String statement, String type, int batch) throws Exception {
         ResultSet result = graphProvider.execute(statement);
         if (result.isSucceeded()) {
             log.info(">> write ({}), batchSize({}), latency({}ms)",
@@ -333,9 +328,9 @@ public class NebulaWriter {
             edgeProperties.put(propName, value);
         }
 
-        List<String> nebulaSrcPkNames = config.srcKeys;
-        List<String> nebulaDstPkNames = config.dstKeys;
-        Map<String, String> srcPkAndValue = new HashMap<>();
+        List<String>        nebulaSrcPkNames = config.srcKeys;
+        List<String>        nebulaDstPkNames = config.dstKeys;
+        Map<String, String> srcPkAndValue    = new HashMap<>();
         for (int i = 0; i < nebulaSrcPkNames.size(); i++) {
             String srcValue = NebulaUtils
                     .extractValue(

@@ -185,37 +185,37 @@ public class NebulaSinkConnectConfig extends AbstractConfig implements Serializa
                         "NebulaGraph passwd")
                 .define(CONNECT_AUTH_OPTIONS,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph authOptions")
                 .define(CONNECT_SCHEMA,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph home schema path")
                 .define(CONNECT_DATE_FORMAT,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph date format")
                 .define(CONNECT_LOCAL_DATETIME_FORMAT,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph local datetime format")
                 .define(CONNECT_ZONE_DATETIME_FORMAT,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph zoned datetime format")
                 .define(CONNECT_LOCAL_TIME_FORMAT,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph local time format")
                 .define(CONNECT_ZONE_TIME_FORMAT,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph zoned time format")
                 .define(CONNECT_ENABLE_TLS,

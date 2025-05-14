@@ -8,8 +8,8 @@ import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
-import com.vesoft.nebula.driver.graph.exception.NoValidSessionException;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
+import com.vesoft.nebula.driver.graph.net.NebulaPool;
 import com.vesoft.nebula.driver.graph.scan.ScanEdgeResultIterator;
 import com.vesoft.nebula.driver.graph.scan.ScanNodeResultIterator;
 import java.io.Serializable;
@@ -27,30 +27,42 @@ public class NebulaGraphProvider implements Serializable {
     private final String              host;
     private final String              user;
     private final Map<String, Object> authOptions;
-    private       NebulaClient        client = null;
+    private       NebulaPool          pool = null;
 
     public NebulaGraphProvider(NebulaSinkConnectConfig config) {
         this.host = config.graphServers;
         this.user = config.user;
         this.authOptions = config.authOptions;
         try {
-            client = NebulaClient.builder(host, user)
+            NebulaPool.Builder builder = NebulaPool.builder(host, user)
                     .withAuthOptions(authOptions)
+                    .withConnectTimeoutMills(config.connectTimeout)
                     .withRequestTimeoutMills(config.requestTimeout)
                     .withEnableTls(config.enableTls)
                     .withDisableVerifyServerCert(config.disableVerifyCert)
                     .withTlsCa(config.caPath)
-                    .withTlsCert(config.certPath, config.keyPath)
-                    .build();
-            initClient(client,
-                       config.schema,
-                       config.dateFormat,
-                       config.localDatetimeFormat,
-                       config.zonedDatetimeFormat,
-                       config.localTimeFormat,
-                       config.zonedTimeFormat);
+                    .withTlsCert(config.certPath, config.keyPath);
+            if (config.schema != null && !config.schema.isEmpty()) {
+                builder.withSchema(config.schema);
+            }
+            if (config.dateFormat != null && !config.schema.isEmpty()) {
+                builder.withDateFormat(config.dateFormat);
+            }
+            if (config.localDatetimeFormat != null && !config.localDatetimeFormat.isEmpty()) {
+                builder.withLocalDatetimeFormat(config.localDatetimeFormat);
+            }
+            if (config.zonedDatetimeFormat != null && !config.zonedDatetimeFormat.isEmpty()) {
+                builder.withZonedDatetimeFormat(config.zonedDatetimeFormat);
+            }
+            if (config.localTimeFormat != null && !config.localTimeFormat.isEmpty()) {
+                builder.withLocalTimeFormat(config.localTimeFormat);
+            }
+            if (config.zonedTimeFormat != null && !config.zonedTimeFormat.isEmpty()) {
+                builder.withZonedTimeFormat(config.zonedTimeFormat);
+            }
+            pool = builder.build();
         } catch (AuthFailedException e) {
-            throw new RuntimeException("auth failed, please check your user and passwd");
+            throw new RuntimeException("auth failed: " + e.getMessage(), e);
         } catch (IOErrorException e) {
             throw new RuntimeException("connect to NebulaGraph server failed, please check "
                                                + "the connectivity between client and server.", e);
@@ -62,93 +74,38 @@ public class NebulaGraphProvider implements Serializable {
         this.user = config.user;
         this.authOptions = config.authOptions;
         try {
-            client = NebulaClient.builder(host, user)
+            NebulaPool.Builder builder = NebulaPool.builder(host, user)
                     .withAuthOptions(authOptions)
+                    .withConnectTimeoutMills(config.connectTimeout)
                     .withRequestTimeoutMills(config.requestTimeout)
                     .withEnableTls(config.enableTls)
                     .withDisableVerifyServerCert(config.disableVerifyCert)
                     .withTlsCa(config.caPath)
-                    .withTlsCert(config.certPath, config.keyPath)
-                    .build();
-            initClient(client,
-                       config.schema,
-                       null,
-                       null,
-                       null,
-                       null,
-                       null);
+                    .withTlsCert(config.certPath, config.keyPath);
+            if (config.schema != null && !config.schema.isEmpty()) {
+                builder.withSchema(config.schema);
+            }
+            pool = builder.build();
         } catch (AuthFailedException e) {
-            throw new RuntimeException("auth failed, please check your user and passwd");
+            throw new RuntimeException("auth failed: " + e.getMessage(), e);
         } catch (IOErrorException e) {
             throw new RuntimeException("connect to NebulaGraph server failed, please check "
                                                + "the connectivity between client and server.", e);
         }
     }
 
-    private void initClient(NebulaClient client,
-                            String schema,
-                            String dateFormat,
-                            String localDatetimeFormat,
-                            String zonedDatetimeFormat,
-                            String localTimeFormat,
-                            String zonedTimeFormat) {
-        ResultSet res;
+    public ResultSet execute(String statement) throws Exception {
+        NebulaClient client = null;
+        ResultSet    res    = null;
         try {
-            if (schema != null && !schema.isEmpty()) {
-                String gql = String.format("SESSION SET home_schema_path=\"%s\"", schema);
-                res = client.execute(gql);
-                if (!res.isSucceeded()) {
-                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
-                }
+            client = pool.getClient();
+            res = client.execute(statement);
+        } finally {
+            if (client != null) {
+                pool.returnClient(client);
             }
-            if (dateFormat != null && !dateFormat.isEmpty()) {
-                String gql = String.format("SESSION SET date_format=\"%s\"", dateFormat);
-                res = client.execute(gql);
-                if (!res.isSucceeded()) {
-                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
-                }
-            }
-
-            if (localDatetimeFormat != null && !localDatetimeFormat.isEmpty()) {
-                String gql = String.format("SESSION SET local_datetime_format=\"%s\"",
-                                           localDatetimeFormat);
-                res = client.execute(gql);
-                if (!res.isSucceeded()) {
-                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
-                }
-            }
-
-            if (zonedDatetimeFormat != null && !zonedDatetimeFormat.isEmpty()) {
-                String gql = String.format("SESSION SET zoned_datetime_format=\"%s\"",
-                                           zonedDatetimeFormat);
-                res = client.execute(gql);
-                if (!res.isSucceeded()) {
-                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
-                }
-            }
-
-            if (zonedTimeFormat != null && !zonedTimeFormat.isEmpty()) {
-                String gql = String.format("SESSION SET zoned_time_format=\"%s\"", zonedTimeFormat);
-                res = client.execute(gql);
-                if (!res.isSucceeded()) {
-                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
-                }
-            }
-
-            if (localTimeFormat != null && !localTimeFormat.isEmpty()) {
-                String gql = String.format("SESSION SET local_time_format=\"%s\"", localTimeFormat);
-                res = client.execute(gql);
-                if (!res.isSucceeded()) {
-                    throw new RuntimeException(gql + " failed: " + res.getErrorMessage());
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("set configs error for session", e);
         }
-    }
-
-    public ResultSet execute(String statement) throws IOErrorException, NoValidSessionException {
-        return client.execute(statement);
+        return res;
     }
 
     public ScanNodeResultIterator scanNode(String graphName,
@@ -156,7 +113,19 @@ public class NebulaGraphProvider implements Serializable {
                                            List<String> returnColumns,
                                            List<Integer> partsId,
                                            int limit) {
-        return client.scanNode(graphName, nodeType, returnColumns, partsId, limit);
+        NebulaClient           client   = null;
+        ScanNodeResultIterator iterator = null;
+        try {
+            client = pool.getClient();
+            iterator = client.scanNode(graphName, nodeType, returnColumns, partsId, limit);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (client != null) {
+                pool.returnClient(client);
+            }
+        }
+        return iterator;
     }
 
 
@@ -165,7 +134,19 @@ public class NebulaGraphProvider implements Serializable {
                                            List<String> returnColumns,
                                            List<Integer> partsId,
                                            int limit) {
-        return client.scanEdge(graphName, edgeType, returnColumns, partsId, limit);
+        NebulaClient           client   = null;
+        ScanEdgeResultIterator iterator = null;
+        try {
+            client = pool.getClient();
+            iterator = client.scanEdge(graphName, edgeType, returnColumns, partsId, limit);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        } finally {
+            if (client != null) {
+                pool.returnClient(client);
+            }
+        }
+        return iterator;
     }
 
 
@@ -176,12 +157,12 @@ public class NebulaGraphProvider implements Serializable {
      * @param nodeType  node type name
      */
     public NebulaNodeSchema getNodeSchema(String graphName, String nodeType)
-            throws IOErrorException, NoValidSessionException {
+            throws Exception {
         NebulaNodeSchema    nodeSchema = new NebulaNodeSchema();
         Map<String, String> schema     = new HashMap<>();
         String              graphType  = getGraphType(graphName);
 
-        ResultSet result = client.execute(
+        ResultSet result = execute(
                 String.format("DESCRIBE NODE TYPE %s OF %s", nodeType, graphType));
         if (!result.isSucceeded() || result.isEmpty()) {
             throw new IllegalArgumentException(
@@ -209,7 +190,7 @@ public class NebulaGraphProvider implements Serializable {
      * @param edgeType  edge type name
      */
     public NebulaEdgeSchema getEdgeSchema(String graphName, String edgeType)
-            throws IOErrorException, NoValidSessionException {
+            throws Exception {
         Map<String, String> schema = new HashMap<>();
 
         String graphType = getGraphType(graphName);
@@ -219,7 +200,7 @@ public class NebulaGraphProvider implements Serializable {
                         + "next OPTIONAL CALL describe_edge_type('%s','%s') return *",
                 graphType, edgeType, graphType, edgeType);
 
-        ResultSet result = client.execute(descEdgeType);
+        ResultSet result = execute(descEdgeType);
         if (!result.isSucceeded() || result.isEmpty()) {
             throw new IllegalArgumentException(
                     "edge type " + edgeType + " does not exist in " + graphName);
@@ -279,8 +260,8 @@ public class NebulaGraphProvider implements Serializable {
      * @param graphName graph name
      * @return graph type name
      */
-    private String getGraphType(String graphName) throws IOErrorException {
-        ResultSet resultSet = client.execute("DESCRIBE GRAPH " + graphName);
+    private String getGraphType(String graphName) throws Exception {
+        ResultSet resultSet = execute("DESCRIBE GRAPH " + graphName);
         String    graphType;
         if (resultSet.isSucceeded() && !resultSet.isEmpty()) {
             graphType = resultSet.next().values().get(1).asString();
@@ -292,6 +273,6 @@ public class NebulaGraphProvider implements Serializable {
 
 
     public void close() {
-        client.close();
+        pool.close();
     }
 }
