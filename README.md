@@ -81,12 +81,12 @@ git clone https://github.com/vesoft-inc/nebula-ng-kafka-connector.git
 mvn clean package -Dmaven.test.skip=true -Dmaven.javadoc.skip=true
 ```
 
-after the command finished, there will be `kafka-connect-nebula-5.0-SNAPSHOT.jar` in
+after the command finished, there will be `kafka-connect-nebula-5.1.0.jar` in
 kafka-connector/connector/target.
 
 ### 2. Put the connector jar to Kafka lib
 
-put the kafka-connect-nebula-5.0-SNAPSHOT.jar into your kafka env: KAFKA_HOME/libs
+put the kafka-connect-nebula-5.1.0.jar into your kafka env: KAFKA_HOME/libs
 
 ### 3. config the connect-nebula-sink.properties
 
