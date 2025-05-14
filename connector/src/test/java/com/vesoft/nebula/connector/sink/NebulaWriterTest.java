@@ -100,7 +100,7 @@ public class NebulaWriterTest {
         try {
             PowerMockito.when(mockProvider.execute(anyString())).thenReturn(result);
             writer.write(getSinkRecords());
-        } catch (IOErrorException | NoValidSessionException | InterruptedException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             assert (false);
         }

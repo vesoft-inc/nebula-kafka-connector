@@ -19,8 +19,6 @@ import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_NEBULA_PROPERTIES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_REQUEST_TIMEOUT;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SCHEMA;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY;
-import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SINK_RETRY_TIMES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_EDGE_TYPES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_NODE_TYPES;
 import static com.vesoft.nebula.connector.config.NebulaConnectConfigName.CONNECT_SOURCE_TOPIC_PREFIX;
@@ -62,9 +60,10 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
     public final List<String>              graphEdgeTypes          = new ArrayList<>();
     public       List<String>              nebulaNodePropertyNames = new ArrayList<>();
     public       List<String>              nebulaEdgePropertyNames = new ArrayList<>();
+    public final int                       connectTimeout;
     public final int                       requestTimeout;
     public final int                       retryTimes;
-    public final int                       intervalTimeMill;
+    public final long                      intervalTimeMill;
 
     public final int batchSize;
 
@@ -93,9 +92,10 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
         Collections.addAll(graphEdgeTypes, getString(CONNECT_SOURCE_EDGE_TYPES).split(","));
         nebulaNodePropertyNames = getList(CONNECT_NEBULA_NODE_PROPERTIES);
         nebulaEdgePropertyNames = getList(CONNECT_NEBULA_EDGE_PROPERTIES);
-        requestTimeout = getInt(CONNECT_REQUEST_TIMEOUT);
-        retryTimes = getInt(CONNECT_SINK_RETRY_TIMES);
-        intervalTimeMill = getInt(CONNECT_SINK_INTERVAL_TIME_MILL_BETWEEN_RETRY);
+        connectTimeout = ConfigUtils.connectTimeout(props);
+        requestTimeout = ConfigUtils.requestTimeout(props);
+        retryTimes = ConfigUtils.retryTimes(props);
+        intervalTimeMill = ConfigUtils.intervalTimeMill(props);
         batchSize = getInt(CONNECT_BATCH_SIZE);
         maxTask = getInt(CONNECT_MAX_TASK);
         topicPrefix = getString(CONNECT_SOURCE_TOPIC_PREFIX);

@@ -61,7 +61,7 @@ public class NebulaNodeReader extends NebulaReader {
         NebulaNodeSchema schema = null;
         try {
             schema = graphProvider.getNodeSchema(graphName, typeName);
-        } catch (IOErrorException | NoValidSessionException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         nodeSchema = schema.getNodeProperties();

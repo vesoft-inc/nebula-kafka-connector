@@ -61,7 +61,7 @@ public class NebulaEdgeReader extends NebulaReader {
         NebulaEdgeSchema schema = null;
         try {
             schema = graphProvider.getEdgeSchema(graphName, typeName);
-        } catch (IOErrorException | NoValidSessionException e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
         Map<String, String> props = schema.getProperties();

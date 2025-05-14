@@ -23,10 +23,10 @@ public class NebulaSinkTask extends SinkTask {
     private static final Logger log = LoggerFactory.getLogger(NebulaSinkTask.class);
 
     NebulaSinkConnectConfig config;
-    NebulaWriter writer;
+    NebulaWriter            writer;
 
     private String connectorName = null;
-    private String taskId = null;
+    private String taskId        = null;
 
 
     @Override
@@ -56,9 +56,9 @@ public class NebulaSinkTask extends SinkTask {
         if (records.isEmpty()) {
             return;
         }
-        final SinkRecord first = records.iterator().next();
-        final int recordsCount = records.size();
-        List<String> schemaNames = new ArrayList<>();
+        final SinkRecord first        = records.iterator().next();
+        final int        recordsCount = records.size();
+        List<String>     schemaNames  = new ArrayList<>();
         if (first.valueSchema() != null) {
             if (first.valueSchema().type() == Schema.Type.STRUCT) {
                 final List<Field> valueSchemaFields = first.valueSchema().fields();
@@ -75,21 +75,14 @@ public class NebulaSinkTask extends SinkTask {
         }
 
         log.info("Received {} records. First record kafka coordinates:({}-{}-{}), record "
-                        + "schema:{}. Writing them to nebula...",
-                recordsCount, first.topic(), first.kafkaPartition(), first.kafkaOffset(),
-                schemaNames);
+                         + "schema:{}. Writing them to nebula...",
+                 recordsCount, first.topic(), first.kafkaPartition(), first.kafkaOffset(),
+                 schemaNames);
 
         try {
             writer.write(records);
-        } catch (IOErrorException e) {
+        } catch (Exception e) {
             log.error("failed to write {} records, reason: {}", records.size(), e.getMessage());
-            throw new NebulaConnectException(e.getMessage());
-        } catch (NoValidSessionException e) {
-            log.error("failed to write {} records for lack of available session, please large the "
-                    + "sink partition config", records.size());
-            throw new NebulaConnectException(e.getMessage());
-        } catch (InterruptedException e) {
-            log.error("failed to write for interrupted exception.", e);
             throw new RuntimeException(e.getMessage());
         }
     }
