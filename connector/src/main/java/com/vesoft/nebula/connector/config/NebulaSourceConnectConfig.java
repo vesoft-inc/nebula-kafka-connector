@@ -126,7 +126,7 @@ public class NebulaSourceConnectConfig extends AbstractConfig implements Seriali
                         "NebulaGraph authOptions")
                 .define(CONNECT_SCHEMA,
                         ConfigDef.Type.STRING,
-                        null,
+                        "",
                         ConfigDef.Importance.LOW,
                         "NebulaGraph home schema path")
                 .define(CONNECT_ENABLE_TLS,
