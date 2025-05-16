@@ -49,5 +49,7 @@ jobs:
         run: |
           mv target/ nebula-graph-kafkaconnector/
           tar czf ./nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz nebula-graph-kafkaconnector/kafka-connect-nebula-${{ steps.get_version.outputs.tagnum }}.jar
+          sha256 nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz | awk  '{print $1}' > nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz.sha256hash.txt
           mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
+          mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz.sha256hash.txt minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
         working-directory: connector
