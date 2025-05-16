@@ -1,6 +1,6 @@
 # This is temporary action for clients test.
 
-name: snapshot
+name: release
 on:
   release:
     types:
