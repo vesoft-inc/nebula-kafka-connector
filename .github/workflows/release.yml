@@ -53,3 +53,11 @@ jobs:
           mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
           mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz.sha256sum.txt minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
         working-directory: connector
+        
+      - name: Trigger yueshu-release
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.GH_PAT }}
+          repository: vesoft-inc/yueshu-release
+          event-type: trigger-nebula-ng-kafka-connector
+          client-payload: '{"origin_tag": "${{ steps.get_version.outputs.tag }}"}'
