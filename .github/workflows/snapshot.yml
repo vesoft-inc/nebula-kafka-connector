@@ -8,7 +8,7 @@ on:
 
 jobs:
   deploy-kafka-connector-snapshot:
-    runs-on: [ self-hosted, nebula-fast ]
+    runs-on: [ self-hosted, linux ]
 
     steps:
       - uses: actions/checkout@v4
