@@ -9,7 +9,7 @@ on:
 
 jobs:
   deploy-kafka-connector-snapshot:
-    runs-on: [ self-hosted, nebula-fast ]
+    runs-on: [ self-hosted, linux ]
 
     steps:
       - uses: actions/checkout@v4
@@ -49,7 +49,7 @@ jobs:
         run: |
           mv target/ nebula-graph-kafkaconnector/
           tar czf ./nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz nebula-graph-kafkaconnector/kafka-connect-nebula-${{ steps.get_version.outputs.tagnum }}.jar
-          sha256sum nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz | awk  '{print $1}' > nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz.sha256sum.txt
+          sha256sum nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz > nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz.sha256sum.txt
           mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
           mc cp nebula-graph-kafkaconnector-${{ steps.get_version.outputs.tagnum }}.tgz.sha256sum.txt minio/release-build/nebula-ng-kafka-connector/${{ steps.get_version.outputs.tagnum }}/
         working-directory: connector
