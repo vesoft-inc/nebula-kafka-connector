@@ -1,7 +1,6 @@
 
 package com.vesoft.nebula.connector.util;
 
-import com.vesoft.nebula.connector.exceptions.DataFormatException;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -61,9 +60,10 @@ public class NebulaUtils {
 
         // process the vector type
         if (dataType.startsWith("VECTOR<")) {
-            StringBuilder sb = new StringBuilder();
-            sb.append(dataType).append("(").append(value).append(")");
-            return sb.toString();
+            return dataType + "(" + value + ")";
+        }
+        if (dataType.startsWith("GEOGRAPHY")) {
+            return "ST_GeogFromText(\"" + value + "\")";
         }
         // process other data type
         switch (dataType) {

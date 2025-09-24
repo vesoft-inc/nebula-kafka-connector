@@ -80,7 +80,7 @@ public class NebulaGraphProviderTest {
             assert (schema.getPkNames().contains("id"));
             assert (schema.getNodeProperties().get("id").equalsIgnoreCase("INT64"));
             assert (schema.getNodeProperties().size() == 5);
-        } catch (IOErrorException | NoValidSessionException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             assert false;
         }
