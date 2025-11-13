@@ -6,7 +6,7 @@
 
     <groupId>com.vesoft</groupId>
     <artifactId>kafka-connector</artifactId>
-    <version>5.1-SNAPSHOT</version>
+    <version>5.2.0</version>
     <packaging>pom</packaging>
     <modules>
         <module>connector</module>
