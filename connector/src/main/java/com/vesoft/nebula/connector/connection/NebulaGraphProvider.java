@@ -6,6 +6,7 @@ import com.vesoft.nebula.connector.config.NebulaSourceConnectConfig;
 import com.vesoft.nebula.connector.sink.NebulaEdgeSchema;
 import com.vesoft.nebula.connector.sink.NebulaNodeSchema;
 import com.vesoft.nebula.driver.graph.data.ResultSet;
+import com.vesoft.nebula.driver.graph.data.ValueWrapper;
 import com.vesoft.nebula.driver.graph.exception.AuthFailedException;
 import com.vesoft.nebula.driver.graph.exception.IOErrorException;
 import com.vesoft.nebula.driver.graph.net.NebulaClient;
@@ -196,7 +197,8 @@ public class NebulaGraphProvider implements Serializable {
         String graphType = getGraphType(graphName);
 
         String descEdgeType = String.format(
-                "CALL describe_graph_type('%s') filter type_name='%s' return type_pattern "
+                "CALL describe_graph_type('%s') filter type_name='%s' return type_pattern,"
+                        + "`primary_key/multiedge_key` "
                         + "next OPTIONAL CALL describe_edge_type('%s','%s') return *",
                 graphType, edgeType, graphType, edgeType);
 
@@ -207,10 +209,17 @@ public class NebulaGraphProvider implements Serializable {
         }
 
         String edgeTypePattern = null;
+        List<String> multipleEdgeKeys = new ArrayList<>();
         while (result.hasNext()) {
             ResultSet.Record record = result.next();
             if (edgeTypePattern == null) {
                 edgeTypePattern = record.get("type_pattern").asString();
+                ValueWrapper edgeMultiKeysValue = record.get("primary_key/multiedge_key");
+                if (edgeMultiKeysValue != null && edgeMultiKeysValue.isList()) {
+                    for (ValueWrapper col : edgeMultiKeysValue.asList()) {
+                        multipleEdgeKeys.add(col.asString());
+                    }
+                }
             }
             if (!record.get("property_name").isNull()) {
                 schema.put(record.get("property_name").asString(),
@@ -249,6 +258,7 @@ public class NebulaGraphProvider implements Serializable {
         for (String pk : dstNodeSchema.getPkNames()) {
             edgeSchema.getTargetPkNameAndType().put(pk, dstNodeSchema.getNodeProperties().get(pk));
         }
+        edgeSchema.setMultipleEdgeKeys(multipleEdgeKeys);
         edgeSchema.setProperties(schema);
         return edgeSchema;
     }

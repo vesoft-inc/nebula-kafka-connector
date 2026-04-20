@@ -1,6 +1,7 @@
 
 package com.vesoft.nebula.connector.sink;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -11,6 +12,7 @@ public class NebulaEdgeSchema {
     private Map<String, String> sourcePkNameAndType = new HashMap<>();
     private String       targetNodeTypeName;
     private Map<String, String> targetPkNameAndType = new HashMap<>();
+    private List<String>  multipleEdgeKeys   = new ArrayList<>();
 
     // map of property name and property data type
     private Map<String, String> properties = new HashMap<>();
@@ -63,5 +65,13 @@ public class NebulaEdgeSchema {
 
     public void setTargetPkNameAndType(Map<String, String> targetPkNameAndType) {
         this.targetPkNameAndType = targetPkNameAndType;
+    }
+
+    public List<String> getMultipleEdgeKeys() {
+        return multipleEdgeKeys;
+    }
+
+    public void setMultipleEdgeKeys(List<String> multipleEdgeKeys) {
+        this.multipleEdgeKeys = multipleEdgeKeys;
     }
 }

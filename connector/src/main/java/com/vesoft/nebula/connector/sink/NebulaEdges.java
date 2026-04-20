@@ -91,7 +91,7 @@ public class NebulaEdges {
                 + "USE %s \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (%s@%s)-[%s@%s]->(%s@%s) "
-                + "WHERE %s AND %s \n"
+                + "WHERE %s AND %s%s \n"
                 + "SET %s";
         return String.format(format,
                              getTableHeaders(),
@@ -105,6 +105,7 @@ public class NebulaEdges {
                              edgeSchema.getTargetNodeTypeName(),
                              getSrcPkFilter(),
                              getDstPkFilter(),
+                             getMultiEdgeKeysFilter(),
                              getUpdateProperties());
     }
 
@@ -114,11 +115,11 @@ public class NebulaEdges {
                 + "USE %s \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (%s@%s)-[%s@%s]->(%s@%s) "
-                + "WHERE %s AND %s \n"
+                + "WHERE %s AND %s%s \n"
                 + "DELETE %s";
         return String.format(format,
-                             getTableHeaders(),
-                             getTableValues(),
+                             getDeleteTableHeaders(),
+                             getDeleteTableValues(),
                              graphName,
                              SRC_NODE_ALIAS,
                              edgeSchema.getSourceNodeTypeName(),
@@ -128,6 +129,7 @@ public class NebulaEdges {
                              edgeSchema.getTargetNodeTypeName(),
                              getSrcPkFilter(),
                              getDstPkFilter(),
+                             getMultiEdgeKeysFilter(),
                              EDGE_ALIAS);
     }
 
@@ -161,6 +163,38 @@ public class NebulaEdges {
         return String.join(",", tableRows);
     }
 
+    private String getDeleteTableHeaders() {
+        List<String> headerNames = new ArrayList<>();
+        for (String pk : edgeSchema.getSourcePkNameAndType().keySet()) {
+            headerNames.add("src_" + pk);
+        }
+        for (String pk : edgeSchema.getTargetPkNameAndType().keySet()) {
+            headerNames.add("dst_" + pk);
+        }
+        for (String key : edgeSchema.getMultipleEdgeKeys()) {
+            headerNames.add(getKafkaFieldByNebulaField(key));
+        }
+        return String.join(",", headerNames);
+    }
+
+    private String getDeleteTableValues() {
+        List<String> tableRows = new ArrayList<>();
+        for (NebulaEdge edge : edges) {
+            List<String> rowValues = new ArrayList<>();
+            for (String pk : edgeSchema.getSourcePkNameAndType().keySet()) {
+                rowValues.add(edge.getSrcPks().get(pk));
+            }
+            for (String pk : edgeSchema.getTargetPkNameAndType().keySet()) {
+                rowValues.add(edge.getDstPks().get(pk));
+            }
+            for (String key : edgeSchema.getMultipleEdgeKeys()) {
+                rowValues.add(edge.getProperties().get(key));
+            }
+            tableRows.add("(" + String.join(",", rowValues) + ")");
+        }
+        return String.join(",", tableRows);
+    }
+
     private String getProperties() {
         StringBuilder propertyString = new StringBuilder();
         for (int index = 0; index < nebulaEdgePropertyNames.size(); index++) {
@@ -179,6 +213,9 @@ public class NebulaEdges {
     private String getUpdateProperties() {
         StringBuilder propertyString = new StringBuilder();
         for (int index = 0; index < nebulaEdgePropertyNames.size(); index++) {
+            if (edgeSchema.getMultipleEdgeKeys().contains(nebulaEdgePropertyNames.get(index))) {
+                continue;
+            }
             propertyString
                     .append(EDGE_ALIAS)
                     .append(".")
@@ -191,6 +228,33 @@ public class NebulaEdges {
             propertyString.deleteCharAt(propertyString.length() - 1);
         }
         return propertyString.toString();
+    }
+
+    private String getMultiEdgeKeysFilter() {
+        if (edgeSchema.getMultipleEdgeKeys() == null
+                || edgeSchema.getMultipleEdgeKeys().isEmpty()) {
+            return "";
+        }
+        StringBuilder filter = new StringBuilder();
+        for (String key : edgeSchema.getMultipleEdgeKeys()) {
+            String kafkaField = getKafkaFieldByNebulaField(key);
+            filter.append(" AND ")
+                    .append(EDGE_ALIAS)
+                    .append(".")
+                    .append(key)
+                    .append("=r.")
+                    .append(kafkaField);
+        }
+        return filter.toString();
+    }
+
+    private String getKafkaFieldByNebulaField(String nebulaField) {
+        int index = nebulaEdgePropertyNames.indexOf(nebulaField);
+        if (index < 0) {
+            throw new IllegalArgumentException(
+                    "edge property " + nebulaField + " is not configured");
+        }
+        return kafkaEdgePropertyNames.get(index);
     }
 
     private String getSrcPkFilter() {

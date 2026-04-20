@@ -209,8 +209,8 @@ public class NebulaEdgeTest {
                          StringBuilder::appendCodePoint,
                          StringBuilder::append)
                 .toString();
-        String expectStatement = "TABLE t{src_id,dst_id,dura,ty,de} = \n"
-                + "(1,2,10,\"friend\",5) \n"
+        String expectStatement = "TABLE t{src_id,dst_id} = \n"
+                + "(1,2) \n"
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
@@ -225,5 +225,168 @@ public class NebulaEdgeTest {
                 .toString();
         assertEquals(expectChars, deleteChars);
 
+    }
+
+    @Test
+    public void testGetEdgeUpdateStatementWithMultiEdgeKeys() {
+        edgeSchema.setMultipleEdgeKeys(Arrays.asList("type"));
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcFields,
+                                                  dstFields,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String updateStatement = nebulaEdges.getUpdateStatement(graphName);
+        String updateChars = updateStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src_id,dst_id,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
+                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty \n"
+                + "SET n_e.duration=r.dura,n_e.degree=r.de";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, updateChars);
+    }
+
+    @Test
+    public void testGetEdgeDeleteStatementWithMultiEdgeKeys() {
+        edgeSchema.setMultipleEdgeKeys(Arrays.asList("type"));
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcFields,
+                                                  dstFields,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String deleteStatement = nebulaEdges.getDeleteStatement(graphName);
+        String deleteChars = deleteStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src_id,dst_id,ty} = \n"
+                + "(1,2,\"friend\") \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
+                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty \n"
+                + "DELETE n_e";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, deleteChars);
+
+    }
+
+    @Test
+    public void testGetEdgeUpdateStatementWithMultipleMultiEdgeKeys() {
+        edgeSchema.setMultipleEdgeKeys(Arrays.asList("type", "degree"));
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcFields,
+                                                  dstFields,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String updateStatement = nebulaEdges.getUpdateStatement(graphName);
+        String updateChars = updateStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src_id,dst_id,dura,ty,de} = \n"
+                + "(1,2,10,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
+                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty "
+                + "AND n_e.degree=r.de \n"
+                + "SET n_e.duration=r.dura";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, updateChars);
+    }
+
+    @Test
+    public void testGetEdgeDeleteStatementWithMultipleMultiEdgeKeys() {
+        edgeSchema.setMultipleEdgeKeys(Arrays.asList("type", "degree"));
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcFields,
+                                                  dstFields,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        String deleteStatement = nebulaEdges.getDeleteStatement(graphName);
+        String deleteChars = deleteStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        String expectStatement = "TABLE t{src_id,dst_id,ty,de} = \n"
+                + "(1,2,\"friend\",5) \n"
+                + "USE nba \n"
+                + "FOR r IN t \n"
+                + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
+                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty "
+                + "AND n_e.degree=r.de \n"
+                + "DELETE n_e";
+        String expectChars = expectStatement
+                .chars()
+                .sorted()
+                .collect(StringBuilder::new,
+                         StringBuilder::appendCodePoint,
+                         StringBuilder::append)
+                .toString();
+        assertEquals(expectChars, deleteChars);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetEdgeUpdateStatementWithUnknownMultiEdgeKey() {
+        edgeSchema.setMultipleEdgeKeys(Arrays.asList("unknown_key"));
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcFields,
+                                                  dstFields,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        nebulaEdges.getUpdateStatement(graphName);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void testGetEdgeDeleteStatementWithUnknownMultiEdgeKey() {
+        edgeSchema.setMultipleEdgeKeys(Arrays.asList("unknown_key"));
+        NebulaEdges nebulaEdges = new NebulaEdges(edgeSchema,
+                                                  srcFields,
+                                                  dstFields,
+                                                  kafkaFieldNames,
+                                                  nebulaFieldNames,
+                                                  Arrays.asList(edge));
+        nebulaEdges.getDeleteStatement(graphName);
     }
 }
