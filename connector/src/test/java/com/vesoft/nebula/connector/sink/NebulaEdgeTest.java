@@ -179,7 +179,7 @@ public class NebulaEdgeTest {
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
-                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id \n"
+                + "FILTER n_src.id=r.src_id AND n_dst.id=r.dst_id \n"
                 + "SET n_e.duration=r.dura,n_e.type=r.ty,n_e.degree=r.de";
         String expectChars = expectStatement
                 .chars()
@@ -214,7 +214,7 @@ public class NebulaEdgeTest {
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
-                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id \n"
+                + "FILTER n_src.id=r.src_id AND n_dst.id=r.dst_id \n"
                 + "DELETE n_e";
         String expectChars = expectStatement
                 .chars()
@@ -249,7 +249,7 @@ public class NebulaEdgeTest {
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
-                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty \n"
+                + "FILTER n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty \n"
                 + "SET n_e.duration=r.dura,n_e.degree=r.de";
         String expectChars = expectStatement
                 .chars()
@@ -283,7 +283,7 @@ public class NebulaEdgeTest {
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
-                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty \n"
+                + "FILTER n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty \n"
                 + "DELETE n_e";
         String expectChars = expectStatement
                 .chars()
@@ -318,7 +318,7 @@ public class NebulaEdgeTest {
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
-                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty "
+                + "FILTER n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty "
                 + "AND n_e.degree=r.de \n"
                 + "SET n_e.duration=r.dura";
         String expectChars = expectStatement
@@ -353,7 +353,7 @@ public class NebulaEdgeTest {
                 + "USE nba \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (n_src@person)-[n_e@friend]->(n_dst@person) "
-                + "WHERE n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty "
+                + "FILTER n_src.id=r.src_id AND n_dst.id=r.dst_id AND n_e.type=r.ty "
                 + "AND n_e.degree=r.de \n"
                 + "DELETE n_e";
         String expectChars = expectStatement
