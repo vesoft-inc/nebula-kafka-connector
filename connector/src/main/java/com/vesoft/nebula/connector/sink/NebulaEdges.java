@@ -91,7 +91,7 @@ public class NebulaEdges {
                 + "USE %s \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (%s@%s)-[%s@%s]->(%s@%s) "
-                + "WHERE %s AND %s%s \n"
+                + "FILTER %s AND %s%s \n"
                 + "SET %s";
         return String.format(format,
                              getTableHeaders(),
@@ -115,7 +115,7 @@ public class NebulaEdges {
                 + "USE %s \n"
                 + "FOR r IN t \n"
                 + "OPTIONAL MATCH (%s@%s)-[%s@%s]->(%s@%s) "
-                + "WHERE %s AND %s%s \n"
+                + "FILTER %s AND %s%s \n"
                 + "DELETE %s";
         return String.format(format,
                              getDeleteTableHeaders(),
