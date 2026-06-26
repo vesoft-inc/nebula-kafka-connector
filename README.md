@@ -104,6 +104,7 @@ you can produce the json data with quickstart/producer_data.sh
 ${KAFKA_HOME}/bin/connect-standalone.sh ${KAFKA_HOME}/config/standalone.properties connect-nebula-sink_*.properties
 ```
 
+
 > please make sure you consume the nodes first.
 
 
